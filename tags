@@ -1,0 +1,22 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	0.0.0	//
+Architecture	README.md	/^## Architecture$/;"	s	chapter:conformance-test-harness
+Component Architecture	README.md	/^## Component Architecture$/;"	s	chapter:conformance-test-harness
+Configuration	README.md	/^### Configuration$/;"	S	section:conformance-test-harness""Usage
+Conformance report	README.md	/^### Conformance report$/;"	S	section:conformance-test-harness""Architecture
+Execution	README.md	/^### Execution$/;"	S	section:conformance-test-harness""Usage
+Repo structure	README.md	/^## Repo structure$/;"	s	chapter:conformance-test-harness
+Test cases	README.md	/^### Test cases$/;"	S	section:conformance-test-harness""Architecture
+Test executor	README.md	/^### Test executor$/;"	S	section:conformance-test-harness""Architecture
+Test harness	README.md	/^### Test harness$/;"	S	section:conformance-test-harness""Architecture
+Test suite description document	README.md	/^### Test suite description document$/;"	S	section:conformance-test-harness""Architecture
+Usage	README.md	/^## Usage$/;"	s	chapter:conformance-test-harness
+Writing tests	README.md	/^## Writing tests/;"	s	chapter:conformance-test-harness
+conformance-test-harness	README.md	/^# conformance-test-harness$/;"	c
