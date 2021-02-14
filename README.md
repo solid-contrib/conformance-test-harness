@@ -43,7 +43,7 @@ The test executor is responsible for executing tests against a Solid server. The
 This is an RDF document containing metadata about the test suite. The metadata includes;
 
   * Prerequisites (e.g. dependencies)
-  * equirements level from the specification (e.g., MUST, SHOULD, MAY, etc.)
+  * Requirements level from the specification (e.g., MUST, SHOULD, MAY, etc.)
   * References to the appropriate section in the specification
   * References to the actual tests
 
