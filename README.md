@@ -11,6 +11,7 @@ Harness used to run Solid conformance tests and generate reports.
 	- [Test cases](#test-cases)
 	- [Conformance report](#conformance-report)
 - [Component Architecture](#component-architecture)
+- [Test suite description document](#test-suite-description-document-1)
 - [Usage](#usage)
 	- [Configuration](#configuration)
 	- [Execution](#execution)
@@ -62,6 +63,10 @@ Conformance reports will be generated using EARL thereby making them available f
 The following is an illustration of the component architecture for the test harness and executor.
 
 ![Harness component architecture](architecture/harness-components.png)
+
+## Test suite description document
+
+![Test suite description document](architecture/test-suite-description.png)
 
 ## Usage
 
