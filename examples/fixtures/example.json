@@ -1,0 +1,11 @@
+{
+  "@context": {
+    "name" : "http://store.example.com/name",
+    "description": "http://store.example.com/description",
+    "Store": "http://store.example.com/Store"
+  },
+  "@id":"http://store.example.com/",
+  "@type":"Store",
+  "description":"The most \"linked\" bike store on earth!",
+  "name":"Links Bike Shop"
+}

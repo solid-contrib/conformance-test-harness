@@ -1,0 +1,61 @@
+{
+  "target": "ess-compat",
+  "servers": {
+    "ess-compat": {
+      "features": {
+        "authentication": true,
+        "acl": true,
+        "wac-allow": true
+      },
+      "solidIdentityProvider": "https://broker.pod-compat.inrupt.com",
+      "serverRoot": "https://pod-compat.inrupt.com",
+      "rootContainer": "/solid-test-suite-alice/",
+      "testContainer": "/solid-test-suite-alice/private/",
+      "users": {
+        "alice": {
+          "webID": "https://pod-compat.inrupt.com/solid-test-suite-alice/profile/card#me",
+          "credentials": "ess-compat-alice.json"
+        },
+        "bob": {
+          "webID": "https://pod-compat.inrupt.com/solid-test-suite-bob/profile/card#me",
+          "credentials": "ess-compat-bob.json"
+        }
+      }
+    },
+    "css": {
+      "features": {
+        "authentication": true,
+        "acl": true
+      },
+      "solidIdentityProvider": "https://broker.pod-compat.inrupt.com",
+      "serverRoot": "http://localhost:3000",
+      "rootContainer": "/",
+      "testContainer": "/test/",
+      "users": {
+        "alice": {
+          "webID": "https://pod-compat.inrupt.com/solid-test-suite-alice/profile/card#me",
+          "credentials": "ess-compat-alice.json"
+        },
+        "bob": {
+          "webID": "https://pod-compat.inrupt.com/solid-test-suite-bob/profile/card#me",
+          "credentials": "ess-compat-bob.json"
+        }
+      }
+    },
+    "nss": {
+      "features": {
+        "authentication": false
+      },
+      "solidIdentityProvider": "https://inrupt.net",
+      "serverRoot": "https://solid-test-suite-alice.inrupt.net",
+      "rootContainer": "/",
+      "testContainer": "/public/",
+      "users": {
+        "alice": {
+        },
+        "bob": {
+        }
+      }
+    }
+  }
+}

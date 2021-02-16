@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.1//EN"
+        "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-2.dtd">
+<html version="XHTML+RDFa 1.1" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <title>XHTML+RDFa example</title>
+    <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />
+    <meta http-equiv="Content-Style-Type" content="text/css" />
+    <meta name="content-language" content="en" />
+    <meta name="robots" content="index, follow" />
+    <link rel="foaf:primaryTopic" type="application/rdf+xml" title="FOAF" href="http://www.example.com/metadata/foaf.rdf" />
+</head>
+<body prefix="contact: http://www.w3.org/2000/10/swap/pim/contact#
+        foaf: http://xmlns.com/foaf/0.1/
+        rdfs: http://www.w3.org/2000/01/rdf-schema#
+        xsd: http://www.w3.org/2001/XMLSchema#">
+<div class="content">
+    <p>
+        <span property="foaf:name">Jerry Smith</span><br />
+        <i>Senior developer, QA</i><br />
+        <a title="More about me" rel="rdfs:seeAlso" href="about.htm">More...</a>
+    </p>
+    <p rel="contact:address">
+        93 Rose Ave <br />
+        <a property="contact:city" rel="rdfs:seeAlso" title="Adelaide on Wikipedia" resource="http://dbpedia.org/resource/Adelaide"
+           href="http://en.wikipedia.org/wiki/Adelaide">Adelaide</a>
+    </p>
+    <p>
+        <span rel="foaf:phone" resource="tel:+6112345678">+61 12/345-678</span>
+    </p>
+</div>
+</body>
+</html>
+
+<!--
+@prefix contact: <http://www.w3.org/2000/10/swap/pim/contact#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xhv: <http://www.w3.org/1999/xhtml/vocab#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<> rdfs:seeAlso <about.htm> ;
+    contact:address [ rdfs:seeAlso <http://dbpedia.org/resource/Adelaide> ;
+            contact:city "Adelaide"@en ] ;
+    foaf:name "Jerry Smith"@en ;
+    foaf:phone <tel:+6112345678> ;
+    foaf:primaryTopic <http://www.example.com/metadata/foaf.rdf> .
+-->
