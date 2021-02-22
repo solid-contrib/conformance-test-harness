@@ -8,7 +8,7 @@ Feature: Requests support content negotiation for JSON-LD resource
     * url target.serverRoot + testContext.resourcePath
 
     # prepare the teardown function
-    * configure afterFeature = function() {Java.type('org.solid.testharness.utils.HttpUtils').deleteResourceRecursively(testContext.containerUrl, testContext.aliceAuthHeader)}
+    * configure afterFeature = function() {Java.type('org.solid.testharness.utils.SolidClient').deleteResourceRecursively(testContext.containerUrl, testContext.aliceAuthHeader)}
 
   Scenario: Alice can read the JSON-LD example as JSON-LD
     Given header Accept = 'application/ld+json'

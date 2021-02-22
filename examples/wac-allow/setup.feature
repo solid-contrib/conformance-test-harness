@@ -10,8 +10,8 @@ Feature: Set up clients with a sample container and resource
           bobAuthHeader: getAuthHeader('bob'),
           resourcePath,
         };
-        res.httpUtils = new HttpUtils(res.aliceAuthHeader);
-        res.resource = new SolidResource(res.httpUtils, target.serverRoot + res.resourcePath, karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
+        res.solidClient = SolidClient.create(res.aliceAuthHeader);
+        res.resource = new SolidResource(res.solidClient, target.serverRoot + res.resourcePath, karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
         res.containerUrl = res.resource.getParentUrl()
         res.containerPath = res.resource.getParentPath()
         return res;

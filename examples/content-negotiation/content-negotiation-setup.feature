@@ -10,8 +10,8 @@ Feature: Set up a new container with sample file for Alice
     * def resourcePath = containerPath + 'example.ttl'
     * def exampleTurtle = karate.readAsString('../fixtures/example.ttl')
     * def aliceAuthHeader = getAuthHeader('alice')
-    * def httpUtils = new HttpUtils(aliceAuthHeader)
-    * def resource = new SolidResource(httpUtils, target.serverRoot + resourcePath, exampleTurtle, 'text/turtle')
+    * def solidClient = SolidClient.create(aliceAuthHeader)
+    * def resource = new SolidResource(solidClient, target.serverRoot + resourcePath, exampleTurtle, 'text/turtle')
     * assert resource != null
     * def containerUrl = resource.getParentUrl()
     * def resourceUrl = target.serverRoot + resourcePath
@@ -22,8 +22,8 @@ Feature: Set up a new container with sample file for Alice
     * def resourcePath = containerPath + 'example.json'
     * def exampleJson = karate.readAsString('../fixtures/example.json')
     * def aliceAuthHeader = getAuthHeader('alice')
-    * def httpUtils = new HttpUtils(aliceAuthHeader)
-    * def resource = new SolidResource(httpUtils, target.serverRoot + resourcePath, exampleJson, 'application/ld+json')
+    * def solidClient = SolidClient.create(aliceAuthHeader)
+    * def resource = new SolidResource(solidClient, target.serverRoot + resourcePath, exampleJson, 'application/ld+json')
     * assert resource != null
     * def containerUrl = resource.getParentUrl()
     * def resourceUrl = target.serverRoot + resourcePath

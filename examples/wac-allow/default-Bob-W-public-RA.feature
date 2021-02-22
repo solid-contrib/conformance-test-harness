@@ -19,7 +19,7 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     """
     * def testContext = callonce setup { bobModes: 'acl:Write', publicModes: 'acl:Read, acl:Append' }
     # prepare the teardown function
-    * configure afterFeature = function() {HttpUtils.deleteResourceRecursively(testContext.containerUrl, testContext.aliceAuthHeader)}
+    * configure afterFeature = function() {SolidClient.deleteResourceRecursively(testContext.containerUrl, testContext.aliceAuthHeader)}
     * url target.serverRoot + testContext.resourcePath
 
   Scenario: There is no acl on the resource
@@ -42,7 +42,7 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     When method GET
     Then status 200
     And match header WAC-Allow != null
-    * def result = HttpUtils.parseWacAllowHeader(responseHeaders)
+    * def result = SolidClient.parseWacAllowHeader(responseHeaders)
     And match result.user contains only ['read', 'write', 'append']
     And match result.public contains only ['read', 'append']
 
@@ -51,7 +51,7 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     When method HEAD
     Then status 200
     And match header WAC-Allow != null
-    * def result = HttpUtils.parseWacAllowHeader(responseHeaders)
+    * def result = SolidClient.parseWacAllowHeader(responseHeaders)
     And match result.user contains only ['read', 'write', 'append']
     And match result.public contains only ['read', 'append']
 
@@ -59,7 +59,7 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     When method GET
     Then status 200
     And match header WAC-Allow != null
-    * def result = HttpUtils.parseWacAllowHeader(responseHeaders)
+    * def result = SolidClient.parseWacAllowHeader(responseHeaders)
     And match result.user contains only ['read', 'append']
     And match result.public contains only ['read', 'append']
 
@@ -67,6 +67,6 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     When method HEAD
     Then status 200
     And match header WAC-Allow != null
-    * def result = HttpUtils.parseWacAllowHeader(responseHeaders)
+    * def result = SolidClient.parseWacAllowHeader(responseHeaders)
     And match result.user contains only ['read', 'append']
     And match result.public contains only ['read', 'append']

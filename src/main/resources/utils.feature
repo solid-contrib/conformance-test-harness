@@ -3,9 +3,9 @@ Feature: Utility Function Library
   Background:
     * def RDFUtils = Java.type('org.solid.testharness.utils.RDFUtils')
     * def Base64 = Java.type('java.util.Base64')
-    * def HttpUtils = Java.type('org.solid.testharness.utils.HttpUtils')
+    * def SolidClient = Java.type('org.solid.testharness.utils.SolidClient')
     * def SolidResource = Java.type('org.solid.testharness.utils.SolidResource')
-    * def TokenExchange = Java.type('org.solid.testharness.utils.TokenExchange')
+    * def AuthManager = Java.type('org.solid.testharness.utils.AuthManager')
 
   Scenario:
     * def base64Encode = function(data) { return Base64.encoder.encodeToString(data.getBytes()) }
@@ -14,7 +14,7 @@ Feature: Utility Function Library
     * def statusFail = function(){ const status = karate.get('responseStatus'); return status >= 400 && status < 500 }
     * def getRandomResourcePath = function(suffix) { return getRandomContainerPath() + java.util.UUID.randomUUID() + suffix }
     * def getRandomContainerPath = function() { return target.testContainer + java.util.UUID.randomUUID() + '/' }
-    * def createClient = function(authHeader) { return new HttpUtils(authHeader) }
+    * def createClient = function(authHeader) { return SolidClient.create(authHeader) }
     * def createOwnerAuthorization =
     """
       function(ownerAgent, target) {
@@ -103,7 +103,7 @@ Feature: Utility Function Library
     """
       function(user) {
         if (target.features.authentication) {
-          return 'Bearer ' + TokenExchange.exchangeToken(target.solidIdentityProvider + '/token', target.users[user])
+          return 'Bearer ' + AuthManager.getAccessToken(target.solidIdentityProvider, target.users[user])
         } else {
           return ''
         }

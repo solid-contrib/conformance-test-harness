@@ -11,8 +11,8 @@ Feature: Set up a sample turtle file for Alice with defined access set for Bob
     * def aliceAuthHeader = getAuthHeader('alice')
     * def bobAuthHeader = getAuthHeader('bob')
     * def exampleTurtle = karate.readAsString('../fixtures/example.ttl')
-    * def httpUtils = new HttpUtils(aliceAuthHeader)
-    * def resource = new SolidResource(httpUtils, target.serverRoot + resourcePath, exampleTurtle, 'text/turtle')
+    * def solidClient = SolidClient.create(aliceAuthHeader)
+    * def resource = new SolidResource(solidClient, target.serverRoot + resourcePath, exampleTurtle, 'text/turtle')
     * assert resource != null
     * def containerUrl = resource.getParentUrl()
     * def acl =
@@ -28,8 +28,8 @@ Feature: Set up a sample turtle file for Alice with defined access set for Bob
     * def aliceAuthHeader = getAuthHeader('alice')
     * def bobAuthHeader = getAuthHeader('bob')
     * def exampleTurtle = karate.readAsString('../fixtures/example.ttl')
-    * def httpUtils = new HttpUtils(aliceAuthHeader)
-    * def resource = new SolidResource(httpUtils, target.serverRoot + resourcePath, exampleTurtle, 'text/turtle')
+    * def solidClient = SolidClient.create(aliceAuthHeader)
+    * def resource = new SolidResource(solidClient, target.serverRoot + resourcePath, exampleTurtle, 'text/turtle')
     * assert resource != null
     * def containerUrl = resource.getParentUrl()
     * def containerPath = resource.getParentPath()

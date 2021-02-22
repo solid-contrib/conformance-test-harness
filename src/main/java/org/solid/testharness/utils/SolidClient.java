@@ -1,11 +1,19 @@
 package org.solid.testharness.utils;
 
 import jakarta.ws.rs.core.Link;
+import org.apache.commons.text.RandomStringGenerator;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
+import org.jose4j.jwk.RsaJsonWebKey;
+import org.jose4j.jwk.RsaJwkGenerator;
+import org.jose4j.jws.AlgorithmIdentifiers;
+import org.jose4j.jws.JsonWebSignature;
+import org.jose4j.jwt.JwtClaims;
+import org.jose4j.lang.JoseException;
+import org.jose4j.lang.UncheckedJoseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +22,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpHeaders;
@@ -32,50 +42,103 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class HttpUtils {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.utils.HttpUtils");
+import static java.util.UUID.randomUUID;
+import static org.apache.commons.text.CharacterPredicates.DIGITS;
+import static org.apache.commons.text.CharacterPredicates.LETTERS;
+import static org.jose4j.jwx.HeaderParameterNames.TYPE;
+
+public class SolidClient {
+    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.utils.SolidClient");
 
     private HttpClient client = null;
     private String authHeader = null;
+    private RsaJsonWebKey clientKey = null;
 
-    public HttpUtils() {
-        this(null);
-    }
+    public static class Builder {
+        private HttpClient.Builder clientBuilder = null;
+        private String authHeader = null;
+        private RsaJsonWebKey clientKey = null;
 
-    public HttpUtils(String authHeader) {
-        // Allow self-signed certificates for testing
-        TrustManager[] trustAllCerts = new TrustManager[]{
-                new X509TrustManager() {
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return null;
-                    }
-                    public void checkClientTrusted(X509Certificate[] certs, String authType) {}
-                    public void checkServerTrusted(X509Certificate[] certs, String authType) {}
-                }
-        };
-        SSLContext sslContext = null;
-        try {
-            sslContext = SSLContext.getInstance("SSL");
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-        } catch (NoSuchAlgorithmException | KeyManagementException e) {
-            e.printStackTrace();
+        private static final RandomStringGenerator GENERATOR = new RandomStringGenerator.Builder()
+                .withinRange('0', 'z').filteredBy(LETTERS, DIGITS).build();
+
+        public Builder() {
+            clientBuilder = HttpClient.newBuilder()
+                    .version(HttpClient.Version.HTTP_1_1)
+                    .connectTimeout(Duration.ofSeconds(5));
         }
-        System.setProperty("jdk.internal.httpclient.disableHostnameVerification", "");
 
-        client = HttpClient.newBuilder()
-                .version(HttpClient.Version.HTTP_1_1)
-                .sslContext(sslContext)
-                .connectTimeout(Duration.ofSeconds(5))
-                .build();
-        this.authHeader = authHeader;
+        public Builder withSessionSupport(){
+            CookieHandler.setDefault(new CookieManager());
+            clientBuilder.cookieHandler(CookieHandler.getDefault());
+            return this;
+        }
+
+        public Builder withLocalhostSupport(){
+            // Allow self-signed certificates for testing
+            TrustManager[] trustAllCerts = new TrustManager[]{
+                    new X509TrustManager() {
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return null;
+                        }
+                        public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+                        public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+                    }
+            };
+            SSLContext sslContext = null;
+            try {
+                sslContext = SSLContext.getInstance("SSL");
+                sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                e.printStackTrace();
+            }
+            System.setProperty("jdk.internal.httpclient.disableHostnameVerification", "");
+
+            clientBuilder.sslContext(sslContext);
+            return this;
+        }
+
+        public Builder withAuthorizationHeader(String authHeader){
+            this.authHeader = authHeader;
+            return this;
+        }
+
+        public Builder withDpopSupport() throws Exception {
+            String identifier = GENERATOR.generate(12);
+            try {
+                clientKey = RsaJwkGenerator.generateJwk(2048);
+            } catch (JoseException e) {
+                throw new Exception("Failed to generate client key", e);
+            }
+            clientKey.setKeyId(identifier);
+            clientKey.setUse("sig");
+            clientKey.setAlgorithm("RS256");
+            return this;
+        }
+
+        public SolidClient build() {
+            SolidClient solidClient = new SolidClient();
+            solidClient.client = clientBuilder.build();
+            solidClient.authHeader = authHeader;
+            solidClient.clientKey = clientKey;
+            return solidClient;
+        }
     }
 
-    public HttpClient getClient() {
+    private SolidClient() {}
+
+    public HttpClient getHttpClient() {
         return client;
     }
 
-    public static HttpUtils create(String authHeader) {
-        return new HttpUtils(authHeader);
+    public static SolidClient create(String authHeader) {
+        return new SolidClient.Builder().withAuthorizationHeader(authHeader).build();
+    }
+
+    public final HttpRequest.Builder signRequest(HttpRequest.Builder builder) throws Exception {
+        HttpRequest provisionalRequest = builder.copy().build();
+        String dpopToken = generateDpopToken(provisionalRequest.method(), provisionalRequest.uri().toString());
+        return builder.header("DPoP", dpopToken);
     }
 
     public final HttpHeaders createResource(URI url, String data, String type) throws IOException, InterruptedException {
@@ -84,7 +147,7 @@ public class HttpUtils {
                 .header("Content-Type", type);
         HttpRequest request = builder.build();
         HttpResponse<Void> response = client.send(request, BodyHandlers.discarding());
-        logResponse(response);
+        HttpUtils.logResponse(logger, response);
         return response.headers();
     }
 
@@ -93,9 +156,9 @@ public class HttpUtils {
                 .header("Accept", "*/*")    // TODO: This is required due to CSS bug: https://github.com/solid/community-server/issues/593
                 .method("HEAD", HttpRequest.BodyPublishers.noBody());
         HttpRequest request = builder.build();
-        logRequest(request);
+        HttpUtils.logRequest(logger, request);
         HttpResponse<Void> response = client.send(request, BodyHandlers.discarding());
-        logResponse(response);
+        HttpUtils.logResponse(logger, response);
         return getAclLink(response.headers());
     }
 
@@ -115,8 +178,8 @@ public class HttpUtils {
                 .header("Content-Type", "text/turtle");
         HttpRequest request = builder.build();
         HttpResponse<Void> response = client.send(request, BodyHandlers.discarding());
-        logResponse(response);
-        return isSuccessful(response.statusCode());
+        HttpUtils.logResponse(logger, response);
+        return HttpUtils.isSuccessful(response.statusCode());
     }
 
     public static Map<String, List<String>> parseWacAllowHeader(Map<String, List<String>> headers) {
@@ -156,9 +219,9 @@ public class HttpUtils {
 
     public static String deleteResourceRecursively(URI url, String authHeader) {
         logger.debug("Delete resource recursively {}", url);
-        HttpUtils utils = new HttpUtils(authHeader);
+        SolidClient solidClient = new SolidClient.Builder().withAuthorizationHeader(authHeader).build();
         try {
-            utils.deleteResourceRecursively(url);
+            solidClient.deleteResourceRecursively(url);
             return "OK";
         } catch (IOException | InterruptedException | ExecutionException e) {
             logger.error(e.getMessage(), e);
@@ -267,34 +330,30 @@ public class HttpUtils {
         return builder;
     }
 
-    private boolean isSuccessful(int code) {
-        return code >= 200 && code < 300;
-    }
-
-    private void logRequest(HttpRequest request) {
-        logger.debug("REQUEST {} {}", request.method(), request.uri());
-        HttpHeaders headers = request.headers();
-        headers.map().forEach((k, v) -> logger.debug("REQ HEADER {}: {}", k, v));
-    }
-
-    private <T> void logResponse(HttpResponse<T> response) {
-        logger.debug("REQUEST {} {}", response.request().method(), response.uri());
-        logger.debug("STATUS  {}", response.statusCode());
-        HttpHeaders headers = response.headers();
-        headers.map().forEach((k, v) -> logger.debug("HEADER  {}: {}", k, v));
-        T body = response.body();
-        if (body != null) {
-            logger.debug("BODY    {}", response.body());
+    // TODO: Switch to elliptical curve as it is faster
+    public String generateDpopToken(final String htm, final String htu) throws Exception {
+        if (clientKey == null) {
+            throw new Exception("This instance does not have DPoP support added");
         }
-    }
+        try {
+            final JsonWebSignature jws = new JsonWebSignature();
+//            jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.ECDSA_USING_P256_CURVE_AND_SHA256);
+            jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.RSA_USING_SHA256);
+            jws.setHeader(TYPE, "dpop+jwt");
+            jws.setJwkHeader(clientKey);
+            jws.setKey(clientKey.getPrivateKey());
 
-    // for testing only
-    public String getAuthHeader() {
-        return authHeader;
-    }
+            final JwtClaims claims = new JwtClaims();
+            claims.setJwtId(randomUUID().toString());
+            claims.setStringClaim("htm", htm);
+            claims.setStringClaim("htu", htu);
+            claims.setIssuedAtToNow();
 
-    // for testing only
-    public String throwException() throws Exception {
-        throw new Exception("Test exception");
+            jws.setPayload(claims.toJson());
+
+            return jws.getCompactSerialization();
+        } catch (final JoseException ex) {
+            throw new UncheckedJoseException("Unable to generate DPoP token", ex);
+        }
     }
 }

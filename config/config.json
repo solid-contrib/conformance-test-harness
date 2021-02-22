@@ -44,16 +44,28 @@
     },
     "nss": {
       "features": {
-        "authentication": false
+        "authentication": true,
+        "acl": true,
+        "wac-allow": true
       },
       "solidIdentityProvider": "https://inrupt.net",
       "serverRoot": "https://solid-test-suite-alice.inrupt.net",
       "rootContainer": "/",
-      "testContainer": "/public/",
+      "testContainer": "/private/",
       "users": {
         "alice": {
+          "webId": "https://solid-test-suite-alice.inrupt.net/profile/card#me",
+          "loginPath": "/login/password",
+          "username": "solid-test-suite-alice",
+          "password": "theg*koow5TEAK1pusm",
+          "origin": "https://tester"
         },
         "bob": {
+          "webId": "https://solid-test-suite-bob.inrupt.net/profile/card#me",
+          "loginPath": "/login/password",
+          "username": "solid-test-suite-bob",
+          "password": "laup6kiff!ble6PULL",
+          "origin": "https://tester"
         }
       }
     }

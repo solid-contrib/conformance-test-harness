@@ -7,7 +7,7 @@ Feature: Bob cannot read an RDF resource to which he is not granted default read
     * url target.serverRoot + testContext.resourcePath
 
     # prepare the teardown function
-    * configure afterFeature = function() {Java.type('org.solid.testharness.utils.HttpUtils').deleteResourceRecursively(testContext.containerUrl, testContext.aliceAuthHeader)}
+    * configure afterFeature = function() {Java.type('org.solid.testharness.utils.SolidClient').deleteResourceRecursively(testContext.containerUrl, testContext.aliceAuthHeader)}
 
   Scenario: Bob can get the resource OPTIONS
     When method OPTIONS

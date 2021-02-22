@@ -16,6 +16,7 @@ Harness used to run Solid conformance tests and generate reports.
 	- [Configuration](#configuration)
 	- [Execution](#execution)
 - [Writing tests](#writing-tests)
+	- [Tips](#test-tips)
 
 <!-- /MarkdownTOC -->
 
@@ -75,3 +76,28 @@ The following is an illustration of the component architecture for the test harn
 ### Execution
 
 ## Writing tests
+
+This section will contain guidelines for writing test cases using the KarateDSL alongside the features that the test harness provides.  
+
+### Tips
+
+The full KarateDSL documentation is at: https://intuit.github.io/karate/
+
+#### Request headers
+
+There are 3 commands to add headers to an HTTP request:
+* `configure headers` - https://intuit.github.io/karate/#configure-headers
+	* Typically used in the `Background` section to set up headers for the whole feature file
+	* Takes a JSON object containing key/value pairs to be added to the headers
+	* Takes a function which returns a JSON object containing key/value pairs to be added to the headers
+	* Often used to set up Authorization headers for set of tests
+	* If later steps need to use different headers you must either update `configure headers` or set it to null and use one
+	  of the commands below to set a new header
+	* Example: `* configure headers = { Authorization: 'some_token', tx_id: '1234' }` 
+* `header` - https://intuit.github.io/karate/#header
+	* Takes a function or expression that returns a header value
+	* Example: `* header Accept = 'application/json'`
+* `headers` - https://intuit.github.io/karate/#headers
+    * Takes a JSON object containing key/value pairs to be added to the headers
+	* Note this is a shortcut command, not an expression as in the previous cases
+	* Example: `* headers { Authorization: 'some_token', tx_id: '1234' }`

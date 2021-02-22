@@ -10,6 +10,8 @@ val karateVersion = "0.9.9.RC4"
 val cucumberReporting = "5.4.0"
 val rdf4jVersion = "3.5.0"
 val jakartaVersion = "3.0.0"
+val jose4jVersion = "0.7.6"
+val commonsTextVersion = "1.9"
 
 java {
     toolchain {
@@ -32,6 +34,8 @@ dependencies {
 
     implementation("jakarta.ws.rs:jakarta.ws.rs-api:$jakartaVersion")
     implementation("org.glassfish.jersey.core:jersey-client:$jakartaVersion")
+    implementation("org.bitbucket.b_c:jose4j:$jose4jVersion")
+    implementation("org.apache.commons:commons-text:$commonsTextVersion")
 
     implementation("org.eclipse.rdf4j:rdf4j-rio-rdfjson:$rdf4jVersion")
     implementation("org.eclipse.rdf4j:rdf4j-rio-n3:$rdf4jVersion")
@@ -69,7 +73,7 @@ tasks.test {
 sourceSets {
     test {
         resources {
-            srcDir("src/main/resource")
+            srcDir("src/main/resources")
         }
         resources {
             srcDir("examples")
@@ -77,6 +81,10 @@ sourceSets {
         resources {
             srcDir("src/test/java")
             exclude("**/*.java")
+        }
+        resources {
+            srcDir("src/test/resources")
+//            exclude("**/*.*")
         }
     }
 }
