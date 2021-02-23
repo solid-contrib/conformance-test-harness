@@ -84,7 +84,8 @@ sourceSets {
         }
         resources {
             srcDir("src/test/resources")
-//            exclude("**/*.*")
+            // don't exclude if you want to load a local karate-config file for testing
+            exclude("**/*.*")
         }
     }
 }

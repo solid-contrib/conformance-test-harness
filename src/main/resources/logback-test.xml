@@ -17,7 +17,7 @@
 <!--    <logger name="net.masterthought.cucumber" level="WARNING"/> -->
     <logger name="com.intuit.karate" level="DEBUG"/>
     <logger name="org.solid.testharness" level="DEBUG"/>
-    <logger name="org.solid.testharness.utils.AuthManager" level="INFO"/>
+    <logger name="org.solid.testharness.http.AuthManager" level="INFO"/>
 
     <root level="info">
         <appender-ref ref="STDOUT" />

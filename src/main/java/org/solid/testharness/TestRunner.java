@@ -19,6 +19,8 @@ import java.util.stream.Stream;
 public class TestRunner {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.runner.TestRunner");
 
+    private static int THREAD_COUNT = 8;
+
     public Results runTests() {
         // allow tests to run against server on localhost
         System.setProperty("jdk.internal.httpclient.disableHostnameVerification", Boolean.TRUE.toString());
@@ -66,7 +68,7 @@ public class TestRunner {
                 .tags(tags)
 //                .outputCucumberJson(true)
                 .outputHtmlReport(true)
-                .parallel(8);
+                .parallel(THREAD_COUNT);
 
         logger.info("===================== START REPORT ========================");
         ReportUtils.generateReport(results.getReportDir());

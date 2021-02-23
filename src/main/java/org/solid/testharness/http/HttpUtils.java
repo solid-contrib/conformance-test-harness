@@ -1,4 +1,4 @@
-package org.solid.testharness.utils;
+package org.solid.testharness.http;
 
 import org.slf4j.Logger;
 

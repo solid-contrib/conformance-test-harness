@@ -1,4 +1,4 @@
-package org.solid.testharness;
+package org.solid.testharness.utils;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

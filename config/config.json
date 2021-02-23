@@ -49,23 +49,22 @@
         "wac-allow": true
       },
       "solidIdentityProvider": "https://inrupt.net",
+      "aclCachePause": 200,
+      "origin": "https://tester",
+      "loginPath": "/login/password",
       "serverRoot": "https://solid-test-suite-alice.inrupt.net",
       "rootContainer": "/",
       "testContainer": "/private/",
       "users": {
         "alice": {
-          "webId": "https://solid-test-suite-alice.inrupt.net/profile/card#me",
-          "loginPath": "/login/password",
+          "webID": "https://solid-test-suite-alice.inrupt.net/profile/card#me",
           "username": "solid-test-suite-alice",
-          "password": "theg*koow5TEAK1pusm",
-          "origin": "https://tester"
+          "password": "theg*koow5TEAK1pusm"
         },
         "bob": {
-          "webId": "https://solid-test-suite-bob.inrupt.net/profile/card#me",
-          "loginPath": "/login/password",
+          "webID": "https://solid-test-suite-bob.inrupt.net/profile/card#me",
           "username": "solid-test-suite-bob",
-          "password": "laup6kiff!ble6PULL",
-          "origin": "https://tester"
+          "password": "laup6kiff!ble6PULL"
         }
       }
     }

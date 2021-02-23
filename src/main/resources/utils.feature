@@ -3,9 +3,9 @@ Feature: Utility Function Library
   Background:
     * def RDFUtils = Java.type('org.solid.testharness.utils.RDFUtils')
     * def Base64 = Java.type('java.util.Base64')
-    * def SolidClient = Java.type('org.solid.testharness.utils.SolidClient')
+    * def SolidClient = Java.type('org.solid.testharness.http.SolidClient')
     * def SolidResource = Java.type('org.solid.testharness.utils.SolidResource')
-    * def AuthManager = Java.type('org.solid.testharness.utils.AuthManager')
+    * def AuthManager = Java.type('org.solid.testharness.http.AuthManager')
 
   Scenario:
     * def base64Encode = function(data) { return Base64.encoder.encodeToString(data.getBytes()) }
@@ -14,7 +14,6 @@ Feature: Utility Function Library
     * def statusFail = function(){ const status = karate.get('responseStatus'); return status >= 400 && status < 500 }
     * def getRandomResourcePath = function(suffix) { return getRandomContainerPath() + java.util.UUID.randomUUID() + suffix }
     * def getRandomContainerPath = function() { return target.testContainer + java.util.UUID.randomUUID() + '/' }
-    * def createClient = function(authHeader) { return SolidClient.create(authHeader) }
     * def createOwnerAuthorization =
     """
       function(ownerAgent, target) {
@@ -99,13 +98,11 @@ Feature: Utility Function Library
       }
     """
 
-    * def getAuthHeader =
+    * def authenticate =
     """
       function(user) {
-        if (target.features.authentication) {
-          return 'Bearer ' + AuthManager.getAccessToken(target.solidIdentityProvider, target.users[user])
-        } else {
-          return ''
-        }
+        return AuthManager.authenticate(user, target);
       }
     """
+
+    * def pause = function (pause) { java.lang.Thread.sleep(pause) }

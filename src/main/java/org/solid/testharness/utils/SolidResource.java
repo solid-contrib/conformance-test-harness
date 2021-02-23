@@ -2,6 +2,7 @@ package org.solid.testharness.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.testharness.http.SolidClient;
 
 import java.io.IOException;
 import java.net.URI;
@@ -39,26 +40,25 @@ public class SolidResource {
         }
     }
 
-    public boolean setAcl(String acl) throws IOException, InterruptedException {
+    public boolean setAcl(String acl) throws Exception {
         if (Boolean.FALSE.equals(aclsAvailable)) return false;
-        URI url = getAclUrl();
+        String url = getAclUrl();
         if (url == null) return false;
-//        logger.debug("Adding ACL to {}:\n{}", url, acl);
-        return solidClient.createAcl(url, acl);
+        return solidClient.createAcl(URI.create(url), acl);
     }
 
-    public boolean setParentAcl(String acl) throws IOException, InterruptedException {
+    public boolean setParentAcl(String acl) throws Exception {
         if (Boolean.FALSE.equals(aclsAvailable)) return false;
-        URI url = getParentAclUrl();
+        String url = getParentAclUrl();
         if (url == null) return false;
-        return solidClient.createAcl(url, acl);
+        return solidClient.createAcl(URI.create(url), acl);
     }
 
-    public URI getUrl() {
-        return url;
+    public String getUrl() {
+        return url.toString();
     }
 
-    public URI getAclUrl() throws IOException, InterruptedException {
+    public String getAclUrl() throws Exception {
         if (aclUrl == null && !Boolean.FALSE.equals(aclsAvailable)) {
             URI aclLink = solidClient.getResourceAclLink(url.toString());
             if (aclLink != null) {
@@ -66,18 +66,18 @@ public class SolidResource {
             }
             aclsAvailable = aclLink != null;
         }
-        return aclUrl;
+        return aclUrl != null ? aclUrl.toString() : null;
     }
 
-    public URI getParentUrl() {
-        return parentUrl;
+    public String getParentUrl() {
+        return parentUrl.toString();
     }
 
     public String getParentPath() {
         return parentUrl.getPath();
     }
 
-    public URI getParentAclUrl() throws IOException, InterruptedException {
+    public String getParentAclUrl() throws Exception {
 //        logger.debug("GET PARENT ACL {} {} {}", parentUrl, parentAclUrl, aclsAvailable);
         if (parentAclUrl == null && !Boolean.FALSE.equals(aclsAvailable)) {
             URI aclLink = solidClient.getResourceAclLink(parentUrl.toString());
@@ -87,6 +87,6 @@ public class SolidResource {
             }
             aclsAvailable = aclLink != null;
         }
-        return parentAclUrl;
+        return parentAclUrl != null ? parentAclUrl.toString() : null;
     }
 }

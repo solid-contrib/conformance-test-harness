@@ -1,6 +1,5 @@
-package org.solid.testharness;
+package org.solid.testharness.http;
 
-import org.solid.testharness.utils.SolidClient;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -21,12 +20,12 @@ import java.util.Map;
 // TODO: Tests not implemented during POC phase but will be going forwards
 
 class SolidClientTest {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.utils.SolidClientTest");
+    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.http.SolidClientTest");
 
     @Test
     @Disabled
     void checkLogin() {
-        SolidClient solidClient = new SolidClient.Builder().build();
+        SolidClient solidClient = new SolidClient("alice");
         HttpClient client = solidClient.getHttpClient();
         URI uri = URI.create("https://server/login");
         Map<Object, Object> data = new HashMap<>();

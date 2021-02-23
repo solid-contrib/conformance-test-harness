@@ -23,7 +23,9 @@ function fn() {
                 }
             })
         }
-        karate.log('CONFIG: ', config);
+        // karate.log('CONFIG: ', config);
+    } else {
+        karate.log('Check the environment properties - config is not defined');
     }
     karate.configure('connectTimeout', 5000);
     karate.configure('readTimeout', 5000);
