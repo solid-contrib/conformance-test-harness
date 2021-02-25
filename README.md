@@ -101,3 +101,9 @@ There are 3 commands to add headers to an HTTP request:
     * Takes a JSON object containing key/value pairs to be added to the headers
 	* Note this is a shortcut command, not an expression as in the previous cases
 	* Example: `* headers { Authorization: 'some_token', tx_id: '1234' }`
+
+#### Response status
+When you know there is only one valid status there is a shortcut but in other cases you need to allow for multiple status codes or ranges. The best options are:
+* `* status 200`
+* `* match [200, 201, 202] contains responseStatus`
+* `* match karate.range(200, 299) contains responseStatus`
