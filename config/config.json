@@ -28,6 +28,7 @@
         "acl": true
       },
       "solidIdentityProvider": "https://broker.pod-compat.inrupt.com",
+      "disableDPoP": true,
       "serverRoot": "http://localhost:3000",
       "rootContainer": "/",
       "testContainer": "/test/",

@@ -36,12 +36,17 @@ public class AuthManager {
         Map<String, String> userConfig = (Map<String, String>) ((Map<String, Object>) config.get("users")).get(user);
         boolean supportsAuthentication = (boolean) ((Map<String, Object>) config.get("features")).get("authentication");
         int aclCachePause = config.containsKey("aclCachePause") ? (int) config.get("aclCachePause") : 0;
+        boolean disableDPoP = config.containsKey("disableDPoP") ? (boolean) config.get("disableDPoP") : false;
 
         if (!supportsAuthentication) {
             return new SolidClient();
         }
 
-        Client authClient = new Client.Builder(user).withDpopSupport().build();
+        Client.Builder builder = new Client.Builder(user);
+        if (!disableDPoP) {
+            builder.withDpopSupport();
+        }
+        Client authClient = builder.build();
         ClientRegistry.register(user, authClient);
 
         if (userConfig.containsKey(USERNAME) && userConfig.containsKey(PASSWORD)) {
