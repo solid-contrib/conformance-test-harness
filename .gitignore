@@ -35,3 +35,6 @@ gradle-app.setting
 
 # Cache of project
 .gradletasknamecache
+
+# local only config file
+local-config.json

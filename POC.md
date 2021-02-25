@@ -23,7 +23,7 @@ npx @inrupt/generate-oidc-token
 ```
 to get this information.
 
-## Configuration
+## Target server configuration
 
 The config for the server(s) under test goes in `config.json`. The format of this is:
 ```json
@@ -47,14 +47,8 @@ The config for the server(s) under test goes in `config.json`. The format of thi
 The initial `target` value is name of the server to test by default from the list below. The
 server sections define each server to be tested including the user accounts, and the features that the server supports.
 
-There is a sample of this file in the `config` folder and this will be used unless you override this location on the command line:
-```
--Dconfig=/path/to/config.json
-```
-You can override the default server by setting `karate.env`:
-```
--Dkarate.env=another_server
-```
+There is a sample of this file in the `config` folder and this will be used unless you override this location as shown below.
+
 Within `config.json` are the user authentication settings. You can either add the token information directly into this:
 ```json
 "users":{
@@ -75,17 +69,35 @@ Or you can keep the credentials in a separate file which allows them to be share
   }
 }
 ```
-In this case you must set up a property on the commandline `credentials` pointing to the credentials directory:
+
+## Setting up the environment
+There 3 important settings:
+* `env` - the name of the target server, used to select the config from the config file
+* `config` - the location of the config file
+* `credentials` - the location of the shared credentials files if used
+
+There are 2 ways to set these properties. Firstly you can provide `local-config.json` in the working directory containing:
+```json
+{
+  "env": "TARGET_SERVER",
+  "config": "PATH_TO_CONFIG",
+  "credentials": "PATH_TO_CREDENTIALS"
+}
 ```
--Dcredentials=/path/to/credentials/directory
+This method works well when testing your tests in an IDE as it doesn't require any environment variables to be set.
+
+Alternatively you can set these things on the command line:
 ```
-You will also need to add it to your IDE configuration for the test runner. 
+-Dkarate.env=TARGET_SERVER
+-Dconfig=PATH_TO_CONFIG
+-Dcredentials=PATH_TO_CREDENTIALS
+``` 
 
 You may be relieved to know that this is not how authentication of test accounts will stay - the process will
 be made much simpler but this worked to get the test harness started.
 
 ## Running the test suite
-To run the test suite with the default target server as defined in `karate-config.js`:
+To run the test suite with the default target server as defined in `config.json`:
 
 ```shell
 ./gradlew test
