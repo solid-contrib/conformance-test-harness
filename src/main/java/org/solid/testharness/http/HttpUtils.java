@@ -1,5 +1,6 @@
 package org.solid.testharness.http;
 
+import jakarta.ws.rs.core.Link;
 import org.slf4j.Logger;
 
 import java.net.URI;
@@ -72,5 +73,16 @@ public class HttpUtils {
                 decodeValue(key),
                 decodeValue(value)
         );
+    }
+
+    // Link can be multi-valued (comma separated) or multi-instance so this builds a list from either form (or both)
+    // TODO: This is temporary as a link can contain a comma so this is not safe - a parser is required
+    public static List<Link> parseLinkHeaders(HttpHeaders headers) {
+        List<String> links = headers.allValues("Link");
+        // TODO: the following must be applied to all link headers, then the whole list flattened
+        if (links.size() == 1 && links.get(0).contains(", ")) {
+            links = Arrays.asList(links.get(0).split(", "));
+        }
+        return links.stream().map(link -> Link.valueOf(link)).collect(Collectors.toList());
     }
 }

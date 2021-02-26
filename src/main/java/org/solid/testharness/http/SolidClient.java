@@ -87,7 +87,6 @@ public class SolidClient {
 
     public final URI getResourceAclLink(String url) throws Exception {
         HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(url))
-                .header("Accept", "*/*")    // TODO: This is required due to CSS bug: https://github.com/solid/community-server/issues/593
                 .method("HEAD", HttpRequest.BodyPublishers.noBody());
         HttpRequest request = client.authorize(builder).build();
         HttpUtils.logRequest(logger, request);
@@ -97,12 +96,8 @@ public class SolidClient {
     }
 
     public URI getAclLink(HttpHeaders headers) {
-        List<String> optLinks = headers.allValues("Link");
-        if (optLinks.size() == 1 && optLinks.get(0).split(", ").length > 1) {
-            // TODO: Investigate why NSS link header is treated as single link when there are more than one - this is the workaround
-            optLinks = Arrays.asList(optLinks.get(0).split(", "));
-        }
-        Optional<Link> aclLink = optLinks.stream().map(link -> Link.valueOf(link)).filter(link -> link.getRels().contains("acl")).findFirst();
+        List<Link> links = HttpUtils.parseLinkHeaders(headers);
+        Optional<Link> aclLink = links.stream().filter(link -> link.getRels().contains("acl")).findFirst();
         return aclLink.isPresent() ? aclLink.get().getUri() : null;
     }
 

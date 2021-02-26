@@ -25,7 +25,8 @@
     "css": {
       "features": {
         "authentication": true,
-        "acl": true
+        "acl": true,
+        "wac-allow": true
       },
       "solidIdentityProvider": "https://broker.pod-compat.inrupt.com",
       "serverRoot": "http://localhost:3000",

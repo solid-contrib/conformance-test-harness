@@ -50,8 +50,4 @@ class RDFUtilsTest {
     @Test
     void isNTriples() {
     }
-
-    @Test
-    void getAclLink() {
-    }
 }

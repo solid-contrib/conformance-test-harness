@@ -13,8 +13,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 public class RDFUtils {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.utils.RDFUtils");
@@ -96,14 +94,5 @@ public class RDFUtils {
             logger.debug("Input is not in N-Triples format", e);
             return false;
         }
-    }
-
-    public static final String getAclLink(Map<String, Object> headers) {
-        if (headers == null) return null;
-        List<String> links = (List<String>) headers.get("Link");
-        if (links.size() == 0) return null;
-        Optional<String> aclLink = links.stream().filter(link -> link.contains("; rel=\"acl\"")).findFirst();
-        if (aclLink.isEmpty()) return null;
-        return aclLink.get().split("[<>]")[1];
     }
 }
