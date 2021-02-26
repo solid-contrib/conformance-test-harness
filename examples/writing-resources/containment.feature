@@ -9,7 +9,7 @@ Feature: Creating a resource using PUT and PATCH must create intermediate contai
     * def containerUrl = target.serverRoot + containerPath
 
     # prepare the teardown function
-    * configure afterFeature = function() {solidClient.deleteResourceRecursively(containerUrl)}
+    * configure afterScenario = function() {solidClient.deleteResourceRecursively(containerUrl)}
 
   Scenario: PUT creates a grandchild resource and intermediate containers
     * def resourceUrl = target.serverRoot + containerPath + intermediateFolder + resourceName
@@ -36,6 +36,7 @@ Feature: Creating a resource using PUT and PATCH must create intermediate contai
     And match grandParentMembers contains parentUrl
 
   Scenario: PATCH creates a grandchild resource and intermediate containers
+    * def resourceUrl = target.serverRoot + containerPath + intermediateFolder + resourceName
     Given url resourceUrl
     And configure headers = solidClient.getAuthHeaders('PATCH', resourceUrl)
     And header Content-Type = "application/sparql-update"
