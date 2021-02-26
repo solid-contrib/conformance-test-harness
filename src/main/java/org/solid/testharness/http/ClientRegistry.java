@@ -17,6 +17,10 @@ public class ClientRegistry {
         registeredClientMap.put(label, client);
     }
 
+    public static boolean hasClient(String label) {
+        return registeredClientMap.containsKey(label);
+    }
+
     public static Client getClient(String label) {
         if (label == null) {
             return registeredClientMap.get(DEFAULT);

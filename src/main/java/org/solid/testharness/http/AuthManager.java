@@ -46,20 +46,25 @@ public class AuthManager {
         if (!disableDPoP) {
             builder.withDpopSupport();
         }
-        Client authClient = builder.build();
-        ClientRegistry.register(user, authClient);
-
-        if (userConfig.containsKey(USERNAME) && userConfig.containsKey(PASSWORD)) {
-            tokens = loginAndGetAccessToken(authClient, userConfig, config);
-        } else if (userConfig.containsKey(REFRESH_TOKEN) && userConfig.containsKey(CLIENT_ID) && userConfig.containsKey(CLIENT_SECRET)) {
-            tokens = exchangeRefreshToken(authClient, userConfig, config);
+        Client authClient = null;
+        if (ClientRegistry.hasClient(user)) {
+            authClient = ClientRegistry.getClient(user);
         } else {
-            logger.warn("Neither login credentials nor refresh token details provided");
-            return null;
+            authClient = builder.build();
+            ClientRegistry.register(user, authClient);
+
+            if (userConfig.containsKey(USERNAME) && userConfig.containsKey(PASSWORD)) {
+                tokens = loginAndGetAccessToken(authClient, userConfig, config);
+            } else if (userConfig.containsKey(REFRESH_TOKEN) && userConfig.containsKey(CLIENT_ID) && userConfig.containsKey(CLIENT_SECRET)) {
+                tokens = exchangeRefreshToken(authClient, userConfig, config);
+            } else {
+                logger.warn("Neither login credentials nor refresh token details provided");
+                return null;
+            }
+            String accessToken = (String) tokens.get("access_token");
+            logger.debug("access_token {}", accessToken);
+            authClient.setAccessToken(accessToken);
         }
-        String accessToken = (String) tokens.get("access_token");
-        logger.debug("access_token {}", accessToken);
-        authClient.setAccessToken(accessToken);
         SolidClient solidClient = new SolidClient(authClient, aclCachePause);
         if (user.equals("alice") && config.containsKey("setupRootAcl") && (boolean) config.get("setupRootAcl")) {
             solidClient.setupRootAcl((String) config.get("serverRoot"), userConfig.get("webID"));
