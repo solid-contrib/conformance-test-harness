@@ -1,6 +1,8 @@
 package org.solid.testharness.utils;
 
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
@@ -11,8 +13,11 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class RDFUtils {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.utils.RDFUtils");
@@ -94,5 +99,17 @@ public class RDFUtils {
             logger.debug("Input is not in N-Triples format", e);
             return false;
         }
+    }
+
+    public static final List<String> parseContainer(String data, String baseUri) {
+        Model model = null;
+        try {
+            model = Rio.parse(new StringReader(data), baseUri, RDFFormat.TURTLE);
+        } catch (Exception e) {
+            logger.error("RDF Parse Error: {} in {}", e.getMessage(), data);
+            return null;
+        }
+        Set<Value> resources = model.filter(null, LDP.CONTAINS, null).objects();
+        return resources.stream().map(resource -> resource.toString()).collect(Collectors.toList());
     }
 }

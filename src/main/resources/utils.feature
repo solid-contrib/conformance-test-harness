@@ -12,8 +12,10 @@ Feature: Utility Function Library
     * def statusSuccess = function(){ const status = karate.get('responseStatus'); return status >= 200 && status < 300 }
     * def statusRedirect = function(){ const status = karate.get('responseStatus'); return status >= 300 && status < 400 }
     * def statusFail = function(){ const status = karate.get('responseStatus'); return status >= 400 && status < 500 }
-    * def getRandomResourcePath = function(suffix) { return getRandomContainerPath() + java.util.UUID.randomUUID() + suffix }
+    * def getRandomResourceName = function(suffix) { return java.util.UUID.randomUUID() + suffix }
+    * def getRandomResourcePath = function(suffix) { return getRandomContainerPath() + getRandomResourceName(suffix) }
     * def getRandomContainerPath = function() { return target.testContainer + java.util.UUID.randomUUID() + '/' }
+    * def getRandomChildContainerPath = function() { return java.util.UUID.randomUUID() + '/' }
     * def createOwnerAuthorization =
     """
       function(ownerAgent, target) {

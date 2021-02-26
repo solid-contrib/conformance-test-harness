@@ -88,6 +88,7 @@ public class TestRunner {
 
         Map<String, Set<String>> testRequirements = Map.of(
                 "content-negotiation", Set.of(),
+                "writing-resources", Set.of(),
                 "protected-operations", Set.of("authentication", "acl"),
                 "wac-allow", Set.of("authentication", "wac-allow")
 //            "acp-operations", Set.of("authentication", "acp")
