@@ -61,7 +61,7 @@ public class AuthManager {
         logger.debug("access_token {}", accessToken);
         authClient.setAccessToken(accessToken);
         SolidClient solidClient = new SolidClient(authClient, aclCachePause);
-        if (user.equals("alice") && (boolean) config.get("setupRootAcl")) {
+        if (user.equals("alice") && config.containsKey("setupRootAcl") && (boolean) config.get("setupRootAcl")) {
             solidClient.setupRootAcl((String) config.get("serverRoot"), userConfig.get("webID"));
         }
         return solidClient;
