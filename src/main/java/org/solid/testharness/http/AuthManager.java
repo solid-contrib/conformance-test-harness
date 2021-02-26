@@ -60,7 +60,11 @@ public class AuthManager {
         String accessToken = (String) tokens.get("access_token");
         logger.debug("access_token {}", accessToken);
         authClient.setAccessToken(accessToken);
-        return new SolidClient(authClient, aclCachePause);
+        SolidClient solidClient = new SolidClient(authClient, aclCachePause);
+        if (user.equals("alice") && (boolean) config.get("setupRootAcl")) {
+            solidClient.setupRootAcl((String) config.get("serverRoot"), userConfig.get("webID"));
+        }
+        return solidClient;
     }
 
     private static final Map<String, Object> exchangeRefreshToken(Client authClient, Map<String, String> userConfig, Map<String, Object> config) throws Exception {

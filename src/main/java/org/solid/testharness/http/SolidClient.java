@@ -57,6 +57,17 @@ public class SolidClient {
         return client.getHttpClient();
     }
 
+    public boolean setupRootAcl(String serverRoot, String webID) throws Exception {
+        URI rootAclUrl = getResourceAclLink(serverRoot + (serverRoot.endsWith("/") ? "" : "/"));
+        String acl = String.format("@prefix acl: <http://www.w3.org/ns/auth/acl#>. " +
+                "<#alice> a acl:Authorization ; " +
+                "  acl:agent <%s> ;" +
+                "  acl:accessTo </>;" +
+                "  acl:default </>;" +
+                "  acl:mode acl:Read, acl:Write, acl:Control .", webID);
+        return createAcl(rootAclUrl, acl);
+    }
+
     public Map<String, String> getAuthHeaders(String method, String uri) throws Exception {
         return client.getAuthHeaders(method, uri);
     }
