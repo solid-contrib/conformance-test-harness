@@ -11,7 +11,7 @@ Feature: Set up a new container with sample file for Alice
     * def exampleTurtle = karate.readAsString('../fixtures/example.ttl')
     * def solidClient = authenticate('alice')
     * def resource = new SolidResource(solidClient, target.serverRoot + resourcePath, exampleTurtle, 'text/turtle')
-    * assert resource != null
+    * assert resource.exists()
     * def containerUrl = resource.getParentUrl()
     * def resourceUrl = target.serverRoot + resourcePath
     * def sample = RDFUtils.turtleToTripleArray(exampleTurtle, resourceUrl)
@@ -22,7 +22,7 @@ Feature: Set up a new container with sample file for Alice
     * def exampleJson = karate.readAsString('../fixtures/example.json')
     * def solidClient = authenticate('alice')
     * def resource = new SolidResource(solidClient, target.serverRoot + resourcePath, exampleJson, 'application/ld+json')
-    * assert resource != null
+    * assert resource.exists()
     * def containerUrl = resource.getParentUrl()
     * def resourceUrl = target.serverRoot + resourcePath
     * def sample = RDFUtils.jsonLdToTripleArray(exampleJson, resourceUrl)

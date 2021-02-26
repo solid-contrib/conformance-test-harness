@@ -17,6 +17,7 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
       }
     """
     * def testContext = callonce setup { bobModes: 'acl:Write', publicModes: 'acl:Read, acl:Append' }
+    * assert testContext.resource.exists()
     * def resourceUrl = target.serverRoot + testContext.resourcePath
     * url resourceUrl
 

@@ -12,7 +12,7 @@ Feature: Set up a sample turtle file for Alice with defined access set for Bob
     * def solidClientBob = authenticate('bob')
     * def exampleTurtle = karate.readAsString('../fixtures/example.ttl')
     * def resource = new SolidResource(solidClient, target.serverRoot + resourcePath, exampleTurtle, 'text/turtle')
-    * assert resource != null
+    * assert resource.exists()
     * def containerUrl = resource.getParentUrl()
     * def acl =
     """
@@ -20,7 +20,7 @@ Feature: Set up a sample turtle file for Alice with defined access set for Bob
        + createOwnerAuthorization(target.users.alice.webID, resourcePath)
        + createBobAccessToAuthorization(target.users.bob.webID, resourcePath, bobAccessModes)
     """
-    * match resource.setAcl(acl) == true
+    * assert resource.setAcl(acl)
 
   @name=setupDefault # input: { bobAccessModes }
   Scenario:
@@ -28,7 +28,7 @@ Feature: Set up a sample turtle file for Alice with defined access set for Bob
     * def solidClientBob = authenticate('bob')
     * def exampleTurtle = karate.readAsString('../fixtures/example.ttl')
     * def resource = new SolidResource(solidClient, target.serverRoot + resourcePath, exampleTurtle, 'text/turtle')
-    * assert resource != null
+    * assert resource.exists()
     * def containerUrl = resource.getParentUrl()
     * def containerPath = resource.getParentPath()
     * def acl =
@@ -37,4 +37,4 @@ Feature: Set up a sample turtle file for Alice with defined access set for Bob
        + createOwnerAuthorization(target.users.alice.webID, containerPath)
        + createBobDefaultAuthorization(target.users.bob.webID, containerPath, bobAccessModes)
     """
-    * match resource.setParentAcl(acl) == true
+    * assert resource.setParentAcl(acl)

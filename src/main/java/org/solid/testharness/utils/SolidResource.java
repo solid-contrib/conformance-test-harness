@@ -18,7 +18,7 @@ public class SolidResource {
     private URI parentAclUrl = null;
     private Boolean aclsAvailable = null;
 
-    public SolidResource(SolidClient solidClient, String url, String body, String type) throws Exception {
+    public SolidResource(SolidClient solidClient, String url, String body, String type) {
         if (solidClient == null) throw new IllegalArgumentException("Parameter solidClient is required");
         if (url == null || url.isEmpty()) throw new IllegalArgumentException("Parameter url is required");
         if (body == null || body.isEmpty()) throw new IllegalArgumentException("Parameter body is required");
@@ -29,15 +29,24 @@ public class SolidResource {
         parentUrl = this.url.getPath().endsWith("/") ? this.url.resolve("..") : this.url.resolve(".");
 //        logger.debug("PARENT URL {}", parentUrl);
 
-        HttpHeaders headers = solidClient.createResource(this.url, body, type);
-        if (headers.allValues("Link").size() != 0) {
-            URI aclLink = solidClient.getAclLink(headers);
-            if (aclLink != null) {
-                logger.debug("ACL LINK {}", aclLink);
-                aclUrl = this.url.resolve(aclLink);
-                aclsAvailable = true;
+        HttpHeaders headers = null;
+        try {
+            headers = solidClient.createResource(this.url, body, type);
+            if (headers.allValues("Link").size() != 0) {
+                URI aclLink = solidClient.getAclLink(headers);
+                if (aclLink != null) {
+                    logger.debug("ACL LINK {}", aclLink);
+                    aclUrl = this.url.resolve(aclLink);
+                    aclsAvailable = true;
+                }
             }
+        } catch (Exception e) {
+            this.url = null;
         }
+    }
+
+    public boolean exists() {
+        return url != null;
     }
 
     public boolean setAcl(String acl) throws Exception {

@@ -79,6 +79,9 @@ public class SolidClient {
         HttpRequest request = client.authorize(builder).build();
         HttpResponse<Void> response = client.send(request, BodyHandlers.discarding());
         HttpUtils.logResponse(logger, response);
+        if (response.statusCode() < 200 || response.statusCode() > 299) {
+            throw new Exception("Failed to create resource - status=" + response.statusCode());
+        }
         return response.headers();
     }
 

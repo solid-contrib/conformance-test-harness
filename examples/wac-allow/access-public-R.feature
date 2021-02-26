@@ -16,6 +16,7 @@ Feature: The WAC-Allow header shows user and public access modes with public rea
       }
     """
     * def testContext = callonce setup { publicModes: 'acl:Read' }
+    * assert testContext.resource.exists()
     * def resourceUrl = target.serverRoot + testContext.resourcePath
     * url resourceUrl
 
