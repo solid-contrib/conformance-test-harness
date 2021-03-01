@@ -2,6 +2,7 @@
 Feature: Utility Function Library
   Background:
     * def RDFUtils = Java.type('org.solid.testharness.utils.RDFUtils')
+    * def HttpUtils = Java.type('org.solid.testharness.http.HttpUtils')
     * def Base64 = Java.type('java.util.Base64')
     * def SolidClient = Java.type('org.solid.testharness.http.SolidClient')
     * def SolidResource = Java.type('org.solid.testharness.utils.SolidResource')

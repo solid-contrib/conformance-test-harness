@@ -45,7 +45,7 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     When method GET
     Then status 200
     And match header WAC-Allow != null
-    * def result = SolidClient.parseWacAllowHeader(responseHeaders)
+    * def result = HttpUtils.parseWacAllowHeader(responseHeaders)
     And match result.user contains only ['read', 'write', 'append']
     And match result.public contains only ['read', 'append']
 
@@ -54,7 +54,7 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     When method HEAD
     Then status 200
     And match header WAC-Allow != null
-    * def result = SolidClient.parseWacAllowHeader(responseHeaders)
+    * def result = HttpUtils.parseWacAllowHeader(responseHeaders)
     And match result.user contains only ['read', 'write', 'append']
     And match result.public contains only ['read', 'append']
 
@@ -62,7 +62,7 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     When method GET
     Then status 200
     And match header WAC-Allow != null
-    * def result = SolidClient.parseWacAllowHeader(responseHeaders)
+    * def result = HttpUtils.parseWacAllowHeader(responseHeaders)
     And match result.user contains only ['read', 'append']
     And match result.public contains only ['read', 'append']
 
@@ -70,6 +70,6 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     When method HEAD
     Then status 200
     And match header WAC-Allow != null
-    * def result = SolidClient.parseWacAllowHeader(responseHeaders)
+    * def result = HttpUtils.parseWacAllowHeader(responseHeaders)
     And match result.user contains only ['read', 'append']
     And match result.public contains only ['read', 'append']

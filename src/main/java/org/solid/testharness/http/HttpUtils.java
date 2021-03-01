@@ -2,6 +2,7 @@ package org.solid.testharness.http;
 
 import jakarta.ws.rs.core.Link;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URLDecoder;
@@ -11,9 +12,13 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class HttpUtils {
+    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.http.HttpUtils");
+
     static boolean isSuccessful(int code) {
         return code >= 200 && code < 300;
     }
@@ -84,5 +89,36 @@ public class HttpUtils {
             links = Arrays.asList(links.get(0).split(", "));
         }
         return links.stream().map(link -> Link.valueOf(link)).collect(Collectors.toList());
+    }
+
+    public static Map<String, List<String>> parseWacAllowHeader(Map<String, List<String>> headers) {
+        logger.debug("WAC-Allow: {}", headers.toString());
+        Map<String, Set<String>> permissions = Map.of(
+                "user", new HashSet<String>(),
+                "public", new HashSet<String>()
+        );
+        Optional<Map.Entry<String, List<String>>> header = headers.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().toLowerCase().equals("wac-allow"))
+                .findFirst();
+        if (header.isPresent()) {
+            String wacAllowHeader = header.get().getValue().get(0);
+            // note this does not support imbalanced quotes
+            Pattern p = Pattern.compile("(\\w+)\\s*=\\s*\"?\\s*((?:\\s*[^\",\\s]+)*)\\s*\"?");
+            Matcher m = p.matcher(wacAllowHeader);
+            while (m.find()) {
+                if (!permissions.containsKey(m.group(1))) {
+                    permissions.put(m.group(1), new HashSet<String>());
+                }
+                if (!m.group(2).isEmpty()) {
+                    permissions.get(m.group(1)).addAll(Arrays.asList(m.group(2).toLowerCase().split("\\s+")));
+                }
+            }
+        } else {
+            logger.error("WAC-Allow header missing");
+        }
+        return permissions.entrySet().stream().collect(Collectors.toMap(
+                entry -> entry.getKey(),
+                entry -> List.copyOf(entry.getValue())));
     }
 }

@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TestRunner {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.runner.TestRunner");
+    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.TestRunner");
 
     private static int THREAD_COUNT = 8;
 

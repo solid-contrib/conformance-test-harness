@@ -17,12 +17,13 @@ import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class SolidClient {
@@ -114,37 +115,6 @@ public class SolidClient {
             Thread.sleep(aclCachePause);
         }
         return HttpUtils.isSuccessful(response.statusCode());
-    }
-
-    public static Map<String, List<String>> parseWacAllowHeader(Map<String, List<String>> headers) {
-        logger.debug("WAC-Allow: {}", headers.toString());
-        Map<String, Set<String>> permissions = Map.of(
-                "user", new HashSet<String>(),
-                "public", new HashSet<String>()
-        );
-        Optional<Map.Entry<String, List<String>>> header = headers.entrySet()
-                .stream()
-                .filter(entry -> entry.getKey().toLowerCase().equals("wac-allow"))
-                .findFirst();
-        if (header.isPresent()) {
-            String wacAllowHeader = header.get().getValue().get(0);
-            // note this does not support imbalanced quotes
-            Pattern p = Pattern.compile("(\\w+)\\s*=\\s*\"?\\s*((?:\\s*[^\",\\s]+)*)\\s*\"?");
-            Matcher m = p.matcher(wacAllowHeader);
-            while (m.find()) {
-                if (!permissions.containsKey(m.group(1))) {
-                    permissions.put(m.group(1), new HashSet<String>());
-                }
-                if (!m.group(2).isEmpty()) {
-                    permissions.get(m.group(1)).addAll(Arrays.asList(m.group(2).toLowerCase().split("\\s+")));
-                }
-            }
-        } else {
-            logger.error("WAC-Allow header missing");
-        }
-        return permissions.entrySet().stream().collect(Collectors.toMap(
-                entry -> entry.getKey(),
-                entry -> List.copyOf(entry.getValue())));
     }
 
     public static String deleteResourceRecursively(String url, String user) {
