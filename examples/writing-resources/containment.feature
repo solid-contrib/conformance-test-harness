@@ -1,42 +1,38 @@
 Feature: Creating a resource using PUT and PATCH must create intermediate containers
 
-  Background:
-    * call read('classpath:utils.feature')
+  Background: Set up clients and paths
     * def solidClient = authenticate('alice')
-    * def containerPath = getRandomContainerPath()
-    * def intermediateFolder = getRandomChildContainerPath()
-    * def resourceName = getRandomResourceName('.txt')
-    * def containerUrl = target.serverRoot + containerPath
+    * def testContainer = createTestContainer(solidClient)
+    * def intermediateContainer = testContainer.generateChildContainer()
+    * def resource = intermediateContainer.generateChildResource('.txt')
 
     # prepare the teardown function
-    * configure afterScenario = function() {solidClient.deleteResourceRecursively(containerUrl)}
+    * configure afterScenario = function() {testContainer.delete()}
 
   Scenario: PUT creates a grandchild resource and intermediate containers
-    * def resourceUrl = target.serverRoot + containerPath + intermediateFolder + resourceName
+    * def resourceUrl = resource.getUrl()
     Given url resourceUrl
     And configure headers = solidClient.getAuthHeaders('PUT', resourceUrl)
     And request "Hello"
     When method PUT
     Then assert responseStatus >= 200 && responseStatus < 300
 
-    * def parentUrl = target.serverRoot + containerPath + intermediateFolder
+    * def parentUrl = intermediateContainer.getUrl()
     Given url parentUrl
     And configure headers = solidClient.getAuthHeaders('GET', parentUrl)
     When method GET
     Then status 200
-    * def parentMembers = RDFUtils.parseContainer(response, parentUrl)
-    And match parentMembers contains resourceUrl
+    And match intermediateContainer.parseMembers(response) contains resource.getUrl()
 
-    * def grandParentUrl = target.serverRoot + containerPath
+    * def grandParentUrl = testContainer.getUrl()
     Given url grandParentUrl
     And configure headers = solidClient.getAuthHeaders('GET', grandParentUrl)
     When method GET
     Then status 200
-    * def grandParentMembers = RDFUtils.parseContainer(response, grandParentUrl)
-    And match grandParentMembers contains parentUrl
+    And match testContainer.parseMembers(response) contains intermediateContainer.getUrl()
 
   Scenario: PATCH creates a grandchild resource and intermediate containers
-    * def resourceUrl = target.serverRoot + containerPath + intermediateFolder + resourceName
+    * def resourceUrl = resource.getUrl()
     Given url resourceUrl
     And configure headers = solidClient.getAuthHeaders('PATCH', resourceUrl)
     And header Content-Type = "application/sparql-update"
@@ -44,18 +40,16 @@ Feature: Creating a resource using PUT and PATCH must create intermediate contai
     When method PATCH
     Then assert responseStatus >= 200 && responseStatus < 300
 
-    * def parentUrl = target.serverRoot + containerPath + intermediateFolder
+    * def parentUrl = intermediateContainer.getUrl()
     Given url parentUrl
     And configure headers = solidClient.getAuthHeaders('GET', parentUrl)
     When method GET
     Then status 200
-    * def parentMembers = RDFUtils.parseContainer(response, parentUrl)
-    And match parentMembers contains resourceUrl
+    And match intermediateContainer.parseMembers(response) contains resource.getUrl()
 
-    * def grandParentUrl = target.serverRoot + containerPath
+    * def grandParentUrl = testContainer.getUrl()
     Given url grandParentUrl
     And configure headers = solidClient.getAuthHeaders('GET', grandParentUrl)
     When method GET
     Then status 200
-    * def grandParentMembers = RDFUtils.parseContainer(response, grandParentUrl)
-    And match grandParentMembers contains parentUrl
+    And match testContainer.parseMembers(response) contains intermediateContainer.getUrl()

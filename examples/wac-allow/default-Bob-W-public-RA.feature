@@ -1,28 +1,29 @@
 Feature: The WAC-Allow header shows user and public access modes with Bob write and public read, append as default on parent
 
-  Background:
-    * call read('classpath:utils.feature')
-    * call read('this:setup.feature')
+  Background: Create test resource giving Bob default write access and public default read/append access
     * def setup =
     """
-      function(config) {
-        const resourcePath = getRandomResourcePath('.ttl');
-        const context = setupClients(resourcePath);
-        const acl = aclPrefix
-          + createOwnerAuthorization(target.users.alice.webID, context.containerPath)
-          + createBobDefaultAuthorization(target.users.bob.webID, context.containerPath, config.bobModes)
-          + createPublicDefaultAuthorization(context.containerPath, config.publicModes)
-        context.resource.setParentAcl(acl)
-        return context;
+      function() {
+        const solidClientAlice = authenticate('alice');
+        const solidClientBob = authenticate('bob');
+        const testContainer = createTestContainer(solidClientAlice);
+        const resource = testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
+        if (resource.exists()) {
+          const acl = aclPrefix
+            + createOwnerAuthorization(target.users.alice.webID, resource.getContainer().getPath())
+            + createBobDefaultAuthorization(target.users.bob.webID, resource.getContainer().getPath(), 'acl:Write')
+            + createPublicDefaultAuthorization(resource.getContainer().getPath(), 'acl:Read, acl:Append')
+          resource.getContainer().setAcl(acl);
+        }
+        return {solidClientAlice, solidClientBob, resource};
       }
     """
-    * def testContext = callonce setup { bobModes: 'acl:Write', publicModes: 'acl:Read, acl:Append' }
+    * def testContext = callonce setup
     * assert testContext.resource.exists()
-    * def resourceUrl = target.serverRoot + testContext.resourcePath
+    * def resourceUrl = testContext.resource.getUrl()
     * url resourceUrl
 
-    # prepare the teardown function
-    * configure afterFeature = function() {SolidClient.deleteResourceRecursively(testContext.containerUrl, 'alice')}
+    * configure afterFeature = function() {testContext.resource.getContainer().delete()}
 
   Scenario: There is no acl on the resource
     Given url testContext.resource.getAclUrl()
@@ -32,8 +33,8 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     Then status 404
 
   Scenario: There is an acl on the parent containing #bobDefault
-    Given url testContext.resource.getParentAclUrl()
-    And configure headers = testContext.solidClientAlice.getAuthHeaders('GET', testContext.resource.getParentAclUrl())
+    Given url testContext.resource.getContainer().getAclUrl()
+    And configure headers = testContext.solidClientAlice.getAuthHeaders('GET', testContext.resource.getContainer().getAclUrl())
     And header Accept = 'text/turtle'
     When method GET
     Then status 200
@@ -45,7 +46,7 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     When method GET
     Then status 200
     And match header WAC-Allow != null
-    * def result = HttpUtils.parseWacAllowHeader(responseHeaders)
+    * def result = parseWacAllowHeader(responseHeaders)
     And match result.user contains only ['read', 'write', 'append']
     And match result.public contains only ['read', 'append']
 
@@ -54,7 +55,7 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     When method HEAD
     Then status 200
     And match header WAC-Allow != null
-    * def result = HttpUtils.parseWacAllowHeader(responseHeaders)
+    * def result = parseWacAllowHeader(responseHeaders)
     And match result.user contains only ['read', 'write', 'append']
     And match result.public contains only ['read', 'append']
 
@@ -62,7 +63,7 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     When method GET
     Then status 200
     And match header WAC-Allow != null
-    * def result = HttpUtils.parseWacAllowHeader(responseHeaders)
+    * def result = parseWacAllowHeader(responseHeaders)
     And match result.user contains only ['read', 'append']
     And match result.public contains only ['read', 'append']
 
@@ -70,6 +71,6 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     When method HEAD
     Then status 200
     And match header WAC-Allow != null
-    * def result = HttpUtils.parseWacAllowHeader(responseHeaders)
+    * def result = parseWacAllowHeader(responseHeaders)
     And match result.user contains only ['read', 'append']
     And match result.public contains only ['read', 'append']

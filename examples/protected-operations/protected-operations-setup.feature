@@ -1,40 +1,32 @@
 @ignore
 Feature: Set up a sample turtle file for Alice with defined access set for Bob
 
-  Background:
-    * callonce read('classpath:utils.feature')
-    * def resourcePath = getRandomResourcePath('.ttl')
-
-  # Get access tokens then create a resource and ACL
   @name=setupAccessTo # input: { bobAccessModes }
-  Scenario:
-    * def solidClient = authenticate('alice')
+  Scenario: Create resource with access for Bob
+    * def solidClientAlice = authenticate('alice')
     * def solidClientBob = authenticate('bob')
-    * def exampleTurtle = karate.readAsString('../fixtures/example.ttl')
-    * def resource = new SolidResource(solidClient, target.serverRoot + resourcePath, exampleTurtle, 'text/turtle')
+    * def testContainer = createTestContainer(solidClientAlice)
+    * def resource = testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
     * assert resource.exists()
-    * def containerUrl = resource.getParentUrl()
     * def acl =
     """
       aclPrefix
-       + createOwnerAuthorization(target.users.alice.webID, resourcePath)
-       + createBobAccessToAuthorization(target.users.bob.webID, resourcePath, bobAccessModes)
+       + createOwnerAuthorization(target.users.alice.webID, resource.getPath())
+       + createBobAccessToAuthorization(target.users.bob.webID, resource.getPath(), bobAccessModes)
     """
     * assert resource.setAcl(acl)
 
   @name=setupDefault # input: { bobAccessModes }
-  Scenario:
-    * def solidClient = authenticate('alice')
+  Scenario: Create resource with default access for Bob
+    * def solidClientAlice = authenticate('alice')
     * def solidClientBob = authenticate('bob')
-    * def exampleTurtle = karate.readAsString('../fixtures/example.ttl')
-    * def resource = new SolidResource(solidClient, target.serverRoot + resourcePath, exampleTurtle, 'text/turtle')
+    * def testContainer = createTestContainer(solidClientAlice)
+    * def resource = testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
     * assert resource.exists()
-    * def containerUrl = resource.getParentUrl()
-    * def containerPath = resource.getParentPath()
     * def acl =
     """
       aclPrefix
-       + createOwnerAuthorization(target.users.alice.webID, containerPath)
-       + createBobDefaultAuthorization(target.users.bob.webID, containerPath, bobAccessModes)
+       + createOwnerAuthorization(target.users.alice.webID, resource.getContainer().getPath())
+       + createBobDefaultAuthorization(target.users.bob.webID, resource.getContainer().getPath(), bobAccessModes)
     """
-    * assert resource.setParentAcl(acl)
+    * assert resource.getContainer().setAcl(acl)

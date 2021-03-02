@@ -2,21 +2,23 @@
 Feature: Utility Function Library
   Background:
     * def RDFUtils = Java.type('org.solid.testharness.utils.RDFUtils')
-    * def HttpUtils = Java.type('org.solid.testharness.http.HttpUtils')
-    * def Base64 = Java.type('java.util.Base64')
-    * def SolidClient = Java.type('org.solid.testharness.http.SolidClient')
     * def SolidResource = Java.type('org.solid.testharness.utils.SolidResource')
-    * def AuthManager = Java.type('org.solid.testharness.http.AuthManager')
+    * def SolidContainer = Java.type('org.solid.testharness.utils.SolidContainer')
 
   Scenario:
-    * def base64Encode = function(data) { return Base64.encoder.encodeToString(data.getBytes()) }
     * def statusSuccess = function(){ const status = karate.get('responseStatus'); return status >= 200 && status < 300 }
     * def statusRedirect = function(){ const status = karate.get('responseStatus'); return status >= 300 && status < 400 }
     * def statusFail = function(){ const status = karate.get('responseStatus'); return status >= 400 && status < 500 }
-    * def getRandomResourceName = function(suffix) { return java.util.UUID.randomUUID() + suffix }
-    * def getRandomResourcePath = function(suffix) { return getRandomContainerPath() + getRandomResourceName(suffix) }
-    * def getRandomContainerPath = function() { return target.testContainer + java.util.UUID.randomUUID() + '/' }
-    * def getRandomChildContainerPath = function() { return java.util.UUID.randomUUID() + '/' }
+    * def parseWacAllowHeader = function(headers) { return Java.type('org.solid.testharness.http.HttpUtils').parseWacAllowHeader(headers) }
+
+    * def createTestContainer =
+    """
+      function(client) {
+        const container = SolidContainer.create(client, target.serverRoot + target.testContainer).generateChildContainer();
+        karate.log(container);
+        return container;
+      }
+    """
     * def createOwnerAuthorization =
     """
       function(ownerAgent, target) {
@@ -101,10 +103,13 @@ Feature: Utility Function Library
       }
     """
 
+    * def clientAlice = Java.type('org.solid.testharness.http.AuthManager').authenticate('alice', target)
+    * def clientBob = Java.type('org.solid.testharness.http.AuthManager').authenticate('bob', target)
     * def authenticate =
     """
       function(user) {
-        return AuthManager.authenticate(user, target);
+        if (user == 'bob') return clientBob;
+        else return clientAlice;
       }
     """
 

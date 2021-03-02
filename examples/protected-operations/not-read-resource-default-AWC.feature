@@ -1,13 +1,11 @@
 Feature: Bob cannot read an RDF resource to which he is not granted default read access via the parent
 
-  Background:
-    # call the setup function to create the resource/acl and get the access tokens for alice and bob
+  Background: Create test resource with all default access except read for Bob
     * def testContext = callonce read('this:protected-operations-setup.feature@name=setupDefault') { bobAccessModes: 'acl:Append, acl:Write, acl:Control' }
-    * def resourceUrl = target.serverRoot + testContext.resourcePath
+    * def resourceUrl = testContext.resource.getUrl()
     * url resourceUrl
 
-    # prepare the teardown function
-    * configure afterFeature = function() {Java.type('org.solid.testharness.http.SolidClient').deleteResourceRecursively(testContext.containerUrl, 'alice')}
+    * configure afterFeature = function() {testContext.resource.getContainer().delete()}
 
   Scenario: Bob can get the resource OPTIONS
     Given configure headers = testContext.solidClientBob.getAuthHeaders('OPTIONS', resourceUrl)
