@@ -31,6 +31,7 @@
       "solidIdentityProvider": "https://broker.pod-compat.inrupt.com",
       "serverRoot": "http://localhost:3000",
       "setupRootAcl": true,
+      "maxThreads": 4,
       "rootContainer": "/",
       "testContainer": "/test/",
       "users": {
@@ -52,6 +53,7 @@
       },
       "solidIdentityProvider": "https://inrupt.net",
       "aclCachePause": 200,
+      "maxThreads": 1,
       "origin": "https://tester",
       "loginPath": "/login/password",
       "serverRoot": "https://solid-test-suite-alice.inrupt.net",
