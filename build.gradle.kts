@@ -12,6 +12,8 @@ val rdf4jVersion = "3.5.0"
 val jakartaVersion = "3.0.0"
 val jose4jVersion = "0.7.6"
 val commonsTextVersion = "1.9"
+val commonsLangVersion = "3.11"
+val mockitoVersion = "3.+"
 
 java {
     toolchain {
@@ -27,6 +29,7 @@ repositories {
 
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
+    testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
 
     implementation("com.intuit.karate:karate-core:$karateVersion")
@@ -36,6 +39,7 @@ dependencies {
     implementation("org.glassfish.jersey.core:jersey-client:$jakartaVersion")
     implementation("org.bitbucket.b_c:jose4j:$jose4jVersion")
     implementation("org.apache.commons:commons-text:$commonsTextVersion")
+    implementation("org.apache.commons:commons-lang3:$commonsLangVersion")
 
     implementation("org.eclipse.rdf4j:rdf4j-rio-rdfjson:$rdf4jVersion")
     implementation("org.eclipse.rdf4j:rdf4j-rio-n3:$rdf4jVersion")
@@ -62,6 +66,7 @@ tasks.test {
     } else {
         systemProperty("features", project.file("examples").absolutePath)
     }
+    systemProperty("agent", System.getProperty("agent"))
     systemProperty("karate.options", System.getProperty("karate.options"))
     systemProperty("karate.env", System.getProperty("karate.env"))
     if (System.getProperty("credentials") != null) {

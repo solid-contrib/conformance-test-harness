@@ -5,7 +5,6 @@ import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFParseException;
 import org.eclipse.rdf4j.rio.Rio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +28,7 @@ import java.util.stream.Collectors;
 public class SolidClient {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.http.SolidClient");
 
-    private Client client = null;
+    private Client client ;
     private int aclCachePause = 0;
 
     public SolidClient() {
@@ -73,8 +72,8 @@ public class SolidClient {
         return client.getAuthHeaders(method, uri);
     }
 
-    public final HttpHeaders createResource(URI url, String data, String type) throws Exception {
-        HttpRequest.Builder builder = HttpRequest.newBuilder(url)
+    public HttpHeaders createResource(URI url, String data, String type) throws Exception {
+        HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
                 .PUT(HttpRequest.BodyPublishers.ofString(data))
                 .header("Content-Type", type);
         HttpRequest request = client.authorize(builder).build();
@@ -86,8 +85,8 @@ public class SolidClient {
         return response.headers();
     }
 
-    public final URI getResourceAclLink(String url) throws Exception {
-        HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(url))
+    public URI getResourceAclLink(String url) throws Exception {
+        HttpRequest.Builder builder = HttpUtils.newRequestBuilder(URI.create(url))
                 .method("HEAD", HttpRequest.BodyPublishers.noBody());
         HttpRequest request = client.authorize(builder).build();
         HttpUtils.logRequest(logger, request);
@@ -103,7 +102,7 @@ public class SolidClient {
     }
 
     public boolean createAcl(URI url, String acl) throws Exception {
-        HttpRequest.Builder builder = HttpRequest.newBuilder(url)
+        HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
                 .PUT(HttpRequest.BodyPublishers.ofString(acl))
                 .header("Content-Type", "text/turtle");
         HttpRequest request = client.authorize(builder).build();
@@ -133,34 +132,34 @@ public class SolidClient {
         return "FAIL";
     }
 
-    public void deleteResourceRecursively(String url) throws Exception, ExecutionException {
+    public void deleteResourceRecursively(String url) throws Exception {
         deleteRecursive(URI.create(url), null).get();
     }
 
-    public void deleteContentsRecursively(String url) throws Exception, ExecutionException {
+    public void deleteContentsRecursively(String url) throws Exception {
         deleteRecursive(URI.create(url), new AtomicInteger(0)).get();
     }
 
-    public void deleteResourceRecursively(URI url) throws Exception, ExecutionException {
+    public void deleteResourceRecursively(URI url) throws Exception {
         deleteRecursive(url, null).get();
     }
 
-    public void deleteContentsRecursively(URI url) throws Exception, ExecutionException {
+    public void deleteContentsRecursively(URI url) throws Exception {
         deleteRecursive(url, new AtomicInteger(0)).get();
     }
 
     private CompletableFuture<HttpResponse<Void>> deleteRecursive(URI url, AtomicInteger depth) {
-        List<URI> failed = null;
+        List<URI> failed;
         if (isContainer(url)) {
             if (depth != null) {
                 depth.incrementAndGet();
             }
             // get all members
-            List<URI> members = null;
+            List<URI> members;
             try {
                 members = getContainerMembers(url).stream().filter(m -> !m.getPath().endsWith("test/")).collect(Collectors.toList());
             } catch (Exception e) {
-                logger.error("Failed to get container members", e);
+                logger.error("Failed to get container members: {}", e.getMessage());
                 return CompletableFuture.completedFuture(null);
             }
 
@@ -168,11 +167,9 @@ public class SolidClient {
             logger.debug("DELETING MEMBERS {}", members.toString());
             List<CompletableFuture<HttpResponse<Void>>> completableFutures = members.stream().map(u -> deleteRecursive(u, depth)).collect(Collectors.toList());
             CompletableFuture<Void> allFutures = CompletableFuture.allOf(completableFutures.toArray(CompletableFuture[]::new));
-            CompletableFuture<List<HttpResponse<Void>>> allCompletableFuture = allFutures.thenApply(future -> {
-                return completableFutures.stream()
-                        .map(completableFuture -> completableFuture.join())
-                        .collect(Collectors.toList());
-            });
+            CompletableFuture<List<HttpResponse<Void>>> allCompletableFuture = allFutures.thenApply(future -> completableFutures.stream()
+                    .map(CompletableFuture::join)
+                    .collect(Collectors.toList()));
             try {
                 failed = allCompletableFuture.thenApply(responses ->
                         responses.stream().filter(response -> response.statusCode() < 200 || response.statusCode() > 299).map(response -> {
@@ -205,7 +202,7 @@ public class SolidClient {
 
     private CompletableFuture<HttpResponse<Void>> deleteResourceAsync(URI url) {
         logger.debug("Deleting Resource {}", url);
-        HttpRequest.Builder builder = HttpRequest.newBuilder(url).DELETE();
+        HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url).DELETE();
         HttpRequest request;
         try {
             request = client.authorize(builder).build();
@@ -213,29 +210,35 @@ public class SolidClient {
             logger.error("Failed to set up authorization", e);
             return CompletableFuture.completedFuture(null);
         }
-        CompletableFuture<HttpResponse<Void>> response = getHttpClient().sendAsync(request, BodyHandlers.discarding());
-        return response;
+        return getHttpClient().sendAsync(request, BodyHandlers.discarding());
     }
 
-    private List<URI> getContainerMembers(URI url) throws Exception {
-        HttpRequest.Builder builder = HttpRequest.newBuilder(url)
-                .GET()
+    public String getContainmentData(URI url) throws Exception {
+        HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
                 .header("Accept", "text/turtle");
         HttpRequest request = client.authorize(builder).build();
         HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
         if (response.statusCode() != 200) {
             throw new Exception("Error response="+response.statusCode()+" trying to get container members for "+url);
         }
-        Model model = null;
+        return response.body();
+    }
+
+    public List<URI> getContainerMembers(URI url) throws Exception {
+        String data = getContainmentData(url);
+        return parseMembers(data, url).stream().map(URI::create).collect(Collectors.toList());
+    }
+
+    public List<String> parseMembers(String data, URI url) throws Exception {
+        Model model;
         try {
-            model = Rio.parse(new StringReader(response.body()), url.toString(), RDFFormat.TURTLE);
-        } catch (RDFParseException e) {
-            logger.error("RDF Parse Error: {} in {}", e.getMessage(), response.body());
+            model = Rio.parse(new StringReader(data), url.toString(), RDFFormat.TURTLE);
+        } catch (Exception e) {
+            logger.error("RDF Parse Error: {} in {}", e.getMessage(), data);
             throw new Exception("Bad container listing");
         }
-        // create list of resources to delete
         Set<Value> resources = model.filter(null, LDP.CONTAINS, null).objects();
-        return resources.stream().map(resource -> URI.create(resource.toString())).collect(Collectors.toList());
+        return resources.stream().map(Object::toString).collect(Collectors.toList());
     }
 
     private boolean isContainer(URI url) {
@@ -244,6 +247,6 @@ public class SolidClient {
 
     @Override
     public String toString() {
-        return "SolidClient user=" + client.getUser() + ", accessToken=" + client.getAccessToken();
+        return "SolidClient: user=" + client.getUser() + ", accessToken=" + client.getAccessToken();
     }
 }
