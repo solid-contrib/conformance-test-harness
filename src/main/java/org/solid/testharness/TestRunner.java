@@ -19,8 +19,6 @@ import java.util.stream.Stream;
 public class TestRunner {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.TestRunner");
 
-    private static int THREAD_COUNT = 8;
-
     public Results runTests() {
         // allow tests to run against server on localhost
         System.setProperty("jdk.internal.httpclient.disableHostnameVerification", Boolean.TRUE.toString());
@@ -39,6 +37,9 @@ public class TestRunner {
 
         Set<String> targetCapabilities = getTargetCapablities(config, targetServer);
         logger.debug("Server features: {}", targetCapabilities.toString());
+
+        int maxThreads = getMaxThreads(config, targetServer);
+        logger.debug("Max threads: {}", maxThreads);
 
         String featuresDirectory = System.getProperty("features");
 
@@ -68,7 +69,7 @@ public class TestRunner {
                 .tags(tags)
 //                .outputCucumberJson(true)
                 .outputHtmlReport(true)
-                .parallel(THREAD_COUNT);
+                .parallel(maxThreads);
 
         logger.info("===================== START REPORT ========================");
         ReportUtils.generateReport(results.getReportDir());
@@ -135,6 +136,17 @@ public class TestRunner {
         Map<String, Object> serverConfig = (Map<String, Object>) servers.get(target);
         Map<String, Object> featureConfig = (Map<String, Object>) serverConfig.get("features");
         return featureConfig.keySet();
+    }
+
+    int getMaxThreads(Map<String, Object> config, String target) {
+        // TODO: This is horrible but it is only a placeholder for future work
+        Map<String, Object> servers = (Map<String, Object>) config.get("servers");
+        Map<String, Object> serverConfig = (Map<String, Object>) servers.get(target);
+        if (serverConfig.containsKey("maxThreads")) {
+            return  (int) serverConfig.get("maxThreads");
+        } else {
+            return 8;
+        }
     }
 
     Map<String,Object> loadConfig(String filename) {
