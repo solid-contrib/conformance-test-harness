@@ -39,6 +39,7 @@ public class Client {
     private String accessToken = null;
     private RsaJsonWebKey clientKey = null;
     private boolean dpopSupported = false;
+    private String agent = null;
     private String user = null;
 
     public static class Builder {
@@ -104,6 +105,7 @@ public class Client {
 
         public Client build() {
             Client client = new Client();
+            client.agent = HttpUtils.getAgent();
             client.user = user;
             client.client = clientBuilder.build();
             client.clientKey = clientKey;
@@ -160,6 +162,9 @@ public class Client {
             headers.put("DPoP", dpopToken);
         } else {
             headers.put("Authorization", "Bearer " + accessToken);
+        }
+        if (agent != null) {
+            headers.put("User-Agent", agent);
         }
         return headers;
     }

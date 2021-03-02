@@ -30,7 +30,7 @@ public class AuthManager {
 
     private static UncheckedObjectMapper objectMapper = new UncheckedObjectMapper();
 
-    public static final SolidClient authenticate(String user, Map<String, Object> config) throws Exception {
+    public static final synchronized SolidClient authenticate(String user, Map<String, Object> config) throws Exception {
         Map<String, Object> tokens = null;
         // TODO: All access to config will be class based, not direct access to the JSON Map
         Map<String, String> userConfig = (Map<String, String>) ((Map<String, Object>) config.get("users")).get(user);
@@ -82,7 +82,7 @@ public class AuthManager {
         // TODO: This should get the token endpoint from the oidc configuration
         URI tokenEndpoint = URI.create(solidIdentityProvider + "/token");
         HttpRequest request = authClient.signRequest(
-                HttpRequest.newBuilder(tokenEndpoint)
+                HttpUtils.newRequestBuilder(tokenEndpoint)
                         .header("Authorization", "Basic " + base64Encode(userConfig.get(CLIENT_ID) + ':' + userConfig.get(CLIENT_SECRET)))
                         .header("Content-Type", "application/x-www-form-urlencoded")
                         .header("Accept", "application/json")
@@ -110,7 +110,7 @@ public class AuthManager {
         Map<Object, Object> data = new HashMap<>();
         data.put(USERNAME, userConfig.get(USERNAME));
         data.put(PASSWORD, userConfig.get(PASSWORD));
-        HttpRequest request = HttpRequest.newBuilder(uri.resolve((String) config.get(LOGIN_PATH)))
+        HttpRequest request = HttpUtils.newRequestBuilder(uri.resolve((String) config.get(LOGIN_PATH)))
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .POST(HttpUtils.ofFormData(data))
                 .build();
@@ -119,7 +119,7 @@ public class AuthManager {
         HttpUtils.logResponse(logger, response);
 
         logger.debug("\n========== GET CONFIGURATION");
-        request = HttpRequest.newBuilder(uri.resolve("/.well-known/openid-configuration"))
+        request = HttpUtils.newRequestBuilder(uri.resolve("/.well-known/openid-configuration"))
                 .header("Accept", "application/json")
                 .build();
         HttpUtils.logRequest(logger, request);
@@ -142,7 +142,7 @@ public class AuthManager {
             put("token_endpoint_auth_method", "client_secret_basic");
         }};
         String registrationBody = objectMapper.writeValueAsString(registration);
-        request = HttpRequest.newBuilder(registrationEndpoint)
+        request = HttpUtils.newRequestBuilder(registrationEndpoint)
                 .POST(HttpRequest.BodyPublishers.ofString(registrationBody))
                 .header("Content-Type", "application/json")
                 .build();
@@ -166,7 +166,7 @@ public class AuthManager {
         URI redirectUrl = URI.create(authorizaUrl);
         do {
             logger.debug("Authorize URL {}", redirectUrl);
-            request = HttpRequest.newBuilder(redirectUrl).build();
+            request = HttpUtils.newRequestBuilder(redirectUrl).build();
             HttpUtils.logRequest(logger, request);
             HttpResponse<Void> authResponse = client.send(request, HttpResponse.BodyHandlers.discarding());
             HttpUtils.logResponse(logger, authResponse);
@@ -194,7 +194,7 @@ public class AuthManager {
         tokenRequestData.put("client_id", clientId);
 
         request = authClient.signRequest(
-                HttpRequest.newBuilder(tokenEndpoint)
+                HttpUtils.newRequestBuilder(tokenEndpoint)
                         .header("Authorization", "Basic " + base64Encode(clientId + ':' + clientSecret))
                         .header("Content-Type", "application/x-www-form-urlencoded")
                         .header("Accept", "application/json")

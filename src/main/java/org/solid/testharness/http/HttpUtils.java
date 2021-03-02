@@ -1,6 +1,7 @@
 package org.solid.testharness.http;
 
 import jakarta.ws.rs.core.Link;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +19,18 @@ import java.util.stream.Collectors;
 
 public class HttpUtils {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.http.HttpUtils");
+
+    public static String getAgent() {
+        String agentString = System.getProperty("agent");
+        if (StringUtils.isEmpty(agentString)) {
+            agentString = "Solid-Conformance-Test-Suite";
+        }
+        return agentString;
+    }
+
+    public static HttpRequest.Builder newRequestBuilder(URI uri) {
+        return HttpRequest.newBuilder(uri).setHeader("User-Agent", getAgent());
+    }
 
     static boolean isSuccessful(int code) {
         return code >= 200 && code < 300;
