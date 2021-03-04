@@ -4,24 +4,57 @@
 such has some very rough edges. There will be a lot of changes in the near future but comments are always welcome. 
 
 ## Prerequisites
-The tests have been run against ESS in ACL compatibility mode, CSS and to some extent NSS. 
-At present we can only run a few tests against NSS and they depend on a public read/write folder. 
-There are 2 ways forward with this:
-* NSS adds support for refresh tokens: See https://github.com/solid/node-solid-server/issues/1533
-* We add an alternative authentication mechanism (based on cookies)
+The example test cases have been run against ESS in ACL compatibility mode, CSS and NSS. They require 2 user accounts to
+be made available via an IdP: alice and bob. The profiles for these users may need additional information adding to them:
+* Trusted app:
+```
+:me acl:trustedApp [
+  acl:mode acl:Read, acl:Write;
+  acl:origin <https://tester>
+];
+```
+* Solid Identity Provider: (where the URL is the IdP of this account) - NSS does not add this to new profiles by default
+```
+:me solid:oidcIssuer <https://inrupt.net/>;
+```
 
-The tests currently rely on two users being set up in an IdP (e.g. https://broker.pod-compat.inrupt.com/).
-The configuration needed for each user is:
+If you are planning to use accounts that do not own PODs on the target server then you will also need to provide a container
+on the target server for the tests that has been granted full access control for the test user.
+
+There are 2 approaches to authentication, refresh tokens and session based login. If the target test server and the chosen IdP
+are compatible (which they should be) then either mechanism can be used to get the access tokens required to run the tests. 
+
+### Refresh tokens
+This relies on getting a refresh token from an IdP (e.g. https://broker.pod-compat.inrupt.com/) and exchanging that for an
+access token in order to run the tests. The refresh token can be created using a simple bootstrap process:
+```shell
+npx @inrupt/generate-oidc-token
+```
+
+The configuration that must be saved for each user is:
 * WebID
 * Client Id
 * Client Secret
 * Refresh Token
 
-Once the accounts are set up, you can run:
-```shell
-npx @inrupt/generate-oidc-token
-```
-to get this information.
+Unfortunately, this process requires a user to go the broker's web page, log in and authorize the application. Also, the
+refresh tokens expire and would need to be recreated regularly. This is not suitable for a CI environment so alternatives 
+are bing considered such as a Mock IdP. 
+ 
+This mechanism will not work for NSS until support for refresh tokens is added: See https://github.com/solid/node-solid-server/issues/1533
+
+### Session based login
+Some IdPs make is easy to authenticate without a browser by supporting form based login and sessions. The test harness has
+the capability to use this mechanism to login and get access tokens. The configuration that must be saved for each user is:
+* WebID
+* Username
+* Password
+  
+The harness also needs to know the login path to use on the IdP and the origin that has been registered as the trusted app 
+for the users.
+
+This mechanism will work in CI environments and the passwords could be passed in as external secrets.
+
 
 ## Target server configuration
 
@@ -37,26 +70,36 @@ The config for the server(s) under test goes in `config.json`. The format of thi
         "wac-allow": true
       },
       "solidIdentityProvider": "",
+      "loginPath": "",
+      "origin": "",
       "serverRoot": "",
       "rootContainer": "",
       "testContainer": "",
+      "setupRootAcl": true,
+      "maxThreads": 8,
       "users": {
       }
-    },
+    }
+  }
+}
 ```
 The initial `target` value is name of the server to test by default from the list below. The
 server sections define each server to be tested including the user accounts, and the features that the server supports.
 
 There is a sample of this file in the `config` folder and this will be used unless you override this location as shown below.
 
-Within `config.json` are the user authentication settings. You can either add the token information directly into this:
-```json
+Within `config.json` are the user authentication settings. You can either add the information directly into this:
+```json5
 "users":{
   "alice":{
     "webID":"https://pod-compat.inrupt.com/solid-test-suite-alice/profile/card#me",
-    "refreshToken": "?????????????????",
-    "clientId": "?????????????????",
-    "clientSecret": "?????????????????"
+    // EITHER
+    "refreshToken": "",
+    "clientId": "",
+    "clientSecret": ""
+    // OR
+    "username": "",
+    "password": ""
   }
 }
 ```
@@ -65,7 +108,7 @@ Or you can keep the credentials in a separate file which allows them to be share
 "users":{
   "alice":{
     "webID":"https://pod-compat.inrupt.com/solid-test-suite-alice/profile/card#me",
-    "credentials":"ess-compat-alice.json"
+    "credentials":"filename.json"
   }
 }
 ```

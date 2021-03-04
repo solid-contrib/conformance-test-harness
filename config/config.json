@@ -7,8 +7,83 @@
         "acl": true,
         "wac-allow": true
       },
+      "solidIdentityProvider": "https://inrupt.net",
+      "loginPath": "/login/password",
+      "origin": "https://tester",
+      "serverRoot": "https://pod-compat.inrupt.com",
+      "rootContainer": "/solid-test-suite-alice/",
+      "testContainer": "/solid-test-suite-alice/shared-test/",
+      "maxThreads": 4,
+      "users": {
+        "alice": {
+          "webID": "https://solid-test-suite-alice.inrupt.net/profile/card#me",
+          "credentials": "inrupt-alice.json"
+        },
+        "bob": {
+          "webID": "https://solid-test-suite-bob.inrupt.net/profile/card#me",
+          "credentials": "inrupt-bob.json"
+        }
+      }
+    },
+    "css": {
+      "features": {
+        "authentication": true,
+        "acl": true,
+        "wac-allow": true
+      },
+      "solidIdentityProvider": "https://inrupt.net",
+      "loginPath": "/login/password",
+      "origin": "https://tester",
+      "serverRoot": "http://localhost:3000",
+      "rootContainer": "/",
+      "testContainer": "/test/",
+      "setupRootAcl": true,
+      "maxThreads": 4,
+      "users": {
+        "alice": {
+          "webID": "https://solid-test-suite-alice.inrupt.net/profile/card#me",
+          "credentials": "inrupt-alice.json"
+        },
+        "bob": {
+          "webID": "https://solid-test-suite-bob.inrupt.net/profile/card#me",
+          "credentials": "inrupt-bob.json"
+        }
+      }
+    },
+    "nss": {
+      "features": {
+        "authentication": true,
+        "acl": true,
+        "wac-allow": true
+      },
+      "solidIdentityProvider": "https://inrupt.net",
+      "loginPath": "/login/password",
+      "origin": "https://tester",
+      "serverRoot": "https://solid-test-suite-alice.inrupt.net",
+      "rootContainer": "/",
+      "testContainer": "/private/",
+      "aclCachePause": 200,
+      "maxThreads": 1,
+      "users": {
+        "alice": {
+          "webID": "https://solid-test-suite-alice.inrupt.net/profile/card#me",
+          "credentials": "inrupt-alice.json"
+        },
+        "bob": {
+          "webID": "https://solid-test-suite-bob.inrupt.net/profile/card#me",
+          "credentials": "inrupt-bob.json"
+        }
+      }
+    },
+    "ess-compat-refresh": {
+      "features": {
+        "authentication": true,
+        "acl": true,
+        "wac-allow": true
+      },
       "solidIdentityProvider": "https://broker.pod-compat.inrupt.com",
       "serverRoot": "https://pod-compat.inrupt.com",
+      "maxThreads": 4,
       "rootContainer": "/solid-test-suite-alice/",
       "testContainer": "/solid-test-suite-alice/private/",
       "users": {
@@ -22,7 +97,7 @@
         }
       }
     },
-    "css": {
+    "css-refresh": {
       "features": {
         "authentication": true,
         "acl": true,
@@ -42,33 +117,6 @@
         "bob": {
           "webID": "https://pod-compat.inrupt.com/solid-test-suite-bob/profile/card#me",
           "credentials": "ess-compat-bob.json"
-        }
-      }
-    },
-    "nss": {
-      "features": {
-        "authentication": true,
-        "acl": true,
-        "wac-allow": true
-      },
-      "solidIdentityProvider": "https://inrupt.net",
-      "aclCachePause": 200,
-      "maxThreads": 1,
-      "origin": "https://tester",
-      "loginPath": "/login/password",
-      "serverRoot": "https://solid-test-suite-alice.inrupt.net",
-      "rootContainer": "/",
-      "testContainer": "/private/",
-      "users": {
-        "alice": {
-          "webID": "https://solid-test-suite-alice.inrupt.net/profile/card#me",
-          "username": "solid-test-suite-alice",
-          "password": "theg*koow5TEAK1pusm"
-        },
-        "bob": {
-          "webID": "https://solid-test-suite-bob.inrupt.net/profile/card#me",
-          "username": "solid-test-suite-bob",
-          "password": "laup6kiff!ble6PULL"
         }
       }
     }
