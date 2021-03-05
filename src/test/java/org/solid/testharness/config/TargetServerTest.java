@@ -16,6 +16,7 @@ public class TargetServerTest {
                 "      \"setupRootAcl\": true," +
                 "      \"aclCachePause\": 100," +
                 "      \"maxThreads\": 4," +
+                "      \"disableDPoP\": true," +
                 "      \"rootContainer\": \"/\"," +
                 "      \"testContainer\": \"/test/\"," +
                 "      \"users\": {" +
@@ -35,13 +36,14 @@ public class TargetServerTest {
 
         assertAll("targetServer",
                 () -> assertNotNull(targetServer.getFeatures()),
-                () -> assertTrue(targetServer.getFeatures().get("feature1")),
-                () -> assertFalse(targetServer.getFeatures().get("feature2")),
+                () -> assertEquals(true, targetServer.getFeatures().get("feature1")),
+                () -> assertEquals(false, targetServer.getFeatures().get("feature2")),
                 () -> assertEquals("IdP", targetServer.getSolidIdentityProvider()),
                 () -> assertEquals("http://localhost:3000", targetServer.getServerRoot()),
                 () -> assertTrue(targetServer.isSetupRootAcl()),
                 () -> assertEquals(100, targetServer.getAclCachePause()),
                 () -> assertEquals(4, targetServer.getMaxThreads()),
+                () -> assertTrue(targetServer.isDisableDPoP()),
                 () -> assertEquals("/", targetServer.getRootContainer()),
                 () -> assertEquals("/test/", targetServer.getTestContainer()),
                 () -> assertNotNull(targetServer.getUsers()),

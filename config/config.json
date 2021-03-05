@@ -38,7 +38,7 @@
       "rootContainer": "/",
       "testContainer": "/test/",
       "setupRootAcl": true,
-      "maxThreads": 4,
+      "maxThreads": 8,
       "users": {
         "alice": {
           "webID": "https://solid-test-suite-alice.inrupt.net/profile/card#me",
@@ -62,7 +62,6 @@
       "serverRoot": "https://solid-test-suite-alice.inrupt.net",
       "rootContainer": "/",
       "testContainer": "/private/",
-      "aclCachePause": 200,
       "maxThreads": 1,
       "users": {
         "alice": {

@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.config.TargetServer;
 import org.solid.testharness.config.TestHarnessConfig;
+import org.solid.testharness.http.AuthManager;
 import org.solid.testharness.utils.ReportUtils;
 
 import java.io.File;
@@ -24,6 +25,7 @@ public class TestRunner {
     public Results runTests() {
         // allow tests to run against server on localhost
         System.setProperty("jdk.internal.httpclient.disableHostnameVerification", Boolean.TRUE.toString());
+        System.setProperty("testmode", "suite-runner");
 
         String serverConfigFilename = System.getProperty("config");
         logger.debug("Config filename {}", serverConfigFilename);
@@ -44,10 +46,9 @@ public class TestRunner {
         TargetServer targetServer = config.getServers().get(targetServerName);
 
         int maxThreads = targetServer.getMaxThreads();
-        if (maxThreads <= 0) {
-            maxThreads = 1;
-        }
         logger.debug("Max threads: {}", maxThreads);
+
+        registerClients(targetServer);
 
         String featuresDirectory = System.getProperty("features");
 
@@ -56,7 +57,7 @@ public class TestRunner {
         logger.info("==== RUNNING FEATURE_PATHS {}", featurePaths);
 
         List<Path> featureFiles = new ArrayList<>();
-        featurePaths.forEach(s -> featureFiles.addAll(findFeatures(Path.of(s))));
+        featurePaths.forEach(s -> featureFiles.addAll(Objects.requireNonNull(findFeatures(Path.of(s)))));
         logger.info("==== FEATURES FILES {}", featureFiles);
 
         // we can also create Features which may be useful when fetching from remote resource although this may cause problems with
@@ -70,12 +71,12 @@ public class TestRunner {
 //                .outputHtmlReport(true)
 //                .parallel(8);
 
-        List<String> tags = Arrays.asList("~@ignore");
+        List<String> tags = Collections.singletonList("~@ignore");
 
         Results results = Runner.builder()
                 .path(featurePaths)
                 .tags(tags)
-//                .outputCucumberJson(true)
+                .outputCucumberJson(true)
                 .outputHtmlReport(true)
                 .parallel(maxThreads);
 
@@ -107,9 +108,9 @@ public class TestRunner {
         );
 
         List<String> featurePaths = new ArrayList<>();
-        testRequirements.entrySet().stream().forEach(entry -> {
-            if (entry.getValue().size() == 0 || targetCapabilities.containsAll(entry.getValue())) {
-                featurePaths.addAll(Collections.singletonList(Paths.get(featuresDirectory, entry.getKey()).toString()));
+        testRequirements.forEach((key, value) -> {
+            if (value.size() == 0 || targetCapabilities.containsAll(value)) {
+                featurePaths.addAll(Collections.singletonList(Paths.get(featuresDirectory, key).toString()));
             }
         });
         return featurePaths;
@@ -134,6 +135,15 @@ public class TestRunner {
             logger.error("Failed to walk path finding features", e);
         }
         return result;
+    }
 
+    private void registerClients(TargetServer targetServer) {
+        targetServer.getUsers().keySet().forEach(user -> {
+            try {
+                AuthManager.authenticate(user, targetServer);
+            } catch (Exception e) {
+                logger.error("Failed to register clients", e);
+            }
+        });
     }
 }

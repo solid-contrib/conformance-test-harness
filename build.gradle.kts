@@ -1,6 +1,11 @@
 plugins {
     java
+//    jacoco
 }
+
+//jacoco {
+//    toolVersion = "0.8.6"
+//}
 
 group = "org.solid.testharness"
 version = "0.0.1-SNAPSHOT"
@@ -26,6 +31,41 @@ repositories {
     // jcenter()
     mavenCentral()
 }
+
+sourceSets {
+    test {
+        java {
+            exclude("TestSuiteRunner.java")
+        }
+        resources {
+            srcDir("src/main/resources")
+        }
+        resources {
+            srcDir("examples")
+        }
+    }
+
+    create("testsuite") {
+        java {
+            srcDir("src/main/java")
+        }
+        java {
+            srcDir("src/test/java")
+        }
+        resources {
+            srcDir("src/main/resources")
+        }
+        resources {
+            srcDir("examples")
+        }
+    }
+}
+
+val testsuiteImplementation by configurations.getting {
+    extendsFrom(configurations.testImplementation.get())
+}
+
+configurations["testsuiteRuntimeOnly"].extendsFrom(configurations.testRuntimeOnly.get())
 
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
@@ -54,7 +94,6 @@ dependencies {
 }
 
 tasks.test {
-    useJUnitPlatform()
     // work out the absolute path to the config file or use the one in the project by default
     if (System.getProperty("config") != null) {
         systemProperty("config", file(System.getProperty("config")).absolutePath)
@@ -66,42 +105,48 @@ tasks.test {
     } else {
         systemProperty("features", project.file("examples").absolutePath)
     }
+    if (System.getProperty("credentials") != null) {
+        systemProperty("credentials", file(System.getProperty("credentials")).absolutePath)
+    }
+
     systemProperty("agent", System.getProperty("agent"))
     systemProperty("karate.options", System.getProperty("karate.options"))
     systemProperty("karate.env", System.getProperty("karate.env"))
-    if (System.getProperty("credentials") != null) {
-        systemProperty("credentials", file(System.getProperty("credentials")).absolutePath)
+
+    useJUnitPlatform {
+        // only run the unit tests
+        excludeTags("solid")
     }
     outputs.upToDateWhen { false }
 }
 
-sourceSets {
-    test {
-        resources {
-            srcDir("src/main/resources")
-        }
-        resources {
-            srcDir("examples")
-        }
-        resources {
-            srcDir("src/test/java")
-            exclude("**/*.java")
-        }
-//        resources {
-//            srcDir("src/test/resources")
-//        }
+val testsuite = task<Test>("testsuite") {
+    description = "Runs test suite."
+    group = "verification"
+    testClassesDirs = sourceSets["testsuite"].output.classesDirs
+    classpath = sourceSets["testsuite"].runtimeClasspath
+    dependsOn("testClasses")
+
+    if (System.getProperty("config") != null) {
+        systemProperty("config", file(System.getProperty("config")).absolutePath)
+    } else {
+        systemProperty("config", project.file("config/config.json").absolutePath)
     }
+    if (System.getProperty("features") != null) {
+        systemProperty("features", file(System.getProperty("features")).absolutePath)
+    } else {
+        systemProperty("features", project.file("examples").absolutePath)
+    }
+    if (System.getProperty("credentials") != null) {
+        systemProperty("credentials", file(System.getProperty("credentials")).absolutePath)
+    }
+
+    systemProperty("agent", System.getProperty("agent"))
+    systemProperty("karate.options", System.getProperty("karate.options"))
+    systemProperty("karate.env", System.getProperty("karate.env"))
+    useJUnitPlatform{
+        // only run the test suite
+        includeTags("solid")
+    }
+    outputs.upToDateWhen { false }
 }
-
-
-//tasks.register<Jar>("uberJar") {
-//    archiveClassifier.set("uber")
-//
-//    from(sourceSets.main.get().output)
-//
-//    dependsOn(configurations.runtimeClasspath)
-//    from({
-//        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
-//    })
-//}
-

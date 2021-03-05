@@ -17,7 +17,7 @@
         </encoder>
     </appender>
 
-<!--    <logger name="net.masterthought.cucumber" level="WARNING"/> -->
+    <logger name="net.masterthought.cucumber" level="WARNING"/>
     <logger name="com.intuit.karate" level="DEBUG"/>
     <logger name="org.solid.testharness" level="DEBUG"/>
 <!--    <logger name="org.solid.testharness.http.Client" level="DEBUG"/>-->

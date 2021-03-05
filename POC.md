@@ -143,13 +143,13 @@ be made much simpler but this worked to get the test harness started.
 To run the test suite with the default target server as defined in `config.json`:
 
 ```shell
-./gradlew test
+./gradlew testsuite
 ```
 To run the test suite with a specific target server:
 ```shell
-./gradlew test -Dkarate.env=ess-compat
-./gradlew test -Dkarate.env=css
-./gradlew test -Dkarate.env=nss
+./gradlew testsuite -Dkarate.env=ess-compat
+./gradlew testsuite -Dkarate.env=css
+./gradlew testsuite -Dkarate.env=nss
 ```
 
 Using an IDE you can also go directly to specific scenarios and run them on their own, viewing the output in the IDE console.
@@ -205,20 +205,20 @@ The test files themselves:
 ## Plans
 
 ### Short term
-* Sort out project structure to retain benefits of IDE whilst keeping tests separate from code.
-* Review the Gradle setup and file locations, particularly tests and resources which are a little confusing since everything is test related.
-* Provide an alternative authentication mechanism to support more servers.
-* Improve the configuration mechanism (including process of acquiring refresh tokens).
-* Decide whether to implement test cases in RDF instead of KarateDSL - this would require a translation layer to be added before
+* [x] Sort out project structure to retain benefits of IDE whilst keeping tests separate from code.
+* [x] Review the Gradle setup and file locations, particularly tests and resources which are a little confusing since everything is test related.
+* [x] Provide an alternative authentication mechanism to support more servers.
+* [x] Improve the configuration mechanism (including process of acquiring refresh tokens).
+* [ ] Decide whether to implement test cases in RDF instead of KarateDSL - this would require a translation layer to be added before
   tests are passed to the TestSuiteRunner. We would also want to see if we could still enable the IDE integration that allows individual
   tests to be run.
-* Add the facility to gather test cases from an external repository.
-* Add a Dockerfile, so the tests can be run in a container.
-* Add unit tests for the harness components themselves.
+* [ ] Add the facility to gather test cases from an external repository.
+* [ ] Add a Dockerfile, so the tests can be run in a container.
+* [ ] Add unit tests for the harness components themselves [IN PROGRESS].
 * ...
 
 ### Longer term
-* Read test case descriptions from test suite description document.
-* Report results in EARL.
-* Create the overall conformance report (matrix of all servers tested) 
+* [ ] Read test case descriptions from test suite description document.
+* [ ] Report results in EARL.
+* [ ] Create the overall conformance report (matrix of all servers tested) 
 * ...

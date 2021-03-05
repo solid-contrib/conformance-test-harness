@@ -16,6 +16,7 @@ public class ReportUtils {
 
     public static void generateReport(String karateOutputPath) {
         logger.info("===================== BUILD REPORT ========================");
+        logger.info("Output path: {}", karateOutputPath);
         Collection<File> jsonFiles = FileUtils.listFiles(new File(karateOutputPath), new String[]{"json"}, true);
         List<String> jsonPaths = new ArrayList<String>(jsonFiles.size());
         jsonFiles.forEach(file -> jsonPaths.add(file.getAbsolutePath()));

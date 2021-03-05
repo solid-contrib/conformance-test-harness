@@ -28,7 +28,7 @@ public class TargetHarnessConfigTest {
                 "        }," +
                 "        \"bob\": {" +
                 "          \"webID\": \"bobWebID\"," +
-                "          \"username\": \"USERNAME\", " +
+                "          \"username\": \"USERNAME\" " +
                 "        }" +
                 "      }}" +
                 "}}";

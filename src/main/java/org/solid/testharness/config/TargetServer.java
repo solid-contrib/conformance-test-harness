@@ -6,7 +6,7 @@ public class TargetServer {
     private Map<String, Boolean> features;
     private String solidIdentityProvider;
     private String serverRoot;
-    private int maxThreads;
+    private int maxThreads = 8;
     private String rootContainer;
     private String testContainer;
     private Map<String, UserCredentials> users;
@@ -14,6 +14,7 @@ public class TargetServer {
     private String origin;
     private int aclCachePause;
     private boolean setupRootAcl;
+    private boolean disableDPoP;
 
     public Map<String, Boolean> getFeatures() {
         return features;
@@ -44,6 +45,9 @@ public class TargetServer {
     }
 
     public void setMaxThreads(int maxThreads) {
+        if (maxThreads <= 0) {
+            throw new IllegalArgumentException("maxThreads must be >= 1");
+        }
         this.maxThreads = maxThreads;
     }
 
@@ -92,6 +96,9 @@ public class TargetServer {
     }
 
     public void setAclCachePause(int aclCachePause) {
+        if (aclCachePause <= 0) {
+            throw new IllegalArgumentException("aclCachePause must be >= 0");
+        }
         this.aclCachePause = aclCachePause;
     }
 
@@ -101,6 +108,14 @@ public class TargetServer {
 
     public void setSetupRootAcl(boolean setupRootAcl) {
         this.setupRootAcl = setupRootAcl;
+    }
+
+    public boolean isDisableDPoP() {
+        return disableDPoP;
+    }
+
+    public void setDisableDPoP(boolean disableDPoP) {
+        this.disableDPoP = disableDPoP;
     }
 
 

@@ -93,4 +93,12 @@ public class UserCredentials {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public boolean isUsingUsernamePassword() {
+        return username != null && password != null;
+    }
+
+    public boolean isUsingRefreshToken() {
+        return refreshToken != null && clientId != null && clientSecret != null;
+    }
 }

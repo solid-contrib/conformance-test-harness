@@ -1,11 +1,11 @@
 package org.solid.testharness.http;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.testharness.config.TargetServer;
+import org.solid.testharness.config.UserCredentials;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.http.HttpRequest;
@@ -15,75 +15,71 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
-import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
 
 public class AuthManager {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.http.AuthManager");
     private static final String USERNAME = "username";
     private static final String PASSWORD = "password";
-    private static final String REFRESH_TOKEN = "refreshToken";
-    private static final String CLIENT_ID = "clientId";
-    private static final String CLIENT_SECRET = "clientSecret";
-    private static final String ORIGIN = "origin";
-    private static final String LOGIN_PATH = "loginPath";
 
-    private static UncheckedObjectMapper objectMapper = new UncheckedObjectMapper();
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
-    public static final synchronized SolidClient authenticate(String user, Map<String, Object> config) throws Exception {
-        Map<String, Object> tokens = null;
-        // TODO: All access to config will be class based, not direct access to the JSON Map
-        Map<String, String> userConfig = (Map<String, String>) ((Map<String, Object>) config.get("users")).get(user);
-        boolean supportsAuthentication = (boolean) ((Map<String, Object>) config.get("features")).get("authentication");
-        int aclCachePause = config.containsKey("aclCachePause") ? (int) config.get("aclCachePause") : 0;
-        boolean disableDPoP = config.containsKey("disableDPoP") ? (boolean) config.get("disableDPoP") : false;
+    public static final synchronized SolidClient authenticate(String user, String config) throws Exception {
+        TargetServer targetServer = objectMapper.readValue(config, TargetServer.class);
+        return authenticate(user, targetServer);
+    }
 
-        if (!supportsAuthentication) {
+    public static final synchronized SolidClient authenticate(String user, TargetServer targetServer) throws Exception {
+        if (!targetServer.getFeatures().getOrDefault("authentication", false)) {
             return new SolidClient();
         }
-
-        Client.Builder builder = new Client.Builder(user);
-        if (!disableDPoP) {
-            builder.withDpopSupport();
-        }
-        Client authClient = null;
+        UserCredentials userConfig = targetServer.getUsers().get(user);
+        Client authClient;
         if (ClientRegistry.hasClient(user)) {
             authClient = ClientRegistry.getClient(user);
         } else {
+            logger.debug("Build new client for {}", user);
+            Client.Builder builder = new Client.Builder(user);
+            if (!targetServer.isDisableDPoP()) {
+                builder.withDpopSupport();
+            }
             authClient = builder.build();
             ClientRegistry.register(user, authClient);
 
-            if (userConfig.containsKey(USERNAME) && userConfig.containsKey(PASSWORD)) {
-                tokens = loginAndGetAccessToken(authClient, userConfig, config);
-            } else if (userConfig.containsKey(REFRESH_TOKEN) && userConfig.containsKey(CLIENT_ID) && userConfig.containsKey(CLIENT_SECRET)) {
-                tokens = exchangeRefreshToken(authClient, userConfig, config);
+            Tokens tokens;
+            if (userConfig.isUsingUsernamePassword()) {
+                tokens = loginAndGetAccessToken(authClient, userConfig, targetServer);
+            } else if (userConfig.isUsingRefreshToken()) {
+                tokens = exchangeRefreshToken(authClient, userConfig, targetServer);
             } else {
                 logger.warn("Neither login credentials nor refresh token details provided");
                 return null;
             }
-            String accessToken = (String) tokens.get("access_token");
-            logger.debug("access_token {}", accessToken);
+            String accessToken = tokens.getAccessToken();
+            logger.debug("access_token ({}) {}", user, accessToken);
             authClient.setAccessToken(accessToken);
         }
-        SolidClient solidClient = new SolidClient(authClient, aclCachePause);
-        if (user.equals("alice") && config.containsKey("setupRootAcl") && (boolean) config.get("setupRootAcl")) {
-            solidClient.setupRootAcl((String) config.get("serverRoot"), userConfig.get("webID"));
+
+        SolidClient solidClient = new SolidClient(authClient, targetServer.getAclCachePause());
+        if (user.equals("alice") && targetServer.isSetupRootAcl()) {
+            // CSS has no root acl by default so added here TODO: check whether this is relevant
+            solidClient.setupRootAcl(targetServer.getServerRoot(), userConfig.getWebID());
         }
         return solidClient;
     }
 
-    private static final Map<String, Object> exchangeRefreshToken(Client authClient, Map<String, String> userConfig, Map<String, Object> config) throws Exception {
-        String solidIdentityProvider = (String) config.get("solidIdentityProvider");
+    private static final Tokens exchangeRefreshToken(Client authClient, UserCredentials userConfig, TargetServer targetServer) throws Exception {
+        String solidIdentityProvider = targetServer.getSolidIdentityProvider();
         logger.info("Exchange refresh token at {} for {}", solidIdentityProvider, authClient.getUser());
 
         Map<Object, Object> data = new HashMap<>();
         data.put("grant_type", "refresh_token");
-        data.put("refresh_token", userConfig.get(REFRESH_TOKEN));
+        data.put("refresh_token", userConfig.getRefreshToken());
         // TODO: This should get the token endpoint from the oidc configuration
         URI tokenEndpoint = URI.create(solidIdentityProvider + "/token");
         HttpRequest request = authClient.signRequest(
                 HttpUtils.newRequestBuilder(tokenEndpoint)
-                        .header("Authorization", "Basic " + base64Encode(userConfig.get(CLIENT_ID) + ':' + userConfig.get(CLIENT_SECRET)))
+                        .header("Authorization", "Basic " + base64Encode(userConfig.getClientId() + ':' + userConfig.getClientSecret()))
                         .header("Content-Type", "application/x-www-form-urlencoded")
                         .header("Accept", "application/json")
                         .POST(HttpUtils.ofFormData(data))
@@ -92,25 +88,25 @@ public class AuthManager {
         HttpResponse<String> response = authClient.send(request, HttpResponse.BodyHandlers.ofString());
         logger.debug("Response {}: {}", response.statusCode(), response.body());
         if (response.statusCode() == 200) {
-            return objectMapper.readValue(response.body());
+            return objectMapper.readValue(response.body(), Tokens.class);
         } else {
             logger.error("FAILED TO GET TOKEN {}", response.body());
             throw new Exception("Token exchange failed - do you need a new refresh_token");
         }
     }
 
-    private static final Map<String, Object> loginAndGetAccessToken(Client authClient, Map<String, String> userConfig, Map<String, Object> config) throws Exception {
-        String solidIdentityProvider = (String) config.get("solidIdentityProvider");
-        String appOrigin = (String) config.get(ORIGIN);
+    private static final Tokens loginAndGetAccessToken(Client authClient, UserCredentials userConfig, TargetServer config) throws Exception {
+        String solidIdentityProvider = config.getSolidIdentityProvider();
+        String appOrigin = config.getOrigin();
 
         logger.info("Login and get access token at {} for {}", solidIdentityProvider, authClient.getUser());
         Client client = ClientRegistry.getClient(ClientRegistry.SESSION_BASED);
         URI uri = URI.create(solidIdentityProvider);
 
         Map<Object, Object> data = new HashMap<>();
-        data.put(USERNAME, userConfig.get(USERNAME));
-        data.put(PASSWORD, userConfig.get(PASSWORD));
-        HttpRequest request = HttpUtils.newRequestBuilder(uri.resolve((String) config.get(LOGIN_PATH)))
+        data.put(USERNAME, userConfig.getUsername());
+        data.put(PASSWORD, userConfig.getPassword());
+        HttpRequest request = HttpUtils.newRequestBuilder(uri.resolve(config.getLoginPath()))
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .POST(HttpUtils.ofFormData(data))
                 .build();
@@ -125,22 +121,21 @@ public class AuthManager {
         HttpUtils.logRequest(logger, request);
         HttpResponse<String> jsonResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
         HttpUtils.logResponse(logger, jsonResponse);
-        Map<String, Object> oidcConfig = objectMapper.readValue(jsonResponse.body());
+        OidcConfiguration oidcConfig = objectMapper.readValue(jsonResponse.body(), OidcConfiguration.class);
 
-        if (!solidIdentityProvider.equals(oidcConfig.get("issuer"))) {
+        if (!solidIdentityProvider.equals(oidcConfig.getIssuer())) {
             throw new Exception("The configured issuer does not match the Solid Identity Provider");
         }
 
-        URI authorizeEndpoint = URI.create((String)oidcConfig.get("authorization_endpoint"));
-        URI tokenEndpoint = URI.create((String)oidcConfig.get("token_endpoint"));
-        URI registrationEndpoint = URI.create((String)oidcConfig.get("registration_endpoint"));
+        URI authorizeEndpoint = URI.create(oidcConfig.getAuthorizeEndpoint());
+        URI tokenEndpoint = URI.create(oidcConfig.getTokenEndpoint());
+        URI registrationEndpoint = URI.create(oidcConfig.getRegistrationEndpoint());
 
         logger.debug("\n========== REGISTER");
-        Map<String, Object> registration = new HashMap<>() {{
-            put("application_type", "web");
-            put("redirect_uris", List.of(appOrigin));
-            put("token_endpoint_auth_method", "client_secret_basic");
-        }};
+        Registration registration = new Registration();
+        registration.setApplicationType("web");
+        registration.setRedirectUris(List.of(appOrigin));
+        registration.setTokenEndpointAuthMethod("client_secret_basic");
         String registrationBody = objectMapper.writeValueAsString(registration);
         request = HttpUtils.newRequestBuilder(registrationEndpoint)
                 .POST(HttpRequest.BodyPublishers.ofString(registrationBody))
@@ -149,10 +144,10 @@ public class AuthManager {
         HttpUtils.logRequest(logger, request);
         HttpResponse<String> regResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
         HttpUtils.logResponse(logger, regResponse);
-        Map<String, Object> clientRegistration = objectMapper.readValue(regResponse.body());
+        Registration clientRegistration = objectMapper.readValue(regResponse.body(), Registration.class);
 
-        String clientId = (String)clientRegistration.get("client_id");
-        String clientSecret = (String)clientRegistration.get("client_secret");
+        String clientId = clientRegistration.getClientId();
+        String clientSecret = clientRegistration.getClientSecret();
 
         logger.debug("\n========== AUTHORIZE");
         Map<String, String> requestParams = new HashMap<>();
@@ -203,7 +198,7 @@ public class AuthManager {
         HttpUtils.logRequest(logger, request);
         HttpResponse<String> tokenResponse = authClient.send(request, HttpResponse.BodyHandlers.ofString());
         HttpUtils.logResponse(logger, tokenResponse);
-        return objectMapper.readValue(tokenResponse.body());
+        return objectMapper.readValue(tokenResponse.body(), Tokens.class);
     }
 
     public static final String base64Encode(String data) {
@@ -224,16 +219,4 @@ public class AuthManager {
         byte[] digest = messageDigest.digest();
         return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
     }
-
-    static class UncheckedObjectMapper extends ObjectMapper {
-        Map<String, Object> readValue(String content) {
-            try {
-                return this.readValue(content, new TypeReference<>() {
-                });
-            } catch (IOException ioe) {
-                throw new CompletionException(ioe);
-            }
-        }
-    }
-
 }

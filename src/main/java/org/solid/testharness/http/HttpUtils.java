@@ -21,11 +21,7 @@ public class HttpUtils {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.http.HttpUtils");
 
     public static String getAgent() {
-        String agentString = System.getProperty("agent");
-        if (StringUtils.isEmpty(agentString)) {
-            agentString = "Solid-Conformance-Test-Suite";
-        }
-        return agentString;
+        return System.getProperty("agent", "Solid-Conformance-Test-Suite");
     }
 
     public static HttpRequest.Builder newRequestBuilder(URI uri) {

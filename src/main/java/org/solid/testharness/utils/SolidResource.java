@@ -46,7 +46,7 @@ public class SolidResource {
                     }
                 }
             } catch (Exception e) {
-                logger.warn("Failed to create resource at " + url, e);
+                logger.warn("Failed to create resource at {}: {}", url, e.toString());
                 this.url = null;
             }
         }
