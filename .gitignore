@@ -38,3 +38,7 @@ gradle-app.setting
 
 # local only config file
 local-config.json
+
+# generated RDF artifacts - until they are published
+!generated-vocab-common*.jar
+
