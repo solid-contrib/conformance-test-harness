@@ -1,0 +1,426 @@
+[
+  {
+    "line": 1,
+    "elements": [
+      {
+        "line": 3,
+        "name": "",
+        "description": "",
+        "type": "background",
+        "keyword": "Background",
+        "steps": [
+          {
+            "name": "def solidClientAlice = authenticate('alice')",
+            "result": {
+              "duration": 188315,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "*",
+            "line": 4
+          },
+          {
+            "name": "def testContainer = createTestContainer(solidClientAlice)",
+            "result": {
+              "duration": 472147,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "*",
+            "line": 5
+          },
+          {
+            "name": "def exampleJson = karate.readAsString('..\/fixtures\/example.json')",
+            "result": {
+              "duration": 1598513,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "*",
+            "line": 6
+          },
+          {
+            "name": "def resource = testContainer.createChildResource('.json', exampleJson, 'application\/ld+json');",
+            "result": {
+              "duration": 236407362,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "*",
+            "line": 7
+          },
+          {
+            "name": "assert resource.exists()",
+            "result": {
+              "duration": 520347,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "*",
+            "line": 8
+          },
+          {
+            "name": "def expected = RDFUtils.jsonLdToTripleArray(exampleJson, resource.getUrl())",
+            "result": {
+              "duration": 2421278,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "*",
+            "line": 9
+          },
+          {
+            "name": "configure headers = solidClientAlice.getAuthHeaders('GET', resource.getUrl())",
+            "result": {
+              "duration": 4134928,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "*",
+            "line": 10
+          },
+          {
+            "name": "url resource.getUrl()",
+            "result": {
+              "duration": 354810,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "*",
+            "line": 11
+          },
+          {
+            "name": "configure afterFeature = function() {resource.getContainer().delete()}",
+            "result": {
+              "duration": 253149,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "*",
+            "line": 13
+          }
+        ]
+      },
+      {
+        "line": 15,
+        "name": "Alice can read the JSON-LD example as JSON-LD",
+        "description": "",
+        "id": "alice-can-read-the-json-ld-example-as-json-ld",
+        "type": "scenario",
+        "keyword": "Scenario",
+        "steps": [
+          {
+            "name": "header Accept = 'application\/ld+json'",
+            "result": {
+              "duration": 89782,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "Given",
+            "line": 16
+          },
+          {
+            "name": "method GET",
+            "result": {
+              "duration": 801417616,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "When",
+            "line": 17,
+            "doc_string": {
+              "content_type": "",
+              "value": "11:00:00.519 request:\n1 > GET https:\/\/pod-compat.inrupt.com\/solid-test-suite-alice\/shared-test\/40db52ab-2211-4545-a515-a4aa88850761\/e7e6f31c-34b2-48ae-9bcf-d9a7aab03341.json\n1 > Accept: application\/ld+json\n1 > Authorization: DPoP eyJhbGciOiJSUzI1NiIsImtpZCI6IlJTZFhXUEplV0pJIn0.eyJpc3MiOiJodHRwczovL2lucnVwdC5uZXQiLCJhdWQiOiJzb2xpZCIsInN1YiI6Imh0dHBzOi8vc29saWQtdGVzdC1zdWl0ZS1hbGljZS5pbnJ1cHQubmV0L3Byb2ZpbGUvY2FyZCNtZSIsImV4cCI6MTYxNjQ5NzE3NywiaWF0IjoxNjE1Mjg3NTc3LCJqdGkiOiI4MTA4ZGVjNDMzNjU2YWNlIiwiY25mIjp7ImprdCI6Ikl6R1dvWkY4dUdoZHJLYXByREpRX1phLUt5bHdrbUFtN1NFR0JZTzNELUkifSwiY2xpZW50X2lkIjoiZWY5NGUwNGYzMzU2MGRhZjYyNmQ5MWY5ZDM1YmJhNzMiLCJ3ZWJpZCI6Imh0dHBzOi8vc29saWQtdGVzdC1zdWl0ZS1hbGljZS5pbnJ1cHQubmV0L3Byb2ZpbGUvY2FyZCNtZSJ9.Zeo9xhfxZr-foKHperjFixHNUBKscNBByWEMddLYJo3c1RIBRli8E0O4mqUlgSX3bU7_CppbOYGWwUffSOnpZAW8_EPJrB0ZsIZom2x8yV_HAnOxpefnOWDoo3uNRIOV5RCpSkzHRV0UHN0AtJk5sD4hMIXZOSCcE4y_-76OzszE403qO9sN8gaiiRxEXWhE3PYSPkh9lGuZdwLP-GUiguivEsxNEVGqQxBogxDgsRqAq4SPz3tO98xa1l1tm9h1F9VmsH2llagsMG3jI9-6AE23bkokeMtAqnKfjfjGR-wGUXBIKXe9qdTTCrtCkICBCmAEmuqLM8jmfpNrJZU2Yw\n1 > User-Agent: \n1 > DPoP: eyJhbGciOiJSUzI1NiIsInR5cCI6ImRwb3Arand0IiwiandrIjp7Imt0eSI6IlJTQSIsImtpZCI6IkJWaDRTNFhoTlNYdiIsInVzZSI6InNpZyIsImFsZyI6IlJTMjU2IiwibiI6Im1KMEpqMzFvN3FUQlNMQWNmVWs3QXZJSExuZHNQcEJLRFpOX0NfeWNZOFJvemhLZXFEV3NwMlpka1FhRkpORUpDbC1VZjdmTUxwdGFiMHR5TmNyMERyeFhJZ2NMNFpqbmhEVUJVU1Q4a08tUmNjZm5yMU5Db09hYXBRZlhsOWJyV2ZGQ0t1VXFBR1ZXR1hfcDFNRTU1WTNVVUdBVFVNVEJxMjNlbGVJYmtybzJ6VWJkc3JYOUhwT3MySzVSNGNiVUF5WWhZOTRYR0czMy0xSTA3VUZDVmFUWFJLOTlDcUhENjVIX3RXa2RJN1h4M2VUOC0zMFZDWUZoejdLbHluWm5QdFNPeUhIY0MxZVA2RmpjN3VycGZxUXRqTkZDX0RPdW1EbU9wdzlKbkxSWkF2a01IM2dlSms5NWlrWUdnc2hwcms0cW5qRzdqcWdsdGpCUUdERE9QUSIsImUiOiJBUUFCIn19.eyJqdGkiOiJlZDQ3Njk5Ni05NzBhLTRjNTMtYTgzZi05MTUwYWVjYWQ4YjUiLCJodG0iOiJHRVQiLCJodHUiOiJodHRwczovL3BvZC1jb21wYXQuaW5ydXB0LmNvbS9zb2xpZC10ZXN0LXN1aXRlLWFsaWNlL3NoYXJlZC10ZXN0LzQwZGI1MmFiLTIyMTEtNDU0NS1hNTE1LWE0YWE4ODg1MDc2MS9lN2U2ZjMxYy0zNGIyLTQ4YWUtOWJjZi1kOWE3YWFiMDMzNDEuanNvbiIsImlhdCI6MTYxNTI4NzYwMH0.M7aLrvgN_HsA2nOVljvppSh1SeGEbTWR6jcLnF5Ou-0HpqY-9eUN-FrDz_1AipU-hn7qMYEe9t6OM01IynKw6TrbFfzjpJLSKxmxdOuiyqQHMxopR5Nfh2w0Vu07TLpb75aImoXQ7NUzTShC-PT5mNEbhWRoBatRUQQYqLCmiPVPT-IS2hpkPA2VLW0ACTm_x5o1JHS2yMrUtPMHV7Sat9sW-z4Nzd7LR9CJ9JtJkeuQinhoPV6DecGOo1rMOgh1iiJ2WY1sR1KGqvmdXPnZyncbJHWpLAjCVTPTt0ZxoSNX8KwYJhc4sb_buhAKlZdFmTcokZZmiK1cYYQ-710qtQ\n1 > Host: pod-compat.inrupt.com\n1 > Connection: Keep-Alive\n1 > Accept-Encoding: gzip,deflate\n\n\n11:00:01.319 response time in milliseconds: 799\n1 < 200\n1 < Server: nginx\/1.19.7\n1 < Date: Tue, 09 Mar 2021 11:00:01 GMT\n1 < Content-Type: application\/ld+json\n1 < Transfer-Encoding: chunked\n1 < Connection: keep-alive\n1 < ETag: W\/\"2e5879ab221d10b548112e2e4ef64ca9d26d75f2d661832733c9f8089c5fdeda\"\n1 < WAC-Allow: user=\"read control write\"\n1 < Set-Cookie: ess-session-jwk=eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ.dWzgHZcf_P4w2arpEZPZHFMnc02ApHKnR9BUYtQyEP6_yeRmBVCVfxb9XJf5kOYOy-3CTaRC-tesg1cpdDzIJva8J6n8Xn9QoEdbYnBsr8NXIZwBjlfYS7VfKreMhTpGLbxBJewZ9Vwz3340dTirFTKWjlgClmLgwVzsqdkJ2bP7OKADiG6Rh5ZIegph4De4SrG4drhrDOSaDWFX1rJ3JXhMwLDFYX8A4CUfACYOd73lbWKxdLfKd3WjP4cunbK79YAqmQjGljh_pddE6QjPp53c7sy3-z0f_YA_ggfcgZa0eeWHahTjUpqH98IbSin5EQQ2UhsaXhugNbI5Vx6QNlVnlMWvn_acO5BuCFPfAtmCe2UnClmIMOmyjCL9vj9bTDzjyHMsq3iMXkZ3kxBV7AwwpjRwLJfGF_0EigqRFrDxmtMYmqDTo_7ydNLBc5WrnFOuRSKgAJxF30axOxT2ha3sJ1y3d3YKjaVDs7qA38gdn1-0hpzp3WZtOoq_5Zl7O_TaoR_JwaMBJk4Gc48jxL33NErdYaQZA2PoNELq_Iiv7p0Zwk6eSnpC3OJTLD7f05AVeURxWYpKMZm6kcIhSXpGGCD49TkQVkq5CWNvqz-a-DM3OvCugR2NBIGt9jLhzQrM6Lkf9dhAorguWMEZztNocXssV6BBpCX0n_dmqjU.Hzdx7URpmaSP_lO0.AYQoDljU1-Shf-LKLJd6eISxFhG68gnqn419F4LqSwy_kSVNTkgjyQFNIUluO5fq9iSnellv6260BIpxCewrZQ3HbceW0L1nVXkqEQ3Z9jTmbwUIf1Xrr7lv4MYh2wiPkyMp8JNZ_oiOnUdK5Hr9eQRJvIWBTRDO7ugc5w1aqQzpI9TaQAx22eDWdkT4tXWZkTj14uqgMxE02SyYMp5Kt9-043ZTrhqej5DG5IiBuKHMknHp1y0NcHBxAiRafCaptvX97MvuiI27G3Lz36tQJx--siCD0nT3Ga19EAKHY_SNRKgj0Xf2RES7G_SLvuSpKg.HjC2SxKPzJKd6a-ftiW6nw; Path=\/; Domain=pod-compat.inrupt.com; Secure; HttpOnly; Expires=Tue, 09 Mar 2021 11:30:01 GMT; SameSite=None;\n1 < Vary: Accept,Accept-Datetime,Prefer\n1 < Accept-Patch: application\/sparql-update\n1 < Last-Modified: Tue, 09 Mar 2021 11:00:00 GMT\n1 < Link: [<http:\/\/www.w3.org\/ns\/ldp#Resource>; rel=\"type\", <https:\/\/pod-compat.inrupt.com\/solid-test-suite-alice\/shared-test\/40db52ab-2211-4545-a515-a4aa88850761\/e7e6f31c-34b2-48ae-9bcf-d9a7aab03341.json>; rel=\"self\", <https:\/\/pod-compat.inrupt.com\/solid-test-suite-alice\/profile\/card#me>; rel=\"http:\/\/www.w3.org\/ns\/solid\/terms#podOwner\", <http:\/\/www.w3.org\/ns\/ldp#RDFSource>; rel=\"type\", <\/solid-test-suite-alice\/shared-test\/40db52ab-2211-4545-a515-a4aa88850761\/e7e6f31c-34b2-48ae-9bcf-d9a7aab03341.json?ext=shex>; rel=\"http:\/\/www.w3.org\/ns\/shex#Schema\", <https:\/\/pod-compat.inrupt.com\/solid-test-suite-alice\/shared-test\/40db52ab-2211-4545-a515-a4aa88850761\/e7e6f31c-34b2-48ae-9bcf-d9a7aab03341.json>; rel=\"original timegate\", <\/solid-test-suite-alice\/shared-test\/40db52ab-2211-4545-a515-a4aa88850761\/e7e6f31c-34b2-48ae-9bcf-d9a7aab03341.json?ext=acl>; rel=\"acl\"]\n1 < Allow: GET,HEAD,OPTIONS,PATCH,PUT,DELETE\n{\"@graph\":[{\"@type\":\"http:\\\/\\\/store.example.com\\\/Store\",\"name\":\"Links Bike Shop\",\"description\":\"The most \\\"linked\\\" bike store on earth!\",\"@id\":\"http:\\\/\\\/store.example.com\\\/\"},{\"@type\":\"ldp:RDFSource\",\"@id\":\"https:\\\/\\\/pod-compat.inrupt.com\\\/solid-test-suite-alice\\\/shared-test\\\/40db52ab-2211-4545-a515-a4aa88850761\\\/e7e6f31c-34b2-48ae-9bcf-d9a7aab03341.json\"}],\"@context\":{\"xsd\":\"http:\\\/\\\/www.w3.org\\\/2001\\\/XMLSchema#\",\"description\":{\"@id\":\"http:\\\/\\\/store.example.com\\\/description\"},\"skos\":\"http:\\\/\\\/www.w3.org\\\/2004\\\/02\\\/skos\\\/core#\",\"rdfs\":\"http:\\\/\\\/www.w3.org\\\/2000\\\/01\\\/rdf-schema#\",\"acl\":\"http:\\\/\\\/www.w3.org\\\/ns\\\/auth\\\/acl#\",\"vcard\":\"http:\\\/\\\/www.w3.org\\\/2006\\\/vcard\\\/ns#\",\"acp\":\"http:\\\/\\\/www.w3.org\\\/ns\\\/solid\\\/acp#\",\"as\":\"https:\\\/\\\/www.w3.org\\\/ns\\\/activitystreams#\",\"rdf\":\"http:\\\/\\\/www.w3.org\\\/1999\\\/02\\\/22-rdf-syntax-ns#\",\"name\":{\"@id\":\"http:\\\/\\\/store.example.com\\\/name\"},\"ldp\":\"http:\\\/\\\/www.w3.org\\\/ns\\\/ldp#\",\"foaf\":\"http:\\\/\\\/xmlns.com\\\/foaf\\\/0.1\\\/\",\"dc\":\"http:\\\/\\\/purl.org\\\/dc\\\/terms\\\/\"}}\n",
+              "line": 17
+            }
+          },
+          {
+            "name": "status 200",
+            "result": {
+              "duration": 7727,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "Then",
+            "line": 18
+          },
+          {
+            "name": "match header Content-Type contains 'application\/ld+json'",
+            "result": {
+              "duration": 71499,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "And",
+            "line": 19
+          },
+          {
+            "name": "match RDFUtils.jsonLdToTripleArray(JSON.stringify(response), resource.getUrl()) contains expected",
+            "result": {
+              "duration": 1348769,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "And",
+            "line": 20
+          }
+        ],
+        "tags": []
+      },
+      {
+        "line": 3,
+        "name": "",
+        "description": "",
+        "type": "background",
+        "keyword": "Background",
+        "steps": [
+          {
+            "name": "def solidClientAlice = authenticate('alice')",
+            "result": {
+              "duration": 398055,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "*",
+            "line": 4
+          },
+          {
+            "name": "def testContainer = createTestContainer(solidClientAlice)",
+            "result": {
+              "duration": 1045058,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "*",
+            "line": 5
+          },
+          {
+            "name": "def exampleJson = karate.readAsString('..\/fixtures\/example.json')",
+            "result": {
+              "duration": 476835,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "*",
+            "line": 6
+          },
+          {
+            "name": "def resource = testContainer.createChildResource('.json', exampleJson, 'application\/ld+json');",
+            "result": {
+              "duration": 250152764,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "*",
+            "line": 7
+          },
+          {
+            "name": "assert resource.exists()",
+            "result": {
+              "duration": 678563,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "*",
+            "line": 8
+          },
+          {
+            "name": "def expected = RDFUtils.jsonLdToTripleArray(exampleJson, resource.getUrl())",
+            "result": {
+              "duration": 1889520,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "*",
+            "line": 9
+          },
+          {
+            "name": "configure headers = solidClientAlice.getAuthHeaders('GET', resource.getUrl())",
+            "result": {
+              "duration": 4447429,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "*",
+            "line": 10
+          },
+          {
+            "name": "url resource.getUrl()",
+            "result": {
+              "duration": 362698,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "*",
+            "line": 11
+          },
+          {
+            "name": "configure afterFeature = function() {resource.getContainer().delete()}",
+            "result": {
+              "duration": 167752,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "*",
+            "line": 13
+          }
+        ]
+      },
+      {
+        "line": 22,
+        "name": "Alice can read the JSON-LD example as TTL",
+        "description": "",
+        "id": "alice-can-read-the-json-ld-example-as-ttl",
+        "type": "scenario",
+        "keyword": "Scenario",
+        "steps": [
+          {
+            "name": "header Accept = 'text\/turtle'",
+            "result": {
+              "duration": 84027,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "Given",
+            "line": 23
+          },
+          {
+            "name": "method GET",
+            "result": {
+              "duration": 783119413,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "When",
+            "line": 24,
+            "doc_string": {
+              "content_type": "",
+              "value": "11:00:00.782 request:\n1 > GET https:\/\/pod-compat.inrupt.com\/solid-test-suite-alice\/shared-test\/42f368f8-b74f-493e-b1c8-46c265c11674\/1b7b29b0-269d-4b5e-aaa8-d917c588cf11.json\n1 > Accept: text\/turtle\n1 > Authorization: DPoP eyJhbGciOiJSUzI1NiIsImtpZCI6IlJTZFhXUEplV0pJIn0.eyJpc3MiOiJodHRwczovL2lucnVwdC5uZXQiLCJhdWQiOiJzb2xpZCIsInN1YiI6Imh0dHBzOi8vc29saWQtdGVzdC1zdWl0ZS1hbGljZS5pbnJ1cHQubmV0L3Byb2ZpbGUvY2FyZCNtZSIsImV4cCI6MTYxNjQ5NzE3NywiaWF0IjoxNjE1Mjg3NTc3LCJqdGkiOiI4MTA4ZGVjNDMzNjU2YWNlIiwiY25mIjp7ImprdCI6Ikl6R1dvWkY4dUdoZHJLYXByREpRX1phLUt5bHdrbUFtN1NFR0JZTzNELUkifSwiY2xpZW50X2lkIjoiZWY5NGUwNGYzMzU2MGRhZjYyNmQ5MWY5ZDM1YmJhNzMiLCJ3ZWJpZCI6Imh0dHBzOi8vc29saWQtdGVzdC1zdWl0ZS1hbGljZS5pbnJ1cHQubmV0L3Byb2ZpbGUvY2FyZCNtZSJ9.Zeo9xhfxZr-foKHperjFixHNUBKscNBByWEMddLYJo3c1RIBRli8E0O4mqUlgSX3bU7_CppbOYGWwUffSOnpZAW8_EPJrB0ZsIZom2x8yV_HAnOxpefnOWDoo3uNRIOV5RCpSkzHRV0UHN0AtJk5sD4hMIXZOSCcE4y_-76OzszE403qO9sN8gaiiRxEXWhE3PYSPkh9lGuZdwLP-GUiguivEsxNEVGqQxBogxDgsRqAq4SPz3tO98xa1l1tm9h1F9VmsH2llagsMG3jI9-6AE23bkokeMtAqnKfjfjGR-wGUXBIKXe9qdTTCrtCkICBCmAEmuqLM8jmfpNrJZU2Yw\n1 > User-Agent: \n1 > DPoP: eyJhbGciOiJSUzI1NiIsInR5cCI6ImRwb3Arand0IiwiandrIjp7Imt0eSI6IlJTQSIsImtpZCI6IkJWaDRTNFhoTlNYdiIsInVzZSI6InNpZyIsImFsZyI6IlJTMjU2IiwibiI6Im1KMEpqMzFvN3FUQlNMQWNmVWs3QXZJSExuZHNQcEJLRFpOX0NfeWNZOFJvemhLZXFEV3NwMlpka1FhRkpORUpDbC1VZjdmTUxwdGFiMHR5TmNyMERyeFhJZ2NMNFpqbmhEVUJVU1Q4a08tUmNjZm5yMU5Db09hYXBRZlhsOWJyV2ZGQ0t1VXFBR1ZXR1hfcDFNRTU1WTNVVUdBVFVNVEJxMjNlbGVJYmtybzJ6VWJkc3JYOUhwT3MySzVSNGNiVUF5WWhZOTRYR0czMy0xSTA3VUZDVmFUWFJLOTlDcUhENjVIX3RXa2RJN1h4M2VUOC0zMFZDWUZoejdLbHluWm5QdFNPeUhIY0MxZVA2RmpjN3VycGZxUXRqTkZDX0RPdW1EbU9wdzlKbkxSWkF2a01IM2dlSms5NWlrWUdnc2hwcms0cW5qRzdqcWdsdGpCUUdERE9QUSIsImUiOiJBUUFCIn19.eyJqdGkiOiJlNmIyNzk2OC01NDFhLTQwYmYtYjQ4ZC1lYWJmNzUzOTFlNGUiLCJodG0iOiJHRVQiLCJodHUiOiJodHRwczovL3BvZC1jb21wYXQuaW5ydXB0LmNvbS9zb2xpZC10ZXN0LXN1aXRlLWFsaWNlL3NoYXJlZC10ZXN0LzQyZjM2OGY4LWI3NGYtNDkzZS1iMWM4LTQ2YzI2NWMxMTY3NC8xYjdiMjliMC0yNjlkLTRiNWUtYWFhOC1kOTE3YzU4OGNmMTEuanNvbiIsImlhdCI6MTYxNTI4NzYwMH0.JOrVoksFLPeOuq6_Atwiik50XO6V54eGnugBv4NSbkRUy3esw-j0ByTZBAbr6ZIlJ1S6OW6RLlzp_fneV_tY5IZbSNz5rLFpmSV8XaiPE2dKCqH7Eu0i9Zb6q0kj8b9N6lGVxKDLi60k9KctK9MIJqBGLSnHsF0wuCUyWNwGQoXJU3IQYPzmeeZk95bKSTj_s2yjjW0XMsuAE2zx9130bEBSRGUqSwZMa7ttFdKjCKeTelT54nZl4s5ckVZJyt2dxFT7ebLY2-stvTP7lnYQ4KcAn2rzqFaGlNZvfnN6duGa8_L6QKNxE7VpyfbCrL_-HS_BLfCDKxsNlCTrUDM-gw\n1 > Host: pod-compat.inrupt.com\n1 > Connection: Keep-Alive\n1 > Accept-Encoding: gzip,deflate\n\n\n11:00:01.564 response time in milliseconds: 781\n1 < 200\n1 < Server: nginx\/1.19.7\n1 < Date: Tue, 09 Mar 2021 11:00:01 GMT\n1 < Content-Type: text\/turtle; charset=UTF-8\n1 < Transfer-Encoding: chunked\n1 < Connection: keep-alive\n1 < ETag: W\/\"6ba820c5df845a07ccc0106fd162d8c6691626911301eeceb0ec746abda6042d\"\n1 < WAC-Allow: user=\"read control write\"\n1 < Set-Cookie: ess-session-jwk=eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ.jflSKY_9VS0vn2udnA_OVhrY7OWeVL7oDzj26M5CjgF44aoU1QJZzug7OCcYjkvOcTQw32_KJO3PlijE5KYvfpXCcYULh0I1qE_8MUNeSxwdj_HZj7jfm2FCgnYcExbBLgeLgADvdvYBgUwKJjmkN87v4FPNpVjHjqGPMddx4KlUfLiLb1shQfP8R_3YLOrY2rIQlUz5OJIqcrpiZqhVTLNN0FAtDWD43vyFjE2TjfFI9rb6c7z_5mqb97zaSsKiXCNHJrXrEsn0t7entW043MnAyLF1ewfhsfjTAaUMA9o_5vuY88tR2uGvBzFL4TG3eBSTnNFKLXn2dSISbvMXJgO9VAhwcdnJBh0i9EtIJegGVhxiUNogja45hXOmGIcWXe5-B40FgCexU9UJ-PhQM3WDbSdhEO_02VOnGNwOgzGkQsYB-ZiZ4241mmOnWCjxcxi7nhcbLdSFa6RLl6iuj3No6spr7bjzbDJOWG80g92bD220F_d_VjItXHlsH0L7Vg3a-ST12AyS5ZsmrM4rhqMVOQ7iQu99j8S8u12jEeAS7by4yHU-QnGFtSqLLOGvR7QOJ99LcvZ72zmMsmujStX5bvOnnSRpGdUbVYiVvvEpomy3iJceY1Om7QvqUp-yz86UyIV_cKZmGyZsy6gJ568WPduaHmfUyYsRU69-34g.goNiNdD63cqTYq58.aFyPEPFWxS62xhwo04kIhJjsUh4PVEO-cUvrkJXX64hT_yKDlXhGm0KKY2wUKT1fcQQoApB2g4OiSzsRSXDurH5oTAvlt4jOiLrNoAPBX8Q6QlsgEGliSGRUxVGNGk3mjH766kvsqDNHNd_UjRcz-E9eB-HW8KNbqdUsGG_BafbPmfuVGEo6qzDPdEFAHyWCR_CulVNVLbMTRzA1HnU0ZunATV3H2MUtQj76_Qlc3aiouV9Tbs7wbBKC0JLSiHZrrrmI-ZrIiWP5cJ9PAr3OJOjx7hzn3Fp0wOjDcr1IWfaODgOtecQDN_5gBuoGCXMJZQ.f3iE3zj08ipAUaMdLfhiYA; Path=\/; Domain=pod-compat.inrupt.com; Secure; HttpOnly; Expires=Tue, 09 Mar 2021 11:30:01 GMT; SameSite=None;\n1 < Vary: Accept,Accept-Datetime,Prefer\n1 < Accept-Patch: application\/sparql-update\n1 < Last-Modified: Tue, 09 Mar 2021 11:00:00 GMT\n1 < Link: [<http:\/\/www.w3.org\/ns\/ldp#Resource>; rel=\"type\", <\/solid-test-suite-alice\/shared-test\/42f368f8-b74f-493e-b1c8-46c265c11674\/1b7b29b0-269d-4b5e-aaa8-d917c588cf11.json?ext=shex>; rel=\"http:\/\/www.w3.org\/ns\/shex#Schema\", <https:\/\/pod-compat.inrupt.com\/solid-test-suite-alice\/shared-test\/42f368f8-b74f-493e-b1c8-46c265c11674\/1b7b29b0-269d-4b5e-aaa8-d917c588cf11.json>; rel=\"original timegate\", <https:\/\/pod-compat.inrupt.com\/solid-test-suite-alice\/profile\/card#me>; rel=\"http:\/\/www.w3.org\/ns\/solid\/terms#podOwner\", <https:\/\/pod-compat.inrupt.com\/solid-test-suite-alice\/shared-test\/42f368f8-b74f-493e-b1c8-46c265c11674\/1b7b29b0-269d-4b5e-aaa8-d917c588cf11.json>; rel=\"self\", <http:\/\/www.w3.org\/ns\/ldp#RDFSource>; rel=\"type\", <\/solid-test-suite-alice\/shared-test\/42f368f8-b74f-493e-b1c8-46c265c11674\/1b7b29b0-269d-4b5e-aaa8-d917c588cf11.json?ext=acl>; rel=\"acl\"]\n1 < Allow: GET,HEAD,OPTIONS,PATCH,PUT,DELETE\n\n",
+              "line": 24
+            }
+          },
+          {
+            "name": "status 200",
+            "result": {
+              "duration": 6873,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "Then",
+            "line": 25
+          },
+          {
+            "name": "match header Content-Type contains 'text\/turtle'",
+            "result": {
+              "duration": 102408,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "And",
+            "line": 26
+          },
+          {
+            "name": "match RDFUtils.turtleToTripleArray(response, resource.getUrl()) contains expected",
+            "result": {
+              "duration": 985592,
+              "status": "passed"
+            },
+            "match": {
+              "location": "karate",
+              "arguments": []
+            },
+            "keyword": "And",
+            "line": 27
+          }
+        ],
+        "tags": []
+      }
+    ],
+    "name": "examples\/content-negotiation\/content-negotiation-jsonld.feature",
+    "description": "Requests support content negotiation for JSON-LD resource",
+    "id": "requests-support-content-negotiation-for-json-ld-resource",
+    "keyword": "Feature",
+    "uri": "examples\/content-negotiation\/content-negotiation-jsonld.feature"
+  }
+]

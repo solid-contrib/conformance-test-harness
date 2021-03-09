@@ -1,0 +1,63 @@
+{
+    "@vocab": "http://solidcommunity.org/testsuite/",
+    "testsuite": "http://solidcommunity.org/testsuite#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "schema": "https://schema.org/",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "dc": "http://purl.org/dc/elements/1.1/",
+    "dct": "http://purl.org/dc/terms/",
+    "dctype": "http://purl.org/dc/dcmitype/",
+
+    "feature": "testsuite:Feature",
+    "background": "testsuite:Background",
+    "scenario": "testsuite:Scenario",
+
+    "passed": "testsuite:Pass",
+    "skipped": "testsuite:Skip",
+    "failed": "testsuite:Fail",
+
+    "results": {
+        "@id": "testsuite:hasTestCase"
+    },
+    "type": "@type",
+    "uri": "@id",
+    "description": {
+        "@id": "rdfs:label"
+    },
+    "line": null,
+    "name": null,
+    "id": null,
+    "keyword": null,
+
+    "elements": {
+        "@id": "testsuite:hasElement",
+        "@context": {
+            "@propagate": true,
+            "description": null,
+            "name": {
+                "@id": "rdfs:label"
+            },
+            "steps": {
+                "@id": "testsuite:hasStep",
+                "@context": {
+                    "@propagate": true,
+                    "name": {
+                        "@id": "rdfs:label"
+                    }
+
+                }
+            }
+        }
+    },
+    "status": "@type",
+    "result": {
+        "@id": "testsuite:hasResult",
+        "@context": {
+            "@vocab": "http://xmlns.com/",
+            "status": "testsuite:hasStatus"
+
+        }
+    }
+}

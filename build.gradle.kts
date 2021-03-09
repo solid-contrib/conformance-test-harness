@@ -13,7 +13,7 @@ version = "0.0.1-SNAPSHOT"
 val junitJupiterVersion = "5.7.0"
 val karateVersion = "0.9.9.RC4"
 val cucumberReporting = "5.4.0"
-val rdf4jVersion = "3.5.0"
+val rdf4jVersion = "3.6.0"
 val jakartaVersion = "3.0.0"
 val jose4jVersion = "0.7.6"
 val commonsTextVersion = "1.9"
@@ -28,7 +28,7 @@ java {
 
 repositories {
     // Use JCenter for resolving dependencies. OR mavenCentral()
-    // jcenter()
+//    jcenter()
     mavenCentral()
 }
 
@@ -81,6 +81,8 @@ dependencies {
     implementation("org.apache.commons:commons-text:$commonsTextVersion")
     implementation("org.apache.commons:commons-lang3:$commonsLangVersion")
 
+    implementation("org.eclipse.rdf4j:rdf4j-repository-sail:$rdf4jVersion")
+    implementation("org.eclipse.rdf4j:rdf4j-sail-memory:$rdf4jVersion")
     implementation("org.eclipse.rdf4j:rdf4j-rio-rdfjson:$rdf4jVersion")
     implementation("org.eclipse.rdf4j:rdf4j-rio-n3:$rdf4jVersion")
     implementation("org.eclipse.rdf4j:rdf4j-rio-nquads:$rdf4jVersion")
@@ -91,6 +93,7 @@ dependencies {
     implementation("org.eclipse.rdf4j:rdf4j-rio-trix:$rdf4jVersion")
     implementation("org.eclipse.rdf4j:rdf4j-rio-turtle:$rdf4jVersion")
     implementation("org.eclipse.rdf4j:rdf4j-rio-jsonld:$rdf4jVersion")
+    implementation(fileTree("src/main/libs") { include("*.jar") })
 }
 
 tasks.test {

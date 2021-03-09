@@ -75,6 +75,7 @@ public class AuthManager {
         Map<Object, Object> data = new HashMap<>();
         data.put("grant_type", "refresh_token");
         data.put("refresh_token", userConfig.getRefreshToken());
+
         // TODO: This should get the token endpoint from the oidc configuration
         URI tokenEndpoint = URI.create(solidIdentityProvider + "/token");
         HttpRequest request = authClient.signRequest(
@@ -90,7 +91,7 @@ public class AuthManager {
         if (response.statusCode() == 200) {
             return objectMapper.readValue(response.body(), Tokens.class);
         } else {
-            logger.error("FAILED TO GET TOKEN {}", response.body());
+            logger.error("FAILED TO GET ACCESS TOKEN {}", response.body());
             throw new Exception("Token exchange failed - do you need a new refresh_token");
         }
     }

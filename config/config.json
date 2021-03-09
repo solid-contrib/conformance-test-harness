@@ -74,6 +74,30 @@
         }
       }
     },
+    "trinpod": {
+      "features": {
+        "authentication": true,
+        "acl": true,
+        "wac-allow": true
+      },
+      "solidIdentityProvider": "https://inrupt.net",
+      "loginPath": "/login/password",
+      "origin": "https://tester",
+      "serverRoot": "https://solidtestsuitealice.trinpod.us",
+      "rootContainer": "/",
+      "testContainer": "/shared-test/",
+      "maxThreads": 1,
+      "users": {
+        "alice": {
+          "webID": "https://solid-test-suite-alice.inrupt.net/profile/card#me",
+          "credentials": "inrupt-alice.json"
+        },
+        "bob": {
+          "webID": "https://solid-test-suite-bob.inrupt.net/profile/card#me",
+          "credentials": "inrupt-bob.json"
+        }
+      }
+    },
     "ess-compat-refresh": {
       "features": {
         "authentication": true,
@@ -116,6 +140,28 @@
         "bob": {
           "webID": "https://pod-compat.inrupt.com/solid-test-suite-bob/profile/card#me",
           "credentials": "ess-compat-bob.json"
+        }
+      }
+    },
+    "nss-refresh": {
+      "features": {
+        "authentication": true,
+        "acl": true,
+        "wac-allow": true
+      },
+      "solidIdentityProvider": "https://solidcommunity.net:8443",
+      "serverRoot": "https://solid-test-suite-alice.solidcommunity.net:8443",
+      "maxThreads": 4,
+      "rootContainer": "/",
+      "testContainer": "/private/",
+      "users": {
+        "alice": {
+          "webID": "https://pod-compat.inrupt.com/solid-test-suite-alice/profile/card#me",
+          "credentials": "nss-alice.json"
+        },
+        "bob": {
+          "webID": "https://pod-compat.inrupt.com/solid-test-suite-alice/profile/card#me",
+          "credentials": "nss-alice.json"
         }
       }
     }
