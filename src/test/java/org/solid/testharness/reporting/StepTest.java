@@ -37,7 +37,7 @@ class StepTest {
         assertAll("step",
                 () -> assertEquals("NAME", step.getName()),
                 () -> assertEquals("KEYWORD", step.getKeyword()),
-                () -> assertEquals("passed", step.getStatus()),
+                () -> assertEquals(Step.Status.PASSED, step.getStatus()),
                 () -> assertEquals(1234, step.getDuration()),
                 () -> assertEquals(12, step.getLine())
         );

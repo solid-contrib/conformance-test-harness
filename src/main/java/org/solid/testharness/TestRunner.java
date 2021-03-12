@@ -89,14 +89,15 @@ public class TestRunner {
                 .path(featurePaths)
                 .tags(tags)
                 .outputCucumberJson(true)
-                .outputJunitXml(true)
+//                .outputJunitXml(true)
                 .outputHtmlReport(true)
                 .parallel(maxThreads);
 
         logger.info("===================== START REPORT ========================");
         ResultProcessor resultProcessor = new ResultProcessor(new File(results.getReportDir()));
-        resultProcessor.processResults();
-        resultProcessor.buildCucumberReport();
+        resultProcessor.processResultsLD();
+//        resultProcessor.buildCucumberReport();
+        resultProcessor.buildTurtleReport();
 
         logger.info("Results:\n  Features  passed: {}, failed: {}, total: {}\n  Scenarios passed: {}, failed: {}, total: {}",
                 results.getFeaturesPassed(), results.getFeaturesFailed(), results.getFeaturesTotal(),
