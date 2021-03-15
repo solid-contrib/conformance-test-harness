@@ -11,7 +11,7 @@ group = "org.solid.testharness"
 version = "0.0.1-SNAPSHOT"
 
 val junitJupiterVersion = "5.7.0"
-val karateVersion = "0.9.9.RC4"
+val karateVersion = "1.0.0"
 val cucumberReporting = "5.4.0"
 val rdf4jVersion = "3.6.0"
 val jakartaVersion = "3.0.0"
