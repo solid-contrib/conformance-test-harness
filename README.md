@@ -106,4 +106,5 @@ There are 3 commands to add headers to an HTTP request:
 When you know there is only one valid status there is a shortcut but in other cases you need to allow for multiple status codes or ranges. The best options are:
 * `* status 200`
 * `* match [200, 201, 202] contains responseStatus`
-* `* match karate.range(200, 299) contains responseStatus`
+* `* match karate.range(200, 299) contains responseStatus` - note, this results in poor error messages as it lists all 100 mismatched values
+* `* assert responseStatus >= 200 && responseStatus < 300`
