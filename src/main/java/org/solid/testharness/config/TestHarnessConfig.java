@@ -20,10 +20,8 @@ public class TestHarnessConfig {
 
     private static TestHarnessConfig INSTANCE;
 
-    // TODO delete this
-    private String target;
-    private Map<String, TargetServer> servers;
     private TargetServer targetServer;
+    private Map<String, TargetServer> servers;
     private Map<String, SolidClient> clients;
 
     public synchronized static TestHarnessConfig getInstance() {
@@ -78,14 +76,6 @@ public class TestHarnessConfig {
 
     public TargetServer getTargetServer() {
         return targetServer;
-    }
-
-    public String getTarget() {
-        return target;
-    }
-
-    public void setTarget(String target) {
-        this.target = target;
     }
 
     public Map<String, TargetServer> getServers() {
