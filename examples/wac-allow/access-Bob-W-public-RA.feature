@@ -4,30 +4,28 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     * def setup =
     """
       function() {
-        const solidClientAlice = authenticate('alice');
-        const solidClientBob = authenticate('bob');
-        const testContainer = createTestContainer(solidClientAlice);
+        const testContainer = createTestContainer(clients.alice);
         const resource = testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
         if (resource.exists()) {
           const acl = aclPrefix
-            + createOwnerAuthorization(target.users.alice.webID, resource.getPath())
-            + createBobAccessToAuthorization(target.users.bob.webID, resource.getPath(), 'acl:Write')
+            + createOwnerAuthorization(webIds.alice, resource.getPath())
+            + createBobAccessToAuthorization(webIds.bob, resource.getPath(), 'acl:Write')
             + createPublicAccessToAuthorization(resource.getPath(), 'acl:Read, acl:Append')
           resource.setAcl(acl);
         }
-        return {solidClientAlice, solidClientBob, resource};
+        return resource;
       }
     """
-    * def testContext = callonce setup
-    * assert testContext.resource.exists()
-    * def resourceUrl = testContext.resource.getUrl()
+    * def resource = callonce setup
+    * assert resource.exists()
+    * def resourceUrl = resource.getUrl()
     * url resourceUrl
 
-    * configure afterFeature = function() {testContext.resource.getContainer().delete()}
+    * configure afterFeature = function() {resource.getContainer().delete()}
 
   Scenario: There is an acl on the resource containing #bobAccessTo
-    Given url testContext.resource.getAclUrl()
-    And configure headers = testContext.solidClientAlice.getAuthHeaders('GET', testContext.resource.getAclUrl())
+    Given url resource.getAclUrl()
+    And configure headers = clients.alice.getAuthHeaders('GET', resource.getAclUrl())
     And header Accept = 'text/turtle'
     When method GET
     Then status 200
@@ -35,14 +33,14 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     And match response contains 'bobAccessTo'
 
   Scenario: There is no acl on the parent
-    Given url testContext.resource.getContainer().getAclUrl()
-    And configure headers = testContext.solidClientAlice.getAuthHeaders('HEAD', testContext.resource.getContainer().getAclUrl())
+    Given url resource.getContainer().getAclUrl()
+    And configure headers = clients.alice.getAuthHeaders('HEAD', resource.getContainer().getAclUrl())
     And header Accept = 'text/turtle'
     When method HEAD
     Then status 404
 
   Scenario: Bob calls GET and the header shows RWA access for user, RA for public
-    Given configure headers = testContext.solidClientBob.getAuthHeaders('GET', resourceUrl)
+    Given configure headers = clients.bob.getAuthHeaders('GET', resourceUrl)
     When method GET
     Then status 200
     And match header WAC-Allow != null
@@ -51,7 +49,7 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     And match result.public contains only ['read', 'append']
 
   Scenario: Bob calls HEAD and the header shows RWA access for user, RA for public
-    Given configure headers = testContext.solidClientBob.getAuthHeaders('HEAD', resourceUrl)
+    Given configure headers = clients.bob.getAuthHeaders('HEAD', resourceUrl)
     When method HEAD
     Then status 200
     And match header WAC-Allow != null
