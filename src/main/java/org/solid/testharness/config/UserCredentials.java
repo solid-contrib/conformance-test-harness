@@ -1,14 +1,20 @@
 package org.solid.testharness.config;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.solid.common.vocab.SOLID_TEST;
 
-import java.io.File;
 import java.io.Reader;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserCredentials {
+    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.config.UserCredentials");
+
     private String webID;
     private String credentials;
     private String refreshToken;
@@ -16,6 +22,19 @@ public class UserCredentials {
     private String clientSecret;
     private String username;
     private String password;
+
+    public UserCredentials() {}
+
+    public UserCredentials(Model model, Resource resource) {
+        for (Statement statement: model.filter(resource, null, null)) {
+            if (statement.getPredicate().equals(SOLID_TEST.webId)) {
+                setWebID(statement.getObject().stringValue());
+            }
+            if (statement.getPredicate().equals(SOLID_TEST.credentials)) {
+                setCredentials(statement.getObject().stringValue());
+            }
+        }
+    }
 
     public String getWebID() {
         return webID;
@@ -29,27 +48,33 @@ public class UserCredentials {
         return credentials;
     }
 
-    public void setCredentials(String credentials) throws Exception {
+    public void setCredentials(String credentials) {
         this.credentials = credentials;
         if (credentials != null) {
-            String credentialsPath = System.getProperty("credentials");
-            Reader reader = new ReaderHelper(credentialsPath).getReader(credentials);
-            ObjectMapper objectMapper = new ObjectMapper();
-            UserCredentials externalCredentials = objectMapper.readValue(reader, UserCredentials.class);
-            if (externalCredentials.getRefreshToken() != null) {
-                setRefreshToken(externalCredentials.getRefreshToken());
-            }
-            if (externalCredentials.getClientId() != null) {
-                setClientId(externalCredentials.getClientId());
-            }
-            if (externalCredentials.getClientSecret() != null) {
-                setClientSecret(externalCredentials.getClientSecret());
-            }
-            if (externalCredentials.getUsername() != null) {
-                setUsername(externalCredentials.getUsername());
-            }
-            if (externalCredentials.getPassword() != null) {
-                setPassword(externalCredentials.getPassword());
+            try {
+//                TODO The ReaderHelper was for testing but look at alternatives
+//                Reader reader = new ReaderHelper(credentialsPath).getReader(credentials);
+                Reader reader = new ReaderHelper(Settings.getInstance().getCredentialsPath()).getReader(credentials);
+                ObjectMapper objectMapper = new ObjectMapper();
+                UserCredentials externalCredentials = objectMapper.readValue(reader, UserCredentials.class);
+                if (externalCredentials.getRefreshToken() != null) {
+                    setRefreshToken(externalCredentials.getRefreshToken());
+                }
+                if (externalCredentials.getClientId() != null) {
+                    setClientId(externalCredentials.getClientId());
+                }
+                if (externalCredentials.getClientSecret() != null) {
+                    setClientSecret(externalCredentials.getClientSecret());
+                }
+                if (externalCredentials.getUsername() != null) {
+                    setUsername(externalCredentials.getUsername());
+                }
+                if (externalCredentials.getPassword() != null) {
+                    setPassword(externalCredentials.getPassword());
+                }
+            } catch (Exception e) {
+                logger.debug("Failed to load user credentials", e);
+                throw new RuntimeException("Failed to load user credentials", e);
             }
         }
     }

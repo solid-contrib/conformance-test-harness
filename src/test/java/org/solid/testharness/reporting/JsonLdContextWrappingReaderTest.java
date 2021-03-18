@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class TestResultReaderTest {
+public class JsonLdContextWrappingReaderTest {
     String context = "\"http://schema.org/\"";
-    String prefix = "{\"@context\": " + context + ", \"results\":";
+    String prefix = "{\"@context\": " + context + ", \"@graph\":";
     String suffix = "}";
 
     @Test

@@ -84,7 +84,7 @@ public class Client {
             } catch (NoSuchAlgorithmException | KeyManagementException e) {
                 e.printStackTrace();
             }
-            System.setProperty("jdk.internal.httpclient.disableHostnameVerification", "");
+            System.setProperty("jdk.internal.httpclient.disableHostnameVerification", Boolean.TRUE.toString());
 
             clientBuilder.sslContext(sslContext);
             return this;

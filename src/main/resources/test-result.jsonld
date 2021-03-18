@@ -1,5 +1,4 @@
 {
-    "@vocab": "http://solidcommunity.org/testsuite/",
     "testsuite": "http://solidcommunity.org/testsuite#",
     "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
@@ -9,55 +8,35 @@
     "dc": "http://purl.org/dc/elements/1.1/",
     "dct": "http://purl.org/dc/terms/",
     "dctype": "http://purl.org/dc/dcmitype/",
+    "earl": "http://www.w3.org/ns/earl#",
 
-    "feature": "testsuite:Feature",
-    "background": "testsuite:Background",
-    "scenario": "testsuite:Scenario",
+    "Feature": "earl:TestCase",
+    "Background": "testsuite:Background",
+    "Scenario": "testsuite:Scenario",
+    "*": "testsuite:Def",
+    "Given": "testsuite:Given",
+    "And": "testsuite:And",
+    "When": "testsuite:When",
+    "Then": "testsuite:Then",
 
-    "passed": "testsuite:Pass",
-    "skipped": "testsuite:Skip",
-    "failed": "testsuite:Fail",
-
-    "results": {
-        "@id": "testsuite:hasTestCase"
-    },
-    "type": "@type",
     "uri": "@id",
-    "description": {
-        "@id": "rdfs:label"
-    },
-    "line": null,
-    "name": null,
-    "id": null,
-    "keyword": null,
+    "name": "rdfs:label",
+    "description": "rdfs:comment",
+    "keyword": "testsuite:keyword",
 
     "elements": {
-        "@id": "testsuite:hasElement",
-        "@context": {
-            "@propagate": true,
-            "description": null,
-            "name": {
-                "@id": "rdfs:label"
-            },
-            "steps": {
-                "@id": "testsuite:hasStep",
-                "@context": {
-                    "@propagate": true,
-                    "name": {
-                        "@id": "rdfs:label"
-                    }
-
-                }
-            }
-        }
+        "@id": "earl:assertions",
+        "@container": "@set"
     },
-    "status": "@type",
-    "result": {
-        "@id": "testsuite:hasResult",
-        "@context": {
-            "@vocab": "http://xmlns.com/",
-            "status": "testsuite:hasStatus"
-
-        }
-    }
+    "steps": {
+        "@id": "earl:result",
+        "@container": "@set"
+    },
+    "result": "testsuite:hasResult",
+    "status": {
+        "@id": "earl:outcome",
+        "@type": "@id"
+    },
+    "doc_string": "testsuite:trace",
+    "value": "earl:info"
 }

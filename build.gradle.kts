@@ -13,7 +13,7 @@ version = "0.0.1-SNAPSHOT"
 val junitJupiterVersion = "5.7.0"
 val karateVersion = "1.0.0"
 val cucumberReporting = "5.4.0"
-val rdf4jVersion = "3.6.0"
+val rdf4jVersion = "3.6.1"
 val jakartaVersion = "3.0.0"
 val jose4jVersion = "0.7.6"
 val commonsTextVersion = "1.9"
@@ -101,7 +101,7 @@ tasks.test {
     if (System.getProperty("config") != null) {
         systemProperty("config", file(System.getProperty("config")).absolutePath)
     } else {
-        systemProperty("config", project.file("config/config.json").absolutePath)
+        systemProperty("config", project.file("config/config.ttl").absolutePath)
     }
     if (System.getProperty("features") != null) {
         systemProperty("features", file(System.getProperty("features")).absolutePath)
@@ -133,7 +133,7 @@ val testsuite = task<Test>("testsuite") {
     if (System.getProperty("config") != null) {
         systemProperty("config", file(System.getProperty("config")).absolutePath)
     } else {
-        systemProperty("config", project.file("config/config.json").absolutePath)
+        systemProperty("config", project.file("config/config.ttl").absolutePath)
     }
     if (System.getProperty("features") != null) {
         systemProperty("features", file(System.getProperty("features")).absolutePath)

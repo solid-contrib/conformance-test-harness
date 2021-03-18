@@ -6,18 +6,6 @@ function(target) {
         RDFUtils,
         SolidResource,
         SolidContainer,
-        statusSuccess: () => {
-            const status = karate.get('responseStatus');
-            return status >= 200 && status < 300
-        },
-        statusRedirect: () =>  {
-            const status = karate.get('responseStatus');
-            return status >= 300 && status < 400
-        },
-        statusFail: () =>  {
-            const status = karate.get('responseStatus');
-            return status >= 400 && status < 500
-        },
         parseWacAllowHeader: (headers) => Java.type('org.solid.testharness.http.HttpUtils').parseWacAllowHeader(headers),
         createTestContainer: (client) => SolidContainer.create(client, target.serverRoot + target.testContainer).generateChildContainer(),
         createOwnerAuthorization: (ownerAgent, targetUri) => `
@@ -95,16 +83,7 @@ function(target) {
             defaultTargets: resourcePath,
             modes: modes
         }),
-        getSolidClient: (user) => clients[user],
-        authenticate: (user) => clients[user],
         pause: (pause) => java.lang.Thread.sleep(pause)
     }
-
-    const AuthManager = Java.type('org.solid.testharness.http.AuthManager')
-    const clients = {};
-    const targetConfig = JSON.stringify(target);
-    Object.keys(target.users).forEach(user => {
-        clients[user] = AuthManager.authenticate(user, targetConfig);
-    })
-    return { utils, clients }
+    return utils
 }

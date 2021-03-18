@@ -13,6 +13,21 @@ import java.util.stream.Collectors;
 
 public class TestResultTest {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.reporting.TestResultTest");
+//    protected-operations.read-resource-default-R.json
+    @Test
+    public void parseResultFileWithLocalContext() {
+        try {
+            File file = new File("/Users/pete/work/solid/conformance-test-harness/build/karate-reports/examples.protected-operations.read-resource-default-R.json");
+            String context = getResourceReader("test-result.jsonld").lines().collect(Collectors.joining("\n"));
+            String baseUri = "http://solidcommunity.org/testsuite";
+            Model model = Rio.parse(new JsonLdContextWrappingReader(new FileReader(file), context), baseUri, RDFFormat.JSONLD);
+            StringWriter sw = new StringWriter();
+            Rio.write(model, sw, RDFFormat.TURTLE);
+            logger.debug(sw.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     public void parseResultWithLocalContext() {

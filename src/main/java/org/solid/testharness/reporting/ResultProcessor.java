@@ -22,6 +22,7 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.EARL;
+import org.solid.testharness.utils.DataRepository;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -39,14 +40,15 @@ public class ResultProcessor {
     private File outputDir;
     private Collection<File> jsonFiles;
     private List<TestJsonResult> results;
-    private Repository repository;
+    private DataRepository repository;
 
-    public ResultProcessor(File outputDir) {
+    public ResultProcessor(DataRepository repository, File outputDir) {
         // convert JSON results to TestResult objects
         logger.info("===================== BUILD REPORT ========================");
         logger.info("Output path: {}", outputDir);
         this.outputDir = outputDir;
         jsonFiles = FileUtils.listFiles(outputDir, new String[]{"json"}, true);
+        this.repository = repository;
     }
 
     public void buildCucumberReport() {
@@ -71,7 +73,6 @@ public class ResultProcessor {
         }
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         String context = br.lines().collect(Collectors.joining("\n"));
-        repository = new SailRepository(new MemoryStore());
         try (RepositoryConnection conn = repository.getConnection()) {
             jsonFiles.forEach(f -> {
                 try {
@@ -240,7 +241,6 @@ public class ResultProcessor {
                 "} WHERE {\n" +
                 "  ?feature earl:assertions ?assertion .\n" +
                 "  ?assertion testsuite:keyword ?keyword .\n" +
-//                "  ?assertion testsuite:keyword 'Scenario' .\n" +
                 "  ?assertion rdfs:comment ?comment .\n" +
                 "}";
         String changeResults = "DELETE {\n" +

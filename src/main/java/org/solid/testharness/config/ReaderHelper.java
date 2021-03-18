@@ -9,8 +9,7 @@ import java.io.Reader;
 public class ReaderHelper {
     private File credentialDirectory;
 
-    public ReaderHelper(String path) throws Exception {
-        File directory = new File(path);
+    public ReaderHelper(File directory) throws Exception {
         if (!directory.exists() || !directory.canRead()) {
             throw new Exception("Credential directory not readable");
         }

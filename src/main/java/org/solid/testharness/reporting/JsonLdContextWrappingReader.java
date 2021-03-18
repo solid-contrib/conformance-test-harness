@@ -18,7 +18,7 @@ class JsonLdContextWrappingReader extends FilterReader {
         if (StringUtils.isBlank(context)) {
             throw new IllegalArgumentException("The JSON-LD context is required");
         }
-        prefix = new StringReader("{\"@context\": " + context + ", \"results\":");
+        prefix = new StringReader("{\"@context\": " + context + ", \"@graph\":");
     }
 
     @Override

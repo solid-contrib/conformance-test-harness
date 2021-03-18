@@ -43,6 +43,9 @@ public class AuthManager {
             if (!targetServer.isDisableDPoP()) {
                 builder.withDpopSupport();
             }
+            if (targetServer.getServerRoot().contains("localhost")) {
+                builder.withLocalhostSupport();
+            }
             authClient = builder.build();
             ClientRegistry.register(user, authClient);
 
@@ -62,6 +65,7 @@ public class AuthManager {
 
         SolidClient solidClient = new SolidClient(authClient, targetServer.getAclCachePause());
         if (user.equals("alice") && targetServer.isSetupRootAcl()) {
+            logger.debug("**** Setup root acl");
             // CSS has no root acl by default so added here TODO: check whether this is relevant
             solidClient.setupRootAcl(targetServer.getServerRoot(), userConfig.getWebID());
         }

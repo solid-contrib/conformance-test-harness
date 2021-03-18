@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.testharness.utils.DataRepository;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -32,7 +33,7 @@ class ResultProcessorTest {
     @Disabled
     public void processResult() {
         String outputDir = "/Users/pete/work/solid/conformance-test-harness/build/karate-reports/";
-        ResultProcessor resultProcessor = new ResultProcessor(new File(outputDir));
+        ResultProcessor resultProcessor = new ResultProcessor(DataRepository.getInstance(), new File(outputDir));
         resultProcessor.processResults();
         List<TestJsonResult> results = resultProcessor.getResults();
         logger.debug("Result {} passed of {}", resultProcessor.countPassedScenarios(), resultProcessor.countScenarios());
@@ -43,7 +44,7 @@ class ResultProcessorTest {
     @Disabled
     public void processResultLD() throws Exception {
         String outputDir = "/Users/pete/work/solid/conformance-test-harness/build/karate-reports/";
-        ResultProcessor resultProcessor = new ResultProcessor(new File(outputDir));
+        ResultProcessor resultProcessor = new ResultProcessor(DataRepository.getInstance(), new File(outputDir));
         resultProcessor.processResultsLD();
         Repository rep = resultProcessor.getRepository();
         String outputFile = "/Users/pete/work/solid/conformance-test-harness/src/test/resources/testsuite-results-earl.ttl";
