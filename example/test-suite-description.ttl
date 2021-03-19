@@ -1,0 +1,34 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix earl: <http://www.w3.org/ns/earl#> .
+@prefix suite: <./> .
+
+# This is a placeholder for an example test suite description document that will describe the tests cases in this examples directory.
+# It contains thoughts about what needs including but makes not assumptions about the vocabs used.
+
+# This document 'implements' a specification
+# suite: implements <https://solidproject.org/TR/protocol>
+
+# It may be that a suite contains other suites so that a whole suite tests a whole spec, but is broken down into smaller suites testing specific areas of that spec
+# - high level description of test suite
+# - reference to the part(s) of spec being tested --- Proposal: This should be split into 1) conformance class 2) requirement within a conformance class -Sarven
+# - requirement level: MUST, SHOULD, MAY --- Proposal: should be a reference to a requirement and the level derived. Do not redeclare (copy) this value -Sarven
+# - spec maturity: draft, reviewed, disputed --- Proposal: refer to spec's publication status instead of declaring the same value here. -Sarven
+# - server features required for testing this suite e.g. web access controls vs ACP, RDFa support --- Proposal: make it possible to cover key components; identity, authentication, authorization systems.. data formats -Sarven
+# - testcase status: draft, approved
+# - list of testcases (or test suites containing test cases - this would allow lower level suites to specify things like features needed as well)
+#   an example of this would be content negotiation tests which required CRUD access but the tests related to RDFa handling must be treated differently as they 
+#   require additional server features and support is optional
+    # test case identifier - possibly a URI for the test feature
+    # known issues
+        # type - system bug, test harness bug, spec issue
+        # links to related issues e.g. in GitHub
+
+# Example we could start with: 
+# Spec: 5.3 (p2) - Servers MUST create intermediate containers and include corresponding containment triples in container representations derived from the
+# URI path component of PUT and PATCH requests
+
+# The tests would include:
+# Create a resource in a non-existing container using PATCH and check the resource is created along with containment triples in the container --- Proposal: should this be "in an existing container"?
+# Create a resource in a non-existing container in a non-existing container using PATCH and check the resource is created along with containment triples in all relevant parent containers
