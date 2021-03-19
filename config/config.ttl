@@ -1,4 +1,5 @@
-@base <https://github.com/solid/conformance-test-harness> .
+@base <https://github.com/solid/conformance-test-harness/> .
+@prefix test-harness: <https://github.com/solid/conformance-test-harness/> .
 @prefix solid-test: <https://github.com/solid/conformance-test-harness/vocab#> .
 
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -7,7 +8,7 @@
 @prefix doap: <http://usefulinc.com/ns/doap#> .
 @prefix earl: <http://www.w3.org/ns/earl#> .
 @prefix solid: <http://www.w3.org/ns/solid/terms#> .
-
+@prefix dcterms: <http://purl.org/dc/terms/> .
 
 <> a earl:Software ;
     doap:name "Solid Specification Conformance Test Harness"@en ;
@@ -19,7 +20,7 @@
         doap:revision "0.0.1-SNAPSHOT"
     ] .
 
-<#ess-compat>
+<ess-compat>
     a earl:Software, earl:TestSubject ;
     doap:name "Enterprise Solid Server (Web Access Control version)";
     doap:release [
@@ -48,7 +49,7 @@
     solid-test:podRoot <https://pod-compat.inrupt.com/solid-test-suite-alice/> ;
     solid-test:testContainer "/solid-test-suite-alice/shared-test/" .
 
-<#css>
+<css>
     a earl:Software, earl:TestSubject ;
     doap:name "Community Solid Server" ;
     doap:release [
@@ -78,7 +79,7 @@
     solid-test:testContainer "/test/" ;
     solid-test:setupAclRoot true .
 
-<#nss>
+<nss>
     a earl:Software, earl:TestSubject ;
     doap:name "Node Solid Server" ;
     doap:release [
