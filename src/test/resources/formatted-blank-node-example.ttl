@@ -1,0 +1,54 @@
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix ns0: <http://www.w3.org/ns/earl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://example.org/DISPLAY_NAME>
+    a <http://www.w3.org/ns/earl#TestCriterion>, <http://www.w3.org/ns/earl#TestRequirement> ;
+    dc:title "FEATURE NAME" ;
+    ns0:assertions [
+                       a ns0:Assertion ;
+                       ns0:assertedBy <http://example.org/> ;
+                       ns0:test <http://example.org/DISPLAY_NAME> ;
+                       ns0:subject <http://example.org/test> ;
+                       ns0:mode ns0:automatic ;
+                       ns0:result [
+                                      a ns0:TestResult ;
+                                      ns0:outcome ns0:failed ;
+                                      dc:date "1970-01-01T01:00:00.999+01:00"^^xsd:dateTime
+                                  ]
+                   ] ;
+    dc:hasPart _:genid2, _:genid3 .
+
+_:genid2
+    a ns0:TestCriterion, ns0:TestCase ;
+    dc:title "SCENARIO 1" ;
+    dc:isPartOf <http://example.org/DISPLAY_NAME> ;
+    ns0:assertions [
+                       a ns0:Assertion ;
+                       ns0:assertedBy <http://example.org/> ;
+                       ns0:test _:genid2 ;
+                       ns0:subject <http://example.org/test> ;
+                       ns0:mode ns0:automatic ;
+                       ns0:result [
+                                      a ns0:TestResult ;
+                                      ns0:outcome ns0:failed ;
+                                      dc:date "1970-01-01T01:00:01.999+01:00"^^xsd:dateTime
+                                  ]
+                   ] .
+
+_:genid3
+    a ns0:TestCriterion, ns0:TestCase ;
+    dc:title "SCENARIO 2" ;
+    dc:isPartOf <http://example.org/DISPLAY_NAME> ;
+    ns0:assertions [
+                       a ns0:Assertion ;
+                       ns0:assertedBy <http://example.org/> ;
+                       ns0:test _:genid3 ;
+                       ns0:subject <http://example.org/test> ;
+                       ns0:mode ns0:automatic ;
+                       ns0:result [
+                                      a ns0:TestResult ;
+                                      ns0:outcome ns0:passed ;
+                                      dc:date "1970-01-01T01:00:02.999+01:00"^^xsd:dateTime
+                                  ]
+                   ] .

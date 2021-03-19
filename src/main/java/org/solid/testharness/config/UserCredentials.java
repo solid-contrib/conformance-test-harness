@@ -53,7 +53,6 @@ public class UserCredentials {
         if (credentials != null) {
             try {
 //                TODO The ReaderHelper was for testing but look at alternatives
-//                Reader reader = new ReaderHelper(credentialsPath).getReader(credentials);
                 Reader reader = new ReaderHelper(Settings.getInstance().getCredentialsPath()).getReader(credentials);
                 ObjectMapper objectMapper = new ObjectMapper();
                 UserCredentials externalCredentials = objectMapper.readValue(reader, UserCredentials.class);

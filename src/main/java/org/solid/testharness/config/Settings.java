@@ -1,5 +1,6 @@
 package org.solid.testharness.config;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,13 +38,13 @@ public class Settings {
         try (Reader fr = new FileReader(workingDirectory.resolve("local.properties").toFile())) {
             Properties prop = new Properties();
             prop.load(fr);
-            if (targetServer == null && prop.containsKey("env")) {
+            if (StringUtils.isBlank(targetServer) && prop.containsKey("env")) {
                 targetServer = prop.getProperty("env");
             }
-            if (credentialsPath == null && prop.containsKey("credentials")) {
+            if (StringUtils.isBlank(credentialsPath) && prop.containsKey("credentials")) {
                 credentialsPath = prop.getProperty("credentials");
             }
-            if (configPath == null && prop.containsKey("config")) {
+            if (StringUtils.isBlank(configPath) && prop.containsKey("config")) {
                 configPath = workingDirectory.resolve(prop.getProperty("config")).toString();
             }
         } catch (IOException e) {

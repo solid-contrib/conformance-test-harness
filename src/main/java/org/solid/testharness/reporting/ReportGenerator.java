@@ -23,7 +23,6 @@ public class ReportGenerator implements SuiteReports {
     public Report featureReport(Suite suite, FeatureResult fr) {
         logger.debug("featureReport");
         repository.addFeatureResult(suite, fr);
-        // templateName, reportDir mandatory
         return Report.template("karate-feature.html")
                 .reportDir(suite.reportDir)
                 .reportFileName(fr.getFeature().getPackageQualifiedName() + ".html")

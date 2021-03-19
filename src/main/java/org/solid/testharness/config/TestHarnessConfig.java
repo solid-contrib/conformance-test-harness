@@ -18,6 +18,7 @@ import java.util.Map;
 public class TestHarnessConfig {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.config.TestHarnessConfig");
 
+    private static final String TEST_HARNESS_URI = "https://github.com/solid/conformance-test-harness/";
     private static TestHarnessConfig INSTANCE;
 
     private TargetServer targetServer;
@@ -39,10 +40,9 @@ public class TestHarnessConfig {
 
         DataRepository dataRepository = DataRepository.getInstance();
         dataRepository.loadTurtle(settings.getConfigFile());
-        // TODO override default server with local-config or something similar
 
-        String target = "https://github.com/solid/conformance-test-harness#" + settings.getTargetServer();
-
+        String targetIri = TEST_HARNESS_URI + settings.getTargetServer();
+        dataRepository.setupNamespaces(TEST_HARNESS_URI);
 
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             RepositoryResult<Statement> statements = conn.getStatements(null, RDF.type, EARL.TestSubject);
@@ -51,14 +51,15 @@ public class TestHarnessConfig {
                 // TODO: Change to IRI not string once this is complete
                 TargetServer server = new TargetServer(dataRepository, (IRI) s.getSubject());
                 servers.put(s.getSubject().stringValue(), server);
-                if (s.getSubject().stringValue().equals(target)) {
+                if (s.getSubject().stringValue().equals(targetIri)) {
                     targetServer = server;
+                    dataRepository.setTestSubject(targetServer.getTestSubject());
                 }
             });
         }
 
         if (targetServer == null) {
-            logger.error("No config found for server: {}", target);
+            logger.error("No config found for server: {}", targetIri);
         } else {
             logger.debug("TestSubject {}", targetServer.getTestSubject());
             logger.debug("Max threads: {}", targetServer.getMaxThreads());

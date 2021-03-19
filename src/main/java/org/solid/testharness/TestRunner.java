@@ -12,6 +12,7 @@ import org.solid.testharness.utils.DataRepository;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -66,9 +67,12 @@ public class TestRunner {
 
         logger.info("===================== START REPORT ========================");
         ResultProcessor resultProcessor = new ResultProcessor(dataRepository, new File(results.getReportDir()));
-        resultProcessor.processResultsLD();
 //        resultProcessor.buildCucumberReport();
         resultProcessor.buildTurtleReport();
+        // dump to console
+        StringWriter dump = new StringWriter();
+        dataRepository.export(dump);
+        logger.info("REPORT\n{}", dump.toString());
 
         logger.info("Results:\n  Features  passed: {}, failed: {}, total: {}\n  Scenarios passed: {}, failed: {}, total: {}",
                 results.getFeaturesPassed(), results.getFeaturesFailed(), results.getFeaturesTotal(),
@@ -89,8 +93,8 @@ public class TestRunner {
         Map<String, Set<String>> testRequirements = Map.of(
 //                "", Set.of(),
                 "content-negotiation", Set.of(),
-                "writing-resources", Set.of(),
-                "protected-operations", Set.of("authentication", "acl"),
+                "writing-resource", Set.of(),
+                "protected-operation", Set.of("authentication", "acl"),
                 "wac-allow", Set.of("authentication", "wac-allow")
 //            "acp-operations", Set.of("authentication", "acp")
         );

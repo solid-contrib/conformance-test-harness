@@ -2,8 +2,18 @@ package org.solid.testharness.utils;
 
 import com.intuit.karate.Suite;
 import com.intuit.karate.core.FeatureResult;
+import com.intuit.karate.core.ScenarioResult;
 import org.eclipse.rdf4j.RDF4JException;
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Namespace;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.impl.SimpleNamespace;
+import org.eclipse.rdf4j.model.util.ModelBuilder;
+import org.eclipse.rdf4j.model.util.RDFCollections;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -13,12 +23,20 @@ import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.common.vocab.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.net.URL;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.eclipse.rdf4j.model.util.Values.bnode;
+import static org.eclipse.rdf4j.model.util.Values.iri;
 
 public class DataRepository extends SailRepository {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.utils.DataRepository");
@@ -28,7 +46,13 @@ public class DataRepository extends SailRepository {
     private DataRepository() {
         super(new MemoryStore());
     }
+    private Namespace NS;
     private IRI assertor;
+    private IRI testSubject;
+
+    public static final String GENID = "/genid/";
+
+    public static Map<String, IRI> EARL_RESULT = Map.of("passed", EARL.passed, "failed", EARL.failed, "skipped", EARL.untested);
 
     public synchronized static DataRepository getInstance() {
         if (INSTANCE == null) {
@@ -61,82 +85,106 @@ public class DataRepository extends SailRepository {
         }
     }
 
-    public void addFeatureResult(Suite suite, FeatureResult fr) {
+    public void setupNamespaces(String baseUri) {
+        // TODO: Determine if this should be a separate IRI to the base
+        this.assertor = iri(baseUri);
+        this.NS = new SimpleNamespace("test-harness", baseUri);
         try (RepositoryConnection conn = getConnection()) {
-//            Resource head = bnode();
-//            Statement st = Values.getValueFactory().createStatement(iri("http://example.org/bob"), RDF.TYPE, DOAP.NAME);
-//            conn.add(st);
+            conn.setNamespace(NS.getPrefix(), NS.getName());
+            conn.setNamespace(EARL.PREFIX, EARL.NAMESPACE);
+            conn.setNamespace(DOAP.PREFIX, DOAP.NAMESPACE);
+            conn.setNamespace(SOLID.PREFIX, SOLID.NAMESPACE);
+            conn.setNamespace(SOLID_TEST.PREFIX, SOLID_TEST.NAMESPACE);
+            conn.setNamespace(DCTERMS.PREFIX, DCTERMS.NAMESPACE);
+            conn.setNamespace(XSD.PREFIX, XSD.NAMESPACE);
+        } catch (RDF4JException e) {
+            logger.error("Failed to setup namespaces", e);
+        }
+    }
 
+    public void addFeatureResult(Suite suite, FeatureResult fr) {
+        long startTime = suite.startTime;
+        try (RepositoryConnection conn = getConnection()) {
+            ModelBuilder builder = new ModelBuilder();
+            IRI featureIri = iri(NS, fr.getDisplayName());
+            IRI featureAssertion = createSkolemizedBlankNode(featureIri);
+            IRI featureResult = createSkolemizedBlankNode(featureIri);
+            conn.add(builder.subject(featureIri)
+                    .add(RDF.TYPE, EARL.TestCriterion)
+                    .add(RDF.TYPE, EARL.TestFeature)
+                    .add(DCTERMS.title, fr.getFeature().getName())
+                    .add(EARL.assertions, featureAssertion)
+                    .add(featureAssertion, RDF.TYPE, EARL.Assertion)
+                    .add(featureAssertion, EARL.assertedBy, assertor)
+                    .add(featureAssertion, EARL.test, featureIri)
+                    .add(featureAssertion, EARL.subject, testSubject)
+                    .add(featureAssertion, EARL.mode, EARL.automatic)
+                    .add(featureAssertion, EARL.result, featureResult)
+                    .add(featureResult, RDF.TYPE, EARL.TestResult)
+                    .add(featureResult, EARL.outcome, fr.isFailed() ? EARL.failed : EARL.passed)
+                    .add(featureResult, DCTERMS.date, new Date((long) (startTime + fr.getDurationMillis())))
+                    .build());
+            for (ScenarioResult sr: fr.getScenarioResults()) {
+                IRI scenarioIri = createSkolemizedBlankNode(featureIri);
+                IRI scenarioAssertion = createSkolemizedBlankNode(featureIri);
+                IRI scenarioResult = createSkolemizedBlankNode(featureIri);
+                builder = new ModelBuilder();
+                conn.add(builder.subject(scenarioIri)
+                        .add(RDF.TYPE, EARL.TestCriterion)
+                        .add(RDF.TYPE, EARL.TestCase)
+                        .add(DCTERMS.title, sr.getScenario().getName())
+                        .add(DCTERMS.isPartOf, featureIri)
+                        .add(EARL.assertions, scenarioAssertion)
+                        .add(scenarioAssertion, RDF.TYPE, EARL.Assertion)
+                        .add(scenarioAssertion, EARL.assertedBy, assertor)
+                        .add(scenarioAssertion, EARL.test, scenarioIri)
+                        .add(scenarioAssertion, EARL.subject, testSubject)
+                        .add(scenarioAssertion, EARL.mode, EARL.automatic)
+                        .add(scenarioAssertion, EARL.result, scenarioResult)
+                        .add(scenarioResult, RDF.TYPE, EARL.TestResult)
+                        .add(scenarioResult, EARL.outcome, sr.isFailed() ? EARL.failed : EARL.passed)
+                        .add(scenarioResult, DCTERMS.date, new Date((long) (startTime + sr.getDurationMillis())))
+                        .add(featureIri, DCTERMS.hasPart, scenarioIri)
+                        .build());
+                if (!sr.getStepResults().isEmpty()) {
+                    List<Resource> steps = sr.getStepResults().stream().map(str -> {
+                        IRI step = createSkolemizedBlankNode(featureIri);
+                        ModelBuilder stepBuilder = new ModelBuilder();
+                        stepBuilder.subject(step)
+                                .add(RDF.TYPE, EARL.TestStep)
+                                .add(DCTERMS.title, str.getStep().getPrefix() + " " + str.getStep().getText())
+                                .add(EARL.outcome, EARL_RESULT.get(str.getResult().getStatus()));
+                        if (!str.getStepLog().isEmpty()) {
+                            stepBuilder.add(EARL.info, str.getStepLog());
+                        }
+                        conn.add(stepBuilder.build());
+                        return step;
+                    }).collect(Collectors.toList());
+                    Resource head = createSkolemizedBlankNode(featureIri);
+                    Model stepList = RDFCollections.asRDF(steps, head, new LinkedHashModel());
+                    stepList.add(scenarioIri, EARL.steps, head);
+                    conn.add(stepList);
+                }
+            }
         } catch (RDF4JException e) {
             logger.error("Failed to load feature result", e);
         }
-/*
+    }
 
-    <TestSuiteDescriptionDoc> a earl:TestCriterion, earl:TestCase ;
-        earl:assertions [...]
-
-        // Assertion
-        //   assertedBy Assertor  use earl:Software too
-        //   subject    TestSubject use earl:Software too
-        //   test       TestCriterion (a testable statement)
-        //              TestRequirement subclass of TestCriterion (a higher level requirements tested by one of more subtests)  Feature, Scenario
-        //              TestCase subclass of TestCriterion (an atomic test)                                                     Step
-        //   result     TestResult
-        //   mode       TestMode
-
-suite
-  startTime
-  env
-  featuresFound
-  features
-    Feature
-
-
-fr
-  feature Feature
-    resource
-    name
-
-  scenarioResults[]
-    stepResults[] StepResult
-      step Step
-      result Result
-        status
-        skipped
-      stepLog
-
-    scenario Scenario
-      name - title
-      steps[]
-
-    startTime
-    endTime
-    durationNanos
+/* Example of a manifest:
+@prefix manifest: <http://www.w3.org/2013/TurtleTests/manifest.ttl#>.
+manifest:IRI_subject
+    a earl:TestCriterion, earl:TestCase;
+    dc:title "IRI_subject";
+    dc:description "IRI subject";
+    mf:action <http://www.w3.org/2013/TurtleTests/IRI_subject.ttl>;
+    mf:result <http://www.w3.org/2013/TurtleTests/IRI_spo.nt>;
+    earl:assertions _:assertions0.
  */
-        // Assertion
-        //   assertedBy Assertor  use earl:Software too
-        //   subject    TestSubject use earl:Software too
-        //   test       TestCriterion (a testable statement)
-        //              TestRequirement subclass of TestCriterion (a higher level requirements tested by one of more subtests)  Feature, Scenario
-        //              TestCase subclass of TestCriterion (an atomic test)                                                     Step
-        //   result     TestResult
-        //   mode       TestMode
 
-    /*
-    TestCriterion
-        dct:title       Human readable title for the test criterion.
-        dct:description Human readable description of the test criterion.
-        dct:hasPart     Relationship to other test criteria that are part of this criterion.
-        dct:isPartOf    Relationship to other test criteria of which this criterion is a part of.
 
-     TestResult: info, output, pointer?
-        dct:title
-        dct:description
-        dct:date
-
-    TestOutcome  passed, failed, inapplicable, untested
-
-     */
+    private IRI createSkolemizedBlankNode(IRI base) {
+        return iri(base.stringValue() + GENID + bnode().getID());
     }
 
     public void export(Writer wr) {
@@ -157,5 +205,9 @@ fr
         } catch (RDF4JException e) {
             logger.error("Failed to generate test suite result report", e);
         }
+    }
+
+    public void setTestSubject(IRI testSubject) {
+        this.testSubject = testSubject;
     }
 }
