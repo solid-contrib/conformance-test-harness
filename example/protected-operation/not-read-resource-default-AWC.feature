@@ -1,7 +1,7 @@
 Feature: Bob cannot read an RDF resource to which he is not granted default read access via the parent
 
   Background: Create test resource with all default access except read for Bob
-    * callonce read('this:protected-operations-setup.feature@name=setupDefault') { bobAccessModes: 'acl:Append, acl:Write, acl:Control' }
+    * callonce read('this:protected-operation-setup.feature@name=setupDefault') { bobAccessModes: 'acl:Append, acl:Write, acl:Control' }
     * def resourceUrl = resource.getUrl()
     * url resourceUrl
 

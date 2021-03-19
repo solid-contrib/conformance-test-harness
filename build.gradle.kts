@@ -106,7 +106,7 @@ tasks.test {
     if (System.getProperty("features") != null) {
         systemProperty("features", file(System.getProperty("features")).absolutePath)
     } else {
-        systemProperty("features", project.file("examples").absolutePath)
+        systemProperty("features", project.file("example").absolutePath)
     }
     if (System.getProperty("credentials") != null) {
         systemProperty("credentials", file(System.getProperty("credentials")).absolutePath)
@@ -138,7 +138,7 @@ val testsuite = task<Test>("testsuite") {
     if (System.getProperty("features") != null) {
         systemProperty("features", file(System.getProperty("features")).absolutePath)
     } else {
-        systemProperty("features", project.file("examples").absolutePath)
+        systemProperty("features", project.file("example").absolutePath)
     }
     if (System.getProperty("credentials") != null) {
         systemProperty("credentials", file(System.getProperty("credentials")).absolutePath)
