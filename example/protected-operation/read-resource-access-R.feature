@@ -1,7 +1,7 @@
 Feature: Bob can only read an RDF resource to which he is only granted read access
 
   Background: Create test resource with read-only access for Bob
-    * callonce read('this:protected-operation-setup.feature@name=setupAccessTo') { bobAccessModes: 'acl:Read' }
+    * callonce read('this:setup.feature@name=setupAccessTo') { bobAccessModes: 'acl:Read' }
     * def resourceUrl = resource.getUrl()
     * url resourceUrl
 

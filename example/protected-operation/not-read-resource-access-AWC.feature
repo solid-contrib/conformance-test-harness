@@ -1,7 +1,7 @@
 Feature: Bob cannot read an RDF resource to which he is not granted read access
 
   Background: Create test resource with all access except read for Bob
-    * callonce read('this:protected-operation-setup.feature@name=setupAccessTo') { bobAccessModes: 'acl:Append, acl:Write, acl:Control' }
+    * callonce read('this:setup.feature@name=setupAccessTo') { bobAccessModes: 'acl:Append, acl:Write, acl:Control' }
     * def resourceUrl = resource.getUrl()
     * url resourceUrl
 
