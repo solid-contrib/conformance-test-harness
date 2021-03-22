@@ -1,0 +1,125 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix earl: <http://www.w3.org/ns/earl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix td: <http://www.w3.org/2006/03/test-description#> .
+
+@prefix manifest: <https://github.com/solid/conformance-test-harness/example/example.ttl#> .
+@prefix repo: <https://github.com/solid/conformance-test-harness/example/> .
+
+manifest: doap:implements <https://solidproject.org/TR/protocol> .
+
+manifest:content-negotiation
+    a td:SpecificationTestCase ;
+    dcterms:title "Content Negotiation"@en ;
+    dcterms:description "The ability of a server to support different content types in response to the Accept header"@en ;
+    td:specificationReference <https://solidproject.org/TR/protocol#resource-representations> ;
+    dcterms:hasPart
+        <https://github.com/solid/conformance-test-harness/example/content-negotiation/content-negotiation-jsonld.feature>,
+        <https://github.com/solid/conformance-test-harness/example/content-negotiation/content-negotiation-turtle.feature>,
+        <https://github.com/solid/conformance-test-harness/example/content-negotiation/content-negotiation-rdfa.feature>
+    .
+
+<https://github.com/solid/conformance-test-harness/example/content-negotiation/content-negotiation-jsonld.feature>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:accepted ;
+    dcterms:title "For a JSON-LD resource" .
+
+<https://github.com/solid/conformance-test-harness/example/content-negotiation/content-negotiation-jsonld.feature>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:accepted ;
+    dcterms:title "For a Turtle resource" .
+
+<https://github.com/solid/conformance-test-harness/example/content-negotiation/content-negotiation-rdfa.feature>
+    a td:TestCase ;
+    dcterms:subject "MAY" ;
+    td:reviewStatus td:unreviewed ;
+    dcterms:title "For a HTML+RDFa resource" .
+
+manifest:writing-resource
+    a td:SpecificationTestCase ;
+    dcterms:title "Writing to a resource"@en ;
+    dcterms:description "The ability create and amend resources"@en ;
+    td:specificationReference <https://solidproject.org/TR/protocol#writing-resources> ;
+    dcterms:hasPart
+        <https://github.com/solid/conformance-test-harness/example/writing-resource/containment.feature>
+.
+
+<https://github.com/solid/conformance-test-harness/example/writing-resource/containment.feature>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:accepted ;
+    dcterms:title "Creating a resource using PUT and PATCH must create intermediate containers" .
+
+manifest:protected-operation
+    a td:SpecificationTestCase ;
+    dcterms:title "Protected Operaions"@en ;
+    dcterms:description "The ability of a server to restrict different types of access to resources using ACLs"@en ;
+    td:specificationReference <https://github.com/solid/web-access-control-spec/> ;
+    td:preCondition "authentication", "acl" ;
+    dcterms:hasPart
+        <https://github.com/solid/conformance-test-harness/example/protected-operation/not-read-resource-access-AWC.feature>,
+        <https://github.com/solid/conformance-test-harness/example/protected-operation/not-read-resource-default-AWC.feature>,
+        <https://github.com/solid/conformance-test-harness/example/protected-operation/read-resource-access-R.feature>,
+        <https://github.com/solid/conformance-test-harness/example/protected-operation/read-resource-default-R.feature>
+.
+
+<https://github.com/solid/conformance-test-harness/example/protected-operation/not-read-resource-access-AWC.feature>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:accepted ;
+    dcterms:title "Cannot read a resource for which read access is not granted" .
+
+<https://github.com/solid/conformance-test-harness/example/protected-operation/not-read-resource-default-AWC.feature>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:accepted ;
+    dcterms:title "Cannot read a resource for which default read access is not granted" .
+
+<https://github.com/solid/conformance-test-harness/example/protected-operation/read-resource-access-R.feature>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:unreviewed ;
+    dcterms:title "Can only read a resource for which only read access is granted" .
+
+<https://github.com/solid/conformance-test-harness/example/protected-operation/read-resource-default-R.feature>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:unreviewed ;
+    dcterms:title "Can only read a resource for which only default read access is granted" .
+
+manifest:wac-allow
+    a td:SpecificationTestCase ;
+    dcterms:title "WAC-Allow header"@en ;
+    dcterms:description "The ability of a server to show the access allowed for the user and for public users"@en ;
+    td:specificationReference <https://solidproject.org/TR/protocol#web-access-control> ;
+    td:preCondition "authentication", "acl", "wac-allow" ;
+    dcterms:hasPart
+        <https://github.com/solid/conformance-test-harness/example/wac-allow/access-Bob-W-public-RA.feature>,
+        <https://github.com/solid/conformance-test-harness/example/wac-allow/default-Bob-W-public-RA.feature>,
+        <https://github.com/solid/conformance-test-harness/example/wac-allow/access-public-R.feature>
+.
+
+<https://github.com/solid/conformance-test-harness/example/wac-allow/access-Bob-W-public-RA.feature>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:accepted ;
+    dcterms:title "Different access for user and public based on accedssTo ACL" .
+
+<https://github.com/solid/conformance-test-harness/example/wac-allow/default-Bob-W-public-RA.feature>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:accepted ;
+    dcterms:title "Different access for user and public based on default ACL" .
+
+<https://github.com/solid/conformance-test-harness/example/wac-allow/access-public-R.feature>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:unreviewed ;
+    dcterms:title "Same access for user and public based on accedssTo ACL" .
+
+
