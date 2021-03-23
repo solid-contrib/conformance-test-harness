@@ -3,18 +3,18 @@ package org.solid.testharness.utils;
 import com.intuit.karate.Suite;
 import com.intuit.karate.core.FeatureResult;
 import com.intuit.karate.core.ScenarioResult;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.rdf4j.RDF4JException;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Namespace;
-import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleNamespace;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.util.RDFCollections;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
+import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFWriter;
@@ -38,13 +38,15 @@ import java.util.stream.Collectors;
 import static org.eclipse.rdf4j.model.util.Values.bnode;
 import static org.eclipse.rdf4j.model.util.Values.iri;
 
-public class DataRepository extends SailRepository {
+@ApplicationScoped
+public class DataRepository implements Repository { //extends SailRepository
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.utils.DataRepository");
 
-    private static DataRepository INSTANCE;
+    private Repository repository;
 
     private DataRepository() {
-        super(new MemoryStore());
+        repository = new SailRepository(new MemoryStore());
+        logger.debug("INITIALIZE DATA REPOSITORY");
     }
     private Namespace NS;
     private IRI assertor;
@@ -53,13 +55,6 @@ public class DataRepository extends SailRepository {
     public static final String GENID = "/genid/";
 
     public static Map<String, IRI> EARL_RESULT = Map.of("passed", EARL.passed, "failed", EARL.failed, "skipped", EARL.untested);
-
-    public synchronized static DataRepository getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new DataRepository();
-        }
-        return INSTANCE;
-    }
 
     public void loadTurtle(URL url) {
         try (RepositoryConnection conn = getConnection()) {
@@ -209,5 +204,45 @@ manifest:IRI_subject
 
     public void setTestSubject(IRI testSubject) {
         this.testSubject = testSubject;
+    }
+
+    @Override
+    public void setDataDir(File dataDir) {
+        repository.setDataDir(dataDir);
+    }
+
+    @Override
+    public File getDataDir() {
+        return repository.getDataDir();
+    }
+
+    @Override
+    public void initialize() throws RepositoryException {
+        repository.initialize();
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return repository.isInitialized();
+    }
+
+    @Override
+    public void shutDown() throws RepositoryException {
+        repository.shutDown();
+    }
+
+    @Override
+    public boolean isWritable() throws RepositoryException {
+        return repository.isWritable();
+    }
+
+    @Override
+    public RepositoryConnection getConnection() throws RepositoryException {
+        return repository.getConnection();
+    }
+
+    @Override
+    public ValueFactory getValueFactory() {
+        return repository.getValueFactory();
     }
 }

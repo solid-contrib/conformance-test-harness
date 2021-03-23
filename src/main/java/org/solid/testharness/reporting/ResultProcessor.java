@@ -1,5 +1,7 @@
 package org.solid.testharness.reporting;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import net.masterthought.cucumber.Configuration;
 import net.masterthought.cucumber.ReportBuilder;
 import org.apache.commons.io.FileUtils;
@@ -15,22 +17,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+@ApplicationScoped
 public class ResultProcessor {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.reporting.ResultProcessor");
 
     private File outputDir;
-    private Collection<File> jsonFiles;
+
+    @Inject
     private DataRepository repository;
 
-    public ResultProcessor(DataRepository repository, File outputDir) {
-        logger.info("===================== BUILD REPORT ========================");
-        logger.info("Output path: {}", outputDir);
-        this.outputDir = outputDir;
-        jsonFiles = FileUtils.listFiles(outputDir, new String[]{"json"}, true);
-        this.repository = repository;
-    }
-
     public void buildCucumberReport() {
+        Collection<File> jsonFiles = FileUtils.listFiles(outputDir, new String[]{"json"}, true);
         List<String> jsonPaths = new ArrayList<>(jsonFiles.size());
         jsonFiles.forEach(file -> jsonPaths.add(file.getAbsolutePath()));
         logger.info("==== REPORT ON {}", jsonPaths);
@@ -54,5 +51,10 @@ public class ResultProcessor {
 
     public Repository getRepository() {
         return repository;
+    }
+
+    public void setReportDir(File file) {
+        this.outputDir = file;
+        logger.info("Output path: {}", outputDir);
     }
 }

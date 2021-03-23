@@ -1,6 +1,6 @@
 function fn() {
-    const TestHarnessConfig = Java.type('org.solid.testharness.config.TestHarnessConfig')
-    const harnessConfig = TestHarnessConfig.getInstance();
+    const bootstrap = Java.type('org.solid.testharness.config.Bootstrap').getInstance();
+    const harnessConfig = bootstrap.getTestHarnessConfig();
 
     // if (localConfig && localConfig.includeAllServers) servers = serverConfig.servers
 

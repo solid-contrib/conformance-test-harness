@@ -7,17 +7,18 @@ import com.intuit.karate.core.TagResults;
 import com.intuit.karate.core.TimelineResults;
 import com.intuit.karate.report.Report;
 import com.intuit.karate.report.SuiteReports;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.utils.DataRepository;
 
+@ApplicationScoped
 public class ReportGenerator implements SuiteReports {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.ReportGenerator");
 
+    @Inject
     DataRepository repository;
-    public ReportGenerator(DataRepository dataRepository) {
-        repository = dataRepository;
-    }
 
     @Override
     public Report featureReport(Suite suite, FeatureResult fr) {

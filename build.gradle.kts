@@ -19,6 +19,9 @@ val jose4jVersion = "0.7.6"
 val commonsTextVersion = "1.9"
 val commonsLangVersion = "3.11"
 val mockitoVersion = "3.+"
+val weldVersion = "4.0.0.Final"
+val weldJunitVersion = "3.0.0.Final"
+val jandexVersion = "2.2.3.Final"
 
 java {
     toolchain {
@@ -27,8 +30,6 @@ java {
 }
 
 repositories {
-    // Use JCenter for resolving dependencies. OR mavenCentral()
-//    jcenter()
     mavenCentral()
 }
 
@@ -41,7 +42,7 @@ sourceSets {
             srcDir("src/main/resources")
         }
         resources {
-            srcDir("examples")
+            srcDir("example")
         }
     }
 
@@ -56,7 +57,7 @@ sourceSets {
             srcDir("src/main/resources")
         }
         resources {
-            srcDir("examples")
+            srcDir("example")
         }
     }
 }
@@ -70,7 +71,9 @@ configurations["testsuiteRuntimeOnly"].extendsFrom(configurations.testRuntimeOnl
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation("org.jboss.weld:weld-junit5:$weldJunitVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
+    testRuntimeOnly("org.jboss:jandex:$jandexVersion")
 
     implementation("com.intuit.karate:karate-core:$karateVersion")
     implementation("net.masterthought:cucumber-reporting:$cucumberReporting")
@@ -80,6 +83,7 @@ dependencies {
     implementation("org.bitbucket.b_c:jose4j:$jose4jVersion")
     implementation("org.apache.commons:commons-text:$commonsTextVersion")
     implementation("org.apache.commons:commons-lang3:$commonsLangVersion")
+    implementation("org.jboss.weld.se:weld-se-shaded:$weldVersion")
 
     implementation("org.eclipse.rdf4j:rdf4j-repository-sail:$rdf4jVersion")
     implementation("org.eclipse.rdf4j:rdf4j-sail-memory:$rdf4jVersion")
@@ -94,6 +98,24 @@ dependencies {
     implementation("org.eclipse.rdf4j:rdf4j-rio-turtle:$rdf4jVersion")
     implementation("org.eclipse.rdf4j:rdf4j-rio-jsonld:$rdf4jVersion")
     implementation(fileTree("src/main/libs") { include("*.jar") })
+}
+
+tasks.register<Copy>("copyResources") {
+    from(file("${projectDir}/src/main/resources/META-INF"))
+    into(file("${buildDir}/classes/java/main/META-INF"))
+}
+tasks.register<Copy>("copyResourcesTest") {
+    from(file("${projectDir}/src/main/resources/META-INF"))
+    into(file("${buildDir}/classes/java/test/META-INF"))
+}
+tasks.register<Copy>("copyResourcesTestsuite") {
+    from(file("${projectDir}/src/main/resources/META-INF"))
+    into(file("${buildDir}/classes/java/testsuite/META-INF"))
+}
+tasks.processResources {
+    dependsOn("copyResources")
+    dependsOn("copyResourcesTest")
+    dependsOn("copyResourcesTestsuite")
 }
 
 tasks.test {

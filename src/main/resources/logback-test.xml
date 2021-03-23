@@ -17,6 +17,7 @@
         </encoder>
     </appender>
 
+<!--    <logger name="org.jboss.weld" level="TRACE"/> -->
     <logger name="net.masterthought.cucumber" level="WARNING"/>
     <logger name="com.intuit.karate" level="DEBUG"/>
     <logger name="org.solid.testharness" level="DEBUG"/>

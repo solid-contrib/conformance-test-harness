@@ -1,5 +1,6 @@
 package org.solid.testharness.config;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,20 +9,13 @@ import java.io.*;
 import java.nio.file.Path;
 import java.util.Properties;
 
+@ApplicationScoped
 public class Settings {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.config.Settings");
 
-    private static Settings INSTANCE;
     private String configPath;
     private String credentialsPath;
     private String targetServer;
-
-    public synchronized static Settings getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new Settings();
-        }
-        return INSTANCE;
-    }
 
     // the settings are taken in the following order of preference: system property, local-config, config
     // Run from IDE: unless env set in IDE, it is not present so load from local-config

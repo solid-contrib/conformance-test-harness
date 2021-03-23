@@ -2,6 +2,7 @@ package org.solid.testharness.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.enterprise.inject.spi.CDI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
@@ -49,11 +50,12 @@ public class UserCredentials {
     }
 
     public void setCredentials(String credentials) {
+        Settings settings = CDI.current().select(Settings.class).get();
         this.credentials = credentials;
         if (credentials != null) {
             try {
 //                TODO The ReaderHelper was for testing but look at alternatives
-                Reader reader = new ReaderHelper(Settings.getInstance().getCredentialsPath()).getReader(credentials);
+                Reader reader = new ReaderHelper(settings.getCredentialsPath()).getReader(credentials);
                 ObjectMapper objectMapper = new ObjectMapper();
                 UserCredentials externalCredentials = objectMapper.readValue(reader, UserCredentials.class);
                 if (externalCredentials.getRefreshToken() != null) {

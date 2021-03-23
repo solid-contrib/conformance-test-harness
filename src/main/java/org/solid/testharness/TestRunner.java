@@ -2,6 +2,8 @@ package org.solid.testharness;
 
 import com.intuit.karate.Results;
 import com.intuit.karate.Runner;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.config.TargetServer;
@@ -20,12 +22,20 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Dependent
 public class TestRunner {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.TestRunner");
 
-    public Results runTests() {
-        TestHarnessConfig config = TestHarnessConfig.getInstance();
+    @Inject
+    DataRepository dataRepository;
+    @Inject
+    TestHarnessConfig config;
+    @Inject
+    ResultProcessor resultProcessor;
+    @Inject
+    ReportGenerator reportGenerator;
 
+    public Results runTests() {
         logger.info("===================== DISCOVER TESTS ========================");
         String featuresDirectory = System.getProperty("features");
         logger.info("Feature directory {}", featuresDirectory);
@@ -53,7 +63,6 @@ public class TestRunner {
 //                .parallel(8);
 
         List<String> tags = Collections.singletonList("~@ignore");
-        DataRepository dataRepository = DataRepository.getInstance();
 
         Results results = Runner.builder()
                 .systemProperty("testmode", "suite-runner")
@@ -62,11 +71,11 @@ public class TestRunner {
                 .outputCucumberJson(true)
 //                .outputJunitXml(true)
                 .outputHtmlReport(true)
-                .suiteReports(new ReportGenerator(dataRepository))
+                .suiteReports(reportGenerator)
                 .parallel(config.getTargetServer().getMaxThreads());
 
         logger.info("===================== START REPORT ========================");
-        ResultProcessor resultProcessor = new ResultProcessor(dataRepository, new File(results.getReportDir()));
+        resultProcessor.setReportDir(new File(results.getReportDir()));
 //        resultProcessor.buildCucumberReport();
         resultProcessor.buildTurtleReport();
         // dump to console

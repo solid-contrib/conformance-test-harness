@@ -1,4 +1,4 @@
-@base <https://github.com/solid/conformance-test-harness> .
+@base <https://github.com/solid/conformance-test-harness/> .
 @prefix solid-test: <https://github.com/solid/conformance-test-harness/vocab#> .
 
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -19,7 +19,7 @@
         doap:revision "0.0.1-SNAPSHOT"
     ] .
 
-<#ess-compat>
+<ess-compat>
     a earl:Software, earl:TestSubject ;
     doap:name "Enterprise Solid Server (Web Access Control version)";
     doap:release [
@@ -48,7 +48,7 @@
     solid-test:podRoot <https://pod-compat.inrupt.com/solid-test-suite-alice/> ;
     solid-test:testContainer "/solid-test-suite-alice/shared-test/" .
 
-<#css>
+<css>
     a earl:Software, earl:TestSubject ;
     doap:name "Community Solid Server" ;
     doap:release [

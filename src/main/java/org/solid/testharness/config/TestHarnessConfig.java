@@ -1,5 +1,10 @@
 package org.solid.testharness.config;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.inject.Inject;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -15,30 +20,27 @@ import org.solid.testharness.utils.DataRepository;
 import java.util.HashMap;
 import java.util.Map;
 
+@ApplicationScoped
 public class TestHarnessConfig {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.config.TestHarnessConfig");
 
     private static final String TEST_HARNESS_URI = "https://github.com/solid/conformance-test-harness/";
-    private static TestHarnessConfig INSTANCE;
 
     private TargetServer targetServer;
     private Map<String, TargetServer> servers;
     private Map<String, SolidClient> clients;
 
-    public synchronized static TestHarnessConfig getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new TestHarnessConfig();
-        }
-        return INSTANCE;
-    }
+    @Inject
+    private DataRepository dataRepository;
 
-    private TestHarnessConfig() {
-        Settings settings = Settings.getInstance();
+    @Inject
+    private Settings settings;
+
+    @PostConstruct
+    public void initialize() {
         settings.loadSystemProperties();
         settings.loadLocalProperties();
         settings.logSettings();
-
-        DataRepository dataRepository = DataRepository.getInstance();
         dataRepository.loadTurtle(settings.getConfigFile());
 
         String targetIri = TEST_HARNESS_URI + settings.getTargetServer();
@@ -63,16 +65,19 @@ public class TestHarnessConfig {
         } else {
             logger.debug("TestSubject {}", targetServer.getTestSubject());
             logger.debug("Max threads: {}", targetServer.getMaxThreads());
-            logger.info("===================== REGISTER CLIENTS ========================");
-            clients = new HashMap<>();
-            targetServer.getUsers().keySet().forEach(user -> {
-                try {
-                    clients.put(user, AuthManager.authenticate(user, targetServer));
-                } catch (Exception e) {
-                    logger.error("Failed to register clients", e);
-                }
-            });
         }
+    }
+
+    public void registerClients() {
+        logger.info("===================== REGISTER CLIENTS ========================");
+        clients = new HashMap<>();
+        targetServer.getUsers().keySet().forEach(user -> {
+            try {
+                clients.put(user, AuthManager.authenticate(user, targetServer));
+            } catch (Exception e) {
+                logger.error("Failed to register clients", e);
+            }
+        });
     }
 
     public TargetServer getTargetServer() {
