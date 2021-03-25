@@ -16,6 +16,7 @@ public class Settings {
     private String configPath;
     private String credentialsPath;
     private String targetServer;
+    private String featuresPath;
 
     // the settings are taken in the following order of preference: system property, local-config, config
     // Run from IDE: unless env set in IDE, it is not present so load from local-config
@@ -25,6 +26,7 @@ public class Settings {
         configPath = System.getProperty("config");
         credentialsPath = System.getProperty("credentials");
         targetServer = System.getProperty("karate.env");
+        featuresPath = System.getProperty("features");
     }
 
     public void loadLocalProperties() {
@@ -40,6 +42,9 @@ public class Settings {
             }
             if (StringUtils.isBlank(configPath) && prop.containsKey("config")) {
                 configPath = workingDirectory.resolve(prop.getProperty("config")).toString();
+            }
+            if (StringUtils.isBlank(featuresPath) && prop.containsKey("features")) {
+                featuresPath = workingDirectory.resolve(prop.getProperty("features")).toString();
             }
         } catch (IOException e) {
             logger.debug("Local properties file not loaded {}", e.getMessage());
@@ -59,10 +64,15 @@ public class Settings {
         return targetServer;
     }
 
+    public String getFeaturesDirectory() {
+        return featuresPath;
+    }
+
     public void logSettings() {
         logger.info("Config filename {}", configPath);
         logger.info("Credentials path {}", credentialsPath);
         logger.info("Target server: {}", targetServer);
+        logger.info("Features path: {}", featuresPath);
         logger.info("Options {}", System.getProperty("karate.options"));
     }
 }

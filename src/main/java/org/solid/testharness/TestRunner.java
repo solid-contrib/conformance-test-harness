@@ -37,9 +37,7 @@ public class TestRunner {
 
     public Results runTests() {
         logger.info("===================== DISCOVER TESTS ========================");
-        String featuresDirectory = System.getProperty("features");
-        logger.info("Feature directory {}", featuresDirectory);
-        List<String> featurePaths = getFeaturePaths(config.getTargetServer(), featuresDirectory);
+        List<String> featurePaths = getFeaturePaths(config.getTargetServer(), config.getFeaturesDirectory());
         logger.info("==== RUNNING FEATURE_PATHS {}", featurePaths);
 
         List<Path> featureFiles = new ArrayList<>();
@@ -79,9 +77,9 @@ public class TestRunner {
 //        resultProcessor.buildCucumberReport();
         resultProcessor.buildTurtleReport();
         // dump to console
-        StringWriter dump = new StringWriter();
-        dataRepository.export(dump);
-        logger.info("REPORT\n{}", dump.toString());
+//        StringWriter dump = new StringWriter();
+//        dataRepository.export(dump);
+//        logger.info("REPORT\n{}", dump.toString());
 
         logger.info("Results:\n  Features  passed: {}, failed: {}, total: {}\n  Scenarios passed: {}, failed: {}, total: {}",
                 results.getFeaturesPassed(), results.getFeaturesFailed(), results.getFeaturesTotal(),

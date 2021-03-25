@@ -17,6 +17,7 @@ import org.solid.testharness.http.AuthManager;
 import org.solid.testharness.http.SolidClient;
 import org.solid.testharness.utils.DataRepository;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -94,5 +95,9 @@ public class TestHarnessConfig {
 
     public Map<String, SolidClient> getClients() {
         return clients;
+    }
+
+    public String getFeaturesDirectory() {
+        return settings.getFeaturesDirectory();
     }
 }
