@@ -2,19 +2,17 @@ package org.solid.testharness;
 
 import com.intuit.karate.Results;
 import com.intuit.karate.Runner;
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.config.TargetServer;
 import org.solid.testharness.config.TestHarnessConfig;
 import org.solid.testharness.reporting.ReportGenerator;
 import org.solid.testharness.reporting.ResultProcessor;
-import org.solid.testharness.utils.DataRepository;
 
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,17 +25,15 @@ public class TestRunner {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.TestRunner");
 
     @Inject
-    DataRepository dataRepository;
-    @Inject
-    TestHarnessConfig config;
+    TestHarnessConfig testHarnessConfig;
     @Inject
     ResultProcessor resultProcessor;
     @Inject
     ReportGenerator reportGenerator;
 
-    public Results runTests() {
+    public List<String> discoverTests() {
         logger.info("===================== DISCOVER TESTS ========================");
-        List<String> featurePaths = getFeaturePaths(config.getTargetServer(), config.getFeaturesDirectory());
+        List<String> featurePaths = getFeaturePaths(testHarnessConfig.getTargetServer(), testHarnessConfig.getFeaturesDirectory());
         logger.info("==== RUNNING FEATURE_PATHS {}", featurePaths);
 
         List<Path> featureFiles = new ArrayList<>();
@@ -46,7 +42,11 @@ public class TestRunner {
         if (featureFiles.isEmpty()) {
             logger.warn("There are no tests available");
         }
+        return featurePaths;
+    }
 
+    public Results runTests(List<String> featurePaths) {
+        testHarnessConfig.registerClients();
         logger.info("===================== START TESTS ========================");
 
         // we can also create Features which may be useful when fetching from remote resource although this may cause problems with
@@ -70,16 +70,13 @@ public class TestRunner {
 //                .outputJunitXml(true)
                 .outputHtmlReport(true)
                 .suiteReports(reportGenerator)
-                .parallel(config.getTargetServer().getMaxThreads());
+                .parallel(testHarnessConfig.getTargetServer().getMaxThreads());
 
         logger.info("===================== START REPORT ========================");
         resultProcessor.setReportDir(new File(results.getReportDir()));
-//        resultProcessor.buildCucumberReport();
         resultProcessor.buildTurtleReport();
-        // dump to console
-//        StringWriter dump = new StringWriter();
-//        dataRepository.export(dump);
-//        logger.info("REPORT\n{}", dump.toString());
+//        resultProcessor.buildCucumberReport();
+//        resultProcessor.printReportToConsole();
 
         logger.info("Results:\n  Features  passed: {}, failed: {}, total: {}\n  Scenarios passed: {}, failed: {}, total: {}",
                 results.getFeaturesPassed(), results.getFeaturesFailed(), results.getFeaturesTotal(),

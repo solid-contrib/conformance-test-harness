@@ -1,7 +1,5 @@
 package org.solid.testharness.reporting;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import net.masterthought.cucumber.Configuration;
 import net.masterthought.cucumber.ReportBuilder;
 import org.apache.commons.io.FileUtils;
@@ -10,9 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.utils.DataRepository;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -24,7 +25,7 @@ public class ResultProcessor {
     private File outputDir;
 
     @Inject
-    private DataRepository repository;
+    DataRepository repository;
 
     public void buildCucumberReport() {
         Collection<File> jsonFiles = FileUtils.listFiles(outputDir, new String[]{"json"}, true);
@@ -47,6 +48,12 @@ public class ResultProcessor {
         } catch (IOException e) {
             logger.error("Failed to generate test suite result report", e);
         }
+    }
+
+    public void printReportToConsole() {
+        StringWriter sw = new StringWriter();
+        repository.export(sw);
+        logger.info("REPORT\n{}", sw.toString());
     }
 
     public Repository getRepository() {

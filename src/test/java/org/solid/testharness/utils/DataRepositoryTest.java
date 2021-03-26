@@ -2,7 +2,9 @@ package org.solid.testharness.utils;
 
 import com.intuit.karate.Suite;
 import com.intuit.karate.core.*;
-import jakarta.inject.Inject;
+import javax.inject.Inject;
+
+import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.util.Values;
@@ -30,8 +32,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@QuarkusTest
 class DataRepositoryTest {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.utils.DataRepositoryTest");
+
     @Inject
     DataRepository repository;
 
@@ -84,8 +88,6 @@ class DataRepositoryTest {
         when(str2.getStepLog()).thenReturn("STEP2 LOG");
         when(sr1.getStepResults()).thenReturn(List.of(str1, str2));
 
-
-//        DataRepository repository = DataRepository.getInstance();
         repository.setupNamespaces("http://example.org/");
         repository.setTestSubject(iri("http://example.org/test"));
         repository.addFeatureResult(suite, fr);
@@ -100,7 +102,6 @@ class DataRepositoryTest {
     @Disabled
     void exportWriter() {
         StringWriter wr = new StringWriter();
-//        DataRepository repository = DataRepository.getInstance();
         try (RepositoryConnection conn = repository.getConnection()) {
             Statement st = Values.getValueFactory().createStatement(iri("http://example.org/bob"), RDF.TYPE, FOAF.PERSON);
             conn.add(st);
@@ -113,7 +114,6 @@ class DataRepositoryTest {
     @Disabled
     void exportStream() {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-//        DataRepository repository = DataRepository.getInstance();
         try (RepositoryConnection conn = repository.getConnection()) {
             Statement st = Values.getValueFactory().createStatement(iri("http://example.org/bob"), RDF.TYPE, FOAF.PERSON);
             conn.add(st);

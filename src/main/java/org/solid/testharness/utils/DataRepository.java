@@ -3,7 +3,6 @@ package org.solid.testharness.utils;
 import com.intuit.karate.Suite;
 import com.intuit.karate.core.FeatureResult;
 import com.intuit.karate.core.ScenarioResult;
-import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.rdf4j.RDF4JException;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -25,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.*;
 
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -39,15 +40,10 @@ import static org.eclipse.rdf4j.model.util.Values.bnode;
 import static org.eclipse.rdf4j.model.util.Values.iri;
 
 @ApplicationScoped
-public class DataRepository implements Repository { //extends SailRepository
+public class DataRepository implements Repository {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.utils.DataRepository");
 
     private Repository repository;
-
-    private DataRepository() {
-        repository = new SailRepository(new MemoryStore());
-        logger.debug("INITIALIZE DATA REPOSITORY");
-    }
     private Namespace NS;
     private IRI assertor;
     private IRI testSubject;
@@ -56,6 +52,11 @@ public class DataRepository implements Repository { //extends SailRepository
 
     public static Map<String, IRI> EARL_RESULT = Map.of("passed", EARL.passed, "failed", EARL.failed, "skipped", EARL.untested);
 
+    @PostConstruct
+    void postConstruct() {
+        repository = new SailRepository(new MemoryStore());
+        logger.debug("INITIALIZE DATA REPOSITORY");
+    }
     public void loadTurtle(URL url) {
         try (RepositoryConnection conn = getConnection()) {
             try {
@@ -165,18 +166,6 @@ public class DataRepository implements Repository { //extends SailRepository
             logger.error("Failed to load feature result", e);
         }
     }
-
-/* Example of a manifest:
-@prefix manifest: <http://www.w3.org/2013/TurtleTests/manifest.ttl#>.
-manifest:IRI_subject
-    a earl:TestCriterion, earl:TestCase;
-    dc:title "IRI_subject";
-    dc:description "IRI subject";
-    mf:action <http://www.w3.org/2013/TurtleTests/IRI_subject.ttl>;
-    mf:result <http://www.w3.org/2013/TurtleTests/IRI_spo.nt>;
-    earl:assertions _:assertions0.
- */
-
 
     private IRI createSkolemizedBlankNode(IRI base) {
         return iri(base.stringValue() + GENID + bnode().getID());

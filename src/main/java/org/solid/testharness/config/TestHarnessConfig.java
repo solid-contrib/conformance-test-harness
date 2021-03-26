@@ -1,10 +1,6 @@
 package org.solid.testharness.config;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Instance;
-import jakarta.enterprise.inject.spi.BeanManager;
-import jakarta.inject.Inject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -17,7 +13,11 @@ import org.solid.testharness.http.AuthManager;
 import org.solid.testharness.http.SolidClient;
 import org.solid.testharness.utils.DataRepository;
 
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,21 +30,40 @@ public class TestHarnessConfig {
     private TargetServer targetServer;
     private Map<String, TargetServer> servers;
     private Map<String, SolidClient> clients;
+    private String featuresDirectory;
+    private File credentialsDirectory;
+    private File configFile;
+
+    // the settings are taken in the following order of preference:
+    //   system property
+    //   env variable
+    //   .env file in cwd
+    //   config/application.properties (local)
+    //   src/main/resources/application.properties (project)
+    // @seeAlso: https://quarkus.io/guides/config-reference#configuration_sources
+
+    @ConfigProperty(name = "config.file")
+    String configPath;
+    @ConfigProperty(name = "credentials.directory")
+    String credentialsPath;
+    @ConfigProperty(name = "target")
+    String target;
+    @ConfigProperty(name = "features.directory")
+    String featuresPath;
 
     @Inject
-    private DataRepository dataRepository;
-
-    @Inject
-    private Settings settings;
+    DataRepository dataRepository;
 
     @PostConstruct
-    public void initialize() {
-        settings.loadSystemProperties();
-        settings.loadLocalProperties();
-        settings.logSettings();
-        dataRepository.loadTurtle(settings.getConfigFile());
+    public void initialize() throws IOException {
+        configFile = new File(configPath).getCanonicalFile();
+        featuresDirectory = new File(featuresPath).getCanonicalPath();
+        credentialsDirectory = new File(credentialsPath).getCanonicalFile();
+        logSettings();
 
-        String targetIri = TEST_HARNESS_URI + settings.getTargetServer();
+        dataRepository.loadTurtle(configFile);
+
+        String targetIri = TEST_HARNESS_URI + target;
         dataRepository.setupNamespaces(TEST_HARNESS_URI);
 
         try (RepositoryConnection conn = dataRepository.getConnection()) {
@@ -89,15 +108,26 @@ public class TestHarnessConfig {
         return servers;
     }
 
-    public void setServers(Map<String, TargetServer> servers) {
-        this.servers = servers;
-    }
-
     public Map<String, SolidClient> getClients() {
         return clients;
     }
 
     public String getFeaturesDirectory() {
-        return settings.getFeaturesDirectory();
+        return featuresDirectory;
+    }
+
+    public File getCredentialsDirectory() {
+        return credentialsDirectory;
+    }
+
+    public void logSettings() {
+        try {
+            logger.info("Config filename {}", configFile.getCanonicalPath());
+            logger.info("Credentials path {}", credentialsDirectory.getCanonicalPath());
+            logger.info("Target server: {}", target);
+            logger.info("Features path: {}", featuresDirectory);
+        } catch (IOException e) {
+            logger.error("Failed to identify file locations from config");
+        }
     }
 }

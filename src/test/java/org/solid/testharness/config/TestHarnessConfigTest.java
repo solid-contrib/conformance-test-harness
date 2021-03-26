@@ -1,15 +1,16 @@
 package org.solid.testharness.config;
 
-import jakarta.inject.Inject;
-import org.jboss.weld.junit5.auto.EnableAutoWeld;
+import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@EnableAutoWeld
+@QuarkusTest
 public class TestHarnessConfigTest {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.config.TestHarnessConfigTest");
 

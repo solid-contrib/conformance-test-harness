@@ -1,9 +1,13 @@
 function fn() {
     const bootstrap = Java.type('org.solid.testharness.config.Bootstrap').getInstance();
+    if (!bootstrap) {
+        karate.log('Scenario was not bootstrapped')
+        karate.abort()
+        return {}
+    }
+
     const harnessConfig = bootstrap.getTestHarnessConfig();
-
     // if (localConfig && localConfig.includeAllServers) servers = serverConfig.servers
-
     const target = harnessConfig.targetServer;
     if (target == null) {
         karate.log('Check the environment properties - config is not defined');
