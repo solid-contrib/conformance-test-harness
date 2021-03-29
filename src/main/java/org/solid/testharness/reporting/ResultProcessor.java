@@ -1,8 +1,5 @@
 package org.solid.testharness.reporting;
 
-import net.masterthought.cucumber.Configuration;
-import net.masterthought.cucumber.ReportBuilder;
-import org.apache.commons.io.FileUtils;
 import org.eclipse.rdf4j.repository.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +11,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 @ApplicationScoped
 public class ResultProcessor {
@@ -26,18 +20,6 @@ public class ResultProcessor {
 
     @Inject
     DataRepository repository;
-
-    public void buildCucumberReport() {
-        Collection<File> jsonFiles = FileUtils.listFiles(outputDir, new String[]{"json"}, true);
-        List<String> jsonPaths = new ArrayList<>(jsonFiles.size());
-        jsonFiles.forEach(file -> jsonPaths.add(file.getAbsolutePath()));
-        logger.info("==== REPORT ON {}", jsonPaths);
-        if (jsonPaths.size() != 0) {
-            Configuration config = new Configuration(new File("build"), "solid-test-harness");
-            ReportBuilder reportBuilder = new ReportBuilder(jsonPaths, config);
-            reportBuilder.generateReports();
-        }
-    }
 
     public void buildTurtleReport() {
         try {

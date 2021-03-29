@@ -1,0 +1,32 @@
+# local override of properties
+config:
+  file: config/config.ttl
+credentials:
+  directory: /Users/pete/work/tokens
+features:
+  directory: example
+testSuiteDescription: example/example.ttl
+target: ess-compat
+#target: css
+
+#includeAllServers: true
+
+# mapping feature URIs
+feature:
+  mappings:
+    - prefix: https://github.com/solid/conformance-test-harness/example
+      path: example
+
+# Logging
+quarkus:
+  log:
+    category:
+      "org.solid.testharness":
+        level: DEBUG # to increase overall logging for development
+      "org.solid.testharness.http.AuthManager":
+        level: INFO # but keep only higher level for authentication
+#"org.solid.testharness.utils":
+#  level: INFO
+#"org.solid.testharness.http.Client":
+#  level: DEBUG
+

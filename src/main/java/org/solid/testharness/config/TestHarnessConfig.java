@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @ApplicationScoped
@@ -30,16 +31,16 @@ public class TestHarnessConfig {
     private TargetServer targetServer;
     private Map<String, TargetServer> servers;
     private Map<String, SolidClient> clients;
-    private String featuresDirectory;
     private File credentialsDirectory;
     private File configFile;
+    private File testSuiteDescriptionFile;
 
     // the settings are taken in the following order of preference:
     //   system property
     //   env variable
     //   .env file in cwd
-    //   config/application.properties (local)
-    //   src/main/resources/application.properties (project)
+    //   config/application.yaml (local)
+    //   src/main/resources/application.yaml (project)
     // @seeAlso: https://quarkus.io/guides/config-reference#configuration_sources
 
     @ConfigProperty(name = "config.file")
@@ -48,8 +49,10 @@ public class TestHarnessConfig {
     String credentialsPath;
     @ConfigProperty(name = "target")
     String target;
-    @ConfigProperty(name = "features.directory")
-    String featuresPath;
+    @ConfigProperty(name = "testSuiteDescription")
+    String testSuiteDescriptionPath;
+    @Inject
+    PathMappings pathMappings;
 
     @Inject
     DataRepository dataRepository;
@@ -57,7 +60,7 @@ public class TestHarnessConfig {
     @PostConstruct
     public void initialize() throws IOException {
         configFile = new File(configPath).getCanonicalFile();
-        featuresDirectory = new File(featuresPath).getCanonicalPath();
+        testSuiteDescriptionFile = new File(testSuiteDescriptionPath).getCanonicalFile();
         credentialsDirectory = new File(credentialsPath).getCanonicalFile();
         logSettings();
 
@@ -112,20 +115,25 @@ public class TestHarnessConfig {
         return clients;
     }
 
-    public String getFeaturesDirectory() {
-        return featuresDirectory;
+    public File getTestSuiteDescription() {
+        return testSuiteDescriptionFile;
     }
 
     public File getCredentialsDirectory() {
         return credentialsDirectory;
     }
 
+    public List<PathMappings.Mapping> getPathMappings() {
+        return pathMappings.getMappings();
+    }
+
     public void logSettings() {
         try {
-            logger.info("Config filename {}", configFile.getCanonicalPath());
-            logger.info("Credentials path {}", credentialsDirectory.getCanonicalPath());
-            logger.info("Target server: {}", target);
-            logger.info("Features path: {}", featuresDirectory);
+            logger.info("Config filename:  {}", configFile.getCanonicalPath());
+            logger.info("Credentials path: {}", credentialsDirectory.getCanonicalPath());
+            logger.info("Test suite:       {}", testSuiteDescriptionFile.getCanonicalPath());
+            logger.info("Path mappings:    {}", pathMappings.getMappings());
+            logger.info("Target server:    {}", target);
         } catch (IOException e) {
             logger.error("Failed to identify file locations from config");
         }

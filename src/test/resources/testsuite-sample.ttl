@@ -1,0 +1,112 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix earl: <http://www.w3.org/ns/earl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix td: <http://www.w3.org/2006/03/test-description#> .
+
+@prefix manifest: <https://example.org/example.ttl#> .
+@prefix repo: <https://example.org/> .
+
+manifest: doap:implements <https://solidproject.org/TR/protocol> .
+
+manifest:group1
+    a td:SpecificationTestCase ;
+    dcterms:title "Group 1"@en ;
+    dcterms:description "Description 1"@en ;
+    td:specificationReference <https://solidproject.org/TR/protocol#spec1> ;
+    dcterms:hasPart
+        <https://example.org/group1/feature1>,
+        <https://example.org/group1/feature2>,
+        <https://example.org/group1/feature3>
+.
+
+<https://example.org/group1/feature1>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:accepted ;
+    dcterms:title "Group 1 Test case 1" .
+
+<https://example.org/group1/feature2>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:accepted ;
+    dcterms:title "Group 1 Test case 2" .
+
+<https://example.org/group1/feature3>
+    a td:TestCase ;
+    dcterms:subject "MAY" ;
+    td:reviewStatus td:unreviewed ;
+    dcterms:title "Group 1 Test case 3" .
+
+manifest:group2
+    a td:SpecificationTestCase ;
+    dcterms:title "Group 2"@en ;
+    dcterms:description "Description 2"@en ;
+    td:specificationReference <https://solidproject.org/TR/protocol#spec2> ;
+    td:preCondition "sf1" ;
+    dcterms:hasPart
+        <https://example.org/group2/feature1>
+.
+
+<https://example.org/group2/feature1>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:accepted ;
+    dcterms:title "Group 2 Test case 1" .
+
+manifest:group3
+    a td:SpecificationTestCase ;
+    dcterms:title "Group 3"@en ;
+    dcterms:description "Description 3"@en ;
+    td:specificationReference <https://solidproject.org/TR/protocol#spec3> ;
+    td:preCondition "sf1", "sf2" ;
+    dcterms:hasPart
+        <https://example.org/group3/feature1>,
+        <https://example.org/group3/feature2>
+.
+
+<https://example.org/group3/feature1>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:accepted ;
+    dcterms:title "Group 3 Test case 1" .
+
+<https://example.org/group3/feature2>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:accepted ;
+    dcterms:title "Group 3 Test case 2" .
+
+manifest:group4
+    a td:SpecificationTestCase ;
+    dcterms:title "Group 4"@en ;
+    dcterms:description "Description 4"@en ;
+    td:specificationReference <https://solidproject.org/TR/protocol#spec4> ;
+    td:preCondition "sf1", "sf3" ;
+    dcterms:hasPart
+        <https://example.org/group4/feature1>,
+        <https://example.org/group4/feature2>,
+        <https://example.org/group4/feature3>
+.
+
+<https://example.org/group4/feature1>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:accepted ;
+    dcterms:title "Group 4 Test case 1" .
+
+<https://example.org/group4/feature2>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:accepted ;
+    dcterms:title "Group 4 Test case 2" .
+
+<https://example.org/group4/feature3>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:unreviewed ;
+    dcterms:title "Group 4 Test case 3" .
+
+

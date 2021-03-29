@@ -28,7 +28,7 @@ manifest:content-negotiation
     td:reviewStatus td:accepted ;
     dcterms:title "For a JSON-LD resource" .
 
-<https://github.com/solid/conformance-test-harness/example/content-negotiation/content-negotiation-jsonld.feature>
+<https://github.com/solid/conformance-test-harness/example/content-negotiation/content-negotiation-turtle.feature>
     a td:TestCase ;
     dcterms:subject "MUST" ;
     td:reviewStatus td:accepted ;

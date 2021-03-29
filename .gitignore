@@ -36,9 +36,6 @@ gradle-app.setting
 # Cache of project
 .gradletasknamecache
 
-# local only config file
-local.properties
-
 # generated RDF artifacts - until they are published
 !generated-vocab-common*.jar
 

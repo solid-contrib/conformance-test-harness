@@ -57,6 +57,7 @@ public class DataRepository implements Repository {
         repository = new SailRepository(new MemoryStore());
         logger.debug("INITIALIZE DATA REPOSITORY");
     }
+
     public void loadTurtle(URL url) {
         try (RepositoryConnection conn = getConnection()) {
             try {

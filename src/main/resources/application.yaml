@@ -1,0 +1,17 @@
+# Default properties
+config:
+  file:
+credentials:
+  directory:
+target:
+testSuiteDescription:
+
+# Logging
+quarkus:
+  log:
+    level: INFO
+    category:
+      "com.intuit.karate":
+        level: DEBUG
+      "org.solid.testharness":
+        level: INFO

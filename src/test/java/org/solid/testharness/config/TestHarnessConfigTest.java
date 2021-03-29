@@ -18,6 +18,12 @@ public class TestHarnessConfigTest {
     TestHarnessConfig testHarnessConfig;
 
     @Test
+    void injection() {
+        assertNotNull(testHarnessConfig);
+        testHarnessConfig.logSettings();
+    }
+
+    @Test
     public void loadFromTurtle() {
         // TODO: Create test config file for tests
         String targetServer = "https://github.com/solid/conformance-test-harness/ess-compat";

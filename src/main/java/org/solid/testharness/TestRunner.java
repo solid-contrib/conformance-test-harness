@@ -2,23 +2,21 @@ package org.solid.testharness;
 
 import com.intuit.karate.Results;
 import com.intuit.karate.Runner;
+import org.eclipse.rdf4j.model.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.solid.testharness.config.TargetServer;
 import org.solid.testharness.config.TestHarnessConfig;
+import org.solid.testharness.discovery.TestSuiteDescription;
 import org.solid.testharness.reporting.ReportGenerator;
 import org.solid.testharness.reporting.ResultProcessor;
+import org.solid.testharness.utils.DataRepository;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Dependent
 public class TestRunner {
@@ -30,18 +28,31 @@ public class TestRunner {
     ResultProcessor resultProcessor;
     @Inject
     ReportGenerator reportGenerator;
+    @Inject
+    DataRepository dataRepository;
 
     public List<String> discoverTests() {
         logger.info("===================== DISCOVER TESTS ========================");
-        List<String> featurePaths = getFeaturePaths(testHarnessConfig.getTargetServer(), testHarnessConfig.getFeaturesDirectory());
-        logger.info("==== RUNNING FEATURE_PATHS {}", featurePaths);
+        TestSuiteDescription suite = new TestSuiteDescription(dataRepository);
+        suite.load(testHarnessConfig.getTestSuiteDescription());
 
-        List<Path> featureFiles = new ArrayList<>();
-        featurePaths.forEach(s -> featureFiles.addAll(findFeatures(Path.of(s))));
-        logger.info("==== FEATURE FILES {}", featureFiles);
-        if (featureFiles.isEmpty()) {
+        // TODO: Consider running some initial tests to discover the features provided by a server
+        List<IRI> testCases = suite.getSuitableTestCases(testHarnessConfig.getTargetServer().getFeatures().keySet());
+        logger.info("==== TEST CASES FOUND: {} - {}", testCases.size(), testCases);
+
+        List<String> featurePaths = suite.locateTestCases(testHarnessConfig.getPathMappings()).stream().filter(f -> {
+            File file = new File(f);
+            if (!file.exists()) {
+                logger.warn("FEATURE NOT IMPLEMENTED: {}", f);
+                return false;
+            }
+            return true;
+        }).collect(Collectors.toList());
+        if (featurePaths.isEmpty()) {
             logger.warn("There are no tests available");
         }
+
+        logger.info("==== RUNNING {} TEST CASES: {}", featurePaths.size(), featurePaths);
         return featurePaths;
     }
 
@@ -63,11 +74,8 @@ public class TestRunner {
         List<String> tags = Collections.singletonList("~@ignore");
 
         Results results = Runner.builder()
-                .systemProperty("testmode", "suite-runner")
                 .path(featurePaths)
                 .tags(tags)
-                .outputCucumberJson(true)
-//                .outputJunitXml(true)
                 .outputHtmlReport(true)
                 .suiteReports(reportGenerator)
                 .parallel(testHarnessConfig.getTargetServer().getMaxThreads());
@@ -75,7 +83,6 @@ public class TestRunner {
         logger.info("===================== START REPORT ========================");
         resultProcessor.setReportDir(new File(results.getReportDir()));
         resultProcessor.buildTurtleReport();
-//        resultProcessor.buildCucumberReport();
 //        resultProcessor.printReportToConsole();
 
         logger.info("Results:\n  Features  passed: {}, failed: {}, total: {}\n  Scenarios passed: {}, failed: {}, total: {}",
@@ -84,50 +91,5 @@ public class TestRunner {
         );
 
         return results;
-    }
-
-    private List<String> getFeaturePaths(TargetServer config, String featuresDirectory) {
-        // select the tests to be run based on the test requirements and server capabilities
-        // TODO: This will be based on a process of reading in the server config and the test description document
-        // TODO: Later - test the server capabilities first rather than use config
-
-        Set<String> targetCapabilities = config.getFeatures().keySet();
-        logger.debug("Server features: {}", targetCapabilities.toString());
-
-        Map<String, Set<String>> testRequirements = Map.of(
-//                "", Set.of(),
-                "content-negotiation", Set.of(),
-                "writing-resource", Set.of(),
-                "protected-operation", Set.of("authentication", "acl"),
-                "wac-allow", Set.of("authentication", "wac-allow")
-//            "acp-operations", Set.of("authentication", "acp")
-        );
-
-        List<String> featurePaths = new ArrayList<>();
-        testRequirements.forEach((key, value) -> {
-            if (value.size() == 0 || targetCapabilities.containsAll(value)) {
-                featurePaths.addAll(Collections.singletonList(Paths.get(featuresDirectory, key).toString()));
-            }
-        });
-        return featurePaths;
-    }
-
-    public static List<Path> findFeatures(Path path) {
-        List<Path> result = new ArrayList<>();
-        if (!Files.isDirectory(path)) {
-            if (Files.isRegularFile(path) && path.getFileName().toString().endsWith(".feature")) {
-                result.add(path);
-            }
-        } else {
-            try (Stream<Path> walk = Files.walk(path)) {
-                result.addAll(walk
-                        .filter(Files::isRegularFile)   // is a file
-                        .filter(p -> p.getFileName().toString().endsWith(".feature"))
-                        .collect(Collectors.toList()));
-            } catch (IOException e) {
-                logger.error("Failed to walk path finding features", e);
-            }
-        }
-        return result;
     }
 }
