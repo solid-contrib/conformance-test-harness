@@ -1,10 +1,6 @@
 # local override of properties
-config:
-  file: config/config.ttl
-credentials:
-  directory: /Users/pete/work/tokens
-features:
-  directory: example
+configFile: config/config.ttl
+credentialsDir: /Users/pete/work/tokens
 testSuiteDescription: example/example.ttl
 target: ess-compat
 #target: css

@@ -131,31 +131,36 @@ external JSON file which can be shared between multliple servers and has the fol
 ```
 
 ## Setting up the environment
-There 4 important settings:
+There 5 important settings:
 * `target` - the name of the target server, used to select the server config from the config file
-* `config.file` - the location of the config file
-* `credentials.directory` - the location of the shared credentials files if used
-* `features.directory` - the location of the test cases to be run (temporary as this will come from the test suite description document)
+* `configFile` - the location of the config file
+* `credentialsDir` - the location of the shared credentials files if used
+* `testSuiteDescription` - the location of the test suite description document that lists the test cases to be run
+* `feature:mappings` - maps test cases IRIs to a local file system (there can be multiple mappings)
 
-There are 2 ways to set these properties. Firstly you can provide `config/application.properties` in the working directory containing:
-```properties
-target=TARGET_SERVER
-config.file=PATH_TO_CONFIG
-credentials.directory=PATH_TO_CREDENTIALS
-features.directory=PATH_TO_TESTS
+There are 2 ways to set these properties. Firstly you can provide `config/application.yaml` in the working directory containing:
+```yaml
+target: TARGET_SERVER
+configFile: PATH_TO_CONFIG
+credentialsDir: PATH_TO_CREDENTIALS
+testSuiteDescription: PATH_TO_TESTSUITE_DOC
+feature:
+  mappings:
+    - prefix: https://github.com/solid/conformance-test-harness/example
+      path: example
 ```
 This method works well when testing your tests in an IDE as it doesn't require anything adding to the command line.
 
 Alternatively you can set these things on the command line:
 ```
 -Dtarget=TARGET_SERVER
--Dconfig.file=PATH_TO_CONFIG
--Dcredentials.directory=PATH_TO_CREDENTIALS
--Dfeatures.directory=PATH_TO_TESTS
+-DconfigFile=PATH_TO_CONFIG
+-DcredentialsDir=PATH_TO_CREDENTIALS
+-testSuiteDescription=PATH_TO_TESTSUITE_DOC
 ``` 
 
 ## Running the test suite
-To run the test suite with the default target server as defined in `config/application.properties`:
+To run the test suite with the default target server as defined in `config/application.yaml`:
 
 ```shell
 # this uses a profile to run the TestSuiteRunner instead of local unit tests

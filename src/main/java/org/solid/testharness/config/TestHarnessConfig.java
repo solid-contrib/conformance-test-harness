@@ -43,9 +43,9 @@ public class TestHarnessConfig {
     //   src/main/resources/application.yaml (project)
     // @seeAlso: https://quarkus.io/guides/config-reference#configuration_sources
 
-    @ConfigProperty(name = "config.file")
+    @ConfigProperty(name = "configFile")
     String configPath;
-    @ConfigProperty(name = "credentials.directory")
+    @ConfigProperty(name = "credentialsDir")
     String credentialsPath;
     @ConfigProperty(name = "target")
     String target;
