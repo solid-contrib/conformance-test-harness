@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.SOLID_TEST;
 
 import javax.enterprise.inject.spi.CDI;
+import java.io.File;
+import java.io.FileReader;
 import java.io.Reader;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -52,31 +54,28 @@ public class UserCredentials {
     public void setCredentials(String credentials) {
         TestHarnessConfig testHarnessConfig = CDI.current().select(TestHarnessConfig.class).get();
         this.credentials = credentials;
-        if (credentials != null) {
-            try {
-//                TODO The ReaderHelper was for testing but look at alternatives
-                Reader reader = new ReaderHelper(testHarnessConfig.getCredentialsDirectory()).getReader(credentials);
-                ObjectMapper objectMapper = new ObjectMapper();
-                UserCredentials externalCredentials = objectMapper.readValue(reader, UserCredentials.class);
-                if (externalCredentials.getRefreshToken() != null) {
-                    setRefreshToken(externalCredentials.getRefreshToken());
-                }
-                if (externalCredentials.getClientId() != null) {
-                    setClientId(externalCredentials.getClientId());
-                }
-                if (externalCredentials.getClientSecret() != null) {
-                    setClientSecret(externalCredentials.getClientSecret());
-                }
-                if (externalCredentials.getUsername() != null) {
-                    setUsername(externalCredentials.getUsername());
-                }
-                if (externalCredentials.getPassword() != null) {
-                    setPassword(externalCredentials.getPassword());
-                }
-            } catch (Exception e) {
-                logger.debug("Failed to load user credentials", e);
-                throw new RuntimeException("Failed to load user credentials", e);
+        try {
+            Reader reader = new FileReader(new File(testHarnessConfig.getCredentialsDirectory(), credentials));
+            ObjectMapper objectMapper = new ObjectMapper();
+            UserCredentials externalCredentials = objectMapper.readValue(reader, UserCredentials.class);
+            if (externalCredentials.getRefreshToken() != null) {
+                setRefreshToken(externalCredentials.getRefreshToken());
             }
+            if (externalCredentials.getClientId() != null) {
+                setClientId(externalCredentials.getClientId());
+            }
+            if (externalCredentials.getClientSecret() != null) {
+                setClientSecret(externalCredentials.getClientSecret());
+            }
+            if (externalCredentials.getUsername() != null) {
+                setUsername(externalCredentials.getUsername());
+            }
+            if (externalCredentials.getPassword() != null) {
+                setPassword(externalCredentials.getPassword());
+            }
+        } catch (Exception e) {
+            logger.debug("Failed to load user credentials", e);
+            throw new RuntimeException("Failed to load user credentials", e);
         }
     }
 

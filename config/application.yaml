@@ -3,7 +3,13 @@ configFile: config/config.ttl
 credentialsDir: /Users/pete/work/tokens
 testSuiteDescription: example/example.ttl
 target: ess-compat
-#target: css
+
+# Test profile
+"%test":
+  configFile: src/test/resources/config-sample.ttl
+  credentialsDir: src/test/resources
+  target: ess-compat
+  testSuiteDescription: src/test/resources/testsuite-sample.ttl
 
 #includeAllServers: true
 

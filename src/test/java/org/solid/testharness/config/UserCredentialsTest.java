@@ -1,13 +1,13 @@
 package org.solid.testharness.config;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Disabled;
+import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
-
-import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@QuarkusTest
 public class UserCredentialsTest {
     ObjectMapper objectMapper = new ObjectMapper();
 
@@ -29,7 +29,9 @@ public class UserCredentialsTest {
                 () -> assertEquals("CLIENT_SECRET", userCredentials.getClientSecret()),
                 () -> assertEquals("USERNAME", userCredentials.getUsername()),
                 () -> assertEquals("PASSWORD", userCredentials.getPassword()),
-                () -> assertNull(userCredentials.getCredentials())
+                () -> assertNull(userCredentials.getCredentials()),
+                () -> assertTrue(userCredentials.isUsingRefreshToken()),
+                () -> assertTrue(userCredentials.isUsingUsernamePassword())
         );
     }
 
@@ -44,20 +46,18 @@ public class UserCredentialsTest {
                 () -> assertNull(userCredentials.getClientSecret()),
                 () -> assertNull(userCredentials.getUsername()),
                 () -> assertNull(userCredentials.getPassword()),
-                () -> assertNull(userCredentials.getCredentials())
+                () -> assertNull(userCredentials.getCredentials()),
+                () -> assertFalse(userCredentials.isUsingRefreshToken()),
+                () -> assertFalse(userCredentials.isUsingUsernamePassword())
         );
     }
 
     @Test
-    @Disabled
     public void parseCredentialsWithExternalFile() throws Exception {
         String json = "{" +
                 "\"webID\": \"ALICE_WEB_ID\", " +
-                "\"credentials\": \"alice-credentials.json\"" +
+                "\"credentials\": \"inrupt-alice.json\"" +
                 "}";
-        File credentialsPath = ReaderHelperTest.getResourceDirectory("alice-credentials.json");
-//        System.setProperty("credentials", credentialsPath);
-
         UserCredentials userCredentials = objectMapper.readValue(json, UserCredentials.class);
         assertAll("userCredentials",
                 () -> assertEquals("ALICE_WEB_ID", userCredentials.getWebID()),
@@ -66,7 +66,16 @@ public class UserCredentialsTest {
                 () -> assertEquals("EXTERNAL_CLIENT_SECRET", userCredentials.getClientSecret()),
                 () -> assertEquals("EXTERNAL_USERNAME", userCredentials.getUsername()),
                 () -> assertEquals("EXTERNAL_PASSWORD", userCredentials.getPassword()),
-                () -> assertEquals("alice-credentials.json", userCredentials.getCredentials())
+                () -> assertEquals("inrupt-alice.json", userCredentials.getCredentials())
         );
+    }
+
+    @Test
+    public void parseCredentialsWithMissingFile() {
+        String json = "{" +
+                "\"webID\": \"ALICE_WEB_ID\", " +
+                "\"credentials\": \"inrupt-missing.json\"" +
+                "}";
+        assertThrows(JsonMappingException.class, () -> objectMapper.readValue(json, UserCredentials.class));
     }
 }

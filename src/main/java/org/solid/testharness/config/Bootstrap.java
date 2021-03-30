@@ -1,5 +1,6 @@
 package org.solid.testharness.config;
 
+import io.quarkus.runtime.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,8 +25,9 @@ public class Bootstrap {
     }
 
     private Bootstrap() {
-        io.quarkus.runtime.Application app = io.quarkus.runtime.Application.currentApplication();
+        Application app = Application.currentApplication();
         if (app == null) {
+            logger.error("BOOTSTRAP - APP INSTANCE {}", app);
             throw new RuntimeException("Features cannot be tested directly from the IDE. Use the TestScenarioRunner instead.");
         }
         logger.debug("BOOTSTRAP - APP INSTANCE {}", app);

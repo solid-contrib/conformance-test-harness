@@ -123,7 +123,7 @@ external JSON file which can be shared between multliple servers and has the fol
   // EITHER
   "refreshToken": "",
   "clientId": "",
-  "clientSecret": ""
+  "clientSecret": "",
   // OR
   "username": "",
   "password": ""
@@ -160,6 +160,7 @@ Alternatively you can set these things on the command line:
 ``` 
 
 ## Running the test suite
+### From the command line via Maven
 To run the test suite with the default target server as defined in `config/application.yaml`:
 
 ```shell
@@ -172,13 +173,18 @@ mvn test -Psolid -Dtarget=ess-compat
 mvn test -Psolid -Dtarget=css
 mvn test -Psolid -Dtarget=nss
 ```
-
+### Via an IDE
 Using an IDE you can also run a specific scenario by editing the TestScenarioRunner and then running it as you would any unit test:
 ```Java
 Results results = testRunner.runTests(Collections.singletonList("classpath:content-negotiation/content-negotiation-turtle.feature"));
 ```
 
-You can also go to the TestSuiteRunnner class and run the whole test suite in the same way.  
+You can also go to the TestSuiteRunnner class and run the whole test suite in the same way.
+
+**Note:** You must configure the IDE to include the following command line option to make Quarkus use the production profile when running tests:  
+```
+-Dquarkus.test.profile=prod
+```
 
 ## Test Reports
 |Report|Location|

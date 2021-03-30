@@ -163,6 +163,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-junit5-mockito</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>${mockito.version}</version>
@@ -287,6 +292,9 @@
                             <includes>
                                 <include>TestSuiteRunner</include>
                             </includes>
+                            <systemPropertyVariables>
+                                <quarkus.test.profile>prod</quarkus.test.profile>
+                            </systemPropertyVariables>
                         </configuration>
                     </plugin>
                 </plugins>

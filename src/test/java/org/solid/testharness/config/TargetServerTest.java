@@ -4,13 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TargetServerTest {
     ObjectMapper objectMapper = new ObjectMapper();
 
+    // TODO: convert to test of Turtle instead of JSON
     @Test
     @Disabled
     public void parseTargetServer() throws Exception {
@@ -26,7 +25,7 @@ public class TargetServerTest {
                 "      \"users\": {" +
                 "        \"alice\": {" +
                 "          \"webID\": \"aliceWebID\"," +
-                "          \"credentials\": \"alice-credentials.json\"" +
+                "          \"credentials\": \"inrupt-alice.json\"" +
                 "        }," +
                 "        \"bob\": {" +
                 "          \"webID\": \"bobWebID\"," +
@@ -34,9 +33,6 @@ public class TargetServerTest {
                 "          \"password\": \"PASSWORD\"" +
                 "        }" +
                 "      }}";
-        File credentialsPath = ReaderHelperTest.getResourceDirectory("alice-credentials.json");
-        // TODO Use Settings
-//        System.setProperty("credentials", credentialsPath);
         TargetServer targetServer = objectMapper.readValue(json, TargetServer.class);
 
         assertAll("targetServer",

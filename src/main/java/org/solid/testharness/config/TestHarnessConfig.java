@@ -56,6 +56,8 @@ public class TestHarnessConfig {
 
     @Inject
     DataRepository dataRepository;
+    @Inject
+    AuthManager authManager;
 
     @PostConstruct
     public void initialize() throws IOException {
@@ -96,7 +98,7 @@ public class TestHarnessConfig {
         clients = new HashMap<>();
         targetServer.getUsers().keySet().forEach(user -> {
             try {
-                clients.put(user, AuthManager.authenticate(user, targetServer));
+                clients.put(user, authManager.authenticate(user, targetServer));
             } catch (Exception e) {
                 logger.error("Failed to register clients", e);
             }
@@ -127,15 +129,11 @@ public class TestHarnessConfig {
         return pathMappings.getMappings();
     }
 
-    public void logSettings() {
-        try {
-            logger.info("Config filename:  {}", configFile.getCanonicalPath());
-            logger.info("Credentials path: {}", credentialsDirectory.getCanonicalPath());
-            logger.info("Test suite:       {}", testSuiteDescriptionFile.getCanonicalPath());
-            logger.info("Path mappings:    {}", pathMappings.getMappings());
-            logger.info("Target server:    {}", target);
-        } catch (IOException e) {
-            logger.error("Failed to identify file locations from config");
-        }
+    private void logSettings() throws IOException {
+        logger.info("Config filename:  {}", configFile.getCanonicalPath());
+        logger.info("Credentials path: {}", credentialsDirectory.getCanonicalPath());
+        logger.info("Test suite:       {}", testSuiteDescriptionFile.getCanonicalPath());
+        logger.info("Path mappings:    {}", pathMappings.getMappings());
+        logger.info("Target server:    {}", target);
     }
 }

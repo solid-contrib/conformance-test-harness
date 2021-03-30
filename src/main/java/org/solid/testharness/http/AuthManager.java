@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.solid.testharness.config.TargetServer;
 import org.solid.testharness.config.UserCredentials;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.http.HttpRequest;
@@ -17,19 +19,15 @@ import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@ApplicationScoped
 public class AuthManager {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.http.AuthManager");
     private static final String USERNAME = "username";
     private static final String PASSWORD = "password";
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = new ObjectMapper();
 
-    public static final synchronized SolidClient authenticate(String user, String config) throws Exception {
-        TargetServer targetServer = objectMapper.readValue(config, TargetServer.class);
-        return authenticate(user, targetServer);
-    }
-
-    public static final synchronized SolidClient authenticate(String user, TargetServer targetServer) throws Exception {
+    public SolidClient authenticate(String user, TargetServer targetServer) throws Exception {
         if (!targetServer.getFeatures().getOrDefault("authentication", false)) {
             return new SolidClient();
         }
@@ -72,7 +70,7 @@ public class AuthManager {
         return solidClient;
     }
 
-    private static final Tokens exchangeRefreshToken(Client authClient, UserCredentials userConfig, TargetServer targetServer) throws Exception {
+    private Tokens exchangeRefreshToken(Client authClient, UserCredentials userConfig, TargetServer targetServer) throws Exception {
         String solidIdentityProvider = targetServer.getSolidIdentityProvider();
         logger.info("Exchange refresh token at {} for {}", solidIdentityProvider, authClient.getUser());
 
@@ -100,7 +98,7 @@ public class AuthManager {
         }
     }
 
-    private static final Tokens loginAndGetAccessToken(Client authClient, UserCredentials userConfig, TargetServer config) throws Exception {
+    private Tokens loginAndGetAccessToken(Client authClient, UserCredentials userConfig, TargetServer config) throws Exception {
         String solidIdentityProvider = config.getSolidIdentityProvider();
         String appOrigin = config.getOrigin();
 
@@ -206,18 +204,18 @@ public class AuthManager {
         return objectMapper.readValue(tokenResponse.body(), Tokens.class);
     }
 
-    public static final String base64Encode(String data) {
+    public String base64Encode(String data) {
         return new String(Base64.getEncoder().encode(data.getBytes()));
     }
 
-    private String generateCodeVerifier() throws UnsupportedEncodingException {
+    private String generateCodeVerifier() {
         SecureRandom secureRandom = new SecureRandom();
         byte[] codeVerifier = new byte[32];
         secureRandom.nextBytes(codeVerifier);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(codeVerifier);
     }
 
-    private String generateCodeChallange(String codeVerifier) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    private String generateCodeChallange(String codeVerifier) throws NoSuchAlgorithmException {
         byte[] bytes = codeVerifier.getBytes(StandardCharsets.US_ASCII);
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
         messageDigest.update(bytes, 0, bytes.length);
