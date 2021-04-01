@@ -2,11 +2,12 @@ package org.solid.testharness.reporting;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryResult;
-import org.solid.common.vocab.RDF;
-import org.solid.common.vocab.TD;
+import org.solid.common.vocab.*;
 import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.Namespaces;
 
 import javax.enterprise.inject.spi.CDI;
 import java.util.ArrayList;
@@ -19,6 +20,11 @@ public class ResultData {
 
     public ResultData() {
         dataRepository = CDI.current().select(DataRepository.class).get();
+    }
+
+    public String getPrefixes() {
+        return Namespaces.generateHtmlPrefixes(List.of(RDF.PREFIX, RDFS.PREFIX, XSD.PREFIX, DCTERMS.PREFIX, DOAP.PREFIX,
+                SOLID.PREFIX, SOLID_TEST.PREFIX, EARL.PREFIX, TD.PREFIX));
     }
 
     public List<SpecificationTestCase> getSpecificationTestCases() {

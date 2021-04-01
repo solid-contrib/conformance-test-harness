@@ -8,13 +8,17 @@ import org.solid.common.vocab.*;
 
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Namespaces {
     private static Map<String, Namespace> namespaces;
 
     public static final String TEST_HARNESS_URI = "https://github.com/solid/conformance-test-harness/";
     public static final String TEST_HARNESS_PREFIX = "test-harness";
+    public static final String TURTLE_PREFIX_FORMAT = "@prefix %s: <%s> .\n";
+    public static final String HTML_PREFIX_FORMAT = "%s: %s";
 
     private Namespaces() {
     }
@@ -27,6 +31,20 @@ public class Namespaces {
             }
         };
         return term;
+    }
+
+    public static String generateTurtlePrefixes(List<String> prefixes) {
+        if (prefixes == null || prefixes.isEmpty()) {
+            return "";
+        }
+        return prefixes.stream().filter(p -> namespaces.containsKey(p)).map(p -> String.format(TURTLE_PREFIX_FORMAT, p, namespaces.get(p).namespace)).collect(Collectors.joining());
+    }
+
+    public static String generateHtmlPrefixes(List<String> prefixes) {
+        if (prefixes == null || prefixes.isEmpty()) {
+            return "";
+        }
+        return prefixes.stream().filter(p -> namespaces.containsKey(p)).map(p -> String.format(HTML_PREFIX_FORMAT, p, namespaces.get(p).namespace)).collect(Collectors.joining(" "));
     }
 
     public static void addToRepository(Repository repository) {
