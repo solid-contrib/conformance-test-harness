@@ -1,8 +1,8 @@
 package org.solid.testharness.reporting;
 
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheFactory;
+import io.quarkus.qute.Engine;
+import io.quarkus.qute.Location;
+import io.quarkus.qute.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.utils.DataRepository;
@@ -20,6 +20,13 @@ public class ResultProcessor {
     @Inject
     DataRepository repository;
 
+    @Inject
+    Engine engine;
+
+    @Location("result-report.html")
+    Template template;
+
+
     public void buildTurtleReport(Writer writer) {
         repository.export(writer);
     }
@@ -31,10 +38,8 @@ public class ResultProcessor {
     }
 
     public void buildHtmlReport(Writer writer) {
-        MustacheFactory mf = new DefaultMustacheFactory();
-        Mustache mustache = mf.compile("templates/result-report.mustache");
         try {
-            mustache.execute(writer, new ResultData());
+            writer.write(template.data(new ResultData()).render());
             writer.flush();
         } catch (IOException e) {
             logger.error("Failed to generate test suite result HTML report", e);

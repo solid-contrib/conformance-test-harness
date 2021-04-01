@@ -28,7 +28,6 @@
         <commons.lang.version>3.11</commons.lang.version>
         <mockito.version>3.8.0</mockito.version>
         <jandex.version>2.2.3.Final</jandex.version>
-        <mustache.version>0.9.7</mustache.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -60,6 +59,10 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-config-yaml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-qute</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intuit.karate</groupId>
@@ -144,11 +147,6 @@
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-rio-jsonld</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.github.spullara.mustache.java</groupId>
-            <artifactId>compiler</artifactId>
-            <version>${mustache.version}</version>
         </dependency>
         <dependency>
             <groupId>org.solid.common.vocab</groupId>

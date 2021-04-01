@@ -50,7 +50,7 @@ public class DataModelBase {
         return model.size();
     }
 
-    protected String getTypesList() {
+    public String getTypesList() {
         Set<Value> values = model.filter(subject, RDF.TYPE, null).objects();
         return values.stream().map(v -> Namespaces.shorten((IRI)v)).collect(Collectors.joining(" "));
     }
