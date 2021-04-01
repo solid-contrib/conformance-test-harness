@@ -5,6 +5,7 @@ import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.util.Models;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.util.Repositories;
@@ -47,6 +48,11 @@ public class DataModelBase {
 
     public int size() {
         return model.size();
+    }
+
+    protected String getTypesList() {
+        Set<Value> values = model.filter(subject, RDF.TYPE, null).objects();
+        return values.stream().map(v -> Namespaces.shorten((IRI)v)).collect(Collectors.joining(" "));
     }
 
     protected String getIriAsString(IRI predicate) {

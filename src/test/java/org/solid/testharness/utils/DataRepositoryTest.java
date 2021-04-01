@@ -88,8 +88,7 @@ class DataRepositoryTest {
         when(str2.getStepLog()).thenReturn("STEP2 LOG");
         when(sr1.getStepResults()).thenReturn(List.of(str1, str2));
 
-        repository.setupNamespaces("http://example.org/");
-        repository.setTestSubject(iri("http://example.org/test"));
+        repository.setTestSubject(iri(Namespaces.TEST_HARNESS_URI,"test"));
         repository.addFeatureResult(suite, fr);
         StringWriter sw = new StringWriter();
         repository.export(sw);

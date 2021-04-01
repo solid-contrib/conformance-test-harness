@@ -12,6 +12,7 @@ import org.solid.common.vocab.RDF;
 import org.solid.testharness.http.AuthManager;
 import org.solid.testharness.http.SolidClient;
 import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.Namespaces;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -23,11 +24,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.rdf4j.model.util.Values.iri;
+
 @ApplicationScoped
 public class TestHarnessConfig {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.config.TestHarnessConfig");
-
-    private static final String TEST_HARNESS_URI = "https://github.com/solid/conformance-test-harness/";
 
     private TargetServer targetServer;
     private Map<String, TargetServer> servers;
@@ -70,8 +71,7 @@ public class TestHarnessConfig {
 
         dataRepository.loadTurtle(new FileReader(configFile));
 
-        String targetIri = TEST_HARNESS_URI + target;
-        dataRepository.setupNamespaces(TEST_HARNESS_URI);
+        IRI targetIri = iri(Namespaces.TEST_HARNESS_URI, target);
 
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             RepositoryResult<Statement> statements = conn.getStatements(null, RDF.type, EARL.TestSubject);
@@ -80,7 +80,7 @@ public class TestHarnessConfig {
                 // TODO: Change to IRI not string once this is complete
                 TargetServer server = new TargetServer((IRI) s.getSubject());
                 servers.put(s.getSubject().stringValue(), server);
-                if (s.getSubject().stringValue().equals(targetIri)) {
+                if (s.getSubject().equals(targetIri)) {
                     targetServer = server;
                     dataRepository.setTestSubject(targetServer.getSubjectIri());
                 }

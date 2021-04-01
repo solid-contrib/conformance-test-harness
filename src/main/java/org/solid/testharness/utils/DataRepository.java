@@ -39,9 +39,9 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 public class DataRepository implements Repository {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.utils.DataRepository");
 
-    private Repository repository;
-    private Namespace NS;
-    private IRI assertor;
+    private Repository repository = new SailRepository(new MemoryStore());
+    // TODO: Determine if this should be a separate IRI to the base
+    private IRI assertor = iri(Namespaces.TEST_HARNESS_URI);
     private IRI testSubject;
 
     public static final String GENID = "/genid/";
@@ -50,7 +50,7 @@ public class DataRepository implements Repository {
 
     @PostConstruct
     void postConstruct() {
-        repository = new SailRepository(new MemoryStore());
+        Namespaces.addToRepository(repository);
         logger.debug("INITIALIZE DATA REPOSITORY");
     }
 
@@ -67,28 +67,11 @@ public class DataRepository implements Repository {
         }
     }
 
-    public void setupNamespaces(String baseUri) {
-        // TODO: Determine if this should be a separate IRI to the base
-        this.assertor = iri(baseUri);
-        this.NS = new SimpleNamespace("test-harness", baseUri);
-        try (RepositoryConnection conn = getConnection()) {
-            conn.setNamespace(NS.getPrefix(), NS.getName());
-            conn.setNamespace(EARL.PREFIX, EARL.NAMESPACE);
-            conn.setNamespace(DOAP.PREFIX, DOAP.NAMESPACE);
-            conn.setNamespace(SOLID.PREFIX, SOLID.NAMESPACE);
-            conn.setNamespace(SOLID_TEST.PREFIX, SOLID_TEST.NAMESPACE);
-            conn.setNamespace(DCTERMS.PREFIX, DCTERMS.NAMESPACE);
-            conn.setNamespace(XSD.PREFIX, XSD.NAMESPACE);
-        } catch (RDF4JException e) {
-            logger.error("Failed to setup namespaces", e);
-        }
-    }
-
     public void addFeatureResult(Suite suite, FeatureResult fr) {
         long startTime = suite.startTime;
         try (RepositoryConnection conn = getConnection()) {
             ModelBuilder builder = new ModelBuilder();
-            IRI featureIri = iri(NS, fr.getDisplayName());
+            IRI featureIri = iri(Namespaces.TEST_HARNESS_URI, fr.getDisplayName());
             IRI featureAssertion = createSkolemizedBlankNode(featureIri);
             IRI featureResult = createSkolemizedBlankNode(featureIri);
             conn.add(builder.subject(featureIri)

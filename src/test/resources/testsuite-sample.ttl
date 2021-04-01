@@ -12,7 +12,7 @@
 manifest: doap:implements <https://solidproject.org/TR/protocol> .
 
 manifest:group1
-    a td:SpecificationTestCase ;
+    a td:SpecificationTestCase, td:TestCriterion ;
     dcterms:title "Group 1"@en ;
     dcterms:description "Description 1"@en ;
     td:specificationReference <https://solidproject.org/TR/protocol#spec1> ;
