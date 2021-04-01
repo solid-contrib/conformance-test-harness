@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.solid.testharness.TestRunner;
 
 import javax.inject.Inject;
+import java.io.FileNotFoundException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,7 +22,7 @@ public class TestSuiteRunner {
     TestRunner testRunner;
 
     @Test
-    void testSuite() {
+    void testSuite() throws FileNotFoundException {
         List<String> featurePaths = testRunner.discoverTests();
         Results results = testRunner.runTests(featurePaths);
         assertNotNull(results);

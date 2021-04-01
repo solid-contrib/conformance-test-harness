@@ -39,7 +39,7 @@ public class TestHarnessConfigTest {
 
     @Test
     void registerClientsWithException() throws Exception {
-        when(authManager.authenticate(anyString(), any(TargetServer.class))).thenThrow(new Exception("Failed"));
+        when(authManager.authenticate(anyString(), any(TargetServer.class))).thenThrow(new Exception("Failed as expected"));
         testHarnessConfig.registerClients();
         Map<String, SolidClient> clients = testHarnessConfig.getClients();
         assertNotNull(clients);

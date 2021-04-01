@@ -1,5 +1,6 @@
 package org.solid.testharness.config;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.junit.QuarkusTest;
@@ -77,5 +78,26 @@ public class UserCredentialsTest {
                 "\"credentials\": \"inrupt-missing.json\"" +
                 "}";
         assertThrows(JsonMappingException.class, () -> objectMapper.readValue(json, UserCredentials.class));
+    }
+
+    @Test
+    public void usernamePasswordOptions() throws JsonProcessingException {
+        String json = "{\"username\": \"USERNAME\"}";
+        UserCredentials userCredentials = objectMapper.readValue(json, UserCredentials.class);
+        assertFalse(userCredentials.isUsingUsernamePassword());
+    }
+
+    @Test
+    public void refreshTokenOptions() throws JsonProcessingException {
+        String json = "{\"refreshToken\": \"TOKEN\"}";
+        UserCredentials userCredentials = objectMapper.readValue(json, UserCredentials.class);
+        assertFalse(userCredentials.isUsingRefreshToken());
+    }
+
+    @Test
+    public void refreshTokenOptions2() throws JsonProcessingException {
+        String json = "{\"refreshToken\": \"TOKEN\", \"clientId\": \"CLIENT_ID\"}";
+        UserCredentials userCredentials = objectMapper.readValue(json, UserCredentials.class);
+        assertFalse(userCredentials.isUsingRefreshToken());
     }
 }

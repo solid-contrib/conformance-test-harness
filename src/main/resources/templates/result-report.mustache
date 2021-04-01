@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Solid Specification - Conformance Test Suite Results</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <!--
+    <link rel="shortcut icon" type="image/png" href="/inrupt.png"/>
+    <link rel="stylesheet" type="text/css" href="/inrupt.css"/>
+    -->
+</head>
+
+<body about="" prefix="rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+    rdfs: http://www.w3.org/2000/01/rdf-schema#
+    owl: http://www.w3.org/2002/07/owl#
+    xsd: http://www.w3.org/2001/XMLSchema#
+    dcterms: http://purl.org/dc/terms/
+    dctypes: http://purl.org/dc/dcmitype/
+    foaf: http://xmlns.com/foaf/0.1/
+    doap: http://usefulinc.com/ns/doap#
+    solid: http://www.w3.org/ns/solid/terms#
+    earl: http://www.w3.org/ns/earl#
+    td: http://www.w3.org/2006/03/test-description#
+    {{additionalNamespaces}}">
+
+<!--
+<header role="header" class="header fixed">
+    <section class="header-wrap">
+    </section>
+</header>
+<div class="header-spacer"></div>
+-->
+<!--
+about
+    a URI or CURIE specifying the resource the metadata is about
+rel and rev
+    specifying a relationship and reverse-relationship with another resource, respectively
+src, href and resource
+    specifying the partner resource
+property
+    specifying a property for the content of an element or the partner resource
+content
+    optional attribute that overrides the content of the element when using the property attribute
+datatype
+    optional attribute that specifies the datatype of text specified for use with the property attribute
+typeof
+    optional attribute that specifies the RDF type(s) of the subject or the partner resource (the resource that the metadata is about).
+-->
+<h1>Specification: {{specification}}</h1>
+<div class="indexBlock">
+    {{#specificationTestCases}}
+        <section class="card" about="{{subject}}" typeof="td:SpecificationTestCase">
+            <h3 property="dcterms:title">{{title}}</h3>
+            <p property="dcterms:description">{{description}}</p>
+            <table>
+                <tr>
+                    <th>TestCase</th>
+                    <th>Title</th>
+                    <th>Level</th>
+                    <th>Status</th>
+                    <th>Outcome</th>
+                </tr>
+                {{#testCases}}
+                    {{> testcase}}
+                {{/testCases}}
+            </table>
+        </section>
+    {{/specificationTestCases}}
+</div>
+</body>
+</html>

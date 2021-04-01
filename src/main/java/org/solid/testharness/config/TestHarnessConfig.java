@@ -17,6 +17,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -31,9 +32,9 @@ public class TestHarnessConfig {
     private TargetServer targetServer;
     private Map<String, TargetServer> servers;
     private Map<String, SolidClient> clients;
-    private File credentialsDirectory;
     private File configFile;
     private File testSuiteDescriptionFile;
+    File credentialsDirectory;
 
     // the settings are taken in the following order of preference:
     //   system property
@@ -61,12 +62,13 @@ public class TestHarnessConfig {
 
     @PostConstruct
     public void initialize() throws IOException {
+        logger.debug("Initializing Config");
         configFile = new File(configPath).getCanonicalFile();
         testSuiteDescriptionFile = new File(testSuiteDescriptionPath).getCanonicalFile();
         credentialsDirectory = new File(credentialsPath).getCanonicalFile();
         logSettings();
 
-        dataRepository.loadTurtle(configFile);
+        dataRepository.loadTurtle(new FileReader(configFile));
 
         String targetIri = TEST_HARNESS_URI + target;
         dataRepository.setupNamespaces(TEST_HARNESS_URI);
@@ -76,11 +78,11 @@ public class TestHarnessConfig {
             servers = new HashMap<>();
             statements.forEach(s -> {
                 // TODO: Change to IRI not string once this is complete
-                TargetServer server = new TargetServer(dataRepository, (IRI) s.getSubject());
+                TargetServer server = new TargetServer((IRI) s.getSubject());
                 servers.put(s.getSubject().stringValue(), server);
                 if (s.getSubject().stringValue().equals(targetIri)) {
                     targetServer = server;
-                    dataRepository.setTestSubject(targetServer.getTestSubject());
+                    dataRepository.setTestSubject(targetServer.getSubjectIri());
                 }
             });
         }
@@ -88,7 +90,7 @@ public class TestHarnessConfig {
         if (targetServer == null) {
             logger.error("No config found for server: {}", targetIri);
         } else {
-            logger.debug("TestSubject {}", targetServer.getTestSubject());
+            logger.debug("TestSubject {}", targetServer.getSubject());
             logger.debug("Max threads: {}", targetServer.getMaxThreads());
         }
     }

@@ -1,58 +1,113 @@
 package org.solid.testharness.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Disabled;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import org.junit.jupiter.api.Test;
+import org.solid.testharness.utils.DataRepository;
 
+import javax.inject.Inject;
+import java.io.StringReader;
+
+import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
 
+@QuarkusTest
+@TestProfile(NoInitializationTestProfile.class)
 public class TargetServerTest {
-    ObjectMapper objectMapper = new ObjectMapper();
+    @Inject
+    DataRepository dataRepository;
 
-    // TODO: convert to test of Turtle instead of JSON
     @Test
-    @Disabled
     public void parseTargetServer() throws Exception {
-        String json = "{ \"features\": { \"feature1\": true, \"feature2\": false }," +
-                "      \"solidIdentityProvider\": \"IdP\"," +
-                "      \"serverRoot\": \"http://localhost:3000\"," +
-                "      \"setupRootAcl\": true," +
-                "      \"aclCachePause\": 100," +
-                "      \"maxThreads\": 4," +
-                "      \"disableDPoP\": true," +
-                "      \"rootContainer\": \"/\"," +
-                "      \"testContainer\": \"/test/\"," +
-                "      \"users\": {" +
-                "        \"alice\": {" +
-                "          \"webID\": \"aliceWebID\"," +
-                "          \"credentials\": \"inrupt-alice.json\"" +
-                "        }," +
-                "        \"bob\": {" +
-                "          \"webID\": \"bobWebID\"," +
-                "          \"username\": \"USERNAME\", " +
-                "          \"password\": \"PASSWORD\"" +
-                "        }" +
-                "      }}";
-        TargetServer targetServer = objectMapper.readValue(json, TargetServer.class);
-
+        StringReader reader = new StringReader("@base <https://example.org/> .\n" +
+                "@prefix solid-test: <https://github.com/solid/conformance-test-harness/vocab#> .\n" +
+                "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n" +
+                "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
+                "@prefix doap: <http://usefulinc.com/ns/doap#> .\n" +
+                "@prefix earl: <http://www.w3.org/ns/earl#> .\n" +
+                "@prefix solid: <http://www.w3.org/ns/solid/terms#> ." +
+                "<ess-compat>\n" +
+                "    a earl:Software, earl:TestSubject ;\n" +
+                "    doap:name \"Enterprise Solid Server (Web Access Control version)\";\n" +
+                "    doap:release [\n" +
+                "        doap:name \"ESS 1.0.9\";\n" +
+                "        doap:revision \"1.0.9\";\n" +
+                "        doap:created \"2021-03-05\"^^xsd:date\n" +
+                "    ];\n" +
+                "    doap:developer <https://inrupt.com/profile/card/#us>;\n" +
+                "    doap:homepage <https://inrupt.com/products/enterprise-solid-server>;\n" +
+                "    doap:description \"A production-grade Solid server produced and supported by Inrupt.\"@en;\n" +
+                "    doap:programming-language \"Java\" ;\n" +
+                "    solid:oidcIssuer <https://inrupt.net> ;\n" +
+                "    solid:loginEndpoint <https://inrupt.net/login/password> ;\n" +
+                "    solid-test:origin <https://tester> ;\n" +
+                "    solid-test:aliceUser [\n" +
+                "        solid-test:webId <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;\n" +
+                "        solid-test:credentials \"inrupt-alice.json\"\n" +
+                "    ] ;\n" +
+                "    solid-test:bobUser [\n" +
+                "        solid-test:webId <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;\n" +
+                "        solid-test:credentials \"inrupt-bob.json\"\n" +
+                "    ] ;\n" +
+                "    solid-test:maxThreads 4 ;\n" +
+                "    solid-test:features \"feature1\" ;\n" +
+                "    solid-test:serverRoot <http://localhost:3000> ;\n" +
+                "    solid-test:podRoot <http://localhost:3000/> ;\n" +
+                "    solid-test:testContainer \"/test/\" ;\n" +
+//                "    solid-test:disableDPoP true ;\n" +
+                "    solid-test:setupAclRoot true .");
+        dataRepository.loadTurtle(reader);
+        TargetServer targetServer = new TargetServer(iri("https://example.org/ess-compat"));
         assertAll("targetServer",
                 () -> assertNotNull(targetServer.getFeatures()),
                 () -> assertEquals(true, targetServer.getFeatures().get("feature1")),
-                () -> assertEquals(false, targetServer.getFeatures().get("feature2")),
-                () -> assertEquals("IdP", targetServer.getSolidIdentityProvider()),
+                () -> assertNull(targetServer.getFeatures().get("feature2")),
+                () -> assertEquals("https://inrupt.net", targetServer.getSolidIdentityProvider()),
+                () -> assertEquals("https://inrupt.net/login/password", targetServer.getLoginEndpoint().toString()),
                 () -> assertEquals("http://localhost:3000", targetServer.getServerRoot()),
-                () -> assertTrue(targetServer.isSetupRootAcl()),
-                () -> assertEquals(100, targetServer.getAclCachePause()),
+                () -> assertEquals("https://tester", targetServer.getOrigin()),
+                () -> assertEquals(false, targetServer.isSetupRootAcl()),
                 () -> assertEquals(4, targetServer.getMaxThreads()),
-                () -> assertTrue(targetServer.isDisableDPoP()),
-                () -> assertEquals("/", targetServer.getRootContainer()),
+                () -> assertEquals(false, targetServer.isDisableDPoP()),
+                () -> assertEquals("http://localhost:3000/", targetServer.getRootContainer()),
                 () -> assertEquals("/test/", targetServer.getTestContainer()),
                 () -> assertNotNull(targetServer.getUsers()),
                 () -> assertEquals(2, targetServer.getUsers().size()),
                 () -> assertNotNull(targetServer.getUsers().get("alice")),
                 () -> assertEquals("EXTERNAL_TOKEN", targetServer.getUsers().get("alice").getRefreshToken()),
                 () -> assertNotNull(targetServer.getUsers().get("bob")),
-                () -> assertEquals("USERNAME", targetServer.getUsers().get("bob").getUsername())
+                () -> assertNull(targetServer.getUsers().get("bob").getUsername()),
+                () -> assertNotNull(targetServer.getWebIds())
+                );
+        assertAll("targetServerCachedValues",
+                () -> assertNotNull(targetServer.getFeatures()),
+                () -> assertEquals("https://inrupt.net", targetServer.getSolidIdentityProvider()),
+                () -> assertEquals("https://inrupt.net/login/password", targetServer.getLoginEndpoint().toString()),
+                () -> assertEquals("http://localhost:3000", targetServer.getServerRoot()),
+                () -> assertEquals("https://tester", targetServer.getOrigin()),
+                () -> assertEquals(false, targetServer.isSetupRootAcl()),
+                () -> assertEquals(4, targetServer.getMaxThreads()),
+                () -> assertEquals(false, targetServer.isDisableDPoP()),
+                () -> assertEquals("http://localhost:3000/", targetServer.getRootContainer()),
+                () -> assertEquals("/test/", targetServer.getTestContainer()),
+                () -> assertNotNull(targetServer.getUsers())
         );
+    }
+
+    @Test
+    public void parseTargetServerWithMissingElements() throws Exception {
+        StringReader reader = new StringReader("@base <https://example.org/> .\n" +
+                "@prefix solid-test: <https://github.com/solid/conformance-test-harness/vocab#> .\n" +
+                "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n" +
+                "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
+                "@prefix doap: <http://usefulinc.com/ns/doap#> .\n" +
+                "@prefix earl: <http://www.w3.org/ns/earl#> .\n" +
+                "@prefix solid: <http://www.w3.org/ns/solid/terms#> ." +
+                "<bad>\n" +
+                "    a earl:Software, earl:TestSubject .");
+        dataRepository.loadTurtle(reader);
+        TargetServer targetServer = new TargetServer(iri("https://example.org/bad"));
+        assertNull(targetServer.getLoginEndpoint());
+        assertEquals(0, targetServer.getUsers().size());
     }
 }

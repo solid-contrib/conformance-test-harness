@@ -13,7 +13,7 @@ import org.solid.testharness.utils.DataRepository;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
-import java.io.File;
+import java.io.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,10 +31,10 @@ public class TestRunner {
     @Inject
     DataRepository dataRepository;
 
-    public List<String> discoverTests() {
+    public List<String> discoverTests() throws FileNotFoundException {
         logger.info("===================== DISCOVER TESTS ========================");
         TestSuiteDescription suite = new TestSuiteDescription(dataRepository);
-        suite.load(testHarnessConfig.getTestSuiteDescription());
+        suite.load(new FileReader(testHarnessConfig.getTestSuiteDescription()));
 
         // TODO: Consider running some initial tests to discover the features provided by a server
         List<IRI> testCases = suite.getSuitableTestCases(testHarnessConfig.getTargetServer().getFeatures().keySet());
@@ -81,9 +81,19 @@ public class TestRunner {
                 .parallel(testHarnessConfig.getTargetServer().getMaxThreads());
 
         logger.info("===================== START REPORT ========================");
-        resultProcessor.setReportDir(new File(results.getReportDir()));
-        resultProcessor.buildTurtleReport();
-//        resultProcessor.printReportToConsole();
+        try {
+            File outputDir = new File(results.getReportDir());
+            logger.info("Reports location: {}", outputDir.getCanonicalPath());
+            File reportTurtleFile = new File(outputDir, "report.ttl");
+            logger.info("Report Turtle file: {}", reportTurtleFile.getPath());
+            resultProcessor.buildTurtleReport(new FileWriter(reportTurtleFile));
+            File reportHtmlFile = new File(outputDir, "report.html");
+            logger.info("Report HTML/RDFa file: {}", reportHtmlFile.getPath());
+            resultProcessor.buildHtmlReport(new FileWriter(reportHtmlFile));
+//            resultProcessor.printReportToConsole();
+        } catch (IOException e) {
+            logger.error("Failed to write reports", e);
+        }
 
         logger.info("Results:\n  Features  passed: {}, failed: {}, total: {}\n  Scenarios passed: {}, failed: {}, total: {}",
                 results.getFeaturesPassed(), results.getFeaturesFailed(), results.getFeaturesTotal(),

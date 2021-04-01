@@ -14,7 +14,7 @@ import org.solid.common.vocab.TD;
 import org.solid.testharness.config.PathMappings;
 import org.solid.testharness.utils.DataRepository;
 
-import java.io.File;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -43,8 +43,8 @@ public class TestSuiteDescription {
             "  FILTER NOT EXISTS { ?group td:preCondition ?precondition FILTER(?precondition NOT IN (%s))}" +
             " } ";
 
-    public void load(File file) {
-        repository.loadTurtle(file);
+    public void load(Reader reader) {
+        repository.loadTurtle(reader);
     }
 
     public List<IRI> getSuitableTestCases(Set<String> serverFeatures) {

@@ -26,11 +26,7 @@ import org.solid.common.vocab.*;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.net.URL;
+import java.io.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -58,27 +54,16 @@ public class DataRepository implements Repository {
         logger.debug("INITIALIZE DATA REPOSITORY");
     }
 
-    public void loadTurtle(URL url) {
+    public void loadTurtle(Reader reader) {
         try (RepositoryConnection conn = getConnection()) {
             try {
-                conn.add(url, RDFFormat.TURTLE);
+                conn.add(reader, RDFFormat.TURTLE);
+                logger.debug("Loaded data into repository, size={}", conn.size());
             } catch (IOException e) {
-                logger.error("Failed to read " + url, e);
+                logger.error("Failed to read data", e);
             }
         } catch (RDF4JException e) {
-            logger.error("Failed to parse data from " + url, e);
-        }
-    }
-
-    public void loadTurtle(File file) {
-        try (RepositoryConnection conn = getConnection()) {
-            try {
-                conn.add(file, RDFFormat.TURTLE);
-            } catch (IOException e) {
-                logger.error("Failed to read " + file, e);
-            }
-        } catch (RDF4JException e) {
-            logger.error("Failed to parse data from " + file, e);
+            logger.error("Failed to parse data", e);
         }
     }
 

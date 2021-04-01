@@ -29,17 +29,12 @@ public class SolidClient {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.http.SolidClient");
 
     private Client client ;
-    private int aclCachePause = 0;
 
     public SolidClient() {
         client = ClientRegistry.getClient(ClientRegistry.DEFAULT);
     }
     public SolidClient(String user) {
         client = ClientRegistry.getClient(user);
-    }
-    public SolidClient(Client client, int aclCachePause) {
-        this.client = client;
-        this.aclCachePause = aclCachePause;
     }
     public SolidClient(Client client) {
         this.client = client;
@@ -110,9 +105,6 @@ public class SolidClient {
         HttpUtils.logRequest(logger, request);
         HttpResponse<Void> response = client.send(request, BodyHandlers.discarding());
         HttpUtils.logResponse(logger, response);
-        if (aclCachePause > 0) {
-            Thread.sleep(aclCachePause);
-        }
         return HttpUtils.isSuccessful(response.statusCode());
     }
 

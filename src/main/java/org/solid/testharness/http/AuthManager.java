@@ -61,7 +61,7 @@ public class AuthManager {
             authClient.setAccessToken(accessToken);
         }
 
-        SolidClient solidClient = new SolidClient(authClient, targetServer.getAclCachePause());
+        SolidClient solidClient = new SolidClient(authClient);
         if (user.equals("alice") && targetServer.isSetupRootAcl()) {
             logger.debug("**** Setup root acl");
             // CSS has no root acl by default so added here TODO: check whether this is relevant
@@ -109,7 +109,7 @@ public class AuthManager {
         Map<Object, Object> data = new HashMap<>();
         data.put(USERNAME, userConfig.getUsername());
         data.put(PASSWORD, userConfig.getPassword());
-        HttpRequest request = HttpUtils.newRequestBuilder(uri.resolve(config.getLoginPath()))
+        HttpRequest request = HttpUtils.newRequestBuilder(config.getLoginEndpoint())
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .POST(HttpUtils.ofFormData(data))
                 .build();
