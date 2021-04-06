@@ -18,7 +18,7 @@
         <jacoco-plugin.version>0.8.6</jacoco-plugin.version>
         <!-- dependencies -->
         <quarkus.version>1.13.0.Final</quarkus.version>
-        <karate.version>1.0.0</karate.version>
+        <karate.version>1.0.1</karate.version>
         <junit.jupiter.version>5.7.0</junit.jupiter.version>
         <hamcrest.version>2.2</hamcrest.version>
         <rdf4j.version>3.6.1</rdf4j.version>
