@@ -71,7 +71,7 @@ public class TestRunner {
 //                .outputHtmlReport(true)
 //                .parallel(8);
 
-        List<String> tags = Collections.singletonList("~@ignore");
+        List<String> tags = List.of("~@ignore");
 
         Results results = Runner.builder()
                 .path(featurePaths)

@@ -8,6 +8,7 @@ import org.solid.testharness.TestRunner;
 
 import javax.inject.Inject;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -22,7 +23,7 @@ public class TestScenarioRunner {
 
     @Test
     void testScenario() {
-        Results results = testRunner.runTests(Collections.singletonList("classpath:content-negotiation/content-negotiation-turtle.feature"));
+        Results results = testRunner.runTests(List.of("classpath:content-negotiation/content-negotiation-turtle.feature"));
         assertNotNull(results);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());
     }

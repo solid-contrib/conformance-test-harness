@@ -176,7 +176,7 @@ mvn test -Psolid -Dtarget=nss
 ### Via an IDE
 Using an IDE you can also run a specific scenario by editing the TestScenarioRunner and then running it as you would any unit test:
 ```Java
-Results results = testRunner.runTests(Collections.singletonList("classpath:content-negotiation/content-negotiation-turtle.feature"));
+Results results = testRunner.runTests(List.of("classpath:content-negotiation/content-negotiation-turtle.feature"));
 ```
 
 You can also go to the TestSuiteRunnner class and run the whole test suite in the same way.
