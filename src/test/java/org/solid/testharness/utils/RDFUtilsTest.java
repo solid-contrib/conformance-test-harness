@@ -1,6 +1,5 @@
 package org.solid.testharness.utils;
 
-import org.eclipse.rdf4j.model.IRI;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
