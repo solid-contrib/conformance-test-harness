@@ -27,23 +27,19 @@ public class ResultProcessor {
     Template template;
 
 
-    public void buildTurtleReport(Writer writer) {
+    public void buildTurtleReport(Writer writer) throws Exception {
         repository.export(writer);
     }
 
-    public void printReportToConsole() {
+    public void printReportToConsole() throws Exception {
         StringWriter sw = new StringWriter();
         repository.export(sw);
         logger.info("REPORT\n{}", sw.toString());
     }
 
-    public void buildHtmlReport(Writer writer) {
-        try {
-            writer.write(template.data(new ResultData()).render());
-            writer.flush();
-        } catch (IOException e) {
-            logger.error("Failed to generate test suite result HTML report", e);
-        }
+    public void buildHtmlReport(Writer writer) throws IOException {
+        writer.write(template.data(new ResultData()).render());
+        writer.flush();
     }
 }
 /*

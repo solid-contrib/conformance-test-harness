@@ -91,7 +91,7 @@ public class TestRunner {
             logger.info("Report HTML/RDFa file: {}", reportHtmlFile.getPath());
             resultProcessor.buildHtmlReport(new FileWriter(reportHtmlFile));
 //            resultProcessor.printReportToConsole();
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("Failed to write reports", e);
         }
 

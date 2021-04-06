@@ -4,13 +4,14 @@ import com.intuit.karate.Suite;
 import com.intuit.karate.core.FeatureResult;
 import com.intuit.karate.core.ScenarioResult;
 import org.eclipse.rdf4j.RDF4JException;
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.model.impl.SimpleNamespace;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.util.RDFCollections;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
@@ -22,7 +23,8 @@ import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.solid.common.vocab.*;
+import org.solid.common.vocab.DCTERMS;
+import org.solid.common.vocab.EARL;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -140,23 +142,23 @@ public class DataRepository implements Repository {
         return iri(base.stringValue() + GENID + bnode().getID());
     }
 
-    public void export(Writer wr) {
+    public void export(Writer wr) throws Exception {
         try (RepositoryConnection conn = getConnection()) {
             RDFWriter rdfWriter = Rio.createWriter(RDFFormat.TURTLE, wr);
             rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true).set(BasicWriterSettings.INLINE_BLANK_NODES, true);
             conn.export(rdfWriter);
         } catch (RDF4JException e) {
-            logger.error("Failed to generate test suite result report", e);
+            throw new Exception("Failed to write repository: " + e.getMessage());
         }
     }
 
-    public void export(OutputStream os) {
+    public void export(OutputStream os) throws Exception {
         try (RepositoryConnection conn = getConnection()) {
             RDFWriter rdfWriter = Rio.createWriter(RDFFormat.TURTLE, os);
             rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true).set(BasicWriterSettings.INLINE_BLANK_NODES, true);
             conn.export(rdfWriter);
         } catch (RDF4JException e) {
-            logger.error("Failed to generate test suite result report", e);
+            throw new Exception("Failed to write repository: " + e.getMessage());
         }
     }
 

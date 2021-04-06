@@ -1,53 +1,41 @@
 package org.solid.testharness.utils;
 
-import org.junit.jupiter.api.Disabled;
+import org.eclipse.rdf4j.model.IRI;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
-// TODO: Tests not implemented during POC phase but will be going forwards
-
-@Disabled
 class RDFUtilsTest {
-
-    private static final File getFile(String fileName) throws IOException
-    {
-        ClassLoader classLoader = RDFUtilsTest.class.getClassLoader();
-        URL resource = classLoader.getResource(fileName);
-
-        if (resource == null) {
-            throw new IllegalArgumentException("file is not found!");
-        } else {
-            return new File(resource.getFile());
-        }
+    @Test
+    void turtleToTripleArray() throws Exception {
+        List<String> triples = RDFUtils.turtleToTripleArray("</bob> a <http://xmlns.com/foaf/0.1/Person> .", "http://example.org");
+        assertNotNull(triples);
+        assertEquals(1, triples.size());
+        assertEquals("<http://example.org/bob> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .", triples.get(0));
     }
 
     @Test
-    void turtleToTripleArray() {
+    void turtleToTripleArrayFails() {
+        assertThrows(Exception.class, () -> RDFUtils.turtleToTripleArray("Not Turtle", "http://example.org"));
     }
 
     @Test
-    void triplesToTripleArray() {
+    void jsonLdToTripleArray() throws Exception {
+        List<String> triples = RDFUtils.jsonLdToTripleArray("{\"@id\": \"http://example.org/bob\", \"@type\": \"http://xmlns.com/foaf/0.1/Person\"}", "http://example.org");
+        assertNotNull(triples);
+        assertEquals(1, triples.size());
+        assertEquals("<http://example.org/bob> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .", triples.get(0));
     }
 
     @Test
-    void jsonLdToTripleArray() {
-        fail("Not implemented");
+    void jsonLdToTripleArrayFails() {
+        assertThrows(Exception.class, () -> RDFUtils.jsonLdToTripleArray("Not JSON-LD", "http://example.org"));
     }
 
     @Test
-    void isTurtle() {
-    }
-
-    @Test
-    void isJsonLD() {
-    }
-
-    @Test
-    void isNTriples() {
+    void meaninglessContruct() {
+        assertNotNull(new RDFUtils());
     }
 }

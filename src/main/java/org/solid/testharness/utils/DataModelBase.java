@@ -7,7 +7,6 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.QueryResults;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.util.Repositories;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,14 +27,18 @@ public class DataModelBase {
     @NotNull
     protected IRI subject;
 
-    private static final String SERVER_GRAPH = "CONSTRUCT {<%s> ?p ?o. ?o ?p1 ?o1} WHERE {<%s> ?p ?o. OPTIONAL {?o ?p1 ?o1}}";
+    protected static boolean SHALLOW = false;
+    protected static boolean DEEP = true;
+    private static final String SERVER_GRAPH = "CONSTRUCT {<%s> ?p ?o} WHERE {<%s> ?p ?o}";
+    private static final String SERVER_GRAPH_2 = "CONSTRUCT {<%s> ?p ?o. ?o ?p1 ?o1} WHERE {<%s> ?p ?o. OPTIONAL {?o ?p1 ?o1}}";
 
-    public DataModelBase(IRI subject) {
+    protected DataModelBase(IRI subject) {
+        this(subject, SHALLOW);
+    }
+    protected DataModelBase(IRI subject, boolean deep) {
         DataRepository dataRepository = CDI.current().select(DataRepository.class).get();
         this.subject = subject;
-        try (RepositoryConnection conn = dataRepository.getConnection()) {
-            model = Repositories.graphQuery(dataRepository, String.format(SERVER_GRAPH, subject, subject), r -> QueryResults.asModel(r));
-        }
+        model = Repositories.graphQuery(dataRepository, String.format(deep ? SERVER_GRAPH_2 : SERVER_GRAPH, subject, subject), r -> QueryResults.asModel(r));
     }
 
     public IRI getSubjectIri() {
@@ -71,8 +74,8 @@ public class DataModelBase {
                     return clazz.getDeclaredConstructor(IRI.class).newInstance((IRI)v);
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                     logger.error("Failed to create instance of {}", clazz.getName());
+                    throw new RuntimeException("Failed to create instance of " + clazz.getName());
                 }
-                return null;
             }).collect(Collectors.toList());
         }
         return null;

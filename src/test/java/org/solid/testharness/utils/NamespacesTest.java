@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 public class NamespacesTest {
     @Test
-    void addToRepository() {
+    void addToRepository() throws Exception {
         DataRepository dataRepository = new DataRepository();
         assertNotNull(dataRepository);
         dataRepository.postConstruct();

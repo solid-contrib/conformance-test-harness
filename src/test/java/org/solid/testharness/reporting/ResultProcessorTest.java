@@ -7,10 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.solid.testharness.utils.DataRepository;
 
 import javax.inject.Inject;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.StringWriter;
+import java.io.*;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -25,7 +22,7 @@ class ResultProcessorTest {
     ResultProcessor resultProcessor;
 
     @Test
-    void buildHtmlReport() throws FileNotFoundException {
+    void buildHtmlReport() throws IOException {
         dataRepository.loadTurtle(new FileReader(new File("src/test/resources/testsuite-sample.ttl")));
         StringWriter sw = new StringWriter();
         resultProcessor.buildHtmlReport(sw);

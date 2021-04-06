@@ -2,32 +2,23 @@ package org.solid.testharness.utils;
 
 import com.intuit.karate.Suite;
 import com.intuit.karate.core.*;
-import javax.inject.Inject;
-
 import io.quarkus.test.junit.QuarkusTest;
-import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.util.Values;
 import org.eclipse.rdf4j.model.vocabulary.FOAF;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFWriter;
-import org.eclipse.rdf4j.rio.Rio;
-import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
+import javax.inject.Inject;
+import java.io.*;
 import java.util.List;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -40,8 +31,7 @@ class DataRepositoryTest {
     DataRepository repository;
 
     @Test
-    @Disabled
-    void addFeatureResult() {
+    void addFeatureResult() throws Exception {
         Suite suite = Suite.forTempUse();
         Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
@@ -98,50 +88,47 @@ class DataRepositoryTest {
     }
 
     @Test
-    @Disabled
-    void exportWriter() {
+    void exportWriter() throws Exception {
+        DataRepository dataRepository = setupRepository();
         StringWriter wr = new StringWriter();
-        try (RepositoryConnection conn = repository.getConnection()) {
-            Statement st = Values.getValueFactory().createStatement(iri("http://example.org/bob"), RDF.TYPE, FOAF.PERSON);
-            conn.add(st);
-            repository.export(wr);
-            assertTrue(wr.toString().contains("<http://example.org/bob> a <http://xmlns.com/foaf/0.1/Person> ."));
-        }
+        dataRepository.export(wr);
+        assertTrue(wr.toString().contains("<http://example.org/bob> a <http://xmlns.com/foaf/0.1/Person> ."));
     }
 
     @Test
-    @Disabled
-    void exportStream() {
+    void exportWriterFailing() throws IOException {
+        DataRepository dataRepository = setupRepository();
+        File tempFile = File.createTempFile("TestHarness-", ".tmp");
+        tempFile.deleteOnExit();
+        Writer wr = new FileWriter(tempFile);
+        wr.close();
+        assertThrows(Exception.class, () -> dataRepository.export(wr));
+    }
+
+    @Test
+    void exportStream() throws Exception {
+        DataRepository dataRepository = setupRepository();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        try (RepositoryConnection conn = repository.getConnection()) {
+        dataRepository.export(os);
+        assertTrue(os.toString().contains("<http://example.org/bob> a <http://xmlns.com/foaf/0.1/Person> ."));
+    }
+
+    @Test
+    void exportStreamFailing() throws IOException {
+        DataRepository dataRepository = setupRepository();
+        File tempFile = File.createTempFile("TestHarness-", ".tmp");
+        tempFile.deleteOnExit();
+        OutputStream os = new FileOutputStream(tempFile);
+        os.close();
+        assertThrows(Exception.class, () -> dataRepository.export(os));
+    }
+
+    private DataRepository setupRepository() {
+        DataRepository dataRepository = new DataRepository();
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
             Statement st = Values.getValueFactory().createStatement(iri("http://example.org/bob"), RDF.TYPE, FOAF.PERSON);
             conn.add(st);
-            repository.export(os);
-            assertTrue(os.toString().contains("<http://example.org/bob> a <http://xmlns.com/foaf/0.1/Person> ."));
         }
-    }
-
-    @Test
-    void losingBlankNodes() throws IOException {
-        InputStream is = getClass().getClassLoader().getResourceAsStream("blank-node-example.ttl");
-        Model model = Rio.parse(is, RDFFormat.TURTLE);
-        assertEquals(43, model.size());
-        StringWriter sw = new StringWriter();
-        RDFWriter rdfWriter = Rio.createWriter(RDFFormat.TURTLE, sw);
-        rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true).set(BasicWriterSettings.INLINE_BLANK_NODES, true);
-        Rio.write(model, rdfWriter);
-        logger.debug("blank-node-example.ttl\n{}", sw.toString());
-    }
-
-    @Test
-    void losingBlankNodes2() throws IOException {
-        InputStream is = getClass().getClassLoader().getResourceAsStream("formatted-blank-node-example.ttl");
-        Model model = Rio.parse(is, RDFFormat.TURTLE);
-        assertEquals(43, model.size());
-        StringWriter sw = new StringWriter();
-        RDFWriter rdfWriter = Rio.createWriter(RDFFormat.TURTLE, sw);
-        rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true).set(BasicWriterSettings.INLINE_BLANK_NODES, true);
-        Rio.write(model, rdfWriter);
-        logger.debug("blank-node-example.ttl\n{}", sw.toString());
+        return dataRepository;
     }
 }

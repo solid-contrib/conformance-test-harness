@@ -21,6 +21,21 @@ import java.util.stream.Collectors;
 public class RDFUtils {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.utils.RDFUtils");
 
+    public static final List<String> turtleToTripleArray(String data, String baseUri) throws Exception {
+        Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.TURTLE);
+        StringWriter sw = new StringWriter();
+        Rio.write(model, sw, RDFFormat.NTRIPLES);
+        return Arrays.asList(sw.toString().split("\n"));
+    }
+
+    public static final List<String> jsonLdToTripleArray(String data, String baseUri) throws Exception {
+        Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.JSONLD);
+        StringWriter sw = new StringWriter();
+        Rio.write(model, sw, RDFFormat.NTRIPLES);
+        return Arrays.asList(sw.toString().split("\n"));
+    }
+
+/*
     public static final Model parse(String data, String contentType, String baseUri) throws IOException {
         RDFFormat dataFormat = null;
         switch (contentType) {
@@ -37,27 +52,8 @@ public class RDFUtils {
         return Rio.parse(new StringReader(data), baseUri, dataFormat);
     }
 
-//    public static final String getValue(String data, String contentType, String subject, String predicate) throws IOException {
-//        Model model = parse(data, contentType);
-//        return model.filter(Values.iri(subject), Values.iri(predicate), null).objects().toArray(new Value[0])[0].stringValue();
-//    }
-
-    public static final List<String> turtleToTripleArray(String data, String baseUri) throws IOException {
-        Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.TURTLE);
-        StringWriter sw = new StringWriter();
-        Rio.write(model, sw, RDFFormat.NTRIPLES);
-        return Arrays.asList(sw.toString().split("\n"));
-    }
-
     public static final List<String> triplesToTripleArray(String data, String baseUri) throws IOException {
         Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.NTRIPLES);
-        StringWriter sw = new StringWriter();
-        Rio.write(model, sw, RDFFormat.NTRIPLES);
-        return Arrays.asList(sw.toString().split("\n"));
-    }
-
-    public static final List<String> jsonLdToTripleArray(String data, String baseUri) throws IOException {
-        Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.JSONLD);
         StringWriter sw = new StringWriter();
         Rio.write(model, sw, RDFFormat.NTRIPLES);
         return Arrays.asList(sw.toString().split("\n"));
@@ -111,4 +107,5 @@ public class RDFUtils {
         Set<Value> resources = model.filter(null, LDP.CONTAINS, null).objects();
         return resources.stream().map(resource -> resource.toString()).collect(Collectors.toList());
     }
+ */
 }
