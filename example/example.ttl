@@ -9,7 +9,8 @@
 @prefix manifest: <https://github.com/solid/conformance-test-harness/example/example.ttl#> .
 @prefix repo: <https://github.com/solid/conformance-test-harness/example/> .
 
-manifest: doap:implements <https://solidproject.org/TR/protocol> .
+manifest: doap:implements <https://solidproject.org/TR/protocol> ;
+    dcterms:hasPart manifest:content-negotiation, manifest:writing-resource, manifest:protected-operation, manifest:wac-allow .
 
 manifest:content-negotiation
     a td:SpecificationTestCase ;

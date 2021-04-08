@@ -9,10 +9,11 @@
 @prefix manifest: <https://example.org/example.ttl#> .
 @prefix repo: <https://example.org/> .
 
-manifest: doap:implements <https://solidproject.org/TR/protocol> .
+manifest: doap:implements <https://solidproject.org/TR/protocol> ;
+    dcterms:hasPart manifest:group1, manifest:group2, manifest:group3, manifest:group4 .
 
 manifest:group1
-    a td:SpecificationTestCase, td:TestCriterion ;
+    a td:SpecificationTestCase ;
     dcterms:title "Group 1"@en ;
     dcterms:description "Description 1"@en ;
     td:specificationReference <https://solidproject.org/TR/protocol#spec1> ;
