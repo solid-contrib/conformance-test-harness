@@ -8,15 +8,12 @@ import org.slf4j.LoggerFactory;
 import org.solid.testharness.config.TestHarnessConfig;
 import org.solid.testharness.discovery.TestSuiteDescription;
 import org.solid.testharness.reporting.ReportGenerator;
-import org.solid.testharness.reporting.ResultProcessor;
-import org.solid.testharness.utils.DataRepository;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
-import java.io.*;
-import java.util.Collections;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Dependent
 public class TestRunner {
@@ -25,34 +22,29 @@ public class TestRunner {
     @Inject
     TestHarnessConfig testHarnessConfig;
     @Inject
-    ResultProcessor resultProcessor;
-    @Inject
     ReportGenerator reportGenerator;
-    @Inject
-    DataRepository dataRepository;
 
-    public List<String> discoverTests() throws FileNotFoundException {
-        logger.info("===================== DISCOVER TESTS ========================");
-        TestSuiteDescription suite = new TestSuiteDescription(dataRepository);
+    private TestSuiteDescription suite;
+
+    public void loadTestSuite() throws FileNotFoundException {
+        suite = new TestSuiteDescription();
         suite.load(new FileReader(testHarnessConfig.getTestSuiteDescription()));
+    }
 
+    public void filterSupportedTests() {
         // TODO: Consider running some initial tests to discover the features provided by a server
-        List<IRI> testCases = suite.getSuitableTestCases(testHarnessConfig.getTargetServer().getFeatures().keySet());
+        List<IRI> testCases = suite.filterSupportedTestCases(testHarnessConfig.getTargetServer().getFeatures().keySet());
         logger.info("==== TEST CASES FOUND: {} - {}", testCases.size(), testCases);
+    }
 
-        List<String> featurePaths = suite.locateTestCases(testHarnessConfig.getPathMappings()).stream().filter(f -> {
-            File file = new File(f);
-            if (!file.exists()) {
-                logger.warn("FEATURE NOT IMPLEMENTED: {}", f);
-                return false;
-            }
-            return true;
-        }).collect(Collectors.toList());
+    public List<String> mapTestLocations() {
+        logger.info("===================== DISCOVER TESTS ========================");
+        List<String> featurePaths = suite.locateTestCases(testHarnessConfig.getPathMappings());
         if (featurePaths.isEmpty()) {
             logger.warn("There are no tests available");
+        } else {
+            logger.info("==== RUNNING {} TEST CASES: {}", featurePaths.size(), featurePaths);
         }
-
-        logger.info("==== RUNNING {} TEST CASES: {}", featurePaths.size(), featurePaths);
         return featurePaths;
     }
 
@@ -79,27 +71,6 @@ public class TestRunner {
                 .outputHtmlReport(true)
                 .suiteReports(reportGenerator)
                 .parallel(testHarnessConfig.getTargetServer().getMaxThreads());
-
-        logger.info("===================== START REPORT ========================");
-        try {
-            File outputDir = new File(results.getReportDir());
-            logger.info("Reports location: {}", outputDir.getCanonicalPath());
-            File reportTurtleFile = new File(outputDir, "report.ttl");
-            logger.info("Report Turtle file: {}", reportTurtleFile.getPath());
-            resultProcessor.buildTurtleReport(new FileWriter(reportTurtleFile));
-            File reportHtmlFile = new File(outputDir, "report.html");
-            logger.info("Report HTML/RDFa file: {}", reportHtmlFile.getPath());
-            resultProcessor.buildHtmlReport(new FileWriter(reportHtmlFile));
-//            resultProcessor.printReportToConsole();
-        } catch (Exception e) {
-            logger.error("Failed to write reports", e);
-        }
-
-        logger.info("Results:\n  Features  passed: {}, failed: {}, total: {}\n  Scenarios passed: {}, failed: {}, total: {}",
-                results.getFeaturesPassed(), results.getFeaturesFailed(), results.getFeaturesTotal(),
-                results.getScenariosPassed(), results.getScenariosFailed(), results.getScenariosTotal()
-        );
-
         return results;
     }
 }

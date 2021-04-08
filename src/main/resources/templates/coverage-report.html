@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Solid Specification - Conformance Test Suite Coverage Report</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <!--
+    <link rel="shortcut icon" type="image/png" href="/inrupt.png"/>
+    <link rel="stylesheet" type="text/css" href="/inrupt.css"/>
+    -->
+</head>
+
+<body about="" prefix="{prefixes}">
+
+{!
+<!--
+<header role="header" class="header fixed">
+    <section class="header-wrap">
+    </section>
+</header>
+<div class="header-spacer"></div>
+-->
+!}
+
+<h1>Specification: {specification}</h1>
+<div class="indexBlock">
+    {#each specificationTestCases}
+        <section class="card" about="{it.subject}" typeof="{it.typesList}">
+            <h3 property="dcterms:title">{it.title}</h3>
+            <p property="dcterms:description">{it.description}</p>
+            <table>
+                <tr>
+                    <th>TestCase</th>
+                    <th>Title</th>
+                    <th>Level</th>
+                    <th>Status</th>
+                    <th>Outcome</th>
+                </tr>
+                {#each it.testCases}
+                    {#include testcase /}
+                {/each}
+            </table>
+        </section>
+    {/each}
+</div>
+</body>
+</html>
+{!
+<!--
+about
+    a URI or CURIE specifying the resource the metadata is about
+rel and rev
+    specifying a relationship and reverse-relationship with another resource, respectively
+src, href and resource
+    specifying the partner resource
+property
+    specifying a property for the content of an element or the partner resource
+content
+    optional attribute that overrides the content of the element when using the property attribute
+datatype
+    optional attribute that specifies the datatype of text specified for use with the property attribute
+typeof
+    optional attribute that specifies the RDF type(s) of the subject or the partner resource (the resource that the metadata is about).
+-->
+!}

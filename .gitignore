@@ -26,6 +26,12 @@ hs_err_pid*
 .gradle
 /build/
 /target/
+*.iml
+
+# ignore scratch and example directories (developer use only)
+/src/test/resources/examples/
+/src/test/resources/scratch/
+/TODO.md
 
 # Ignore Gradle GUI config
 gradle-app.setting

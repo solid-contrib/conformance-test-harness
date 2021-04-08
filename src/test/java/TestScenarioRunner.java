@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.solid.testharness.TestRunner;
 
 import javax.inject.Inject;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

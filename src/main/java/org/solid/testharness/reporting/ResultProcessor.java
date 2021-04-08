@@ -1,6 +1,5 @@
 package org.solid.testharness.reporting;
 
-import io.quarkus.qute.Engine;
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
 import org.slf4j.Logger;
@@ -20,11 +19,10 @@ public class ResultProcessor {
     @Inject
     DataRepository repository;
 
-    @Inject
-    Engine engine;
-
+    @Location("coverage-report.html")
+    Template coverageTemplate;
     @Location("result-report.html")
-    Template template;
+    Template resultTemplate;
 
 
     public void buildTurtleReport(Writer writer) throws Exception {
@@ -37,8 +35,13 @@ public class ResultProcessor {
         logger.info("REPORT\n{}", sw.toString());
     }
 
-    public void buildHtmlReport(Writer writer) throws IOException {
-        writer.write(template.data(new ResultData()).render());
+    public void buildHtmlCoverageReport(Writer writer) throws IOException {
+        writer.write(coverageTemplate.data(new ResultData()).render());
+        writer.flush();
+    }
+
+    public void buildHtmlResultReport(Writer writer) throws IOException {
+        writer.write(resultTemplate.data(new ResultData()).render());
         writer.flush();
     }
 }

@@ -93,7 +93,7 @@ public class TestHarnessConfigTest {
         List<PathMappings.Mapping> mappings = testHarnessConfig.getPathMappings();
         assertNotNull(mappings);
         assertEquals(1, mappings.size());
-        assertEquals("https://github.com/solid/conformance-test-harness/example", mappings.get(0).prefix);
-        assertEquals("example", mappings.get(0).path);
+        assertEquals("https://example.org", mappings.get(0).prefix);
+        assertEquals("src/test/resources/dummy-features", mappings.get(0).path);
     }
 }

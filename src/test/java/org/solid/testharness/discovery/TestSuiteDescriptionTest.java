@@ -38,7 +38,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void load() throws FileNotFoundException {
-        TestSuiteDescription suite = new TestSuiteDescription(repository);
+        TestSuiteDescription suite = new TestSuiteDescription();
         suite.load(new FileReader(("src/test/resources/testsuite-sample.ttl")));
         try (RepositoryConnection conn = repository.getConnection()) {
             assertFalse(conn.isEmpty());
@@ -46,57 +46,57 @@ class TestSuiteDescriptionTest {
     }
 
     @Test
-    void getSuitableTestCasesNullFeatures() throws FileNotFoundException {
-        TestSuiteDescription suite = new TestSuiteDescription(repository);
+    void filterSupportedTestCasesNullFeatures() throws FileNotFoundException {
+        TestSuiteDescription suite = new TestSuiteDescription();
         suite.load(new FileReader(("src/test/resources/testsuite-sample.ttl")));
-        List<IRI> features = suite.getSuitableTestCases(null);
+        List<IRI> features = suite.filterSupportedTestCases(null);
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3");
         assertThat("Group 1 matches", features, containsInAnyOrder(expected));
     }
 
     @Test
-    void getSuitableTestCasesEmptyFeatures() throws FileNotFoundException {
-        TestSuiteDescription suite = new TestSuiteDescription(repository);
+    void filterSupportedTestCasesEmptyFeatures() throws FileNotFoundException {
+        TestSuiteDescription suite = new TestSuiteDescription();
         suite.load(new FileReader(("src/test/resources/testsuite-sample.ttl")));
-        List<IRI> features = suite.getSuitableTestCases(Set.of());
+        List<IRI> features = suite.filterSupportedTestCases(Set.of());
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3");
         assertThat("Groups 1 matches", features, containsInAnyOrder(expected));
     }
 
     @Test
-    void getSuitableTestCasesOneFeature() throws FileNotFoundException {
-        TestSuiteDescription suite = new TestSuiteDescription(repository);
+    void filterSupportedTestCasesOneFeature() throws FileNotFoundException {
+        TestSuiteDescription suite = new TestSuiteDescription();
         suite.load(new FileReader(("src/test/resources/testsuite-sample.ttl")));
-        List<IRI> features = suite.getSuitableTestCases(Set.of("sf1"));
+        List<IRI> features = suite.filterSupportedTestCases(Set.of("sf1"));
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3", "group2/feature1");
         assertThat("Groups 1, 2 match", features, containsInAnyOrder(expected));
     }
 
     @Test
-    void getSuitableTestCasesFeature1And2() throws FileNotFoundException {
-        TestSuiteDescription suite = new TestSuiteDescription(repository);
+    void filterSupportedTestCasesFeature1And2() throws FileNotFoundException {
+        TestSuiteDescription suite = new TestSuiteDescription();
         suite.load(new FileReader(("src/test/resources/testsuite-sample.ttl")));
-        List<IRI> features = suite.getSuitableTestCases(Set.of("sf1", "sf2"));
+        List<IRI> features = suite.filterSupportedTestCases(Set.of("sf1", "sf2"));
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
                 "group2/feature1", "group3/feature1", "group3/feature2");
         assertThat("Groups 1, 2, 3 match", features, containsInAnyOrder(expected));
     }
 
     @Test
-    void getSuitableTestCasesFeature1And3() throws FileNotFoundException {
-        TestSuiteDescription suite = new TestSuiteDescription(repository);
+    void filterSupportedTestCasesFeature1And3() throws FileNotFoundException {
+        TestSuiteDescription suite = new TestSuiteDescription();
         suite.load(new FileReader(("src/test/resources/testsuite-sample.ttl")));
-        List<IRI> features = suite.getSuitableTestCases(Set.of("sf1", "sf3"));
+        List<IRI> features = suite.filterSupportedTestCases(Set.of("sf1", "sf3"));
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
                 "group2/feature1", "group4/feature1", "group4/feature2", "group4/feature3");
         assertThat("Groups 1, 2, 4 match", features, containsInAnyOrder(expected));
     }
 
     @Test
-    void getSuitableTestCasesAllFeatures() throws FileNotFoundException {
-        TestSuiteDescription suite = new TestSuiteDescription(repository);
+    void filterSupportedTestCasesAllFeatures() throws FileNotFoundException {
+        TestSuiteDescription suite = new TestSuiteDescription();
         suite.load(new FileReader(("src/test/resources/testsuite-sample.ttl")));
-        List<IRI> features = suite.getSuitableTestCases(Set.of("sf1", "sf2", "sf3"));
+        List<IRI> features = suite.filterSupportedTestCases(Set.of("sf1", "sf2", "sf3"));
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
                 "group2/feature1", "group3/feature1", "group3/feature2",
                 "group4/feature1", "group4/feature2", "group4/feature3"
@@ -105,27 +105,28 @@ class TestSuiteDescriptionTest {
     }
 
     @Test
-    void getSuitableTestCasesFeature3() throws FileNotFoundException {
-        TestSuiteDescription suite = new TestSuiteDescription(repository);
+    void filterSupportedTestCasesFeature3() throws FileNotFoundException {
+        TestSuiteDescription suite = new TestSuiteDescription();
         suite.load(new FileReader(("src/test/resources/testsuite-sample.ttl")));
-        List<IRI> features = suite.getSuitableTestCases(Set.of("sf3"));
+        List<IRI> features = suite.filterSupportedTestCases(Set.of("sf3"));
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3");
         assertThat("Group 1 matches", features, containsInAnyOrder(expected));
     }
 
     @Test
-    void convertList() {
-        TestSuiteDescription suite = new TestSuiteDescription(null);
+    void mapFeaturePaths() {
+        TestSuiteDescription suite = new TestSuiteDescription();
         suite.testCases = List.of(
                 iri("https://example.org/group1/feature1"), iri("https://example.org/group1/feature2"),
                 iri("https://example.org/group2/feature1"), iri("https://example.org/group3/feature1")
         );
         List<PathMappings.Mapping> mappings = List.of(
-                PathMappings.Mapping.create("https://example.org/group1", "example/group1"),
-                PathMappings.Mapping.create("https://example.org/group2", "otherExample")
+                PathMappings.Mapping.create("https://example.org/group1", "src/test/resources/dummy-features/group1"),
+                PathMappings.Mapping.create("https://example.org/group2", "src/test/resources/dummy-features/otherExample")
         );
         List<String> paths = suite.locateTestCases(mappings);
-        String[] expected = new String[]{"example/group1/feature1", "example/group1/feature2", "otherExample/feature1", "https://example.org/group3/feature1"};
+        String[] expected = new String[]{"src/test/resources/dummy-features/group1/feature1", "src/test/resources/dummy-features/group1/feature2",
+                "src/test/resources/dummy-features/otherExample/feature1", "https://example.org/group3/feature1"};
         assertThat("Locations match", paths, containsInAnyOrder(expected));
     }
 

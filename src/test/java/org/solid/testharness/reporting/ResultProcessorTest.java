@@ -7,7 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.solid.testharness.utils.DataRepository;
 
 import javax.inject.Inject;
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringWriter;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -22,10 +25,23 @@ class ResultProcessorTest {
     ResultProcessor resultProcessor;
 
     @Test
-    void buildHtmlReport() throws IOException {
+    void buildHtmlResultReport() throws IOException {
+        // load assertor description
+        // load config for target server
+        dataRepository.loadTurtle(new FileReader(new File("src/test/resources/testsuite-sample.ttl")));
+        // load results
+        StringWriter sw = new StringWriter();
+        resultProcessor.buildHtmlResultReport(sw);
+        logger.debug("OUTPUT:\n{}", sw.toString());
+        assertTrue(sw.toString().length() > 1);
+    }
+
+    @Test
+    void buildHtmlCoverageReport() throws IOException {
+        // load assertor description
         dataRepository.loadTurtle(new FileReader(new File("src/test/resources/testsuite-sample.ttl")));
         StringWriter sw = new StringWriter();
-        resultProcessor.buildHtmlReport(sw);
+        resultProcessor.buildHtmlCoverageReport(sw);
         logger.debug("OUTPUT:\n{}", sw.toString());
         assertTrue(sw.toString().length() > 1);
     }

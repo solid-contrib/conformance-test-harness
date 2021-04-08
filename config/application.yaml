@@ -10,6 +10,10 @@ target: ess-compat
   credentialsDir: src/test/resources
   target: ess-compat
   testSuiteDescription: src/test/resources/testsuite-sample.ttl
+  feature:
+    mappings:
+      - prefix: https://example.org
+        path: src/test/resources/dummy-features
 
 #includeAllServers: true
 
