@@ -1,9 +1,6 @@
 package org.solid.testharness.utils;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.QueryResults;
@@ -14,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.inject.spi.CDI;
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -90,8 +88,20 @@ public class DataModelBase {
         return null;
     }
 
+    protected BNode getAsBNode(IRI predicate) {
+        Set<Value> values = model.filter(subject, predicate, null).objects();
+        if (values.size() > 0) {
+            Value value = values.iterator().next();
+            return value.isBNode() ? (BNode) value : null;
+        }
+        return null;
+    }
 
     protected String getLiteralAsString(IRI predicate) {
+        return getLiteralAsString(subject, predicate);
+    }
+
+    protected String getLiteralAsString(Resource subject, IRI predicate) {
         Optional<Literal> value = Models.getPropertyLiteral(model, subject, predicate);
         return value.map(Value::stringValue).orElse(null);
     }
@@ -109,5 +119,13 @@ public class DataModelBase {
     protected boolean getLiteralAsBoolean(IRI predicate) {
         Optional<Literal> value = Models.getPropertyLiteral(model, subject, predicate);
         return value.map(Literal::booleanValue).orElse(false);
+    }
+
+    protected LocalDate getLiteralAsDate(IRI predicate) {
+        Optional<Literal> value = Models.getPropertyLiteral(model, subject, predicate);
+        return value.map(Literal::calendarValue).map(v -> LocalDate.of(
+                v.getYear(),
+                v.getMonth(),
+                v.getDay())).orElse(null);
     }
 }

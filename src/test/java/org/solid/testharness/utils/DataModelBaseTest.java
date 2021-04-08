@@ -1,15 +1,18 @@
 package org.solid.testharness.utils;
 
 import io.quarkus.test.junit.QuarkusTest;
+import org.eclipse.rdf4j.model.BNode;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.solid.testharness.reporting.TestCase;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -35,6 +38,8 @@ class DataModelBaseTest extends AbstractDataModelTests {
                 "    ex:hasStrings \"string1\", \"string2\" ;\n" +
                 "    ex:hasInt 1 ;\n" +
                 "    ex:hasBool true ;" +
+                "    ex:hasDate \"2021-04-08\"^^xsd:date ;\n" +
+                "    ex:hasBNode [ ex:hasString \"string\" ];\n" +
                 "    ex:hasTest ex:test1 .\n" +
                 "ex:test1 a earl:TestCase .";
     }
@@ -51,13 +56,13 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void sizeShallow() {
-        assertEquals(9, dataModelBase.size());
+        assertEquals(11, dataModelBase.size());
     }
 
     @Test
     void sizeDeep() {
         DataModelBase deepModel = new DataModelBase(iri(NS, "test"), DataModelBase.DEEP);
-        assertEquals(10, deepModel.size());
+        assertEquals(13, deepModel.size());
     }
 
     @Test
@@ -120,6 +125,24 @@ class DataModelBaseTest extends AbstractDataModelTests {
     }
 
     @Test
+    void getAsBNode() {
+        assertNotNull(dataModelBase.getAsBNode(iri(NS, "hasBNode")));
+    }
+
+    @Test
+    void getMissingAsBNode() {
+        assertNull(dataModelBase.getAsBNode(iri(NS, "hasMissingBNode")));
+    }
+
+    @Test
+    void getLiteralAsStringFromBNode() {
+        DataModelBase deepModel = new DataModelBase(iri(NS, "test"), DataModelBase.DEEP);
+        BNode node = deepModel.getAsBNode(iri(NS, "hasBNode"));
+        assertNotNull(node);
+        assertEquals("string", deepModel.getLiteralAsString(node, iri(NS, "hasString")));
+    }
+
+    @Test
     void getLiteralsAsStringSet() {
         Set<String> set = dataModelBase.getLiteralsAsStringSet(iri(NS, "hasStrings"));
         assertNotNull(set);
@@ -152,6 +175,17 @@ class DataModelBaseTest extends AbstractDataModelTests {
     @Test
     void getMissingLiteralAsBoolean() {
         assertEquals(false, dataModelBase.getLiteralAsBoolean(iri(NS, "hasMissingBool")));
+    }
+
+    @Test
+    void getLiteralAsDate() {
+        LocalDate date = dataModelBase.getLiteralAsDate(iri(NS, "hasDate"));
+        assertThat("Date matches", date.isEqual(LocalDate.parse("2021-04-08")));
+    }
+
+    @Test
+    void getMissingLiteralAsDate() {
+        assertNull(dataModelBase.getLiteralAsDate(iri(NS, "hasMissingDate")));
     }
 
     class TestClass extends DataModelBase {

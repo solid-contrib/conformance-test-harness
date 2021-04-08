@@ -1,9 +1,13 @@
 {#with it}
 <tr id="{subject}" about="{subject}" typeof="{typesList}">
     <td>{subject}</td>
-    <td property="dcterms:title" resource="">{title}</td>
-    <td property="dcterms:subject" resource="">{level}</td>
-    <td property="td:reviewStatus" resource="">{status}</td>
-    <td property="earl:result" resource="">{outcome}</td>
+    <td property="dcterms:title">{title}</td>
+    <td property="dcterms:subject">{level}</td>
+    <td property="td:reviewStatus">{status}</td>
+    {#if coverageMode}
+    <td property="earl:mode">{isImplemented}</td>
+    {#else}
+    <td property="earl:result">{outcome}</td>
+    {/if}
 </tr>
 {/with}

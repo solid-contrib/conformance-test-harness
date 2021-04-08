@@ -7,10 +7,18 @@
     <link rel="shortcut icon" type="image/png" href="/inrupt.png"/>
     <link rel="stylesheet" type="text/css" href="/inrupt.css"/>
     -->
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+    </style>
 </head>
 
 <body about="" prefix="{prefixes}">
-
+<h1>Solid Specification - Conformance Test Suite Coverage Report</h1>
 {!
 <!--
 <header role="header" class="header fixed">
@@ -21,7 +29,12 @@
 -->
 !}
 
-<h1>Specification: {specification}</h1>
+<h1>Specification under test: <a property="doap:implements" resource="{specification}" href="{specification}">{specification}</a></h1>
+
+{#with assertor}
+    {#include assertor /}
+{/with}
+
 <div class="indexBlock">
     {#each specificationTestCases}
         <section class="card" about="{it.subject}" typeof="{it.typesList}">
@@ -33,10 +46,10 @@
                     <th>Title</th>
                     <th>Level</th>
                     <th>Status</th>
-                    <th>Outcome</th>
+                    <th>Implemented</th>
                 </tr>
                 {#each it.testCases}
-                    {#include testcase /}
+                    {#include testcase coverageMode=true /}
                 {/each}
             </table>
         </section>

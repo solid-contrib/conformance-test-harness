@@ -1,25 +1,21 @@
 package org.solid.testharness.reporting;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.solid.common.vocab.*;
-import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.DataModelBase;
 import org.solid.testharness.utils.Namespaces;
 
-import javax.enterprise.inject.spi.CDI;
-import java.util.ArrayList;
 import java.util.List;
 
-public class ResultData {
-    private DataRepository dataRepository;
-    private String specification = "Solid Spec";
-    private List<SpecificationTestCase> specificationTestCases = new ArrayList<>();
+import static org.eclipse.rdf4j.model.util.Values.iri;
 
-    public ResultData() {
-        dataRepository = CDI.current().select(DataRepository.class).get();
+public class ResultData extends DataModelBase {
+    private Assertor assertor;
+
+    public ResultData(IRI subject) {
+        super(subject);
+        assertor = new Assertor(iri(Namespaces.TEST_HARNESS_URI));
     }
 
     public String getPrefixes() {
@@ -28,17 +24,15 @@ public class ResultData {
     }
 
     public List<SpecificationTestCase> getSpecificationTestCases() {
-        try (RepositoryConnection conn = dataRepository.getConnection()) {
-            RepositoryResult<Statement> statements = conn.getStatements(null, RDF.type, TD.SpecificationTestCase);
-            statements.forEach(s -> {
-                SpecificationTestCase specificationTestCase = new SpecificationTestCase((IRI) s.getSubject());
-                specificationTestCases.add(specificationTestCase);
-            });
-        }
-        return specificationTestCases;
+        return getModelList(DCTERMS.hasPart, SpecificationTestCase.class);
     }
 
     public String getSpecification() {
-        return specification;
+        return getIriAsString(DOAP.implements_);
     }
+
+    public Assertor getAssertor() {
+        return assertor;
+    }
+
 }

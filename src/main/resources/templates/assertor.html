@@ -1,0 +1,10 @@
+{#with it}
+<section about="{subject}" typeof="{typesList}">
+    <h2 property="doap:name">{softwareName}</h2>
+    <p property="doap:description">{description}</p>
+    <p><b>Created: </b><span property="doap:created">{createdDate}</span></p>
+    <p><b>By: </b><a property="doap:developer" href="{developer}">{developer}</a></p>
+    <p><b>Homepage: </b><a property="doap:homepage" href="{homepage}">{homepage}</a></p>
+    <p><b>Version: </b><span property="doap:release/doap:revision">{revision}</span></p>
+</section>
+{/with}

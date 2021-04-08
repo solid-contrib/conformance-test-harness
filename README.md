@@ -156,7 +156,7 @@ The config for the server(s) under test goes in `config.ttl`. An example of this
 <> a earl:Software ;
    doap:name "Solid Specification Conformance Test Harness"@en ;
    doap:description "A test harness that will run suites of tests related to Solid specifications."@en ;
-   doap:created: "2021-02-16"^^xsd:date ;
+   doap:created "2021-02-16"^^xsd:date ;
    doap:developer <https://inrupt.com/profile/card/#us>;
    doap:homepage <https://github.com/solid/conformance-test-harness> ;
    doap:release [
