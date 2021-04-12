@@ -274,6 +274,10 @@ You can also go to the TestSuiteRunnner class and run the whole test suite in th
 |------|--------|
 |Summary report|`target/karate-reports/karate-summary.html`|
 |Timeline|`target/karate-reports/karate-timeline.html`|
+|Coverage (HTML+RDFa)|`target/coverage.html`|
+|Results (HTML+RDFa)|`target/report.html`|
+|Results (Turtle)|`target/report.ttl`|
+|Unit test coverage|`target/site/jacoco/index.html`|
 
 ## Writing tests
 
