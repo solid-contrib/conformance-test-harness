@@ -1,13 +1,36 @@
 {#with it}
 <tr id="{subject}" about="{subject}" typeof="{typesList}">
-    <td>{subject}</td>
+    <td>
+        {#if isImplemented}
+        <a href="{subject}">{subject}</a>
+        {#else}
+        {subject}
+        {/if}
+    </td>
     <td property="dcterms:title">{title}</td>
     <td property="dcterms:subject">{level}</td>
     <td property="td:reviewStatus">{status}</td>
     {#if coverageMode}
-    <td property="earl:mode">{isImplemented}</td>
+    <td property="earl:mode" content="{modeAsIri}">{isImplemented ? '✔' : '✗'}</td>
+    {#else if isImplemented}
+    <td property="earl:subject"><a href="{testSubject}">{assertion.testSubject}</a></td>
+    <td property="earl:result">
+        {#switch assertion.result.outcome}
+        {#case 'http://www.w3.org/ns/earl#passed'}
+        ✔
+        {#case 'http://www.w3.org/ns/earl#failed'}
+        ✗
+        {#else}
+        o
+        {/switch}
+    </td>
+    <td><time datatype="xsd:dateTime" datetime="{assertion.result.date}" property="dcterms:date">{assertion.result.date}</time></td>
+    <td><a href="#scenarios-{link}">Scenarios</a></td>
     {#else}
-    <td property="earl:result">{outcome}</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
     {/if}
 </tr>
 {/with}

@@ -35,7 +35,7 @@ public class TargetServer extends DataModelBase {
     private Boolean disableDPoP;
 
     public TargetServer(IRI subject) {
-        super(subject, DEEP);
+        super(subject, ConstructMode.DEEP);
         logger.debug("Retrieved {} statements for {}", super.size(), subject);
     }
 

@@ -7,37 +7,23 @@
     <link rel="shortcut icon" type="image/png" href="/inrupt.png"/>
     <link rel="stylesheet" type="text/css" href="/inrupt.css"/>
     -->
-    <style>
-        table {
-            border-collapse: collapse;
-        }
-        table, th, td {
-            border: 1px solid black;
-        }
-    </style>
+    {#include css /}
+    {#include js /}
 </head>
 
-<body about="" prefix="{prefixes}">
-<h1>Solid Specification - Conformance Test Suite Coverage Report</h1>
-{!
-<!--
-<header role="header" class="header fixed">
-    <section class="header-wrap">
-    </section>
+<body about="{subject}" prefix="{prefixes}">
+<header>
+    <h1>Solid Specification - Conformance Test Suite Coverage Report</h1>
+    <h2>
+        <dl><dt>Specification under test</dt><dd><a href="{specification}" rel="doap:implements" title="Specification link">{specification}</a></dd></dl>
+    </h2>
+    {#with assertor}{#include assertor /}{/with}
 </header>
-<div class="header-spacer"></div>
--->
-!}
 
-<h1>Specification under test: <a property="doap:implements" resource="{specification}" href="{specification}">{specification}</a></h1>
-
-{#with assertor}
-    {#include assertor /}
-{/with}
-
-<div class="indexBlock">
+<main>
     {#each specificationTestCases}
-        <section class="card" about="{it.subject}" typeof="{it.typesList}">
+    <div property="dcterms:hasPart" resource="{it.subject}">
+        <section about="{it.subject}" typeof="{it.typesList}">
             <h3 property="dcterms:title">{it.title}</h3>
             <p property="dcterms:description">{it.description}</p>
             <table>
@@ -53,8 +39,9 @@
                 {/each}
             </table>
         </section>
+    </div>
     {/each}
-</div>
+</main>
 </body>
 </html>
 {!

@@ -5,19 +5,18 @@ import org.solid.common.vocab.DCTERMS;
 import org.solid.common.vocab.EARL;
 import org.solid.testharness.utils.DataModelBase;
 
-import java.time.LocalDateTime;
-
-public class TestResult extends DataModelBase  {
-    public TestResult(IRI subject) {
-        super(subject, ConstructMode.DEEP);
+public class Step extends DataModelBase {
+    public Step(IRI subject) {
+        super(subject);
     }
 
+    public String getTitle() {
+        return getLiteralAsString(DCTERMS.title);
+    }
     public String getOutcome() {
         return getIriAsString(EARL.outcome);
     }
-
-    public LocalDateTime getDate() {
-        return getLiteralAsDateTime(DCTERMS.date);
+    public String getInfo() {
+        return getLiteralAsString(EARL.info);
     }
-
 }

@@ -34,7 +34,6 @@ public class TestSuiteRunner {
         List<String> featurePaths = testRunner.mapTestLocations();
         Results results = testRunner.runTests(featurePaths);
         assertNotNull(results);
-        assertEquals(0, results.getFailCount(), results.getErrorMessages());
 
         logger.info("===================== START REPORT ========================");
         try {
@@ -57,6 +56,7 @@ public class TestSuiteRunner {
                 results.getFeaturesPassed(), results.getFeaturesFailed(), results.getFeaturesTotal(),
                 results.getScenariosPassed(), results.getScenariosFailed(), results.getScenariosTotal()
         );
+        assertEquals(0, results.getFailCount(), results.getErrorMessages());
     }
 
     @Test

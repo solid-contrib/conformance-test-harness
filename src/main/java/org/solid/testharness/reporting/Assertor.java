@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 public class Assertor extends DataModelBase {
     public Assertor(IRI subject) {
-        super(subject, DEEP);
+        super(subject, ConstructMode.DEEP);
     }
 
     public String getSoftwareName() {

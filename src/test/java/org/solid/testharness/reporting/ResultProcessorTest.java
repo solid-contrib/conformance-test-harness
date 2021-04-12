@@ -52,5 +52,29 @@ class ResultProcessorTest {
         logger.debug("OUTPUT:\n{}", sw.toString());
         assertTrue(sw.toString().length() > 1);
     }
-}
+
+    @Test
+    void buildHtmlResultReportFile() throws IOException {
+        File reportFile = new File("target/example-result-report.html");
+        dataRepository.loadTurtle(new FileReader(new File("src/test/resources/harness-sample.ttl")));
+        dataRepository.loadTurtle(new FileReader(new File("src/test/resources/config-sample.ttl")));
+        dataRepository.loadTurtle(new FileReader(new File("src/test/resources/testsuite-sample.ttl")));
+        dataRepository.loadTurtle(new FileReader(new File("src/test/resources/testsuite-results-sample.ttl")));
+        FileWriter wr = new FileWriter(reportFile);
+        resultProcessor.buildHtmlResultReport(wr);
+        wr.close();
+        assertTrue(reportFile.exists());
+    }
+
+    @Test
+    void buildHtmlCoverageReportFile() throws IOException {
+        File reportFile = new File("target/example-coverage-report.html");
+        dataRepository.loadTurtle(new FileReader(new File("src/test/resources/harness-sample.ttl")));
+        dataRepository.loadTurtle(new FileReader(new File("src/test/resources/testsuite-sample.ttl")));
+        dataRepository.loadTurtle(new FileReader(new File("src/test/resources/coverage-sample.ttl")));
+        FileWriter wr = new FileWriter(reportFile);
+        resultProcessor.buildHtmlCoverageReport(wr);
+        wr.close();
+        assertTrue(reportFile.exists());
+    }}
 

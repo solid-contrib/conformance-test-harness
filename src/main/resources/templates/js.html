@@ -1,0 +1,8 @@
+<script>
+    document.addEventListener("DOMContentLoaded", function(event){
+        const anchors = document.getElementsByTagName("a");
+        for (let i = 0; i < anchors.length; i++) {
+            anchors[i].href = anchors[i].href.replace('github.com/solid/conformance-test-harness/example', 'github.com/solid/conformance-test-harness/blob/main/example')
+        }
+    });
+</script>

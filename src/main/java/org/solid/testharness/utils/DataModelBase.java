@@ -2,6 +2,7 @@ package org.solid.testharness.utils;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.util.Models;
+import org.eclipse.rdf4j.model.util.RDFCollections;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.repository.util.Repositories;
@@ -12,6 +13,8 @@ import javax.enterprise.inject.spi.CDI;
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -25,18 +28,41 @@ public class DataModelBase {
     @NotNull
     protected IRI subject;
 
-    protected static boolean SHALLOW = false;
-    protected static boolean DEEP = true;
+    public enum ConstructMode {
+        SHALLOW,
+        DEEP,
+        LIST;
+    }
+
     private static final String SERVER_GRAPH = "CONSTRUCT {<%s> ?p ?o} WHERE {<%s> ?p ?o}";
     private static final String SERVER_GRAPH_2 = "CONSTRUCT {<%s> ?p ?o. ?o ?p1 ?o1} WHERE {<%s> ?p ?o. OPTIONAL {?o ?p1 ?o1}}";
+    private static final String SERVER_GRAPH_LIST = "CONSTRUCT {" +
+            "  <%s> ?p ?o. ?o ?p1 ?o1 . " +
+            "  ?listRest rdf:first ?head ; rdf:rest ?tail ." +
+            "} WHERE {" +
+            "  <%s> ?p ?o." +
+            "  OPTIONAL {?o ?p1 ?o1 . ?o rdf:rest* ?listRest . ?listRest rdf:first ?head ; rdf:rest ?tail .}" +
+            "}";
 
     protected DataModelBase(IRI subject) {
-        this(subject, SHALLOW);
+        this(subject, ConstructMode.SHALLOW);
     }
-    protected DataModelBase(IRI subject, boolean deep) {
+    protected DataModelBase(IRI subject, ConstructMode mode) {
         DataRepository dataRepository = CDI.current().select(DataRepository.class).get();
         this.subject = subject;
-        model = Repositories.graphQuery(dataRepository, String.format(deep ? SERVER_GRAPH_2 : SERVER_GRAPH, subject, subject), r -> QueryResults.asModel(r));
+        String query;
+        switch (mode) {
+            case DEEP:
+                query = SERVER_GRAPH_2;
+                break;
+            case LIST:
+                query = SERVER_GRAPH_LIST;
+                break;
+            default:
+                query = SERVER_GRAPH;
+                break;
+        }
+        model = Repositories.graphQuery(dataRepository, String.format(query, subject, subject), r -> QueryResults.asModel(r));
     }
 
     public IRI getSubjectIri() {
@@ -75,6 +101,24 @@ public class DataModelBase {
                     throw new RuntimeException("Failed to create instance of " + clazz.getName());
                 }
             }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    protected <T extends DataModelBase> List<T> getModelCollectionList(IRI predicate, Class<T> clazz) {
+        Resource node = Models.objectResource(model.filter(subject, predicate, null)).orElse(null);
+        if(node != null) {
+            List<Value> values = RDFCollections.asValues(model, node, new ArrayList<Value>());
+            if (values.size() > 0) {
+                return values.stream().filter(Value::isIRI).map(v -> {
+                    try {
+                        return clazz.getDeclaredConstructor(IRI.class).newInstance((IRI) v);
+                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                        logger.error("Failed to create instance of {}", clazz.getName());
+                        throw new RuntimeException("Failed to create instance of " + clazz.getName());
+                    }
+                }).collect(Collectors.toList());
+            }
         }
         return null;
     }
@@ -127,5 +171,17 @@ public class DataModelBase {
                 v.getYear(),
                 v.getMonth(),
                 v.getDay())).orElse(null);
+    }
+
+    protected LocalDateTime getLiteralAsDateTime(IRI predicate) {
+        Optional<Literal> value = Models.getPropertyLiteral(model, subject, predicate);
+        return value.map(Literal::calendarValue).map(v -> LocalDateTime.of(
+                v.getYear(),
+                v.getMonth(),
+                v.getDay(),
+                v.getHour(),
+                v.getMinute(),
+                v.getSecond(),
+                v.getMillisecond())).orElse(null);
     }
 }

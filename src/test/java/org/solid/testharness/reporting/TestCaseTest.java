@@ -6,7 +6,6 @@ import org.solid.testharness.utils.AbstractDataModelTests;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 @QuarkusTest
 class TestCaseTest extends AbstractDataModelTests  {
@@ -53,9 +52,4 @@ class TestCaseTest extends AbstractDataModelTests  {
         assertEquals("Accepted", testCase.getStatus());
     }
 
-    @Test
-    void getOutcome() {
-        TestCase testCase = new TestCase(iri(NS, "test1"));
-        assertNull(testCase.getOutcome());
-    }
 }

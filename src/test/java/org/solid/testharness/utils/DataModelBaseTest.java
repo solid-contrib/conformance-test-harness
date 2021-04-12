@@ -61,7 +61,7 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void sizeDeep() {
-        DataModelBase deepModel = new DataModelBase(iri(NS, "test"), DataModelBase.DEEP);
+        DataModelBase deepModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.DEEP);
         assertEquals(13, deepModel.size());
     }
 
@@ -136,7 +136,7 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void getLiteralAsStringFromBNode() {
-        DataModelBase deepModel = new DataModelBase(iri(NS, "test"), DataModelBase.DEEP);
+        DataModelBase deepModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.DEEP);
         BNode node = deepModel.getAsBNode(iri(NS, "hasBNode"));
         assertNotNull(node);
         assertEquals("string", deepModel.getLiteralAsString(node, iri(NS, "hasString")));

@@ -1,0 +1,34 @@
+{#with it}
+<tr id="{subject}" about="{subject}" typeof="{typesList}">
+    <td property="dcterms:title">{title}</td>
+    <td property="earl:result">
+        {#switch assertion.result.outcome}
+        {#case 'http://www.w3.org/ns/earl#passed'}
+        ✔
+        {#case 'http://www.w3.org/ns/earl#failed'}
+        ✗
+        {#else}
+        o
+        {/switch}
+    </td>
+    <td><time datatype="xsd:dateTime" datetime="{assertion.result.date}" property="dcterms:date">{assertion.result.date}</time></td>
+    <td>
+        {#if steps}
+        <table>
+            <tr>
+                <th>Step</th>
+                <th>Outcome</th>
+                <th>Info</th>
+            </tr>
+            {#each steps}
+            <tr>
+                <td>{it.title}</td>
+                <td>{it.outcome}</td>
+                <td><pre>{it.info}</pre></td>
+            </tr>
+            {/each}
+        </table>
+        {/if}
+    </td>
+</tr>
+{/with}

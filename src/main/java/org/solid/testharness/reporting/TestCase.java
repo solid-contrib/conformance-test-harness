@@ -6,6 +6,7 @@ import org.solid.common.vocab.EARL;
 import org.solid.common.vocab.TD;
 import org.solid.testharness.utils.DataModelBase;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
@@ -37,7 +38,20 @@ public class TestCase extends DataModelBase {
         return mode == null || !mode.equals(EARL.untested);
     }
 
-    public String getOutcome() {
-        return null;
+    public IRI getModeAsIri() {
+        return getAsIri(EARL.mode);
+    }
+
+    public Assertion getAssertion() {
+        List<Assertion> assertions = getModelList(EARL.assertions, Assertion.class);
+        if (assertions != null && !assertions.isEmpty()) {
+            return assertions.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    public List<Scenario> getScenarios() {
+        return getModelList(DCTERMS.hasPart, Scenario.class);
     }
 }

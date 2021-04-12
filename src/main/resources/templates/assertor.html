@@ -2,9 +2,14 @@
 <section about="{subject}" typeof="{typesList}">
     <h2 property="doap:name">{softwareName}</h2>
     <p property="doap:description">{description}</p>
-    <p><b>Created: </b><span property="doap:created">{createdDate}</span></p>
-    <p><b>By: </b><a property="doap:developer" href="{developer}">{developer}</a></p>
-    <p><b>Homepage: </b><a property="doap:homepage" href="{homepage}">{homepage}</a></p>
-    <p><b>Version: </b><span property="doap:release/doap:revision">{revision}</span></p>
+    <dl><dt>Created</dt><dd><time datatype="xsd:date" datetime="{createdDate}" property="doap:created">{createdDate}</time></dd></dl>
+    <dl><dt>By</dt><dd><a href="{developer}" rel="doap:developer" title="Software developer">{developer}</a></dd></dl>
+    <dl><dt>Homepage</dt><dd><a href="{homepage}" rel="doap:homepage" title="Software homepage">{homepage}</a></dd></dl>
+    <dl>
+        <dt>Version</dt>
+        <dd property="doap:release" href="#rev">
+            <span about="#rev" property="doap:revision">{revision}</span>
+        </dd>
+    </dl>
 </section>
 {/with}

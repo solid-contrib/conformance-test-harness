@@ -7,37 +7,26 @@
     <link rel="shortcut icon" type="image/png" href="/inrupt.png"/>
     <link rel="stylesheet" type="text/css" href="/inrupt.css"/>
     -->
-    <style>
-        table {
-            border-collapse: collapse;
-        }
-        table, th, td {
-            border: 1px solid black;
-        }
-    </style>
+    {#include css /}
+    {#include js /}
 </head>
 
-<body about="" prefix="{prefixes}">
-<h1>Solid Specification - Conformance Test Suite Results</h1>
-{!
-<!--
-<header role="header" class="header fixed">
-    <section class="header-wrap">
-    </section>
+<body about="{subject}" prefix="{prefixes}">
+<header>
+    <h1>Solid Specification - Conformance Test Suite Results</h1>
+    <h2>
+        <dl><dt>Specification under test</dt><dd><a href="{specification}" rel="doap:implements" title="Specification link">{specification}</a></dd></dl>
+    </h2>
+    {#with assertor}{#include assertor /}{/with}
+
+    <h2>Target server description - TODO</h2>
 </header>
-<div class="header-spacer"></div>
--->
-!}
 
-<h1>Specification under test: <a property="doap:implements" resource="{specification}" href="{specification}">{specification}</a></h1>
-
-{#with assertor}
-{#include assertor /}
-{/with}
-
-<div class="indexBlock">
+<main>
+    <h2>Results by test feature</h2>
     {#each specificationTestCases}
-        <section class="card" about="{it.subject}" typeof="{it.typesList}">
+    <div property="dcterms:hasPart" resource="{it.subject}">
+        <section about="{it.subject}" typeof="{it.typesList}">
             <h3 property="dcterms:title">{it.title}</h3>
             <p property="dcterms:description">{it.description}</p>
             <table>
@@ -46,15 +35,48 @@
                     <th>Title</th>
                     <th>Level</th>
                     <th>Status</th>
+                    <th>Target</th>
                     <th>Outcome</th>
+                    <th>Timestamp</th>
+                    <th>Scenario link</th>
                 </tr>
+                {#let anchor=it.anchor}
                 {#each it.testCases}
-                    {#include testcase /}
+                    {#include testcase link=anchor /}
                 {/each}
+                {/let}
             </table>
         </section>
+    </div>
     {/each}
-</div>
+
+    <hr/>
+    <h2>Results by test scenario</h2>
+    {#each specificationTestCases}
+    <div id="scenarios-{it.anchor}" property="dcterms:hasPart" resource="{it.subject}">
+        <section about="{it.subject}" typeof="{it.typesList}">
+            <h3 property="dcterms:title">{it.title}</h3>
+            {#each it.testCases}
+            {#if it.scenarios}
+                <h3 property="dcterms:title">{it.title}</h3>
+                <table>
+                    <tr>
+                        <th>Scenario</th>
+                        <th>Outcome</th>
+                        <th>Timestamp</th>
+                        <th>Scenario link</th>
+                    </tr>
+                    {#each it.scenarios}
+                    {#include scenario /}
+                    {/each}
+                </table>
+            {/if}
+            {/each}
+        </section>
+    </div>
+    {/each}
+
+</main>
 </body>
 </html>
 {!

@@ -28,7 +28,7 @@ public class SpecificationTestCase extends DataModelBase {
         return getModelList(DCTERMS.hasPart, TestCase.class);
     }
 
-    public String getOutcome() {
-        return null;
+    public String getAnchor() {
+        return subject.getLocalName();
     }
 }

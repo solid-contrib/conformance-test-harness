@@ -64,10 +64,4 @@ class SpecificationTestCaseTest extends AbstractDataModelTests {
         List<TestCase> testCases = specificationTestCase.getTestCases();
         assertNull(testCases);
     }
-
-    @Test
-    void getOutcome() {
-        SpecificationTestCase specificationTestCase = new SpecificationTestCase(iri(NS, "test1"));
-        assertNull(specificationTestCase.getOutcome());
-    }
 }
