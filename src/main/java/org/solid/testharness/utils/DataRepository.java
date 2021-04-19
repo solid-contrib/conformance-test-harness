@@ -62,10 +62,19 @@ public class DataRepository implements Repository {
                 conn.add(reader, RDFFormat.TURTLE);
                 logger.debug("Loaded data into repository, size={}", conn.size());
             } catch (IOException e) {
-                logger.error("Failed to read data", e);
+                logger.error("Failed to read data", e.getMessage());
             }
         } catch (RDF4JException e) {
-            logger.error("Failed to parse data", e);
+            logger.error("Failed to parse data", e.getMessage());
+        }
+    }
+
+    public void loadRdfa(Reader reader, String baseUri) {
+        try (RepositoryConnection conn = getConnection()) {
+            conn.add(reader, baseUri, RDFFormat.RDFA);
+            logger.debug("Loaded data into repository, size={}", conn.size());
+        } catch (IOException | RDF4JException e) {
+            logger.error("Failed to parse data", e.getMessage());
         }
     }
 
@@ -133,8 +142,8 @@ public class DataRepository implements Repository {
                     conn.add(stepList);
                 }
             }
-        } catch (RDF4JException e) {
-            logger.error("Failed to load feature result", e);
+        } catch (Exception e) {
+            logger.error("Failed to load feature result", e.getMessage());
         }
     }
 

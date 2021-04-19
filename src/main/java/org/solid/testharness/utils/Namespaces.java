@@ -23,7 +23,7 @@ public class Namespaces {
     private Namespaces() {
     }
 
-    public static String shorten(@NotNull IRI iri) {
+    public static String shorten(IRI iri) {
         String term = iri.stringValue();
         for (Namespace namespace : namespaces.values()) {
             if (term.startsWith(namespace.namespace)) {

@@ -8,18 +8,15 @@ import org.eclipse.rdf4j.model.util.Values;
 import org.eclipse.rdf4j.model.vocabulary.FOAF;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
 import java.io.*;
 import java.util.List;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,11 +24,10 @@ import static org.mockito.Mockito.when;
 class DataRepositoryTest {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.utils.DataRepositoryTest");
 
-    @Inject
-    DataRepository repository;
-
     @Test
     void addFeatureResult() throws Exception {
+        DataRepository dataRepository = new DataRepository();
+        dataRepository.postConstruct();
         Suite suite = Suite.forTempUse();
         Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
@@ -75,16 +71,55 @@ class DataRepositoryTest {
         StepResult str2 = mock(StepResult.class);
         when(str2.getStep()).thenReturn(step2);
         when(str2.getResult()).thenReturn(res2);
-        when(str2.getStepLog()).thenReturn("STEP2 LOG");
+        when(str2.getStepLog()).thenReturn("");
         when(sr1.getStepResults()).thenReturn(List.of(str1, str2));
 
-        repository.setTestSubject(iri(Namespaces.TEST_HARNESS_URI,"test"));
-        repository.addFeatureResult(suite, fr);
+        dataRepository.setTestSubject(iri(Namespaces.TEST_HARNESS_URI,"test"));
+        dataRepository.addFeatureResult(suite, fr);
         StringWriter sw = new StringWriter();
-        repository.export(sw);
-        logger.debug(sw.toString());
+        dataRepository.export(sw);
         assertTrue(sw.toString().contains("test-harness:DISPLAY_NAME"));
         assertTrue(sw.toString().contains("dcterms:title \"FEATURE NAME\""));
+    }
+
+    @Test
+    void addFeatureResultTestFailed() throws Exception {
+        DataRepository dataRepository = new DataRepository();
+        dataRepository.postConstruct();
+        Suite suite = Suite.forTempUse();
+        Feature feature = mock(Feature.class);
+        when(feature.getName()).thenReturn("FEATURE NAME");
+        FeatureResult fr = mock(FeatureResult.class);
+        when(fr.getDisplayName()).thenReturn("DISPLAY_NAME");
+        when(fr.getFeature()).thenReturn(feature);
+        when(fr.isFailed()).thenReturn(false);
+        when(fr.getDurationMillis()).thenReturn(1000.0);
+        when(fr.getScenarioResults()).thenReturn(null);
+
+        dataRepository.setTestSubject(iri(Namespaces.TEST_HARNESS_URI,"test"));
+        dataRepository.addFeatureResult(suite, fr);
+        StringWriter sw = new StringWriter();
+        dataRepository.export(sw);
+        assertTrue(sw.toString().contains("test-harness:DISPLAY_NAME"));
+        assertTrue(sw.toString().contains("dcterms:title \"FEATURE NAME\""));
+    }
+
+    @Test
+    void addFeatureResultBadRdf() throws Exception {
+        DataRepository dataRepository = new DataRepository();
+        dataRepository.postConstruct();
+        Suite suite = Suite.forTempUse();
+        Feature feature = mock(Feature.class);
+        when(feature.getName()).thenReturn(null);
+        FeatureResult fr = mock(FeatureResult.class);
+        when(fr.getDisplayName()).thenReturn("");
+        when(fr.getFeature()).thenReturn(feature);
+
+        dataRepository.setTestSubject(iri(Namespaces.TEST_HARNESS_URI,"test"));
+        dataRepository.addFeatureResult(suite, fr);
+        StringWriter sw = new StringWriter();
+        dataRepository.export(sw);
+        assertFalse(sw.toString().contains("test-harness:DISPLAY_NAME"));
     }
 
     @Test
@@ -92,7 +127,7 @@ class DataRepositoryTest {
         DataRepository dataRepository = setupRepository();
         StringWriter wr = new StringWriter();
         dataRepository.export(wr);
-        assertTrue(wr.toString().contains("<http://example.org/bob> a <http://xmlns.com/foaf/0.1/Person> ."));
+        assertTrue(wr.toString().contains(TestData.SAMPLE_EXPORTED_TRIPLE));
     }
 
     @Test
@@ -110,7 +145,7 @@ class DataRepositoryTest {
         DataRepository dataRepository = setupRepository();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         dataRepository.export(os);
-        assertTrue(os.toString().contains("<http://example.org/bob> a <http://xmlns.com/foaf/0.1/Person> ."));
+        assertTrue(os.toString().contains(TestData.SAMPLE_EXPORTED_TRIPLE));
     }
 
     @Test
@@ -123,12 +158,86 @@ class DataRepositoryTest {
         assertThrows(Exception.class, () -> dataRepository.export(os));
     }
 
+    @Test
+    void loadTurtle() {
+        DataRepository dataRepository = new DataRepository();
+        dataRepository.loadTurtle(new StringReader(TestData.SAMPLE_TURTLE));
+        assertEquals(1, dataRepositorySize(dataRepository));
+    }
+
+    @Test
+    void loadTurtleBadFile() {
+        DataRepository dataRepository = new DataRepository();
+        dataRepository.loadTurtle(getBadReader());
+        assertEquals(0, dataRepositorySize(dataRepository));
+    }
+
+    @Test
+    void loadTurtleBadData() {
+        DataRepository dataRepository = new DataRepository();
+        dataRepository.loadTurtle(new StringReader(TestData.SAMPLE_JSONLD));
+        assertEquals(0, dataRepositorySize(dataRepository));
+    }
+
+    @Test
+    void loadRdfa() {
+        DataRepository dataRepository = new DataRepository();
+        dataRepository.loadRdfa(new StringReader(TestData.SAMPLE_HTML), TestData.SAMPLE_BASE);
+        assertEquals(1, dataRepositorySize(dataRepository));
+    }
+
+    @Test
+    void loadRdfaBadFile() {
+        DataRepository dataRepository = new DataRepository();
+        dataRepository.loadRdfa(getBadReader(), TestData.SAMPLE_BASE);
+        assertEquals(0, dataRepositorySize(dataRepository));
+    }
+
+    @Test
+    void loadRdfaBadData() {
+        DataRepository dataRepository = new DataRepository();
+        dataRepository.loadRdfa(new StringReader(TestData.SAMPLE_JSONLD), TestData.SAMPLE_BASE);
+        assertEquals(0, dataRepositorySize(dataRepository));
+    }
+
+    @Test
+    void testOverriddenMethods() {
+        DataRepository dataRepository = new DataRepository();
+        File dataDir = new File("/tmp");
+        dataRepository.setDataDir(dataDir);
+        File newDataDir = dataRepository.getDataDir();
+        assertTrue(dataDir.equals(newDataDir));
+        assertFalse(dataRepository.isInitialized());
+        dataRepository.initialize();
+        assertTrue(dataRepository.isInitialized());
+        assertNotNull(dataRepository.getValueFactory());
+        assertTrue(dataRepository.isWritable());
+        dataRepository.shutDown();
+        assertFalse(dataRepository.isInitialized());
+    }
+
     private DataRepository setupRepository() {
         DataRepository dataRepository = new DataRepository();
         try (RepositoryConnection conn = dataRepository.getConnection()) {
-            Statement st = Values.getValueFactory().createStatement(iri("http://example.org/bob"), RDF.TYPE, FOAF.PERSON);
+            Statement st = Values.getValueFactory().createStatement(iri(TestData.SAMPLE_BASE + "/bob"), RDF.TYPE, FOAF.PERSON);
             conn.add(st);
         }
         return dataRepository;
+    }
+
+    private long dataRepositorySize(DataRepository dataRepository) {
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            return conn.size();
+        }
+    }
+
+    private Reader getBadReader() {
+        Reader reader = Reader.nullReader();
+        try {
+            reader.close();
+        } catch (IOException e) {
+            logger.error("Failed to close a null reader in tests");
+        }
+        return reader;
     }
 }

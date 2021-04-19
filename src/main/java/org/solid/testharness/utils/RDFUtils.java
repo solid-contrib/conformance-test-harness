@@ -35,6 +35,13 @@ public class RDFUtils {
         return Arrays.asList(sw.toString().split("\n"));
     }
 
+    public static final List<String> rdfaToTripleArray(String data, String baseUri) throws Exception {
+        Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.RDFA);
+        StringWriter sw = new StringWriter();
+        Rio.write(model, sw, RDFFormat.NTRIPLES);
+        return Arrays.asList(sw.toString().split("\n"));
+    }
+
 /*
     public static final Model parse(String data, String contentType, String baseUri) throws IOException {
         RDFFormat dataFormat = null;
