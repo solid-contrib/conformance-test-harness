@@ -13,6 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
@@ -159,23 +162,24 @@ class DataRepositoryTest {
     }
 
     @Test
-    void loadTurtle() {
+    void loadTurtle() throws MalformedURLException {
         DataRepository dataRepository = new DataRepository();
-        dataRepository.loadTurtle(new StringReader(TestData.SAMPLE_TURTLE));
-        assertEquals(1, dataRepositorySize(dataRepository));
+        URL url = Paths.get("src/test/resources/config-sample.ttl").normalize().toUri().toURL();
+        dataRepository.loadTurtle(url);
+        assertEquals(55, dataRepositorySize(dataRepository));
     }
 
     @Test
-    void loadTurtleBadFile() {
+    void loadTurtleBadUrl() throws MalformedURLException {
         DataRepository dataRepository = new DataRepository();
-        dataRepository.loadTurtle(getBadReader());
+        dataRepository.loadTurtle(new URL("file:/missing.txt"));
         assertEquals(0, dataRepositorySize(dataRepository));
     }
 
     @Test
-    void loadTurtleBadData() {
+    void loadTurtleBadData() throws MalformedURLException {
         DataRepository dataRepository = new DataRepository();
-        dataRepository.loadTurtle(new StringReader(TestData.SAMPLE_JSONLD));
+        dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/inrupt-alice.json"));
         assertEquals(0, dataRepositorySize(dataRepository));
     }
 

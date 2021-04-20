@@ -10,6 +10,8 @@ import org.solid.testharness.http.SolidClient;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +33,7 @@ public class TestHarnessConfigTest {
     @Test
     void registerClients() throws Exception {
         when(authManager.authenticate(anyString(), any(TargetServer.class))).thenReturn(new SolidClient());
+        testHarnessConfig.loadConfig();
         testHarnessConfig.registerClients();
         Map<String, SolidClient> clients = testHarnessConfig.getClients();
         assertNotNull(clients);
@@ -38,8 +41,9 @@ public class TestHarnessConfigTest {
     }
 
     @Test
-    void registerClientsWithException() throws Exception {
+    void registerClientsWithAuthException() throws Exception {
         when(authManager.authenticate(anyString(), any(TargetServer.class))).thenThrow(new Exception("Failed as expected"));
+        testHarnessConfig.loadConfig();
         testHarnessConfig.registerClients();
         Map<String, SolidClient> clients = testHarnessConfig.getClients();
         assertNotNull(clients);
@@ -47,13 +51,15 @@ public class TestHarnessConfigTest {
     }
 
     @Test
-    void getTargetServer() {
+    void getTargetServer() throws IOException {
+        testHarnessConfig.loadConfig();
         TargetServer targetServer = testHarnessConfig.getTargetServer();
         assertNotNull(targetServer);
     }
 
     @Test
-    void getServers() {
+    void getServers() throws IOException {
+        testHarnessConfig.loadConfig();
         Map<String, TargetServer> servers = testHarnessConfig.getServers();
         assertNotNull(servers);
         assertEquals(2, servers.size());
@@ -66,6 +72,7 @@ public class TestHarnessConfigTest {
     @Test
     void getClients() throws Exception {
         when(authManager.authenticate(anyString(), any(TargetServer.class))).thenReturn(new SolidClient());
+        testHarnessConfig.loadConfig();
         testHarnessConfig.registerClients();
         Map<String, SolidClient> clients = testHarnessConfig.getClients();
         assertNotNull(clients);
@@ -78,8 +85,8 @@ public class TestHarnessConfigTest {
 
     @Test
     void getTestSuiteDescription() {
-        File file = testHarnessConfig.getTestSuiteDescription();
-        assertTrue(file.exists() && file.isFile());
+        URL url = testHarnessConfig.getTestSuiteDescription();
+        assertTrue(url.getProtocol().equals("file"));
     }
 
     @Test

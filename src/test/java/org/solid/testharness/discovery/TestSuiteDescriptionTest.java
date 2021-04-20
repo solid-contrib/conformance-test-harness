@@ -9,10 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.config.PathMappings;
 import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -37,45 +37,45 @@ class TestSuiteDescriptionTest {
     }
 
     @Test
-    void load() throws FileNotFoundException {
+    void load() throws MalformedURLException {
         TestSuiteDescription suite = new TestSuiteDescription();
-        suite.load(new FileReader(("src/test/resources/testsuite-sample.ttl")));
+        suite.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
         try (RepositoryConnection conn = repository.getConnection()) {
             assertFalse(conn.isEmpty());
         }
     }
 
     @Test
-    void filterSupportedTestCasesNullFeatures() throws FileNotFoundException {
+    void filterSupportedTestCasesNullFeatures() throws MalformedURLException {
         TestSuiteDescription suite = new TestSuiteDescription();
-        suite.load(new FileReader(("src/test/resources/testsuite-sample.ttl")));
+        suite.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
         List<IRI> features = suite.filterSupportedTestCases(null);
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3");
         assertThat("Group 1 matches", features, containsInAnyOrder(expected));
     }
 
     @Test
-    void filterSupportedTestCasesEmptyFeatures() throws FileNotFoundException {
+    void filterSupportedTestCasesEmptyFeatures() throws MalformedURLException {
         TestSuiteDescription suite = new TestSuiteDescription();
-        suite.load(new FileReader(("src/test/resources/testsuite-sample.ttl")));
+        suite.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
         List<IRI> features = suite.filterSupportedTestCases(Set.of());
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3");
         assertThat("Groups 1 matches", features, containsInAnyOrder(expected));
     }
 
     @Test
-    void filterSupportedTestCasesOneFeature() throws FileNotFoundException {
+    void filterSupportedTestCasesOneFeature() throws MalformedURLException {
         TestSuiteDescription suite = new TestSuiteDescription();
-        suite.load(new FileReader(("src/test/resources/testsuite-sample.ttl")));
+        suite.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
         List<IRI> features = suite.filterSupportedTestCases(Set.of("sf1"));
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3", "group2/feature1");
         assertThat("Groups 1, 2 match", features, containsInAnyOrder(expected));
     }
 
     @Test
-    void filterSupportedTestCasesFeature1And2() throws FileNotFoundException {
+    void filterSupportedTestCasesFeature1And2() throws MalformedURLException {
         TestSuiteDescription suite = new TestSuiteDescription();
-        suite.load(new FileReader(("src/test/resources/testsuite-sample.ttl")));
+        suite.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
         List<IRI> features = suite.filterSupportedTestCases(Set.of("sf1", "sf2"));
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
                 "group2/feature1", "group3/feature1", "group3/feature2");
@@ -83,9 +83,9 @@ class TestSuiteDescriptionTest {
     }
 
     @Test
-    void filterSupportedTestCasesFeature1And3() throws FileNotFoundException {
+    void filterSupportedTestCasesFeature1And3() throws MalformedURLException {
         TestSuiteDescription suite = new TestSuiteDescription();
-        suite.load(new FileReader(("src/test/resources/testsuite-sample.ttl")));
+        suite.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
         List<IRI> features = suite.filterSupportedTestCases(Set.of("sf1", "sf3"));
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
                 "group2/feature1", "group4/feature1", "group4/feature2", "group4/feature3");
@@ -93,9 +93,9 @@ class TestSuiteDescriptionTest {
     }
 
     @Test
-    void filterSupportedTestCasesAllFeatures() throws FileNotFoundException {
+    void filterSupportedTestCasesAllFeatures() throws MalformedURLException {
         TestSuiteDescription suite = new TestSuiteDescription();
-        suite.load(new FileReader(("src/test/resources/testsuite-sample.ttl")));
+        suite.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
         List<IRI> features = suite.filterSupportedTestCases(Set.of("sf1", "sf2", "sf3"));
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
                 "group2/feature1", "group3/feature1", "group3/feature2",
@@ -105,9 +105,9 @@ class TestSuiteDescriptionTest {
     }
 
     @Test
-    void filterSupportedTestCasesFeature3() throws FileNotFoundException {
+    void filterSupportedTestCasesFeature3() throws MalformedURLException {
         TestSuiteDescription suite = new TestSuiteDescription();
-        suite.load(new FileReader(("src/test/resources/testsuite-sample.ttl")));
+        suite.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
         List<IRI> features = suite.filterSupportedTestCases(Set.of("sf3"));
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3");
         assertThat("Group 1 matches", features, containsInAnyOrder(expected));

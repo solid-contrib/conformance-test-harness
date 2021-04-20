@@ -4,6 +4,7 @@ import io.quarkus.test.junit.QuarkusMock;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 
+import java.io.IOException;
 import java.io.StringReader;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -13,12 +14,11 @@ public abstract class AbstractDataModelTests {
     public abstract String getData();
 
     @BeforeAll
-    void setup() {
+    void setup() throws IOException {
         StringReader reader = new StringReader(getData());
         DataRepository repository = new DataRepository();
         repository.postConstruct();
-        repository.loadTurtle(reader);
+        TestData.insertData(repository, reader);
         QuarkusMock.installMockForType(repository, DataRepository.class);
     }
-
 }

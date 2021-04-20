@@ -20,7 +20,7 @@ public class TestScenarioRunner {
     TestRunner testRunner;
 
     @Test
-    void testScenario() {
+    void testScenario() throws Exception {
 //        String featurePath = "classpath:content-negotiation/content-negotiation-turtle.feature";
         String featurePath = "classpath:writing-resource/containment.feature";
         Results results = testRunner.runTest(featurePath);

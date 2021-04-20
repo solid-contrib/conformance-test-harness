@@ -1,6 +1,5 @@
 package org.solid.testharness.config;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +15,6 @@ public class MockTestHarnessConfig extends TestHarnessConfig {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.config.MockTestHarnessConfig");
 
     @PostConstruct
-    @Override
     public void initialize() throws IOException {
         super.credentialsDirectory = new File("src/test/resources").getCanonicalFile();
         logger.debug("Mock initialization");

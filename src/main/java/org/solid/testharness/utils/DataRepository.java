@@ -29,6 +29,7 @@ import org.solid.common.vocab.EARL;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import java.io.*;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -56,16 +57,16 @@ public class DataRepository implements Repository {
         logger.debug("INITIALIZE DATA REPOSITORY");
     }
 
-    public void loadTurtle(Reader reader) {
+    public void loadTurtle(URL url) {
         try (RepositoryConnection conn = getConnection()) {
             try {
-                conn.add(reader, RDFFormat.TURTLE);
+                conn.add(url, RDFFormat.TURTLE);
                 logger.debug("Loaded data into repository, size={}", conn.size());
             } catch (IOException e) {
-                logger.error("Failed to read data", e.getMessage());
+                logger.error("Failed to read data from {}: {}", url.toString(), e.getMessage());
             }
         } catch (RDF4JException e) {
-            logger.error("Failed to parse data", e.getMessage());
+            logger.error("Failed to parse data from {}: {}", url.toString(), e.getMessage());
         }
     }
 

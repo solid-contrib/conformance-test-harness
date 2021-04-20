@@ -4,6 +4,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.TestData;
 
 import javax.inject.Inject;
 import java.io.StringReader;
@@ -56,7 +57,7 @@ public class TargetServerTest {
                 "    solid-test:testContainer \"/test/\" ;\n" +
 //                "    solid-test:disableDPoP true ;\n" +
                 "    solid-test:setupAclRoot true .");
-        dataRepository.loadTurtle(reader);
+        TestData.insertData(dataRepository, reader);
         TargetServer targetServer = new TargetServer(iri("https://example.org/ess-compat"));
         assertAll("targetServer",
                 () -> assertNotNull(targetServer.getFeatures()),
@@ -105,7 +106,7 @@ public class TargetServerTest {
                 "@prefix solid: <http://www.w3.org/ns/solid/terms#> ." +
                 "<bad>\n" +
                 "    a earl:Software, earl:TestSubject .");
-        dataRepository.loadTurtle(reader);
+        TestData.insertData(dataRepository, reader);
         TargetServer targetServer = new TargetServer(iri("https://example.org/bad"));
         assertNull(targetServer.getLoginEndpoint());
         assertEquals(0, targetServer.getUsers().size());

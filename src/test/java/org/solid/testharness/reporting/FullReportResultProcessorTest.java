@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
 import java.io.*;
@@ -37,7 +38,7 @@ class FullReportResultProcessorTest {
     @Test
     void buildHtmlResultReportFromTarget() throws IOException {
         File reportFile = new File("target/test-result-report.html");
-        dataRepository.loadTurtle(new FileReader(new File("target/report.ttl")));
+        dataRepository.loadTurtle(TestUtils.getFileUrl("target/report.ttl"));
         FileWriter wr = new FileWriter(reportFile);
         resultProcessor.buildHtmlResultReport(wr);
         wr.close();
@@ -47,7 +48,7 @@ class FullReportResultProcessorTest {
     @Test
     void buildHtmlCoverageReportFromTarget() throws IOException {
         File reportFile = new File("target/test-coverage-report.html");
-        dataRepository.loadTurtle(new FileReader(new File("target/report.ttl")));
+        dataRepository.loadTurtle(TestUtils.getFileUrl("target/report.ttl"));
         FileWriter wr = new FileWriter(reportFile);
         resultProcessor.buildHtmlCoverageReport(wr);
         wr.close();

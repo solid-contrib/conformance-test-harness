@@ -21,6 +21,7 @@
 </header>
 
 <main>
+    {#if specificationTestCases}
     {#each specificationTestCases}
     <div property="dcterms:hasPart" resource="{it.subject}">
         <section about="{it.subject}" typeof="{it.typesList}">
@@ -41,6 +42,9 @@
         </section>
     </div>
     {/each}
+    {#else}
+    <p>No tests were discovered.</p>
+    {/if}
 </main>
 </body>
 </html>

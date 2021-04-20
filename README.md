@@ -243,6 +243,42 @@ Alternatively you can set these things on the command line:
 
 ### Execution
 
+#### Run from a single jar
+The test harness can be packaged into a single jar (which will eventually be a released binary):
+```shell
+mvn package
+```
+This creates `target/testharness-0.0.1-SNAPSHOT-runner.jar` which can be deployed to its own directory and run as:
+```shell
+java -jar testharness-0.0.1-SNAPSHOT-runner.jar
+```
+The command line options are:
+```
+usage: run
+ -c,--config <arg>   path to test subject config (Turtle)
+    --coverage       produce a coverage report
+ -h,--help           print this message
+ -o,--output <arg>   output directory
+ -s,--suite <arg>    test suite URI
+ -t,--target <arg>   target server
+```
+If you want to control the logging output or set up mappings between URIs and local directories for test features you can also 
+create `config/application.yaml` in your current working directory based on the definition shown above. Note that the jar file
+does not have to be in this directory. The command line options override any equivalent options set in any application properties file.
+An example of a minimal properties file which could be used to map test features would be:
+```yaml
+credentialsDir: PATH_TO_CREDENTIALS
+testSuiteNamespace: https://github.com/solid/conformance-test-harness/example/example.ttl#
+feature:
+  mappings:
+    - prefix: https://github.com/solid/conformance-test-harness/example
+      path: /Users/pete/work/solid/conformance-test-harness/example
+```
+The application wrapper is still under development so there will be changes to the above options and properties. 
+For example, the `testSuiteNamespace` will be removed and once a new method of generating access tokens has been added, 
+the `credentialsDir` will go. 
+
+
 #### From the command line via Maven
 To run the test suite with the default target server as defined in `config/application.yaml`:
 

@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,7 +29,7 @@ public class TestSuiteRunner {
     ResultProcessor resultProcessor;
 
     @Test
-    void testSuite() throws FileNotFoundException {
+    void testSuite() throws IOException {
         testRunner.loadTestSuite();
         testRunner.filterSupportedTests();
         List<String> featurePaths = testRunner.mapTestLocations();

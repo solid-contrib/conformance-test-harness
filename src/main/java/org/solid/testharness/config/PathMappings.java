@@ -2,11 +2,12 @@ package org.solid.testharness.config;
 
 import io.quarkus.arc.config.ConfigProperties;
 
+import java.util.Collections;
 import java.util.List;
 
 @ConfigProperties(prefix = "feature")
 public class PathMappings {
-    private List<Mapping> mappings;
+    private List<Mapping> mappings = Collections.emptyList();
 
     public void setMappings(List<Mapping> mappings) {
         this.mappings = mappings;

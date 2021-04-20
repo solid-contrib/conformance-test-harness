@@ -17,7 +17,7 @@ import org.solid.testharness.utils.DataRepository;
 
 import javax.enterprise.inject.spi.CDI;
 import java.io.File;
-import java.io.Reader;
+import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -54,8 +54,8 @@ public class TestSuiteDescription {
             "  ?feature a td:TestCase ." +
             "} ";
 
-    public void load(Reader reader) {
-        repository.loadTurtle(reader);
+    public void load(URL url) {
+        repository.loadTurtle(url);
     }
 
     public List<IRI> filterSupportedTestCases(Set<String> serverFeatures) {

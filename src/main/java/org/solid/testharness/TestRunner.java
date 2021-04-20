@@ -11,8 +11,7 @@ import org.solid.testharness.reporting.ReportGenerator;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
 
 @Dependent
@@ -26,13 +25,14 @@ public class TestRunner {
 
     private TestSuiteDescription suite;
 
-    public void loadTestSuite() throws FileNotFoundException {
+    public void loadTestSuite() {
         suite = new TestSuiteDescription();
-        suite.load(new FileReader(testHarnessConfig.getTestSuiteDescription()));
+        suite.load(testHarnessConfig.getTestSuiteDescription());
     }
 
-    public void filterSupportedTests() {
+    public void filterSupportedTests() throws IOException {
         // TODO: Consider running some initial tests to discover the features provided by a server
+        testHarnessConfig.loadConfig();
         List<IRI> testCases = suite.filterSupportedTestCases(testHarnessConfig.getTargetServer().getFeatures().keySet());
         logger.info("==== TEST CASES FOUND: {} - {}", testCases.size(), testCases);
     }
@@ -72,7 +72,8 @@ public class TestRunner {
                 .parallel(testHarnessConfig.getTargetServer().getMaxThreads());
     }
 
-    public Results runTest(String featurePath) {
+    public Results runTest(String featurePath) throws IOException {
+        testHarnessConfig.loadConfig();
         testHarnessConfig.registerClients();
         logger.info("===================== START SINGLE TEST ========================");
         return Runner.builder()

@@ -5,9 +5,9 @@ import io.quarkus.test.junit.TestProfile;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
-import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @QuarkusTest
 @TestProfile(ConfigSetupTestProfile.class)
@@ -25,5 +25,10 @@ public class TestHarnessConfigSetupTest {
     @Test
     void getClientsNotRegistered() {
         assertNull(testHarnessConfig.getClients());
+    }
+
+    @Test
+    void registerClientsWithException() {
+        assertThrows(RuntimeException.class, () -> testHarnessConfig.registerClients());
     }
 }
