@@ -7,8 +7,6 @@ import org.solid.testharness.config.TargetServer;
 import org.solid.testharness.config.UserCredentials;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;

@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.solid.testharness.TestRunner;
 
 import javax.inject.Inject;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -22,7 +21,9 @@ public class TestScenarioRunner {
 
     @Test
     void testScenario() {
-        Results results = testRunner.runTests(List.of("classpath:content-negotiation/content-negotiation-turtle.feature"));
+//        String featurePath = "classpath:content-negotiation/content-negotiation-turtle.feature";
+        String featurePath = "classpath:writing-resource/containment.feature";
+        Results results = testRunner.runTest(featurePath);
         assertNotNull(results);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());
     }

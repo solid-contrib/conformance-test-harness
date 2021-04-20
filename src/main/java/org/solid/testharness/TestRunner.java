@@ -48,6 +48,7 @@ public class TestRunner {
         return featurePaths;
     }
 
+    @SuppressWarnings("unchecked")
     public Results runTests(List<String> featurePaths) {
         testHarnessConfig.registerClients();
         logger.info("===================== START TESTS ========================");
@@ -63,14 +64,20 @@ public class TestRunner {
 //                .outputHtmlReport(true)
 //                .parallel(8);
 
-        List<String> tags = List.of("~@ignore");
-
-        Results results = Runner.builder()
+        return Runner.builder()
                 .path(featurePaths)
-                .tags(tags)
+                .tags("~@ignore")
                 .outputHtmlReport(true)
                 .suiteReports(reportGenerator)
                 .parallel(testHarnessConfig.getTargetServer().getMaxThreads());
-        return results;
+    }
+
+    public Results runTest(String featurePath) {
+        testHarnessConfig.registerClients();
+        logger.info("===================== START SINGLE TEST ========================");
+        return Runner.builder()
+                .path(featurePath)
+                .tags("~@ignore")
+                .parallel(1);
     }
 }
