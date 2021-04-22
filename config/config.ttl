@@ -53,9 +53,9 @@
     a earl:Software, earl:TestSubject ;
     doap:name "Community Solid Server" ;
     doap:release [
-                     doap:name "CSS 0.8.0" ;
-                     doap:revision "0.8.0" ;
-                     doap:created "2021-03-04"^^xsd:date
+                     doap:name "CSS 0.8.1" ;
+                     doap:revision "0.8.1" ;
+                     doap:created "2021-03-23"^^xsd:date
                  ] ;
     doap:developer <https://github.com/solid> ;
     doap:homepage <https://github.com/solid/community-server> ;

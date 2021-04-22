@@ -7,18 +7,20 @@
     <artifactId>testharness</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <properties>
-        <compiler-plugin.version>3.8.1</compiler-plugin.version>
         <maven.compiler.parameters>true</maven.compiler.parameters>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+        <!-- plugins -->
         <quarkus.package.type>uber-jar</quarkus.package.type>
-
+        <compiler-plugin.version>3.8.1</compiler-plugin.version>
         <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
+        <release.plugin.version>2.5.3</release.plugin.version>
         <jandex.maven.version>1.0.8</jandex.maven.version>
         <jacoco-plugin.version>0.8.6</jacoco-plugin.version>
+
         <!-- dependencies -->
         <quarkus.version>1.13.2.Final</quarkus.version>
         <karate.version>1.0.1</karate.version>
@@ -255,6 +257,14 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${compiler-plugin.version}</version>
+                <!--
+                <configuration>
+                    <compilerArgs>
+                        <arg>-Xlint:deprecation</arg>
+                        <arg>-Xlint:unchecked</arg>
+                    </compilerArgs>
+                </configuration>
+                -->
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -264,6 +274,15 @@
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                         <maven.home>${maven.home}</maven.home>
                     </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>${release.plugin.version}</version>
+                <configuration>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <goals>install</goals>
                 </configuration>
             </plugin>
             <plugin>
@@ -287,6 +306,14 @@
             </plugin>
         </plugins>
     </build>
+
+    <scm>
+        <connection>scm:git:git://github.com/solid/conformance-test-harness.git</connection>
+        <developerConnection>scm:git:git@github.com:solid/conformance-test-harness.git</developerConnection>
+        <url>https://github.com/solid/conformance-test-harness</url>
+        <tag>HEAD</tag>
+    </scm>
+
     <profiles>
         <profile>
             <id>unit</id>

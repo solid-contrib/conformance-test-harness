@@ -1,8 +1,9 @@
 # Default properties
 configFile:
 credentialsDir:
-target:
 testSuiteDescription:
+testSuiteNamespace:
+target:
 
 # Logging
 quarkus:

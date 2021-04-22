@@ -22,11 +22,13 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
+# project files
 .idea
 .gradle
 /build/
 /target/
 *.iml
+release.properties
 
 # ignore scratch and example directories (developer use only)
 /src/test/resources/examples/
@@ -45,3 +47,5 @@ gradle-app.setting
 # generated RDF artifacts - until they are published
 !generated-vocab-common*.jar
 
+# MacOS
+.DS_Store
