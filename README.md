@@ -1,5 +1,5 @@
 # conformance-test-harness
-Harness used to run Solid conformance tests and generate reports.
+The test harness used to run Solid conformance tests and generate reports.
 
 <!-- MarkdownTOC -->
 
@@ -24,6 +24,7 @@ Harness used to run Solid conformance tests and generate reports.
     - [Example test cases](#example-test-cases)
     - [Test patterns](#test-patterns)
 	- [Tips](#test-tips)
+- [Processes](#processes)
 
 <!-- /MarkdownTOC -->
 
@@ -197,7 +198,7 @@ First there is a description of this test harness, then sections to define each 
 There is a sample of this file in the `config/config.ttl` folder and this will be used unless you override this location as shown below.
 
 This system needs user credentials for authentication, but these should not be kept in the file itself. There is a reference to an
-external JSON file which can be shared between multliple servers and has the following format:
+external JSON file which can be shared between multiple servers and has the following format:
 ```json5
 {
   "webID":"https://pod-compat.inrupt.com/solid-test-suite-alice/profile/card#me",
@@ -211,47 +212,13 @@ external JSON file which can be shared between multliple servers and has the fol
 }
 ```
 
-### Setting up the environment
-There 5 important settings:
-* `target` - the name of the target server, used to select the server config from the config file
-* `configFile` - the location of the config file
-* `credentialsDir` - the location of the shared credentials files if used
-* `testSuiteDescription` - the location of the test suite description document that lists the test cases to be run
-* `feature:mappings` - maps test cases IRIs to a local file system (there can be multiple mappings)
-
-There are 2 ways to set these properties. Firstly you can provide `config/application.yaml` in the working directory containing:
-```yaml
-target: TARGET_SERVER
-configFile: PATH_TO_CONFIG
-credentialsDir: PATH_TO_CREDENTIALS
-testSuiteDescription: PATH_TO_TESTSUITE_DOC
-feature:
-  mappings:
-    - prefix: https://github.com/solid/conformance-test-harness/example
-      path: example
-```
-This method works well when testing your tests in an IDE as it doesn't require anything adding to the command line.
-
-Alternatively you can set these things on the command line:
-```
--Dtarget=TARGET_SERVER
--DconfigFile=PATH_TO_CONFIG
--DcredentialsDir=PATH_TO_CREDENTIALS
--testSuiteDescription=PATH_TO_TESTSUITE_DOC
-``` 
-**NOTE:** When the command line application is added the options will be detailed here.
-
 ### Execution
+The test harness is packaged into a single, executable jar which is available as an asset in the release within github: https://github.com/solid/conformance-test-harness/releases.
+The only dependency is on Java 11. You can run it and see its usage as follows:
+```shell
+java -jar solid-conformance-test-harness.jar --help
+```
 
-#### Run from a single jar
-The test harness can be packaged into a single jar (which will eventually be a released binary):
-```shell
-mvn package
-```
-This creates `target/testharness-0.0.1-SNAPSHOT-runner.jar` which can be deployed to its own directory and run as:
-```shell
-java -jar testharness-0.0.1-SNAPSHOT-runner.jar
-```
 The command line options are:
 ```
 usage: run
@@ -277,33 +244,6 @@ feature:
 The application wrapper is still under development so there will be changes to the above options and properties. 
 For example, the `testSuiteNamespace` will be removed and once a new method of generating access tokens has been added, 
 the `credentialsDir` will go. 
-
-
-#### From the command line via Maven
-To run the test suite with the default target server as defined in `config/application.yaml`:
-
-```shell
-# this uses a profile to run the TestSuiteRunner instead of local unit tests
-mvn test -Psolid
-```
-To run the test suite with a specific target server:
-```shell
-mvn test -Psolid -Dtarget=ess-compat
-mvn test -Psolid -Dtarget=css
-mvn test -Psolid -Dtarget=nss
-```
-#### Via an IDE
-Using an IDE you can also run a specific scenario by editing the TestScenarioRunner and then running it as you would any unit test:
-```Java
-Results results = testRunner.runTests(List.of("classpath:content-negotiation/content-negotiation-turtle.feature"));
-```
-
-You can also go to the TestSuiteRunnner class and run the whole test suite in the same way.
-
-**Note:** You must configure the IDE to include the following command line option to make Quarkus use the production profile when running tests:
-```
--Dquarkus.test.profile=prod
-```
 
 ## Test Reports
 |Report|Location|
@@ -382,3 +322,100 @@ When you know there is only one valid status there is a shortcut but in other ca
 * `* match [200, 201, 202] contains responseStatus`
 * `* match karate.range(200, 299) contains responseStatus` - note, this results in poor error messages as it lists all 100 mismatched values
 * `* assert responseStatus >= 200 && responseStatus < 300`
+
+## Processes
+### Checkout
+```shell
+git clone git@github.com:solid/conformance-test-harness.git
+```
+
+### Setting up the environment
+There 5 important settings:
+* `target` - the name of the target server, used to select the server config from the config file
+* `configFile` - the location of the config file
+* `credentialsDir` - the location of the shared credentials files if used
+* `testSuiteDescription` - the location of the test suite description document that lists the test cases to be run
+* `feature:mappings` - maps test cases IRIs to a local file system (there can be multiple mappings)
+
+There are 2 ways to set these properties. Firstly you can provide `config/application.yaml` in the working directory containing:
+```yaml
+target: TARGET_SERVER
+configFile: PATH_TO_CONFIG
+credentialsDir: PATH_TO_CREDENTIALS
+testSuiteDescription: PATH_TO_TESTSUITE_DOC
+feature:
+  mappings:
+    - prefix: https://github.com/solid/conformance-test-harness/example
+      path: example
+```
+This method works well when running your tests in an IDE as it doesn't require anything adding to the command line.
+
+Alternatively you can set these things on the command line:
+```
+-Dtarget=TARGET_SERVER
+-DconfigFile=PATH_TO_CONFIG
+-DcredentialsDir=PATH_TO_CREDENTIALS
+-testSuiteDescription=PATH_TO_TESTSUITE_DOC
+``` 
+
+### Build and test
+To run the unit tests on the harness itself:
+```shell
+mvn test
+```
+To run the test suite with the default target server as defined in `config/application.yaml`:
+```shell
+# this uses a profile to run the TestSuiteRunner instead of local unit tests
+mvn test -Psolid
+```
+To run the test suite with a specific target server:
+```shell
+mvn test -Psolid -Dtarget=ess-compat
+mvn test -Psolid -Dtarget=css
+mvn test -Psolid -Dtarget=nss
+```
+
+Using an IDE you can also run a specific scenario by editing the TestScenarioRunner and then running it as you would any unit test:
+```Java
+String featurePath = "classpath:writing-resource/containment.feature";
+Results results = testRunner.runTest(featurePath);
+```
+
+You can also go to the TestSuiteRunnner class and run the whole test suite in the same way.
+
+**Note:** You must configure the IDE to include the following command line option to make Quarkus use the production profile when running tests:
+```
+-Dquarkus.test.profile=prod
+```
+
+### Package
+The test harness can be packaged into a single jar:
+```shell
+mvn package
+```
+To quickly build this package without running the unit tests:
+```shell
+mvn -Dmaven.test.skip=true package
+```
+This creates `target/solid-conformance-test-harness-runner.jar` which can be deployed to its own directory and run as:
+```shell
+java -jar solid-conformance-test-harness-runner.jar
+```
+
+### Release
+```shell
+mvn release:prepare
+```
+The first time you run this it will ask various questions to help setup `release.properties` which will be used for future releases.
+This process automatically modifies `pom.xml` to prepare a release version, commits the change and tags the repository, then sets up the 
+project ready for the ongoing development of the next version. 
+
+You can test this process, and undo the results with:
+```shell
+mvn release:prepare -DdryRun=true
+mvn release:clean
+```
+
+Once the release has been completed you should go to the release tag in github and edit it. You can then upload
+`target/solid-conformance-test-harness-runner.jar` as an asset of the release.
+
