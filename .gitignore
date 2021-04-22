@@ -33,6 +33,7 @@ release.properties
 # ignore scratch and example directories (developer use only)
 /src/test/resources/examples/
 /src/test/resources/scratch/
+/src/test/java/scratch/
 /TODO.md
 
 # Ignore Gradle GUI config
