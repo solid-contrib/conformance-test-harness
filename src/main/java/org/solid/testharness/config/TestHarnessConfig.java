@@ -39,6 +39,7 @@ public class TestHarnessConfig {
     private URL testSuiteDescriptionFile;
     File credentialsDirectory;
     private boolean initialized = false;
+    private File outputDir;
 
     // the settings are taken in the following order of preference:
     //   system property
@@ -64,7 +65,7 @@ public class TestHarnessConfig {
     @Inject
     AuthManager authManager;
 
-    public void loadConfig() throws IOException {
+    public void loadTestSubjectConfig() throws IOException {
         if (!initialized) {
             initialized = true;
             logger.debug("Initializing Config");
@@ -176,6 +177,14 @@ public class TestHarnessConfig {
 
     public void setCredentialsDirectory(File credentialsDirectory) {
         this.credentialsDirectory = credentialsDirectory;
+    }
+
+    public void setOutputDirectory(File outputDir) throws IOException {
+        this.outputDir = outputDir.getCanonicalFile();
+    }
+
+    public File getOutputDirectory() {
+        return outputDir;
     }
 
     public List<PathMappings.Mapping> getPathMappings() {

@@ -1,10 +1,9 @@
-import com.intuit.karate.Results;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.solid.testharness.TestRunner;
+import org.solid.testharness.config.TestHarnessConfig;
+import org.solid.testharness.reporting.TestSuiteResults;
 
 import javax.inject.Inject;
 
@@ -14,16 +13,19 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @Tag("solid")
 @QuarkusTest
 public class TestScenarioRunner {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.TestScenarioRunner");
-
+    @Inject
+    TestHarnessConfig testHarnessConfig;
     @Inject
     TestRunner testRunner;
 
     @Test
     void testScenario() throws Exception {
+        testHarnessConfig.loadTestSubjectConfig();
+        testHarnessConfig.registerClients();
 //        String featurePath = "classpath:content-negotiation/content-negotiation-turtle.feature";
         String featurePath = "classpath:writing-resource/containment.feature";
-        Results results = testRunner.runTest(featurePath);
+        // TODO: what setup is needed - subject and register clients
+        TestSuiteResults results = testRunner.runTest(featurePath);
         assertNotNull(results);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());
     }

@@ -28,6 +28,8 @@ class TestSuiteDescriptionTest {
 
     @Inject
     DataRepository repository;
+    @Inject
+    TestSuiteDescription testSuiteDescription;
 
     @BeforeEach
     void setUp() {
@@ -38,85 +40,76 @@ class TestSuiteDescriptionTest {
 
     @Test
     void load() throws MalformedURLException {
-        TestSuiteDescription suite = new TestSuiteDescription();
-        suite.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        testSuiteDescription.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
         try (RepositoryConnection conn = repository.getConnection()) {
             assertFalse(conn.isEmpty());
         }
     }
 
     @Test
-    void filterSupportedTestCasesNullFeatures() throws MalformedURLException {
-        TestSuiteDescription suite = new TestSuiteDescription();
-        suite.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
-        List<IRI> features = suite.filterSupportedTestCases(null);
+    void getSupportedTestCasesNullFeatures() throws MalformedURLException {
+        testSuiteDescription.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        List<IRI> testCases = testSuiteDescription.getSupportedTestCases(null);
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3");
-        assertThat("Group 1 matches", features, containsInAnyOrder(expected));
+        assertThat("Group 1 matches", testCases, containsInAnyOrder(expected));
     }
 
     @Test
-    void filterSupportedTestCasesEmptyFeatures() throws MalformedURLException {
-        TestSuiteDescription suite = new TestSuiteDescription();
-        suite.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
-        List<IRI> features = suite.filterSupportedTestCases(Set.of());
+    void getSupportedTestCasesEmptyFeatures() throws MalformedURLException {
+        testSuiteDescription.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of());
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3");
-        assertThat("Groups 1 matches", features, containsInAnyOrder(expected));
+        assertThat("Groups 1 matches", testCases, containsInAnyOrder(expected));
     }
 
     @Test
-    void filterSupportedTestCasesOneFeature() throws MalformedURLException {
-        TestSuiteDescription suite = new TestSuiteDescription();
-        suite.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
-        List<IRI> features = suite.filterSupportedTestCases(Set.of("sf1"));
+    void getSupportedTestCasesOneFeature() throws MalformedURLException {
+        testSuiteDescription.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf1"));
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3", "group2/feature1");
-        assertThat("Groups 1, 2 match", features, containsInAnyOrder(expected));
+        assertThat("Groups 1, 2 match", testCases, containsInAnyOrder(expected));
     }
 
     @Test
-    void filterSupportedTestCasesFeature1And2() throws MalformedURLException {
-        TestSuiteDescription suite = new TestSuiteDescription();
-        suite.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
-        List<IRI> features = suite.filterSupportedTestCases(Set.of("sf1", "sf2"));
+    void getSupportedTestCasesFeature1And2() throws MalformedURLException {
+        testSuiteDescription.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf1", "sf2"));
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
                 "group2/feature1", "group3/feature1", "group3/feature2");
-        assertThat("Groups 1, 2, 3 match", features, containsInAnyOrder(expected));
+        assertThat("Groups 1, 2, 3 match", testCases, containsInAnyOrder(expected));
     }
 
     @Test
-    void filterSupportedTestCasesFeature1And3() throws MalformedURLException {
-        TestSuiteDescription suite = new TestSuiteDescription();
-        suite.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
-        List<IRI> features = suite.filterSupportedTestCases(Set.of("sf1", "sf3"));
+    void getSupportedTestCasesFeature1And3() throws MalformedURLException {
+        testSuiteDescription.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf1", "sf3"));
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
                 "group2/feature1", "group4/feature1", "group4/feature2", "group4/feature3");
-        assertThat("Groups 1, 2, 4 match", features, containsInAnyOrder(expected));
+        assertThat("Groups 1, 2, 4 match", testCases, containsInAnyOrder(expected));
     }
 
     @Test
-    void filterSupportedTestCasesAllFeatures() throws MalformedURLException {
-        TestSuiteDescription suite = new TestSuiteDescription();
-        suite.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
-        List<IRI> features = suite.filterSupportedTestCases(Set.of("sf1", "sf2", "sf3"));
+    void getSupportedTestCasesAllFeatures() throws MalformedURLException {
+        testSuiteDescription.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf1", "sf2", "sf3"));
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
                 "group2/feature1", "group3/feature1", "group3/feature2",
                 "group4/feature1", "group4/feature2", "group4/feature3"
         );
-        assertThat("All groups match", features, containsInAnyOrder(expected));
+        assertThat("All groups match", testCases, containsInAnyOrder(expected));
     }
 
     @Test
-    void filterSupportedTestCasesFeature3() throws MalformedURLException {
-        TestSuiteDescription suite = new TestSuiteDescription();
-        suite.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
-        List<IRI> features = suite.filterSupportedTestCases(Set.of("sf3"));
+    void getSupportedTestCasesFeature3() throws MalformedURLException {
+        testSuiteDescription.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf3"));
         IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3");
-        assertThat("Group 1 matches", features, containsInAnyOrder(expected));
+        assertThat("Group 1 matches", testCases, containsInAnyOrder(expected));
     }
 
     @Test
     void mapFeaturePaths() {
-        TestSuiteDescription suite = new TestSuiteDescription();
-        suite.testCases = List.of(
+        List<IRI> testCases = List.of(
                 iri("https://example.org/group1/feature1"), iri("https://example.org/group1/feature2"),
                 iri("https://example.org/group2/feature1"), iri("https://example.org/group3/feature1")
         );
@@ -124,10 +117,11 @@ class TestSuiteDescriptionTest {
                 PathMappings.Mapping.create("https://example.org/group1", "src/test/resources/dummy-features/group1"),
                 PathMappings.Mapping.create("https://example.org/group2", "src/test/resources/dummy-features/otherExample")
         );
-        List<String> paths = suite.locateTestCases(mappings);
+        List<String> paths = testSuiteDescription.locateTestCases(testCases, mappings);
         String[] expected = new String[]{"src/test/resources/dummy-features/group1/feature1", "src/test/resources/dummy-features/group1/feature2",
                 "src/test/resources/dummy-features/otherExample/feature1", "https://example.org/group3/feature1"};
         assertThat("Locations match", paths, containsInAnyOrder(expected));
+        // TODO: assert changes in repository
     }
 
     private IRI[] createIriList(String... testCases) {

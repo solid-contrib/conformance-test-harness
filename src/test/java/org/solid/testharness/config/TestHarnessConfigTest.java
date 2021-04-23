@@ -33,7 +33,7 @@ public class TestHarnessConfigTest {
     @Test
     void registerClients() throws Exception {
         when(authManager.authenticate(anyString(), any(TargetServer.class))).thenReturn(new SolidClient());
-        testHarnessConfig.loadConfig();
+        testHarnessConfig.loadTestSubjectConfig();
         testHarnessConfig.registerClients();
         Map<String, SolidClient> clients = testHarnessConfig.getClients();
         assertNotNull(clients);
@@ -43,7 +43,7 @@ public class TestHarnessConfigTest {
     @Test
     void registerClientsWithAuthException() throws Exception {
         when(authManager.authenticate(anyString(), any(TargetServer.class))).thenThrow(new Exception("Failed as expected"));
-        testHarnessConfig.loadConfig();
+        testHarnessConfig.loadTestSubjectConfig();
         testHarnessConfig.registerClients();
         Map<String, SolidClient> clients = testHarnessConfig.getClients();
         assertNotNull(clients);
@@ -52,14 +52,14 @@ public class TestHarnessConfigTest {
 
     @Test
     void getTargetServer() throws IOException {
-        testHarnessConfig.loadConfig();
+        testHarnessConfig.loadTestSubjectConfig();
         TargetServer targetServer = testHarnessConfig.getTargetServer();
         assertNotNull(targetServer);
     }
 
     @Test
     void getServers() throws IOException {
-        testHarnessConfig.loadConfig();
+        testHarnessConfig.loadTestSubjectConfig();
         Map<String, TargetServer> servers = testHarnessConfig.getServers();
         assertNotNull(servers);
         assertEquals(2, servers.size());
@@ -72,7 +72,7 @@ public class TestHarnessConfigTest {
     @Test
     void getClients() throws Exception {
         when(authManager.authenticate(anyString(), any(TargetServer.class))).thenReturn(new SolidClient());
-        testHarnessConfig.loadConfig();
+        testHarnessConfig.loadTestSubjectConfig();
         testHarnessConfig.registerClients();
         Map<String, SolidClient> clients = testHarnessConfig.getClients();
         assertNotNull(clients);

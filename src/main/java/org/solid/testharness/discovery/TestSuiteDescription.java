@@ -15,7 +15,8 @@ import org.solid.common.vocab.TD;
 import org.solid.testharness.config.PathMappings;
 import org.solid.testharness.utils.DataRepository;
 
-import javax.enterprise.inject.spi.CDI;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.io.File;
 import java.net.URL;
 import java.util.*;
@@ -25,16 +26,17 @@ import java.util.stream.Stream;
 /**
  * Representation of a test suite description document parsed from RDF
  */
+@ApplicationScoped
 public class TestSuiteDescription {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.discovery.TestSuiteDescription");
 
-    DataRepository repository;
-    List<IRI> testCases = new ArrayList<>();
+    @Inject
+    DataRepository dataRepository;
 
-    public TestSuiteDescription() {
-        this.repository = CDI.current().select(DataRepository.class).get();;
-    }
-
+    // TODO: This currently finds all td:SpecificationTestCase. It should pay attention to:
+    //   manifest: dcterms:hasPart manifest:testgroup
+    // This will give the developer a simple way to control which tests groups are run, either by changing the file
+    // or specifying on the comment line. It may also help if loading >1 test suite description
     private static final String SELECT_SUPPORTED_TEST_CASES =
             "PREFIX " + TD.PREFIX + ": <" + TD.NAMESPACE + ">\n" +
             "PREFIX " + DCTERMS.PREFIX + ": <" + DCTERMS.NAMESPACE + ">\n" +
@@ -54,22 +56,35 @@ public class TestSuiteDescription {
             "  ?feature a td:TestCase ." +
             "} ";
 
+    /**
+     * Load data from the URL
+     * @param url
+     */
     public void load(URL url) {
-        repository.loadTurtle(url);
+        // TODO: Search for linked test suite documents or specifications and load data from them as well
+        dataRepository.loadTurtle(url);
     }
 
-    public List<IRI> filterSupportedTestCases(Set<String> serverFeatures) {
+    /**
+     * This searches the whole dataRepository for supported test cases based on the server capabilities
+     * @param serverFeatures
+     * @return List of features
+     */
+    public List<IRI> getSupportedTestCases(Set<String> serverFeatures) {
         String serverFeatureList = serverFeatures != null && !serverFeatures.isEmpty() ? "\"" + String.join("\", \"", serverFeatures) + "\"" : "";
-        selectTestCases(String.format(SELECT_SUPPORTED_TEST_CASES, serverFeatureList));
-        return testCases;
+        return selectTestCases(String.format(SELECT_SUPPORTED_TEST_CASES, serverFeatureList));
     }
 
-    public List<String> locateTestCases(List<PathMappings.Mapping> pathMappings) {
+    public List<IRI> getAllTestCases() {
+        return selectTestCases(SELECT_ALL_TEST_CASES);
+    }
+
+    public List<String> locateTestCases(List<IRI> testCases, List<PathMappings.Mapping> pathMappings) {
         if (testCases.isEmpty()) {
-            selectTestCases(SELECT_ALL_TEST_CASES);
+            return Collections.EMPTY_LIST;
         }
         Stream<String> testCaseStream;
-        try (RepositoryConnection conn = repository.getConnection()) {
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
             if (pathMappings == null || pathMappings.isEmpty()) {
                 testCaseStream = testCases.stream().map(t -> t.stringValue());
             } else {
@@ -80,6 +95,7 @@ public class TestSuiteDescription {
                         String mappedLocation = location.replace(mapping.prefix, mapping.path);
                         File file = new File(mappedLocation);
                         if (!file.exists()) {
+                            // TODO: if starter feature files are auto-generated, read for @ignore as well
                             logger.warn("FEATURE NOT IMPLEMENTED: {}", mappedLocation);
                             conn.add(t, EARL.mode, EARL.untested);
                             return null;
@@ -98,8 +114,9 @@ public class TestSuiteDescription {
         return Collections.EMPTY_LIST;
     }
 
-    private void selectTestCases(String query) {
-        try (RepositoryConnection conn = repository.getConnection()) {
+    private List<IRI> selectTestCases(String query) {
+        List<IRI> testCases = new ArrayList<>();
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
             TupleQuery tupleQuery = conn.prepareTupleQuery(query);
             try (TupleQueryResult result = tupleQuery.evaluate()) {
                 while (result.hasNext()) {
@@ -111,5 +128,6 @@ public class TestSuiteDescription {
         } catch (RDF4JException e) {
             logger.error("Failed to setup namespaces", e);
         }
+        return testCases;
     }
 }

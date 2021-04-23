@@ -2,16 +2,13 @@ package org.solid.testharness;
 
 import com.intuit.karate.Results;
 import com.intuit.karate.Runner;
-import org.eclipse.rdf4j.model.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.solid.testharness.config.TestHarnessConfig;
-import org.solid.testharness.discovery.TestSuiteDescription;
-import org.solid.testharness.reporting.ReportGenerator;
+import org.solid.testharness.reporting.TestSuiteResults;
+import org.solid.testharness.utils.FeatureResultHandler;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
-import java.io.IOException;
 import java.util.List;
 
 @Dependent
@@ -19,38 +16,10 @@ public class TestRunner {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.TestRunner");
 
     @Inject
-    TestHarnessConfig testHarnessConfig;
-    @Inject
-    ReportGenerator reportGenerator;
-
-    private TestSuiteDescription suite;
-
-    public void loadTestSuite() {
-        suite = new TestSuiteDescription();
-        suite.load(testHarnessConfig.getTestSuiteDescription());
-    }
-
-    public void filterSupportedTests() throws IOException {
-        // TODO: Consider running some initial tests to discover the features provided by a server
-        testHarnessConfig.loadConfig();
-        List<IRI> testCases = suite.filterSupportedTestCases(testHarnessConfig.getTargetServer().getFeatures().keySet());
-        logger.info("==== TEST CASES FOUND: {} - {}", testCases.size(), testCases);
-    }
-
-    public List<String> mapTestLocations() {
-        logger.info("===================== DISCOVER TESTS ========================");
-        List<String> featurePaths = suite.locateTestCases(testHarnessConfig.getPathMappings());
-        if (featurePaths.isEmpty()) {
-            logger.warn("There are no tests available");
-        } else {
-            logger.info("==== RUNNING {} TEST CASES: {}", featurePaths.size(), featurePaths);
-        }
-        return featurePaths;
-    }
+    FeatureResultHandler featureResultHandler;
 
     @SuppressWarnings("unchecked")
-    public Results runTests(List<String> featurePaths) {
-        testHarnessConfig.registerClients();
+    public TestSuiteResults runTests(List<String> featurePaths, int threads) {
         logger.info("===================== START TESTS ========================");
 
         // we can also create Features which may be useful when fetching from remote resource although this may cause problems with
@@ -64,21 +33,21 @@ public class TestRunner {
 //                .outputHtmlReport(true)
 //                .parallel(8);
 
-        return Runner.builder()
+        Results results = Runner.builder()
                 .path(featurePaths)
                 .tags("~@ignore")
                 .outputHtmlReport(true)
-                .suiteReports(reportGenerator)
-                .parallel(testHarnessConfig.getTargetServer().getMaxThreads());
+                .suiteReports(featureResultHandler)
+                .parallel(threads);
+        return new TestSuiteResults(results);
     }
 
-    public Results runTest(String featurePath) throws IOException {
-        testHarnessConfig.loadConfig();
-        testHarnessConfig.registerClients();
+    public TestSuiteResults runTest(String featurePath) {
         logger.info("===================== START SINGLE TEST ========================");
-        return Runner.builder()
+        Results results = Runner.builder()
                 .path(featurePath)
                 .tags("~@ignore")
                 .parallel(1);
+        return new TestSuiteResults(results);
     }
 }
