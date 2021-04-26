@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.solid.testharness</groupId>
     <artifactId>testharness</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3-SNAPSHOT</version>
     <properties>
         <maven.compiler.parameters>true</maven.compiler.parameters>
         <maven.compiler.source>11</maven.compiler.source>
@@ -309,7 +309,7 @@
         <connection>scm:git:git://github.com/solid/conformance-test-harness.git</connection>
         <developerConnection>scm:git:git@github.com:solid/conformance-test-harness.git</developerConnection>
         <url>https://github.com/solid/conformance-test-harness</url>
-        <tag>v0.0.2</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <profiles>
