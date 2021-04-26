@@ -401,6 +401,7 @@ java -jar solid-conformance-test-harness-runner.jar
 ```
 
 ### Release
+Update CHANGELOG.md to highlight new features before starting the release.
 ```shell
 mvn release:prepare
 ```

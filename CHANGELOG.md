@@ -4,6 +4,7 @@
 
 ### Features
 * Improvements to the release process
+* Command line application ready for use - see the section on Execution in README.md
 
 ## Release 0.0.1
 
