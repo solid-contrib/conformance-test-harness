@@ -15,14 +15,14 @@ import java.io.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
-class ResultProcessorTest {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.reporting.ResultProcessorTest");
+class ReportGeneratorTest {
+    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.reporting.ReportGeneratorTest");
 
     @Inject
     DataRepository dataRepository;
 
     @Inject
-    ResultProcessor resultProcessor;
+    ReportGenerator reportGenerator;
 
     @BeforeEach
     void setUp() {
@@ -38,8 +38,8 @@ class ResultProcessorTest {
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/testsuite-results-sample.ttl"));
         StringWriter sw = new StringWriter();
-        resultProcessor.buildHtmlResultReport(sw);
-        logger.debug("OUTPUT:\n{}", sw.toString());
+        reportGenerator.buildHtmlResultReport(sw);
+        logger.debug("OUTPUT:\n{}", sw);
         assertTrue(sw.toString().length() > 1);
     }
 
@@ -49,8 +49,8 @@ class ResultProcessorTest {
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/coverage-sample.ttl"));
         StringWriter sw = new StringWriter();
-        resultProcessor.buildHtmlCoverageReport(sw);
-        logger.debug("OUTPUT:\n{}", sw.toString());
+        reportGenerator.buildHtmlCoverageReport(sw);
+        logger.debug("OUTPUT:\n{}", sw);
         assertTrue(sw.toString().length() > 1);
     }
 
@@ -62,7 +62,7 @@ class ResultProcessorTest {
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/testsuite-results-sample.ttl"));
         FileWriter wr = new FileWriter(reportFile);
-        resultProcessor.buildHtmlResultReport(wr);
+        reportGenerator.buildHtmlResultReport(wr);
         wr.close();
         assertTrue(reportFile.exists());
     }
@@ -74,7 +74,7 @@ class ResultProcessorTest {
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/coverage-sample.ttl"));
         FileWriter wr = new FileWriter(reportFile);
-        resultProcessor.buildHtmlCoverageReport(wr);
+        reportGenerator.buildHtmlCoverageReport(wr);
         wr.close();
         assertTrue(reportFile.exists());
     }}

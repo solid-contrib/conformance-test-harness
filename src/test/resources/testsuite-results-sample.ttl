@@ -18,7 +18,7 @@
     a earl:Assertion;
     earl:assertedBy <https://github.com/solid/conformance-test-harness/>;
     earl:test <https://example.org/group1/feature1>;
-    earl:subject test-harness:ess-compat;
+    earl:subject test-harness:testserver;
     earl:mode earl:automatic;
     earl:result <https://example.org/group1/feature1/genid/node1f273av6vx12> .
 
@@ -38,7 +38,7 @@
     a earl:Assertion;
     earl:assertedBy <https://github.com/solid/conformance-test-harness/>;
     earl:test <https://example.org/group1/feature1/genid/node1f273av6vx13>;
-    earl:subject test-harness:ess-compat;
+    earl:subject test-harness:testserver;
     earl:mode earl:automatic;
     earl:result <https://example.org/group1/feature1/genid/node1f273av6vx15> .
 
@@ -168,7 +168,7 @@
     a earl:Assertion;
     earl:assertedBy <https://github.com/solid/conformance-test-harness/>;
     earl:test <https://example.org/group1/feature1/genid/node1f273av6vx42>;
-    earl:subject test-harness:ess-compat;
+    earl:subject test-harness:testserver;
     earl:mode earl:automatic;
     earl:result <https://example.org/group1/feature1/genid/node1f273av6vx44> .
 

@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
@@ -164,44 +164,40 @@ class DataRepositoryTest {
     @Test
     void loadTurtle() throws MalformedURLException {
         DataRepository dataRepository = new DataRepository();
-        URL url = Paths.get("src/test/resources/config-sample.ttl").normalize().toUri().toURL();
+        URL url = Path.of("src/test/resources/config-sample.ttl").normalize().toUri().toURL();
         dataRepository.loadTurtle(url);
         assertEquals(55, dataRepositorySize(dataRepository));
     }
 
     @Test
-    void loadTurtleBadUrl() throws MalformedURLException {
+    void loadTurtleBadUrl() {
         DataRepository dataRepository = new DataRepository();
-        dataRepository.loadTurtle(new URL("file:/missing.txt"));
-        assertEquals(0, dataRepositorySize(dataRepository));
+        assertThrows(TestHarnessInitializationException.class, () -> dataRepository.loadTurtle(new URL("file:/missing.txt")));
     }
 
     @Test
-    void loadTurtleBadData() throws MalformedURLException {
+    void loadTurtleBadData() {
         DataRepository dataRepository = new DataRepository();
-        dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/inrupt-alice.json"));
-        assertEquals(0, dataRepositorySize(dataRepository));
+        assertThrows(TestHarnessInitializationException.class, () -> dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/inrupt-alice.json")));
     }
 
     @Test
-    void loadRdfa() {
+    void loadRdfa() throws MalformedURLException {
         DataRepository dataRepository = new DataRepository();
-        dataRepository.loadRdfa(new StringReader(TestData.SAMPLE_HTML), TestData.SAMPLE_BASE);
+        dataRepository.loadRdfa(TestUtils.getFileUrl("src/test/resources/rdfa-sample.html"), TestData.SAMPLE_BASE);
         assertEquals(1, dataRepositorySize(dataRepository));
     }
 
     @Test
-    void loadRdfaBadFile() {
+    void loadRdfaBadUrl() {
         DataRepository dataRepository = new DataRepository();
-        dataRepository.loadRdfa(getBadReader(), TestData.SAMPLE_BASE);
-        assertEquals(0, dataRepositorySize(dataRepository));
+        assertThrows(TestHarnessInitializationException.class, () -> dataRepository.loadRdfa(new URL("file:/missing.txt"), TestData.SAMPLE_BASE));
     }
 
     @Test
     void loadRdfaBadData() {
         DataRepository dataRepository = new DataRepository();
-        dataRepository.loadRdfa(new StringReader(TestData.SAMPLE_JSONLD), TestData.SAMPLE_BASE);
-        assertEquals(0, dataRepositorySize(dataRepository));
+        assertThrows(TestHarnessInitializationException.class, () -> dataRepository.loadRdfa(TestUtils.getFileUrl("src/test/resources/jsonld-sample.json"), TestData.SAMPLE_BASE));
     }
 
     @Test
@@ -210,7 +206,7 @@ class DataRepositoryTest {
         File dataDir = new File("/tmp");
         dataRepository.setDataDir(dataDir);
         File newDataDir = dataRepository.getDataDir();
-        assertTrue(dataDir.equals(newDataDir));
+        assertEquals(dataDir, newDataDir);
         assertFalse(dataRepository.isInitialized());
         dataRepository.initialize();
         assertTrue(dataRepository.isInitialized());

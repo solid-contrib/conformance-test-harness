@@ -6,27 +6,25 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 @TestProfile(FullReportTestProfile.class)
 @Disabled
-class FullReportResultProcessorTest {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.reporting.ResultProcessorTest");
-
+class FullReportReportGeneratorTest {
     @Inject
     DataRepository dataRepository;
 
     @Inject
-    ResultProcessor resultProcessor;
+    ReportGenerator reportGenerator;
 
     @BeforeEach
     void setUp() {
@@ -40,7 +38,7 @@ class FullReportResultProcessorTest {
         File reportFile = new File("target/test-result-report.html");
         dataRepository.loadTurtle(TestUtils.getFileUrl("target/report.ttl"));
         FileWriter wr = new FileWriter(reportFile);
-        resultProcessor.buildHtmlResultReport(wr);
+        reportGenerator.buildHtmlResultReport(wr);
         wr.close();
         assertTrue(reportFile.exists());
     }
@@ -50,7 +48,7 @@ class FullReportResultProcessorTest {
         File reportFile = new File("target/test-coverage-report.html");
         dataRepository.loadTurtle(TestUtils.getFileUrl("target/report.ttl"));
         FileWriter wr = new FileWriter(reportFile);
-        resultProcessor.buildHtmlCoverageReport(wr);
+        reportGenerator.buildHtmlCoverageReport(wr);
         wr.close();
         assertTrue(reportFile.exists());
     }

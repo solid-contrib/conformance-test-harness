@@ -23,6 +23,6 @@ function fn() {
         // servers,
         ...additionalConfig,
         clients: karate.toMap(harnessConfig.clients),
-        webIds: target.webIds
+        webIds: target ? target.webIds : {}
     };
 }

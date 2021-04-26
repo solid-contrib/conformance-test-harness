@@ -16,8 +16,8 @@ import java.io.Writer;
 import static org.eclipse.rdf4j.model.util.Values.iri;
 
 @ApplicationScoped
-public class ResultProcessor {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.reporting.ResultProcessor");
+public class ReportGenerator {
+    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.reporting.ReportGenerator");
 
     @Inject
     DataRepository repository;
@@ -38,7 +38,7 @@ public class ResultProcessor {
     public void printReportToConsole() throws Exception {
         StringWriter sw = new StringWriter();
         repository.export(sw);
-        logger.info("REPORT\n{}", sw.toString());
+        logger.info("REPORT\n{}", sw);
     }
 
     public void buildHtmlCoverageReport(Writer writer) throws IOException {

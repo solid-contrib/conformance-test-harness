@@ -14,6 +14,7 @@ import org.solid.common.vocab.EARL;
 import org.solid.common.vocab.TD;
 import org.solid.testharness.config.PathMappings;
 import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -58,7 +59,7 @@ public class TestSuiteDescription {
 
     /**
      * Load data from the URL
-     * @param url
+     * @param url starting point for discovering tests
      */
     public void load(URL url) {
         // TODO: Search for linked test suite documents or specifications and load data from them as well
@@ -67,7 +68,7 @@ public class TestSuiteDescription {
 
     /**
      * This searches the whole dataRepository for supported test cases based on the server capabilities
-     * @param serverFeatures
+     * @param serverFeatures set of supported features
      * @return List of features
      */
     public List<IRI> getSupportedTestCases(Set<String> serverFeatures) {
@@ -86,7 +87,7 @@ public class TestSuiteDescription {
         Stream<String> testCaseStream;
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             if (pathMappings == null || pathMappings.isEmpty()) {
-                testCaseStream = testCases.stream().map(t -> t.stringValue());
+                testCaseStream = testCases.stream().map(Value::stringValue);
             } else {
                 testCaseStream = testCases.stream().map(t -> {
                     String location = t.stringValue();
@@ -109,9 +110,8 @@ public class TestSuiteDescription {
             }
             return testCaseStream.collect(Collectors.toList());
         } catch (RDF4JException e) {
-            logger.error("Failed to setup namespaces", e);
+            throw new TestHarnessInitializationException(e.toString());
         }
-        return Collections.EMPTY_LIST;
     }
 
     private List<IRI> selectTestCases(String query) {
@@ -126,7 +126,7 @@ public class TestSuiteDescription {
                 }
             }
         } catch (RDF4JException e) {
-            logger.error("Failed to setup namespaces", e);
+            throw new TestHarnessInitializationException(e.toString());
         }
         return testCases;
     }

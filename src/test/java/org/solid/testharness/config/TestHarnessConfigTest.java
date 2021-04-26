@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.http.AuthManager;
 import org.solid.testharness.http.SolidClient;
+import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -44,29 +45,26 @@ public class TestHarnessConfigTest {
     void registerClientsWithAuthException() throws Exception {
         when(authManager.authenticate(anyString(), any(TargetServer.class))).thenThrow(new Exception("Failed as expected"));
         testHarnessConfig.loadTestSubjectConfig();
-        testHarnessConfig.registerClients();
-        Map<String, SolidClient> clients = testHarnessConfig.getClients();
-        assertNotNull(clients);
-        assertEquals(0, clients.size());
+        assertThrows(TestHarnessInitializationException.class, () -> testHarnessConfig.registerClients());
     }
 
     @Test
-    void getTargetServer() throws IOException {
+    void getTargetServer() {
         testHarnessConfig.loadTestSubjectConfig();
         TargetServer targetServer = testHarnessConfig.getTargetServer();
         assertNotNull(targetServer);
     }
 
     @Test
-    void getServers() throws IOException {
+    void getServers() {
         testHarnessConfig.loadTestSubjectConfig();
         Map<String, TargetServer> servers = testHarnessConfig.getServers();
         assertNotNull(servers);
         assertEquals(2, servers.size());
-        assertTrue(servers.containsKey("https://github.com/solid/conformance-test-harness/ess-compat"));
-        assertEquals("https://pod-compat.inrupt.com", servers.get("https://github.com/solid/conformance-test-harness/ess-compat").getServerRoot());
-        assertTrue(servers.containsKey("https://github.com/solid/conformance-test-harness/css"));
-        assertEquals("http://localhost:3000", servers.get("https://github.com/solid/conformance-test-harness/css").getServerRoot());
+        assertTrue(servers.containsKey("https://github.com/solid/conformance-test-harness/testserver"));
+        assertEquals("https://pod-compat.inrupt.com", servers.get("https://github.com/solid/conformance-test-harness/testserver").getServerRoot());
+        assertTrue(servers.containsKey("https://github.com/solid/conformance-test-harness/testserver2"));
+        assertEquals("http://localhost:3000", servers.get("https://github.com/solid/conformance-test-harness/testserver2").getServerRoot());
     }
 
     @Test
@@ -86,7 +84,7 @@ public class TestHarnessConfigTest {
     @Test
     void getTestSuiteDescription() {
         URL url = testHarnessConfig.getTestSuiteDescription();
-        assertTrue(url.getProtocol().equals("file"));
+        assertEquals("file", url.getProtocol());
     }
 
     @Test

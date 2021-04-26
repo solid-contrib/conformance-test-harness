@@ -9,13 +9,20 @@ target: ess-compat
 "%test":
   configFile: src/test/resources/config-sample.ttl
   credentialsDir: src/test/resources
-  target: ess-compat
+  target: testserver
   testSuiteDescription: src/test/resources/testsuite-sample.ttl
   testSuiteNamespace: https://example.org/example.ttl#
   feature:
     mappings:
       - prefix: https://example.org
         path: src/test/resources/dummy-features
+
+  quarkus:
+    log:
+      category:
+        "org.solid.testharness.http.AuthManager":
+          level: DEBUG
+
 
 #includeAllServers: true
 

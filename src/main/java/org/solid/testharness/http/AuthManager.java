@@ -51,7 +51,7 @@ public class AuthManager {
             } else if (userConfig.isUsingRefreshToken()) {
                 tokens = exchangeRefreshToken(authClient, userConfig, targetServer);
             } else {
-                logger.warn("Neither login credentials nor refresh token details provided");
+                logger.warn("Neither login credentials nor refresh token details provided for {}", user);
                 return null;
             }
             String accessToken = tokens.getAccessToken();
@@ -167,7 +167,7 @@ public class AuthManager {
             HttpResponse<Void> authResponse = client.send(request, HttpResponse.BodyHandlers.discarding());
             HttpUtils.logResponse(logger, authResponse);
             Optional<String> locationHeader = authResponse.headers().firstValue("Location");
-            redirectUrl = locationHeader.isPresent() ? authorizeEndpoint.resolve(locationHeader.get()) : null;
+            redirectUrl = locationHeader.map(authorizeEndpoint::resolve).orElse(null);
         } while (redirectUrl != null && !redirectUrl.toString().startsWith(appOrigin));
 
         if (redirectUrl == null) {

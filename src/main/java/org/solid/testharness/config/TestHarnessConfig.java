@@ -13,6 +13,7 @@
  import org.solid.testharness.http.SolidClient;
  import org.solid.testharness.utils.DataRepository;
  import org.solid.testharness.utils.Namespaces;
+ import org.solid.testharness.utils.TestHarnessInitializationException;
 
  import javax.enterprise.context.ApplicationScoped;
  import javax.inject.Inject;
@@ -20,7 +21,7 @@
  import java.io.IOException;
  import java.net.MalformedURLException;
  import java.net.URL;
- import java.nio.file.Paths;
+ import java.nio.file.Path;
  import java.util.HashMap;
  import java.util.List;
  import java.util.Map;
@@ -65,7 +66,7 @@ public class TestHarnessConfig {
     @Inject
     AuthManager authManager;
 
-    public void loadTestSubjectConfig() throws IOException {
+    public void loadTestSubjectConfig()  {
         if (!initialized) {
             initialized = true;
             logger.debug("Initializing Config");
@@ -99,14 +100,14 @@ public class TestHarnessConfig {
     public void registerClients() {
         logger.info("===================== REGISTER CLIENTS ========================");
         if (targetServer == null) {
-            throw new RuntimeException("No target server has been configured");
+            throw new TestHarnessInitializationException("No target server has been configured");
         }
         clients = new HashMap<>();
         targetServer.getUsers().keySet().forEach(user -> {
             try {
                 clients.put(user, authManager.authenticate(user, targetServer));
             } catch (Exception e) {
-                logger.error("Failed to register clients", e);
+                throw new TestHarnessInitializationException("Failed to register clients: %s", e.toString());
             }
         });
     }
@@ -137,7 +138,7 @@ public class TestHarnessConfig {
     public URL getConfigUrl() {
         if (configUrl == null) {
             try {
-                configUrl = Paths.get(configPath).toAbsolutePath().normalize().toUri().toURL();
+                configUrl = Path.of(configPath).toAbsolutePath().normalize().toUri().toURL();
             } catch (MalformedURLException e) {
                 throw new RuntimeException("configPath config is not a valid file or URL", e);
             }
@@ -152,7 +153,7 @@ public class TestHarnessConfig {
     public URL getTestSuiteDescription()  {
         if (testSuiteDescriptionFile == null) {
             try {
-                testSuiteDescriptionFile = Paths.get(testSuiteDescription).toAbsolutePath().normalize().toUri().toURL();
+                testSuiteDescriptionFile = Path.of(testSuiteDescription).toAbsolutePath().normalize().toUri().toURL();
             } catch (MalformedURLException e) {
                 throw new RuntimeException("testSuiteDescription config is not a valid file or URL", e);
             }
@@ -175,12 +176,8 @@ public class TestHarnessConfig {
         return credentialsDirectory;
     }
 
-    public void setCredentialsDirectory(File credentialsDirectory) {
-        this.credentialsDirectory = credentialsDirectory;
-    }
-
-    public void setOutputDirectory(File outputDir) throws IOException {
-        this.outputDir = outputDir.getCanonicalFile();
+    public void setOutputDirectory(File outputDir) {
+        this.outputDir = outputDir;
     }
 
     public File getOutputDirectory() {
@@ -191,9 +188,9 @@ public class TestHarnessConfig {
         return pathMappings.getMappings();
     }
 
-    private void logSettings() throws IOException {
+    private void logSettings() {
         logger.info("Config url:       {}", getConfigUrl().toString());
-        logger.info("Credentials path: {}", getCredentialsDirectory().getCanonicalPath());
+        logger.info("Credentials path: {}", getCredentialsDirectory().getPath());
         logger.info("Test suite:       {}", getTestSuiteDescription().toString());
         logger.info("Path mappings:    {}", pathMappings.getMappings());
         logger.info("Target server:    {}", getTestSubject().stringValue());

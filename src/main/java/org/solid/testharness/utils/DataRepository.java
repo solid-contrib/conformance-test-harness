@@ -58,24 +58,24 @@ public class DataRepository implements Repository {
     }
 
     public void loadTurtle(URL url) {
-        try (RepositoryConnection conn = getConnection()) {
-            try {
-                conn.add(url, RDFFormat.TURTLE);
-                logger.debug("Loaded data into repository, size={}", conn.size());
-            } catch (IOException e) {
-                logger.error("Failed to read data from {}: {}", url.toString(), e.getMessage());
-            }
-        } catch (RDF4JException e) {
-            logger.error("Failed to parse data from {}: {}", url.toString(), e.getMessage());
-        }
+        loadData(url, null, RDFFormat.TURTLE);
     }
 
-    public void loadRdfa(Reader reader, String baseUri) {
+    public void loadRdfa(URL url, String baseUri) {
+        loadData(url, baseUri, RDFFormat.RDFA);
+    }
+
+    public void loadData(URL url, String baseUri, RDFFormat format) {
         try (RepositoryConnection conn = getConnection()) {
-            conn.add(reader, baseUri, RDFFormat.RDFA);
-            logger.debug("Loaded data into repository, size={}", conn.size());
-        } catch (IOException | RDF4JException e) {
-            logger.error("Failed to parse data", e.getMessage());
+            try {
+                logger.info("Loading {} from {}", format.getName(), url.toString());
+                conn.add(url, baseUri, format);
+                logger.debug("Loaded data into repository, size={}", conn.size());
+            } catch (IOException e) {
+                throw new TestHarnessInitializationException("Failed to read data from %s: %s", url.toString(), e.toString());
+            }
+        } catch (RDF4JException e) {
+            throw new TestHarnessInitializationException("Failed to parse data: %s", e.toString());
         }
     }
 
@@ -144,7 +144,7 @@ public class DataRepository implements Repository {
                 }
             }
         } catch (Exception e) {
-            logger.error("Failed to load feature result", e.getMessage());
+            logger.error("Failed to load feature result: {}", e.getMessage());
         }
     }
 

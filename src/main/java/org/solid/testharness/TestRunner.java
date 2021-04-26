@@ -2,8 +2,7 @@ package org.solid.testharness;
 
 import com.intuit.karate.Results;
 import com.intuit.karate.Runner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.solid.testharness.reporting.TestSuiteResults;
 import org.solid.testharness.utils.FeatureResultHandler;
 
@@ -13,15 +12,11 @@ import java.util.List;
 
 @Dependent
 public class TestRunner {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.TestRunner");
-
     @Inject
     FeatureResultHandler featureResultHandler;
 
     @SuppressWarnings("unchecked")
     public TestSuiteResults runTests(List<String> featurePaths, int threads) {
-        logger.info("===================== START TESTS ========================");
-
         // we can also create Features which may be useful when fetching from remote resource although this may cause problems with
         // loading other features files due to classpath issues - Karate may need a RemoteResource type that knows how to fetch related
         // resources from the same URL the feature came from
@@ -43,7 +38,9 @@ public class TestRunner {
     }
 
     public TestSuiteResults runTest(String featurePath) {
-        logger.info("===================== START SINGLE TEST ========================");
+        if (StringUtils.isBlank(featurePath)) {
+            throw new IllegalArgumentException("featurePath is a required parameter");
+        }
         Results results = Runner.builder()
                 .path(featurePath)
                 .tags("~@ignore")

@@ -18,7 +18,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Formatter;
 
@@ -40,14 +39,14 @@ public class Application implements QuarkusApplication {
      */
 
     @Override
-    public int run(String... args) throws Exception {
+    public int run(String... args) {
         logger.debug("Args: {}", Arrays.toString(args));
 
         Options options = new Options();
         options.addOption(Option.builder().longOpt("coverage").desc("produce a coverage report").build());
-        options.addOption("c", "config", true, "path to test subject config (Turtle)");
+        options.addOption("c", "config", true, "URL or path to test subject config (Turtle)");
         options.addOption("t", "target", true, "target server");
-        options.addOption("s", "suite", true, "test suite URI");
+        options.addOption("s", "suite", true, "URL or path to test suite description");
         options.addOption("o", "output", true, "output directory");
 //        options.addOption("f", "feature", true, "feature filter");
         options.addOption("h", "help", false, "print this message");
@@ -61,10 +60,10 @@ public class Application implements QuarkusApplication {
             } else {
                 File outputDir;
                 if (line.hasOption("output") && !StringUtils.isEmpty(line.getOptionValue("output"))) {
-                    outputDir = Paths.get(line.getOptionValue("output")).toAbsolutePath().normalize().toFile();
-                    logger.debug("Output = {}", outputDir.getCanonicalPath());
+                    outputDir = Path.of(line.getOptionValue("output")).toAbsolutePath().normalize().toFile();
+                    logger.debug("Output = {}", outputDir.getPath());
                 } else {
-                    outputDir = Paths.get("").toAbsolutePath().toFile();
+                    outputDir = Path.of("").toAbsolutePath().toFile();
                 }
                 Formatter formatter = new Formatter();
                 if (!validateOutputDir(outputDir.toPath(), formatter)) {
@@ -144,7 +143,7 @@ public class Application implements QuarkusApplication {
                 if (path.startsWith("file:") || path.startsWith("http:") || path.startsWith("https:")) {
                     return new URL(path);
                 } else {
-                    return Paths.get(path).toAbsolutePath().normalize().toUri().toURL();
+                    return Path.of(path).toAbsolutePath().normalize().toUri().toURL();
                 }
             } catch (MalformedURLException e) {
                 error.format("%s '%s' is not a valid file path or URL: %s", param, path, e.getMessage());
@@ -152,5 +151,4 @@ public class Application implements QuarkusApplication {
         }
         return null;
     }
-
 }

@@ -27,7 +27,7 @@ public class TargetServerTest {
                 "@prefix doap: <http://usefulinc.com/ns/doap#> .\n" +
                 "@prefix earl: <http://www.w3.org/ns/earl#> .\n" +
                 "@prefix solid: <http://www.w3.org/ns/solid/terms#> ." +
-                "<ess-compat>\n" +
+                "<testserver>\n" +
                 "    a earl:Software, earl:TestSubject ;\n" +
                 "    doap:name \"Enterprise Solid Server (Web Access Control version)\";\n" +
                 "    doap:release [\n" +
@@ -58,7 +58,7 @@ public class TargetServerTest {
 //                "    solid-test:disableDPoP true ;\n" +
                 "    solid-test:setupAclRoot true .");
         TestData.insertData(dataRepository, reader);
-        TargetServer targetServer = new TargetServer(iri("https://example.org/ess-compat"));
+        TargetServer targetServer = new TargetServer(iri("https://example.org/testserver"));
         assertAll("targetServer",
                 () -> assertNotNull(targetServer.getFeatures()),
                 () -> assertEquals(true, targetServer.getFeatures().get("feature1")),
