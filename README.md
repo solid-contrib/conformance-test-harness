@@ -216,17 +216,17 @@ external JSON file which can be shared between multiple servers and has the foll
 The test harness is packaged into a single, executable jar which is available as an asset in the release within github: https://github.com/solid/conformance-test-harness/releases.
 The only dependency is on Java 11. You can run it and see its usage as follows:
 ```shell
-java -jar solid-conformance-test-harness.jar --help
+java -jar solid-conformance-test-harness-runner.jar --help
 ```
 
 The command line options are:
 ```
 usage: run
- -c,--config <arg>   path to test subject config (Turtle)
+ -c,--config <arg>   URL or path to test subject config (Turtle)
     --coverage       produce a coverage report
  -h,--help           print this message
  -o,--output <arg>   output directory
- -s,--suite <arg>    test suite URI
+ -s,--suite <arg>    URL or path to test suite description
  -t,--target <arg>   target server
 ```
 If you want to control the logging output or set up mappings between URIs and local directories for test features you can also 
@@ -235,25 +235,23 @@ does not have to be in this directory. The command line options override any equ
 An example of a minimal properties file which could be used to map test features would be:
 ```yaml
 credentialsDir: PATH_TO_CREDENTIALS
-testSuiteNamespace: https://github.com/solid/conformance-test-harness/example/example.ttl#
 feature:
   mappings:
     - prefix: https://github.com/solid/conformance-test-harness/example
       path: /Users/pete/work/solid/conformance-test-harness/example
 ```
 The application wrapper is still under development so there will be changes to the above options and properties. 
-For example, the `testSuiteNamespace` will be removed and once a new method of generating access tokens has been added, 
-the `credentialsDir` will go. 
+For example, once a new method of generating access tokens has been added, the `credentialsDir` will go. 
 
 ## Test Reports
 |Report|Location|
 |------|--------|
+|Coverage (HTML+RDFa)|`coverage.html`|
+|Results (HTML+RDFa)|`report.html`|
+|Results (Turtle)|`report.ttl`|
 |Summary report|`target/karate-reports/karate-summary.html`|
 |Timeline|`target/karate-reports/karate-timeline.html`|
-|Coverage (HTML+RDFa)|`target/coverage.html`|
-|Results (HTML+RDFa)|`target/report.html`|
-|Results (Turtle)|`target/report.ttl`|
-|Unit test coverage|`target/site/jacoco/index.html`|
+|Unit test coverage|`target/site/jacoco/index.html` (when run form maven)|
 
 ## Writing tests
 

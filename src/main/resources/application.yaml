@@ -2,7 +2,6 @@
 configFile:
 credentialsDir:
 testSuiteDescription:
-testSuiteNamespace:
 target:
 
 # Logging

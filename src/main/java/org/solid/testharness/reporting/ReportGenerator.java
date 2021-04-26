@@ -2,9 +2,13 @@ package org.solid.testharness.reporting;
 
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.common.vocab.DOAP;
 import org.solid.testharness.utils.DataRepository;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -13,17 +17,12 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 
-import static org.eclipse.rdf4j.model.util.Values.iri;
-
 @ApplicationScoped
 public class ReportGenerator {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.reporting.ReportGenerator");
 
     @Inject
-    DataRepository repository;
-
-    @ConfigProperty(name = "testSuiteNamespace")
-    String testSuiteNamespace;
+    DataRepository dataRepository;
 
     @Location("coverage-report.html")
     Template coverageTemplate;
@@ -32,23 +31,37 @@ public class ReportGenerator {
 
 
     public void buildTurtleReport(Writer writer) throws Exception {
-        repository.export(writer);
+        dataRepository.export(writer);
     }
 
     public void printReportToConsole() throws Exception {
         StringWriter sw = new StringWriter();
-        repository.export(sw);
+        dataRepository.export(sw);
         logger.info("REPORT\n{}", sw);
     }
 
     public void buildHtmlCoverageReport(Writer writer) throws IOException {
-        writer.write(coverageTemplate.data(new ResultData(iri(testSuiteNamespace))).render());
+        IRI testSuite = getTestSuiteNamespace();
+        writer.write(coverageTemplate.data(new ResultData(testSuite)).render());
         writer.flush();
     }
 
     public void buildHtmlResultReport(Writer writer) throws IOException {
-        writer.write(resultTemplate.data(new ResultData(iri(testSuiteNamespace))).render());
+        IRI testSuite = getTestSuiteNamespace();
+        writer.write(resultTemplate.data(new ResultData(testSuite)).render());
         writer.flush();
+    }
+
+    private IRI getTestSuiteNamespace() {
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            RepositoryResult<Statement> statements = conn.getStatements(null, DOAP.implements_, null);
+            // TODO: if we use multiple test suites this will need to iterate
+            if (statements.hasNext()) {
+                Statement st = statements.next();
+                return st.getSubject().isIRI() ? (IRI) st.getSubject() : null;
+            }
+            return null;
+        }
     }
 }
 

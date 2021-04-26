@@ -32,12 +32,6 @@ public class Application implements QuarkusApplication {
     @Inject
     ConformanceTestHarness conformanceTestHarness;
 
-    /**
-     * test(s) to run
-     * output settings
-     * options for CI use e.g. overall pass/fail
-     */
-
     @Override
     public int run(String... args) {
         logger.debug("Args: {}", Arrays.toString(args));

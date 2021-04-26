@@ -2,7 +2,6 @@
 configFile: config/config.ttl
 credentialsDir: /Users/pete/work/tokens
 testSuiteDescription: example/example.ttl
-testSuiteNamespace: https://github.com/solid/conformance-test-harness/example/example.ttl#
 target: ess-compat
 
 # Test profile
@@ -11,7 +10,6 @@ target: ess-compat
   credentialsDir: src/test/resources
   target: testserver
   testSuiteDescription: src/test/resources/testsuite-sample.ttl
-  testSuiteNamespace: https://example.org/example.ttl#
   feature:
     mappings:
       - prefix: https://example.org
