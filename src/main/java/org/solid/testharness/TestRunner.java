@@ -6,11 +6,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.solid.testharness.reporting.TestSuiteResults;
 import org.solid.testharness.utils.FeatureResultHandler;
 
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.List;
 
-@Dependent
+@ApplicationScoped
 public class TestRunner {
     @Inject
     FeatureResultHandler featureResultHandler;
