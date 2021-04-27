@@ -107,18 +107,16 @@ public class DataModelBase {
 
     protected <T extends DataModelBase> List<T> getModelCollectionList(IRI predicate, Class<T> clazz) {
         Resource node = Models.objectResource(model.filter(subject, predicate, null)).orElse(null);
-        if(node != null) {
+        if (node != null) {
             List<Value> values = RDFCollections.asValues(model, node, new ArrayList<Value>());
-            if (values.size() > 0) {
-                return values.stream().filter(Value::isIRI).map(v -> {
-                    try {
-                        return clazz.getDeclaredConstructor(IRI.class).newInstance((IRI) v);
-                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                        logger.error("Failed to create instance of {}", clazz.getName());
-                        throw new RuntimeException("Failed to create instance of " + clazz.getName());
-                    }
-                }).collect(Collectors.toList());
-            }
+            return values.stream().filter(Value::isIRI).map(v -> {
+                try {
+                    return clazz.getDeclaredConstructor(IRI.class).newInstance((IRI) v);
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    logger.error("Failed to create instance of {}", clazz.getName());
+                    throw new RuntimeException("Failed to create instance of " + clazz.getName());
+                }
+            }).collect(Collectors.toList());
         }
         return null;
     }

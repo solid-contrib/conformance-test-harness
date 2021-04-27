@@ -5,9 +5,11 @@ import org.eclipse.rdf4j.model.BNode;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.solid.testharness.reporting.Step;
 import org.solid.testharness.reporting.TestCase;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -39,9 +41,13 @@ class DataModelBaseTest extends AbstractDataModelTests {
                 "    ex:hasInt 1 ;\n" +
                 "    ex:hasBool true ;" +
                 "    ex:hasDate \"2021-04-08\"^^xsd:date ;\n" +
+                "    ex:hasDateTime \"2021-04-08T12:30:00.000\"^^xsd:dateTime ;\n" +
                 "    ex:hasBNode [ ex:hasString \"string\" ];\n" +
-                "    ex:hasTest ex:test1 .\n" +
-                "ex:test1 a earl:TestCase .";
+                "    ex:hasTest ex:test1 ;\n" +
+                "    ex:hasSteps (ex:step1 ex:step2) .\n" +
+                "ex:test1 a earl:TestCase .\n" +
+                "ex:step1 a earl:Step .\n" +
+                "ex:step2 a earl:Step .";
     }
 
     @Test
@@ -56,13 +62,19 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void sizeShallow() {
-        assertEquals(11, dataModelBase.size());
+        assertEquals(13, dataModelBase.size());
     }
 
     @Test
     void sizeDeep() {
         DataModelBase deepModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.DEEP);
-        assertEquals(13, deepModel.size());
+        assertEquals(17, deepModel.size());
+    }
+
+    @Test
+    void sizeList() {
+        DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.LIST);
+        assertEquals(17, listModel.size());
     }
 
     @Test
@@ -100,6 +112,28 @@ class DataModelBaseTest extends AbstractDataModelTests {
     }
 
     @Test
+    void getModelCollectionList() {
+        DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.LIST);
+        List<Step> models = listModel.getModelCollectionList(iri(NS, "hasSteps"), Step.class);
+        assertNotNull(models);
+        assertEquals(2, models.size());
+        assertEquals("earl:Step", models.get(0).getTypesList());
+    }
+
+    @Test
+    void getEmptyModelCollectionList() {
+        DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.LIST);
+        List<Step> models = listModel.getModelCollectionList(iri(NS, "hasSteps2"), Step.class);
+        assertNull(models);
+    }
+
+    @Test
+    void getBadModelCollectionList() {
+        DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.LIST);
+        assertThrows(RuntimeException.class, () -> listModel.getModelCollectionList(iri(NS, "hasSteps"), TestClass.class));
+    }
+
+    @Test
     void getAsIri() {
         assertTrue(iri(NS, "iri").equals(dataModelBase.getAsIri(iri(NS, "hasIri"))));
     }
@@ -132,6 +166,11 @@ class DataModelBaseTest extends AbstractDataModelTests {
     @Test
     void getMissingAsBNode() {
         assertNull(dataModelBase.getAsBNode(iri(NS, "hasMissingBNode")));
+    }
+
+    @Test
+    void getIriAsBNode() {
+        assertNull(dataModelBase.getAsBNode(iri(NS, "hasString")));
     }
 
     @Test
@@ -186,6 +225,16 @@ class DataModelBaseTest extends AbstractDataModelTests {
     @Test
     void getMissingLiteralAsDate() {
         assertNull(dataModelBase.getLiteralAsDate(iri(NS, "hasMissingDate")));
+    }
+
+    @Test
+    void getLiteralAsDateTime() {
+        LocalDateTime dateTime = dataModelBase.getLiteralAsDateTime(iri(NS, "hasDateTime"));
+        assertThat("DateTime matches", dateTime.isEqual(LocalDateTime.parse("2021-04-08T12:30:00.000")));
+    }
+    @Test
+    void getMissingLiteralAsDateTime() {
+        assertNull(dataModelBase.getLiteralAsDateTime(iri(NS, "hasMissingDateTime")));
     }
 
     class TestClass extends DataModelBase {

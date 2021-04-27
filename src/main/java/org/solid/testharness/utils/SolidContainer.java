@@ -44,10 +44,6 @@ public class SolidContainer extends SolidResource {
 
     public SolidResource createChildResource(String suffix, String body, String type) {
         try {
-            if (url == null) {
-                logger.error("Cannot call createChildResource when container has no URL");
-                return null;
-            }
             URI childUrl = url.resolve(UUID.randomUUID() + suffix);
             logger.info("Create child in {}: {}", url, childUrl);
             return new SolidResource(super.solidClient, childUrl.toString(), body, type);

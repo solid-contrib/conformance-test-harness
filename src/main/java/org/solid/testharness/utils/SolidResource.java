@@ -69,11 +69,11 @@ public class SolidResource {
     }
 
     public String getUrl() {
-        return url.toString();
+        return url != null ? url.toString() : null;
     }
 
     public String getPath() {
-        return url.getPath();
+        return url != null ? url.getPath() : null;
     }
 
     public boolean isContainer() {
@@ -111,7 +111,7 @@ public class SolidResource {
     @Override
     public String toString() {
         if (isContainer) {
-            return "SolidContainer: " + (url != null ? url.toString() : "null");
+            return "SolidContainer: " + url.toString();
         } else {
             return "SolidResource: " + (url != null ? url.toString() : "null");
         }
