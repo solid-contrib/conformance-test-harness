@@ -39,7 +39,7 @@ public class TestSuiteRunner {
     }
 
     @Test
-    void testSuiteCoverage() {
+    void testSuiteCoverage() throws Exception {
         conformanceTestHarness.initialize();
         assertTrue(conformanceTestHarness.createCoverageReport());
     }

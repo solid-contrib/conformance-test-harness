@@ -10,10 +10,12 @@ import org.solid.testharness.config.TestHarnessConfig;
 import org.solid.testharness.discovery.TestSuiteDescription;
 import org.solid.testharness.reporting.ReportGenerator;
 import org.solid.testharness.reporting.TestSuiteResults;
+import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -30,6 +32,8 @@ import static org.mockito.Mockito.when;
 class ConformanceTestHarnessTest {
     @Inject
     ConformanceTestHarness conformanceTestHarness;
+    @Inject
+    DataRepository dataRepository;
 
     @InjectMock
     TestHarnessConfig testHarnessConfig;
@@ -50,8 +54,18 @@ class ConformanceTestHarnessTest {
     }
 
     @Test
-    void initialize() {
+    void initialize() throws Exception {
         conformanceTestHarness.initialize();
+        StringWriter sw = new StringWriter();
+        dataRepository.export(sw);
+        String result = sw.toString();
+        assertTrue(result.contains("a earl:Software"));
+        assertTrue(result.contains("doap:name"));
+        assertTrue(result.contains("doap:description"));
+        assertTrue(result.contains("doap:created"));
+        assertTrue(result.contains("doap:developer"));
+        assertTrue(result.contains("doap:homepage"));
+        assertTrue(result.contains("doap:revision"));
     }
 
     @Test

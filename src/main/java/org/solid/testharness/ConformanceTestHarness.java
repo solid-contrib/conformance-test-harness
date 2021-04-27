@@ -1,12 +1,21 @@
 package org.solid.testharness;
 
+import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.util.ModelBuilder;
+import org.eclipse.rdf4j.model.util.Values;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.common.vocab.DOAP;
+import org.solid.common.vocab.EARL;
 import org.solid.testharness.config.TestHarnessConfig;
 import org.solid.testharness.discovery.TestSuiteDescription;
 import org.solid.testharness.reporting.ReportGenerator;
 import org.solid.testharness.reporting.TestSuiteResults;
+import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.Namespaces;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -14,7 +23,14 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
+import java.util.Properties;
+
+import static org.eclipse.rdf4j.model.util.Values.iri;
 
 @ApplicationScoped
 public class ConformanceTestHarness {
@@ -28,9 +44,28 @@ public class ConformanceTestHarness {
     TestRunner testRunner;
     @Inject
     ReportGenerator reportGenerator;
+    @Inject
+    DataRepository dataRepository;
 
-    public void initialize() {
-        // setup repo and assertor
+    public void initialize() throws IOException {
+        try (final InputStream is = getClass().getClassLoader().getResourceAsStream("assertor.properties")) {
+            Properties properties = new Properties();
+            properties.load(is);
+            try (RepositoryConnection conn = dataRepository.getConnection()) {
+                ModelBuilder builder = new ModelBuilder();
+                BNode bnode = Values.bnode();
+                conn.add(builder.subject(iri(Namespaces.TEST_HARNESS_URI))
+                        .add(RDF.TYPE, EARL.Software)
+                        .add(DOAP.name, properties.getProperty("package.name"))
+                        .add(DOAP.description, properties.getProperty("package.description"))
+                        .add(DOAP.created, Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(properties.getProperty("package.buildTime")))))
+                        .add(DOAP.developer, iri(properties.getProperty("package.organizationUrl")))
+                        .add(DOAP.homepage, iri(properties.getProperty("package.url")))
+                        .add(DOAP.release, bnode)
+                        .add(bnode, DOAP.revision, properties.getProperty("package.version"))
+                        .build());
+            }
+        }
     }
 
     public boolean createCoverageReport() {

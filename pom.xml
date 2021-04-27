@@ -3,7 +3,16 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.solid.testharness</groupId>
     <artifactId>testharness</artifactId>
+    <name>Solid Specification Conformance Test Harness</name>
+    <description>A test harness that will run suites of tests related to Solid specifications.</description>
     <version>0.0.3-SNAPSHOT</version>
+    <organization>
+        <name>Inrupt</name>
+        <url>https://inrupt.com</url>
+    </organization>
+    <inceptionYear>2021</inceptionYear>
+    <url>https://github.com/solid/conformance-test-harness</url>
+
     <properties>
         <maven.compiler.parameters>true</maven.compiler.parameters>
         <maven.compiler.source>11</maven.compiler.source>
@@ -17,6 +26,7 @@
         <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
         <release.plugin.version>2.5.3</release.plugin.version>
         <jandex.maven.version>1.0.8</jandex.maven.version>
+        <properties.plugin.version>1.0.0</properties.plugin.version>
         <jacoco-plugin.version>0.8.6</jacoco-plugin.version>
 
         <!-- dependencies -->
@@ -34,6 +44,14 @@
         <mockito.version>3.8.0</mockito.version>
         <jandex.version>2.2.3.Final</jandex.version>
         <jackson.version>2.12.3</jackson.version>
+
+        <!-- package info -->
+        <package.name>${pom.name}</package.name>
+        <package.description>${pom.description}</package.description>
+        <package.organizationUrl>${pom.organization.url}</package.organizationUrl>
+        <package.url>${pom.url}</package.url>
+        <package.version>${pom.version}</package.version>
+        <package.buildTime>${maven.build.timestamp}</package.buildTime>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -282,6 +300,24 @@
                 <configuration>
                     <tagNameFormat>v@{project.version}</tagNameFormat>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>${properties.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>write-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <outputFile>
+                                ${project.build.outputDirectory}/assertor.properties
+                            </outputFile>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>

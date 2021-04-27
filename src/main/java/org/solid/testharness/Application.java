@@ -101,8 +101,8 @@ public class Application implements QuarkusApplication {
                     return results != null && results.getFailCount() == 0 ? 0 : 1;
                 }
             }
-        } catch(ParseException e) {
-            logger.error("Parsing failed.  Reason: {}", e.getMessage());
+        } catch(Exception e) {
+            logger.error("Application initialization failed.  Reason: {}", e.getMessage());
         }
         return 1;
     }

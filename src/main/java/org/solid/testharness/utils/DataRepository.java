@@ -83,6 +83,7 @@ public class DataRepository implements Repository {
         long startTime = suite.startTime;
         try (RepositoryConnection conn = getConnection()) {
             ModelBuilder builder = new ModelBuilder();
+            // TODO: We should use the feature's own IRI (via the path mapping) not TEST_HARNESS_URI
             IRI featureIri = iri(Namespaces.TEST_HARNESS_URI, fr.getDisplayName());
             IRI featureAssertion = createSkolemizedBlankNode(featureIri);
             IRI featureResult = createSkolemizedBlankNode(featureIri);
