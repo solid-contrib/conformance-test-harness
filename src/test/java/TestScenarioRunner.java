@@ -19,12 +19,11 @@ public class TestScenarioRunner {
     TestRunner testRunner;
 
     @Test
-    void testScenario() throws Exception {
+    void testScenario() {
         testHarnessConfig.loadTestSubjectConfig();
         testHarnessConfig.registerClients();
 //        String featurePath = "classpath:content-negotiation/content-negotiation-turtle.feature";
         String featurePath = "classpath:writing-resource/containment.feature";
-        // TODO: what setup is needed - subject and register clients
         TestSuiteResults results = testRunner.runTest(featurePath);
         assertNotNull(results);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());

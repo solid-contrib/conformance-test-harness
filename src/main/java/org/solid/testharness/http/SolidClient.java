@@ -9,6 +9,7 @@ import org.eclipse.rdf4j.rio.Rio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -52,7 +53,7 @@ public class SolidClient {
         return client.getHttpClient();
     }
 
-    public boolean setupRootAcl(String serverRoot, String webID) throws Exception {
+    public boolean setupRootAcl(String serverRoot, String webID) throws IOException, InterruptedException {
         URI rootAclUrl = getResourceAclLink(serverRoot + (serverRoot.endsWith("/") ? "" : "/"));
         String acl = String.format("@prefix acl: <http://www.w3.org/ns/auth/acl#>. " +
                 "<#alice> a acl:Authorization ; " +
@@ -63,7 +64,7 @@ public class SolidClient {
         return createAcl(rootAclUrl, acl);
     }
 
-    public Map<String, String> getAuthHeaders(String method, String uri) throws Exception {
+    public Map<String, String> getAuthHeaders(String method, String uri) {
         return client.getAuthHeaders(method, uri);
     }
 
@@ -80,7 +81,7 @@ public class SolidClient {
         return response.headers();
     }
 
-    public URI getResourceAclLink(String url) throws Exception {
+    public URI getResourceAclLink(String url) throws IOException, InterruptedException {
         HttpRequest.Builder builder = HttpUtils.newRequestBuilder(URI.create(url))
                 .method("HEAD", HttpRequest.BodyPublishers.noBody());
         HttpRequest request = client.authorize(builder).build();
@@ -96,7 +97,7 @@ public class SolidClient {
         return aclLink.isPresent() ? aclLink.get().getUri() : null;
     }
 
-    public boolean createAcl(URI url, String acl) throws Exception {
+    public boolean createAcl(URI url, String acl) throws IOException, InterruptedException {
         HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
                 .PUT(HttpRequest.BodyPublishers.ofString(acl))
                 .header("Content-Type", "text/turtle");

@@ -136,14 +136,14 @@ public class Client {
         return client.send(request, responseBodyHandler);
     }
 
-    public final HttpRequest.Builder signRequest(HttpRequest.Builder builder) throws Exception {
+    public final HttpRequest.Builder signRequest(HttpRequest.Builder builder) {
         if (!dpopSupported) return builder;
         HttpRequest provisionalRequest = builder.copy().build();
         String dpopToken = generateDpopToken(provisionalRequest.method(), provisionalRequest.uri().toString());
         return builder.header("DPoP", dpopToken);
     }
 
-    public final HttpRequest.Builder authorize(HttpRequest.Builder builder) throws Exception {
+    public final HttpRequest.Builder authorize(HttpRequest.Builder builder) {
         if (accessToken == null) return builder;
         if (dpopSupported) {
             builder.setHeader("Authorization", "DPoP " + accessToken);
@@ -153,7 +153,7 @@ public class Client {
         }
     }
 
-    public Map<String, String> getAuthHeaders(String method, String uri) throws Exception {
+    public Map<String, String> getAuthHeaders(String method, String uri) {
         Map<String, String> headers = new HashMap<>();
         if (accessToken == null) return headers;
         if (dpopSupported) {
@@ -170,9 +170,9 @@ public class Client {
     }
 
     // TODO: Switch to elliptical curve as it is faster
-    public String generateDpopToken(final String htm, final String htu) throws Exception {
+    public String generateDpopToken(final String htm, final String htu) {
         if (clientKey == null) {
-            throw new Exception("This instance does not have DPoP support added");
+            throw new RuntimeException("This instance does not have DPoP support added");
         }
         try {
             final JsonWebSignature jws = new JsonWebSignature();

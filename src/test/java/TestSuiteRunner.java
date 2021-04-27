@@ -10,7 +10,6 @@ import org.solid.testharness.utils.DataRepository;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,7 +24,7 @@ public class TestSuiteRunner {
     ConformanceTestHarness conformanceTestHarness;
 
     @BeforeEach
-    void setup() throws IOException {
+    void setup() {
         testHarnessConfig.setOutputDirectory(new File("target"));
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             conn.clear();
@@ -33,7 +32,7 @@ public class TestSuiteRunner {
     }
 
     @Test
-    void testSuite() throws IOException {
+    void testSuite() {
         TestSuiteResults results = conformanceTestHarness.runTestSuites();
         assertNotNull(results);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());
