@@ -2,8 +2,6 @@ package org.solid.testharness.utils;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.solid.testharness.http.SolidClient;
 
 import java.net.URI;
@@ -16,8 +14,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class SolidResourceTest {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.utils.SolidResourceTest");
-
     private static final String TEST_URL = "http://localhost/resource";
     URI testUrl = URI.create(TEST_URL);
     URI aclUrl = URI.create(testUrl + ".acl");

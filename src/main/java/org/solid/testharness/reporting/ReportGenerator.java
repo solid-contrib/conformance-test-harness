@@ -19,7 +19,7 @@ import java.io.Writer;
 
 @ApplicationScoped
 public class ReportGenerator {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.reporting.ReportGenerator");
+    private static final Logger logger = LoggerFactory.getLogger(ReportGenerator.class);
 
     @Inject
     DataRepository dataRepository;

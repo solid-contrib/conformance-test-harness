@@ -25,7 +25,7 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 
 @QuarkusMain
 public class Application implements QuarkusApplication {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.Application");
+    private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
     @Inject
     Config config;

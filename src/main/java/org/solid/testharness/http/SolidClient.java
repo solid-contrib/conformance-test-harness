@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class SolidClient {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.http.SolidClient");
+    private static final Logger logger = LoggerFactory.getLogger(SolidClient.class);
 
     private Client client ;
 

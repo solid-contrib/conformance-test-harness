@@ -5,8 +5,6 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.solid.testharness.config.PathMappings;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestUtils;
@@ -24,8 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @QuarkusTest
 class TestSuiteDescriptionTest {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.discovery.TestSuiteDescriptionTest");
-
     @Inject
     DataRepository repository;
     @Inject

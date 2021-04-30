@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Disabled
 class HttpClientTest {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.http.HttpClientTest");
+    private static final Logger logger = LoggerFactory.getLogger(HttpClientTest.class);
 
     @Test
     void linkHeaders() throws IOException, InterruptedException {

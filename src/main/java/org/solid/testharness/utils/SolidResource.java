@@ -9,7 +9,7 @@ import java.net.URI;
 import java.net.http.HttpHeaders;
 
 public class SolidResource {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.utils.SolidResource");
+    private static final Logger logger = LoggerFactory.getLogger(SolidResource.class);
 
     protected SolidClient solidClient;
     protected URI url;

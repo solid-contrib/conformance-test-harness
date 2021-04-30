@@ -35,7 +35,7 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 
 @ApplicationScoped
 public class ConformanceTestHarness {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.ConformanceTestHarness");
+    private static final Logger logger = LoggerFactory.getLogger(ConformanceTestHarness.class);
 
     @Inject
     Config config;

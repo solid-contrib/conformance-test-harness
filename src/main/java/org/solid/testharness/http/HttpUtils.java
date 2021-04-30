@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class HttpUtils {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.http.HttpUtils");
+    private static final Logger logger = LoggerFactory.getLogger(HttpUtils.class);
 
     public static String getAgent() {
         return System.getProperty("agent", "Solid-Conformance-Test-Suite");

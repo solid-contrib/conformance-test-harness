@@ -29,7 +29,7 @@ import java.util.stream.Stream;
  */
 @ApplicationScoped
 public class TestSuiteDescription {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.discovery.TestSuiteDescription");
+    private static final Logger logger = LoggerFactory.getLogger(TestSuiteDescription.class);
 
     @Inject
     DataRepository dataRepository;

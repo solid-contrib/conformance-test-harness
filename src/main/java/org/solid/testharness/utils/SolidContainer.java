@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class SolidContainer extends SolidResource {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.utils.SolidContainer");
+    private static final Logger logger = LoggerFactory.getLogger(SolidContainer.class);
 
     public SolidContainer(SolidClient solidClient, String url) throws IllegalArgumentException {
         super(solidClient, validateUrl(url), null, null);

@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DataModelBase {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.utils.DataModelBase");
+    private static final Logger logger = LoggerFactory.getLogger(DataModelBase.class);
 
     @NotNull
     protected Model model;

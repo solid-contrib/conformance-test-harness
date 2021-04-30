@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class RDFUtils {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.utils.RDFUtils");
+    private static final Logger logger = LoggerFactory.getLogger(RDFUtils.class);
 
     public static final List<String> turtleToTripleArray(String data, String baseUri) throws Exception {
         Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.TURTLE);

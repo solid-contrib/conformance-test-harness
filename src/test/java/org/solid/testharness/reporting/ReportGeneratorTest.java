@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 class ReportGeneratorTest {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.reporting.ReportGeneratorTest");
+    private static final Logger logger = LoggerFactory.getLogger(ReportGeneratorTest.class);
 
     @Inject
     DataRepository dataRepository;

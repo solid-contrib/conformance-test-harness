@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class AuthManager {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.http.AuthManager");
+    private static final Logger logger = LoggerFactory.getLogger(AuthManager.class);
     private static final String USERNAME = "username";
     private static final String PASSWORD = "password";
 

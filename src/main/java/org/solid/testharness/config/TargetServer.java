@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class TargetServer extends DataModelBase {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.config.TargetServer");
+    private static final Logger logger = LoggerFactory.getLogger(TargetServer.class);
 
     private Map<String, Boolean> features;
     private String solidIdentityProvider;

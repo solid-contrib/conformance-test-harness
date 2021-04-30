@@ -19,7 +19,7 @@ import java.util.Map;
 // TODO: Tests not implemented during POC phase but will be going forwards
 
 class SolidClientTest {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.http.SolidClientTest");
+    private static final Logger logger = LoggerFactory.getLogger(SolidClientTest.class);
 
     @Test
     @Disabled

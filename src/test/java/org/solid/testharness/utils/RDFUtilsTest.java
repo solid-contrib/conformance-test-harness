@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 class RDFUtilsTest {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.utils.RDFUtilsTest");
+    private static final Logger logger = LoggerFactory.getLogger(RDFUtilsTest.class);
 
     @Test
     void turtleToTripleArray() throws Exception {

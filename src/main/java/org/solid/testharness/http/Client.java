@@ -33,7 +33,7 @@ import static org.apache.commons.text.CharacterPredicates.LETTERS;
 import static org.jose4j.jwx.HeaderParameterNames.TYPE;
 
 public class Client {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.http.Client");
+    private static final Logger logger = LoggerFactory.getLogger(Client.class);
 
     private HttpClient client = null;
     private String accessToken = null;
