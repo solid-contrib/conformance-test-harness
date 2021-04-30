@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.ConformanceTestHarness;
-import org.solid.testharness.config.TestHarnessConfig;
+import org.solid.testharness.config.Config;
 import org.solid.testharness.reporting.TestSuiteResults;
 import org.solid.testharness.utils.DataRepository;
 
@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 public class TestSuiteRunner {
     @Inject
-    TestHarnessConfig testHarnessConfig;
+    Config config;
     @Inject
     DataRepository dataRepository;
     @Inject
@@ -25,7 +25,7 @@ public class TestSuiteRunner {
 
     @BeforeEach
     void setup() {
-        testHarnessConfig.setOutputDirectory(new File("target"));
+        config.setOutputDirectory(new File("target"));
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             conn.clear();
         }

@@ -25,12 +25,13 @@ import static org.mockito.Mockito.when;
 
 @QuarkusTest
 class DataRepositoryTest {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.utils.DataRepositoryTest");
+    private static final Logger logger = LoggerFactory.getLogger(DataRepositoryTest.class);
 
     @Test
     void addFeatureResult() throws Exception {
         DataRepository dataRepository = new DataRepository();
         dataRepository.postConstruct();
+        dataRepository.setTestSubject(iri("http://example.org/test"));
         Suite suite = Suite.forTempUse();
         Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
@@ -77,7 +78,6 @@ class DataRepositoryTest {
         when(str2.getStepLog()).thenReturn("");
         when(sr1.getStepResults()).thenReturn(List.of(str1, str2));
 
-        dataRepository.setTestSubject(iri(Namespaces.TEST_HARNESS_URI,"test"));
         dataRepository.addFeatureResult(suite, fr);
         StringWriter sw = new StringWriter();
         dataRepository.export(sw);
@@ -89,6 +89,7 @@ class DataRepositoryTest {
     void addFeatureResultTestFailed() throws Exception {
         DataRepository dataRepository = new DataRepository();
         dataRepository.postConstruct();
+        dataRepository.setTestSubject(iri("http://example.org/test"));
         Suite suite = Suite.forTempUse();
         Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
@@ -99,7 +100,6 @@ class DataRepositoryTest {
         when(fr.getDurationMillis()).thenReturn(1000.0);
         when(fr.getScenarioResults()).thenReturn(null);
 
-        dataRepository.setTestSubject(iri(Namespaces.TEST_HARNESS_URI,"test"));
         dataRepository.addFeatureResult(suite, fr);
         StringWriter sw = new StringWriter();
         dataRepository.export(sw);
@@ -111,6 +111,7 @@ class DataRepositoryTest {
     void addFeatureResultBadRdf() throws Exception {
         DataRepository dataRepository = new DataRepository();
         dataRepository.postConstruct();
+        dataRepository.setTestSubject(iri("http://example.org/test"));
         Suite suite = Suite.forTempUse();
         Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn(null);
@@ -118,7 +119,6 @@ class DataRepositoryTest {
         when(fr.getDisplayName()).thenReturn("");
         when(fr.getFeature()).thenReturn(feature);
 
-        dataRepository.setTestSubject(iri(Namespaces.TEST_HARNESS_URI,"test"));
         dataRepository.addFeatureResult(suite, fr);
         StringWriter sw = new StringWriter();
         dataRepository.export(sw);

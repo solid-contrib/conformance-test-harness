@@ -110,7 +110,7 @@ public class TargetServer extends DataModelBase {
             try {
                 this.loginEndpoint = new URI(getIriAsString(SOLID.loginEndpoint));
             } catch (URISyntaxException | NullPointerException e) {
-                logger.warn("{} is not a valid URI: {}", SOLID.loginEndpoint.stringValue(), e.getMessage());
+                logger.warn("{} is not a valid URI: {}", SOLID.loginEndpoint.stringValue(), e);
             }
         }
         return loginEndpoint;

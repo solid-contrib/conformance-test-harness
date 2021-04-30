@@ -51,8 +51,8 @@ public class AuthManager {
             } else if (userConfig.isUsingRefreshToken()) {
                 tokens = exchangeRefreshToken(authClient, userConfig, targetServer);
             } else {
-                logger.warn("Neither login credentials nor refresh token details provided for {}", user);
-                return null;
+                logger.warn("UserCredentials for {}: {}", user, userConfig);
+                throw new Exception("Neither login credentials nor refresh token details provided for " + user);
             }
             String accessToken = tokens.getAccessToken();
             logger.debug("access_token ({}) {}", user, accessToken);

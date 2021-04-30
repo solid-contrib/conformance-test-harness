@@ -2,7 +2,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.TestRunner;
-import org.solid.testharness.config.TestHarnessConfig;
+import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.reporting.TestSuiteResults;
 
 import javax.inject.Inject;
@@ -14,14 +14,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @QuarkusTest
 public class TestScenarioRunner {
     @Inject
-    TestHarnessConfig testHarnessConfig;
+    TestSubject testSubject;
     @Inject
     TestRunner testRunner;
 
     @Test
     void testScenario() {
-        testHarnessConfig.loadTestSubjectConfig();
-        testHarnessConfig.registerClients();
+        testSubject.loadTestSubjectConfig();
+        testSubject.registerClients();
 //        String featurePath = "classpath:content-negotiation/content-negotiation-turtle.feature";
         String featurePath = "classpath:writing-resource/containment.feature";
         TestSuiteResults results = testRunner.runTest(featurePath);

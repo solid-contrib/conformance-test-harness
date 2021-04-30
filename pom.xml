@@ -30,27 +30,27 @@
         <jacoco-plugin.version>0.8.6</jacoco-plugin.version>
 
         <!-- dependencies -->
-        <quarkus.version>1.13.2.Final</quarkus.version>
+        <quarkus.version>1.13.3.Final</quarkus.version>
         <karate.version>1.0.1</karate.version>
-        <junit.jupiter.version>5.7.0</junit.jupiter.version>
+        <junit.jupiter.version>5.7.1</junit.jupiter.version>
         <hamcrest.version>2.2</hamcrest.version>
-        <rdf4j.version>3.6.2</rdf4j.version>
+        <rdf4j.version>3.6.3</rdf4j.version>
         <semargl.version>0.7</semargl.version>
         <jakarta.version>3.0.0</jakarta.version>
-        <jose4j.version>0.7.6</jose4j.version>
+        <jose4j.version>0.7.7</jose4j.version>
         <commons.text.version>1.9</commons.text.version>
-        <commons.lang.version>3.11</commons.lang.version>
+        <commons.lang.version>3.12.0</commons.lang.version>
         <commons.cli.version>1.4</commons.cli.version>
-        <mockito.version>3.8.0</mockito.version>
+        <mockito.version>3.9.0</mockito.version>
         <jandex.version>2.2.3.Final</jandex.version>
         <jackson.version>2.12.3</jackson.version>
 
         <!-- package info -->
-        <package.name>${pom.name}</package.name>
-        <package.description>${pom.description}</package.description>
-        <package.organizationUrl>${pom.organization.url}</package.organizationUrl>
-        <package.url>${pom.url}</package.url>
-        <package.version>${pom.version}</package.version>
+        <package.name>${project.name}</package.name>
+        <package.description>${project.description}</package.description>
+        <package.organizationUrl>${project.organization.url}</package.organizationUrl>
+        <package.url>${project.url}</package.url>
+        <package.version>${project.version}</package.version>
         <package.buildTime>${maven.build.timestamp}</package.buildTime>
     </properties>
     <dependencyManagement>

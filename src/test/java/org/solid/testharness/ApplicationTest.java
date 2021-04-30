@@ -5,7 +5,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.solid.testharness.config.TestHarnessConfig;
+import org.solid.testharness.config.Config;
 import org.solid.testharness.reporting.TestSuiteResults;
 import org.solid.testharness.utils.Namespaces;
 
@@ -18,7 +18,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,14 +28,14 @@ class ApplicationTest {
     @Inject
     Application application;
     @Inject
-    TestHarnessConfig testHarnessConfig;
+    Config config;
 
     @InjectMock
     ConformanceTestHarness conformanceTestHarness;
 
     @BeforeEach
     void setup() {
-        testHarnessConfig.setOutputDirectory(null);
+        config.setOutputDirectory(null);
     }
 
     @Test
@@ -50,7 +51,7 @@ class ApplicationTest {
     @Test
     void outputBad() {
         assertEquals(1, application.run("--output", "./missing"));
-        assertNull(testHarnessConfig.getOutputDirectory());
+        assertNull(config.getOutputDirectory());
     }
 
     @Test
@@ -58,7 +59,7 @@ class ApplicationTest {
         Path tmp = Files.createTempFile("test", ".tmp");
         tmp.toFile().deleteOnExit();
         assertEquals(1, application.run("--output", tmp.toString()));
-        assertNull(testHarnessConfig.getOutputDirectory());
+        assertNull(config.getOutputDirectory());
     }
 
     @Test
@@ -67,7 +68,7 @@ class ApplicationTest {
         tmp.toFile().setWritable(false);
         tmp.toFile().deleteOnExit();
         assertEquals(1, application.run("--output", tmp.toString()));
-        assertNull(testHarnessConfig.getOutputDirectory());
+        assertNull(config.getOutputDirectory());
     }
 
     @Test
@@ -76,7 +77,7 @@ class ApplicationTest {
         tmp.toFile().setExecutable(false);
         tmp.toFile().deleteOnExit();
         assertEquals(1, application.run("--output", tmp.toString()));
-        assertNull(testHarnessConfig.getOutputDirectory());
+        assertNull(config.getOutputDirectory());
     }
 
     @Test
@@ -84,7 +85,7 @@ class ApplicationTest {
         when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
         assertEquals(0, application.run("--output", "", "--coverage"));
         File cwd = Path.of("").toAbsolutePath().toFile();
-        assertEquals(cwd, testHarnessConfig.getOutputDirectory());
+        assertEquals(cwd, config.getOutputDirectory());
     }
 
     @Test
@@ -97,7 +98,7 @@ class ApplicationTest {
         when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
         assertEquals(0, application.run("--suite", "suitefile", "--coverage"));
         URL url = Path.of("suitefile").toAbsolutePath().normalize().toUri().toURL();
-        assertEquals(url, testHarnessConfig.getTestSuiteDescription());
+        assertEquals(url, config.getTestSuiteDescription());
     }
 
     @Test
@@ -105,7 +106,7 @@ class ApplicationTest {
         when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
         assertEquals(0, application.run("--suite", "file://test/file", "--coverage"));
         URL url = new URL("file://test/file");
-        assertEquals(url, testHarnessConfig.getTestSuiteDescription());
+        assertEquals(url, config.getTestSuiteDescription());
     }
 
     @Test
@@ -113,7 +114,7 @@ class ApplicationTest {
         when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
         assertEquals(0, application.run("--suite", "http://example.org", "--coverage"));
         URL url = new URL("http://example.org");
-        assertEquals(url, testHarnessConfig.getTestSuiteDescription());
+        assertEquals(url, config.getTestSuiteDescription());
     }
 
     @Test
@@ -121,7 +122,7 @@ class ApplicationTest {
         when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
         assertEquals(0, application.run("--suite", "https://example.org", "--coverage"));
         URL url = new URL("https://example.org");
-        assertEquals(url, testHarnessConfig.getTestSuiteDescription());
+        assertEquals(url, config.getTestSuiteDescription());
     }
 
     @Test
@@ -134,7 +135,7 @@ class ApplicationTest {
         TestSuiteResults results = mockResults(0);
         when(conformanceTestHarness.runTestSuites()).thenReturn(results);
         assertEquals(0, application.run("--target", ""));
-        assertEquals(iri(Namespaces.TEST_HARNESS_URI, "testserver"), testHarnessConfig.getTestSubject());
+        assertEquals(iri(Namespaces.TEST_HARNESS_URI, "testserver"), config.getTestSubject());
     }
 
     @Test
@@ -142,7 +143,7 @@ class ApplicationTest {
         TestSuiteResults results = mockResults(0);
         when(conformanceTestHarness.runTestSuites()).thenReturn(results);
         assertEquals(0, application.run("--target", "test"));
-        assertEquals(iri(Namespaces.TEST_HARNESS_URI, "test"), testHarnessConfig.getTestSubject());
+        assertEquals(iri(Namespaces.TEST_HARNESS_URI, "test"), config.getTestSubject());
     }
 
     @Test
@@ -150,7 +151,7 @@ class ApplicationTest {
         TestSuiteResults results = mockResults(0);
         when(conformanceTestHarness.runTestSuites()).thenReturn(results);
         assertEquals(0, application.run("--target", "http://example.org/test"));
-        assertEquals(iri("http://example.org/test"), testHarnessConfig.getTestSubject());
+        assertEquals(iri("http://example.org/test"), config.getTestSubject());
     }
 
     @Test
@@ -164,7 +165,7 @@ class ApplicationTest {
         when(conformanceTestHarness.runTestSuites()).thenReturn(results);
         assertEquals(0, application.run("--config", "configfile"));
         URL url = Path.of("configfile").toAbsolutePath().normalize().toUri().toURL();
-        assertEquals(url, testHarnessConfig.getConfigUrl());
+        assertEquals(url, config.getConfigUrl());
     }
 
     @Test
@@ -173,7 +174,7 @@ class ApplicationTest {
         when(conformanceTestHarness.runTestSuites()).thenReturn(results);
         assertEquals(0, application.run("--config", "file://test/file"));
         URL url = new URL("file://test/file");
-        assertEquals(url, testHarnessConfig.getConfigUrl());
+        assertEquals(url, config.getConfigUrl());
     }
 
     @Test
@@ -182,7 +183,7 @@ class ApplicationTest {
         when(conformanceTestHarness.runTestSuites()).thenReturn(results);
         assertEquals(0, application.run("--config", "http://example.org"));
         URL url = new URL("http://example.org");
-        assertEquals(url, testHarnessConfig.getConfigUrl());
+        assertEquals(url, config.getConfigUrl());
     }
 
     @Test
@@ -191,7 +192,7 @@ class ApplicationTest {
         when(conformanceTestHarness.runTestSuites()).thenReturn(results);
         assertEquals(0, application.run("--config", "https://example.org"));
         URL url = new URL("https://example.org");
-        assertEquals(url, testHarnessConfig.getConfigUrl());
+        assertEquals(url, config.getConfigUrl());
     }
 
     @Test

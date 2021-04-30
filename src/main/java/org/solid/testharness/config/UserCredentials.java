@@ -8,6 +8,7 @@ import org.eclipse.rdf4j.model.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.SOLID_TEST;
+import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.inject.spi.CDI;
 import java.io.File;
@@ -16,7 +17,7 @@ import java.io.Reader;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserCredentials {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.config.UserCredentials");
+    private static final Logger logger = LoggerFactory.getLogger(UserCredentials.class);
 
     private String webID;
     private String credentials;
@@ -52,10 +53,10 @@ public class UserCredentials {
     }
 
     public void setCredentials(String credentials) {
-        TestHarnessConfig testHarnessConfig = CDI.current().select(TestHarnessConfig.class).get();
+        Config config = CDI.current().select(Config.class).get();
         this.credentials = credentials;
         try {
-            Reader reader = new FileReader(new File(testHarnessConfig.getCredentialsDirectory(), credentials));
+            Reader reader = new FileReader(new File(config.getCredentialsDirectory(), credentials));
             ObjectMapper objectMapper = new ObjectMapper();
             UserCredentials externalCredentials = objectMapper.readValue(reader, UserCredentials.class);
             if (externalCredentials.getRefreshToken() != null) {
@@ -74,8 +75,8 @@ public class UserCredentials {
                 setPassword(externalCredentials.getPassword());
             }
         } catch (Exception e) {
-            logger.debug("Failed to load user credentials", e);
-            throw new RuntimeException("Failed to load user credentials", e);
+            logger.debug("Failed to load user credentials: {}", e.toString());
+            throw new TestHarnessInitializationException("Failed to load user credentials: %s", e.toString());
         }
     }
 
@@ -125,5 +126,26 @@ public class UserCredentials {
 
     public boolean isUsingRefreshToken() {
         return refreshToken != null && clientId != null && clientSecret != null;
+    }
+
+    @Override
+    public String toString() {
+        if (isUsingUsernamePassword()) {
+            return String.format("UserCredentials: webId=%s, credentials=%s, username=%s, password=%s",
+                    webID, credentials, mask(username), mask(password)
+            );
+        } else if (isUsingRefreshToken()) {
+            return String.format("UserCredentials: webId=%s, credentials=%s, refreshToken=%s, clientId=%s, clientSecret=%s",
+                    webID, credentials, mask(refreshToken), mask(clientId), mask(clientSecret)
+            );
+        } else {
+            return String.format("UserCredentials: webId=%s, credentials=%s, username=%s, password=%s, refreshToken=%s, clientId=%s, clientSecret=%s",
+                    webID, credentials, mask(username), mask(password), mask(refreshToken), mask(clientId), mask(clientSecret)
+            );
+        }
+    }
+
+    private String mask(String value) {
+        return value != null ? "***" : "null";
     }
 }

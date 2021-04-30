@@ -5,8 +5,9 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.solid.testharness.config.Config;
 import org.solid.testharness.config.TargetServer;
-import org.solid.testharness.config.TestHarnessConfig;
+import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.discovery.TestSuiteDescription;
 import org.solid.testharness.reporting.ReportGenerator;
 import org.solid.testharness.reporting.TestSuiteResults;
@@ -36,7 +37,9 @@ class ConformanceTestHarnessTest {
     DataRepository dataRepository;
 
     @InjectMock
-    TestHarnessConfig testHarnessConfig;
+    Config config;
+    @InjectMock
+    TestSubject testSubject;
     @InjectMock
     TestSuiteDescription testSuiteDescription;
     @InjectMock
@@ -50,7 +53,7 @@ class ConformanceTestHarnessTest {
     void setup() throws IOException {
         tmp = Files.createTempDirectory(null);
         tmp.toFile().deleteOnExit();
-        when(testHarnessConfig.getOutputDirectory()).thenReturn(tmp.toFile());
+        when(config.getOutputDirectory()).thenReturn(tmp.toFile());
     }
 
     @Test
@@ -146,7 +149,7 @@ class ConformanceTestHarnessTest {
         TargetServer targetServer = mock(TargetServer.class);
         when(targetServer.getFeatures()).thenReturn(Map.of("feature", false));
         when(targetServer.getMaxThreads()).thenReturn(1);
-        when(testHarnessConfig.getTargetServer()).thenReturn(targetServer);
+        when(testSubject.getTargetServer()).thenReturn(targetServer);
     }
 
     private TestSuiteResults mockResults(int failures) {

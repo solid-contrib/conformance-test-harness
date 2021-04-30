@@ -1,25 +1,30 @@
 package org.solid.testharness.config;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
+import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestData;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.io.StringReader;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @QuarkusTest
-@TestProfile(NoInitializationTestProfile.class)
 public class TargetServerTest {
+    @InjectMock
+    Config config;
+
     @Inject
     DataRepository dataRepository;
 
     @Test
     public void parseTargetServer() throws Exception {
+        when(config.getCredentialsDirectory()).thenReturn(new File("src/test/resources").getCanonicalFile());
         StringReader reader = new StringReader("@base <https://example.org/> .\n" +
                 "@prefix solid-test: <https://github.com/solid/conformance-test-harness/vocab#> .\n" +
                 "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n" +

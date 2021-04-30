@@ -2,27 +2,7 @@
 configFile: config/config.ttl
 credentialsDir: /Users/pete/work/tokens
 testSuiteDescription: example/example.ttl
-target: ess-compat
-
-# Test profile
-"%test":
-  configFile: src/test/resources/config-sample.ttl
-  credentialsDir: src/test/resources
-  target: testserver
-  testSuiteDescription: src/test/resources/testsuite-sample.ttl
-  feature:
-    mappings:
-      - prefix: https://example.org
-        path: src/test/resources/dummy-features
-
-  quarkus:
-    log:
-      category:
-        "org.solid.testharness.http.AuthManager":
-          level: DEBUG
-
-
-#includeAllServers: true
+target: https://github.com/solid/conformance-test-harness/ess-compat
 
 # mapping feature URIs
 feature:
@@ -37,9 +17,34 @@ quarkus:
       "org.solid.testharness":
         level: DEBUG # to increase overall logging for development
       "org.solid.testharness.http.AuthManager":
-        level: INFO # but keep only higher level for authentication
+        level: ∏ # but keep only higher level for authentication
 #"org.solid.testharness.utils":
 #  level: INFO
 #"org.solid.testharness.http.Client":
 #  level: DEBUG
 
+# Test profile
+"%test":
+  configFile: src/test/resources/config-sample.ttl
+  credentialsDir: src/test/resources
+  target: https://github.com/solid/conformance-test-harness/testserver
+  testSuiteDescription: src/test/resources/testsuite-sample.ttl
+  feature:
+    mappings:
+      - prefix: https://example.org
+        path: src/test/resources/dummy-features
+
+  quarkus:
+    log:
+      category:
+        "org.solid.testharness.http.AuthManager":
+          level: DEBUG
+
+"%blank":
+  configFile:
+  target:
+  testSuiteDescription:
+  credentialsDir:
+  feature:
+    mappings:
+      - null

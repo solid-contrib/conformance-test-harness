@@ -6,9 +6,8 @@ function fn() {
         return {}
     }
 
-    const harnessConfig = bootstrap.getTestHarnessConfig();
-    // if (localConfig && localConfig.includeAllServers) servers = serverConfig.servers
-    const target = harnessConfig.targetServer;
+    const testSubject = bootstrap.getTestSubject();
+    const target = testSubject.targetServer;
     if (target == null) {
         karate.log('Check the environment properties - config is not defined');
     }
@@ -20,9 +19,8 @@ function fn() {
     const additionalConfig = karate.call('classpath:setup.js', target)
     return {
         target,
-        // servers,
         ...additionalConfig,
-        clients: karate.toMap(harnessConfig.clients),
+        clients: karate.toMap(testSubject.clients),
         webIds: target ? target.webIds : {}
     };
 }

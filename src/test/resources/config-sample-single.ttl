@@ -1,0 +1,38 @@
+@base <https://github.com/solid/conformance-test-harness/> .
+@prefix solid-test: <https://github.com/solid/conformance-test-harness/vocab#> .
+
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix earl: <http://www.w3.org/ns/earl#> .
+@prefix solid: <http://www.w3.org/ns/solid/terms#> .
+
+<default>
+    a earl:Software, earl:TestSubject ;
+    doap:name "Enterprise Solid Server (Web Access Control version)";
+    doap:release [
+        doap:name "ESS 1.0.9";
+        doap:revision "1.0.9";
+        doap:created "2021-03-05"^^xsd:date
+    ];
+    doap:developer <https://inrupt.com/profile/card/#us>;
+    doap:homepage <https://inrupt.com/products/enterprise-solid-server>;
+    doap:description "A production-grade Solid server produced and supported by Inrupt."@en;
+    doap:programming-language "Java" ;
+    solid:oidcIssuer <https://inrupt.net> ;
+    solid:loginEndpoint <https://inrupt.net/login/password> ;
+    solid-test:origin <https://tester> ;
+    solid-test:aliceUser [
+        solid-test:webId <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;
+        solid-test:credentials "inrupt-alice.json"
+    ] ;
+    solid-test:bobUser [
+        solid-test:webId <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;
+        solid-test:credentials "inrupt-bob.json"
+    ] ;
+    solid-test:maxThreads 4 ;
+    solid-test:features "authentication", "acl", "wac-allow" ;
+    solid-test:serverRoot <https://pod-compat.inrupt.com> ;
+    solid-test:podRoot <https://pod-compat.inrupt.com/solid-test-suite-alice/> ;
+    solid-test:testContainer "/solid-test-suite-alice/shared-test/" .

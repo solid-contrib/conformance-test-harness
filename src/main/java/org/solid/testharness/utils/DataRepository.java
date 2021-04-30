@@ -28,7 +28,10 @@ import org.solid.common.vocab.EARL;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
@@ -40,7 +43,7 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 
 @ApplicationScoped
 public class DataRepository implements Repository {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.utils.DataRepository");
+    private static final Logger logger = LoggerFactory.getLogger(DataRepository.class);
 
     private Repository repository = new SailRepository(new MemoryStore());
     // TODO: Determine if this should be a separate IRI to the base
@@ -79,11 +82,16 @@ public class DataRepository implements Repository {
         }
     }
 
+    public void setTestSubject(IRI testSubject) {
+        this.testSubject = testSubject;
+    }
+
     public void addFeatureResult(Suite suite, FeatureResult fr) {
         long startTime = suite.startTime;
         try (RepositoryConnection conn = getConnection()) {
             ModelBuilder builder = new ModelBuilder();
             // TODO: We should use the feature's own IRI (via the path mapping) not TEST_HARNESS_URI
+            // PathMappings.Mapping mapping = pathMappings.stream().filter(m -> location.startsWith(m.prefix)).findFirst().orElse(null);
             IRI featureIri = iri(Namespaces.TEST_HARNESS_URI, fr.getDisplayName());
             IRI featureAssertion = createSkolemizedBlankNode(featureIri);
             IRI featureResult = createSkolemizedBlankNode(featureIri);
@@ -145,7 +153,7 @@ public class DataRepository implements Repository {
                 }
             }
         } catch (Exception e) {
-            logger.error("Failed to load feature result: {}", e.getMessage());
+            logger.error("Failed to load feature result: {}", e.toString());
         }
     }
 
@@ -159,7 +167,7 @@ public class DataRepository implements Repository {
             rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true).set(BasicWriterSettings.INLINE_BLANK_NODES, true);
             conn.export(rdfWriter);
         } catch (RDF4JException e) {
-            throw new Exception("Failed to write repository: " + e.getMessage());
+            throw new Exception("Failed to write repository: " + e.toString());
         }
     }
 
@@ -169,12 +177,8 @@ public class DataRepository implements Repository {
             rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true).set(BasicWriterSettings.INLINE_BLANK_NODES, true);
             conn.export(rdfWriter);
         } catch (RDF4JException e) {
-            throw new Exception("Failed to write repository: " + e.getMessage());
+            throw new Exception("Failed to write repository: " + e.toString());
         }
-    }
-
-    public void setTestSubject(IRI testSubject) {
-        this.testSubject = testSubject;
     }
 
     @Override

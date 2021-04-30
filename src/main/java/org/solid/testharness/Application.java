@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.model.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.solid.testharness.config.TestHarnessConfig;
+import org.solid.testharness.config.Config;
 import org.solid.testharness.reporting.TestSuiteResults;
 import org.solid.testharness.utils.Namespaces;
 
@@ -28,7 +28,7 @@ public class Application implements QuarkusApplication {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.Application");
 
     @Inject
-    TestHarnessConfig testHarnessConfig;
+    Config config;
     @Inject
     ConformanceTestHarness conformanceTestHarness;
 
@@ -64,7 +64,7 @@ public class Application implements QuarkusApplication {
                     logger.error(formatter.toString());
                     return 1;
                 }
-                testHarnessConfig.setOutputDirectory(outputDir);
+                config.setOutputDirectory(outputDir);
 
                 if (line.hasOption("suite")) {
                     URL url = createUrl(line.getOptionValue("suite"), "suite", formatter);
@@ -72,8 +72,8 @@ public class Application implements QuarkusApplication {
                         logger.error(formatter.toString());
                         return 1;
                     }
-                    testHarnessConfig.setTestSuiteDescription(url);
-                    logger.debug("Suite = {}", testHarnessConfig.getTestSuiteDescription().toString());
+                    config.setTestSuiteDescription(url);
+                    logger.debug("Suite = {}", config.getTestSuiteDescription().toString());
                 }
 
                 conformanceTestHarness.initialize();
@@ -85,7 +85,7 @@ public class Application implements QuarkusApplication {
                         String target = line.getOptionValue("target");
                         IRI testSubject = target.contains(":") ? iri(target) : iri(Namespaces.TEST_HARNESS_URI, target);
                         logger.debug("Target: {}", testSubject.stringValue());
-                        testHarnessConfig.setTestSubject(testSubject);
+                        config.setTestSubject(testSubject);
                     }
                     if (line.hasOption("config")){
                         URL url = createUrl(line.getOptionValue("config"), "config", formatter);
@@ -93,8 +93,8 @@ public class Application implements QuarkusApplication {
                             logger.error(formatter.toString());
                             return 1;
                         }
-                        testHarnessConfig.setConfigUrl(url);
-                        logger.debug("Config = {}", testHarnessConfig.getConfigUrl().toString());
+                        config.setConfigUrl(url);
+                        logger.debug("Config = {}", config.getConfigUrl().toString());
                     }
 
                     TestSuiteResults results = conformanceTestHarness.runTestSuites();
@@ -102,7 +102,7 @@ public class Application implements QuarkusApplication {
                 }
             }
         } catch(Exception e) {
-            logger.error("Application initialization failed.  Reason: {}", e.getMessage());
+            logger.error("Application initialization failed.  Reason: {}", e.toString());
         }
         return 1;
     }
@@ -140,7 +140,7 @@ public class Application implements QuarkusApplication {
                     return Path.of(path).toAbsolutePath().normalize().toUri().toURL();
                 }
             } catch (MalformedURLException e) {
-                error.format("%s '%s' is not a valid file path or URL: %s", param, path, e.getMessage());
+                error.format("%s '%s' is not a valid file path or URL: %s", param, path, e);
             }
         }
         return null;

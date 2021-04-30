@@ -7,10 +7,10 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.inject.spi.CDI;
 
 /**
- * This provides the TestHarnessConfig into Karate features by accessing the CDI container.
+ * This provides the TestSubject into Karate features by accessing the CDI container.
  */
 public class Bootstrap {
-    private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.config.Bootstrap");
+    private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
 
     private static Bootstrap INSTANCE;
     public synchronized static Bootstrap getInstance() {
@@ -18,7 +18,7 @@ public class Bootstrap {
             try {
                 INSTANCE = new Bootstrap();
             } catch (RuntimeException e) {
-                logger.error(e.getMessage());
+                logger.error(e.toString());
             }
         }
         return INSTANCE;
@@ -33,7 +33,7 @@ public class Bootstrap {
         logger.debug("BOOTSTRAP - APP INSTANCE {}", app);
     }
 
-    public TestHarnessConfig getTestHarnessConfig() {
-        return CDI.current().select(TestHarnessConfig.class).get();
+    public TestSubject getTestSubject() {
+        return CDI.current().select(TestSubject.class).get();
     }
 }

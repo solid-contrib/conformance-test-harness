@@ -120,7 +120,7 @@ public class SolidClient {
             solidClient.deleteResourceRecursively(url);
             return "OK";
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.toString(), e);
         }
         return "FAIL";
     }
@@ -152,7 +152,7 @@ public class SolidClient {
             try {
                 members = getContainerMembers(url).stream().filter(m -> !m.getPath().endsWith("test/")).collect(Collectors.toList());
             } catch (Exception e) {
-                logger.error("Failed to get container members: {}", e.getMessage());
+                logger.error("Failed to get container members: {}", e.toString());
                 return CompletableFuture.completedFuture(null);
             }
 
@@ -227,7 +227,7 @@ public class SolidClient {
         try {
             model = Rio.parse(new StringReader(data), url.toString(), RDFFormat.TURTLE);
         } catch (Exception e) {
-            logger.error("RDF Parse Error: {} in {}", e.getMessage(), data);
+            logger.error("RDF Parse Error: {} in {}", e.toString(), data);
             throw new Exception("Bad container listing");
         }
         Set<Value> resources = model.filter(null, LDP.CONTAINS, null).objects();

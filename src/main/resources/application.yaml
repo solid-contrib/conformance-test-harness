@@ -3,6 +3,9 @@ configFile:
 credentialsDir:
 testSuiteDescription:
 target:
+feature:
+  mappings:
+    - null
 
 # Logging
 quarkus:

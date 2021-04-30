@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
-import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
@@ -44,7 +43,7 @@ class SolidClientTest {
                     .POST(ofFormData(data));
 
         } catch (IOException | InterruptedException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.toString(), e);
         }
     }
 
@@ -77,7 +76,7 @@ class SolidClientTest {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             logger.debug("RESPONSE {}", response.body());
         } catch (IOException | InterruptedException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.toString(), e);
         }
     }
 
@@ -99,7 +98,7 @@ class SolidClientTest {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             logger.debug("RESPONSE {}", response.body());
         } catch (IOException | InterruptedException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.toString(), e);
         }
     }
 }

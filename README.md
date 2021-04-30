@@ -320,7 +320,7 @@ git clone git@github.com:solid/conformance-test-harness.git
 
 ### Setting up the environment
 There 5 important settings:
-* `target` - the name of the target server, used to select the server config from the config file
+* `target` - the IRI of the target server, used to select the server config from the config file
 * `configFile` - the location of the config file
 * `credentialsDir` - the location of the shared credentials files if used
 * `testSuiteDescription` - the location of the test suite description document that lists the test cases to be run
@@ -328,7 +328,7 @@ There 5 important settings:
 
 There are 2 ways to set these properties. Firstly you can provide `config/application.yaml` in the working directory containing:
 ```yaml
-target: TARGET_SERVER
+target: TARGET_SERVER_IRI
 configFile: PATH_TO_CONFIG
 credentialsDir: PATH_TO_CREDENTIALS
 testSuiteDescription: PATH_TO_TESTSUITE_DOC
@@ -341,7 +341,7 @@ This method works well when running your tests in an IDE as it doesn't require a
 
 Alternatively you can set these things on the command line:
 ```
--Dtarget=TARGET_SERVER
+-Dtarget=TARGET_SERVER_IRI
 -DconfigFile=PATH_TO_CONFIG
 -DcredentialsDir=PATH_TO_CREDENTIALS
 -testSuiteDescription=PATH_TO_TESTSUITE_DOC
@@ -359,9 +359,9 @@ mvn test -Psolid
 ```
 To run the test suite with a specific target server:
 ```shell
-mvn test -Psolid -Dtarget=ess-compat
-mvn test -Psolid -Dtarget=css
-mvn test -Psolid -Dtarget=nss
+mvn test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/ess-compat
+mvn test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/css
+mvn test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/nss
 ```
 
 Using an IDE you can also run a specific scenario by editing the TestScenarioRunner and then running it as you would any unit test:

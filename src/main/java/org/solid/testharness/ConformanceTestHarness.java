@@ -10,7 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.DOAP;
 import org.solid.common.vocab.EARL;
-import org.solid.testharness.config.TestHarnessConfig;
+import org.solid.testharness.config.Config;
+import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.discovery.TestSuiteDescription;
 import org.solid.testharness.reporting.ReportGenerator;
 import org.solid.testharness.reporting.TestSuiteResults;
@@ -37,7 +38,9 @@ public class ConformanceTestHarness {
     private static final Logger logger = LoggerFactory.getLogger("org.solid.testharness.ConformanceTestHarness");
 
     @Inject
-    TestHarnessConfig testHarnessConfig;
+    Config config;
+    @Inject
+    TestSubject testSubject;
     @Inject
     TestSuiteDescription testSuiteDescription;
     @Inject
@@ -69,11 +72,12 @@ public class ConformanceTestHarness {
     }
 
     public boolean createCoverageReport() {
+        config.logConfigSettings();
         logger.info("===================== DISCOVER TESTS ========================");
         try {
-            testSuiteDescription.load(testHarnessConfig.getTestSuiteDescription());
+            testSuiteDescription.load(config.getTestSuiteDescription());
             List<IRI> testCases = testSuiteDescription.getAllTestCases();
-            List<String> featurePaths = testSuiteDescription.locateTestCases(testCases, testHarnessConfig.getPathMappings());
+            List<String> featurePaths = testSuiteDescription.locateTestCases(testCases, config.getPathMappings());
             if (featurePaths.isEmpty()) {
                 logger.warn("There are no tests available");
                 return true;
@@ -84,7 +88,7 @@ public class ConformanceTestHarness {
         }
 
         logger.info("===================== BUILD REPORT ========================");
-        File outputDir = testHarnessConfig.getOutputDirectory();
+        File outputDir = config.getOutputDirectory();
         logger.info("Reports location: {}", outputDir.getPath());
         try {
             File coverageHtmlFile = new File(outputDir, "coverage.html");
@@ -98,16 +102,17 @@ public class ConformanceTestHarness {
     }
 
     public TestSuiteResults runTestSuites() {
+        config.logConfigSettings();
         logger.info("===================== DISCOVER TESTS ========================");
         List<String> featurePaths;
         try {
-            testSuiteDescription.load(testHarnessConfig.getTestSuiteDescription());
-            testHarnessConfig.loadTestSubjectConfig(); // TODO:is this in right place?
+            testSuiteDescription.load(config.getTestSuiteDescription());
+            testSubject.loadTestSubjectConfig(); // TODO:is this in right place?
             // TODO: Consider running some initial tests to discover the features provided by a server
-            List<IRI> testCases = testSuiteDescription.getSupportedTestCases(testHarnessConfig.getTargetServer().getFeatures().keySet());
+            List<IRI> testCases = testSuiteDescription.getSupportedTestCases(testSubject.getTargetServer().getFeatures().keySet());
             logger.info("==== TEST CASES FOUND: {} - {}", testCases.size(), testCases);
 
-            featurePaths = testSuiteDescription.locateTestCases(testCases, testHarnessConfig.getPathMappings());
+            featurePaths = testSuiteDescription.locateTestCases(testCases, config.getPathMappings());
             if (featurePaths.isEmpty()) {
                 logger.warn("There are no tests available");
                 return null;
@@ -115,17 +120,17 @@ public class ConformanceTestHarness {
                 logger.info("==== RUNNING {} TEST CASES: {}", featurePaths.size(), featurePaths);
             }
 
-            testHarnessConfig.registerClients();
+            testSubject.registerClients();
         } catch (TestHarnessInitializationException e) {
             logger.error("Cannot run test suites", e);
             return null;
         }
 
         logger.info("===================== RUN TESTS ========================");
-        TestSuiteResults results = testRunner.runTests(featurePaths, testHarnessConfig.getTargetServer().getMaxThreads());
+        TestSuiteResults results = testRunner.runTests(featurePaths, testSubject.getTargetServer().getMaxThreads());
 
         logger.info("===================== BUILD REPORTS ========================");
-        File outputDir = testHarnessConfig.getOutputDirectory();
+        File outputDir = config.getOutputDirectory();
         logger.info("Reports location: {}", outputDir.getPath());
         try {
             File reportTurtleFile = new File(outputDir, "report.ttl");
