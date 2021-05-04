@@ -7,6 +7,8 @@ import org.solid.testharness.reporting.TestSuiteResults;
 
 import javax.inject.Inject;
 
+import java.nio.file.Path;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -22,9 +24,10 @@ public class TestScenarioRunner {
     void testScenario() {
         testSubject.loadTestSubjectConfig();
         testSubject.registerClients();
-//        String featurePath = "classpath:content-negotiation/content-negotiation-turtle.feature";
-        String featurePath = "classpath:writing-resource/containment.feature";
-        TestSuiteResults results = testRunner.runTest(featurePath);
+//        String featurePath = "content-negotiation/content-negotiation-turtle.feature";
+        String featurePath = "example/writing-resource/containment.feature";
+        String uri = Path.of(featurePath).toAbsolutePath().normalize().toUri().toString();
+        TestSuiteResults results = testRunner.runTest(uri);
         assertNotNull(results);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());
     }

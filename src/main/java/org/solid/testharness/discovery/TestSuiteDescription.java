@@ -19,6 +19,7 @@ import org.solid.testharness.utils.TestHarnessInitializationException;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.File;
+import java.net.URI;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -88,18 +89,20 @@ public class TestSuiteDescription {
         }
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             return testCases.stream().map(t -> {
-                    String mappedLocation = pathMappings.mapFeatureIri(t);
-                    // TODO: check for http vs file type (may need to use URI to ensure we have consistency) then use appropriate method to check existence
-                    File file = new File(mappedLocation);
-                    if (!mappedLocation.startsWith("http") && !file.exists()) {
-                        // TODO: if starter feature files are auto-generated, read for @ignore as well
-                        logger.warn("FEATURE NOT IMPLEMENTED: {}", mappedLocation);
-                        conn.add(t, EARL.mode, EARL.untested);
-                        return null;
-                    } else {
-                        return mappedLocation;
-                    }
-                }).filter(Objects::nonNull).collect(Collectors.toList());
+                URI mappedLocation = pathMappings.mapFeatureIri(t);
+                if (mappedLocation.getScheme().equals("http") || mappedLocation.getScheme().equals("https")) {
+                    throw new TestHarnessInitializationException("Remote test cases are not yet supported - use mappings to point to local copies");
+                }
+                File file = new File(mappedLocation.getPath());
+                if (!file.exists()) {
+                    // TODO: if starter feature files are auto-generated, read for @ignore as well
+                    logger.warn("FEATURE NOT IMPLEMENTED: {}", mappedLocation);
+                    conn.add(t, EARL.mode, EARL.untested);
+                    return null;
+                } else {
+                    return mappedLocation.toString();
+                }
+            }).filter(Objects::nonNull).collect(Collectors.toList());
         } catch (RDF4JException e) {
             throw new TestHarnessInitializationException(e.toString());
         }

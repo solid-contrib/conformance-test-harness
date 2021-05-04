@@ -3,6 +3,7 @@ configFile: config/config.ttl
 credentialsDir: /Users/pete/work/tokens
 testSuiteDescription: example/example.ttl
 target: https://github.com/solid/conformance-test-harness/ess-compat
+#target: https://github.com/solid/conformance-test-harness/css
 
 # mapping feature URIs
 feature:

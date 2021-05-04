@@ -229,7 +229,7 @@ credentialsDir: PATH_TO_CREDENTIALS
 feature:
   mappings:
     - prefix: https://github.com/solid/conformance-test-harness/example
-      path: /Users/pete/work/solid/conformance-test-harness/example
+      path: example
 ```
 The application wrapper is still under development so there will be changes to the above options and properties. 
 For example, once a new method of generating access tokens has been added, the `credentialsDir` will go. 
@@ -324,7 +324,8 @@ There 5 important settings:
 * `configFile` - the location of the config file
 * `credentialsDir` - the location of the shared credentials files if used
 * `testSuiteDescription` - the location of the test suite description document that lists the test cases to be run
-* `feature:mappings` - maps test cases IRIs to a local file system (there can be multiple mappings)
+* `feature:mappings` - maps test cases IRIs to a local file system (there can be multiple mappings). Mappings should be ordered so
+the most specific is first. This allows individual files to be mapped separately from their containing directories.
 
 There are 2 ways to set these properties. Firstly you can provide `config/application.yaml` in the working directory containing:
 ```yaml

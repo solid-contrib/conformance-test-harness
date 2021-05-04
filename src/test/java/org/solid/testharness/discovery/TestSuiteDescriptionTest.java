@@ -6,6 +6,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.TestHarnessInitializationException;
 import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
@@ -18,6 +19,7 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @QuarkusTest
 class TestSuiteDescriptionTest {
@@ -103,14 +105,30 @@ class TestSuiteDescriptionTest {
     }
 
     @Test
-    void mapFeaturePaths() {
+    void mapRemoteFeaturePaths() {
+        List<IRI> testCases = List.of(iri("https://example.org/dummy/group3/feature1"));
+        assertThrows(TestHarnessInitializationException.class, () -> testSuiteDescription.locateTestCases(testCases));
+    }
+
+    @Test
+    void mapFeaturePaths() throws MalformedURLException {
+        List<IRI> testCases = List.of(iri("https://example.org/features/test.feature"));
+        List<String> paths = testSuiteDescription.locateTestCases(testCases);
+        String[] expected = new String[]{TestUtils.getPathUri("src/test/resources/test.feature").toString()};
+        assertThat("Locations match", paths, containsInAnyOrder(expected));
+    }
+
+    @Test
+    void mapMissingFeaturePaths() throws MalformedURLException {
         List<IRI> testCases = List.of(
                 iri("https://example.org/dummy/group1/feature1"), iri("https://example.org/dummy/group1/feature2"),
-                iri("https://example.org/dummy/group2/feature1"), iri("https://example.org/dummy/group3/feature1")
+                iri("https://example.org/dummy/group2/feature1")
         );
         List<String> paths = testSuiteDescription.locateTestCases(testCases);
-        String[] expected = new String[]{"src/test/resources/dummy-features/group1/feature1", "src/test/resources/dummy-features/group1/feature2",
-                "src/test/resources/dummy-features/otherExample/feature1", "https://example.org/dummy/group3/feature1"};
+        String[] expected = new String[]{TestUtils.getPathUri("src/test/resources/dummy-features/group1/feature1").toString(),
+                TestUtils.getPathUri("src/test/resources/dummy-features/group1/feature2").toString(),
+                TestUtils.getPathUri("src/test/resources/dummy-features/otherExample/feature1").toString()
+        };
         assertThat("Locations match", paths, containsInAnyOrder(expected));
         // TODO: assert changes in repository
     }
