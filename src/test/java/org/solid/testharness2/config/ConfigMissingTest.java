@@ -1,8 +1,9 @@
-package org.solid.testharness.config;
+package org.solid.testharness2.config;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import org.junit.jupiter.api.Test;
+import org.solid.testharness.config.Config;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.inject.Inject;
@@ -34,11 +35,6 @@ public class ConfigMissingTest {
     @Test
     void getCredentialsDirectory() {
         assertThrows(TestHarnessInitializationException.class, () -> config.getCredentialsDirectory());
-    }
-
-    @Test
-    void getMappings() {
-        assertNull(config.getPathMappings());
     }
 
     @Test

@@ -47,7 +47,7 @@ public class DataRepository implements Repository {
 
     private Repository repository = new SailRepository(new MemoryStore());
     // TODO: Determine if this should be a separate IRI to the base
-    private IRI assertor = iri(Namespaces.TEST_HARNESS_URI);
+    private IRI assertor;
     private IRI testSubject;
 
     public static final String GENID = "/genid/";
@@ -86,13 +86,14 @@ public class DataRepository implements Repository {
         this.testSubject = testSubject;
     }
 
-    public void addFeatureResult(Suite suite, FeatureResult fr) {
+    public void setAssertor(IRI assertor) {
+        this.assertor = assertor;
+    }
+
+    public void addFeatureResult(Suite suite, FeatureResult fr, IRI featureIri) {
         long startTime = suite.startTime;
         try (RepositoryConnection conn = getConnection()) {
             ModelBuilder builder = new ModelBuilder();
-            // TODO: We should use the feature's own IRI (via the path mapping) not TEST_HARNESS_URI
-            // PathMappings.Mapping mapping = pathMappings.stream().filter(m -> location.startsWith(m.prefix)).findFirst().orElse(null);
-            IRI featureIri = iri(Namespaces.TEST_HARNESS_URI, fr.getDisplayName());
             IRI featureAssertion = createSkolemizedBlankNode(featureIri);
             IRI featureResult = createSkolemizedBlankNode(featureIri);
             conn.add(builder.subject(featureIri)

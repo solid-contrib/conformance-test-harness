@@ -7,108 +7,108 @@
 @prefix td: <http://www.w3.org/2006/03/test-description#> .
 @prefix test-harness: <https://github.com/solid/conformance-test-harness/> .
 
-<https://example.org/group1/feature1>
+<https://example.org/dummy/group1/feature1>
     a earl:TestCriterion, earl:TestFeature ;
     dcterms:title "Group 1 Test case 1" ;
-    earl:assertions <https://example.org/group1/feature1/genid/node1f273av6vx11> ;
-    dcterms:hasPart <https://example.org/group1/feature1/genid/node1f273av6vx13>,
-                    <https://example.org/group1/feature1/scenario2>.
+    earl:assertions <https://example.org/dummy/group1/feature1/genid/node1f273av6vx11> ;
+    dcterms:hasPart <https://example.org/dummy/group1/feature1/genid/node1f273av6vx13>,
+                    <https://example.org/dummy/group1/feature1/scenario2>.
 
-<https://example.org/group1/feature1/genid/node1f273av6vx11>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx11>
     a earl:Assertion;
     earl:assertedBy <https://github.com/solid/conformance-test-harness/>;
-    earl:test <https://example.org/group1/feature1>;
+    earl:test <https://example.org/dummy/group1/feature1>;
     earl:subject test-harness:testserver;
     earl:mode earl:automatic;
-    earl:result <https://example.org/group1/feature1/genid/node1f273av6vx12> .
+    earl:result <https://example.org/dummy/group1/feature1/genid/node1f273av6vx12> .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx12>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx12>
     a earl:TestResult;
     earl:outcome earl:passed;
     dcterms:date "2021-04-01T17:13:01.628+01:00"^^xsd:dateTime .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx13>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx13>
     a earl:TestCriterion, earl:TestCase;
     dcterms:title "Group 1 Test case 1 Test 1";
-    dcterms:isPartOf <https://example.org/group1/feature1>;
-    earl:assertions <https://example.org/group1/feature1/genid/node1f273av6vx14>;
-    earl:steps <https://example.org/group1/feature1/genid/node1f273av6vx29> .
+    dcterms:isPartOf <https://example.org/dummy/group1/feature1>;
+    earl:assertions <https://example.org/dummy/group1/feature1/genid/node1f273av6vx14>;
+    earl:steps <https://example.org/dummy/group1/feature1/genid/node1f273av6vx29> .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx14>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx14>
     a earl:Assertion;
     earl:assertedBy <https://github.com/solid/conformance-test-harness/>;
-    earl:test <https://example.org/group1/feature1/genid/node1f273av6vx13>;
+    earl:test <https://example.org/dummy/group1/feature1/genid/node1f273av6vx13>;
     earl:subject test-harness:testserver;
     earl:mode earl:automatic;
-    earl:result <https://example.org/group1/feature1/genid/node1f273av6vx15> .
+    earl:result <https://example.org/dummy/group1/feature1/genid/node1f273av6vx15> .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx15>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx15>
     a earl:TestResult;
     earl:outcome earl:passed;
     dcterms:date "2021-04-01T17:12:59.933+01:00"^^xsd:dateTime .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx29>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx29>
     a rdf:List;
-    rdf:first <https://example.org/group1/feature1/genid/node1f273av6vx16>;
-    rdf:rest (<https://example.org/group1/feature1/genid/node1f273av6vx17>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx18>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx19>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx20>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx21>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx22>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx23>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx24>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx25>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx26>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx27>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx28>) .
+    rdf:first <https://example.org/dummy/group1/feature1/genid/node1f273av6vx16>;
+    rdf:rest (<https://example.org/dummy/group1/feature1/genid/node1f273av6vx17>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx18>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx19>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx20>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx21>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx22>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx23>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx24>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx25>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx26>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx27>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx28>) .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx16>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx16>
     a earl:TestStep;
     dcterms:title "* def testContainer = createTestContainer(clients.alice)";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx17>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx17>
     a earl:TestStep;
     dcterms:title "* def exampleTurtle = karate.readAsString('../fixtures/example.ttl')";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx18>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx18>
     a earl:TestStep;
     dcterms:title "* def resource = testContainer.createChildResource('.ttl', exampleTurtle, 'text/turtle');";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx19>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx19>
     a earl:TestStep;
     dcterms:title "* assert resource.exists()";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx20>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx20>
     a earl:TestStep;
     dcterms:title "* def expected = RDFUtils.turtleToTripleArray(exampleTurtle, resource.getUrl())";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx21>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx21>
     a earl:TestStep;
     dcterms:title "* configure headers = clients.alice.getAuthHeaders('GET', resource.getUrl())";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx22>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx22>
     a earl:TestStep;
     dcterms:title "* url resource.getUrl()";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx23>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx23>
     a earl:TestStep;
     dcterms:title "* configure afterFeature = function() {resource.getContainer().delete()}";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx24>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx24>
     a earl:TestStep;
     dcterms:title "Given header Accept = 'application/ld+json'";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx25>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx25>
     a earl:TestStep;
     dcterms:title "When method GET";
     earl:outcome earl:passed;
@@ -142,87 +142,87 @@
 {\"@graph\":[{\"@id\":\"http:\\/\\/example.org\\/#hello\",\"linked\":\"http:\\/\\/example.org\\/#world\"},{\"@type\":\"ldp:RDFSource\",\"@id\":\"https:\\/\\/pod-compat.inrupt.com\\/solid-test-suite-alice\\/shared-test\\/e76ea929-dfa2-4e89-8add-39aa75435a24\\/7528a979-8253-4e47-a9b1-1cf936c1814f.ttl\"}],\"@context\":{\"as\":\"https:\\/\\/www.w3.org\\/ns\\/activitystreams#\",\"rdf\":\"http:\\/\\/www.w3.org\\/1999\\/02\\/22-rdf-syntax-ns#\",\"xsd\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\",\"ldp\":\"http:\\/\\/www.w3.org\\/ns\\/ldp#\",\"skos\":\"http:\\/\\/www.w3.org\\/2004\\/02\\/skos\\/core#\",\"rdfs\":\"http:\\/\\/www.w3.org\\/2000\\/01\\/rdf-schema#\",\"acl\":\"http:\\/\\/www.w3.org\\/ns\\/auth\\/acl#\",\"vcard\":\"http:\\/\\/www.w3.org\\/2006\\/vcard\\/ns#\",\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\"linked\":{\"@type\":\"@id\",\"@id\":\"http:\\/\\/example.org\\/#linked\"},\"dc\":\"http:\\/\\/purl.org\\/dc\\/terms\\/\",\"acp\":\"http:\\/\\/www.w3.org\\/ns\\/solid\\/acp#\"}}
 """ .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx26>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx26>
     a earl:TestStep;
     dcterms:title "Then status 200";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx27>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx27>
     a earl:TestStep;
     dcterms:title "And match header Content-Type contains 'application/ld+json'";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx28>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx28>
     a earl:TestStep;
     dcterms:title "And match RDFUtils.jsonLdToTripleArray(JSON.stringify(response), resource.getUrl()) contains expected";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx42>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx42>
     a earl:TestCriterion, earl:TestCase;
     dcterms:title "Group 1 Test case 1 Test 2";
-    dcterms:isPartOf <https://example.org/group1/feature1>;
-    earl:assertions <https://example.org/group1/feature1/genid/node1f273av6vx43>;
-    earl:steps <https://example.org/group1/feature1/genid/node1f273av6vx58> .
+    dcterms:isPartOf <https://example.org/dummy/group1/feature1>;
+    earl:assertions <https://example.org/dummy/group1/feature1/genid/node1f273av6vx43>;
+    earl:steps <https://example.org/dummy/group1/feature1/genid/node1f273av6vx58> .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx43>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx43>
     a earl:Assertion;
     earl:assertedBy <https://github.com/solid/conformance-test-harness/>;
-    earl:test <https://example.org/group1/feature1/genid/node1f273av6vx42>;
+    earl:test <https://example.org/dummy/group1/feature1/genid/node1f273av6vx42>;
     earl:subject test-harness:testserver;
     earl:mode earl:automatic;
-    earl:result <https://example.org/group1/feature1/genid/node1f273av6vx44> .
+    earl:result <https://example.org/dummy/group1/feature1/genid/node1f273av6vx44> .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx44>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx44>
     a earl:TestResult;
     earl:outcome earl:passed;
     dcterms:date "2021-04-01T17:12:59.884+01:00"^^xsd:dateTime .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx45>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx45>
     a earl:TestStep;
     dcterms:title "* def testContainer = createTestContainer(clients.alice)";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx46>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx46>
     a earl:TestStep;
     dcterms:title "* def exampleTurtle = karate.readAsString('../fixtures/example.ttl')";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx47>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx47>
     a earl:TestStep;
     dcterms:title "* def resource = testContainer.createChildResource('.ttl', exampleTurtle, 'text/turtle');";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx48>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx48>
     a earl:TestStep;
     dcterms:title "* assert resource.exists()";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx49>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx49>
     a earl:TestStep;
     dcterms:title "* def expected = RDFUtils.turtleToTripleArray(exampleTurtle, resource.getUrl())";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx50>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx50>
     a earl:TestStep;
     dcterms:title "* configure headers = clients.alice.getAuthHeaders('GET', resource.getUrl())";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx51>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx51>
     a earl:TestStep;
     dcterms:title "* url resource.getUrl()";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx52>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx52>
     a earl:TestStep;
     dcterms:title "* configure afterFeature = function() {resource.getContainer().delete()}";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx53>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx53>
     a earl:TestStep;
     dcterms:title "Given header Accept = 'text/turtle'";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx54>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx54>
     a earl:TestStep;
     dcterms:title "When method GET";
     earl:outcome earl:passed;
@@ -256,80 +256,80 @@
 
 """ .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx55>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx55>
     a earl:TestStep;
     dcterms:title "Then status 200";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx56>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx56>
     a earl:TestStep;
     dcterms:title "And match header Content-Type contains 'text/turtle'";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx57>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx57>
     a earl:TestStep;
     dcterms:title "And match RDFUtils.turtleToTripleArray(response, resource.getUrl()) contains expected";
     earl:outcome earl:passed .
 
-<https://example.org/group1/feature1/genid/node1f273av6vx58>
+<https://example.org/dummy/group1/feature1/genid/node1f273av6vx58>
     a rdf:List;
-    rdf:first <https://example.org/group1/feature1/genid/node1f273av6vx45>;
-    rdf:rest (<https://example.org/group1/feature1/genid/node1f273av6vx46>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx47>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx48>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx49>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx50>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx51>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx52>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx53>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx54>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx55>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx56>
-                 <https://example.org/group1/feature1/genid/node1f273av6vx57>) .
+    rdf:first <https://example.org/dummy/group1/feature1/genid/node1f273av6vx45>;
+    rdf:rest (<https://example.org/dummy/group1/feature1/genid/node1f273av6vx46>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx47>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx48>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx49>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx50>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx51>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx52>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx53>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx54>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx55>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx56>
+                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx57>) .
 
-<https://example.org/group1/feature2>
+<https://example.org/dummy/group1/feature2>
     a earl:TestCriterion, earl:TestFeature ;
     dcterms:subject "MUST" ;
     td:reviewStatus td:accepted ;
     dcterms:title "Group 1 Test case 2" .
 
-<https://example.org/group1/feature3>
+<https://example.org/dummy/group1/feature3>
     a earl:TestCriterion, earl:TestFeature ;
     dcterms:subject "MAY" ;
     td:reviewStatus td:unreviewed ;
     dcterms:title "Group 1 Test case 3" .
 
-<https://example.org/group2/feature1>
+<https://example.org/dummy/group2/feature1>
     a earl:TestCriterion, earl:TestFeature ;
     dcterms:subject "MUST" ;
     td:reviewStatus td:accepted ;
     dcterms:title "Group 2 Test case 1" .
 
-<https://example.org/group3/feature1>
+<https://example.org/dummy/group3/feature1>
     a earl:TestCriterion, earl:TestFeature ;
     dcterms:subject "MUST" ;
     td:reviewStatus td:accepted ;
     dcterms:title "Group 3 Test case 1" .
 
-<https://example.org/group3/feature2>
+<https://example.org/dummy/group3/feature2>
     a earl:TestCriterion, earl:TestFeature ;
     dcterms:subject "MUST" ;
     td:reviewStatus td:accepted ;
     dcterms:title "Group 3 Test case 2" .
 
-<https://example.org/group4/feature1>
+<https://example.org/dummy/group4/feature1>
     a earl:TestCriterion, earl:TestFeature ;
     dcterms:subject "MUST" ;
     td:reviewStatus td:accepted ;
     dcterms:title "Group 4 Test case 1" .
 
-<https://example.org/group4/feature2>
+<https://example.org/dummy/group4/feature2>
     a earl:TestCriterion, earl:TestFeature ;
     dcterms:subject "MUST" ;
     td:reviewStatus td:accepted ;
     dcterms:title "Group 4 Test case 2" .
 
-<https://example.org/group4/feature3>
+<https://example.org/dummy/group4/feature3>
     a earl:TestCriterion, earl:TestFeature ;
     dcterms:subject "MUST" ;
     td:reviewStatus td:unreviewed ;

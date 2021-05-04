@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -48,15 +47,6 @@ public class ConfigTest {
         File file = new File("target");
         config.setOutputDirectory(file);
         assertEquals(file, config.getOutputDirectory());
-    }
-
-    @Test
-    void getPathMappings() {
-        List<PathMappings.Mapping> mappings = config.getPathMappings();
-        assertNotNull(mappings);
-        assertEquals(1, mappings.size());
-        assertEquals("https://example.org", mappings.get(0).prefix);
-        assertEquals("src/test/resources/dummy-features", mappings.get(0).path);
     }
 
     @Test

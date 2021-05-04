@@ -5,7 +5,6 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.solid.testharness.config.PathMappings;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestUtils;
 
@@ -106,21 +105,17 @@ class TestSuiteDescriptionTest {
     @Test
     void mapFeaturePaths() {
         List<IRI> testCases = List.of(
-                iri("https://example.org/group1/feature1"), iri("https://example.org/group1/feature2"),
-                iri("https://example.org/group2/feature1"), iri("https://example.org/group3/feature1")
+                iri("https://example.org/dummy/group1/feature1"), iri("https://example.org/dummy/group1/feature2"),
+                iri("https://example.org/dummy/group2/feature1"), iri("https://example.org/dummy/group3/feature1")
         );
-        List<PathMappings.Mapping> mappings = List.of(
-                PathMappings.Mapping.create("https://example.org/group1", "src/test/resources/dummy-features/group1"),
-                PathMappings.Mapping.create("https://example.org/group2", "src/test/resources/dummy-features/otherExample")
-        );
-        List<String> paths = testSuiteDescription.locateTestCases(testCases, mappings);
+        List<String> paths = testSuiteDescription.locateTestCases(testCases);
         String[] expected = new String[]{"src/test/resources/dummy-features/group1/feature1", "src/test/resources/dummy-features/group1/feature2",
-                "src/test/resources/dummy-features/otherExample/feature1", "https://example.org/group3/feature1"};
+                "src/test/resources/dummy-features/otherExample/feature1", "https://example.org/dummy/group3/feature1"};
         assertThat("Locations match", paths, containsInAnyOrder(expected));
         // TODO: assert changes in repository
     }
 
     private IRI[] createIriList(String... testCases) {
-        return Stream.of(testCases).map(s -> iri("https://example.org/" + s)).toArray(IRI[]::new);
+        return Stream.of(testCases).map(s -> iri("https://example.org/dummy/" + s)).toArray(IRI[]::new);
     }
 }

@@ -39,7 +39,7 @@ class ReportGeneratorTest {
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/testsuite-results-sample.ttl"));
         StringWriter sw = new StringWriter();
         reportGenerator.buildHtmlResultReport(sw);
-        logger.debug("OUTPUT:\n{}", sw);
+//        logger.debug("OUTPUT:\n{}", sw);
         assertTrue(sw.toString().length() > 1);
     }
 
@@ -50,7 +50,7 @@ class ReportGeneratorTest {
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/coverage-sample.ttl"));
         StringWriter sw = new StringWriter();
         reportGenerator.buildHtmlCoverageReport(sw);
-        logger.debug("OUTPUT:\n{}", sw);
+//        logger.debug("OUTPUT:\n{}", sw);
         assertTrue(sw.toString().length() > 1);
     }
 

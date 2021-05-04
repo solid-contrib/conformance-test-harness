@@ -3,6 +3,7 @@ package org.solid.testharness.utils;
 import com.intuit.karate.Suite;
 import com.intuit.karate.core.*;
 import io.quarkus.test.junit.QuarkusTest;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.util.Values;
 import org.eclipse.rdf4j.model.vocabulary.FOAF;
@@ -27,11 +28,16 @@ import static org.mockito.Mockito.when;
 class DataRepositoryTest {
     private static final Logger logger = LoggerFactory.getLogger(DataRepositoryTest.class);
 
+    private static final IRI assertor = iri("http://example.org/testharness");
+    private static final IRI testSubject = iri("http://example.org/test");
+    private static final IRI featureIri = iri("http://example.org/feature");
+
     @Test
     void addFeatureResult() throws Exception {
         DataRepository dataRepository = new DataRepository();
         dataRepository.postConstruct();
-        dataRepository.setTestSubject(iri("http://example.org/test"));
+        dataRepository.setAssertor(assertor);
+        dataRepository.setTestSubject(testSubject);
         Suite suite = Suite.forTempUse();
         Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
@@ -78,10 +84,10 @@ class DataRepositoryTest {
         when(str2.getStepLog()).thenReturn("");
         when(sr1.getStepResults()).thenReturn(List.of(str1, str2));
 
-        dataRepository.addFeatureResult(suite, fr);
+        dataRepository.addFeatureResult(suite, fr, featureIri);
         StringWriter sw = new StringWriter();
         dataRepository.export(sw);
-        assertTrue(sw.toString().contains("test-harness:DISPLAY_NAME"));
+        assertTrue(sw.toString().contains(featureIri.stringValue()));
         assertTrue(sw.toString().contains("dcterms:title \"FEATURE NAME\""));
     }
 
@@ -89,7 +95,8 @@ class DataRepositoryTest {
     void addFeatureResultTestFailed() throws Exception {
         DataRepository dataRepository = new DataRepository();
         dataRepository.postConstruct();
-        dataRepository.setTestSubject(iri("http://example.org/test"));
+        dataRepository.setAssertor(assertor);
+        dataRepository.setTestSubject(testSubject);
         Suite suite = Suite.forTempUse();
         Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
@@ -100,10 +107,10 @@ class DataRepositoryTest {
         when(fr.getDurationMillis()).thenReturn(1000.0);
         when(fr.getScenarioResults()).thenReturn(null);
 
-        dataRepository.addFeatureResult(suite, fr);
+        dataRepository.addFeatureResult(suite, fr, featureIri);
         StringWriter sw = new StringWriter();
         dataRepository.export(sw);
-        assertTrue(sw.toString().contains("test-harness:DISPLAY_NAME"));
+        assertTrue(sw.toString().contains(featureIri.stringValue()));
         assertTrue(sw.toString().contains("dcterms:title \"FEATURE NAME\""));
     }
 
@@ -111,7 +118,8 @@ class DataRepositoryTest {
     void addFeatureResultBadRdf() throws Exception {
         DataRepository dataRepository = new DataRepository();
         dataRepository.postConstruct();
-        dataRepository.setTestSubject(iri("http://example.org/test"));
+        dataRepository.setAssertor(assertor);
+        dataRepository.setTestSubject(testSubject);
         Suite suite = Suite.forTempUse();
         Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn(null);
@@ -119,10 +127,10 @@ class DataRepositoryTest {
         when(fr.getDisplayName()).thenReturn("");
         when(fr.getFeature()).thenReturn(feature);
 
-        dataRepository.addFeatureResult(suite, fr);
+        dataRepository.addFeatureResult(suite, fr, featureIri);
         StringWriter sw = new StringWriter();
         dataRepository.export(sw);
-        assertFalse(sw.toString().contains("test-harness:DISPLAY_NAME"));
+        assertFalse(sw.toString().contains(featureIri.stringValue()));
     }
 
     @Test

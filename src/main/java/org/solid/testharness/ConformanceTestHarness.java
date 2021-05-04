@@ -54,10 +54,12 @@ public class ConformanceTestHarness {
         try (final InputStream is = getClass().getClassLoader().getResourceAsStream("assertor.properties")) {
             Properties properties = new Properties();
             properties.load(is);
+            IRI assertor = iri(Namespaces.TEST_HARNESS_URI);
+            dataRepository.setAssertor(assertor);
             try (RepositoryConnection conn = dataRepository.getConnection()) {
                 ModelBuilder builder = new ModelBuilder();
                 BNode bnode = Values.bnode();
-                conn.add(builder.subject(iri(Namespaces.TEST_HARNESS_URI))
+                conn.add(builder.subject(assertor)
                         .add(RDF.TYPE, EARL.Software)
                         .add(DOAP.name, properties.getProperty("package.name"))
                         .add(DOAP.description, properties.getProperty("package.description"))
@@ -77,7 +79,7 @@ public class ConformanceTestHarness {
         try {
             testSuiteDescription.load(config.getTestSuiteDescription());
             List<IRI> testCases = testSuiteDescription.getAllTestCases();
-            List<String> featurePaths = testSuiteDescription.locateTestCases(testCases, config.getPathMappings());
+            List<String> featurePaths = testSuiteDescription.locateTestCases(testCases);
             if (featurePaths.isEmpty()) {
                 logger.warn("There are no tests available");
                 return true;
@@ -112,7 +114,7 @@ public class ConformanceTestHarness {
             List<IRI> testCases = testSuiteDescription.getSupportedTestCases(testSubject.getTargetServer().getFeatures().keySet());
             logger.info("==== TEST CASES FOUND: {} - {}", testCases.size(), testCases);
 
-            featurePaths = testSuiteDescription.locateTestCases(testCases, config.getPathMappings());
+            featurePaths = testSuiteDescription.locateTestCases(testCases);
             if (featurePaths.isEmpty()) {
                 logger.warn("There are no tests available");
                 return null;

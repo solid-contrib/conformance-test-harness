@@ -18,24 +18,24 @@ manifest:group1
     dcterms:description "Description 1"@en ;
     td:specificationReference <https://solidproject.org/TR/protocol#spec1> ;
     dcterms:hasPart
-        <https://example.org/group1/feature1>,
-        <https://example.org/group1/feature2>,
-        <https://example.org/group1/feature3>
+        <https://example.org/dummy/group1/feature1>,
+        <https://example.org/dummy/group1/feature2>,
+        <https://example.org/dummy/group1/feature3>
 .
 
-<https://example.org/group1/feature1>
+<https://example.org/dummy/group1/feature1>
     a td:TestCase ;
     dcterms:subject "MUST" ;
     td:reviewStatus td:accepted ;
     dcterms:title "Group 1 Test case 1" .
 
-<https://example.org/group1/feature2>
+<https://example.org/dummy/group1/feature2>
     a td:TestCase ;
     dcterms:subject "MUST" ;
     td:reviewStatus td:accepted ;
     dcterms:title "Group 1 Test case 2" .
 
-<https://example.org/group1/feature3>
+<https://example.org/dummy/group1/feature3>
     a td:TestCase ;
     dcterms:subject "MAY" ;
     td:reviewStatus td:unreviewed ;
@@ -48,10 +48,10 @@ manifest:group2
     td:specificationReference <https://solidproject.org/TR/protocol#spec2> ;
     td:preCondition "sf1" ;
     dcterms:hasPart
-        <https://example.org/group2/feature1>
+        <https://example.org/dummy/group2/feature1>
 .
 
-<https://example.org/group2/feature1>
+<https://example.org/dummy/group2/feature1>
     a td:TestCase ;
     dcterms:subject "MUST" ;
     td:reviewStatus td:accepted ;
@@ -64,17 +64,17 @@ manifest:group3
     td:specificationReference <https://solidproject.org/TR/protocol#spec3> ;
     td:preCondition "sf1", "sf2" ;
     dcterms:hasPart
-        <https://example.org/group3/feature1>,
-        <https://example.org/group3/feature2>
+        <https://example.org/dummy/group3/feature1>,
+        <https://example.org/dummy/group3/feature2>
 .
 
-<https://example.org/group3/feature1>
+<https://example.org/dummy/group3/feature1>
     a td:TestCase ;
     dcterms:subject "MUST" ;
     td:reviewStatus td:accepted ;
     dcterms:title "Group 3 Test case 1" .
 
-<https://example.org/group3/feature2>
+<https://example.org/dummy/group3/feature2>
     a td:TestCase ;
     dcterms:subject "MUST" ;
     td:reviewStatus td:accepted ;
@@ -87,24 +87,24 @@ manifest:group4
     td:specificationReference <https://solidproject.org/TR/protocol#spec4> ;
     td:preCondition "sf1", "sf3" ;
     dcterms:hasPart
-        <https://example.org/group4/feature1>,
-        <https://example.org/group4/feature2>,
-        <https://example.org/group4/feature3>
+        <https://example.org/dummy/group4/feature1>,
+        <https://example.org/dummy/group4/feature2>,
+        <https://example.org/dummy/group4/feature3>
 .
 
-<https://example.org/group4/feature1>
+<https://example.org/dummy/group4/feature1>
     a td:TestCase ;
     dcterms:subject "MUST" ;
     td:reviewStatus td:accepted ;
     dcterms:title "Group 4 Test case 1" .
 
-<https://example.org/group4/feature2>
+<https://example.org/dummy/group4/feature2>
     a td:TestCase ;
     dcterms:subject "MUST" ;
     td:reviewStatus td:accepted ;
     dcterms:title "Group 4 Test case 2" .
 
-<https://example.org/group4/feature3>
+<https://example.org/dummy/group4/feature3>
     a td:TestCase ;
     dcterms:subject "MUST" ;
     td:reviewStatus td:unreviewed ;

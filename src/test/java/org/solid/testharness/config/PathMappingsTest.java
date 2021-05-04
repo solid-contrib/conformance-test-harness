@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Test;
 import javax.inject.Inject;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 @TestProfile(ConfigTestNormalProfile.class)
@@ -20,14 +19,16 @@ class PathMappingsTest {
     void getMappings() {
         List<PathMappings.Mapping> mappings = pathMappings.getMappings();
         assertNotNull(mappings);
-        assertEquals(1, mappings.size());
-        assertEquals("https://example.org", mappings.get(0).prefix);
-        assertEquals("src/test/resources/dummy-features", mappings.get(0).path);
+        assertEquals(3, mappings.size());
+        assertEquals("https://example.org/dummy/group1", mappings.get(0).prefix);
+        assertEquals("src/test/resources/dummy-features/group1", mappings.get(0).path);
     }
 
     @Test
     void testToString() {
-        assertEquals("[https://example.org => src/test/resources/dummy-features]", pathMappings.toString());
+        assertEquals("[https://example.org/dummy/group1 => src/test/resources/dummy-features/group1, " +
+                "https://example.org/dummy/group2 => src/test/resources/dummy-features/otherExample, " +
+                "https://example.org/features => src/test/resources]", pathMappings.toString());
     }
 
     @Test
@@ -38,5 +39,11 @@ class PathMappingsTest {
         );
         pathMappings.setMappings(mappings);
         assertEquals("[prefix1 => path1, prefix2 => path2]", pathMappings.toString());
+    }
+
+    @Test
+    void setNullMappings() {
+        pathMappings.setMappings(null);
+        assertNull(pathMappings.getMappings());
     }
 }

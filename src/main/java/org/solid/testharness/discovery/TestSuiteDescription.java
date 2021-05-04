@@ -22,7 +22,6 @@ import java.io.File;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Representation of a test suite description document parsed from RDF
@@ -33,6 +32,9 @@ public class TestSuiteDescription {
 
     @Inject
     DataRepository dataRepository;
+
+    @Inject
+    PathMappings pathMappings;
 
     // TODO: This currently finds all td:SpecificationTestCase. It should pay attention to:
     //   manifest: dcterms:hasPart manifest:testgroup
@@ -80,35 +82,24 @@ public class TestSuiteDescription {
         return selectTestCases(SELECT_ALL_TEST_CASES);
     }
 
-    public List<String> locateTestCases(List<IRI> testCases, List<PathMappings.Mapping> pathMappings) {
+    public List<String> locateTestCases(List<IRI> testCases) {
         if (testCases.isEmpty()) {
             return Collections.EMPTY_LIST;
         }
-        Stream<String> testCaseStream;
         try (RepositoryConnection conn = dataRepository.getConnection()) {
-            if (pathMappings == null || pathMappings.isEmpty()) {
-                testCaseStream = testCases.stream().map(Value::stringValue);
-            } else {
-                testCaseStream = testCases.stream().map(t -> {
-                    String location = t.stringValue();
-                    PathMappings.Mapping mapping = pathMappings.stream().filter(m -> location.startsWith(m.prefix)).findFirst().orElse(null);
-                    if (mapping != null) {
-                        String mappedLocation = location.replace(mapping.prefix, mapping.path);
-                        File file = new File(mappedLocation);
-                        if (!file.exists()) {
-                            // TODO: if starter feature files are auto-generated, read for @ignore as well
-                            logger.warn("FEATURE NOT IMPLEMENTED: {}", mappedLocation);
-                            conn.add(t, EARL.mode, EARL.untested);
-                            return null;
-                        } else {
-                            return mappedLocation;
-                        }
+            return testCases.stream().map(t -> {
+                    String mappedLocation = pathMappings.mapFeatureIri(t);
+                    // TODO: check for http vs file type (may need to use URI to ensure we have consistency) then use appropriate method to check existence
+                    File file = new File(mappedLocation);
+                    if (!mappedLocation.startsWith("http") && !file.exists()) {
+                        // TODO: if starter feature files are auto-generated, read for @ignore as well
+                        logger.warn("FEATURE NOT IMPLEMENTED: {}", mappedLocation);
+                        conn.add(t, EARL.mode, EARL.untested);
+                        return null;
                     } else {
-                        return location;
+                        return mappedLocation;
                     }
-                }).filter(Objects::nonNull);
-            }
-            return testCaseStream.collect(Collectors.toList());
+                }).filter(Objects::nonNull).collect(Collectors.toList());
         } catch (RDF4JException e) {
             throw new TestHarnessInitializationException(e.toString());
         }

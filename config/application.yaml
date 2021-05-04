@@ -17,7 +17,7 @@ quarkus:
       "org.solid.testharness":
         level: DEBUG # to increase overall logging for development
       "org.solid.testharness.http.AuthManager":
-        level: ∏ # but keep only higher level for authentication
+        level: INFO # but keep only higher level for authentication
 #"org.solid.testharness.utils":
 #  level: INFO
 #"org.solid.testharness.http.Client":
@@ -31,8 +31,12 @@ quarkus:
   testSuiteDescription: src/test/resources/testsuite-sample.ttl
   feature:
     mappings:
-      - prefix: https://example.org
-        path: src/test/resources/dummy-features
+      - prefix: https://example.org/dummy/group1
+        path: src/test/resources/dummy-features/group1
+      - prefix: https://example.org/dummy/group2
+        path: src/test/resources/dummy-features/otherExample
+      - prefix: https://example.org/features
+        path: src/test/resources
 
   quarkus:
     log:

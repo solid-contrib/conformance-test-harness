@@ -1,4 +1,4 @@
-package org.solid.testharness.config;
+package org.solid.testharness2.config;
 
 import io.quarkus.test.junit.QuarkusTestProfile;
 

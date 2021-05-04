@@ -11,7 +11,6 @@ import javax.inject.Inject;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Optional;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
@@ -106,15 +105,11 @@ public class Config {
         this.outputDir = outputDir;
     }
 
-    public List<PathMappings.Mapping> getPathMappings() {
-        return pathMappings.getMappings();
-    }
-
     public void logConfigSettings() {
         logger.info("Config url:       {}", getConfigUrl().toString());
         logger.info("Credentials path: {}", getCredentialsDirectory().getPath());
         logger.info("Test suite:       {}", getTestSuiteDescription().toString());
-        logger.info("Path mappings:    {}", getPathMappings());
+        logger.info("Path mappings:    {}", pathMappings.getMappings());
         logger.info("Target server:    {}", target.orElse("not defined"));
     }
 }
