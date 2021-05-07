@@ -17,6 +17,7 @@ import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
+import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -26,6 +27,7 @@ import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import static java.util.UUID.randomUUID;
 import static org.apache.commons.text.CharacterPredicates.DIGITS;
@@ -43,8 +45,8 @@ public class Client {
     private String user = null;
 
     public static class Builder {
-        private HttpClient.Builder clientBuilder = null;
-        private String user = null;
+        private HttpClient.Builder clientBuilder;
+        private String user;
         private RsaJsonWebKey clientKey = null;
 
         private static final RandomStringGenerator GENERATOR = new RandomStringGenerator.Builder()
@@ -134,6 +136,47 @@ public class Client {
 
     public <T> HttpResponse<T> send(HttpRequest request, HttpResponse.BodyHandler<T> responseBodyHandler) throws IOException, InterruptedException {
         return client.send(request, responseBodyHandler);
+    }
+
+    public HttpResponse<String> getAsString(URI url) throws IOException, InterruptedException {
+        HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
+                .header("Accept", "text/turtle");
+        HttpRequest request = authorize(builder).build();
+        return client.send(request, HttpResponse.BodyHandlers.ofString());
+    }
+
+    public HttpResponse<Void> put(URI url, String data, String type) throws IOException, InterruptedException {
+        HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
+                .PUT(HttpRequest.BodyPublishers.ofString(data))
+                .header("Content-Type", type);
+        HttpRequest request = authorize(builder).build();
+        HttpUtils.logRequest(logger, request);
+        HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+        HttpUtils.logResponse(logger, response);
+        return response;
+    }
+
+    public HttpResponse<Void> head(URI url) throws IOException, InterruptedException {
+        HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
+                .method("HEAD", HttpRequest.BodyPublishers.noBody());
+        HttpRequest request = authorize(builder).build();
+        HttpUtils.logRequest(logger, request);
+        HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+        HttpUtils.logResponse(logger, response);
+        return response;
+    }
+
+    public CompletableFuture<HttpResponse<Void>> deleteAsync(URI url) {
+        logger.debug("Deleting {}", url);
+        HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url).DELETE();
+        HttpRequest request;
+        try {
+            request = authorize(builder).build();
+        } catch (Exception e) {
+            logger.error("Failed to set up authorization", e);
+            return CompletableFuture.completedFuture(null);
+        }
+        return client.sendAsync(request, HttpResponse.BodyHandlers.discarding());
     }
 
     public final HttpRequest.Builder signRequest(HttpRequest.Builder builder) {

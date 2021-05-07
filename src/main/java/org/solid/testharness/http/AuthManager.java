@@ -10,10 +10,6 @@ import javax.enterprise.context.ApplicationScoped;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -206,18 +202,18 @@ public class AuthManager {
         return new String(Base64.getEncoder().encode(data.getBytes()));
     }
 
-    private String generateCodeVerifier() {
-        SecureRandom secureRandom = new SecureRandom();
-        byte[] codeVerifier = new byte[32];
-        secureRandom.nextBytes(codeVerifier);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(codeVerifier);
-    }
+//    private String generateCodeVerifier() {
+//        SecureRandom secureRandom = new SecureRandom();
+//        byte[] codeVerifier = new byte[32];
+//        secureRandom.nextBytes(codeVerifier);
+//        return Base64.getUrlEncoder().withoutPadding().encodeToString(codeVerifier);
+//    }
 
-    private String generateCodeChallange(String codeVerifier) throws NoSuchAlgorithmException {
-        byte[] bytes = codeVerifier.getBytes(StandardCharsets.US_ASCII);
-        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-        messageDigest.update(bytes, 0, bytes.length);
-        byte[] digest = messageDigest.digest();
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
-    }
+//    private String generateCodeChallange(String codeVerifier) throws NoSuchAlgorithmException {
+//        byte[] bytes = codeVerifier.getBytes(StandardCharsets.US_ASCII);
+//        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+//        messageDigest.update(bytes, 0, bytes.length);
+//        byte[] digest = messageDigest.digest();
+//        return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
+//    }
 }
