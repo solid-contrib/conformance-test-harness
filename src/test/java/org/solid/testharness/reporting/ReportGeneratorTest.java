@@ -37,7 +37,7 @@ class ReportGeneratorTest {
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/testsuite-results-sample.ttl"));
-        StringWriter sw = new StringWriter();
+        final StringWriter sw = new StringWriter();
         reportGenerator.buildHtmlResultReport(sw);
 //        logger.debug("OUTPUT:\n{}", sw);
         assertTrue(sw.toString().length() > 1);
@@ -48,7 +48,7 @@ class ReportGeneratorTest {
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/harness-sample.ttl"));
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/coverage-sample.ttl"));
-        StringWriter sw = new StringWriter();
+        final StringWriter sw = new StringWriter();
         reportGenerator.buildHtmlCoverageReport(sw);
 //        logger.debug("OUTPUT:\n{}", sw);
         assertTrue(sw.toString().length() > 1);
@@ -56,12 +56,12 @@ class ReportGeneratorTest {
 
     @Test
     void buildHtmlResultReportFile() throws IOException {
-        File reportFile = new File("target/example-result-report.html");
+        final File reportFile = new File("target/example-result-report.html");
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/harness-sample.ttl"));
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/testsuite-results-sample.ttl"));
-        FileWriter wr = new FileWriter(reportFile);
+        final FileWriter wr = new FileWriter(reportFile);
         reportGenerator.buildHtmlResultReport(wr);
         wr.close();
         assertTrue(reportFile.exists());
@@ -69,11 +69,11 @@ class ReportGeneratorTest {
 
     @Test
     void buildHtmlCoverageReportFile() throws IOException {
-        File reportFile = new File("target/example-coverage-report.html");
+        final File reportFile = new File("target/example-coverage-report.html");
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/harness-sample.ttl"));
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
         dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/coverage-sample.ttl"));
-        FileWriter wr = new FileWriter(reportFile);
+        final FileWriter wr = new FileWriter(reportFile);
         reportGenerator.buildHtmlCoverageReport(wr);
         wr.close();
         assertTrue(reportFile.exists());

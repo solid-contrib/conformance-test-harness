@@ -25,7 +25,7 @@ public class TargetServerTest {
     @Test
     public void parseTargetServer() throws Exception {
         when(config.getCredentialsDirectory()).thenReturn(new File("src/test/resources").getCanonicalFile());
-        StringReader reader = new StringReader("@base <https://example.org/> .\n" +
+        final StringReader reader = new StringReader("@base <https://example.org/> .\n" +
                 "@prefix solid-test: <https://github.com/solid/conformance-test-harness/vocab#> .\n" +
                 "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n" +
                 "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
@@ -63,7 +63,7 @@ public class TargetServerTest {
 //                "    solid-test:disableDPoP true ;\n" +
                 "    solid-test:setupAclRoot true .");
         TestData.insertData(dataRepository, reader);
-        TargetServer targetServer = new TargetServer(iri("https://example.org/testserver"));
+        final TargetServer targetServer = new TargetServer(iri("https://example.org/testserver"));
         assertAll("targetServer",
                 () -> assertNotNull(targetServer.getFeatures()),
                 () -> assertEquals(true, targetServer.getFeatures().get("feature1")),
@@ -84,7 +84,7 @@ public class TargetServerTest {
                 () -> assertNotNull(targetServer.getUsers().get("bob")),
                 () -> assertNull(targetServer.getUsers().get("bob").getUsername()),
                 () -> assertNotNull(targetServer.getWebIds())
-                );
+        );
         assertAll("targetServerCachedValues",
                 () -> assertNotNull(targetServer.getFeatures()),
                 () -> assertEquals("https://inrupt.net", targetServer.getSolidIdentityProvider()),
@@ -102,7 +102,7 @@ public class TargetServerTest {
 
     @Test
     public void parseTargetServerWithMissingElements() throws Exception {
-        StringReader reader = new StringReader("@base <https://example.org/> .\n" +
+        final StringReader reader = new StringReader("@base <https://example.org/> .\n" +
                 "@prefix solid-test: <https://github.com/solid/conformance-test-harness/vocab#> .\n" +
                 "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n" +
                 "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
@@ -112,7 +112,7 @@ public class TargetServerTest {
                 "<bad>\n" +
                 "    a earl:Software, earl:TestSubject .");
         TestData.insertData(dataRepository, reader);
-        TargetServer targetServer = new TargetServer(iri("https://example.org/bad"));
+        final TargetServer targetServer = new TargetServer(iri("https://example.org/bad"));
         assertNull(targetServer.getLoginEndpoint());
         assertEquals(0, targetServer.getUsers().size());
     }

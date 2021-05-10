@@ -33,10 +33,10 @@ public class Application implements QuarkusApplication {
     ConformanceTestHarness conformanceTestHarness;
 
     @Override
-    public int run(String... args) {
+    public int run(final String... args) {
         logger.debug("Args: {}", Arrays.toString(args));
 
-        Options options = new Options();
+        final Options options = new Options();
         options.addOption(Option.builder().longOpt("coverage").desc("produce a coverage report").build());
         options.addOption("c", "config", true, "URL or path to test subject config (Turtle)");
         options.addOption("t", "target", true, "target server");
@@ -45,21 +45,21 @@ public class Application implements QuarkusApplication {
 //        options.addOption("f", "feature", true, "feature filter");
         options.addOption("h", "help", false, "print this message");
 
-        CommandLineParser parser = new DefaultParser();
+        final CommandLineParser parser = new DefaultParser();
         try {
-            CommandLine line = parser.parse(options, args);
+            final CommandLine line = parser.parse(options, args);
             if (line.hasOption("help")) {
-                HelpFormatter formatter = new HelpFormatter();
+                final HelpFormatter formatter = new HelpFormatter();
                 formatter.printHelp( "run", options );
             } else {
-                File outputDir;
+                final File outputDir;
                 if (line.hasOption("output") && !StringUtils.isEmpty(line.getOptionValue("output"))) {
                     outputDir = Path.of(line.getOptionValue("output")).toAbsolutePath().normalize().toFile();
                     logger.debug("Output = {}", outputDir.getPath());
                 } else {
                     outputDir = Path.of("").toAbsolutePath().toFile();
                 }
-                Formatter formatter = new Formatter();
+                final Formatter formatter = new Formatter();
                 if (!validateOutputDir(outputDir.toPath(), formatter)) {
                     logger.error(formatter.toString());
                     return 1;
@@ -67,7 +67,7 @@ public class Application implements QuarkusApplication {
                 config.setOutputDirectory(outputDir);
 
                 if (line.hasOption("suite")) {
-                    URL url = createUrl(line.getOptionValue("suite"), "suite", formatter);
+                    final URL url = createUrl(line.getOptionValue("suite"), "suite", formatter);
                     if (url == null) {
                         logger.error(formatter.toString());
                         return 1;
@@ -82,13 +82,15 @@ public class Application implements QuarkusApplication {
                     return conformanceTestHarness.createCoverageReport() ? 0 : 1;
                 } else {
                     if (line.hasOption("target") && !StringUtils.isEmpty(line.getOptionValue("target"))) {
-                        String target = line.getOptionValue("target");
-                        IRI testSubject = target.contains(":") ? iri(target) : iri(Namespaces.TEST_HARNESS_URI, target);
+                        final String target = line.getOptionValue("target");
+                        final IRI testSubject = target.contains(":")
+                                ? iri(target)
+                                : iri(Namespaces.TEST_HARNESS_URI, target);
                         logger.debug("Target: {}", testSubject.stringValue());
                         config.setTestSubject(testSubject);
                     }
-                    if (line.hasOption("config")){
-                        URL url = createUrl(line.getOptionValue("config"), "config", formatter);
+                    if (line.hasOption("config")) {
+                        final URL url = createUrl(line.getOptionValue("config"), "config", formatter);
                         if (url == null) {
                             logger.error(formatter.toString());
                             return 1;
@@ -97,21 +99,21 @@ public class Application implements QuarkusApplication {
                         logger.debug("Config = {}", config.getConfigUrl().toString());
                     }
 
-                    TestSuiteResults results = conformanceTestHarness.runTestSuites();
+                    final TestSuiteResults results = conformanceTestHarness.runTestSuites();
                     return results != null && results.getFailCount() == 0 ? 0 : 1;
                 }
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             logger.error("Application initialization failed.  Reason: {}", e.toString());
         }
         return 1;
     }
 
-    public static void main(String... args) {
+    public static void main(final String... args) {
         Quarkus.run(Application.class, args);
     }
 
-    private boolean validateOutputDir(Path dir, Formatter error) {
+    private boolean validateOutputDir(final Path dir, final Formatter error) {
         if (!Files.exists(dir)) {
             error.format("Output directory '%s' does not exist", dir);
             return false;
@@ -131,7 +133,7 @@ public class Application implements QuarkusApplication {
         return true;
     }
 
-    private URL createUrl(String path, String param, Formatter error) {
+    private URL createUrl(final String path, final String param, final Formatter error) {
         if (!StringUtils.isEmpty(path)) {
             try {
                 if (path.startsWith("file:") || path.startsWith("http:") || path.startsWith("https:")) {

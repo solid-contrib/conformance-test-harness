@@ -59,9 +59,9 @@ class ConformanceTestHarnessTest {
     @Test
     void initialize() throws Exception {
         conformanceTestHarness.initialize();
-        StringWriter sw = new StringWriter();
+        final StringWriter sw = new StringWriter();
         dataRepository.export(sw);
-        String result = sw.toString();
+        final String result = sw.toString();
         assertTrue(result.contains("a earl:Software"));
         assertTrue(result.contains("doap:name"));
         assertTrue(result.contains("doap:description"));
@@ -127,7 +127,7 @@ class ConformanceTestHarnessTest {
         mockTargetServer();
         when(testSuiteDescription.getSupportedTestCases(any())).thenReturn(Collections.emptyList());
         when(testSuiteDescription.locateTestCases(any())).thenReturn(List.of("test"));
-        TestSuiteResults results = mockResults(1);
+        final TestSuiteResults results = mockResults(1);
         when(testRunner.runTests(any(), anyInt())).thenReturn(results);
         assertEquals(1, conformanceTestHarness.runTestSuites().getFailCount());
         assertTrue(Files.exists(tmp.resolve("report.html")));
@@ -139,21 +139,21 @@ class ConformanceTestHarnessTest {
         mockTargetServer();
         when(testSuiteDescription.getSupportedTestCases(any())).thenReturn(Collections.emptyList());
         when(testSuiteDescription.locateTestCases(any())).thenReturn(List.of("test"));
-        TestSuiteResults results = mockResults(1);
+        final TestSuiteResults results = mockResults(1);
         when(testRunner.runTests(any(), anyInt())).thenReturn(results);
         assertEquals(1, conformanceTestHarness.runTestSuites().getFailCount());
         assertTrue(Files.notExists(tmp.resolve("report.html")));
     }
 
     private void mockTargetServer() {
-        TargetServer targetServer = mock(TargetServer.class);
+        final TargetServer targetServer = mock(TargetServer.class);
         when(targetServer.getFeatures()).thenReturn(Map.of("feature", false));
         when(targetServer.getMaxThreads()).thenReturn(1);
         when(testSubject.getTargetServer()).thenReturn(targetServer);
     }
 
-    private TestSuiteResults mockResults(int failures) {
-        Results results = mock(Results.class);
+    private TestSuiteResults mockResults(final int failures) {
+        final Results results = mock(Results.class);
         when(results.getFailCount()).thenReturn(failures);
         return new TestSuiteResults(results);
     }

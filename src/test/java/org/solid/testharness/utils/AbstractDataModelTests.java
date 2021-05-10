@@ -15,8 +15,8 @@ public abstract class AbstractDataModelTests {
 
     @BeforeAll
     void setup() throws IOException {
-        StringReader reader = new StringReader(getData());
-        DataRepository repository = new DataRepository();
+        final StringReader reader = new StringReader(getData());
+        final DataRepository repository = new DataRepository();
         repository.postConstruct();
         TestData.insertData(repository, reader);
         QuarkusMock.installMockForType(repository, DataRepository.class);

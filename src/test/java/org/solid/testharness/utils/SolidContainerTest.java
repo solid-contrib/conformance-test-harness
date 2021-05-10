@@ -38,7 +38,7 @@ class SolidContainerTest {
 
     @Test
     void testCreate() {
-        SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
+        final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
         assertTrue(container.isContainer());
         assertTrue(container.exists());
     }
@@ -47,59 +47,62 @@ class SolidContainerTest {
     void listMembers() throws Exception {
         when(solidClient.parseMembers("containmentData", testUrl)).thenReturn(List.of("member"));
         when(solidClient.getContainmentData(testUrl)).thenReturn("containmentData");
-        SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
+        final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
         assertEquals("member", container.listMembers().get(0));
     }
 
     @Test
     void listMembersException() throws Exception {
         when(solidClient.getContainmentData(testUrl)).thenThrow(new Exception("Error"));
-        SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
+        final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
         assertThrows(Exception.class, () -> container.listMembers());
     }
 
     @Test
     void parseMembers() throws Exception {
         when(solidClient.parseMembers("containmentData", testUrl)).thenReturn(List.of("member"));
-        SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
+        final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
         assertEquals("member", container.parseMembers("containmentData").get(0));
     }
 
     @Test
     void parseMembersException() throws Exception {
         when(solidClient.parseMembers("containmentData", testUrl)).thenThrow(new Exception("Error"));
-        SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
+        final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
         assertThrows(Exception.class, () -> container.parseMembers("containmentData"));
     }
 
     @Test
     void generateChildContainer() throws Exception {
-        SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
-        SolidContainer childContainer = container.generateChildContainer();
+        final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
+        final SolidContainer childContainer = container.generateChildContainer();
         assertTrue(childContainer.isContainer());
-        assertTrue(childContainer.getUrl().startsWith(TEST_URL) && childContainer.getUrl().length() > TEST_URL.length());
+        assertTrue(childContainer.getUrl().startsWith(TEST_URL) &&
+                childContainer.getUrl().length() > TEST_URL.length());
     }
 
     @Test
     void generateChildResource() throws Exception {
-        SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
-        SolidResource childResource = container.generateChildResource(".suffix");
+        final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
+        final SolidResource childResource = container.generateChildResource(".suffix");
         assertFalse(childResource.isContainer());
         assertTrue(childResource.getUrl().startsWith(TEST_URL) && childResource.getUrl().endsWith(".suffix"));
     }
 
     @Test
     void createChildResource() throws Exception {
-        SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
+        final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
         when(solidClient.createResource(any(), any(), any())).thenReturn(null);
-        SolidResource childResource = container.createChildResource(".suffix", "hello", "text/plain");
+        final SolidResource childResource = container.createChildResource(
+                ".suffix", "hello", "text/plain"
+        );
         assertFalse(childResource.isContainer());
         assertTrue(childResource.getUrl().startsWith(TEST_URL) && childResource.getUrl().endsWith(".suffix"));
     }
 
     @Test
     void createChildResourcException() throws Exception {
-        SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
+        final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
         assertNull(container.createChildResource(".suffix", "hello", null));
     }
 }

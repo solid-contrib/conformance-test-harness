@@ -39,19 +39,20 @@ public class TestSubject {
         targetServer = null;
         IRI testSubject = config.getTestSubject();
         try (final InputStream is = config.getConfigUrl().openStream()) {
-            Model model = Rio.parse(is, config.getConfigUrl().toString(), RDFFormat.TURTLE);
-            Set<Resource> testSubjects = model.filter(null, RDF.type, EARL.TestSubject).subjects();
+            final Model model = Rio.parse(is, config.getConfigUrl().toString(), RDFFormat.TURTLE);
+            final Set<Resource> testSubjects = model.filter(null, RDF.type, EARL.TestSubject).subjects();
             if (testSubjects.size() == 0) {
                 throw new TestHarnessInitializationException("No TestSubjects were found in the config file");
             }
             if (testSubject == null && testSubjects.size() > 1) {
-                throw new TestHarnessInitializationException("No target has been specified but there are more than one available");
+                throw new TestHarnessInitializationException("No target has been specified but there are more than " +
+                        "one available");
             }
             try (RepositoryConnection conn = dataRepository.getConnection()) {
                 if (testSubject != null) {
                     for (Resource subject : testSubjects) {
                         if (subject.equals(testSubject)) {
-                            Model subjectModel = model.filter(subject, null, null);
+                            final Model subjectModel = model.filter(subject, null, null);
                             conn.add(subjectModel);
                             for (Value value : subjectModel.objects()) {
                                 if (value.isBNode()) {
@@ -68,7 +69,8 @@ public class TestSubject {
                     targetServer = new TargetServer(testSubject);
                 }
                 if (targetServer == null) {
-                    throw new TestHarnessInitializationException("No config found for server: %s", testSubject.stringValue());
+                    throw new TestHarnessInitializationException("No config found for server: %s",
+                            testSubject.stringValue());
                 }
                 config.setTestSubject(testSubject);
                 dataRepository.setTestSubject(testSubject);
@@ -76,7 +78,8 @@ public class TestSubject {
                 logger.debug("Max threads: {}", targetServer.getMaxThreads());
             }
         } catch (IOException e) {
-            throw new TestHarnessInitializationException("Failed to read config file %s: %s", config.getConfigUrl().toString(), e.toString());
+            throw new TestHarnessInitializationException("Failed to read config file %s: %s",
+                    config.getConfigUrl().toString(), e.toString());
         }
     }
 

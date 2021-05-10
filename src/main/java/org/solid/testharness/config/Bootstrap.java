@@ -9,11 +9,11 @@ import javax.enterprise.inject.spi.CDI;
 /**
  * This provides the TestSubject into Karate features by accessing the CDI container.
  */
-public class Bootstrap {
+public final class Bootstrap {
     private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
 
     private static Bootstrap INSTANCE;
-    public synchronized static Bootstrap getInstance() {
+    public static synchronized Bootstrap getInstance() {
         if (INSTANCE == null) {
             try {
                 INSTANCE = new Bootstrap();
@@ -25,10 +25,11 @@ public class Bootstrap {
     }
 
     private Bootstrap() {
-        Application app = Application.currentApplication();
+        final Application app = Application.currentApplication();
         if (app == null) {
             logger.error("BOOTSTRAP - APP INSTANCE {}", app);
-            throw new RuntimeException("Features cannot be tested directly from the IDE. Use the TestScenarioRunner instead.");
+            throw new RuntimeException("Features cannot be tested directly from the IDE. " +
+                    "Use the TestScenarioRunner instead.");
         }
         logger.debug("BOOTSTRAP - APP INSTANCE {}", app);
     }

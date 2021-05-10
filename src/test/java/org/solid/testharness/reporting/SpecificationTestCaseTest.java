@@ -34,34 +34,34 @@ class SpecificationTestCaseTest extends AbstractDataModelTests {
 
     @Test
     void getTitle() {
-        SpecificationTestCase specificationTestCase = new SpecificationTestCase(iri(NS, "test1"));
+        final SpecificationTestCase specificationTestCase = new SpecificationTestCase(iri(NS, "test1"));
         assertEquals("Title", specificationTestCase.getTitle());
     }
 
     @Test
     void getDescription() {
-        SpecificationTestCase specificationTestCase = new SpecificationTestCase(iri(NS, "test1"));
+        final SpecificationTestCase specificationTestCase = new SpecificationTestCase(iri(NS, "test1"));
         assertEquals("Description", specificationTestCase.getDescription());
     }
 
     @Test
     void getSpecificationReference() {
-        SpecificationTestCase specificationTestCase = new SpecificationTestCase(iri(NS, "test1"));
+        final SpecificationTestCase specificationTestCase = new SpecificationTestCase(iri(NS, "test1"));
         assertEquals(NS + "spec", specificationTestCase.getSpecificationReference());
     }
 
     @Test
     void getTestCases() {
-        SpecificationTestCase specificationTestCase = new SpecificationTestCase(iri(NS, "test1"));
-        List<TestCase> testCases = specificationTestCase.getTestCases();
+        final SpecificationTestCase specificationTestCase = new SpecificationTestCase(iri(NS, "test1"));
+        final List<TestCase> testCases = specificationTestCase.getTestCases();
         assertNotNull(testCases);
         assertEquals(1, testCases.size());
     }
 
     @Test
     void getEmptyTestCases() {
-        SpecificationTestCase specificationTestCase = new SpecificationTestCase(iri(NS, "test2"));
-        List<TestCase> testCases = specificationTestCase.getTestCases();
+        final SpecificationTestCase specificationTestCase = new SpecificationTestCase(iri(NS, "test2"));
+        final List<TestCase> testCases = specificationTestCase.getTestCases();
         assertNull(testCases);
     }
 }

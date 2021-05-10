@@ -18,8 +18,8 @@ public class FeatureResultHandler implements SuiteReports {
     PathMappings pathMappings;
 
     @Override
-    public Report featureReport(Suite suite, FeatureResult fr) {
-        IRI featureIri = pathMappings.unmapFeaturePath(fr.getDisplayName());
+    public Report featureReport(final Suite suite, final FeatureResult fr) {
+        final IRI featureIri = pathMappings.unmapFeaturePath(fr.getDisplayName());
         dataRepository.addFeatureResult(suite, fr, featureIri);
         return SuiteReports.super.featureReport(suite, fr);
     }

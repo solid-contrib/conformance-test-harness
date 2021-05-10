@@ -13,7 +13,7 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 public class ResultData extends DataModelBase {
     private Assertor assertor;
 
-    public ResultData(IRI subject) {
+    public ResultData(final IRI subject) {
         super(subject);
         assertor = new Assertor(iri(Namespaces.TEST_HARNESS_URI));
     }

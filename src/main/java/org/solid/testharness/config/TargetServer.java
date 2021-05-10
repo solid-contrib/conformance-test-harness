@@ -34,14 +34,15 @@ public class TargetServer extends DataModelBase {
     private Boolean setupRootAcl;
     private Boolean disableDPoP;
 
-    public TargetServer(IRI subject) {
+    public TargetServer(final IRI subject) {
         super(subject, ConstructMode.DEEP);
         logger.debug("Retrieved {} statements for {}", super.size(), subject);
     }
 
     public Map<String, Boolean> getFeatures() {
         if (features == null) {
-            this.features = getLiteralsAsStringSet(SOLID_TEST.features).stream().collect(Collectors.toMap(Object::toString, f -> Boolean.TRUE));
+            this.features = getLiteralsAsStringSet(SOLID_TEST.features).stream()
+                    .collect(Collectors.toMap(Object::toString, f -> Boolean.TRUE));
         }
         return features;
     }
@@ -83,17 +84,21 @@ public class TargetServer extends DataModelBase {
 
     public Map<String, UserCredentials> getUsers() {
         if (users == null) {
-            Optional<Resource> aliceUser = Models.objectResource(model.filter(subject, SOLID_TEST.aliceUser, null));
-            Optional<Resource> bobUser = Models.objectResource(model.filter(subject, SOLID_TEST.bobUser, null));
+            final Optional<Resource> aliceUser = Models.objectResource(
+                    model.filter(subject, SOLID_TEST.aliceUser, null)
+            );
+            final Optional<Resource> bobUser = Models.objectResource(
+                    model.filter(subject, SOLID_TEST.bobUser, null)
+            );
             users = new HashMap<>();
             webIds = new HashMap<>();
             if (aliceUser.isPresent()) {
-                UserCredentials cred = new UserCredentials(model, aliceUser.get());
+                final UserCredentials cred = new UserCredentials(model, aliceUser.get());
                 users.put("alice", cred);
                 webIds.put("alice", cred.getWebID());
             }
             if (bobUser.isPresent()) {
-                UserCredentials cred = new UserCredentials(model, bobUser.get());
+                final UserCredentials cred = new UserCredentials(model, bobUser.get());
                 users.put("bob", cred);
                 webIds.put("bob", cred.getWebID());
             }

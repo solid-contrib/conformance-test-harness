@@ -32,7 +32,7 @@ public class TestSubjectSetupTest {
     void setupMissingTargetSingleConfig() throws MalformedURLException {
         when(config.getConfigUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/config-sample-single.ttl"));
         testSubject.loadTestSubjectConfig();
-        TargetServer targetServer = testSubject.getTargetServer();
+        final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
         assertEquals("https://github.com/solid/conformance-test-harness/default", targetServer.getSubject());
     }
@@ -43,7 +43,7 @@ public class TestSubjectSetupTest {
         when(config.getConfigUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
         when(config.getTestSubject()).thenReturn(iri("https://github.com/solid/conformance-test-harness/testserver"));
         testSubject.loadTestSubjectConfig();
-        TargetServer targetServer = testSubject.getTargetServer();
+        final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
         assertEquals("https://github.com/solid/conformance-test-harness/testserver", targetServer.getSubject());
     }

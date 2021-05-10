@@ -30,25 +30,25 @@ class TestCaseTest extends AbstractDataModelTests  {
 
     @Test
     void getTitle() {
-        TestCase testCase = new TestCase(iri(NS, "test1"));
+        final TestCase testCase = new TestCase(iri(NS, "test1"));
         assertEquals("Title", testCase.getTitle());
     }
 
     @Test
     void getLevel() {
-        TestCase testCase = new TestCase(iri(NS, "test1"));
+        final TestCase testCase = new TestCase(iri(NS, "test1"));
         assertEquals("MUST", testCase.getLevel());
     }
 
     @Test
     void getStatusUnreviewed() {
-        TestCase testCase = new TestCase(iri(NS, "test1"));
+        final TestCase testCase = new TestCase(iri(NS, "test1"));
         assertEquals("Unreviewed", testCase.getStatus());
     }
 
     @Test
     void getStatusAccepted() {
-        TestCase testCase = new TestCase(iri(NS, "test2"));
+        final TestCase testCase = new TestCase(iri(NS, "test2"));
         assertEquals("Accepted", testCase.getStatus());
     }
 

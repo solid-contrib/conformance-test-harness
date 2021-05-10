@@ -6,13 +6,12 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.solid.common.vocab.*;
 
-import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class Namespaces {
+public final class Namespaces {
     private static Map<String, Namespace> namespaces;
 
     public static final String TEST_HARNESS_URI = "https://github.com/solid/conformance-test-harness/";
@@ -20,34 +19,37 @@ public class Namespaces {
     public static final String TURTLE_PREFIX_FORMAT = "@prefix %s: <%s> .\n";
     public static final String HTML_PREFIX_FORMAT = "%s: %s";
 
-    private Namespaces() {
-    }
-
-    public static String shorten(IRI iri) {
-        String term = iri.stringValue();
+    public static String shorten(final IRI iri) {
+        final String term = iri.stringValue();
         for (Namespace namespace : namespaces.values()) {
             if (term.startsWith(namespace.namespace)) {
                 return term.replace(namespace.namespace, namespace.prefix + ":");
             }
-        };
+        }
         return term;
     }
 
-    public static String generateTurtlePrefixes(List<String> prefixes) {
+    public static String generateTurtlePrefixes(final List<String> prefixes) {
         if (prefixes == null || prefixes.isEmpty()) {
             return "";
         }
-        return prefixes.stream().filter(p -> namespaces.containsKey(p)).map(p -> String.format(TURTLE_PREFIX_FORMAT, p, namespaces.get(p).namespace)).collect(Collectors.joining());
+        return prefixes.stream()
+                .filter(p -> namespaces.containsKey(p))
+                .map(p -> String.format(TURTLE_PREFIX_FORMAT, p, namespaces.get(p).namespace))
+                .collect(Collectors.joining());
     }
 
-    public static String generateHtmlPrefixes(List<String> prefixes) {
+    public static String generateHtmlPrefixes(final List<String> prefixes) {
         if (prefixes == null || prefixes.isEmpty()) {
             return "";
         }
-        return prefixes.stream().filter(p -> namespaces.containsKey(p)).map(p -> String.format(HTML_PREFIX_FORMAT, p, namespaces.get(p).namespace)).collect(Collectors.joining(" "));
+        return prefixes.stream()
+                .filter(p -> namespaces.containsKey(p))
+                .map(p -> String.format(HTML_PREFIX_FORMAT, p, namespaces.get(p).namespace))
+                .collect(Collectors.joining(" "));
     }
 
-    public static void addToRepository(Repository repository) {
+    public static void addToRepository(final Repository repository) {
         try (RepositoryConnection conn = repository.getConnection()) {
             namespaces.forEach((k, v) -> conn.setNamespace(k, v.namespace));
         }
@@ -68,9 +70,11 @@ public class Namespaces {
     private static class Namespace {
         String prefix;
         String namespace;
-        Namespace(String prefix, String namespace) {
+        Namespace(final String prefix, final String namespace) {
             this.prefix = prefix;
             this.namespace = namespace;
         }
     }
+
+    private Namespaces() { }
 }

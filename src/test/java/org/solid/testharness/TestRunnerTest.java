@@ -18,28 +18,28 @@ class TestRunnerTest {
 
     @Test
     void runTests() {
-        TestSuiteResults results = testRunner.runTests(List.of("src/test/resources/test.feature"), 1);
+        final TestSuiteResults results = testRunner.runTests(List.of("src/test/resources/test.feature"), 1);
         assertNotNull(results);
         assertEquals(1, results.getFailCount());
     }
 
     @Test
     void runTestsEmpty() {
-        TestSuiteResults results = testRunner.runTests(Collections.emptyList(), 10);
+        final TestSuiteResults results = testRunner.runTests(Collections.emptyList(), 10);
         assertNotNull(results);
         assertEquals(0, results.getFailCount());
     }
 
     @Test
     void runTestsNoThreads() {
-        TestSuiteResults results = testRunner.runTests(Collections.emptyList(), 0);
+        final TestSuiteResults results = testRunner.runTests(Collections.emptyList(), 0);
         assertNotNull(results);
         assertEquals(0, results.getFailCount());
     }
 
     @Test
     void runTestsNoList() {
-        TestSuiteResults results = testRunner.runTests(null, 1);
+        final TestSuiteResults results = testRunner.runTests(null, 1);
         assertNotNull(results);
         assertEquals(0, results.getFailCount());
     }
@@ -51,7 +51,7 @@ class TestRunnerTest {
 
     @Test
     void runTest() {
-        TestSuiteResults results = testRunner.runTest("src/test/resources/test.feature");
+        final TestSuiteResults results = testRunner.runTest("src/test/resources/test.feature");
         assertNotNull(results);
         assertEquals(1, results.getFailCount());
     }

@@ -17,11 +17,11 @@ public class SolidResource {
     private Boolean aclAvailable = null;
     private boolean isContainer;
 
-    public SolidResource(SolidClient solidClient, String url) {
+    public SolidResource(final SolidClient solidClient, final String url) {
         this(solidClient, url, null, null);
     }
 
-    public SolidResource(SolidClient solidClient, String url, String body, String type) {
+    public SolidResource(final SolidClient solidClient, final String url, final String body, final String type) {
         if (solidClient == null) throw new IllegalArgumentException("Parameter solidClient is required");
         if (StringUtils.isEmpty(url)) throw new IllegalArgumentException("Parameter url is required");
         if (body != null && StringUtils.isEmpty(type)) {
@@ -34,11 +34,11 @@ public class SolidResource {
         isContainer = url.endsWith("/");
 
         if (body != null) {
-            HttpHeaders headers;
+            final HttpHeaders headers;
             try {
                 headers = solidClient.createResource(this.url, body, type);
                 if (headers != null && headers.allValues("Link").size() != 0) {
-                    URI aclLink = solidClient.getAclLink(headers);
+                    final URI aclLink = solidClient.getAclLink(headers);
                     if (aclLink != null) {
                         logger.debug("ACL LINK {}", aclLink);
                         aclUrl = this.url.resolve(aclLink);
@@ -53,7 +53,8 @@ public class SolidResource {
         logger.debug("SolidResource: {}", this.url);
     }
 
-    public static SolidResource create(SolidClient solidClient, String url, String body, String type) {
+    public static SolidResource create(final SolidClient solidClient, final String url, final String body,
+                                       final String type) {
         return new SolidResource(solidClient, url, body, type);
     }
 
@@ -61,9 +62,9 @@ public class SolidResource {
         return url != null;
     }
 
-    public boolean setAcl(String acl) throws Exception {
+    public boolean setAcl(final String acl) throws Exception {
         if (Boolean.FALSE.equals(aclAvailable)) return false;
-        String url = getAclUrl();
+        final String url = getAclUrl();
         if (url == null) return false;
         return solidClient.createAcl(URI.create(url), acl);
     }
@@ -95,7 +96,7 @@ public class SolidResource {
 
     public String getAclUrl() throws Exception {
         if (aclUrl == null && !Boolean.FALSE.equals(aclAvailable)) {
-            URI aclLink = solidClient.getResourceAclLink(url.toString());
+            final URI aclLink = solidClient.getResourceAclLink(url.toString());
             if (aclLink != null) {
                 aclUrl = url.resolve(aclLink);
             }

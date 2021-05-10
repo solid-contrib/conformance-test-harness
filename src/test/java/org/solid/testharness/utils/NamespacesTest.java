@@ -16,12 +16,14 @@ import static org.junit.jupiter.api.Assertions.*;
 public class NamespacesTest {
     @Test
     void addToRepository() throws Exception {
-        DataRepository dataRepository = new DataRepository();
+        final DataRepository dataRepository = new DataRepository();
         assertNotNull(dataRepository);
         dataRepository.postConstruct();
-        StringReader reader = new StringReader("<https://github.com/solid/conformance-test-harness/> a <http://www.w3.org/ns/earl#Software> .");
+        final StringReader reader = new StringReader(
+                "<https://github.com/solid/conformance-test-harness/> a <http://www.w3.org/ns/earl#Software> ."
+        );
         TestData.insertData(dataRepository, reader);
-        StringWriter sw = new StringWriter();
+        final StringWriter sw = new StringWriter();
         dataRepository.export(sw);
         assertTrue(sw.toString().contains("earl:Software"));
     }
@@ -43,24 +45,28 @@ public class NamespacesTest {
 
     @Test
     void buildTurtlePrefixesNullOrEmpty() {
-        List<String> empty = null;
+        final List<String> empty = null;
         assertEquals("", Namespaces.generateTurtlePrefixes(empty));
         assertEquals("", Namespaces.generateTurtlePrefixes(List.of()));
     }
 
     @Test
     void buildTurtlePrefixes1() {
-        assertEquals("@prefix earl: <http://www.w3.org/ns/earl#> .\n", Namespaces.generateTurtlePrefixes(List.of(EARL.PREFIX)));
+        assertEquals("@prefix earl: <http://www.w3.org/ns/earl#> .\n",
+                Namespaces.generateTurtlePrefixes(List.of(EARL.PREFIX))
+        );
     }
 
     @Test
     void buildTurtlePrefixes2() {
-        assertEquals("@prefix earl: <http://www.w3.org/ns/earl#> .\n@prefix doap: <http://usefulinc.com/ns/doap#> .\n", Namespaces.generateTurtlePrefixes(List.of(EARL.PREFIX, DOAP.PREFIX)));
+        assertEquals("@prefix earl: <http://www.w3.org/ns/earl#> .\n@prefix doap: <http://usefulinc.com/ns/doap#> .\n",
+                Namespaces.generateTurtlePrefixes(List.of(EARL.PREFIX, DOAP.PREFIX))
+        );
     }
 
     @Test
     void buildHtmlPrefixesNullOrEmpty() {
-        List<String> empty = null;
+        final List<String> empty = null;
         assertEquals("", Namespaces.generateHtmlPrefixes(empty));
         assertEquals("", Namespaces.generateHtmlPrefixes(List.of()));
     }
@@ -72,6 +78,8 @@ public class NamespacesTest {
 
     @Test
     void buildHtmlPrefixes2() {
-        assertEquals("earl: http://www.w3.org/ns/earl# doap: http://usefulinc.com/ns/doap#", Namespaces.generateHtmlPrefixes(List.of(EARL.PREFIX, DOAP.PREFIX)));
+        assertEquals("earl: http://www.w3.org/ns/earl# doap: http://usefulinc.com/ns/doap#",
+                Namespaces.generateHtmlPrefixes(List.of(EARL.PREFIX, DOAP.PREFIX))
+        );
     }
 }

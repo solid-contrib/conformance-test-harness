@@ -52,18 +52,21 @@ public class ConformanceTestHarness {
 
     public void initialize() throws IOException {
         try (final InputStream is = getClass().getClassLoader().getResourceAsStream("assertor.properties")) {
-            Properties properties = new Properties();
+            final Properties properties = new Properties();
             properties.load(is);
-            IRI assertor = iri(Namespaces.TEST_HARNESS_URI);
+            final IRI assertor = iri(Namespaces.TEST_HARNESS_URI);
             dataRepository.setAssertor(assertor);
             try (RepositoryConnection conn = dataRepository.getConnection()) {
-                ModelBuilder builder = new ModelBuilder();
-                BNode bnode = Values.bnode();
+                final ModelBuilder builder = new ModelBuilder();
+                final BNode bnode = Values.bnode();
                 conn.add(builder.subject(assertor)
                         .add(RDF.TYPE, EARL.Software)
                         .add(DOAP.name, properties.getProperty("package.name"))
                         .add(DOAP.description, properties.getProperty("package.description"))
-                        .add(DOAP.created, Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(properties.getProperty("package.buildTime")))))
+                        .add(DOAP.created, Date.from(
+                                Instant.from(DateTimeFormatter.ISO_INSTANT
+                                        .parse(properties.getProperty("package.buildTime")))
+                        ))
                         .add(DOAP.developer, iri(properties.getProperty("package.organizationUrl")))
                         .add(DOAP.homepage, iri(properties.getProperty("package.url")))
                         .add(DOAP.release, bnode)
@@ -78,8 +81,8 @@ public class ConformanceTestHarness {
         logger.info("===================== DISCOVER TESTS ========================");
         try {
             testSuiteDescription.load(config.getTestSuiteDescription());
-            List<IRI> testCases = testSuiteDescription.getAllTestCases();
-            List<String> featurePaths = testSuiteDescription.locateTestCases(testCases);
+            final List<IRI> testCases = testSuiteDescription.getAllTestCases();
+            final List<String> featurePaths = testSuiteDescription.locateTestCases(testCases);
             if (featurePaths.isEmpty()) {
                 logger.warn("There are no tests available");
                 return true;
@@ -90,10 +93,10 @@ public class ConformanceTestHarness {
         }
 
         logger.info("===================== BUILD REPORT ========================");
-        File outputDir = config.getOutputDirectory();
+        final File outputDir = config.getOutputDirectory();
         logger.info("Reports location: {}", outputDir.getPath());
         try {
-            File coverageHtmlFile = new File(outputDir, "coverage.html");
+            final File coverageHtmlFile = new File(outputDir, "coverage.html");
             logger.info("Coverage report HTML/RDFa file: {}", coverageHtmlFile.getPath());
             reportGenerator.buildHtmlCoverageReport(new FileWriter(coverageHtmlFile));
             return true;
@@ -106,12 +109,14 @@ public class ConformanceTestHarness {
     public TestSuiteResults runTestSuites() {
         config.logConfigSettings();
         logger.info("===================== DISCOVER TESTS ========================");
-        List<String> featurePaths;
+        final List<String> featurePaths;
         try {
             testSuiteDescription.load(config.getTestSuiteDescription());
             testSubject.loadTestSubjectConfig(); // TODO:is this in right place?
             // TODO: Consider running some initial tests to discover the features provided by a server
-            List<IRI> testCases = testSuiteDescription.getSupportedTestCases(testSubject.getTargetServer().getFeatures().keySet());
+            final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(
+                    testSubject.getTargetServer().getFeatures().keySet()
+            );
             logger.info("==== TEST CASES FOUND: {} - {}", testCases.size(), testCases);
 
             featurePaths = testSuiteDescription.locateTestCases(testCases);
@@ -129,17 +134,18 @@ public class ConformanceTestHarness {
         }
 
         logger.info("===================== RUN TESTS ========================");
-        TestSuiteResults results = testRunner.runTests(featurePaths, testSubject.getTargetServer().getMaxThreads());
+        final TestSuiteResults results = testRunner.runTests(featurePaths,
+                testSubject.getTargetServer().getMaxThreads());
 
         logger.info("===================== BUILD REPORTS ========================");
-        File outputDir = config.getOutputDirectory();
+        final File outputDir = config.getOutputDirectory();
         logger.info("Reports location: {}", outputDir.getPath());
         try {
-            File reportTurtleFile = new File(outputDir, "report.ttl");
+            final File reportTurtleFile = new File(outputDir, "report.ttl");
             logger.info("Report Turtle file: {}", reportTurtleFile.getPath());
             reportGenerator.buildTurtleReport(new FileWriter(reportTurtleFile));
 
-            File reportHtmlFile = new File(outputDir, "report.html");
+            final File reportHtmlFile = new File(outputDir, "report.html");
             logger.info("Report HTML/RDFa file: {}", reportHtmlFile.getPath());
             reportGenerator.buildHtmlResultReport(new FileWriter(reportHtmlFile));
 //            resultProcessor.printReportToConsole();

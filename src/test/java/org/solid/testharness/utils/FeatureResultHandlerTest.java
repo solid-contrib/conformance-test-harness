@@ -25,7 +25,7 @@ class FeatureResultHandlerTest {
 
     @Test
     void featureReport() {
-        FeatureResult fr = new FeatureResult(Feature.read("src/test/resources/test.feature"));
+        final FeatureResult fr = new FeatureResult(Feature.read("src/test/resources/test.feature"));
         featureResultHandler.featureReport(new Suite(), fr);
         verify(dataRepository).addFeatureResult(any(), any(), eq(iri("https://example.org/features/test.feature")));
     }

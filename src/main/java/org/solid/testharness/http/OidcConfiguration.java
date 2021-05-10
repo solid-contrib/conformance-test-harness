@@ -14,7 +14,7 @@ public class OidcConfiguration {
         return issuer;
     }
 
-    public void set(String issuer) {
+    public void set(final String issuer) {
         this.issuer = issuer;
     }
 
@@ -23,7 +23,7 @@ public class OidcConfiguration {
     }
 
     @JsonSetter("authorization_endpoint")
-    public void setAuthorizeEndpoint(String authorizeEndpoint) {
+    public void setAuthorizeEndpoint(final String authorizeEndpoint) {
         this.authorizeEndpoint = authorizeEndpoint;
     }
 
@@ -32,7 +32,7 @@ public class OidcConfiguration {
     }
 
     @JsonSetter("token_endpoint")
-    public void setTokenEndpoint(String tokenEndpoint) {
+    public void setTokenEndpoint(final String tokenEndpoint) {
         this.tokenEndpoint = tokenEndpoint;
     }
 
@@ -41,7 +41,7 @@ public class OidcConfiguration {
     }
 
     @JsonSetter("registration_endpoint")
-    public void setRegistrationEndpoint(String registrationEndpoint) {
+    public void setRegistrationEndpoint(final String registrationEndpoint) {
         this.registrationEndpoint = registrationEndpoint;
     }
 }

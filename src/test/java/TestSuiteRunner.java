@@ -33,7 +33,7 @@ public class TestSuiteRunner {
 
     @Test
     void testSuite() {
-        TestSuiteResults results = conformanceTestHarness.runTestSuites();
+        final TestSuiteResults results = conformanceTestHarness.runTestSuites();
         assertNotNull(results);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());
     }

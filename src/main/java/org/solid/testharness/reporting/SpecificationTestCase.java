@@ -8,7 +8,7 @@ import org.solid.testharness.utils.DataModelBase;
 import java.util.List;
 
 public class SpecificationTestCase extends DataModelBase {
-    public SpecificationTestCase(IRI subject) {
+    public SpecificationTestCase(final IRI subject) {
         super(subject);
     }
 

@@ -11,30 +11,31 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 
-public class RDFUtils {
+public final class RDFUtils {
     private static final Logger logger = LoggerFactory.getLogger(RDFUtils.class);
 
-    public static final List<String> turtleToTripleArray(String data, String baseUri) throws Exception {
-        Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.TURTLE);
-        StringWriter sw = new StringWriter();
+    public static List<String> turtleToTripleArray(final String data, final String baseUri) throws Exception {
+        final Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.TURTLE);
+        final StringWriter sw = new StringWriter();
         Rio.write(model, sw, RDFFormat.NTRIPLES);
         return Arrays.asList(sw.toString().split("\n"));
     }
 
-    public static final List<String> jsonLdToTripleArray(String data, String baseUri) throws Exception {
-        Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.JSONLD);
-        StringWriter sw = new StringWriter();
+    public static List<String> jsonLdToTripleArray(final String data, final String baseUri) throws Exception {
+        final Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.JSONLD);
+        final StringWriter sw = new StringWriter();
         Rio.write(model, sw, RDFFormat.NTRIPLES);
         return Arrays.asList(sw.toString().split("\n"));
     }
 
-    public static final List<String> rdfaToTripleArray(String data, String baseUri) throws Exception {
-        Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.RDFA);
-        StringWriter sw = new StringWriter();
+    public static List<String> rdfaToTripleArray(final String data, final String baseUri) throws Exception {
+        final Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.RDFA);
+        final StringWriter sw = new StringWriter();
         Rio.write(model, sw, RDFFormat.NTRIPLES);
         return Arrays.asList(sw.toString().split("\n"));
     }
 
+    private RDFUtils() { }
 /*
     public static final Model parse(String data, String contentType, String baseUri) throws IOException {
         RDFFormat dataFormat = null;

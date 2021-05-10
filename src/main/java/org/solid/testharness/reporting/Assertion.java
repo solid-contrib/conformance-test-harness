@@ -7,7 +7,7 @@ import org.solid.testharness.utils.DataModelBase;
 import java.util.List;
 
 public class Assertion extends DataModelBase {
-    public Assertion(IRI subject) {
+    public Assertion(final IRI subject) {
         super(subject, ConstructMode.DEEP);
     }
 
@@ -28,7 +28,7 @@ public class Assertion extends DataModelBase {
     }
 
     public TestResult getResult() {
-        List<TestResult> results = getModelList(EARL.result, TestResult.class);
+        final List<TestResult> results = getModelList(EARL.result, TestResult.class);
         if (!results.isEmpty()) {
             return results.get(0);
         } else {
