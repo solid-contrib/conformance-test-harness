@@ -10,12 +10,13 @@ import javax.inject.Inject;
 import java.net.MalformedURLException;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
 public class TestSubjectSetupTest {
-
     @InjectMock
     Config config;
 
@@ -68,7 +69,7 @@ public class TestSubjectSetupTest {
     }
 
     @Test
-    void registerWithoutServer() throws MalformedURLException {
+    void registerWithoutServer() {
         assertThrows(TestHarnessInitializationException.class, () -> testSubject.registerClients());
     }
 }

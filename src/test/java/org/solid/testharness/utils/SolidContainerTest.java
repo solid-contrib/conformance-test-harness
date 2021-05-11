@@ -2,6 +2,7 @@ package org.solid.testharness.utils;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClient;
 
 import java.net.URI;
@@ -94,7 +95,7 @@ class SolidContainerTest {
         final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
         when(solidClient.createResource(any(), any(), any())).thenReturn(null);
         final SolidResource childResource = container.createChildResource(
-                ".suffix", "hello", "text/plain"
+                ".suffix", "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN
         );
         assertFalse(childResource.isContainer());
         assertTrue(childResource.getUrl().startsWith(TEST_URL) && childResource.getUrl().endsWith(".suffix"));

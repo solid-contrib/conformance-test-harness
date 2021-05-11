@@ -3,6 +3,7 @@ package org.solid.testharness.config;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
+import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestData;
 
@@ -61,7 +62,7 @@ public class TargetServerTest {
                 "    solid-test:podRoot <http://localhost:3000/> ;\n" +
                 "    solid-test:testContainer \"/test/\" ;\n" +
 //                "    solid-test:disableDPoP true ;\n" +
-                "    solid-test:setupAclRoot true .");
+                "    solid-test:setupRootAcl true .");
         TestData.insertData(dataRepository, reader);
         final TargetServer targetServer = new TargetServer(iri("https://example.org/testserver"));
         assertAll("targetServer",
@@ -79,10 +80,11 @@ public class TargetServerTest {
                 () -> assertEquals("/test/", targetServer.getTestContainer()),
                 () -> assertNotNull(targetServer.getUsers()),
                 () -> assertEquals(2, targetServer.getUsers().size()),
-                () -> assertNotNull(targetServer.getUsers().get("alice")),
-                () -> assertEquals("EXTERNAL_TOKEN", targetServer.getUsers().get("alice").getRefreshToken()),
-                () -> assertNotNull(targetServer.getUsers().get("bob")),
-                () -> assertNull(targetServer.getUsers().get("bob").getUsername()),
+                () -> assertNotNull(targetServer.getUsers().get(HttpConstants.ALICE)),
+                () -> assertEquals("EXTERNAL_TOKEN",
+                        targetServer.getUsers().get(HttpConstants.ALICE).getRefreshToken()),
+                () -> assertNotNull(targetServer.getUsers().get(HttpConstants.BOB)),
+                () -> assertNull(targetServer.getUsers().get(HttpConstants.BOB).getUsername()),
                 () -> assertNotNull(targetServer.getWebIds())
         );
         assertAll("targetServerCachedValues",

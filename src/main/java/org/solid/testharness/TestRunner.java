@@ -16,6 +16,7 @@ public class TestRunner {
     FeatureResultHandler featureResultHandler;
 
     @SuppressWarnings("unchecked")
+    // Unavoidable as Runner.builder().path() takes a list or vararg of Strings
     public TestSuiteResults runTests(final List<String> featurePaths, final int threads) {
         // we can also create Features which may be useful when fetching from remote resource although this may cause
         // problems with loading other features files due to classpath issues - Karate may need a RemoteResource type

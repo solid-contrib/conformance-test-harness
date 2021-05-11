@@ -89,8 +89,7 @@ class PathMappingsTest {
 
     @Test
     void setNullMappings() {
-        pathMappings.setMappings(null);
-        assertNull(pathMappings.getMappings());
+        assertThrows(NullPointerException.class, () -> pathMappings.setMappings(null));
     }
 
     @Test
@@ -98,7 +97,7 @@ class PathMappingsTest {
         final List nullList = new ArrayList();
         nullList.add(null);
         pathMappings.setMappings(nullList);
-        assertNull(pathMappings.getMappings());
+        assertTrue(pathMappings.getMappings().isEmpty());
     }
 
     @Test
@@ -121,15 +120,12 @@ class PathMappingsTest {
 
     @Test
     void unmapFeaturePathFileFeature() {
-        final IRI iri = pathMappings.unmapFeaturePath("file:/local/test.feature");
-        assertEquals(iri("file:/local/test.feature"), iri);
+        assertNull(pathMappings.unmapFeaturePath("file:/local/test.feature"));
     }
 
     @Test
     void unmapFeaturePathNoMapping() {
-        assertThrows(IllegalArgumentException.class,
-                () -> pathMappings.unmapFeaturePath("src/test/nomapping/test.feature")
-        );
+        assertNull(pathMappings.unmapFeaturePath("src/test/nomapping/test.feature"));
     }
 
     @Test

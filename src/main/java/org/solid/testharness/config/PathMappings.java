@@ -3,26 +3,35 @@ package org.solid.testharness.config;
 import io.quarkus.arc.config.ConfigProperties;
 import org.eclipse.rdf4j.model.IRI;
 
+import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.rdf4j.model.util.Values.iri;
 
 @ConfigProperties(prefix = "feature")
 public class PathMappings {
-    private List<Mapping> mappings;
+    private List<Mapping> mappings = Collections.emptyList();
 
-    public void setMappings(final List<Mapping> mappings) {
-        this.mappings = (mappings != null && mappings.size() == 1 && mappings.get(0) == null) ? null : mappings;
+    public void setMappings(@NotNull final List<Mapping> mappings) {
+        requireNonNull(mappings, "mappings must not be null");
+        if (mappings.size() == 1 && mappings.get(0) == null) {
+            this.mappings = Collections.emptyList();
+        } else {
+            this.mappings = mappings;
+        }
     }
+
     public List<Mapping> getMappings() {
         return mappings;
     }
 
     @Override
     public String toString() {
-        return mappings != null ? mappings.toString() : null;
+        return mappings.toString();
     }
 
     public IRI unmapFeaturePath(final String path) {
@@ -33,7 +42,7 @@ public class PathMappings {
                 ? path
                 : Path.of(path).toAbsolutePath().normalize().toUri().toString();
         final Mapping mapping = mappings.stream().filter(m -> finalPath.startsWith(m.path)).findFirst().orElse(null);
-        return mapping != null ? iri(finalPath.replace(mapping.path, mapping.prefix)) : iri(path);
+        return mapping != null ? iri(finalPath.replace(mapping.path, mapping.prefix)) : null;
     }
 
     public URI mapFeatureIri(final IRI featureIri) {

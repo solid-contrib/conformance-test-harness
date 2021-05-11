@@ -75,15 +75,23 @@ public class DataRepository implements Repository {
     public void loadData(final URL url, final String baseUri, final RDFFormat format) {
         try (RepositoryConnection conn = getConnection()) {
             try {
-                logger.info("Loading {} from {}", format.getName(), url.toString());
+                if (logger.isInfoEnabled()) {
+                    logger.info("Loading {} from {}", format.getName(), url.toString());
+                }
                 conn.add(url, baseUri, format);
-                logger.debug("Loaded data into repository, size={}", conn.size());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Loaded data into repository, size={}", conn.size());
+                }
             } catch (IOException e) {
-                throw new TestHarnessInitializationException("Failed to read data from %s: %s",
-                        url.toString(), e.toString());
+                throw (TestHarnessInitializationException) new TestHarnessInitializationException(
+                        "Failed to read data from %s: %s",
+                        url.toString(), e.toString()
+                ).initCause(e);
             }
         } catch (RDF4JException e) {
-            throw new TestHarnessInitializationException("Failed to parse data: %s", e.toString());
+            throw (TestHarnessInitializationException) new TestHarnessInitializationException(
+                    "Failed to parse data: %s", e.toString()
+            ).initCause(e);
         }
     }
 
@@ -95,6 +103,8 @@ public class DataRepository implements Repository {
         this.assertor = assertor;
     }
 
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+    // This method creates an unknown number of objects in a loop dependent on the test cases
     public void addFeatureResult(final Suite suite, final FeatureResult fr, final IRI featureIri) {
         final long startTime = suite.startTime;
         try (RepositoryConnection conn = getConnection()) {
@@ -159,7 +169,9 @@ public class DataRepository implements Repository {
                 }
             }
         } catch (Exception e) {
-            logger.error("Failed to load feature result: {}", e.toString());
+            if (logger.isErrorEnabled()) {
+                logger.error("Failed to load feature result: {}", e.toString());
+            }
         }
     }
 
@@ -168,24 +180,20 @@ public class DataRepository implements Repository {
     }
 
     public void export(final Writer wr) throws Exception {
-        try (RepositoryConnection conn = getConnection()) {
-            final RDFWriter rdfWriter = Rio.createWriter(RDFFormat.TURTLE, wr);
-            rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true)
-                    .set(BasicWriterSettings.INLINE_BLANK_NODES, true);
-            conn.export(rdfWriter);
-        } catch (RDF4JException e) {
-            throw new Exception("Failed to write repository: " + e.toString());
-        }
+        export(Rio.createWriter(RDFFormat.TURTLE, wr));
     }
 
     public void export(final OutputStream os) throws Exception {
+        export(Rio.createWriter(RDFFormat.TURTLE, os));
+    }
+
+    private void export(final RDFWriter rdfWriter) throws Exception {
         try (RepositoryConnection conn = getConnection()) {
-            final RDFWriter rdfWriter = Rio.createWriter(RDFFormat.TURTLE, os);
             rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true)
                     .set(BasicWriterSettings.INLINE_BLANK_NODES, true);
             conn.export(rdfWriter);
         } catch (RDF4JException e) {
-            throw new Exception("Failed to write repository: " + e.toString());
+            throw (Exception) new Exception("Failed to write repository: " + e).initCause(e);
         }
     }
 
@@ -199,6 +207,8 @@ public class DataRepository implements Repository {
         return repository.getDataDir();
     }
 
+    @SuppressWarnings("deprecation")
+    // Ignore warning as we have to override this to complete the interface
     @Override
     public void initialize() throws RepositoryException {
         repository.initialize();

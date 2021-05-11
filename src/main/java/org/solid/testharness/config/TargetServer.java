@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.SOLID;
 import org.solid.common.vocab.SOLID_TEST;
+import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.utils.DataModelBase;
 
 import javax.validation.constraints.Positive;
@@ -36,7 +37,9 @@ public class TargetServer extends DataModelBase {
 
     public TargetServer(final IRI subject) {
         super(subject, ConstructMode.DEEP);
-        logger.debug("Retrieved {} statements for {}", super.size(), subject);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Retrieved {} statements for {}", super.size(), subject);
+        }
     }
 
     public Map<String, Boolean> getFeatures() {
@@ -94,13 +97,13 @@ public class TargetServer extends DataModelBase {
             webIds = new HashMap<>();
             if (aliceUser.isPresent()) {
                 final UserCredentials cred = new UserCredentials(model, aliceUser.get());
-                users.put("alice", cred);
-                webIds.put("alice", cred.getWebID());
+                users.put(HttpConstants.ALICE, cred);
+                webIds.put(HttpConstants.ALICE, cred.getWebID());
             }
             if (bobUser.isPresent()) {
                 final UserCredentials cred = new UserCredentials(model, bobUser.get());
-                users.put("bob", cred);
-                webIds.put("bob", cred.getWebID());
+                users.put(HttpConstants.BOB, cred);
+                webIds.put(HttpConstants.BOB, cred.getWebID());
             }
         }
         return users;
@@ -113,9 +116,18 @@ public class TargetServer extends DataModelBase {
     public URI getLoginEndpoint() {
         if (loginEndpoint == null) {
             try {
-                this.loginEndpoint = new URI(getIriAsString(SOLID.loginEndpoint));
-            } catch (URISyntaxException | NullPointerException e) {
-                logger.warn("{} is not a valid URI: {}", SOLID.loginEndpoint.stringValue(), e);
+                final String iri = getIriAsString(SOLID.loginEndpoint);
+                if (iri != null) {
+                    this.loginEndpoint = new URI(iri);
+                } else {
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("No login endpoint is defined");
+                    }
+                }
+            } catch (URISyntaxException e) {
+                if (logger.isWarnEnabled()) {
+                    logger.warn("{} is not a valid URI: {}", SOLID.loginEndpoint.stringValue(), e);
+                }
             }
         }
         return loginEndpoint;

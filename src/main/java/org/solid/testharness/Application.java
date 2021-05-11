@@ -27,6 +27,13 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 public class Application implements QuarkusApplication {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
+    public static final String CONFIG = "config";
+    public static final String TARGET = "target";
+    public static final String SUITE = "suite";
+    public static final String OUTPUT = "output";
+    public static final String HELP = "help";
+    public static final String COVERAGE = "coverage";
+
     @Inject
     Config config;
     @Inject
@@ -34,77 +41,88 @@ public class Application implements QuarkusApplication {
 
     @Override
     public int run(final String... args) {
-        logger.debug("Args: {}", Arrays.toString(args));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Args: {}", Arrays.toString(args));
+        }
 
         final Options options = new Options();
-        options.addOption(Option.builder().longOpt("coverage").desc("produce a coverage report").build());
-        options.addOption("c", "config", true, "URL or path to test subject config (Turtle)");
-        options.addOption("t", "target", true, "target server");
-        options.addOption("s", "suite", true, "URL or path to test suite description");
-        options.addOption("o", "output", true, "output directory");
+        options.addOption(Option.builder().longOpt(COVERAGE).desc("produce a coverage report").build());
+        options.addOption("c", CONFIG, true, "URL or path to test subject config (Turtle)");
+        options.addOption("t", TARGET, true, "target server");
+        options.addOption("s", SUITE, true, "URL or path to test suite description");
+        options.addOption("o", OUTPUT, true, "output directory");
 //        options.addOption("f", "feature", true, "feature filter");
-        options.addOption("h", "help", false, "print this message");
+        options.addOption("h", HELP, false, "print this message");
 
         final CommandLineParser parser = new DefaultParser();
         try {
             final CommandLine line = parser.parse(options, args);
-            if (line.hasOption("help")) {
+            if (line.hasOption(HELP)) {
                 final HelpFormatter formatter = new HelpFormatter();
                 formatter.printHelp( "run", options );
             } else {
                 final File outputDir;
-                if (line.hasOption("output") && !StringUtils.isEmpty(line.getOptionValue("output"))) {
-                    outputDir = Path.of(line.getOptionValue("output")).toAbsolutePath().normalize().toFile();
-                    logger.debug("Output = {}", outputDir.getPath());
+                if (line.hasOption(OUTPUT) && !StringUtils.isEmpty(line.getOptionValue(OUTPUT))) {
+                    outputDir = Path.of(line.getOptionValue(OUTPUT)).toAbsolutePath().normalize().toFile();
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Output = {}", outputDir.getPath());
+                    }
                 } else {
                     outputDir = Path.of("").toAbsolutePath().toFile();
                 }
-                final Formatter formatter = new Formatter();
-                if (!validateOutputDir(outputDir.toPath(), formatter)) {
-                    logger.error(formatter.toString());
-                    return 1;
-                }
-                config.setOutputDirectory(outputDir);
-
-                if (line.hasOption("suite")) {
-                    final URL url = createUrl(line.getOptionValue("suite"), "suite", formatter);
-                    if (url == null) {
-                        logger.error(formatter.toString());
+                try (final Formatter formatter = new Formatter()) {
+                    if (!validateOutputDir(outputDir.toPath(), formatter)) {
+                        logger.error("{}", formatter);
                         return 1;
                     }
-                    config.setTestSuiteDescription(url);
-                    logger.debug("Suite = {}", config.getTestSuiteDescription().toString());
-                }
+                    config.setOutputDirectory(outputDir);
 
-                conformanceTestHarness.initialize();
-
-                if (line.hasOption("coverage")) {
-                    return conformanceTestHarness.createCoverageReport() ? 0 : 1;
-                } else {
-                    if (line.hasOption("target") && !StringUtils.isEmpty(line.getOptionValue("target"))) {
-                        final String target = line.getOptionValue("target");
-                        final IRI testSubject = target.contains(":")
-                                ? iri(target)
-                                : iri(Namespaces.TEST_HARNESS_URI, target);
-                        logger.debug("Target: {}", testSubject.stringValue());
-                        config.setTestSubject(testSubject);
-                    }
-                    if (line.hasOption("config")) {
-                        final URL url = createUrl(line.getOptionValue("config"), "config", formatter);
+                    if (line.hasOption(SUITE)) {
+                        final URL url = createUrl(line.getOptionValue(SUITE), SUITE, formatter);
                         if (url == null) {
-                            logger.error(formatter.toString());
+                            logger.error("{}", formatter);
                             return 1;
                         }
-                        config.setConfigUrl(url);
-                        logger.debug("Config = {}", config.getConfigUrl().toString());
+                        config.setTestSuiteDescription(url);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Suite = {}", config.getTestSuiteDescription().toString());
+                        }
                     }
 
-                    final TestSuiteResults results = conformanceTestHarness.runTestSuites();
-                    return results != null && results.getFailCount() == 0 ? 0 : 1;
+                    conformanceTestHarness.initialize();
+
+                    if (line.hasOption(COVERAGE)) {
+                        return conformanceTestHarness.createCoverageReport() ? 0 : 1;
+                    } else {
+                        if (line.hasOption(TARGET) && !StringUtils.isEmpty(line.getOptionValue(TARGET))) {
+                            final String target = line.getOptionValue(TARGET);
+                            final IRI testSubject = target.contains(":")
+                                    ? iri(target)
+                                    : iri(Namespaces.TEST_HARNESS_URI, target);
+                            logger.debug("Target: {}", testSubject);
+                            config.setTestSubject(testSubject);
+                        }
+                        if (line.hasOption(CONFIG)) {
+                            final URL url = createUrl(line.getOptionValue(CONFIG), CONFIG, formatter);
+                            if (url == null) {
+                                logger.error("{}", formatter);
+                                return 1;
+                            }
+                            config.setConfigUrl(url);
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Config = {}", config.getConfigUrl().toString());
+                            }
+                        }
+
+                        final TestSuiteResults results = conformanceTestHarness.runTestSuites();
+                        return results != null && results.getFailCount() == 0 ? 0 : 1;
+                    }
                 }
             }
         } catch (Exception e) {
-            logger.error("Application initialization failed.  Reason: {}", e.toString());
+            if (logger.isErrorEnabled()) {
+                logger.error("Application initialization failed.  Reason: {}", e.toString());
+            }
         }
         return 1;
     }

@@ -52,8 +52,10 @@ public class ReportGenerator {
     }
 
     private IRI getTestSuiteNamespace() {
-        try (RepositoryConnection conn = dataRepository.getConnection()) {
-            final RepositoryResult<Statement> statements = conn.getStatements(null, DOAP.implements_, null);
+        try (
+                RepositoryConnection conn = dataRepository.getConnection();
+                RepositoryResult<Statement> statements = conn.getStatements(null, DOAP.implements_, null)
+        ) {
             // TODO: if we use multiple test suites this will need to iterate
             if (statements.hasNext()) {
                 final Statement st = statements.next();

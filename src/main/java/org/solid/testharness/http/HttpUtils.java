@@ -24,27 +24,35 @@ public final class HttpUtils {
     }
 
     public static HttpRequest.Builder newRequestBuilder(final URI uri) {
-        return HttpRequest.newBuilder(uri).setHeader("User-Agent", getAgent());
+        return HttpRequest.newBuilder(uri).setHeader(HttpConstants.USER_AGENT, getAgent());
     }
 
     static boolean isSuccessful(final int code) {
         return code >= 200 && code < 300;
     }
 
+    public static boolean isHttpProtocol(final String protocol) {
+        return "http".equals(protocol) || "https".equals(protocol);
+    }
+
     public static void logRequest(final Logger logger, final HttpRequest request) {
-        logger.debug("REQUEST {} {}", request.method(), request.uri());
-        final HttpHeaders headers = request.headers();
-        headers.map().forEach((k, v) -> logger.debug("REQ HEADER {}: {}", k, v));
+        if (logger.isDebugEnabled()) {
+            logger.debug("REQUEST {} {}", request.method(), request.uri());
+            final HttpHeaders headers = request.headers();
+            headers.map().forEach((k, v) -> logger.debug("REQ HEADER {}: {}", k, v));
+        }
     }
 
     public static <T> void logResponse(final Logger logger, final HttpResponse<T> response) {
-        logger.debug("RESPONSE {} {}", response.request().method(), response.uri());
-        logger.debug("STATUS   {}", response.statusCode());
-        final HttpHeaders headers = response.headers();
-        headers.map().forEach((k, v) -> logger.debug("HEADER   {}: {}", k, v));
-        final T body = response.body();
-        if (body != null) {
-            logger.debug("BODY     {}", response.body());
+        if (logger.isDebugEnabled()) {
+            logger.debug("RESPONSE {} {}", response.request().method(), response.uri());
+            logger.debug("STATUS   {}", response.statusCode());
+            final HttpHeaders headers = response.headers();
+            headers.map().forEach((k, v) -> logger.debug("HEADER   {}: {}", k, v));
+            final T body = response.body();
+            if (body != null) {
+                logger.debug("BODY     {}", body);
+            }
         }
     }
 
@@ -52,10 +60,10 @@ public final class HttpUtils {
         final var builder = new StringBuilder();
         for (Map.Entry<Object, Object> entry : data.entrySet()) {
             if (builder.length() > 0) {
-                builder.append("&");
+                builder.append('&');
             }
             builder.append(encodeValue(entry.getKey().toString()));
-            builder.append("=");
+            builder.append('=');
             builder.append(encodeValue(entry.getValue().toString()));
         }
         return HttpRequest.BodyPublishers.ofString(builder.toString());
@@ -83,7 +91,7 @@ public final class HttpUtils {
     }
 
     public static AbstractMap.SimpleImmutableEntry<String, String> splitQueryParameter(final String it) {
-        final int idx = it.indexOf("=");
+        final int idx = it.indexOf('=');
         final String key = idx > 0 ? it.substring(0, idx) : it;
         final String value = idx > 0 && it.length() > idx + 1 ? it.substring(idx + 1) : null;
         return new AbstractMap.SimpleImmutableEntry<>(
@@ -103,15 +111,19 @@ public final class HttpUtils {
         return links.stream().map(link -> Link.valueOf(link)).collect(Collectors.toList());
     }
 
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+    // This method deliberately creates objects in a loop dependent on the structure of the header
     public static Map<String, List<String>> parseWacAllowHeader(final Map<String, List<String>> headers) {
-        logger.debug("WAC-Allow: {}", headers.toString());
+        if (logger.isDebugEnabled()) {
+            logger.debug("WAC-Allow: {}", headers.toString());
+        }
         final Map<String, Set<String>> permissions = Map.of(
                 "user", new HashSet<String>(),
                 "public", new HashSet<String>()
         );
         final Optional<Map.Entry<String, List<String>>> header = headers.entrySet()
                 .stream()
-                .filter(entry -> entry.getKey().toLowerCase().equals("wac-allow"))
+                .filter(entry -> HttpConstants.HEADER_WAC_ALLOW.equalsIgnoreCase(entry.getKey()))
                 .findFirst();
         if (header.isPresent()) {
             final String wacAllowHeader = header.get().getValue().get(0);
@@ -120,10 +132,12 @@ public final class HttpUtils {
             final Matcher m = p.matcher(wacAllowHeader);
             while (m.find()) {
                 if (!permissions.containsKey(m.group(1))) {
-                    permissions.put(m.group(1), new HashSet<String>());
+                    permissions.put(m.group(1), new HashSet<>());
                 }
                 if (!m.group(2).isEmpty()) {
-                    permissions.get(m.group(1)).addAll(Arrays.asList(m.group(2).toLowerCase().split("\\s+")));
+                    permissions.get(m.group(1)).addAll(
+                            Arrays.asList(m.group(2).toLowerCase(Locale.ROOT).split("\\s+"))
+                    );
                 }
             }
         } else {

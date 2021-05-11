@@ -38,17 +38,17 @@ import static org.jose4j.jwx.HeaderParameterNames.TYPE;
 public class Client {
     private static final Logger logger = LoggerFactory.getLogger(Client.class);
 
-    private HttpClient client = null;
-    private String accessToken = null;
-    private RsaJsonWebKey clientKey = null;
-    private boolean dpopSupported = false;
-    private String agent = null;
-    private String user = null;
+    private HttpClient httpClient;
+    private String accessToken;
+    private RsaJsonWebKey clientKey;
+    private boolean dpopSupported;
+    private String agent;
+    private String user;
 
     public static class Builder {
         private HttpClient.Builder clientBuilder;
         private String user;
-        private RsaJsonWebKey clientKey = null;
+        private RsaJsonWebKey clientKey;
 
         private static final RandomStringGenerator GENERATOR = new RandomStringGenerator.Builder()
                 .withinRange('0', 'z').filteredBy(LETTERS, DIGITS).build();
@@ -73,10 +73,13 @@ public class Client {
             // Allow self-signed certificates for testing
             final TrustManager[] trustAllCerts = new TrustManager[]{
                 new X509TrustManager() {
+                    @Override
                     public X509Certificate[] getAcceptedIssuers() {
-                        return null;
+                        return new X509Certificate[0];
                     }
+                    @Override
                     public void checkClientTrusted(final X509Certificate[] certs, final String authType) { }
+                    @Override
                     public void checkServerTrusted(final X509Certificate[] certs, final String authType) { }
                 }
             };
@@ -85,7 +88,7 @@ public class Client {
                 sslContext = SSLContext.getInstance("SSL");
                 sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
             } catch (NoSuchAlgorithmException | KeyManagementException e) {
-                e.printStackTrace();
+                logger.error("Failed to setup sslContext", e);
             }
             System.setProperty("jdk.internal.httpclient.disableHostnameVerification", Boolean.TRUE.toString());
 
@@ -110,7 +113,7 @@ public class Client {
             final Client client = new Client();
             client.agent = HttpUtils.getAgent();
             client.user = user;
-            client.client = clientBuilder.build();
+            client.httpClient = clientBuilder.build();
             client.clientKey = clientKey;
             client.dpopSupported = clientKey != null;
             return client;
@@ -118,7 +121,7 @@ public class Client {
     }
 
     public HttpClient getHttpClient() {
-        return client;
+        return httpClient;
     }
 
     public void setAccessToken(final String accessToken) {
@@ -135,34 +138,34 @@ public class Client {
 
     public <T> HttpResponse<T> send(final HttpRequest request, final HttpResponse.BodyHandler<T> responseBodyHandler)
             throws IOException, InterruptedException {
-        return client.send(request, responseBodyHandler);
+        return httpClient.send(request, responseBodyHandler);
     }
 
     public HttpResponse<String> getAsString(final URI url) throws IOException, InterruptedException {
         final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
-                .header("Accept", "text/turtle");
+                .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
         final HttpRequest request = authorize(builder).build();
-        return client.send(request, HttpResponse.BodyHandlers.ofString());
+        return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
     public HttpResponse<Void> put(final URI url, final String data, final String type)
             throws IOException, InterruptedException {
         final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
                 .PUT(HttpRequest.BodyPublishers.ofString(data))
-                .header("Content-Type", type);
+                .header(HttpConstants.HEADER_CONTENT_TYPE, type);
         final HttpRequest request = authorize(builder).build();
         HttpUtils.logRequest(logger, request);
-        final HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+        final HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
         HttpUtils.logResponse(logger, response);
         return response;
     }
 
     public HttpResponse<Void> head(final URI url) throws IOException, InterruptedException {
         final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
-                .method("HEAD", HttpRequest.BodyPublishers.noBody());
+                .method(HttpConstants.METHOD_HEAD, HttpRequest.BodyPublishers.noBody());
         final HttpRequest request = authorize(builder).build();
         HttpUtils.logRequest(logger, request);
-        final HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+        final HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
         HttpUtils.logResponse(logger, response);
         return response;
     }
@@ -177,23 +180,23 @@ public class Client {
             logger.error("Failed to set up authorization", e);
             return CompletableFuture.completedFuture(null);
         }
-        return client.sendAsync(request, HttpResponse.BodyHandlers.discarding());
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding());
     }
 
     public HttpRequest.Builder signRequest(final HttpRequest.Builder builder) {
         if (!dpopSupported) return builder;
         final HttpRequest provisionalRequest = builder.copy().build();
         final String dpopToken = generateDpopToken(provisionalRequest.method(), provisionalRequest.uri().toString());
-        return builder.header("DPoP", dpopToken);
+        return builder.header(HttpConstants.HEADER_DPOP, dpopToken);
     }
 
     public  HttpRequest.Builder authorize(final HttpRequest.Builder builder) {
         if (accessToken == null) return builder;
         if (dpopSupported) {
-            builder.setHeader("Authorization", "DPoP " + accessToken);
+            builder.setHeader(HttpConstants.HEADER_AUTHORIZATION, HttpConstants.PREFIX_DPOP + accessToken);
             return signRequest(builder);
         } else {
-            return builder.setHeader("Authorization", "Bearer " + accessToken);
+            return builder.setHeader(HttpConstants.HEADER_AUTHORIZATION, HttpConstants.PREFIX_BEARER + accessToken);
         }
     }
 
@@ -201,14 +204,14 @@ public class Client {
         final Map<String, String> headers = new HashMap<>();
         if (accessToken == null) return headers;
         if (dpopSupported) {
-            headers.put("Authorization", "DPoP " + accessToken);
+            headers.put(HttpConstants.HEADER_AUTHORIZATION, HttpConstants.PREFIX_DPOP + accessToken);
             final String dpopToken = generateDpopToken(method, uri);
-            headers.put("DPoP", dpopToken);
+            headers.put(HttpConstants.HEADER_DPOP, dpopToken);
         } else {
-            headers.put("Authorization", "Bearer " + accessToken);
+            headers.put(HttpConstants.HEADER_AUTHORIZATION, HttpConstants.PREFIX_BEARER + accessToken);
         }
         if (agent != null) {
-            headers.put("User-Agent", agent);
+            headers.put(HttpConstants.USER_AGENT, agent);
         }
         return headers;
     }

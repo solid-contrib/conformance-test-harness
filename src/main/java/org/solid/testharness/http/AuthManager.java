@@ -16,8 +16,6 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class AuthManager {
     private static final Logger logger = LoggerFactory.getLogger(AuthManager.class);
-    private static final String USERNAME = "username";
-    private static final String PASSWORD = "password";
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -56,7 +54,7 @@ public class AuthManager {
         }
 
         final SolidClient solidClient = new SolidClient(authClient);
-        if (user.equals("alice") && targetServer.isSetupRootAcl()) {
+        if (HttpConstants.ALICE.equals(user) && targetServer.isSetupRootAcl()) {
             logger.debug("**** Setup root acl");
             // CSS has no root acl by default so added here TODO: check whether this is relevant
             solidClient.setupRootAcl(targetServer.getServerRoot(), userConfig.getWebID());
@@ -67,29 +65,35 @@ public class AuthManager {
     private Tokens exchangeRefreshToken(final Client authClient, final UserCredentials userConfig,
                                         final TargetServer targetServer) throws Exception {
         final String solidIdentityProvider = targetServer.getSolidIdentityProvider();
-        logger.info("Exchange refresh token at {} for {}", solidIdentityProvider, authClient.getUser());
+        if (logger.isInfoEnabled()) {
+            logger.info("Exchange refresh token at {} for {}", solidIdentityProvider, authClient.getUser());
+        }
 
         final Map<Object, Object> data = new HashMap<>();
-        data.put("grant_type", "refresh_token");
-        data.put("refresh_token", userConfig.getRefreshToken());
+        data.put(HttpConstants.GRANT_TYPE, HttpConstants.REFRESH_TOKEN);
+        data.put(HttpConstants.REFRESH_TOKEN, userConfig.getRefreshToken());
 
         // TODO: This should get the token endpoint from the oidc configuration
         final URI tokenEndpoint = URI.create(solidIdentityProvider + "/token");
         final HttpRequest request = authClient.signRequest(
                 HttpUtils.newRequestBuilder(tokenEndpoint)
-                        .header("Authorization", "Basic " +
+                        .header(HttpConstants.HEADER_AUTHORIZATION, HttpConstants.PREFIX_BASIC +
                                 base64Encode(userConfig.getClientId() + ':' + userConfig.getClientSecret()))
-                        .header("Content-Type", "application/x-www-form-urlencoded")
-                        .header("Accept", "application/json")
+                        .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED)
+                        .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
                         .POST(HttpUtils.ofFormData(data))
         ).build();
 
         final HttpResponse<String> response = authClient.send(request, HttpResponse.BodyHandlers.ofString());
-        logger.debug("Response {}: {}", response.statusCode(), response.body());
-        if (response.statusCode() == 200) {
+        final String body = response.body();
+        final int statusCode = response.statusCode();
+        if (logger.isDebugEnabled()) {
+            logger.debug("Response {}: {}", statusCode, body);
+        }
+        if (statusCode == HttpConstants.STATUS_OK) {
             return objectMapper.readValue(response.body(), Tokens.class);
         } else {
-            logger.error("FAILED TO GET ACCESS TOKEN {}", response.body());
+            logger.error("FAILED TO GET ACCESS TOKEN {}", body);
             throw new Exception("Token exchange failed - do you need a new refresh_token");
         }
     }
@@ -99,15 +103,17 @@ public class AuthManager {
         final String solidIdentityProvider = config.getSolidIdentityProvider();
         final String appOrigin = config.getOrigin();
 
-        logger.info("Login and get access token at {} for {}", solidIdentityProvider, authClient.getUser());
+        if (logger.isInfoEnabled()) {
+            logger.info("Login and get access token at {} for {}", solidIdentityProvider, authClient.getUser());
+        }
         final Client client = ClientRegistry.getClient(ClientRegistry.SESSION_BASED);
         final URI uri = URI.create(solidIdentityProvider);
 
         final Map<Object, Object> data = new HashMap<>();
-        data.put(USERNAME, userConfig.getUsername());
-        data.put(PASSWORD, userConfig.getPassword());
+        data.put(HttpConstants.USERNAME, userConfig.getUsername());
+        data.put(HttpConstants.PASSWORD, userConfig.getPassword());
         HttpRequest request = HttpUtils.newRequestBuilder(config.getLoginEndpoint())
-                .header("Content-Type", "application/x-www-form-urlencoded")
+                .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED)
                 .POST(HttpUtils.ofFormData(data))
                 .build();
         HttpUtils.logRequest(logger, request);
@@ -115,8 +121,8 @@ public class AuthManager {
         HttpUtils.logResponse(logger, response);
 
         logger.debug("\n========== GET CONFIGURATION");
-        request = HttpUtils.newRequestBuilder(uri.resolve("/.well-known/openid-configuration"))
-                .header("Accept", "application/json")
+        request = HttpUtils.newRequestBuilder(uri.resolve(HttpConstants.OPENID_CONFIGURATION))
+                .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
                 .build();
         HttpUtils.logRequest(logger, request);
         final HttpResponse<String> jsonResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -139,7 +145,7 @@ public class AuthManager {
         final String registrationBody = objectMapper.writeValueAsString(registration);
         request = HttpUtils.newRequestBuilder(registrationEndpoint)
                 .POST(HttpRequest.BodyPublishers.ofString(registrationBody))
-                .header("Content-Type", "application/json")
+                .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
                 .build();
         HttpUtils.logRequest(logger, request);
         final HttpResponse<String> regResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -151,10 +157,10 @@ public class AuthManager {
 
         logger.debug("\n========== AUTHORIZE");
         final Map<String, String> requestParams = new HashMap<>();
-        requestParams.put("response_type", "code");
-        requestParams.put("redirect_uri", appOrigin);
-        requestParams.put("scope", "openid");
-        requestParams.put("client_id", clientId);
+        requestParams.put(HttpConstants.RESPONSE_TYPE, HttpConstants.CODE);
+        requestParams.put(HttpConstants.REDIRECT_URI, appOrigin);
+        requestParams.put(HttpConstants.SCOPE, HttpConstants.OPENID);
+        requestParams.put(HttpConstants.CLIENT_ID, clientId);
         final String authorizaUrl = requestParams.keySet().stream()
                 .map(key -> key + "=" + HttpUtils.encodeValue(requestParams.get(key)))
                 .collect(Collectors.joining("&", authorizeEndpoint + "?", ""));
@@ -174,7 +180,7 @@ public class AuthManager {
             throw new Exception("Failed to follow authentication redirects");
         }
         final Map<String, List<String>> params = HttpUtils.splitQuery(redirectUrl);
-        final String authCode = params.containsKey("code") ? params.get("code").get(0) : null;
+        final String authCode = params.containsKey(HttpConstants.CODE) ? params.get(HttpConstants.CODE).get(0) : null;
         if (authCode == null) {
             // Please make sure the cookie is valid, and add "${appOrigin}" as a trusted app!
             throw new Exception("Failed to get auth code");
@@ -183,16 +189,17 @@ public class AuthManager {
 
         logger.debug("\n========== ACCESS TOKEN");
         final Map<Object, Object> tokenRequestData = new HashMap<>();
-        tokenRequestData.put("grant_type", "authorization_code");
-        tokenRequestData.put("code", authCode);
-        tokenRequestData.put("redirect_uri", appOrigin);
-        tokenRequestData.put("client_id", clientId);
+        tokenRequestData.put(HttpConstants.GRANT_TYPE, HttpConstants.AUTHORIZATION_CODE_TYPE);
+        tokenRequestData.put(HttpConstants.CODE, authCode);
+        tokenRequestData.put(HttpConstants.REDIRECT_URI, appOrigin);
+        tokenRequestData.put(HttpConstants.CLIENT_ID, clientId);
 
         request = authClient.signRequest(
                 HttpUtils.newRequestBuilder(tokenEndpoint)
-                        .header("Authorization", "Basic " + base64Encode(clientId + ':' + clientSecret))
-                        .header("Content-Type", "application/x-www-form-urlencoded")
-                        .header("Accept", "application/json")
+                        .header(HttpConstants.HEADER_AUTHORIZATION, HttpConstants.PREFIX_BASIC +
+                                base64Encode(clientId + ':' + clientSecret))
+                        .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED)
+                        .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
                         .POST(HttpUtils.ofFormData(tokenRequestData))
         ).build();
         HttpUtils.logRequest(logger, request);

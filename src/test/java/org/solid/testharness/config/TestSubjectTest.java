@@ -4,6 +4,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.http.AuthManager;
+import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClient;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
@@ -81,9 +82,9 @@ public class TestSubjectTest {
         final Map<String, SolidClient> clients = testSubject.getClients();
         assertNotNull(clients);
         assertEquals(2, clients.size());
-        assertTrue(clients.containsKey("alice"));
-        assertNotNull(clients.get("alice"));
-        assertTrue(clients.containsKey("bob"));
-        assertNotNull(clients.get("bob"));
+        assertTrue(clients.containsKey(HttpConstants.ALICE));
+        assertNotNull(clients.get(HttpConstants.ALICE));
+        assertTrue(clients.containsKey(HttpConstants.BOB));
+        assertNotNull(clients.get(HttpConstants.BOB));
     }
 }

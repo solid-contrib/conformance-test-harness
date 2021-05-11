@@ -22,9 +22,9 @@ import org.solid.testharness.utils.TestHarnessInitializationException;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -51,7 +51,8 @@ public class ConformanceTestHarness {
     DataRepository dataRepository;
 
     public void initialize() throws IOException {
-        try (final InputStream is = getClass().getClassLoader().getResourceAsStream("assertor.properties")) {
+        try (final InputStream is = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("assertor.properties")) {
             final Properties properties = new Properties();
             properties.load(is);
             final IRI assertor = iri(Namespaces.TEST_HARNESS_URI);
@@ -94,11 +95,15 @@ public class ConformanceTestHarness {
 
         logger.info("===================== BUILD REPORT ========================");
         final File outputDir = config.getOutputDirectory();
-        logger.info("Reports location: {}", outputDir.getPath());
+        if (logger.isInfoEnabled()) {
+            logger.info("Reports location: {}", outputDir.getPath());
+        }
         try {
             final File coverageHtmlFile = new File(outputDir, "coverage.html");
-            logger.info("Coverage report HTML/RDFa file: {}", coverageHtmlFile.getPath());
-            reportGenerator.buildHtmlCoverageReport(new FileWriter(coverageHtmlFile));
+            if (logger.isInfoEnabled()) {
+                logger.info("Coverage report HTML/RDFa file: {}", coverageHtmlFile.getPath());
+            }
+            reportGenerator.buildHtmlCoverageReport(Files.newBufferedWriter(coverageHtmlFile.toPath()));
             return true;
         } catch (IOException e) {
             logger.error("Failed to write coverage report", e);
@@ -117,13 +122,15 @@ public class ConformanceTestHarness {
             final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(
                     testSubject.getTargetServer().getFeatures().keySet()
             );
-            logger.info("==== TEST CASES FOUND: {} - {}", testCases.size(), testCases);
+            if (logger.isInfoEnabled()) {
+                logger.info("==== TEST CASES FOUND: {} - {}", testCases.size(), testCases);
+            }
 
             featurePaths = testSuiteDescription.locateTestCases(testCases);
             if (featurePaths.isEmpty()) {
                 logger.warn("There are no tests available");
                 return null;
-            } else {
+            } else if (logger.isInfoEnabled()) {
                 logger.info("==== RUNNING {} TEST CASES: {}", featurePaths.size(), featurePaths);
             }
 
@@ -139,21 +146,27 @@ public class ConformanceTestHarness {
 
         logger.info("===================== BUILD REPORTS ========================");
         final File outputDir = config.getOutputDirectory();
-        logger.info("Reports location: {}", outputDir.getPath());
+        if (logger.isInfoEnabled()) {
+            logger.info("Reports location: {}", outputDir.getPath());
+        }
         try {
             final File reportTurtleFile = new File(outputDir, "report.ttl");
-            logger.info("Report Turtle file: {}", reportTurtleFile.getPath());
-            reportGenerator.buildTurtleReport(new FileWriter(reportTurtleFile));
+            if (logger.isInfoEnabled()) {
+                logger.info("Report Turtle file: {}", reportTurtleFile.getPath());
+            }
+            reportGenerator.buildTurtleReport(Files.newBufferedWriter(reportTurtleFile.toPath()));
 
             final File reportHtmlFile = new File(outputDir, "report.html");
-            logger.info("Report HTML/RDFa file: {}", reportHtmlFile.getPath());
-            reportGenerator.buildHtmlResultReport(new FileWriter(reportHtmlFile));
+            if (logger.isInfoEnabled()) {
+                logger.info("Report HTML/RDFa file: {}", reportHtmlFile.getPath());
+            }
+            reportGenerator.buildHtmlResultReport(Files.newBufferedWriter(reportHtmlFile.toPath()));
 //            resultProcessor.printReportToConsole();
         } catch (Exception e) {
             logger.error("Failed to write reports", e);
         }
 
-        logger.info(results.toString());
+        logger.info("{}", results);
         return results;
     }
 }

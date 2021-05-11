@@ -13,6 +13,7 @@ import org.solid.common.vocab.DCTERMS;
 import org.solid.common.vocab.EARL;
 import org.solid.common.vocab.TD;
 import org.solid.testharness.config.PathMappings;
+import org.solid.testharness.http.HttpUtils;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
@@ -41,9 +42,9 @@ public class TestSuiteDescription {
     //   manifest: dcterms:hasPart manifest:testgroup
     // This will give the developer a simple way to control which tests groups are run, either by changing the file
     // or specifying on the comment line. It may also help if loading >1 test suite description
-    private static final String SELECT_SUPPORTED_TEST_CASES =
-            "PREFIX " + TD.PREFIX + ": <" + TD.NAMESPACE + ">\n" +
-            "PREFIX " + DCTERMS.PREFIX + ": <" + DCTERMS.NAMESPACE + ">\n" +
+    private static final String PREFIXES = String.format("PREFIX %s: <%s>\nPREFIX %s: <%s>\n",
+            TD.PREFIX, TD.NAMESPACE, DCTERMS.PREFIX, DCTERMS.NAMESPACE);
+    private static final String SELECT_SUPPORTED_TEST_CASES = PREFIXES +
             "SELECT DISTINCT ?feature WHERE {" +
             "  ?group a td:SpecificationTestCase ." +
             "  ?group dcterms:hasPart ?feature ." +
@@ -51,9 +52,7 @@ public class TestSuiteDescription {
             "  FILTER NOT EXISTS { ?group td:preCondition ?precondition FILTER(?precondition NOT IN (%s))}" +
             "} ";
 
-    private static final String SELECT_ALL_TEST_CASES =
-            "PREFIX " + TD.PREFIX + ": <" + TD.NAMESPACE + ">\n" +
-            "PREFIX " + DCTERMS.PREFIX + ": <" + DCTERMS.NAMESPACE + ">\n" +
+    private static final String SELECT_ALL_TEST_CASES = PREFIXES +
             "SELECT DISTINCT ?feature WHERE {" +
             "  ?group a td:SpecificationTestCase ." +
             "  ?group dcterms:hasPart ?feature ." +
@@ -92,7 +91,7 @@ public class TestSuiteDescription {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             return testCases.stream().map(t -> {
                 final URI mappedLocation = pathMappings.mapFeatureIri(t);
-                if (mappedLocation.getScheme().equals("http") || mappedLocation.getScheme().equals("https")) {
+                if (HttpUtils.isHttpProtocol(mappedLocation.getScheme())) {
                     throw new TestHarnessInitializationException("Remote test cases are not yet supported - use " +
                             "mappings to point to local copies");
                 }
@@ -107,7 +106,8 @@ public class TestSuiteDescription {
                 }
             }).filter(Objects::nonNull).collect(Collectors.toList());
         } catch (RDF4JException e) {
-            throw new TestHarnessInitializationException(e.toString());
+            throw (TestHarnessInitializationException) new TestHarnessInitializationException(e.toString())
+                    .initCause(e);
         }
     }
 
@@ -123,7 +123,8 @@ public class TestSuiteDescription {
                 }
             }
         } catch (RDF4JException e) {
-            throw new TestHarnessInitializationException(e.toString());
+            throw (TestHarnessInitializationException) new TestHarnessInitializationException(e.toString())
+                    .initCause(e);
         }
         return testCases;
     }

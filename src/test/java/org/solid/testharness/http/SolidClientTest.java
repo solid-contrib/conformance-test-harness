@@ -77,7 +77,8 @@ class SolidClientTest {
 
         when(mockClient.head(any())).thenReturn(mockResponse);
         when(mockResponse.headers()).thenReturn(mockHeaders);
-        when(mockClient.put(eq(URI.create("http://localhost:3000/.acl")), any(), eq("text/turtle")))
+        when(mockClient.put(eq(URI.create("http://localhost:3000/.acl")), any(),
+                eq(HttpConstants.MEDIA_TYPE_TEXT_TURTLE)))
                 .thenReturn(mockResponseOk);
 
         final SolidClient solidClient = new SolidClient(mockClient);
@@ -89,7 +90,8 @@ class SolidClientTest {
                 "  acl:accessTo </>;" +
                 "  acl:default </>;" +
                 "  acl:mode acl:Read, acl:Write, acl:Control .";
-        verify(mockClient).put(URI.create("http://localhost:3000/.acl"), expectedAcl, "text/turtle");
+        verify(mockClient).put(URI.create("http://localhost:3000/.acl"), expectedAcl,
+                HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
     }
 
     @Test
@@ -103,7 +105,8 @@ class SolidClientTest {
 
         when(mockClient.head(any())).thenReturn(mockResponse);
         when(mockResponse.headers()).thenReturn(mockHeaders);
-        when(mockClient.put(eq(URI.create("http://localhost:3000/.acl")), any(), eq("text/turtle")))
+        when(mockClient.put(eq(URI.create("http://localhost:3000/.acl")), any(),
+                eq(HttpConstants.MEDIA_TYPE_TEXT_TURTLE)))
                 .thenReturn(mockResponseOk);
 
         final SolidClient solidClient = new SolidClient(mockClient);
@@ -115,7 +118,8 @@ class SolidClientTest {
                 "  acl:accessTo </>;" +
                 "  acl:default </>;" +
                 "  acl:mode acl:Read, acl:Write, acl:Control .";
-        verify(mockClient).put(URI.create("http://localhost:3000/.acl"), expectedAcl, "text/turtle");
+        verify(mockClient).put(URI.create("http://localhost:3000/.acl"), expectedAcl,
+                HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
     }
 
     @Test
@@ -129,7 +133,8 @@ class SolidClientTest {
 
         when(mockClient.head(any())).thenReturn(mockResponse);
         when(mockResponse.headers()).thenReturn(mockHeaders);
-        when(mockClient.put(eq(URI.create("http://localhost:3000/.acl")), any(), eq("text/turtle")))
+        when(mockClient.put(eq(URI.create("http://localhost:3000/.acl")), any(),
+                eq(HttpConstants.MEDIA_TYPE_TEXT_TURTLE)))
                 .thenReturn(mockResponseFail);
 
         final SolidClient solidClient = new SolidClient(mockClient);
@@ -154,14 +159,15 @@ class SolidClientTest {
         final HttpHeaders mockHeaders = HttpHeaders.of(Collections.emptyMap(), (k, v) -> true);
         when(mockResponse.headers()).thenReturn(mockHeaders);
         when(mockResponse.statusCode()).thenReturn(200);
-        when(mockClient.put(eq(URI.create("http://localhost:3000/test")), eq("DATA"), eq("text/plain")))
+        when(mockClient.put(eq(URI.create("http://localhost:3000/test")), eq("DATA"),
+                eq(HttpConstants.MEDIA_TYPE_TEXT_PLAIN)))
                 .thenReturn(mockResponse);
 
         final SolidClient solidClient = new SolidClient(mockClient);
         final HttpHeaders headers = solidClient.createResource(URI.create("http://localhost:3000/test"),
-                "DATA", "text/plain");
+                "DATA", HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertTrue(headers.map().isEmpty());
-        verify(mockClient).put(URI.create("http://localhost:3000/test"), "DATA", "text/plain");
+        verify(mockClient).put(URI.create("http://localhost:3000/test"), "DATA", HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
     }
 
     @Test
@@ -171,12 +177,14 @@ class SolidClientTest {
         final HttpHeaders mockHeaders = HttpHeaders.of(Collections.emptyMap(), (k, v) -> true);
         when(mockResponse.headers()).thenReturn(mockHeaders);
         when(mockResponse.statusCode()).thenReturn(412);
-        when(mockClient.put(eq(URI.create("http://localhost:3000/test")), eq("DATA"), eq("text/plain")))
+        when(mockClient.put(eq(URI.create("http://localhost:3000/test")), eq("DATA"),
+                eq(HttpConstants.MEDIA_TYPE_TEXT_PLAIN)))
                 .thenReturn(mockResponse);
 
         final SolidClient solidClient = new SolidClient(mockClient);
         final Exception exception = assertThrows(Exception.class,
-                () -> solidClient.createResource(URI.create("http://localhost:3000/test"), "DATA", "text/plain")
+                () -> solidClient.createResource(URI.create("http://localhost:3000/test"), "DATA",
+                        HttpConstants.MEDIA_TYPE_TEXT_PLAIN)
         );
         assertEquals("Failed to create resource - status=412", exception.getMessage());
     }
@@ -244,13 +252,14 @@ class SolidClientTest {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
 
-        when(mockClient.put(eq(resourceAcl), eq("ACL"), eq("text/turtle"))).thenReturn(mockResponse);
+        when(mockClient.put(eq(resourceAcl), eq("ACL"), eq(HttpConstants.MEDIA_TYPE_TEXT_TURTLE)))
+                .thenReturn(mockResponse);
         when(mockResponse.statusCode()).thenReturn(200);
 
         final SolidClient solidClient = new SolidClient(mockClient);
         final boolean res = solidClient.createAcl(resourceAcl, "ACL");
         assertTrue(res);
-        verify(mockClient).put(resourceAcl, "ACL", "text/turtle");
+        verify(mockClient).put(resourceAcl, "ACL", HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
     }
 
     @Test
@@ -260,13 +269,14 @@ class SolidClientTest {
         final URI resourceAcl = URI.create("http://localhost:3000/test.acl");
 
         when(mockClient.head(any())).thenReturn(mockResponse);
-        when(mockClient.put(eq(resourceAcl), eq("ACL"), eq("text/turtle"))).thenReturn(mockResponse);
+        when(mockClient.put(eq(resourceAcl), eq("ACL"), eq(HttpConstants.MEDIA_TYPE_TEXT_TURTLE)))
+                .thenReturn(mockResponse);
         when(mockResponse.statusCode()).thenReturn(500);
 
         final SolidClient solidClient = new SolidClient(mockClient);
         final boolean res = solidClient.createAcl(resourceAcl, "ACL");
         assertFalse(res);
-        verify(mockClient).put(resourceAcl, "ACL", "text/turtle");
+        verify(mockClient).put(resourceAcl, "ACL", HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
     }
 
     @Test
@@ -519,6 +529,4 @@ class SolidClientTest {
         solidClient.getClient().setAccessToken("ACCESS");
         assertEquals("SolidClient: user=toStringUser, accessToken=ACCESS", solidClient.toString());
     }
-
-
 }

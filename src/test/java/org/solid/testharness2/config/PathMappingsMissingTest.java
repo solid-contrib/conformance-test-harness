@@ -6,8 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.solid.testharness.config.PathMappings;
 
 import javax.inject.Inject;
+import java.net.URI;
 
+import static org.eclipse.rdf4j.model.util.Values.iri;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 @TestProfile(ConfigTestBlankProfile.class)
@@ -17,11 +21,21 @@ class PathMappingsMissingTest {
 
     @Test
     void getMappings() {
-        assertNull(pathMappings.getMappings());
+        assertTrue(pathMappings.getMappings().isEmpty());
     }
 
     @Test
     void testToString() {
-        assertNull(pathMappings.toString());
+        assertEquals("[]", pathMappings.toString());
+    }
+
+    @Test
+    void unmapFeaturePath() {
+        assertNull(pathMappings.unmapFeaturePath("/path"));
+    }
+
+    @Test
+    void mapFeatureIri() {
+        assertEquals(URI.create("file:/path"), pathMappings.mapFeatureIri(iri("file:/path")));
     }
 }

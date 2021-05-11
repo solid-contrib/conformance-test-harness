@@ -12,11 +12,12 @@ import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.inject.spi.CDI;
 import java.io.File;
-import java.io.FileReader;
 import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UserCredentials {
+public final class UserCredentials {
     private static final Logger logger = LoggerFactory.getLogger(UserCredentials.class);
 
     private String webID;
@@ -53,8 +54,8 @@ public class UserCredentials {
     public void setCredentials(final String credentials) {
         final Config config = CDI.current().select(Config.class).get();
         this.credentials = credentials;
-        try {
-            final Reader reader = new FileReader(new File(config.getCredentialsDirectory(), credentials));
+        final Path credentialsPath = new File(config.getCredentialsDirectory(), credentials).toPath();
+        try (final Reader reader = Files.newBufferedReader(credentialsPath)) {
             final ObjectMapper objectMapper = new ObjectMapper();
             final UserCredentials externalCredentials = objectMapper.readValue(reader, UserCredentials.class);
             if (externalCredentials.getRefreshToken() != null) {
@@ -73,8 +74,12 @@ public class UserCredentials {
                 setPassword(externalCredentials.getPassword());
             }
         } catch (Exception e) {
-            logger.debug("Failed to load user credentials: {}", e.toString());
-            throw new TestHarnessInitializationException("Failed to load user credentials: %s", e.toString());
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to load user credentials: {}", e.toString());
+            }
+            throw (TestHarnessInitializationException) new TestHarnessInitializationException(
+                    "Failed to load user credentials: %s", e.toString()
+            ).initCause(e);
         }
     }
 

@@ -88,7 +88,7 @@ public class DataModelBase {
 
     protected String getIriAsString(final IRI predicate) {
         final Set<Value> values = model.filter(subject, predicate, null).objects();
-        if (values.size() > 0) {
+        if (!values.isEmpty()) {
             return values.iterator().next().stringValue();
         }
         return null;
@@ -96,14 +96,18 @@ public class DataModelBase {
 
     protected <T extends DataModelBase> List<T> getModelList(final IRI predicate, final Class<T> clazz) {
         final Set<Value> values = model.filter(subject, predicate, null).objects();
-        if (values.size() > 0) {
+        if (!values.isEmpty()) {
             return values.stream().filter(Value::isIRI).map(v -> {
                 try {
                     return clazz.getDeclaredConstructor(IRI.class).newInstance((IRI)v);
                 } catch (InstantiationException | IllegalAccessException |
                         InvocationTargetException | NoSuchMethodException e) {
-                    logger.error("Failed to create instance of {}", clazz.getName());
-                    throw new RuntimeException("Failed to create instance of " + clazz.getName());
+                    if (logger.isErrorEnabled()) {
+                        logger.error("Failed to create instance of {}", clazz.getName());
+                    }
+                    throw (RuntimeException) new RuntimeException(
+                            "Failed to create instance of " + clazz.getName()
+                    ).initCause(e);
                 }
             }).collect(Collectors.toList());
         }
@@ -119,8 +123,12 @@ public class DataModelBase {
                     return clazz.getDeclaredConstructor(IRI.class).newInstance((IRI) v);
                 } catch (InstantiationException | IllegalAccessException |
                         InvocationTargetException | NoSuchMethodException e) {
-                    logger.error("Failed to create instance of {}", clazz.getName());
-                    throw new RuntimeException("Failed to create instance of " + clazz.getName());
+                    if (logger.isErrorEnabled()) {
+                        logger.error("Failed to create instance of {}", clazz.getName());
+                    }
+                    throw (RuntimeException) new RuntimeException(
+                            "Failed to create instance of " + clazz.getName()
+                    ).initCause(e);
                 }
             }).collect(Collectors.toList());
         }
@@ -129,7 +137,7 @@ public class DataModelBase {
 
     protected IRI getAsIri(final IRI predicate) {
         final Set<Value> values = model.filter(subject, predicate, null).objects();
-        if (values.size() > 0) {
+        if (!values.isEmpty()) {
             final Value value = values.iterator().next();
             return value.isIRI() ? (IRI) value : null;
         }
@@ -138,7 +146,7 @@ public class DataModelBase {
 
     protected BNode getAsBNode(final IRI predicate) {
         final Set<Value> values = model.filter(subject, predicate, null).objects();
-        if (values.size() > 0) {
+        if (!values.isEmpty()) {
             final Value value = values.iterator().next();
             return value.isBNode() ? (BNode) value : null;
         }

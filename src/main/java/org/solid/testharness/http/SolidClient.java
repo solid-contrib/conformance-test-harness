@@ -82,8 +82,8 @@ public class SolidClient {
     }
 
     public boolean createAcl(final URI url, final String acl) throws IOException, InterruptedException {
-        logger.debug("ACL: {}", acl);
-        final HttpResponse<Void> response = client.put(url, acl, "text/turtle");
+        logger.debug("ACL: {} for {}", acl, url);
+        final HttpResponse<Void> response = client.put(url, acl, HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
         return HttpUtils.isSuccessful(response.statusCode());
     }
 
@@ -102,7 +102,7 @@ public class SolidClient {
             model = Rio.parse(new StringReader(data), url.toString(), RDFFormat.TURTLE);
         } catch (Exception e) {
             logger.error("RDF Parse Error: {} in {}", e, data);
-            throw new Exception("Bad container listing");
+            throw (Exception) new Exception("Bad container listing").initCause(e);
         }
         final Set<Value> resources = model.filter(null, LDP.CONTAINS, null).objects();
         return resources.stream().map(Object::toString).collect(Collectors.toList());
@@ -132,7 +132,9 @@ public class SolidClient {
                         .map(URI::create)
                         .collect(Collectors.toList());
             } catch (Exception e) {
-                logger.error("Failed to get container members: {}", e.toString());
+                if (logger.isErrorEnabled()) {
+                    logger.error("Failed to get container members: {}", e.toString());
+                }
                 return CompletableFuture.completedFuture(null);
             }
 
@@ -154,9 +156,11 @@ public class SolidClient {
                         responses.stream()
                                 .filter(response -> !HttpUtils.isSuccessful(response.statusCode()))
                                 .map(response -> {
-                                    logger.debug("BAD RESPONSE {} {} {}", response.statusCode(),
-                                            response.uri(), response.body()
-                                    );
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug("BAD RESPONSE {} {} {}", response.statusCode(),
+                                                response.uri(), response.body()
+                                        );
+                                    }
                                     return response.uri();
                                 })
                                 .collect(Collectors.toList())

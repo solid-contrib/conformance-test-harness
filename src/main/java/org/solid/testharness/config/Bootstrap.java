@@ -13,17 +13,21 @@ public final class Bootstrap {
     private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
 
     private static Bootstrap INSTANCE;
-    public static synchronized Bootstrap getInstance() {
-        if (INSTANCE == null) {
-            try {
-                INSTANCE = new Bootstrap();
-            } catch (RuntimeException e) {
-                logger.error(e.toString());
+    public static Bootstrap getInstance() {
+        synchronized (Bootstrap.class) {
+            if (INSTANCE == null) {
+                try {
+                    INSTANCE = new Bootstrap();
+                } catch (RuntimeException e) {
+                    logger.error("{}", e);
+                }
             }
+            return INSTANCE;
         }
-        return INSTANCE;
     }
 
+    @SuppressWarnings("PMD.CloseResource")
+    // The application is closed by Quarkus
     private Bootstrap() {
         final Application app = Application.currentApplication();
         if (app == null) {

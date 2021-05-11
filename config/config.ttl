@@ -67,7 +67,7 @@
     solid-test:serverRoot <http://localhost:3000> ;
     solid-test:podRoot <http://localhost:3000/> ;
     solid-test:testContainer "/test/" ;
-    solid-test:setupAclRoot true .
+    solid-test:setupRootAcl true .
 
 <nss>
     a earl:Software, earl:TestSubject ;
