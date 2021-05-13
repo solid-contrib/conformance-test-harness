@@ -35,6 +35,10 @@ public final class HttpUtils {
         return "http".equals(protocol) || "https".equals(protocol);
     }
 
+    public static boolean isFileProtocol(final String protocol) {
+        return "file".equals(protocol);
+    }
+
     public static void logRequest(final Logger logger, final HttpRequest request) {
         if (logger.isDebugEnabled()) {
             logger.debug("REQUEST {} {}", request.method(), request.uri());

@@ -2,6 +2,7 @@ package org.solid.testharness.config;
 
 import io.quarkus.arc.config.ConfigProperties;
 import org.eclipse.rdf4j.model.IRI;
+import org.solid.testharness.http.HttpUtils;
 
 import javax.validation.constraints.NotNull;
 import java.net.URI;
@@ -35,12 +36,14 @@ public class PathMappings {
     }
 
     public IRI unmapFeaturePath(final String path) {
-        if (path.startsWith("http:") || path.startsWith("https:")) {
-            return iri(path);
+        URI uri = URI.create(path);
+        if (HttpUtils.isHttpProtocol(uri.getScheme())) {
+            return iri(uri.toString());
         }
-        final String finalPath = path.startsWith("file:")
-                ? path
-                : Path.of(path).toAbsolutePath().normalize().toUri().toString();
+        if (!HttpUtils.isFileProtocol(uri.getScheme())) {
+            uri = Path.of(path).toAbsolutePath().normalize().toUri();
+        }
+        final String finalPath = uri.toString();
         final Mapping mapping = mappings.stream().filter(m -> finalPath.startsWith(m.path)).findFirst().orElse(null);
         return mapping != null ? iri(finalPath.replace(mapping.path, mapping.prefix)) : null;
     }
