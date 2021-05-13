@@ -41,9 +41,7 @@ public class Application implements QuarkusApplication {
 
     @Override
     public int run(final String... args) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Args: {}", Arrays.toString(args));
-        }
+        logger.debug("Args: {}", Arrays.toString(args));
 
         final Options options = new Options();
         options.addOption(Option.builder().longOpt(COVERAGE).desc("produce a coverage report").build());
@@ -64,9 +62,7 @@ public class Application implements QuarkusApplication {
                 final File outputDir;
                 if (line.hasOption(OUTPUT) && !StringUtils.isEmpty(line.getOptionValue(OUTPUT))) {
                     outputDir = Path.of(line.getOptionValue(OUTPUT)).toAbsolutePath().normalize().toFile();
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Output = {}", outputDir.getPath());
-                    }
+                    logger.debug("Output = {}", outputDir.getPath());
                 } else {
                     outputDir = Path.of("").toAbsolutePath().toFile();
                 }
@@ -84,9 +80,7 @@ public class Application implements QuarkusApplication {
                             return 1;
                         }
                         config.setTestSuiteDescription(url);
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Suite = {}", config.getTestSuiteDescription().toString());
-                        }
+                        logger.debug("Suite = {}", config.getTestSuiteDescription().toString());
                     }
 
                     conformanceTestHarness.initialize();
@@ -109,9 +103,7 @@ public class Application implements QuarkusApplication {
                                 return 1;
                             }
                             config.setConfigUrl(url);
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Config = {}", config.getConfigUrl().toString());
-                            }
+                            logger.debug("Config = {}", config.getConfigUrl().toString());
                         }
 
                         final TestSuiteResults results = conformanceTestHarness.runTestSuites();
@@ -120,9 +112,7 @@ public class Application implements QuarkusApplication {
                 }
             }
         } catch (Exception e) {
-            if (logger.isErrorEnabled()) {
-                logger.error("Application initialization failed.  Reason: {}", e.toString());
-            }
+            logger.error("Application initialization failed.  Reason: {}", e.toString());
         }
         return 1;
     }

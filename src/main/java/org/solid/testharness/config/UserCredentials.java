@@ -74,9 +74,7 @@ public final class UserCredentials {
                 setPassword(externalCredentials.getPassword());
             }
         } catch (Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to load user credentials: {}", e.toString());
-            }
+            logger.debug("Failed to load user credentials: {}", e.toString());
             throw (TestHarnessInitializationException) new TestHarnessInitializationException(
                     "Failed to load user credentials: %s", e.toString()
             ).initCause(e);

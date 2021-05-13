@@ -118,9 +118,7 @@ public final class HttpUtils {
     @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     // This method deliberately creates objects in a loop dependent on the structure of the header
     public static Map<String, List<String>> parseWacAllowHeader(final Map<String, List<String>> headers) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("WAC-Allow: {}", headers.toString());
-        }
+        logger.debug("WAC-Allow: {}", headers.toString());
         final Map<String, Set<String>> permissions = Map.of(
                 "user", new HashSet<String>(),
                 "public", new HashSet<String>()

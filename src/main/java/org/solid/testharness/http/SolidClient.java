@@ -132,9 +132,7 @@ public class SolidClient {
                         .map(URI::create)
                         .collect(Collectors.toList());
             } catch (Exception e) {
-                if (logger.isErrorEnabled()) {
-                    logger.error("Failed to get container members: {}", e.toString());
-                }
+                logger.error("Failed to get container members: {}", e.toString());
                 return CompletableFuture.completedFuture(null);
             }
 
@@ -156,11 +154,9 @@ public class SolidClient {
                         responses.stream()
                                 .filter(response -> !HttpUtils.isSuccessful(response.statusCode()))
                                 .map(response -> {
-                                    if (logger.isDebugEnabled()) {
-                                        logger.debug("BAD RESPONSE {} {} {}", response.statusCode(),
-                                                response.uri(), response.body()
-                                        );
-                                    }
+                                    logger.debug("BAD RESPONSE {} {} {}", response.statusCode(),
+                                            response.uri(), response.body()
+                                    );
                                     return response.uri();
                                 })
                                 .collect(Collectors.toList())

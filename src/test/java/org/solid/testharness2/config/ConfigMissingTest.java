@@ -8,8 +8,7 @@ import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.inject.Inject;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 @TestProfile(ConfigTestBlankProfile.class)
@@ -39,6 +38,6 @@ public class ConfigMissingTest {
 
     @Test
     void logConfigSettings() {
-        assertThrows(TestHarnessInitializationException.class, () -> config.logConfigSettings());
+        assertDoesNotThrow(() -> config.logConfigSettings());
     }
 }

@@ -102,9 +102,7 @@ public class DataModelBase {
                     return clazz.getDeclaredConstructor(IRI.class).newInstance((IRI)v);
                 } catch (InstantiationException | IllegalAccessException |
                         InvocationTargetException | NoSuchMethodException e) {
-                    if (logger.isErrorEnabled()) {
-                        logger.error("Failed to create instance of {}", clazz.getName());
-                    }
+                    logger.error("Failed to create instance of {}", clazz.getName());
                     throw (RuntimeException) new RuntimeException(
                             "Failed to create instance of " + clazz.getName()
                     ).initCause(e);
@@ -123,9 +121,7 @@ public class DataModelBase {
                     return clazz.getDeclaredConstructor(IRI.class).newInstance((IRI) v);
                 } catch (InstantiationException | IllegalAccessException |
                         InvocationTargetException | NoSuchMethodException e) {
-                    if (logger.isErrorEnabled()) {
-                        logger.error("Failed to create instance of {}", clazz.getName());
-                    }
+                    logger.error("Failed to create instance of {}", clazz.getName());
                     throw (RuntimeException) new RuntimeException(
                             "Failed to create instance of " + clazz.getName()
                     ).initCause(e);

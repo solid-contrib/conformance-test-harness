@@ -13,7 +13,7 @@ import java.io.StringReader;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @QuarkusTest
 public class TargetServerTest {
@@ -73,7 +73,7 @@ public class TargetServerTest {
                 () -> assertEquals("https://inrupt.net/login/password", targetServer.getLoginEndpoint().toString()),
                 () -> assertEquals("http://localhost:3000", targetServer.getServerRoot()),
                 () -> assertEquals("https://tester", targetServer.getOrigin()),
-                () -> assertEquals(false, targetServer.isSetupRootAcl()),
+                () -> assertEquals(true, targetServer.isSetupRootAcl()),
                 () -> assertEquals(4, targetServer.getMaxThreads()),
                 () -> assertEquals(false, targetServer.isDisableDPoP()),
                 () -> assertEquals("http://localhost:3000/", targetServer.getRootContainer()),
@@ -93,7 +93,7 @@ public class TargetServerTest {
                 () -> assertEquals("https://inrupt.net/login/password", targetServer.getLoginEndpoint().toString()),
                 () -> assertEquals("http://localhost:3000", targetServer.getServerRoot()),
                 () -> assertEquals("https://tester", targetServer.getOrigin()),
-                () -> assertEquals(false, targetServer.isSetupRootAcl()),
+                () -> assertEquals(true, targetServer.isSetupRootAcl()),
                 () -> assertEquals(4, targetServer.getMaxThreads()),
                 () -> assertEquals(false, targetServer.isDisableDPoP()),
                 () -> assertEquals("http://localhost:3000/", targetServer.getRootContainer()),

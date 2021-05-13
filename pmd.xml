@@ -5,7 +5,7 @@
          xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
 
     <description>
-        Inrupt PMD rules
+        Inrupt PMD rules adapted for the Conformance Test Harness
     </description>
 
     <rule ref="category/java/security.xml"/>
@@ -15,7 +15,8 @@
     </rule>
     <rule ref="category/java/performance.xml"/>
     <rule ref="category/java/bestpractices.xml">
-        <exclude name="UnusedImports" />
+        <exclude name="UnusedImports" /> <!-- Rule is deprecated and reports false positives -->
+        <exclude name="GuardLogStatement"/> <!-- Clutters with virtually no performance benefit in the test harness -->
     </rule>
     <rule ref="category/java/errorprone.xml">
         <!-- This is useful for EJB, but not for modern JavaEE CDI applications -->

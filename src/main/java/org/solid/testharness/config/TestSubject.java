@@ -63,10 +63,8 @@ public class TestSubject {
             }
             targetServer = new TargetServer(testSubject);
             dataRepository.setTestSubject(testSubject);
-            if (logger.isDebugEnabled()) {
-                logger.debug("TestSubject {}", targetServer.getSubject());
-                logger.debug("Max threads: {}", targetServer.getMaxThreads());
-            }
+            logger.debug("TestSubject {}", targetServer.getSubject());
+            logger.debug("Max threads: {}", targetServer.getMaxThreads());
         } catch (IOException e) {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException(
                     "Failed to read config file %s: %s",

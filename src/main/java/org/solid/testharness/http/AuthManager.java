@@ -65,9 +65,7 @@ public class AuthManager {
     private Tokens exchangeRefreshToken(final Client authClient, final UserCredentials userConfig,
                                         final TargetServer targetServer) throws Exception {
         final String solidIdentityProvider = targetServer.getSolidIdentityProvider();
-        if (logger.isInfoEnabled()) {
-            logger.info("Exchange refresh token at {} for {}", solidIdentityProvider, authClient.getUser());
-        }
+        logger.info("Exchange refresh token at {} for {}", solidIdentityProvider, authClient.getUser());
 
         final Map<Object, Object> data = new HashMap<>();
         data.put(HttpConstants.GRANT_TYPE, HttpConstants.REFRESH_TOKEN);
@@ -87,9 +85,7 @@ public class AuthManager {
         final HttpResponse<String> response = authClient.send(request, HttpResponse.BodyHandlers.ofString());
         final String body = response.body();
         final int statusCode = response.statusCode();
-        if (logger.isDebugEnabled()) {
-            logger.debug("Response {}: {}", statusCode, body);
-        }
+        logger.debug("Response {}: {}", statusCode, body);
         if (statusCode == HttpConstants.STATUS_OK) {
             return objectMapper.readValue(response.body(), Tokens.class);
         } else {
@@ -102,10 +98,7 @@ public class AuthManager {
                                           final TargetServer config) throws Exception {
         final String solidIdentityProvider = config.getSolidIdentityProvider();
         final String appOrigin = config.getOrigin();
-
-        if (logger.isInfoEnabled()) {
-            logger.info("Login and get access token at {} for {}", solidIdentityProvider, authClient.getUser());
-        }
+        logger.info("Login and get access token at {} for {}", solidIdentityProvider, authClient.getUser());
         final Client client = ClientRegistry.getClient(ClientRegistry.SESSION_BASED);
         final URI uri = URI.create(solidIdentityProvider);
 

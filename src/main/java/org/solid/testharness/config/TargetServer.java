@@ -37,9 +37,7 @@ public class TargetServer extends DataModelBase {
 
     public TargetServer(final IRI subject) {
         super(subject, ConstructMode.DEEP);
-        if (logger.isDebugEnabled()) {
-            logger.debug("Retrieved {} statements for {}", super.size(), subject);
-        }
+        logger.debug("Retrieved {} statements for {}", super.size(), subject);
     }
 
     public Map<String, Boolean> getFeatures() {
@@ -113,21 +111,13 @@ public class TargetServer extends DataModelBase {
         return webIds;
     }
 
-    public URI getLoginEndpoint() {
+    public URI getLoginEndpoint() throws URISyntaxException {
         if (loginEndpoint == null) {
-            try {
-                final String iri = getIriAsString(SOLID.loginEndpoint);
-                if (iri != null) {
-                    this.loginEndpoint = new URI(iri);
-                } else {
-                    if (logger.isWarnEnabled()) {
-                        logger.warn("No login endpoint is defined");
-                    }
-                }
-            } catch (URISyntaxException e) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("{} is not a valid URI: {}", SOLID.loginEndpoint.stringValue(), e);
-                }
+            final String iri = getIriAsString(SOLID.loginEndpoint);
+            if (iri != null) {
+                this.loginEndpoint = new URI(iri);
+            } else {
+                logger.warn("No login endpoint is defined");
             }
         }
         return loginEndpoint;

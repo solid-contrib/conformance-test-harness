@@ -75,13 +75,9 @@ public class DataRepository implements Repository {
     public void loadData(final URL url, final String baseUri, final RDFFormat format) {
         try (RepositoryConnection conn = getConnection()) {
             try {
-                if (logger.isInfoEnabled()) {
-                    logger.info("Loading {} from {}", format.getName(), url.toString());
-                }
+                logger.info("Loading {} from {}", format.getName(), url.toString());
                 conn.add(url, baseUri, format);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Loaded data into repository, size={}", conn.size());
-                }
+                logger.debug("Loaded data into repository, size={}", conn.size());
             } catch (IOException e) {
                 throw (TestHarnessInitializationException) new TestHarnessInitializationException(
                         "Failed to read data from %s: %s",
@@ -169,9 +165,7 @@ public class DataRepository implements Repository {
                 }
             }
         } catch (Exception e) {
-            if (logger.isErrorEnabled()) {
-                logger.error("Failed to load feature result: {}", e.toString());
-            }
+            logger.error("Failed to load feature result: {}", e.toString());
         }
     }
 

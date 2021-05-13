@@ -48,9 +48,7 @@ public class SolidContainer extends SolidResource {
             logger.info("Create child in {}: {}", url, childUrl);
             return new SolidResource(super.solidClient, childUrl.toString(), body, type);
         } catch (Exception e) {
-            if (logger.isErrorEnabled()) {
-                logger.error("createChildResource in " + url.toString() + " failed", e);
-            }
+            logger.error("createChildResource in " + url.toString() + " failed", e);
         }
         return null;
     }

@@ -10,9 +10,8 @@ import org.junit.jupiter.api.Test;
 import javax.inject.Inject;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @QuarkusTest
 class FeatureResultHandlerTest {
@@ -28,5 +27,13 @@ class FeatureResultHandlerTest {
         final FeatureResult fr = new FeatureResult(Feature.read("src/test/resources/test.feature"));
         featureResultHandler.featureReport(new Suite(), fr);
         verify(dataRepository).addFeatureResult(any(), any(), eq(iri("https://example.org/features/test.feature")));
+    }
+
+    @Test
+    void featureReportFails() {
+        final FeatureResult fr = new FeatureResult(Feature.read("src/test/resources/test.feature"));
+        fr.setDisplayName("FAIL");
+        featureResultHandler.featureReport(new Suite(), fr);
+        verify(dataRepository, never()).addFeatureResult(any(), any(), any());
     }
 }
