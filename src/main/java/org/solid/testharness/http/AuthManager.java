@@ -7,6 +7,7 @@ import org.solid.testharness.config.TargetServer;
 import org.solid.testharness.config.UserCredentials;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -17,6 +18,9 @@ import java.util.stream.Collectors;
 public class AuthManager {
     private static final Logger logger = LoggerFactory.getLogger(AuthManager.class);
 
+    @Inject
+    ClientRegistry clientRegistry;
+
     private ObjectMapper objectMapper = new ObjectMapper();
 
     public SolidClient authenticate(final String user, final TargetServer targetServer) throws Exception {
@@ -25,8 +29,8 @@ public class AuthManager {
         }
         final UserCredentials userConfig = targetServer.getUsers().get(user);
         final Client authClient;
-        if (ClientRegistry.hasClient(user)) {
-            authClient = ClientRegistry.getClient(user);
+        if (clientRegistry.hasClient(user)) {
+            authClient = clientRegistry.getClient(user);
         } else {
             logger.debug("Build new client for {}", user);
             final Client.Builder builder = new Client.Builder(user);
@@ -37,7 +41,7 @@ public class AuthManager {
                 builder.withLocalhostSupport();
             }
             authClient = builder.build();
-            ClientRegistry.register(user, authClient);
+            clientRegistry.register(user, authClient);
 
             final Tokens tokens;
             if (userConfig.isUsingUsernamePassword()) {
@@ -52,14 +56,7 @@ public class AuthManager {
             logger.debug("access_token ({}) {}", user, accessToken);
             authClient.setAccessToken(accessToken);
         }
-
-        final SolidClient solidClient = new SolidClient(authClient);
-        if (HttpConstants.ALICE.equals(user) && targetServer.isSetupRootAcl()) {
-            logger.debug("**** Setup root acl");
-            // CSS has no root acl by default so added here TODO: check whether this is relevant
-            solidClient.setupRootAcl(targetServer.getServerRoot(), userConfig.getWebID());
-        }
-        return solidClient;
+        return new SolidClient(authClient);
     }
 
     private Tokens exchangeRefreshToken(final Client authClient, final UserCredentials userConfig,
@@ -106,7 +103,7 @@ public class AuthManager {
         if (logger.isInfoEnabled()) {
             logger.info("Login and get access token at {} for {}", solidIdentityProvider, authClient.getUser());
         }
-        final Client client = ClientRegistry.getClient(ClientRegistry.SESSION_BASED);
+        final Client client = clientRegistry.getClient(ClientRegistry.SESSION_BASED);
         final URI uri = URI.create(solidIdentityProvider);
 
         final Map<Object, Object> data = new HashMap<>();

@@ -19,10 +19,10 @@ quarkus:
         level: DEBUG # to increase overall logging for development
       "org.solid.testharness.http.AuthManager":
         level: INFO # but keep only higher level for authentication
-#"org.solid.testharness.utils":
-#  level: INFO
-#"org.solid.testharness.http.Client":
-#  level: DEBUG
+#      "org.solid.testharness.utils":
+#        level: INFO
+#      "org.solid.testharness.http.Client":
+#        level: DEBUG
 
 # Test profile
 "%test":

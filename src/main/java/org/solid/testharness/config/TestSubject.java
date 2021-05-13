@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.EARL;
 import org.solid.common.vocab.RDF;
 import org.solid.testharness.http.AuthManager;
+import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClient;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestHarnessInitializationException;
@@ -18,9 +19,12 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import static java.util.Objects.requireNonNull;
 
 @ApplicationScoped
 public class TestSubject {
@@ -87,6 +91,41 @@ public class TestSubject {
                         conn.add(model.filter((BNode) value, null, null));
                     }
                 }
+            }
+        }
+    }
+
+    public void prepareServer() {
+        if (targetServer == null) {
+            throw new TestHarnessInitializationException("No target server has been configured");
+        }
+        if (targetServer.isSetupRootAcl()) {
+            // CSS has no root acl by default so added here TODO: check whether this is relevant
+            logger.debug("Setup root acl");
+            final SolidClient solidClient = new SolidClient(HttpConstants.ALICE);
+            final String webId = requireNonNull(targetServer.getUsers().get(HttpConstants.ALICE).getWebID(),
+                    "Alice's webID is required");
+
+            try {
+                final URI rootAclUrl = solidClient.getResourceAclLink(
+                        targetServer.getServerRoot() + (targetServer.getServerRoot().endsWith("/") ? "" : "/")
+                );
+                if (rootAclUrl == null) {
+                    throw new TestHarnessInitializationException("Failed getting the root ACL link");
+                }
+                final String acl = String.format("@prefix acl: <http://www.w3.org/ns/auth/acl#>. " +
+                        "<#alice> a acl:Authorization ; " +
+                        "  acl:agent <%s> ;" +
+                        "  acl:accessTo <./>;" +
+                        "  acl:default <./>;" +
+                        "  acl:mode acl:Read, acl:Write, acl:Control .", webId);
+                if (!solidClient.createAcl(rootAclUrl, acl)) {
+                    throw new TestHarnessInitializationException("Failed to create root ACL");
+                }
+            } catch (IOException | InterruptedException e) {
+                throw (TestHarnessInitializationException) new TestHarnessInitializationException(
+                        "Failed to create root ACL: %s", e.toString()
+                ).initCause(e);
             }
         }
     }
