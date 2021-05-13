@@ -17,7 +17,7 @@ public class TestCase extends DataModelBase {
             iri(TD.NS, "accepted"), "Accepted"
     );
 
-    public TestCase(IRI subject) {
+    public TestCase(final IRI subject) {
         super(subject);
     }
 
@@ -34,7 +34,7 @@ public class TestCase extends DataModelBase {
     }
 
     public boolean isImplemented() {
-        IRI mode = getAsIri(EARL.mode);
+        final IRI mode = getAsIri(EARL.mode);
         return mode == null || !mode.equals(EARL.untested);
     }
 
@@ -43,7 +43,7 @@ public class TestCase extends DataModelBase {
     }
 
     public Assertion getAssertion() {
-        List<Assertion> assertions = getModelList(EARL.assertions, Assertion.class);
+        final List<Assertion> assertions = getModelList(EARL.assertions, Assertion.class);
         if (assertions != null && !assertions.isEmpty()) {
             return assertions.get(0);
         } else {

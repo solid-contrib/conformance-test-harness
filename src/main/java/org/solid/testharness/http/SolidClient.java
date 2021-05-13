@@ -27,19 +27,19 @@ import java.util.stream.Collectors;
 public class SolidClient {
     private static final Logger logger = LoggerFactory.getLogger(SolidClient.class);
 
-    private Client client ;
+    private Client client;
 
     public SolidClient() {
         client = ClientRegistry.getClient(ClientRegistry.DEFAULT);
     }
-    public SolidClient(String user) {
+    public SolidClient(final String user) {
         client = ClientRegistry.getClient(user);
     }
-    public SolidClient(Client client) {
+    public SolidClient(final Client client) {
         this.client = client;
     }
 
-    public static SolidClient create(String user) {
+    public static SolidClient create(final String user) {
         return new SolidClient(user);
     }
 
@@ -47,9 +47,9 @@ public class SolidClient {
         return client;
     }
 
-    public boolean setupRootAcl(String serverRoot, String webID) throws IOException, InterruptedException {
-        URI rootAclUrl = getResourceAclLink(serverRoot + (serverRoot.endsWith("/") ? "" : "/"));
-        String acl = String.format("@prefix acl: <http://www.w3.org/ns/auth/acl#>. " +
+    public boolean setupRootAcl(final String serverRoot, final String webID) throws IOException, InterruptedException {
+        final URI rootAclUrl = getResourceAclLink(serverRoot + (serverRoot.endsWith("/") ? "" : "/"));
+        final String acl = String.format("@prefix acl: <http://www.w3.org/ns/auth/acl#>. " +
                 "<#alice> a acl:Authorization ; " +
                 "  acl:agent <%s> ;" +
                 "  acl:accessTo </>;" +
@@ -58,65 +58,66 @@ public class SolidClient {
         return createAcl(rootAclUrl, acl);
     }
 
-    public Map<String, String> getAuthHeaders(String method, String uri) {
+    public Map<String, String> getAuthHeaders(final String method, final String uri) {
         return client.getAuthHeaders(method, uri);
     }
 
-    public HttpHeaders createResource(URI url, String data, String type) throws Exception {
-        HttpResponse<Void> response = client.put(url, data, type);
+    public HttpHeaders createResource(final URI url, final String data, final String type) throws Exception {
+        final HttpResponse<Void> response = client.put(url, data, type);
         if (!HttpUtils.isSuccessful(response.statusCode())) {
             throw new Exception("Failed to create resource - status=" + response.statusCode());
         }
         return response.headers();
     }
 
-    public URI getResourceAclLink(String url) throws IOException, InterruptedException {
-        HttpResponse<Void> response = client.head(URI.create(url));
+    public URI getResourceAclLink(final String url) throws IOException, InterruptedException {
+        final HttpResponse<Void> response = client.head(URI.create(url));
         return getAclLink(response.headers());
     }
 
-    public URI getAclLink(HttpHeaders headers) {
-        List<Link> links = HttpUtils.parseLinkHeaders(headers);
-        Optional<Link> aclLink = links.stream().filter(link -> link.getRels().contains("acl")).findFirst();
+    public URI getAclLink(final HttpHeaders headers) {
+        final List<Link> links = HttpUtils.parseLinkHeaders(headers);
+        final Optional<Link> aclLink = links.stream().filter(link -> link.getRels().contains("acl")).findFirst();
         return aclLink.map(Link::getUri).orElse(null);
     }
 
-    public boolean createAcl(URI url, String acl) throws IOException, InterruptedException {
-        logger.debug("ACL: {}", acl);
-        HttpResponse<Void> response = client.put(url, acl, "text/turtle");
+    public boolean createAcl(final URI url, final String acl) throws IOException, InterruptedException {
+        logger.debug("ACL: {} for {}", acl, url);
+        final HttpResponse<Void> response = client.put(url, acl, HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
         return HttpUtils.isSuccessful(response.statusCode());
     }
 
-    public String getContainmentData(URI url) throws Exception {
-        HttpResponse<String> response = client.getAsString(url);
+    public String getContainmentData(final URI url) throws Exception {
+        final HttpResponse<String> response = client.getAsString(url);
         if (!HttpUtils.isSuccessful(response.statusCode())) {
-            throw new Exception("Error response="+response.statusCode()+" trying to get container members for "+url);
+            throw new Exception("Error response=" + response.statusCode() +
+                    " trying to get container members for " + url);
         }
         return response.body();
     }
 
-    public List<String> parseMembers(String data, URI url) throws Exception {
-        Model model;
+    public List<String> parseMembers(final String data, final URI url) throws Exception {
+        final Model model;
         try {
             model = Rio.parse(new StringReader(data), url.toString(), RDFFormat.TURTLE);
         } catch (Exception e) {
             logger.error("RDF Parse Error: {} in {}", e, data);
-            throw new Exception("Bad container listing");
+            throw (Exception) new Exception("Bad container listing").initCause(e);
         }
-        Set<Value> resources = model.filter(null, LDP.CONTAINS, null).objects();
+        final Set<Value> resources = model.filter(null, LDP.CONTAINS, null).objects();
         return resources.stream().map(Object::toString).collect(Collectors.toList());
     }
 
-    public void deleteResourceRecursively(URI url) throws Exception {
+    public void deleteResourceRecursively(final URI url) throws Exception {
         deleteRecursive(url, null).get();
     }
 
-    public void deleteContentsRecursively(URI url) throws Exception {
+    public void deleteContentsRecursively(final URI url) throws Exception {
         deleteRecursive(url, new AtomicInteger(0)).get();
     }
 
-    private CompletableFuture<HttpResponse<Void>> deleteRecursive(URI url, AtomicInteger depth) {
-        List<URI> failed;
+    private CompletableFuture<HttpResponse<Void>> deleteRecursive(final URI url, final AtomicInteger depth) {
+        final List<URI> failed;
         if (url == null) {
             throw new IllegalArgumentException("url is required");
         }
@@ -125,10 +126,11 @@ public class SolidClient {
                 depth.incrementAndGet();
             }
             // get all members
-            List<URI> members;
+            final List<URI> members;
             try {
-                String data = getContainmentData(url);
-                members = parseMembers(data, url).stream().map(URI::create).collect(Collectors.toList());
+                members = parseMembers(getContainmentData(url), url).stream()
+                        .map(URI::create)
+                        .collect(Collectors.toList());
             } catch (Exception e) {
                 logger.error("Failed to get container members: {}", e.toString());
                 return CompletableFuture.completedFuture(null);
@@ -136,17 +138,28 @@ public class SolidClient {
 
             // delete members via this method
             logger.debug("DELETING MEMBERS {}", members);
-            List<CompletableFuture<HttpResponse<Void>>> completableFutures = members.stream().map(u -> deleteRecursive(u, depth)).collect(Collectors.toList());
-            CompletableFuture<Void> allFutures = CompletableFuture.allOf(completableFutures.toArray(CompletableFuture[]::new));
-            CompletableFuture<List<HttpResponse<Void>>> allCompletableFuture = allFutures.thenApply(future -> completableFutures.stream()
-                    .map(CompletableFuture::join)
-                    .collect(Collectors.toList()));
+            final List<CompletableFuture<HttpResponse<Void>>> completableFutures = members.stream()
+                    .map(u -> deleteRecursive(u, depth))
+                    .collect(Collectors.toList());
+            final CompletableFuture<Void> allFutures = CompletableFuture.allOf(
+                    completableFutures.toArray(CompletableFuture[]::new)
+            );
+            final CompletableFuture<List<HttpResponse<Void>>> allCompletableFuture = allFutures
+                    .thenApply(future -> completableFutures.stream()
+                            .map(CompletableFuture::join)
+                            .collect(Collectors.toList())
+                    );
             try {
                 failed = allCompletableFuture.thenApply(responses ->
-                        responses.stream().filter(response -> !HttpUtils.isSuccessful(response.statusCode())).map(response -> {
-                            logger.debug("BAD RESPONSE {} {} {}", response.statusCode(), response.uri(), response.body());
-                            return response.uri();
-                        }).collect(Collectors.toList())
+                        responses.stream()
+                                .filter(response -> !HttpUtils.isSuccessful(response.statusCode()))
+                                .map(response -> {
+                                    logger.debug("BAD RESPONSE {} {} {}", response.statusCode(),
+                                            response.uri(), response.body()
+                                    );
+                                    return response.uri();
+                                })
+                                .collect(Collectors.toList())
                 ).exceptionally(ex -> {
                     // TODO: We don't know which one failed
                     logger.error("Failed to delete resources", ex);
@@ -171,7 +184,7 @@ public class SolidClient {
         }
     }
 
-    private boolean isContainer(@NotNull URI url) {
+    private boolean isContainer(@NotNull final URI url) {
         return url.getPath().endsWith("/");
     }
 

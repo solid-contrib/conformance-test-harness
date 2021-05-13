@@ -3,6 +3,7 @@ package org.solid.testharness.config;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
+import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestData;
 
@@ -12,7 +13,7 @@ import java.io.StringReader;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @QuarkusTest
 public class TargetServerTest {
@@ -25,7 +26,7 @@ public class TargetServerTest {
     @Test
     public void parseTargetServer() throws Exception {
         when(config.getCredentialsDirectory()).thenReturn(new File("src/test/resources").getCanonicalFile());
-        StringReader reader = new StringReader("@base <https://example.org/> .\n" +
+        final StringReader reader = new StringReader("@base <https://example.org/> .\n" +
                 "@prefix solid-test: <https://github.com/solid/conformance-test-harness/vocab#> .\n" +
                 "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n" +
                 "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
@@ -61,9 +62,9 @@ public class TargetServerTest {
                 "    solid-test:podRoot <http://localhost:3000/> ;\n" +
                 "    solid-test:testContainer \"/test/\" ;\n" +
 //                "    solid-test:disableDPoP true ;\n" +
-                "    solid-test:setupAclRoot true .");
+                "    solid-test:setupRootAcl true .");
         TestData.insertData(dataRepository, reader);
-        TargetServer targetServer = new TargetServer(iri("https://example.org/testserver"));
+        final TargetServer targetServer = new TargetServer(iri("https://example.org/testserver"));
         assertAll("targetServer",
                 () -> assertNotNull(targetServer.getFeatures()),
                 () -> assertEquals(true, targetServer.getFeatures().get("feature1")),
@@ -72,26 +73,27 @@ public class TargetServerTest {
                 () -> assertEquals("https://inrupt.net/login/password", targetServer.getLoginEndpoint().toString()),
                 () -> assertEquals("http://localhost:3000", targetServer.getServerRoot()),
                 () -> assertEquals("https://tester", targetServer.getOrigin()),
-                () -> assertEquals(false, targetServer.isSetupRootAcl()),
+                () -> assertEquals(true, targetServer.isSetupRootAcl()),
                 () -> assertEquals(4, targetServer.getMaxThreads()),
                 () -> assertEquals(false, targetServer.isDisableDPoP()),
                 () -> assertEquals("http://localhost:3000/", targetServer.getRootContainer()),
                 () -> assertEquals("/test/", targetServer.getTestContainer()),
                 () -> assertNotNull(targetServer.getUsers()),
                 () -> assertEquals(2, targetServer.getUsers().size()),
-                () -> assertNotNull(targetServer.getUsers().get("alice")),
-                () -> assertEquals("EXTERNAL_TOKEN", targetServer.getUsers().get("alice").getRefreshToken()),
-                () -> assertNotNull(targetServer.getUsers().get("bob")),
-                () -> assertNull(targetServer.getUsers().get("bob").getUsername()),
+                () -> assertNotNull(targetServer.getUsers().get(HttpConstants.ALICE)),
+                () -> assertEquals("EXTERNAL_TOKEN",
+                        targetServer.getUsers().get(HttpConstants.ALICE).getRefreshToken()),
+                () -> assertNotNull(targetServer.getUsers().get(HttpConstants.BOB)),
+                () -> assertNull(targetServer.getUsers().get(HttpConstants.BOB).getUsername()),
                 () -> assertNotNull(targetServer.getWebIds())
-                );
+        );
         assertAll("targetServerCachedValues",
                 () -> assertNotNull(targetServer.getFeatures()),
                 () -> assertEquals("https://inrupt.net", targetServer.getSolidIdentityProvider()),
                 () -> assertEquals("https://inrupt.net/login/password", targetServer.getLoginEndpoint().toString()),
                 () -> assertEquals("http://localhost:3000", targetServer.getServerRoot()),
                 () -> assertEquals("https://tester", targetServer.getOrigin()),
-                () -> assertEquals(false, targetServer.isSetupRootAcl()),
+                () -> assertEquals(true, targetServer.isSetupRootAcl()),
                 () -> assertEquals(4, targetServer.getMaxThreads()),
                 () -> assertEquals(false, targetServer.isDisableDPoP()),
                 () -> assertEquals("http://localhost:3000/", targetServer.getRootContainer()),
@@ -102,7 +104,7 @@ public class TargetServerTest {
 
     @Test
     public void parseTargetServerWithMissingElements() throws Exception {
-        StringReader reader = new StringReader("@base <https://example.org/> .\n" +
+        final StringReader reader = new StringReader("@base <https://example.org/> .\n" +
                 "@prefix solid-test: <https://github.com/solid/conformance-test-harness/vocab#> .\n" +
                 "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n" +
                 "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
@@ -112,7 +114,7 @@ public class TargetServerTest {
                 "<bad>\n" +
                 "    a earl:Software, earl:TestSubject .");
         TestData.insertData(dataRepository, reader);
-        TargetServer targetServer = new TargetServer(iri("https://example.org/bad"));
+        final TargetServer targetServer = new TargetServer(iri("https://example.org/bad"));
         assertNull(targetServer.getLoginEndpoint());
         assertEquals(0, targetServer.getUsers().size());
     }

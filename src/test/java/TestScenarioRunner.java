@@ -25,9 +25,9 @@ public class TestScenarioRunner {
         testSubject.loadTestSubjectConfig();
         testSubject.registerClients();
 //        String featurePath = "content-negotiation/content-negotiation-turtle.feature";
-        String featurePath = "example/writing-resource/containment.feature";
-        String uri = Path.of(featurePath).toAbsolutePath().normalize().toUri().toString();
-        TestSuiteResults results = testRunner.runTest(uri);
+        final String featurePath = "example/writing-resource/containment.feature";
+        final String uri = Path.of(featurePath).toAbsolutePath().normalize().toUri().toString();
+        final TestSuiteResults results = testRunner.runTest(uri);
         assertNotNull(results);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());
     }

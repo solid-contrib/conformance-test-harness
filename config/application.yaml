@@ -53,3 +53,8 @@ quarkus:
   feature:
     mappings:
       - null
+  quarkus:
+    log:
+      category:
+        "org.solid.testharness.config.Config":
+          level: WARN

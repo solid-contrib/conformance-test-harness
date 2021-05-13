@@ -35,7 +35,8 @@ public class DataModelBase {
     }
 
     private static final String SERVER_GRAPH = "CONSTRUCT {<%s> ?p ?o} WHERE {<%s> ?p ?o}";
-    private static final String SERVER_GRAPH_2 = "CONSTRUCT {<%s> ?p ?o. ?o ?p1 ?o1} WHERE {<%s> ?p ?o. OPTIONAL {?o ?p1 ?o1}}";
+    private static final String SERVER_GRAPH_2 = "CONSTRUCT {<%s> ?p ?o. ?o ?p1 ?o1} " +
+            "WHERE {<%s> ?p ?o. OPTIONAL {?o ?p1 ?o1}}";
     private static final String SERVER_GRAPH_LIST = "CONSTRUCT {" +
             "  <%s> ?p ?o. ?o ?p1 ?o1 . " +
             "  ?listRest rdf:first ?head ; rdf:rest ?tail ." +
@@ -44,13 +45,13 @@ public class DataModelBase {
             "  OPTIONAL {?o ?p1 ?o1 . ?o rdf:rest* ?listRest . ?listRest rdf:first ?head ; rdf:rest ?tail .}" +
             "}";
 
-    protected DataModelBase(IRI subject) {
+    protected DataModelBase(final IRI subject) {
         this(subject, ConstructMode.SHALLOW);
     }
-    protected DataModelBase(IRI subject, ConstructMode mode) {
-        DataRepository dataRepository = CDI.current().select(DataRepository.class).get();
+    protected DataModelBase(final IRI subject, final ConstructMode mode) {
+        final DataRepository dataRepository = CDI.current().select(DataRepository.class).get();
         this.subject = subject;
-        String query;
+        final String query;
         switch (mode) {
             case DEEP:
                 query = SERVER_GRAPH_2;
@@ -62,7 +63,10 @@ public class DataModelBase {
                 query = SERVER_GRAPH;
                 break;
         }
-        model = Repositories.graphQuery(dataRepository, String.format(query, subject, subject), r -> QueryResults.asModel(r));
+        model = Repositories.graphQuery(dataRepository,
+                String.format(query, subject, subject),
+                r -> QueryResults.asModel(r)
+        );
     }
 
     public IRI getSubjectIri() {
@@ -78,101 +82,107 @@ public class DataModelBase {
     }
 
     public String getTypesList() {
-        Set<Value> values = model.filter(subject, RDF.TYPE, null).objects();
+        final Set<Value> values = model.filter(subject, RDF.TYPE, null).objects();
         return values.stream().map(v -> Namespaces.shorten((IRI)v)).collect(Collectors.joining(" "));
     }
 
-    protected String getIriAsString(IRI predicate) {
-        Set<Value> values = model.filter(subject, predicate, null).objects();
-        if (values.size() > 0) {
+    protected String getIriAsString(final IRI predicate) {
+        final Set<Value> values = model.filter(subject, predicate, null).objects();
+        if (!values.isEmpty()) {
             return values.iterator().next().stringValue();
         }
         return null;
     }
 
-    protected <T extends DataModelBase> List<T> getModelList(IRI predicate, Class<T> clazz) {
-        Set<Value> values = model.filter(subject, predicate, null).objects();
-        if (values.size() > 0) {
+    protected <T extends DataModelBase> List<T> getModelList(final IRI predicate, final Class<T> clazz) {
+        final Set<Value> values = model.filter(subject, predicate, null).objects();
+        if (!values.isEmpty()) {
             return values.stream().filter(Value::isIRI).map(v -> {
                 try {
                     return clazz.getDeclaredConstructor(IRI.class).newInstance((IRI)v);
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                } catch (InstantiationException | IllegalAccessException |
+                        InvocationTargetException | NoSuchMethodException e) {
                     logger.error("Failed to create instance of {}", clazz.getName());
-                    throw new RuntimeException("Failed to create instance of " + clazz.getName());
+                    throw (RuntimeException) new RuntimeException(
+                            "Failed to create instance of " + clazz.getName()
+                    ).initCause(e);
                 }
             }).collect(Collectors.toList());
         }
         return null;
     }
 
-    protected <T extends DataModelBase> List<T> getModelCollectionList(IRI predicate, Class<T> clazz) {
-        Resource node = Models.objectResource(model.filter(subject, predicate, null)).orElse(null);
+    protected <T extends DataModelBase> List<T> getModelCollectionList(final IRI predicate, final Class<T> clazz) {
+        final Resource node = Models.objectResource(model.filter(subject, predicate, null)).orElse(null);
         if (node != null) {
-            List<Value> values = RDFCollections.asValues(model, node, new ArrayList<Value>());
+            final List<Value> values = RDFCollections.asValues(model, node, new ArrayList<Value>());
             return values.stream().filter(Value::isIRI).map(v -> {
                 try {
                     return clazz.getDeclaredConstructor(IRI.class).newInstance((IRI) v);
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                } catch (InstantiationException | IllegalAccessException |
+                        InvocationTargetException | NoSuchMethodException e) {
                     logger.error("Failed to create instance of {}", clazz.getName());
-                    throw new RuntimeException("Failed to create instance of " + clazz.getName());
+                    throw (RuntimeException) new RuntimeException(
+                            "Failed to create instance of " + clazz.getName()
+                    ).initCause(e);
                 }
             }).collect(Collectors.toList());
         }
         return null;
     }
 
-    protected IRI getAsIri(IRI predicate) {
-        Set<Value> values = model.filter(subject, predicate, null).objects();
-        if (values.size() > 0) {
-            Value value = values.iterator().next();
+    protected IRI getAsIri(final IRI predicate) {
+        final Set<Value> values = model.filter(subject, predicate, null).objects();
+        if (!values.isEmpty()) {
+            final Value value = values.iterator().next();
             return value.isIRI() ? (IRI) value : null;
         }
         return null;
     }
 
-    protected BNode getAsBNode(IRI predicate) {
-        Set<Value> values = model.filter(subject, predicate, null).objects();
-        if (values.size() > 0) {
-            Value value = values.iterator().next();
+    protected BNode getAsBNode(final IRI predicate) {
+        final Set<Value> values = model.filter(subject, predicate, null).objects();
+        if (!values.isEmpty()) {
+            final Value value = values.iterator().next();
             return value.isBNode() ? (BNode) value : null;
         }
         return null;
     }
 
-    protected String getLiteralAsString(IRI predicate) {
+    protected String getLiteralAsString(final IRI predicate) {
         return getLiteralAsString(subject, predicate);
     }
 
-    protected String getLiteralAsString(Resource subject, IRI predicate) {
-        Optional<Literal> value = Models.getPropertyLiteral(model, subject, predicate);
+    protected String getLiteralAsString(final Resource subject, final IRI predicate) {
+        final Optional<Literal> value = Models.getPropertyLiteral(model, subject, predicate);
         return value.map(Value::stringValue).orElse(null);
     }
 
-    protected Set<String> getLiteralsAsStringSet(IRI predicate) {
-        Set<Literal> value = Models.getPropertyLiterals(model, subject, predicate);
+    protected Set<String> getLiteralsAsStringSet(final IRI predicate) {
+        final Set<Literal> value = Models.getPropertyLiterals(model, subject, predicate);
         return value.stream().map(Value::stringValue).collect(Collectors.toSet());
     }
 
-    protected int getLiteralAsInt(IRI predicate) {
-        Optional<Literal> value = Models.getPropertyLiteral(model, subject, predicate);
+    protected int getLiteralAsInt(final IRI predicate) {
+        final Optional<Literal> value = Models.getPropertyLiteral(model, subject, predicate);
         return value.map(Literal::intValue).orElse(0);
     }
 
-    protected boolean getLiteralAsBoolean(IRI predicate) {
-        Optional<Literal> value = Models.getPropertyLiteral(model, subject, predicate);
+    protected boolean getLiteralAsBoolean(final IRI predicate) {
+        final Optional<Literal> value = Models.getPropertyLiteral(model, subject, predicate);
         return value.map(Literal::booleanValue).orElse(false);
     }
 
-    protected LocalDate getLiteralAsDate(IRI predicate) {
-        Optional<Literal> value = Models.getPropertyLiteral(model, subject, predicate);
+    protected LocalDate getLiteralAsDate(final IRI predicate) {
+        final Optional<Literal> value = Models.getPropertyLiteral(model, subject, predicate);
         return value.map(Literal::calendarValue).map(v -> LocalDate.of(
                 v.getYear(),
                 v.getMonth(),
                 v.getDay())).orElse(null);
     }
 
-    protected LocalDateTime getLiteralAsDateTime(IRI predicate) {
-        Optional<Literal> value = Models.getPropertyLiteral(model, subject, predicate);
+    protected LocalDateTime getLiteralAsDateTime(final IRI predicate) {
+        final Optional<Literal> value = Models.getPropertyLiteral(model, subject, predicate);
         return value.map(Literal::calendarValue).map(v -> LocalDateTime.of(
                 v.getYear(),
                 v.getMonth(),

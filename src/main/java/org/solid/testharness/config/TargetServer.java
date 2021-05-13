@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.SOLID;
 import org.solid.common.vocab.SOLID_TEST;
+import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.utils.DataModelBase;
 
 import javax.validation.constraints.Positive;
@@ -34,14 +35,15 @@ public class TargetServer extends DataModelBase {
     private Boolean setupRootAcl;
     private Boolean disableDPoP;
 
-    public TargetServer(IRI subject) {
+    public TargetServer(final IRI subject) {
         super(subject, ConstructMode.DEEP);
         logger.debug("Retrieved {} statements for {}", super.size(), subject);
     }
 
     public Map<String, Boolean> getFeatures() {
         if (features == null) {
-            this.features = getLiteralsAsStringSet(SOLID_TEST.features).stream().collect(Collectors.toMap(Object::toString, f -> Boolean.TRUE));
+            this.features = getLiteralsAsStringSet(SOLID_TEST.features).stream()
+                    .collect(Collectors.toMap(Object::toString, f -> Boolean.TRUE));
         }
         return features;
     }
@@ -83,19 +85,23 @@ public class TargetServer extends DataModelBase {
 
     public Map<String, UserCredentials> getUsers() {
         if (users == null) {
-            Optional<Resource> aliceUser = Models.objectResource(model.filter(subject, SOLID_TEST.aliceUser, null));
-            Optional<Resource> bobUser = Models.objectResource(model.filter(subject, SOLID_TEST.bobUser, null));
+            final Optional<Resource> aliceUser = Models.objectResource(
+                    model.filter(subject, SOLID_TEST.aliceUser, null)
+            );
+            final Optional<Resource> bobUser = Models.objectResource(
+                    model.filter(subject, SOLID_TEST.bobUser, null)
+            );
             users = new HashMap<>();
             webIds = new HashMap<>();
             if (aliceUser.isPresent()) {
-                UserCredentials cred = new UserCredentials(model, aliceUser.get());
-                users.put("alice", cred);
-                webIds.put("alice", cred.getWebID());
+                final UserCredentials cred = new UserCredentials(model, aliceUser.get());
+                users.put(HttpConstants.ALICE, cred);
+                webIds.put(HttpConstants.ALICE, cred.getWebID());
             }
             if (bobUser.isPresent()) {
-                UserCredentials cred = new UserCredentials(model, bobUser.get());
-                users.put("bob", cred);
-                webIds.put("bob", cred.getWebID());
+                final UserCredentials cred = new UserCredentials(model, bobUser.get());
+                users.put(HttpConstants.BOB, cred);
+                webIds.put(HttpConstants.BOB, cred.getWebID());
             }
         }
         return users;
@@ -105,12 +111,13 @@ public class TargetServer extends DataModelBase {
         return webIds;
     }
 
-    public URI getLoginEndpoint() {
+    public URI getLoginEndpoint() throws URISyntaxException {
         if (loginEndpoint == null) {
-            try {
-                this.loginEndpoint = new URI(getIriAsString(SOLID.loginEndpoint));
-            } catch (URISyntaxException | NullPointerException e) {
-                logger.warn("{} is not a valid URI: {}", SOLID.loginEndpoint.stringValue(), e);
+            final String iri = getIriAsString(SOLID.loginEndpoint);
+            if (iri != null) {
+                this.loginEndpoint = new URI(iri);
+            } else {
+                logger.warn("No login endpoint is defined");
             }
         }
         return loginEndpoint;

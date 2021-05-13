@@ -8,7 +8,7 @@ import org.solid.testharness.utils.DataModelBase;
 import java.time.LocalDateTime;
 
 public class TestResult extends DataModelBase  {
-    public TestResult(IRI subject) {
+    public TestResult(final IRI subject) {
         super(subject, ConstructMode.DEEP);
     }
 

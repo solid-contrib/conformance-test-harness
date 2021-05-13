@@ -52,7 +52,11 @@ public class DataRepository implements Repository {
 
     public static final String GENID = "/genid/";
 
-    public static Map<String, IRI> EARL_RESULT = Map.of("passed", EARL.passed, "failed", EARL.failed, "skipped", EARL.untested);
+    public static Map<String, IRI> EARL_RESULT = Map.of(
+            "passed", EARL.passed,
+            "failed", EARL.failed,
+            "skipped", EARL.untested
+    );
 
     @PostConstruct
     void postConstruct() {
@@ -60,42 +64,49 @@ public class DataRepository implements Repository {
         logger.debug("INITIALIZE DATA REPOSITORY");
     }
 
-    public void loadTurtle(URL url) {
+    public void loadTurtle(final URL url) {
         loadData(url, null, RDFFormat.TURTLE);
     }
 
-    public void loadRdfa(URL url, String baseUri) {
+    public void loadRdfa(final URL url, final String baseUri) {
         loadData(url, baseUri, RDFFormat.RDFA);
     }
 
-    public void loadData(URL url, String baseUri, RDFFormat format) {
+    public void loadData(final URL url, final String baseUri, final RDFFormat format) {
         try (RepositoryConnection conn = getConnection()) {
             try {
                 logger.info("Loading {} from {}", format.getName(), url.toString());
                 conn.add(url, baseUri, format);
                 logger.debug("Loaded data into repository, size={}", conn.size());
             } catch (IOException e) {
-                throw new TestHarnessInitializationException("Failed to read data from %s: %s", url.toString(), e.toString());
+                throw (TestHarnessInitializationException) new TestHarnessInitializationException(
+                        "Failed to read data from %s: %s",
+                        url.toString(), e.toString()
+                ).initCause(e);
             }
         } catch (RDF4JException e) {
-            throw new TestHarnessInitializationException("Failed to parse data: %s", e.toString());
+            throw (TestHarnessInitializationException) new TestHarnessInitializationException(
+                    "Failed to parse data: %s", e.toString()
+            ).initCause(e);
         }
     }
 
-    public void setTestSubject(IRI testSubject) {
+    public void setTestSubject(final IRI testSubject) {
         this.testSubject = testSubject;
     }
 
-    public void setAssertor(IRI assertor) {
+    public void setAssertor(final IRI assertor) {
         this.assertor = assertor;
     }
 
-    public void addFeatureResult(Suite suite, FeatureResult fr, IRI featureIri) {
-        long startTime = suite.startTime;
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+    // This method creates an unknown number of objects in a loop dependent on the test cases
+    public void addFeatureResult(final Suite suite, final FeatureResult fr, final IRI featureIri) {
+        final long startTime = suite.startTime;
         try (RepositoryConnection conn = getConnection()) {
             ModelBuilder builder = new ModelBuilder();
-            IRI featureAssertion = createSkolemizedBlankNode(featureIri);
-            IRI featureResult = createSkolemizedBlankNode(featureIri);
+            final IRI featureAssertion = createSkolemizedBlankNode(featureIri);
+            final IRI featureResult = createSkolemizedBlankNode(featureIri);
             conn.add(builder.subject(featureIri)
                     .add(RDF.TYPE, EARL.TestCriterion)
                     .add(RDF.TYPE, EARL.TestFeature)
@@ -112,9 +123,9 @@ public class DataRepository implements Repository {
                     .add(featureResult, DCTERMS.date, new Date((long) (startTime + fr.getDurationMillis())))
                     .build());
             for (ScenarioResult sr: fr.getScenarioResults()) {
-                IRI scenarioIri = createSkolemizedBlankNode(featureIri);
-                IRI scenarioAssertion = createSkolemizedBlankNode(featureIri);
-                IRI scenarioResult = createSkolemizedBlankNode(featureIri);
+                final IRI scenarioIri = createSkolemizedBlankNode(featureIri);
+                final IRI scenarioAssertion = createSkolemizedBlankNode(featureIri);
+                final IRI scenarioResult = createSkolemizedBlankNode(featureIri);
                 builder = new ModelBuilder();
                 conn.add(builder.subject(scenarioIri)
                         .add(RDF.TYPE, EARL.TestCriterion)
@@ -134,9 +145,9 @@ public class DataRepository implements Repository {
                         .add(featureIri, DCTERMS.hasPart, scenarioIri)
                         .build());
                 if (!sr.getStepResults().isEmpty()) {
-                    List<Resource> steps = sr.getStepResults().stream().map(str -> {
-                        IRI step = createSkolemizedBlankNode(featureIri);
-                        ModelBuilder stepBuilder = new ModelBuilder();
+                    final List<Resource> steps = sr.getStepResults().stream().map(str -> {
+                        final IRI step = createSkolemizedBlankNode(featureIri);
+                        final ModelBuilder stepBuilder = new ModelBuilder();
                         stepBuilder.subject(step)
                                 .add(RDF.TYPE, EARL.TestStep)
                                 .add(DCTERMS.title, str.getStep().getPrefix() + " " + str.getStep().getText())
@@ -147,8 +158,8 @@ public class DataRepository implements Repository {
                         conn.add(stepBuilder.build());
                         return step;
                     }).collect(Collectors.toList());
-                    Resource head = createSkolemizedBlankNode(featureIri);
-                    Model stepList = RDFCollections.asRDF(steps, head, new LinkedHashModel());
+                    final Resource head = createSkolemizedBlankNode(featureIri);
+                    final Model stepList = RDFCollections.asRDF(steps, head, new LinkedHashModel());
                     stepList.add(scenarioIri, EARL.steps, head);
                     conn.add(stepList);
                 }
@@ -158,32 +169,30 @@ public class DataRepository implements Repository {
         }
     }
 
-    private IRI createSkolemizedBlankNode(IRI base) {
+    private IRI createSkolemizedBlankNode(final IRI base) {
         return iri(base.stringValue() + GENID + bnode().getID());
     }
 
-    public void export(Writer wr) throws Exception {
-        try (RepositoryConnection conn = getConnection()) {
-            RDFWriter rdfWriter = Rio.createWriter(RDFFormat.TURTLE, wr);
-            rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true).set(BasicWriterSettings.INLINE_BLANK_NODES, true);
-            conn.export(rdfWriter);
-        } catch (RDF4JException e) {
-            throw new Exception("Failed to write repository: " + e.toString());
-        }
+    public void export(final Writer wr) throws Exception {
+        export(Rio.createWriter(RDFFormat.TURTLE, wr));
     }
 
-    public void export(OutputStream os) throws Exception {
+    public void export(final OutputStream os) throws Exception {
+        export(Rio.createWriter(RDFFormat.TURTLE, os));
+    }
+
+    private void export(final RDFWriter rdfWriter) throws Exception {
         try (RepositoryConnection conn = getConnection()) {
-            RDFWriter rdfWriter = Rio.createWriter(RDFFormat.TURTLE, os);
-            rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true).set(BasicWriterSettings.INLINE_BLANK_NODES, true);
+            rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true)
+                    .set(BasicWriterSettings.INLINE_BLANK_NODES, true);
             conn.export(rdfWriter);
         } catch (RDF4JException e) {
-            throw new Exception("Failed to write repository: " + e.toString());
+            throw (Exception) new Exception("Failed to write repository: " + e).initCause(e);
         }
     }
 
     @Override
-    public void setDataDir(File dataDir) {
+    public void setDataDir(final File dataDir) {
         repository.setDataDir(dataDir);
     }
 
@@ -192,6 +201,8 @@ public class DataRepository implements Repository {
         return repository.getDataDir();
     }
 
+    @SuppressWarnings("deprecation")
+    // Ignore warning as we have to override this to complete the interface
     @Override
     public void initialize() throws RepositoryException {
         repository.initialize();

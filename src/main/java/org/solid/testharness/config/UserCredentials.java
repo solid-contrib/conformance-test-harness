@@ -12,11 +12,12 @@ import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.inject.spi.CDI;
 import java.io.File;
-import java.io.FileReader;
 import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UserCredentials {
+public final class UserCredentials {
     private static final Logger logger = LoggerFactory.getLogger(UserCredentials.class);
 
     private String webID;
@@ -27,9 +28,7 @@ public class UserCredentials {
     private String username;
     private String password;
 
-    public UserCredentials() {}
-
-    public UserCredentials(Model model, Resource resource) {
+    public UserCredentials(final Model model, final Resource resource) {
         for (Statement statement: model.filter(resource, null, null)) {
             if (statement.getPredicate().equals(SOLID_TEST.webId)) {
                 setWebID(statement.getObject().stringValue());
@@ -44,7 +43,7 @@ public class UserCredentials {
         return webID;
     }
 
-    public void setWebID(String webID) {
+    public void setWebID(final String webID) {
         this.webID = webID;
     }
 
@@ -52,13 +51,13 @@ public class UserCredentials {
         return credentials;
     }
 
-    public void setCredentials(String credentials) {
-        Config config = CDI.current().select(Config.class).get();
+    public void setCredentials(final String credentials) {
+        final Config config = CDI.current().select(Config.class).get();
         this.credentials = credentials;
-        try {
-            Reader reader = new FileReader(new File(config.getCredentialsDirectory(), credentials));
-            ObjectMapper objectMapper = new ObjectMapper();
-            UserCredentials externalCredentials = objectMapper.readValue(reader, UserCredentials.class);
+        final Path credentialsPath = new File(config.getCredentialsDirectory(), credentials).toPath();
+        try (final Reader reader = Files.newBufferedReader(credentialsPath)) {
+            final ObjectMapper objectMapper = new ObjectMapper();
+            final UserCredentials externalCredentials = objectMapper.readValue(reader, UserCredentials.class);
             if (externalCredentials.getRefreshToken() != null) {
                 setRefreshToken(externalCredentials.getRefreshToken());
             }
@@ -76,7 +75,9 @@ public class UserCredentials {
             }
         } catch (Exception e) {
             logger.debug("Failed to load user credentials: {}", e.toString());
-            throw new TestHarnessInitializationException("Failed to load user credentials: %s", e.toString());
+            throw (TestHarnessInitializationException) new TestHarnessInitializationException(
+                    "Failed to load user credentials: %s", e.toString()
+            ).initCause(e);
         }
     }
 
@@ -84,7 +85,7 @@ public class UserCredentials {
         return refreshToken;
     }
 
-    public void setRefreshToken(String refreshToken) {
+    public void setRefreshToken(final String refreshToken) {
         this.refreshToken = refreshToken;
     }
 
@@ -92,7 +93,7 @@ public class UserCredentials {
         return clientId;
     }
 
-    public void setClientId(String clientId) {
+    public void setClientId(final String clientId) {
         this.clientId = clientId;
     }
 
@@ -100,7 +101,7 @@ public class UserCredentials {
         return clientSecret;
     }
 
-    public void setClientSecret(String clientSecret) {
+    public void setClientSecret(final String clientSecret) {
         this.clientSecret = clientSecret;
     }
 
@@ -108,7 +109,7 @@ public class UserCredentials {
         return username;
     }
 
-    public void setUsername(String username) {
+    public void setUsername(final String username) {
         this.username = username;
     }
 
@@ -116,7 +117,7 @@ public class UserCredentials {
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(final String password) {
         this.password = password;
     }
 
@@ -135,17 +136,22 @@ public class UserCredentials {
                     webID, credentials, mask(username), mask(password)
             );
         } else if (isUsingRefreshToken()) {
-            return String.format("UserCredentials: webId=%s, credentials=%s, refreshToken=%s, clientId=%s, clientSecret=%s",
+            return String.format("UserCredentials: webId=%s, credentials=%s, " +
+                            "refreshToken=%s, clientId=%s, clientSecret=%s",
                     webID, credentials, mask(refreshToken), mask(clientId), mask(clientSecret)
             );
         } else {
-            return String.format("UserCredentials: webId=%s, credentials=%s, username=%s, password=%s, refreshToken=%s, clientId=%s, clientSecret=%s",
-                    webID, credentials, mask(username), mask(password), mask(refreshToken), mask(clientId), mask(clientSecret)
+            return String.format("UserCredentials: webId=%s, credentials=%s, username=%s, password=%s, " +
+                            "refreshToken=%s, clientId=%s, clientSecret=%s",
+                    webID, credentials, mask(username), mask(password),
+                    mask(refreshToken), mask(clientId), mask(clientSecret)
             );
         }
     }
 
-    private String mask(String value) {
+    private String mask(final String value) {
         return value != null ? "***" : "null";
     }
+
+    public UserCredentials() { }
 }

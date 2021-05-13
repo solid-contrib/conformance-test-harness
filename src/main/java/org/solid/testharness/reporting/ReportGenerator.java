@@ -29,35 +29,36 @@ public class ReportGenerator {
     @Location("result-report.html")
     Template resultTemplate;
 
-
-    public void buildTurtleReport(Writer writer) throws Exception {
+    public void buildTurtleReport(final Writer writer) throws Exception {
         dataRepository.export(writer);
     }
 
     public void printReportToConsole() throws Exception {
-        StringWriter sw = new StringWriter();
+        final StringWriter sw = new StringWriter();
         dataRepository.export(sw);
         logger.info("REPORT\n{}", sw);
     }
 
-    public void buildHtmlCoverageReport(Writer writer) throws IOException {
-        IRI testSuite = getTestSuiteNamespace();
+    public void buildHtmlCoverageReport(final Writer writer) throws IOException {
+        final IRI testSuite = getTestSuiteNamespace();
         writer.write(coverageTemplate.data(new ResultData(testSuite)).render());
         writer.flush();
     }
 
-    public void buildHtmlResultReport(Writer writer) throws IOException {
-        IRI testSuite = getTestSuiteNamespace();
+    public void buildHtmlResultReport(final Writer writer) throws IOException {
+        final IRI testSuite = getTestSuiteNamespace();
         writer.write(resultTemplate.data(new ResultData(testSuite)).render());
         writer.flush();
     }
 
     private IRI getTestSuiteNamespace() {
-        try (RepositoryConnection conn = dataRepository.getConnection()) {
-            RepositoryResult<Statement> statements = conn.getStatements(null, DOAP.implements_, null);
+        try (
+                RepositoryConnection conn = dataRepository.getConnection();
+                RepositoryResult<Statement> statements = conn.getStatements(null, DOAP.implements_, null)
+        ) {
             // TODO: if we use multiple test suites this will need to iterate
             if (statements.hasNext()) {
-                Statement st = statements.next();
+                final Statement st = statements.next();
                 return st.getSubject().isIRI() ? (IRI) st.getSubject() : null;
             }
             return null;

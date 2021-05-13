@@ -10,12 +10,13 @@ import javax.inject.Inject;
 import java.net.MalformedURLException;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
 public class TestSubjectSetupTest {
-
     @InjectMock
     Config config;
 
@@ -32,7 +33,7 @@ public class TestSubjectSetupTest {
     void setupMissingTargetSingleConfig() throws MalformedURLException {
         when(config.getConfigUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/config-sample-single.ttl"));
         testSubject.loadTestSubjectConfig();
-        TargetServer targetServer = testSubject.getTargetServer();
+        final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
         assertEquals("https://github.com/solid/conformance-test-harness/default", targetServer.getSubject());
     }
@@ -43,7 +44,7 @@ public class TestSubjectSetupTest {
         when(config.getConfigUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
         when(config.getTestSubject()).thenReturn(iri("https://github.com/solid/conformance-test-harness/testserver"));
         testSubject.loadTestSubjectConfig();
-        TargetServer targetServer = testSubject.getTargetServer();
+        final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
         assertEquals("https://github.com/solid/conformance-test-harness/testserver", targetServer.getSubject());
     }
@@ -68,7 +69,7 @@ public class TestSubjectSetupTest {
     }
 
     @Test
-    void registerWithoutServer() throws MalformedURLException {
+    void registerWithoutServer() {
         assertThrows(TestHarnessInitializationException.class, () -> testSubject.registerClients());
     }
 }

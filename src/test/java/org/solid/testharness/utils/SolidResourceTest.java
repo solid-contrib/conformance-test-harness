@@ -2,6 +2,7 @@ package org.solid.testharness.utils;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClient;
 
 import java.net.URI;
@@ -52,25 +53,27 @@ class SolidResourceTest {
 
     @Test
     void testConstructorNoBody() {
-        SolidResource resource = new SolidResource(solidClient, testUrl.toString());
+        final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
         assertTrue(resource.exists());
     }
 
     @Test
     void testCreate() {
-        SolidResource resource = SolidResource.create(solidClient, testUrl.toString(), "hello", "text/plain");
+        final SolidResource resource = SolidResource.create(solidClient, testUrl.toString(), "hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertTrue(resource.exists());
     }
 
     @Test
     void resourceExistsWithAcl() throws Exception {
-        Map<String, List<String>> headerMap = Map.of("Link", List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
-        HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
-        when(solidClient.createResource(testUrl, "hello", "text/plain")).thenReturn(headers);
+        final Map<String, List<String>> headerMap = Map.of("Link", List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
+        final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
+        when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
         when(solidClient.getAclLink(headers)).thenReturn(aclUrl);
         when(solidClient.getResourceAclLink(testUrl.toString())).thenReturn(aclUrl);
 
-        SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello", "text/plain");
+        final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
 
         assertTrue(resource.exists());
         assertEquals(aclUrl.toString(), resource.getAclUrl());
@@ -78,12 +81,13 @@ class SolidResourceTest {
 
     @Test
     void resourceExistsWithoutAcl() throws Exception {
-        Map<String, List<String>> headerMap = Map.of("Link", List.of("<" + aclUrl + ">; rel=\"noacl\""));
-        HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
-        when(solidClient.createResource(testUrl, "hello", "text/plain")).thenReturn(headers);
+        final Map<String, List<String>> headerMap = Map.of("Link", List.of("<" + aclUrl + ">; rel=\"noacl\""));
+        final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
+        when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
         when(solidClient.getResourceAclLink(testUrl.toString())).thenReturn(null);
 
-        SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello", "text/plain");
+        final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
 
         assertTrue(resource.exists());
         assertNull(resource.getAclUrl());
@@ -91,11 +95,12 @@ class SolidResourceTest {
 
     @Test
     void resourceExistsNoLink() throws Exception {
-        Map<String, List<String>> headerMap = Collections.emptyMap(); // Map.of("Link", List.of("<"+aclUrl+">; rel=\"noacl\""));
-        HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
-        when(solidClient.createResource(testUrl, "hello", "text/plain")).thenReturn(headers);
+        final Map<String, List<String>> headerMap = Collections.emptyMap();
+        final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
+        when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
 
-        SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello", "text/plain");
+        final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
 
         assertTrue(resource.exists());
         assertNull(resource.getAclUrl());
@@ -103,11 +108,12 @@ class SolidResourceTest {
 
     @Test
     void resourceExistsWithAclAfterLookup() throws Exception {
-        when(solidClient.createResource(testUrl, "hello", "text/plain")).thenReturn(null);
-        URI lookedUpAclUrl = URI.create("http://localhost/lookupedUpAcl");
+        when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
+        final URI lookedUpAclUrl = URI.create("http://localhost/lookupedUpAcl");
         when(solidClient.getResourceAclLink(testUrl.toString())).thenReturn(lookedUpAclUrl);
 
-        SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello", "text/plain");
+        final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
 
         assertTrue(resource.exists());
         assertEquals(lookedUpAclUrl.toString(), resource.getAclUrl());
@@ -115,19 +121,22 @@ class SolidResourceTest {
 
     @Test
     void resourceNotExists() throws Exception {
-        when(solidClient.createResource(testUrl, "hello", "text/plain")).thenThrow(new Exception());
+        when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN))
+                .thenThrow(new Exception());
 
-        SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello", "text/plain");
+        final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
 
         assertFalse(resource.exists());
     }
 
     @Test
     void getContainer() throws Exception {
-        when(solidClient.createResource(testUrl, "hello", "text/plain")).thenReturn(null);
+        when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
 
-        SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello", "text/plain");
-        SolidContainer container = resource.getContainer();
+        final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
+        final SolidContainer container = resource.getContainer();
 
         assertTrue(resource.exists());
         assertFalse(resource.isContainer());
@@ -138,11 +147,12 @@ class SolidResourceTest {
 
     @Test
     void getParent() throws Exception {
-        when(solidClient.createResource(testUrl, "hello", "text/plain")).thenReturn(null);
+        when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
 
-        SolidResource resource = new SolidResource(solidClient, "http://localhost/container/resource", "hello", "text/plain");
-        SolidContainer container = resource.getContainer();
-        SolidContainer nextContainer = container.getContainer();
+        final SolidResource resource = new SolidResource(solidClient, "http://localhost/container/resource",
+                "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
+        final SolidContainer container = resource.getContainer();
+        final SolidContainer nextContainer = container.getContainer();
 
         assertTrue(resource.exists());
         assertTrue(container.exists());
@@ -155,11 +165,12 @@ class SolidResourceTest {
 
     @Test
     void getTopLevelContainer() throws Exception {
-        when(solidClient.createResource(testUrl, "hello", "text/plain")).thenReturn(null);
+        when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
 
-        SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello", "text/plain");
-        SolidContainer container = resource.getContainer();
-        SolidContainer nextContainer = container.getContainer();
+        final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
+        final SolidContainer container = resource.getContainer();
+        final SolidContainer nextContainer = container.getContainer();
 
         assertTrue(resource.exists());
         assertTrue(container.exists());
@@ -170,20 +181,22 @@ class SolidResourceTest {
 
     @Test
     void setAclNoUrl() throws Exception {
-        when(solidClient.createResource(testUrl, "hello", "text/plain")).thenReturn(null);
-        SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello", "text/plain");
+        when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
+        final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertFalse(resource.setAcl("acl"));
     }
 
     @Test
     void setAclMissing() throws Exception {
-        Map<String, List<String>> headerMap = Map.of("Link", List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
-        HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
-        when(solidClient.createResource(testUrl, "hello", "text/plain")).thenReturn(headers);
+        final Map<String, List<String>> headerMap = Map.of("Link", List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
+        final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
+        when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
         when(solidClient.getAclLink(headers)).thenReturn(null);
         when(solidClient.getResourceAclLink(testUrl.toString())).thenReturn(null);
 
-        SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello", "text/plain");
+        final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertFalse(resource.setAcl("acl"));
         // second attempt short cuts as false
         assertFalse(resource.setAcl("acl"));
@@ -191,30 +204,34 @@ class SolidResourceTest {
 
     @Test
     void setAcl() throws Exception {
-        Map<String, List<String>> headerMap = Map.of("Link", List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
-        HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
-        when(solidClient.createResource(testUrl, "hello", "text/plain")).thenReturn(headers);
+        final Map<String, List<String>> headerMap = Map.of("Link", List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
+        final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
+        when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
         when(solidClient.getAclLink(headers)).thenReturn(aclUrl);
         when(solidClient.getResourceAclLink(testUrl.toString())).thenReturn(aclUrl);
         when(solidClient.createAcl(aclUrl, "acl")).thenReturn(true);
 
-        when(solidClient.createResource(testUrl, "hello", "text/plain")).thenReturn(headers);
-        SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello", "text/plain");
+        when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
+        final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertTrue(resource.setAcl("acl"));
     }
 
     @Test
     void getUrl() throws Exception {
-        when(solidClient.createResource(testUrl, "hello", "text/plain")).thenReturn(null);
-        SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello", "text/plain");
+        when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
+        final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertEquals(TEST_URL, resource.getUrl());
         assertEquals("/resource", resource.getPath());
     }
 
     @Test
     void getUrlNull() throws Exception {
-        when(solidClient.createResource(testUrl, "hello", "text/plain")).thenThrow(new Exception("Failed as expected"));
-        SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello", "text/plain");
+        when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN))
+                .thenThrow(new Exception("Failed as expected"));
+        final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertFalse(resource.exists());
         assertNull(resource.getUrl());
         assertNull(resource.getPath());
@@ -222,13 +239,14 @@ class SolidResourceTest {
 
     @Test
     void getAclUrlMissing() throws Exception {
-        Map<String, List<String>> headerMap = Map.of("Link", List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
-        HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
-        when(solidClient.createResource(testUrl, "hello", "text/plain")).thenReturn(headers);
+        final Map<String, List<String>> headerMap = Map.of("Link", List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
+        final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
+        when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
         when(solidClient.getAclLink(headers)).thenReturn(null);
         when(solidClient.getResourceAclLink(testUrl.toString())).thenReturn(null);
 
-        SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello", "text/plain");
+        final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertNull(resource.getAclUrl());
         // second attempt short cuts
         assertNull(resource.getAclUrl());
@@ -236,37 +254,43 @@ class SolidResourceTest {
 
     @Test
     void delete() throws Exception {
-        when(solidClient.createResource(testUrl, "hello", "text/plain")).thenReturn(null);
-        SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello", "text/plain");
+        when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
+        final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertDoesNotThrow(() -> resource.delete());
     }
 
     @Test
     void deleteException() throws Exception {
-        when(solidClient.createResource(testUrl, "hello", "text/plain")).thenReturn(null);
-        SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello", "text/plain");
+        when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
+        final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         doThrow(new Exception("Failed as expected")).when(solidClient).deleteResourceRecursively(testUrl);
         assertThrows(Exception.class, () -> resource.delete());
     }
 
     @Test
     void resourceToString() throws Exception {
-        when(solidClient.createResource(testUrl, "hello", "text/plain")).thenReturn(null);
-        SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello", "text/plain");
+        when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
+        final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertEquals("SolidResource: " + TEST_URL, resource.toString());
     }
 
     @Test
     void emptyResourceToString() throws Exception {
-        when(solidClient.createResource(testUrl, "hello", "text/plain")).thenThrow(new Exception("Failed as expected"));
-        SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello", "text/plain");
+        when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN))
+                .thenThrow(new Exception("Failed as expected"));
+        final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertEquals("SolidResource: null", resource.toString());
     }
 
     @Test
     void containerToString() throws Exception {
-        when(solidClient.createResource(new URI("http://localhost/container/"), null, null)).thenReturn(null);
-        SolidResource resource = new SolidResource(solidClient, "http://localhost/container/", null, null);
+        when(solidClient.createResource(new URI("http://localhost/container/"), null, null))
+                .thenReturn(null);
+        final SolidResource resource = new SolidResource(solidClient, "http://localhost/container/", null, null);
         assertEquals("SolidContainer: http://localhost/container/", resource.toString());
     }
 }

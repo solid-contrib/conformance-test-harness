@@ -34,58 +34,58 @@ class DataRepositoryTest {
 
     @Test
     void addFeatureResult() throws Exception {
-        DataRepository dataRepository = new DataRepository();
+        final DataRepository dataRepository = new DataRepository();
         dataRepository.postConstruct();
         dataRepository.setAssertor(assertor);
         dataRepository.setTestSubject(testSubject);
-        Suite suite = Suite.forTempUse();
-        Feature feature = mock(Feature.class);
+        final Suite suite = Suite.forTempUse();
+        final Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
-        Scenario scenario1 = mock(Scenario.class);
+        final Scenario scenario1 = mock(Scenario.class);
         when(scenario1.getName()).thenReturn("SCENARIO 1");
-        Scenario scenario2 = mock(Scenario.class);
+        final Scenario scenario2 = mock(Scenario.class);
         when(scenario2.getName()).thenReturn("SCENARIO 2");
-        Step step1 = mock(Step.class);
+        final Step step1 = mock(Step.class);
         when(step1.getPrefix()).thenReturn("When");
         when(step1.getText()).thenReturn("method GET");
-        Step step2 = mock(Step.class);
+        final Step step2 = mock(Step.class);
         when(step2.getPrefix()).thenReturn("Then");
         when(step2.getText()).thenReturn("Status 200");
-        Result res1 = mock(Result.class);
+        final Result res1 = mock(Result.class);
         when(res1.getStatus()).thenReturn("passed");
-        Result res2 = mock(Result.class);
+        final Result res2 = mock(Result.class);
         when(res2.getStatus()).thenReturn("skipped");
 
-        FeatureResult fr = mock(FeatureResult.class);
+        final FeatureResult fr = mock(FeatureResult.class);
         when(fr.getDisplayName()).thenReturn("DISPLAY_NAME");
         when(fr.getFeature()).thenReturn(feature);
         when(fr.isFailed()).thenReturn(true);
         when(fr.getDurationMillis()).thenReturn(1000.0);
 
-        ScenarioResult sr1 = mock(ScenarioResult.class);
+        final ScenarioResult sr1 = mock(ScenarioResult.class);
         when(sr1.getScenario()).thenReturn(scenario1);
         when(sr1.isFailed()).thenReturn(true);
         when(sr1.getDurationMillis()).thenReturn(2000.0);
 
-        ScenarioResult sr2 = mock(ScenarioResult.class);
+        final ScenarioResult sr2 = mock(ScenarioResult.class);
         when(sr2.getScenario()).thenReturn(scenario2);
         when(sr2.isFailed()).thenReturn(false);
         when(sr2.getDurationMillis()).thenReturn(3000.0);
 
         when(fr.getScenarioResults()).thenReturn(List.of(sr1, sr2));
 
-        StepResult str1 = mock(StepResult.class);
+        final StepResult str1 = mock(StepResult.class);
         when(str1.getStep()).thenReturn(step1);
         when(str1.getResult()).thenReturn(res1);
         when(str1.getStepLog()).thenReturn("STEP1 LOG");
-        StepResult str2 = mock(StepResult.class);
+        final StepResult str2 = mock(StepResult.class);
         when(str2.getStep()).thenReturn(step2);
         when(str2.getResult()).thenReturn(res2);
         when(str2.getStepLog()).thenReturn("");
         when(sr1.getStepResults()).thenReturn(List.of(str1, str2));
 
         dataRepository.addFeatureResult(suite, fr, featureIri);
-        StringWriter sw = new StringWriter();
+        final StringWriter sw = new StringWriter();
         dataRepository.export(sw);
         assertTrue(sw.toString().contains(featureIri.stringValue()));
         assertTrue(sw.toString().contains("dcterms:title \"FEATURE NAME\""));
@@ -93,14 +93,14 @@ class DataRepositoryTest {
 
     @Test
     void addFeatureResultTestFailed() throws Exception {
-        DataRepository dataRepository = new DataRepository();
+        final DataRepository dataRepository = new DataRepository();
         dataRepository.postConstruct();
         dataRepository.setAssertor(assertor);
         dataRepository.setTestSubject(testSubject);
-        Suite suite = Suite.forTempUse();
-        Feature feature = mock(Feature.class);
+        final Suite suite = Suite.forTempUse();
+        final Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
-        FeatureResult fr = mock(FeatureResult.class);
+        final FeatureResult fr = mock(FeatureResult.class);
         when(fr.getDisplayName()).thenReturn("DISPLAY_NAME");
         when(fr.getFeature()).thenReturn(feature);
         when(fr.isFailed()).thenReturn(false);
@@ -108,7 +108,7 @@ class DataRepositoryTest {
         when(fr.getScenarioResults()).thenReturn(null);
 
         dataRepository.addFeatureResult(suite, fr, featureIri);
-        StringWriter sw = new StringWriter();
+        final StringWriter sw = new StringWriter();
         dataRepository.export(sw);
         assertTrue(sw.toString().contains(featureIri.stringValue()));
         assertTrue(sw.toString().contains("dcterms:title \"FEATURE NAME\""));
@@ -116,104 +116,113 @@ class DataRepositoryTest {
 
     @Test
     void addFeatureResultBadRdf() throws Exception {
-        DataRepository dataRepository = new DataRepository();
+        final DataRepository dataRepository = new DataRepository();
         dataRepository.postConstruct();
         dataRepository.setAssertor(assertor);
         dataRepository.setTestSubject(testSubject);
-        Suite suite = Suite.forTempUse();
-        Feature feature = mock(Feature.class);
+        final Suite suite = Suite.forTempUse();
+        final Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn(null);
-        FeatureResult fr = mock(FeatureResult.class);
+        final FeatureResult fr = mock(FeatureResult.class);
         when(fr.getDisplayName()).thenReturn("");
         when(fr.getFeature()).thenReturn(feature);
 
         dataRepository.addFeatureResult(suite, fr, featureIri);
-        StringWriter sw = new StringWriter();
+        final StringWriter sw = new StringWriter();
         dataRepository.export(sw);
         assertFalse(sw.toString().contains(featureIri.stringValue()));
     }
 
     @Test
     void exportWriter() throws Exception {
-        DataRepository dataRepository = setupRepository();
-        StringWriter wr = new StringWriter();
+        final DataRepository dataRepository = setupRepository();
+        final StringWriter wr = new StringWriter();
         dataRepository.export(wr);
         assertTrue(wr.toString().contains(TestData.SAMPLE_EXPORTED_TRIPLE));
     }
 
     @Test
     void exportWriterFailing() throws IOException {
-        DataRepository dataRepository = setupRepository();
-        File tempFile = File.createTempFile("TestHarness-", ".tmp");
+        final DataRepository dataRepository = setupRepository();
+        final File tempFile = File.createTempFile("TestHarness-", ".tmp");
         tempFile.deleteOnExit();
-        Writer wr = new FileWriter(tempFile);
+        final Writer wr = new FileWriter(tempFile);
         wr.close();
         assertThrows(Exception.class, () -> dataRepository.export(wr));
     }
 
     @Test
     void exportStream() throws Exception {
-        DataRepository dataRepository = setupRepository();
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        final DataRepository dataRepository = setupRepository();
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
         dataRepository.export(os);
         assertTrue(os.toString().contains(TestData.SAMPLE_EXPORTED_TRIPLE));
     }
 
     @Test
     void exportStreamFailing() throws IOException {
-        DataRepository dataRepository = setupRepository();
-        File tempFile = File.createTempFile("TestHarness-", ".tmp");
+        final DataRepository dataRepository = setupRepository();
+        final File tempFile = File.createTempFile("TestHarness-", ".tmp");
         tempFile.deleteOnExit();
-        OutputStream os = new FileOutputStream(tempFile);
+        final OutputStream os = new FileOutputStream(tempFile);
         os.close();
         assertThrows(Exception.class, () -> dataRepository.export(os));
     }
 
     @Test
     void loadTurtle() throws MalformedURLException {
-        DataRepository dataRepository = new DataRepository();
-        URL url = Path.of("src/test/resources/config-sample.ttl").normalize().toUri().toURL();
+        final DataRepository dataRepository = new DataRepository();
+        final URL url = Path.of("src/test/resources/config-sample.ttl").normalize().toUri().toURL();
         dataRepository.loadTurtle(url);
         assertEquals(55, dataRepositorySize(dataRepository));
     }
 
     @Test
     void loadTurtleBadUrl() {
-        DataRepository dataRepository = new DataRepository();
-        assertThrows(TestHarnessInitializationException.class, () -> dataRepository.loadTurtle(new URL("file:/missing.txt")));
+        final DataRepository dataRepository = new DataRepository();
+        assertThrows(TestHarnessInitializationException.class,
+                () -> dataRepository.loadTurtle(new URL("file:/missing.txt"))
+        );
     }
 
     @Test
     void loadTurtleBadData() {
-        DataRepository dataRepository = new DataRepository();
-        assertThrows(TestHarnessInitializationException.class, () -> dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/inrupt-alice.json")));
+        final DataRepository dataRepository = new DataRepository();
+        assertThrows(TestHarnessInitializationException.class,
+                () -> dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/inrupt-alice.json"))
+        );
     }
 
     @Test
     void loadRdfa() throws MalformedURLException {
-        DataRepository dataRepository = new DataRepository();
+        final DataRepository dataRepository = new DataRepository();
         dataRepository.loadRdfa(TestUtils.getFileUrl("src/test/resources/rdfa-sample.html"), TestData.SAMPLE_BASE);
         assertEquals(1, dataRepositorySize(dataRepository));
     }
 
     @Test
     void loadRdfaBadUrl() {
-        DataRepository dataRepository = new DataRepository();
-        assertThrows(TestHarnessInitializationException.class, () -> dataRepository.loadRdfa(new URL("file:/missing.txt"), TestData.SAMPLE_BASE));
+        final DataRepository dataRepository = new DataRepository();
+        assertThrows(TestHarnessInitializationException.class,
+                () -> dataRepository.loadRdfa(new URL("file:/missing.txt"), TestData.SAMPLE_BASE)
+        );
     }
 
     @Test
     void loadRdfaBadData() {
-        DataRepository dataRepository = new DataRepository();
-        assertThrows(TestHarnessInitializationException.class, () -> dataRepository.loadRdfa(TestUtils.getFileUrl("src/test/resources/jsonld-sample.json"), TestData.SAMPLE_BASE));
+        final DataRepository dataRepository = new DataRepository();
+        assertThrows(TestHarnessInitializationException.class,
+                () -> dataRepository.loadRdfa(TestUtils.getFileUrl("src/test/resources/jsonld-sample.json"),
+                        TestData.SAMPLE_BASE)
+        );
     }
 
     @Test
     void testOverriddenMethods() {
-        DataRepository dataRepository = new DataRepository();
-        File dataDir = new File("/tmp");
+        final DataRepository dataRepository = new DataRepository();
+        final File dataDir = new File("/tmp");
         dataRepository.setDataDir(dataDir);
-        File newDataDir = dataRepository.getDataDir();
+        final File newDataDir = dataRepository.getDataDir();
         assertEquals(dataDir, newDataDir);
         assertFalse(dataRepository.isInitialized());
         dataRepository.initialize();
@@ -225,22 +234,23 @@ class DataRepositoryTest {
     }
 
     private DataRepository setupRepository() {
-        DataRepository dataRepository = new DataRepository();
+        final DataRepository dataRepository = new DataRepository();
         try (RepositoryConnection conn = dataRepository.getConnection()) {
-            Statement st = Values.getValueFactory().createStatement(iri(TestData.SAMPLE_BASE + "/bob"), RDF.TYPE, FOAF.PERSON);
+            final Statement st = Values.getValueFactory()
+                    .createStatement(iri(TestData.SAMPLE_BASE + "/bob"), RDF.TYPE, FOAF.PERSON);
             conn.add(st);
         }
         return dataRepository;
     }
 
-    private long dataRepositorySize(DataRepository dataRepository) {
+    private long dataRepositorySize(final DataRepository dataRepository) {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             return conn.size();
         }
     }
 
     private Reader getBadReader() {
-        Reader reader = Reader.nullReader();
+        final Reader reader = Reader.nullReader();
         try {
             reader.close();
         } catch (IOException e) {

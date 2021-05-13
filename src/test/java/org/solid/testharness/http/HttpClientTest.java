@@ -24,17 +24,21 @@ class HttpClientTest {
 
     @Test
     void linkHeaders() throws IOException, InterruptedException {
-        HttpClient client = HttpClient.newBuilder()
+        final HttpClient client = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
                 .connectTimeout(Duration.ofSeconds(5))
                 .build();
 
-        HttpRequest request = HttpUtils.newRequestBuilder(URI.create("https://solid-test-suite-alice.inrupt.net")).build();
+        HttpRequest request = HttpUtils.newRequestBuilder(
+                URI.create("https://solid-test-suite-alice.inrupt.net")
+        ).build();
         HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
         List<String> links = response.headers().allValues("Link");
         logger.debug("NSS links {}: {}", links.size(), links);
 
-        request = HttpUtils.newRequestBuilder(URI.create("https://pod-compat.inrupt.com/solid-test-suite-alice/profile/card#me")).build();
+        request = HttpUtils.newRequestBuilder(
+                URI.create("https://pod-compat.inrupt.com/solid-test-suite-alice/profile/card#me")
+        ).build();
         response = client.send(request, HttpResponse.BodyHandlers.discarding());
         links = response.headers().allValues("Link");
         logger.debug("ESS links {}: {}", links.size(), links);
@@ -42,28 +46,30 @@ class HttpClientTest {
 
     @Test
     void parseNoLinkHeaders() throws IOException, InterruptedException {
-        HttpClient client = HttpClient.newBuilder()
+        final HttpClient client = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
                 .connectTimeout(Duration.ofSeconds(5))
                 .build();
 
-        HttpRequest request = HttpUtils.newRequestBuilder(URI.create("https://pod-compat.inrupt.com/")).build();
-        HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
-        List<Link> links = HttpUtils.parseLinkHeaders(response.headers());
+        final HttpRequest request = HttpUtils.newRequestBuilder(URI.create("https://pod-compat.inrupt.com/")).build();
+        final HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+        final List<Link> links = HttpUtils.parseLinkHeaders(response.headers());
         assertNotNull(links);
         assertEquals(0, links.size());
     }
 
     @Test
     void parseMultiValueLinkHeaders() throws IOException, InterruptedException {
-        HttpClient client = HttpClient.newBuilder()
+        final HttpClient client = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
                 .connectTimeout(Duration.ofSeconds(5))
                 .build();
 
-        HttpRequest request = HttpUtils.newRequestBuilder(URI.create("https://solid-test-suite-alice.inrupt.net")).build();
-        HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
-        List<Link> links = HttpUtils.parseLinkHeaders(response.headers());
+        final HttpRequest request = HttpUtils.newRequestBuilder(
+                URI.create("https://solid-test-suite-alice.inrupt.net")
+        ).build();
+        final HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+        final List<Link> links = HttpUtils.parseLinkHeaders(response.headers());
         assertNotNull(links);
         assertTrue(links.size() > 1);
         // TODO: test that no link contains multiple links
@@ -71,17 +77,18 @@ class HttpClientTest {
 
     @Test
     void parseMultipleLinkHeaders() throws IOException, InterruptedException {
-        HttpClient client = HttpClient.newBuilder()
+        final HttpClient client = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
                 .connectTimeout(Duration.ofSeconds(5))
                 .build();
 
-        HttpRequest request = HttpUtils.newRequestBuilder(URI.create("https://pod-compat.inrupt.com/solid-test-suite-alice/profile/card#me")).build();
-        HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
-        List<Link> links = HttpUtils.parseLinkHeaders(response.headers());
+        final HttpRequest request = HttpUtils.newRequestBuilder(
+                URI.create("https://pod-compat.inrupt.com/solid-test-suite-alice/profile/card#me")
+        ).build();
+        final HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+        final List<Link> links = HttpUtils.parseLinkHeaders(response.headers());
         assertNotNull(links);
         assertTrue(links.size() > 1);
         // TODO: test that no link contains multiple links
     }
-
 }

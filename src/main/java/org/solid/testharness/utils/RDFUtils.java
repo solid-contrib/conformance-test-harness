@@ -3,49 +3,46 @@ package org.solid.testharness.utils;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 
-public class RDFUtils {
-    private static final Logger logger = LoggerFactory.getLogger(RDFUtils.class);
-
-    public static final List<String> turtleToTripleArray(String data, String baseUri) throws Exception {
-        Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.TURTLE);
-        StringWriter sw = new StringWriter();
+public final class RDFUtils {
+    public static List<String> turtleToTripleArray(final String data, final String baseUri) throws Exception {
+        final Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.TURTLE);
+        final StringWriter sw = new StringWriter();
         Rio.write(model, sw, RDFFormat.NTRIPLES);
         return Arrays.asList(sw.toString().split("\n"));
     }
 
-    public static final List<String> jsonLdToTripleArray(String data, String baseUri) throws Exception {
-        Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.JSONLD);
-        StringWriter sw = new StringWriter();
+    public static List<String> jsonLdToTripleArray(final String data, final String baseUri) throws Exception {
+        final Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.JSONLD);
+        final StringWriter sw = new StringWriter();
         Rio.write(model, sw, RDFFormat.NTRIPLES);
         return Arrays.asList(sw.toString().split("\n"));
     }
 
-    public static final List<String> rdfaToTripleArray(String data, String baseUri) throws Exception {
-        Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.RDFA);
-        StringWriter sw = new StringWriter();
+    public static List<String> rdfaToTripleArray(final String data, final String baseUri) throws Exception {
+        final Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.RDFA);
+        final StringWriter sw = new StringWriter();
         Rio.write(model, sw, RDFFormat.NTRIPLES);
         return Arrays.asList(sw.toString().split("\n"));
     }
 
+    private RDFUtils() { }
 /*
     public static final Model parse(String data, String contentType, String baseUri) throws IOException {
         RDFFormat dataFormat = null;
         switch (contentType) {
-            case "text/turtle":
+            case HttpConstants.MEDIA_TYPE_TEXT_TURTLE:
                 dataFormat = RDFFormat.TURTLE;
                 break;
             case "text/n-triples":
                 dataFormat = RDFFormat.NTRIPLES;
                 break;
-            case "text/plain":
+            case HttpConstants.MEDIA_TYPE_TEXT_PLAIN:
                 dataFormat = RDFFormat.NTRIPLES;
                 break;
         }

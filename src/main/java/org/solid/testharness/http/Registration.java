@@ -19,7 +19,7 @@ public class Registration {
     }
 
     @JsonSetter("client_id")
-    public void setClientId(String clientId) {
+    public void setClientId(final String clientId) {
         this.clientId = clientId;
     }
 
@@ -28,7 +28,7 @@ public class Registration {
     }
 
     @JsonSetter("client_secret")
-    public void setClientSecret(String clientSecret) {
+    public void setClientSecret(final String clientSecret) {
         this.clientSecret = clientSecret;
     }
 
@@ -37,7 +37,7 @@ public class Registration {
         return applicationType;
     }
 
-    public void setApplicationType(String applicationType) {
+    public void setApplicationType(final String applicationType) {
         this.applicationType = applicationType;
     }
 
@@ -46,7 +46,7 @@ public class Registration {
         return redirectUris;
     }
 
-    public void setRedirectUris(List<String> redirectUris) {
+    public void setRedirectUris(final List<String> redirectUris) {
         this.redirectUris = redirectUris;
     }
 
@@ -55,7 +55,7 @@ public class Registration {
         return tokenEndpointAuthMethod;
     }
 
-    public void setTokenEndpointAuthMethod(String tokenEndpointAuthMethod) {
+    public void setTokenEndpointAuthMethod(final String tokenEndpointAuthMethod) {
         this.tokenEndpointAuthMethod = tokenEndpointAuthMethod;
     }
 }

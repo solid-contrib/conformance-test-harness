@@ -11,16 +11,16 @@ class BootstrapQuarkusTest {
 
     @Test
     void getInstance() {
-        Bootstrap bootstrap = Bootstrap.getInstance();
+        final Bootstrap bootstrap = Bootstrap.getInstance();
         assertNotNull(bootstrap);
-        Bootstrap bootstrap2 = Bootstrap.getInstance();
+        final Bootstrap bootstrap2 = Bootstrap.getInstance();
         assertNotNull(bootstrap2);
         assertEquals(bootstrap, bootstrap2);
     }
 
     @Test
     void getTestSubject() {
-        Bootstrap bootstrap = Bootstrap.getInstance();
+        final Bootstrap bootstrap = Bootstrap.getInstance();
         assertNotNull(bootstrap.getTestSubject());
     }
 }

@@ -8,7 +8,7 @@ import org.solid.testharness.utils.DataModelBase;
 import java.time.LocalDate;
 
 public class Assertor extends DataModelBase {
-    public Assertor(IRI subject) {
+    public Assertor(final IRI subject) {
         super(subject, ConstructMode.DEEP);
     }
 
@@ -33,7 +33,7 @@ public class Assertor extends DataModelBase {
     }
 
     public String getRevision() {
-        BNode release = getAsBNode(DOAP.release);
+        final BNode release = getAsBNode(DOAP.release);
         if (release == null) {
             return null;
         }

@@ -15,6 +15,7 @@ import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -36,47 +37,55 @@ public class TestSubject {
     AuthManager authManager;
 
     public void loadTestSubjectConfig()  {
-        targetServer = null;
-        IRI testSubject = config.getTestSubject();
+        final IRI configuredTestSubject = config.getTestSubject();
         try (final InputStream is = config.getConfigUrl().openStream()) {
-            Model model = Rio.parse(is, config.getConfigUrl().toString(), RDFFormat.TURTLE);
-            Set<Resource> testSubjects = model.filter(null, RDF.type, EARL.TestSubject).subjects();
-            if (testSubjects.size() == 0) {
+            final Model model = Rio.parse(is, config.getConfigUrl().toString(), RDFFormat.TURTLE);
+            final Set<Resource> testSubjects = model.filter(null, RDF.type, EARL.TestSubject).subjects();
+            if (testSubjects.isEmpty()) {
                 throw new TestHarnessInitializationException("No TestSubjects were found in the config file");
             }
-            if (testSubject == null && testSubjects.size() > 1) {
-                throw new TestHarnessInitializationException("No target has been specified but there are more than one available");
+            if (configuredTestSubject == null && testSubjects.size() > 1) {
+                throw new TestHarnessInitializationException("No target has been specified but there are more than " +
+                        "one available");
             }
-            try (RepositoryConnection conn = dataRepository.getConnection()) {
-                if (testSubject != null) {
-                    for (Resource subject : testSubjects) {
-                        if (subject.equals(testSubject)) {
-                            Model subjectModel = model.filter(subject, null, null);
-                            conn.add(subjectModel);
-                            for (Value value : subjectModel.objects()) {
-                                if (value.isBNode()) {
-                                    conn.add(model.filter((BNode) value, null, null));
-                                }
-                            }
-                            testSubject = (IRI) subject;
-                            targetServer = new TargetServer(testSubject);
-                        }
-                    }
-                } else {
-                    conn.add(model);
-                    testSubject = (IRI) testSubjects.iterator().next();
-                    targetServer = new TargetServer(testSubject);
-                }
-                if (targetServer == null) {
-                    throw new TestHarnessInitializationException("No config found for server: %s", testSubject.stringValue());
-                }
+            final IRI testSubject;
+            if (configuredTestSubject == null) {
+                testSubject = (IRI) testSubjects.iterator().next();
                 config.setTestSubject(testSubject);
-                dataRepository.setTestSubject(testSubject);
-                logger.debug("TestSubject {}", targetServer.getSubject());
-                logger.debug("Max threads: {}", targetServer.getMaxThreads());
+                loadSubjectIntoRepository(model, null);
+            } else {
+                testSubject = (IRI) testSubjects.stream()
+                        .filter(subject -> subject.equals(configuredTestSubject))
+                        .findFirst()
+                        .orElseThrow(() -> new TestHarnessInitializationException("No config found for server: %s",
+                                configuredTestSubject.stringValue()));
+                loadSubjectIntoRepository(model, testSubject);
             }
+            targetServer = new TargetServer(testSubject);
+            dataRepository.setTestSubject(testSubject);
+            logger.debug("TestSubject {}", targetServer.getSubject());
+            logger.debug("Max threads: {}", targetServer.getMaxThreads());
         } catch (IOException e) {
-            throw new TestHarnessInitializationException("Failed to read config file %s: %s", config.getConfigUrl().toString(), e.toString());
+            throw (TestHarnessInitializationException) new TestHarnessInitializationException(
+                    "Failed to read config file %s: %s",
+                    config.getConfigUrl().toString(), e.toString()
+            ).initCause(e);
+        }
+    }
+
+    private void loadSubjectIntoRepository(@NotNull final Model model, final IRI subject) {
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            if (subject == null) {
+                conn.add(model);
+            } else {
+                final Model subjectModel = model.filter(subject, null, null);
+                conn.add(subjectModel);
+                for (Value value : subjectModel.objects()) {
+                    if (value.isBNode()) {
+                        conn.add(model.filter((BNode) value, null, null));
+                    }
+                }
+            }
         }
     }
 
@@ -90,7 +99,9 @@ public class TestSubject {
             try {
                 clients.put(user, authManager.authenticate(user, targetServer));
             } catch (Exception e) {
-                throw new TestHarnessInitializationException("Failed to register clients: %s", e.toString());
+                throw (TestHarnessInitializationException) new TestHarnessInitializationException(
+                        "Failed to register clients: %s", e.toString()
+                ).initCause(e);
             }
         });
     }

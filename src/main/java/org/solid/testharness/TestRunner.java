@@ -16,11 +16,13 @@ public class TestRunner {
     FeatureResultHandler featureResultHandler;
 
     @SuppressWarnings("unchecked")
-    public TestSuiteResults runTests(List<String> featurePaths, int threads) {
-        // we can also create Features which may be useful when fetching from remote resource although this may cause problems with
-        // loading other features files due to classpath issues - Karate may need a RemoteResource type that knows how to fetch related
-        // resources from the same URL the feature came from
-//        List<Feature> featureList = featureFiles.stream().map(f -> Feature.read(new FileResource(f.toFile()))).collect(Collectors.toList());
+    // Unavoidable as Runner.builder().path() takes a list or vararg of Strings
+    public TestSuiteResults runTests(final List<String> featurePaths, final int threads) {
+        // we can also create Features which may be useful when fetching from remote resource although this may cause
+        // problems with loading other features files due to classpath issues - Karate may need a RemoteResource type
+        // that knows how to fetch related resources from the same URL the feature came from
+//        List<Feature> featureList = featureFiles.stream()
+//              .map(f -> Feature.read(new FileResource(f.toFile()))).collect(Collectors.toList());
 //        logger.info("==== FEATURES {}", featureList);
 //        Results results = Runner.builder()
 //                .features(featureList)
@@ -28,7 +30,7 @@ public class TestRunner {
 //                .outputHtmlReport(true)
 //                .parallel(8);
 
-        Results results = Runner.builder()
+        final Results results = Runner.builder()
                 .path(featurePaths)
                 .tags("~@ignore")
                 .outputHtmlReport(true)
@@ -37,11 +39,11 @@ public class TestRunner {
         return new TestSuiteResults(results);
     }
 
-    public TestSuiteResults runTest(String featurePath) {
+    public TestSuiteResults runTest(final String featurePath) {
         if (StringUtils.isBlank(featurePath)) {
             throw new IllegalArgumentException("featurePath is a required parameter");
         }
-        Results results = Runner.builder()
+        final Results results = Runner.builder()
                 .path(featurePath)
                 .tags("~@ignore")
                 .parallel(1);

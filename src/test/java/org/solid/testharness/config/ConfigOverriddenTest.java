@@ -27,7 +27,9 @@ public class ConfigOverriddenTest {
 
     @Test
     void getTestSubjectChanged() {
-        assertEquals("https://github.com/solid/conformance-test-harness/testserver2", config.getTestSubject().stringValue());
+        assertEquals("https://github.com/solid/conformance-test-harness/testserver2",
+                config.getTestSubject().stringValue()
+        );
     }
 
     @Test

@@ -34,20 +34,21 @@ import static org.apache.commons.text.CharacterPredicates.DIGITS;
 import static org.apache.commons.text.CharacterPredicates.LETTERS;
 import static org.jose4j.jwx.HeaderParameterNames.TYPE;
 
+@SuppressWarnings("checkstyle:FinalClass") // Not final because it needs mocking for tests
 public class Client {
     private static final Logger logger = LoggerFactory.getLogger(Client.class);
 
-    private HttpClient client = null;
-    private String accessToken = null;
-    private RsaJsonWebKey clientKey = null;
-    private boolean dpopSupported = false;
-    private String agent = null;
-    private String user = null;
+    private HttpClient httpClient;
+    private String accessToken;
+    private RsaJsonWebKey clientKey;
+    private boolean dpopSupported;
+    private String agent;
+    private String user;
 
     public static class Builder {
         private HttpClient.Builder clientBuilder;
         private String user;
-        private RsaJsonWebKey clientKey = null;
+        private RsaJsonWebKey clientKey;
 
         private static final RandomStringGenerator GENERATOR = new RandomStringGenerator.Builder()
                 .withinRange('0', 'z').filteredBy(LETTERS, DIGITS).build();
@@ -55,36 +56,39 @@ public class Client {
         public Builder() {
             this("");
         }
-        public Builder(String user) {
+        public Builder(final String user) {
             this.user = user;
             clientBuilder = HttpClient.newBuilder()
                     .version(HttpClient.Version.HTTP_1_1)
                     .connectTimeout(Duration.ofSeconds(5));
         }
 
-        public Builder withSessionSupport(){
+        public Builder withSessionSupport() {
             CookieHandler.setDefault(new CookieManager());
             clientBuilder.cookieHandler(CookieHandler.getDefault());
             return this;
         }
 
-        public Builder withLocalhostSupport(){
+        public Builder withLocalhostSupport() {
             // Allow self-signed certificates for testing
-            TrustManager[] trustAllCerts = new TrustManager[]{
-                    new X509TrustManager() {
-                        public X509Certificate[] getAcceptedIssuers() {
-                            return null;
-                        }
-                        public void checkClientTrusted(X509Certificate[] certs, String authType) {}
-                        public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+            final TrustManager[] trustAllCerts = new TrustManager[]{
+                new X509TrustManager() {
+                    @Override
+                    public X509Certificate[] getAcceptedIssuers() {
+                        return new X509Certificate[0];
                     }
+                    @Override
+                    public void checkClientTrusted(final X509Certificate[] certs, final String authType) { }
+                    @Override
+                    public void checkServerTrusted(final X509Certificate[] certs, final String authType) { }
+                }
             };
             SSLContext sslContext = null;
             try {
                 sslContext = SSLContext.getInstance("SSL");
                 sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
             } catch (NoSuchAlgorithmException | KeyManagementException e) {
-                e.printStackTrace();
+                logger.error("Failed to setup sslContext", e);
             }
             System.setProperty("jdk.internal.httpclient.disableHostnameVerification", Boolean.TRUE.toString());
 
@@ -93,7 +97,7 @@ public class Client {
         }
 
         public Builder withDpopSupport() throws Exception {
-            String identifier = GENERATOR.generate(12);
+            final String identifier = GENERATOR.generate(12);
             try {
                 clientKey = RsaJwkGenerator.generateJwk(2048);
             } catch (JoseException e) {
@@ -106,23 +110,21 @@ public class Client {
         }
 
         public Client build() {
-            Client client = new Client();
+            final Client client = new Client();
             client.agent = HttpUtils.getAgent();
             client.user = user;
-            client.client = clientBuilder.build();
+            client.httpClient = clientBuilder.build();
             client.clientKey = clientKey;
             client.dpopSupported = clientKey != null;
             return client;
         }
     }
 
-    private Client() {}
-
     public HttpClient getHttpClient() {
-        return client;
+        return httpClient;
     }
 
-    public void setAccessToken(String accessToken) {
+    public void setAccessToken(final String accessToken) {
         this.accessToken = accessToken;
     }
 
@@ -134,80 +136,82 @@ public class Client {
         return user;
     }
 
-    public <T> HttpResponse<T> send(HttpRequest request, HttpResponse.BodyHandler<T> responseBodyHandler) throws IOException, InterruptedException {
-        return client.send(request, responseBodyHandler);
+    public <T> HttpResponse<T> send(final HttpRequest request, final HttpResponse.BodyHandler<T> responseBodyHandler)
+            throws IOException, InterruptedException {
+        return httpClient.send(request, responseBodyHandler);
     }
 
-    public HttpResponse<String> getAsString(URI url) throws IOException, InterruptedException {
-        HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
-                .header("Accept", "text/turtle");
-        HttpRequest request = authorize(builder).build();
-        return client.send(request, HttpResponse.BodyHandlers.ofString());
+    public HttpResponse<String> getAsString(final URI url) throws IOException, InterruptedException {
+        final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
+                .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
+        final HttpRequest request = authorize(builder).build();
+        return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    public HttpResponse<Void> put(URI url, String data, String type) throws IOException, InterruptedException {
-        HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
+    public HttpResponse<Void> put(final URI url, final String data, final String type)
+            throws IOException, InterruptedException {
+        final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
                 .PUT(HttpRequest.BodyPublishers.ofString(data))
-                .header("Content-Type", type);
-        HttpRequest request = authorize(builder).build();
+                .header(HttpConstants.HEADER_CONTENT_TYPE, type);
+        final HttpRequest request = authorize(builder).build();
         HttpUtils.logRequest(logger, request);
-        HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+        final HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
         HttpUtils.logResponse(logger, response);
         return response;
     }
 
-    public HttpResponse<Void> head(URI url) throws IOException, InterruptedException {
-        HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
-                .method("HEAD", HttpRequest.BodyPublishers.noBody());
-        HttpRequest request = authorize(builder).build();
+    public HttpResponse<Void> head(final URI url) throws IOException, InterruptedException {
+        final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
+                .method(HttpConstants.METHOD_HEAD, HttpRequest.BodyPublishers.noBody());
+        final HttpRequest request = authorize(builder).build();
         HttpUtils.logRequest(logger, request);
-        HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+        final HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
         HttpUtils.logResponse(logger, response);
         return response;
     }
 
-    public CompletableFuture<HttpResponse<Void>> deleteAsync(URI url) {
+    public CompletableFuture<HttpResponse<Void>> deleteAsync(final URI url) {
         logger.debug("Deleting {}", url);
-        HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url).DELETE();
-        HttpRequest request;
+        final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url).DELETE();
+        final HttpRequest request;
         try {
             request = authorize(builder).build();
         } catch (Exception e) {
             logger.error("Failed to set up authorization", e);
             return CompletableFuture.completedFuture(null);
         }
-        return client.sendAsync(request, HttpResponse.BodyHandlers.discarding());
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding());
     }
 
-    public final HttpRequest.Builder signRequest(HttpRequest.Builder builder) {
+    public HttpRequest.Builder signRequest(final HttpRequest.Builder builder) {
         if (!dpopSupported) return builder;
-        HttpRequest provisionalRequest = builder.copy().build();
-        String dpopToken = generateDpopToken(provisionalRequest.method(), provisionalRequest.uri().toString());
-        return builder.header("DPoP", dpopToken);
+        final HttpRequest provisionalRequest = builder.copy().build();
+        final String dpopToken = generateDpopToken(provisionalRequest.method(), provisionalRequest.uri().toString());
+        return builder.header(HttpConstants.HEADER_DPOP, dpopToken);
     }
 
-    public final HttpRequest.Builder authorize(HttpRequest.Builder builder) {
+    public  HttpRequest.Builder authorize(final HttpRequest.Builder builder) {
         if (accessToken == null) return builder;
         if (dpopSupported) {
-            builder.setHeader("Authorization", "DPoP " + accessToken);
+            builder.setHeader(HttpConstants.HEADER_AUTHORIZATION, HttpConstants.PREFIX_DPOP + accessToken);
             return signRequest(builder);
         } else {
-            return builder.setHeader("Authorization", "Bearer " + accessToken);
+            return builder.setHeader(HttpConstants.HEADER_AUTHORIZATION, HttpConstants.PREFIX_BEARER + accessToken);
         }
     }
 
-    public Map<String, String> getAuthHeaders(String method, String uri) {
-        Map<String, String> headers = new HashMap<>();
+    public Map<String, String> getAuthHeaders(final String method, final String uri) {
+        final Map<String, String> headers = new HashMap<>();
         if (accessToken == null) return headers;
         if (dpopSupported) {
-            headers.put("Authorization", "DPoP " + accessToken);
-            String dpopToken = generateDpopToken(method, uri);
-            headers.put("DPoP", dpopToken);
+            headers.put(HttpConstants.HEADER_AUTHORIZATION, HttpConstants.PREFIX_DPOP + accessToken);
+            final String dpopToken = generateDpopToken(method, uri);
+            headers.put(HttpConstants.HEADER_DPOP, dpopToken);
         } else {
-            headers.put("Authorization", "Bearer " + accessToken);
+            headers.put(HttpConstants.HEADER_AUTHORIZATION, HttpConstants.PREFIX_BEARER + accessToken);
         }
         if (agent != null) {
-            headers.put("User-Agent", agent);
+            headers.put(HttpConstants.USER_AGENT, agent);
         }
         return headers;
     }
@@ -238,4 +242,6 @@ public class Client {
             throw new UncheckedJoseException("Unable to generate DPoP token", ex);
         }
     }
+
+    private Client() { }
 }

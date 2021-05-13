@@ -67,13 +67,13 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void sizeDeep() {
-        DataModelBase deepModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.DEEP);
+        final DataModelBase deepModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.DEEP);
         assertEquals(17, deepModel.size());
     }
 
     @Test
     void sizeList() {
-        DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.LIST);
+        final DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.LIST);
         assertEquals(17, listModel.size());
     }
 
@@ -94,7 +94,7 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void getModelList() {
-        List<TestCase> models = dataModelBase.getModelList(iri(NS, "hasTest"), TestCase.class);
+        final List<TestCase> models = dataModelBase.getModelList(iri(NS, "hasTest"), TestCase.class);
         assertNotNull(models);
         assertEquals(1, models.size());
         assertEquals("earl:TestCase", models.get(0).getTypesList());
@@ -102,7 +102,7 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void getEmptyModelList() {
-        List<TestCase> models = dataModelBase.getModelList(iri(NS, "hasTest2"), TestCase.class);
+        final List<TestCase> models = dataModelBase.getModelList(iri(NS, "hasTest2"), TestCase.class);
         assertNull(models);
     }
 
@@ -113,8 +113,8 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void getModelCollectionList() {
-        DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.LIST);
-        List<Step> models = listModel.getModelCollectionList(iri(NS, "hasSteps"), Step.class);
+        final DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.LIST);
+        final List<Step> models = listModel.getModelCollectionList(iri(NS, "hasSteps"), Step.class);
         assertNotNull(models);
         assertEquals(2, models.size());
         assertEquals("earl:Step", models.get(0).getTypesList());
@@ -122,15 +122,17 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void getEmptyModelCollectionList() {
-        DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.LIST);
-        List<Step> models = listModel.getModelCollectionList(iri(NS, "hasSteps2"), Step.class);
+        final DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.LIST);
+        final List<Step> models = listModel.getModelCollectionList(iri(NS, "hasSteps2"), Step.class);
         assertNull(models);
     }
 
     @Test
     void getBadModelCollectionList() {
-        DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.LIST);
-        assertThrows(RuntimeException.class, () -> listModel.getModelCollectionList(iri(NS, "hasSteps"), TestClass.class));
+        final DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.LIST);
+        assertThrows(RuntimeException.class,
+                () -> listModel.getModelCollectionList(iri(NS, "hasSteps"), TestClass.class)
+        );
     }
 
     @Test
@@ -175,15 +177,15 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void getLiteralAsStringFromBNode() {
-        DataModelBase deepModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.DEEP);
-        BNode node = deepModel.getAsBNode(iri(NS, "hasBNode"));
+        final DataModelBase deepModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.DEEP);
+        final BNode node = deepModel.getAsBNode(iri(NS, "hasBNode"));
         assertNotNull(node);
         assertEquals("string", deepModel.getLiteralAsString(node, iri(NS, "hasString")));
     }
 
     @Test
     void getLiteralsAsStringSet() {
-        Set<String> set = dataModelBase.getLiteralsAsStringSet(iri(NS, "hasStrings"));
+        final Set<String> set = dataModelBase.getLiteralsAsStringSet(iri(NS, "hasStrings"));
         assertNotNull(set);
         assertEquals(2, set.size());
         assertTrue(set.contains("string1") && set.contains("string2"));
@@ -191,7 +193,7 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void getMissingLiteralsAsStringSet() {
-        Set<String> set = dataModelBase.getLiteralsAsStringSet(iri(NS, "hasMissingStrings"));
+        final Set<String> set = dataModelBase.getLiteralsAsStringSet(iri(NS, "hasMissingStrings"));
         assertNotNull(set);
         assertEquals(0, set.size());
     }
@@ -218,7 +220,7 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void getLiteralAsDate() {
-        LocalDate date = dataModelBase.getLiteralAsDate(iri(NS, "hasDate"));
+        final LocalDate date = dataModelBase.getLiteralAsDate(iri(NS, "hasDate"));
         assertThat("Date matches", date.isEqual(LocalDate.parse("2021-04-08")));
     }
 
@@ -229,7 +231,7 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void getLiteralAsDateTime() {
-        LocalDateTime dateTime = dataModelBase.getLiteralAsDateTime(iri(NS, "hasDateTime"));
+        final LocalDateTime dateTime = dataModelBase.getLiteralAsDateTime(iri(NS, "hasDateTime"));
         assertThat("DateTime matches", dateTime.isEqual(LocalDateTime.parse("2021-04-08T12:30:00.000")));
     }
     @Test

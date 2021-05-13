@@ -6,7 +6,7 @@ import org.solid.common.vocab.EARL;
 import org.solid.testharness.utils.DataModelBase;
 
 public class Step extends DataModelBase {
-    public Step(IRI subject) {
+    public Step(final IRI subject) {
         super(subject);
     }
 

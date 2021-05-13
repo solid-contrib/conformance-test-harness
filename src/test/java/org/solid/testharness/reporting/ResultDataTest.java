@@ -26,21 +26,27 @@ class ResultDataTest extends AbstractDataModelTests {
 
     @Test
     void getPrefixes() {
-        ResultData resultData = new ResultData(iri("http://example.org/"));
-        assertEquals("xsd: http://www.w3.org/2001/XMLSchema# dcterms: http://purl.org/dc/terms/ doap: http://usefulinc.com/ns/doap# solid: http://www.w3.org/ns/solid/terms# solid-test: https://github.com/solid/conformance-test-harness/vocab# earl: http://www.w3.org/ns/earl# td: http://www.w3.org/2006/03/test-description#", resultData.getPrefixes());
+        final ResultData resultData = new ResultData(iri("http://example.org/"));
+        assertEquals("xsd: http://www.w3.org/2001/XMLSchema# " +
+                "dcterms: http://purl.org/dc/terms/ " +
+                "doap: http://usefulinc.com/ns/doap# " +
+                "solid: http://www.w3.org/ns/solid/terms# " +
+                "solid-test: https://github.com/solid/conformance-test-harness/vocab# " +
+                "earl: http://www.w3.org/ns/earl# " +
+                "td: http://www.w3.org/2006/03/test-description#", resultData.getPrefixes());
     }
 
     @Test
     void getSpecificationTestCases() {
-        ResultData resultData = new ResultData(iri("http://example.org/"));
-        List<SpecificationTestCase> testCases = resultData.getSpecificationTestCases();
+        final ResultData resultData = new ResultData(iri("http://example.org/"));
+        final List<SpecificationTestCase> testCases = resultData.getSpecificationTestCases();
         assertNotNull(testCases);
         assertEquals(2, testCases.size());
     }
 
     @Test
     void getSpecification() {
-        ResultData resultData = new ResultData(iri("http://example.org/"));
+        final ResultData resultData = new ResultData(iri("http://example.org/"));
         assertEquals("https://solidproject.org/TR/protocol#spec1", resultData.getSpecification());
     }
 }

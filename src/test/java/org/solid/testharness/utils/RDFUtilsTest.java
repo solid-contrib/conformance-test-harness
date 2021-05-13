@@ -16,7 +16,7 @@ class RDFUtilsTest {
 
     @Test
     void turtleToTripleArray() throws Exception {
-        List<String> triples = RDFUtils.turtleToTripleArray(TestData.SAMPLE_TURTLE, TestData.SAMPLE_BASE);
+        final List<String> triples = RDFUtils.turtleToTripleArray(TestData.SAMPLE_TURTLE, TestData.SAMPLE_BASE);
         assertNotNull(triples);
         assertEquals(1, triples.size());
         assertEquals(TestData.SAMPLE_TURTLE_TRIPLE, triples.get(0));
@@ -29,7 +29,7 @@ class RDFUtilsTest {
 
     @Test
     void jsonLdToTripleArray() throws Exception {
-        List<String> triples = RDFUtils.jsonLdToTripleArray(TestData.SAMPLE_JSONLD, TestData.SAMPLE_BASE);
+        final List<String> triples = RDFUtils.jsonLdToTripleArray(TestData.SAMPLE_JSONLD, TestData.SAMPLE_BASE);
         assertNotNull(triples);
         assertEquals(1, triples.size());
         assertEquals(TestData.SAMPLE_JSONLD_TRIPLE, triples.get(0));
@@ -42,7 +42,7 @@ class RDFUtilsTest {
 
     @Test
     void rdfaToTripleArray() throws Exception {
-        List<String> triples = RDFUtils.rdfaToTripleArray(TestData.SAMPLE_HTML, TestData.SAMPLE_BASE);
+        final List<String> triples = RDFUtils.rdfaToTripleArray(TestData.SAMPLE_HTML, TestData.SAMPLE_BASE);
         logger.error(Arrays.toString(triples.toArray()));
         assertNotNull(triples);
         assertEquals(1, triples.size());
@@ -52,10 +52,5 @@ class RDFUtilsTest {
     @Test
     void rdfaToTripleArrayFails() {
         assertThrows(Exception.class, () -> RDFUtils.rdfaToTripleArray("Not RDFa", TestData.SAMPLE_BASE));
-    }
-
-    @Test
-    void meaninglessContruct() {
-        assertNotNull(new RDFUtils());
     }
 }

@@ -21,7 +21,9 @@ public class ConfigTest {
 
     @Test
     void getTestSubjectDefault() {
-        assertEquals("https://github.com/solid/conformance-test-harness/testserver", config.getTestSubject().stringValue());
+        assertEquals("https://github.com/solid/conformance-test-harness/testserver",
+                config.getTestSubject().stringValue()
+        );
     }
 
     @Test
@@ -36,7 +38,7 @@ public class ConfigTest {
 
     @Test
     void getCredentialsDirectory() throws IOException {
-        File file = config.getCredentialsDirectory();
+        final File file = config.getCredentialsDirectory();
         assertTrue(file.exists() && file.isDirectory());
         assertEquals(Path.of("src/test/resources").toFile().getCanonicalFile(), file);
     }
@@ -44,7 +46,7 @@ public class ConfigTest {
     @Test
     void getOutputDirectory() {
         assertNull(config.getOutputDirectory());
-        File file = new File("target");
+        final File file = new File("target");
         config.setOutputDirectory(file);
         assertEquals(file, config.getOutputDirectory());
     }

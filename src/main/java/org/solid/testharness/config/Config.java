@@ -52,7 +52,7 @@ public class Config {
         return testSubject;
     }
 
-    public void setTestSubject(IRI testSubject) {
+    public void setTestSubject(final IRI testSubject) {
         this.testSubject = testSubject;
     }
 
@@ -61,28 +61,35 @@ public class Config {
             try {
                 configUrl = Path.of(configFile.get()).toAbsolutePath().normalize().toUri().toURL();
             } catch (Exception e) {
-                throw new TestHarnessInitializationException("configFile config is not a valid file or URL: %s", e.toString());
+                throw (TestHarnessInitializationException) new TestHarnessInitializationException(
+                        "configFile config is not a valid file or URL: %s",
+                        e.toString()
+                ).initCause(e);
             }
         }
         return configUrl;
     }
 
-    public void setConfigUrl(URL configUrl) {
+    public void setConfigUrl(final URL configUrl) {
         this.configUrl = configUrl;
     }
 
     public URL getTestSuiteDescription()  {
         if (testSuiteDescriptionFile == null) {
             try {
-                testSuiteDescriptionFile = Path.of(testSuiteDescription.get()).toAbsolutePath().normalize().toUri().toURL();
+                testSuiteDescriptionFile = Path.of(testSuiteDescription.get()).toAbsolutePath()
+                        .normalize().toUri().toURL();
             } catch (Exception e) {
-                throw new TestHarnessInitializationException("testSuiteDescription config is not a valid file or URL: %s", e.toString());
+                throw (TestHarnessInitializationException) new TestHarnessInitializationException(
+                        "testSuiteDescription config not a valid file or URL: %s",
+                        e.toString()
+                ).initCause(e);
             }
         }
         return testSuiteDescriptionFile;
     }
 
-    public void setTestSuiteDescription(URL testSuiteDescriptionFile) {
+    public void setTestSuiteDescription(final URL testSuiteDescriptionFile) {
         this.testSuiteDescriptionFile = testSuiteDescriptionFile;
     }
 
@@ -91,7 +98,10 @@ public class Config {
             try {
                 credentialsDirectory = Path.of(credentialsPath.get()).toFile().getCanonicalFile();
             } catch (Exception e) {
-                throw new TestHarnessInitializationException("credentialsDir config is not a valid file: %s", e.toString());
+                throw (TestHarnessInitializationException) new TestHarnessInitializationException(
+                        "credentialsDir config is not a valid file: %s",
+                        e.toString()
+                ).initCause(e);
             }
         }
         return credentialsDirectory;
@@ -101,15 +111,17 @@ public class Config {
         return outputDir;
     }
 
-    public void setOutputDirectory(File outputDir) {
+    public void setOutputDirectory(final File outputDir) {
         this.outputDir = outputDir;
     }
 
     public void logConfigSettings() {
-        logger.info("Config url:       {}", getConfigUrl().toString());
-        logger.info("Credentials path: {}", getCredentialsDirectory().getPath());
-        logger.info("Test suite:       {}", getTestSuiteDescription().toString());
-        logger.info("Path mappings:    {}", pathMappings.getMappings());
-        logger.info("Target server:    {}", target.orElse("not defined"));
+        if (logger.isInfoEnabled()) {
+            logger.info("Config url:       {}", getConfigUrl().toString());
+            logger.info("Credentials path: {}", getCredentialsDirectory().getPath());
+            logger.info("Test suite:       {}", getTestSuiteDescription().toString());
+            logger.info("Path mappings:    {}", pathMappings.getMappings());
+            logger.info("Target server:    {}", target.orElse("not defined"));
+        }
     }
 }

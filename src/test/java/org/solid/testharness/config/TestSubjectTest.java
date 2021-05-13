@@ -4,6 +4,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.http.AuthManager;
+import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClient;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
@@ -33,14 +34,15 @@ public class TestSubjectTest {
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver"));
         testSubject.loadTestSubjectConfig();
         testSubject.registerClients();
-        Map<String, SolidClient> clients = testSubject.getClients();
+        final Map<String, SolidClient> clients = testSubject.getClients();
         assertNotNull(clients);
         assertEquals(2, clients.size());
     }
 
     @Test
     void registerClientsWithAuthException() throws Exception {
-        when(authManager.authenticate(anyString(), any(TargetServer.class))).thenThrow(new Exception("Failed as expected"));
+        when(authManager.authenticate(anyString(), any(TargetServer.class)))
+                .thenThrow(new Exception("Failed as expected"));
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver"));
         testSubject.loadTestSubjectConfig();
         assertThrows(TestHarnessInitializationException.class, () -> testSubject.registerClients());
@@ -50,7 +52,7 @@ public class TestSubjectTest {
     void getTargetServer() {
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver"));
         testSubject.loadTestSubjectConfig();
-        TargetServer targetServer = testSubject.getTargetServer();
+        final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
         assertEquals("https://github.com/solid/conformance-test-harness/testserver", targetServer.getSubject());
     }
@@ -59,7 +61,7 @@ public class TestSubjectTest {
     void getTargetServer2() {
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver2"));
         testSubject.loadTestSubjectConfig();
-        TargetServer targetServer = testSubject.getTargetServer();
+        final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
         assertEquals("https://github.com/solid/conformance-test-harness/testserver2", targetServer.getSubject());
     }
@@ -68,7 +70,7 @@ public class TestSubjectTest {
     void getTargetServerDefault() {
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver"));
         testSubject.loadTestSubjectConfig();
-        TargetServer targetServer = testSubject.getTargetServer();
+        final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
     }
 
@@ -77,12 +79,12 @@ public class TestSubjectTest {
         when(authManager.authenticate(anyString(), any(TargetServer.class))).thenReturn(new SolidClient());
         testSubject.loadTestSubjectConfig();
         testSubject.registerClients();
-        Map<String, SolidClient> clients = testSubject.getClients();
+        final Map<String, SolidClient> clients = testSubject.getClients();
         assertNotNull(clients);
         assertEquals(2, clients.size());
-        assertTrue(clients.containsKey("alice"));
-        assertNotNull(clients.get("alice"));
-        assertTrue(clients.containsKey("bob"));
-        assertNotNull(clients.get("bob"));
+        assertTrue(clients.containsKey(HttpConstants.ALICE));
+        assertNotNull(clients.get(HttpConstants.ALICE));
+        assertTrue(clients.containsKey(HttpConstants.BOB));
+        assertNotNull(clients.get(HttpConstants.BOB));
     }
 }
