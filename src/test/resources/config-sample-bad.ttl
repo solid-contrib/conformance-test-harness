@@ -23,5 +23,5 @@
                              solid-test:webId <https://example.org/webid> ;
                              solid-test:credentials "inrupt-alice.json"
                          ] ;
-    solid-test:serverRoot <http://localhost> ;
+    solid-test:serverRoot <http://localhost/> ;
     solid-test:setupRootAcl true .

@@ -149,6 +149,10 @@ public class TestSubject {
         return targetServer;
     }
 
+    public void setTargetServer(final TargetServer targetServer) {
+        this.targetServer = targetServer;
+    }
+
     public Map<String, SolidClient> getClients() {
         return clients;
     }
