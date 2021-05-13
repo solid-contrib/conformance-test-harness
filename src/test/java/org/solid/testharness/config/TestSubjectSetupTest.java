@@ -69,6 +69,11 @@ public class TestSubjectSetupTest {
     }
 
     @Test
+    void prepareServerWithoutServer() {
+        assertThrows(TestHarnessInitializationException.class, () -> testSubject.prepareServer());
+    }
+
+    @Test
     void registerWithoutServer() {
         assertThrows(TestHarnessInitializationException.class, () -> testSubject.registerClients());
     }

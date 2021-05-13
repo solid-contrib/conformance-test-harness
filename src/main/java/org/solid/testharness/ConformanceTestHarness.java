@@ -129,6 +129,7 @@ public class ConformanceTestHarness {
             }
 
             testSubject.registerClients();
+            testSubject.prepareServer();
         } catch (TestHarnessInitializationException e) {
             logger.error("Cannot run test suites", e);
             return null;

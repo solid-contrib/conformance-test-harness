@@ -8,7 +8,9 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.testharness.utils.TestHarnessInitializationException;
 
+import javax.enterprise.inject.spi.CDI;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.StringReader;
@@ -30,10 +32,15 @@ public class SolidClient {
     private Client client;
 
     public SolidClient() {
-        client = ClientRegistry.getClient(ClientRegistry.DEFAULT);
+        final ClientRegistry clientRegistry = CDI.current().select(ClientRegistry.class).get();
+        client = clientRegistry.getClient(ClientRegistry.DEFAULT);
     }
     public SolidClient(final String user) {
-        client = ClientRegistry.getClient(user);
+        final ClientRegistry clientRegistry = CDI.current().select(ClientRegistry.class).get();
+        client = clientRegistry.getClient(user);
+        if (client == null) {
+            throw new TestHarnessInitializationException("Client '%s' has not been registered yet", user);
+        }
     }
     public SolidClient(final Client client) {
         this.client = client;
@@ -45,17 +52,6 @@ public class SolidClient {
 
     public Client getClient() {
         return client;
-    }
-
-    public boolean setupRootAcl(final String serverRoot, final String webID) throws IOException, InterruptedException {
-        final URI rootAclUrl = getResourceAclLink(serverRoot + (serverRoot.endsWith("/") ? "" : "/"));
-        final String acl = String.format("@prefix acl: <http://www.w3.org/ns/auth/acl#>. " +
-                "<#alice> a acl:Authorization ; " +
-                "  acl:agent <%s> ;" +
-                "  acl:accessTo </>;" +
-                "  acl:default </>;" +
-                "  acl:mode acl:Read, acl:Write, acl:Control .", webID);
-        return createAcl(rootAclUrl, acl);
     }
 
     public Map<String, String> getAuthHeaders(final String method, final String uri) {

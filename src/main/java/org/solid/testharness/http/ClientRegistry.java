@@ -1,32 +1,37 @@
 package org.solid.testharness.http;
 
-import java.util.*;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
-public final class ClientRegistry {
-    private static final Map<String, Client> registeredClientMap = Collections.synchronizedMap(new HashMap<>());
+@ApplicationScoped
+public class ClientRegistry {
+    private Map<String, Client> registeredClientMap;
 
     public static final String DEFAULT = "default";
     public static final String SESSION_BASED = "session";
 
-    static {
+    @PostConstruct
+    void postConstruct() {
+        registeredClientMap = Collections.synchronizedMap(new HashMap<>());
         register(DEFAULT, new Client.Builder().build());
         register(SESSION_BASED, new Client.Builder().withSessionSupport().build());
     }
 
-    public static void register(final String label, final Client client) {
+    public void register(final String label, final Client client) {
         registeredClientMap.put(label, client);
     }
 
-    public static boolean hasClient(final String label) {
+    public boolean hasClient(final String label) {
         return registeredClientMap.containsKey(label);
     }
 
-    public static Client getClient(final String label) {
+    public Client getClient(final String label) {
         if (label == null) {
             return registeredClientMap.get(DEFAULT);
         }
         return registeredClientMap.get(label);
     }
-
-    private ClientRegistry() { }
 }
