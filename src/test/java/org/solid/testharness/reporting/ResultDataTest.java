@@ -7,8 +7,7 @@ import org.solid.testharness.utils.AbstractDataModelTests;
 import java.util.List;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 class ResultDataTest extends AbstractDataModelTests {
@@ -48,5 +47,11 @@ class ResultDataTest extends AbstractDataModelTests {
     void getSpecification() {
         final ResultData resultData = new ResultData(iri("http://example.org/"));
         assertEquals("https://solidproject.org/TR/protocol#spec1", resultData.getSpecification());
+    }
+
+    @Test
+    void getAssertor() {
+        final ResultData resultData = new ResultData(iri("http://example.org/"));
+        assertNotNull(resultData.getAssertor());
     }
 }

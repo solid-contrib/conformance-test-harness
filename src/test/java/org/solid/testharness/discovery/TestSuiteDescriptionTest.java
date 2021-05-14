@@ -11,6 +11,7 @@ import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
 import java.net.MalformedURLException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -18,8 +19,7 @@ import java.util.stream.Stream;
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 class TestSuiteDescriptionTest {
@@ -104,6 +104,12 @@ class TestSuiteDescriptionTest {
         final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf3"));
         final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3");
         assertThat("Group 1 matches", testCases, containsInAnyOrder(expected));
+    }
+
+    @Test
+    void mapEmptyList() {
+        final List<IRI> testCases = Collections.emptyList();
+        assertTrue(testSuiteDescription.locateTestCases(testCases).isEmpty());
     }
 
     @Test

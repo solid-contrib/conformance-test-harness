@@ -20,6 +20,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
+
 public class DataModelBase {
     private static final Logger logger = LoggerFactory.getLogger(DataModelBase.class);
 
@@ -49,6 +51,7 @@ public class DataModelBase {
         this(subject, ConstructMode.SHALLOW);
     }
     protected DataModelBase(final IRI subject, final ConstructMode mode) {
+        requireNonNull(subject, "subject is required");
         final DataRepository dataRepository = CDI.current().select(DataRepository.class).get();
         this.subject = subject;
         final String query;
@@ -65,7 +68,7 @@ public class DataModelBase {
         }
         model = Repositories.graphQuery(dataRepository,
                 String.format(query, subject, subject),
-                r -> QueryResults.asModel(r)
+                QueryResults::asModel
         );
     }
 

@@ -22,7 +22,7 @@ public class Scenario extends DataModelBase {
 
     public Assertion getAssertion() {
         final List<Assertion> assertions = getModelList(EARL.assertions, Assertion.class);
-        if (assertions != null && !assertions.isEmpty()) {
+        if (assertions != null) {
             return assertions.get(0);
         } else {
             return null;

@@ -51,6 +51,11 @@ class DataModelBaseTest extends AbstractDataModelTests {
     }
 
     @Test
+    void nullSubjectConstruct() {
+        assertThrows(NullPointerException.class, () -> new DataModelBase(null));
+    }
+
+    @Test
     void getSubjectIri() {
         assertTrue(iri(NS, "test").equals(dataModelBase.getSubjectIri()));
     }

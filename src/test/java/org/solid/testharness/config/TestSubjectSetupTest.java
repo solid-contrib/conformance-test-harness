@@ -36,7 +36,6 @@ public class TestSubjectSetupTest {
         assertEquals("https://github.com/solid/conformance-test-harness/default", targetServer.getSubject());
     }
 
-
     @Test
     void setupTargetMultipleConfig() throws MalformedURLException {
         when(config.getConfigUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
@@ -70,11 +69,5 @@ public class TestSubjectSetupTest {
     void prepareServerWithoutServer() {
         testSubject.setTargetServer(null);
         assertThrows(TestHarnessInitializationException.class, () -> testSubject.prepareServer());
-    }
-
-    @Test
-    void registerWithoutServer() {
-        testSubject.setTargetServer(null);
-        assertThrows(TestHarnessInitializationException.class, () -> testSubject.registerClients());
     }
 }
