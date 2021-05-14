@@ -27,13 +27,13 @@
         <release.plugin.version>2.5.3</release.plugin.version>
         <jandex.maven.version>1.0.8</jandex.maven.version>
         <properties.plugin.version>1.0.0</properties.plugin.version>
-        <jacoco-plugin.version>0.8.6</jacoco-plugin.version>
+        <jacoco-plugin.version>0.8.7</jacoco-plugin.version>
         <checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
         <checkstyle.tool.version>8.42</checkstyle.tool.version>
         <pmd.plugin.version>3.14.0</pmd.plugin.version>
 
         <!-- dependencies -->
-        <quarkus.version>1.13.3.Final</quarkus.version>
+        <quarkus.version>1.13.4.Final</quarkus.version>
         <karate.version>1.0.1</karate.version>
         <junit.jupiter.version>5.7.1</junit.jupiter.version>
         <hamcrest.version>2.2</hamcrest.version>
@@ -44,7 +44,7 @@
         <commons.text.version>1.9</commons.text.version>
         <commons.lang.version>3.12.0</commons.lang.version>
         <commons.cli.version>1.4</commons.cli.version>
-        <mockito.version>3.9.0</mockito.version>
+        <mockito.version>3.10.0</mockito.version>
         <jandex.version>2.2.3.Final</jandex.version>
         <jackson.version>2.12.3</jackson.version>
 
