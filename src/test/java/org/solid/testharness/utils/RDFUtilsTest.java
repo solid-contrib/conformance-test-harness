@@ -19,7 +19,7 @@ class RDFUtilsTest {
         final List<String> triples = RDFUtils.turtleToTripleArray(TestData.SAMPLE_TURTLE, TestData.SAMPLE_BASE);
         assertNotNull(triples);
         assertEquals(1, triples.size());
-        assertEquals(TestData.SAMPLE_TURTLE_TRIPLE, triples.get(0));
+        assertEquals(TestData.SAMPLE_TRIPLE, triples.get(0));
     }
 
     @Test
@@ -32,7 +32,7 @@ class RDFUtilsTest {
         final List<String> triples = RDFUtils.jsonLdToTripleArray(TestData.SAMPLE_JSONLD, TestData.SAMPLE_BASE);
         assertNotNull(triples);
         assertEquals(1, triples.size());
-        assertEquals(TestData.SAMPLE_JSONLD_TRIPLE, triples.get(0));
+        assertEquals(TestData.SAMPLE_TRIPLE, triples.get(0));
     }
 
     @Test

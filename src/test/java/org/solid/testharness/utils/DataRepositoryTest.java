@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -28,9 +29,9 @@ import static org.mockito.Mockito.when;
 class DataRepositoryTest {
     private static final Logger logger = LoggerFactory.getLogger(DataRepositoryTest.class);
 
-    private static final IRI assertor = iri("http://example.org/testharness");
-    private static final IRI testSubject = iri("http://example.org/test");
-    private static final IRI featureIri = iri("http://example.org/feature");
+    private static final IRI assertor = iri(TestData.SAMPLE_NS, "testharness");
+    private static final IRI testSubject = iri(TestData.SAMPLE_NS, "test");
+    private static final IRI featureIri = iri(TestData.SAMPLE_NS, "feature");
 
     @Test
     void addFeatureResult() throws Exception {
@@ -138,7 +139,7 @@ class DataRepositoryTest {
         final DataRepository dataRepository = setupRepository();
         final StringWriter wr = new StringWriter();
         dataRepository.export(wr);
-        assertTrue(wr.toString().contains(TestData.SAMPLE_EXPORTED_TRIPLE));
+        assertTrue(wr.toString().contains(TestData.SAMPLE_TURTLE));
     }
 
     @Test
@@ -146,7 +147,7 @@ class DataRepositoryTest {
         final DataRepository dataRepository = setupRepository();
         final File tempFile = File.createTempFile("TestHarness-", ".tmp");
         tempFile.deleteOnExit();
-        final Writer wr = new FileWriter(tempFile);
+        final Writer wr = Files.newBufferedWriter(tempFile.toPath());
         wr.close();
         assertThrows(Exception.class, () -> dataRepository.export(wr));
     }
@@ -156,7 +157,7 @@ class DataRepositoryTest {
         final DataRepository dataRepository = setupRepository();
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         dataRepository.export(os);
-        assertTrue(os.toString().contains(TestData.SAMPLE_EXPORTED_TRIPLE));
+        assertTrue(os.toString().contains(TestData.SAMPLE_TURTLE));
     }
 
     @Test
@@ -164,7 +165,7 @@ class DataRepositoryTest {
         final DataRepository dataRepository = setupRepository();
         final File tempFile = File.createTempFile("TestHarness-", ".tmp");
         tempFile.deleteOnExit();
-        final OutputStream os = new FileOutputStream(tempFile);
+        final OutputStream os = Files.newOutputStream(tempFile.toPath());
         os.close();
         assertThrows(Exception.class, () -> dataRepository.export(os));
     }
@@ -237,7 +238,7 @@ class DataRepositoryTest {
         final DataRepository dataRepository = new DataRepository();
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             final Statement st = Values.getValueFactory()
-                    .createStatement(iri(TestData.SAMPLE_BASE + "/bob"), RDF.TYPE, FOAF.PERSON);
+                    .createStatement(iri(TestData.SAMPLE_NS, "bob"), RDF.TYPE, FOAF.PERSON);
             conn.add(st);
         }
         return dataRepository;
@@ -247,15 +248,5 @@ class DataRepositoryTest {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             return conn.size();
         }
-    }
-
-    private Reader getBadReader() {
-        final Reader reader = Reader.nullReader();
-        try {
-            reader.close();
-        } catch (IOException e) {
-            logger.error("Failed to close a null reader in tests");
-        }
-        return reader;
     }
 }

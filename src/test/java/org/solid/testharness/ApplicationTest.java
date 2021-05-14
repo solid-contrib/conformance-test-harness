@@ -18,10 +18,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @QuarkusTest
 class ApplicationTest {

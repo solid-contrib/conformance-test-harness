@@ -6,9 +6,7 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.solid.common.vocab.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class Namespaces {
@@ -29,7 +27,11 @@ public final class Namespaces {
         return term;
     }
 
-    public static String generateTurtlePrefixes(final List<String> prefixes) {
+    public static String generateAllTurtlePrefixes() {
+        return generateTurtlePrefixes(namespaceMap.keySet());
+    }
+
+    public static String generateTurtlePrefixes(final Collection<String> prefixes) {
         if (prefixes == null || prefixes.isEmpty()) {
             return "";
         }
@@ -39,7 +41,7 @@ public final class Namespaces {
                 .collect(Collectors.joining());
     }
 
-    public static String generateHtmlPrefixes(final List<String> prefixes) {
+    public static String generateHtmlPrefixes(final Collection<String> prefixes) {
         if (prefixes == null || prefixes.isEmpty()) {
             return "";
         }
@@ -65,6 +67,8 @@ public final class Namespaces {
         namespaceMap.put(DCTERMS.PREFIX, new Namespace(DCTERMS.PREFIX, DCTERMS.NAMESPACE));
         namespaceMap.put(XSD.PREFIX, new Namespace(XSD.PREFIX, XSD.NAMESPACE));
         namespaceMap.put(TD.PREFIX, new Namespace(TD.PREFIX, TD.NAMESPACE));
+        namespaceMap.put(RDF.PREFIX, new Namespace(RDF.PREFIX, RDF.NAMESPACE));
+        namespaceMap.put(RDFS.PREFIX, new Namespace(RDFS.PREFIX, RDFS.NAMESPACE));
     }
 
     private static class Namespace {

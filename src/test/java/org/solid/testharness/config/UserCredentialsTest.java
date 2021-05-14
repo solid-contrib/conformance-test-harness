@@ -9,6 +9,7 @@ import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.junit.jupiter.api.Test;
+import org.solid.testharness.utils.TestData;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -23,15 +24,16 @@ public class UserCredentialsTest {
 
     @Test
     public void createFromModel() throws IOException {
-        final Resource user = iri("http://example.org/alice");
+        final Resource user = iri(TestData.SAMPLE_NS, "alice");
         final Reader reader = new StringReader(
+                "@prefix ex: <" + TestData.SAMPLE_NS + "> .\n" +
                 "@prefix solid-test: <https://github.com/solid/conformance-test-harness/vocab#> ." +
-                "<http://example.org/alice> solid-test:webId <http://example.org/alice/profile/card#me>." +
-                "<http://example.org/alice> solid-test:credentials \"inrupt-alice.json\".");
+                "ex:alice solid-test:webId <https://example.org/alice/profile/card#me>." +
+                "ex:alice solid-test:credentials \"inrupt-alice.json\".");
         final Model model = Rio.parse(reader, RDFFormat.TURTLE);
         final UserCredentials userCredentials = new UserCredentials(model, user);
         assertAll("userCredentials",
-                () -> assertEquals("http://example.org/alice/profile/card#me", userCredentials.getWebID()),
+                () -> assertEquals("https://example.org/alice/profile/card#me", userCredentials.getWebID()),
                 () -> assertEquals("EXTERNAL_USERNAME", userCredentials.getUsername()),
                 () -> assertEquals("EXTERNAL_PASSWORD", userCredentials.getPassword()),
                 () -> assertEquals("EXTERNAL_TOKEN", userCredentials.getRefreshToken()),
@@ -41,7 +43,7 @@ public class UserCredentialsTest {
                 () -> assertTrue(userCredentials.isUsingRefreshToken()),
                 () -> assertTrue(userCredentials.isUsingUsernamePassword())
         );
-        assertEquals("UserCredentials: webId=http://example.org/alice/profile/card#me, " +
+        assertEquals("UserCredentials: webId=https://example.org/alice/profile/card#me, " +
                 "credentials=inrupt-alice.json, username=***, password=***", userCredentials.toString());
     }
 

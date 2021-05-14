@@ -3,6 +3,7 @@ package org.solid.testharness.reporting;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.utils.AbstractDataModelTests;
+import org.solid.testharness.utils.TestData;
 
 import java.util.List;
 
@@ -13,11 +14,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class ResultDataTest extends AbstractDataModelTests {
     @Override
     public String getData() {
-        return "@prefix td: <http://www.w3.org/2006/03/test-description#> .\n" +
-                "@prefix ex: <http://example.org/> .\n" +
-                "@prefix doap: <http://usefulinc.com/ns/doap#> .\n" +
-                "@prefix dcterms: <http://purl.org/dc/terms/> .\n" +
-                "<http://example.org/> doap:implements <https://solidproject.org/TR/protocol#spec1> ;\n" +
+        return TestData.PREFIXES +
+                "<" + TestData.SAMPLE_NS + "> doap:implements <https://solidproject.org/TR/protocol#spec1> ;\n" +
                 "  dcterms:hasPart ex:test1, ex:test2 .\n" +
                 "ex:test1 a td:SpecificationTestCase .\n" +
                 "ex:test2 a td:SpecificationTestCase .";
@@ -25,8 +23,10 @@ class ResultDataTest extends AbstractDataModelTests {
 
     @Test
     void getPrefixes() {
-        final ResultData resultData = new ResultData(iri("http://example.org/"));
-        assertEquals("xsd: http://www.w3.org/2001/XMLSchema# " +
+        final ResultData resultData = new ResultData(iri(TestData.SAMPLE_NS));
+        assertEquals("rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns# " +
+                "rdfs: http://www.w3.org/2000/01/rdf-schema# " +
+                "xsd: http://www.w3.org/2001/XMLSchema# " +
                 "dcterms: http://purl.org/dc/terms/ " +
                 "doap: http://usefulinc.com/ns/doap# " +
                 "solid: http://www.w3.org/ns/solid/terms# " +
@@ -37,7 +37,7 @@ class ResultDataTest extends AbstractDataModelTests {
 
     @Test
     void getSpecificationTestCases() {
-        final ResultData resultData = new ResultData(iri("http://example.org/"));
+        final ResultData resultData = new ResultData(iri(TestData.SAMPLE_NS));
         final List<SpecificationTestCase> testCases = resultData.getSpecificationTestCases();
         assertNotNull(testCases);
         assertEquals(2, testCases.size());
@@ -45,13 +45,13 @@ class ResultDataTest extends AbstractDataModelTests {
 
     @Test
     void getSpecification() {
-        final ResultData resultData = new ResultData(iri("http://example.org/"));
+        final ResultData resultData = new ResultData(iri(TestData.SAMPLE_NS));
         assertEquals("https://solidproject.org/TR/protocol#spec1", resultData.getSpecification());
     }
 
     @Test
     void getAssertor() {
-        final ResultData resultData = new ResultData(iri("http://example.org/"));
+        final ResultData resultData = new ResultData(iri(TestData.SAMPLE_NS));
         assertNotNull(resultData.getAssertor());
     }
 }

@@ -326,6 +326,13 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco-plugin.version}</version>
+                <!-- This can be used to exclude a class from coverage if needed
+                <configuration>
+                    <excludes>
+                        <exclude>**/ReportGenerator.*</exclude>
+                    </excludes>
+                </configuration>
+                -->
                 <executions>
                     <execution>
                         <goals>
