@@ -351,18 +351,18 @@ Alternatively you can set these things on the command line:
 ### Build and test
 To run the unit tests on the harness itself:
 ```shell
-mvn test
+./mvnw test
 ```
 To run the test suite with the default target server as defined in `config/application.yaml`:
 ```shell
 # this uses a profile to run the TestSuiteRunner instead of local unit tests
-mvn test -Psolid
+./mvnw test -Psolid
 ```
 To run the test suite with a specific target server:
 ```shell
-mvn test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/ess-compat
-mvn test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/css
-mvn test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/nss
+./mvnw test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/ess-compat
+./mvnw test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/css
+./mvnw test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/nss
 ```
 
 Using an IDE you can also run a specific scenario by editing the TestScenarioRunner and then running it as you would any unit test:
@@ -381,11 +381,11 @@ You can also go to the TestSuiteRunnner class and run the whole test suite in th
 ### Package
 The test harness can be packaged into a single jar:
 ```shell
-mvn package
+./mvnw package
 ```
 To quickly build this package without running the unit tests:
 ```shell
-mvn -Dmaven.test.skip=true package
+./mvnw -Dmaven.test.skip=true package
 ```
 This creates `target/solid-conformance-test-harness-runner.jar` which can be deployed to its own directory and run as:
 ```shell
@@ -395,7 +395,7 @@ java -jar solid-conformance-test-harness-runner.jar
 ### Release
 Update CHANGELOG.md to highlight new features before starting the release.
 ```shell
-mvn release:prepare
+./mvnw release:prepare
 ```
 The first time you run this it will ask various questions to help setup `release.properties` which will be used for future releases.
 This process automatically modifies `pom.xml` to prepare a release version, commits the change and tags the repository, then sets up the 
@@ -403,8 +403,8 @@ project ready for the ongoing development of the next version.
 
 You can test this process, and undo the results with:
 ```shell
-mvn release:prepare -DdryRun=true
-mvn release:clean
+./mvnw release:prepare -DdryRun=true
+./mvnw release:clean
 ```
 
 Once the release has been completed you should go to the release tag in github and edit it. You can then upload
