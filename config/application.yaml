@@ -1,6 +1,5 @@
 # local override of properties
 configFile: config/config.ttl
-credentialsDir: /Users/pete/work/tokens
 testSuiteDescription: example/example.ttl
 target: https://github.com/solid/conformance-test-harness/ess-compat
 #target: https://github.com/solid/conformance-test-harness/css
@@ -27,7 +26,6 @@ quarkus:
 # Test profile
 "%test":
   configFile: src/test/resources/config-sample.ttl
-  credentialsDir: src/test/resources
   target: https://github.com/solid/conformance-test-harness/testserver
   testSuiteDescription: src/test/resources/testsuite-sample.ttl
   feature:
@@ -49,7 +47,6 @@ quarkus:
   configFile:
   target:
   testSuiteDescription:
-  credentialsDir:
   feature:
     mappings:
       - null

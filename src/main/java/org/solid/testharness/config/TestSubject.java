@@ -134,7 +134,7 @@ public class TestSubject {
         if (targetServer == null) {
             throw new TestHarnessInitializationException("No target server has been configured");
         }
-        targetServer.getUsers().keySet().forEach(user -> {
+        targetServer.getWebIds().keySet().forEach(user -> {
             try {
                 clients.put(user, authManager.authenticate(user, targetServer));
             } catch (Exception e) {

@@ -1,6 +1,7 @@
 package org.solid.testharness.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.quarkus.arc.config.ConfigPrefix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.config.TargetServer;
@@ -19,6 +20,13 @@ public class AuthManager {
     private static final Logger logger = LoggerFactory.getLogger(AuthManager.class);
 
     @Inject
+    UserCredentials aliceCredentials;
+
+    @ConfigPrefix("bob")
+    UserCredentials bobCredentials;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Inject
     ClientRegistry clientRegistry;
 
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -27,7 +35,9 @@ public class AuthManager {
         if (!targetServer.getFeatures().getOrDefault("authentication", false)) {
             return new SolidClient();
         }
-        final UserCredentials userConfig = targetServer.getUsers().get(user);
+        final UserCredentials userConfig = HttpConstants.ALICE.equals(user)
+            ? aliceCredentials
+            : bobCredentials;
         final Client authClient;
         if (clientRegistry.hasClient(user)) {
             authClient = clientRegistry.getClient(user);
@@ -66,14 +76,14 @@ public class AuthManager {
 
         final Map<Object, Object> data = new HashMap<>();
         data.put(HttpConstants.GRANT_TYPE, HttpConstants.REFRESH_TOKEN);
-        data.put(HttpConstants.REFRESH_TOKEN, userConfig.getRefreshToken());
+        data.put(HttpConstants.REFRESH_TOKEN, userConfig.refreshToken);
 
         // TODO: This should get the token endpoint from the oidc configuration
         final URI tokenEndpoint = URI.create(solidIdentityProvider + "/token");
         final HttpRequest request = authClient.signRequest(
                 HttpUtils.newRequestBuilder(tokenEndpoint)
                         .header(HttpConstants.HEADER_AUTHORIZATION, HttpConstants.PREFIX_BASIC +
-                                base64Encode(userConfig.getClientId() + ':' + userConfig.getClientSecret()))
+                                base64Encode(userConfig.clientId.get() + ':' + userConfig.clientSecret.get()))
                         .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED)
                         .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
                         .POST(HttpUtils.ofFormData(data))
@@ -100,9 +110,9 @@ public class AuthManager {
         final URI uri = URI.create(solidIdentityProvider);
 
         final Map<Object, Object> data = new HashMap<>();
-        data.put(HttpConstants.USERNAME, userConfig.getUsername());
-        data.put(HttpConstants.PASSWORD, userConfig.getPassword());
-        HttpRequest request = HttpUtils.newRequestBuilder(config.getLoginEndpoint())
+        data.put(HttpConstants.USERNAME, userConfig.username.get());
+        data.put(HttpConstants.PASSWORD, userConfig.password.get());
+        HttpRequest request = HttpUtils.newRequestBuilder(URI.create(config.getLoginEndpoint()))
                 .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED)
                 .POST(HttpUtils.ofFormData(data))
                 .build();

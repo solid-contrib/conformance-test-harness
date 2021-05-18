@@ -1,7 +1,0 @@
-{
-  "refreshToken": "EXTERNAL_TOKEN",
-  "clientId": "EXTERNAL_CLIENT_ID",
-  "clientSecret": "EXTERNAL_CLIENT_SECRET",
-  "username": "EXTERNAL_USERNAME",
-  "password": "EXTERNAL_PASSWORD"
-}
