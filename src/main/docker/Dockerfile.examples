@@ -1,0 +1,8 @@
+FROM openjdk:11
+COPY target/solid-conformance-test-harness-runner.jar /app/
+COPY example/ /app/example/
+COPY config/config.ttl /app/servers.ttl
+COPY src/main/docker/application.yaml /app/config/
+WORKDIR /app
+RUN ls -la /app/*
+ENTRYPOINT ["java", "-jar", "/app/solid-conformance-test-harness-runner.jar"]
