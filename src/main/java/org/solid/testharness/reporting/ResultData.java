@@ -34,5 +34,4 @@ public class ResultData extends DataModelBase {
     public Assertor getAssertor() {
         return assertor;
     }
-
 }

@@ -61,8 +61,10 @@ public class ReportGenerator {
                 final Statement st = statements.next();
                 return st.getSubject().isIRI() ? (IRI) st.getSubject() : null;
             }
-            return null;
         }
+        // Jacoco reports only 50% of branches tested but this is not solvable
+        // See : https://github.com/cobertura/cobertura/issues/289
+        return null;
     }
 }
 

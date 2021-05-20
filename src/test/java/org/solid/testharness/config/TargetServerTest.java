@@ -26,14 +26,8 @@ public class TargetServerTest {
     @Test
     public void parseTargetServer() throws Exception {
         when(config.getCredentialsDirectory()).thenReturn(new File("src/test/resources").getCanonicalFile());
-        final StringReader reader = new StringReader("@base <https://example.org/> .\n" +
-                "@prefix solid-test: <https://github.com/solid/conformance-test-harness/vocab#> .\n" +
-                "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n" +
-                "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
-                "@prefix doap: <http://usefulinc.com/ns/doap#> .\n" +
-                "@prefix earl: <http://www.w3.org/ns/earl#> .\n" +
-                "@prefix solid: <http://www.w3.org/ns/solid/terms#> ." +
-                "<testserver>\n" +
+        final StringReader reader = new StringReader(TestData.PREFIXES +
+                "ex:testserver\n" +
                 "    a earl:Software, earl:TestSubject ;\n" +
                 "    doap:name \"Enterprise Solid Server (Web Access Control version)\";\n" +
                 "    doap:release [\n" +
@@ -64,7 +58,7 @@ public class TargetServerTest {
 //                "    solid-test:disableDPoP true ;\n" +
                 "    solid-test:setupRootAcl true .");
         TestData.insertData(dataRepository, reader);
-        final TargetServer targetServer = new TargetServer(iri("https://example.org/testserver"));
+        final TargetServer targetServer = new TargetServer(iri(TestData.SAMPLE_NS, "testserver"));
         assertAll("targetServer",
                 () -> assertNotNull(targetServer.getFeatures()),
                 () -> assertEquals(true, targetServer.getFeatures().get("feature1")),
@@ -104,17 +98,9 @@ public class TargetServerTest {
 
     @Test
     public void parseTargetServerWithMissingElements() throws Exception {
-        final StringReader reader = new StringReader("@base <https://example.org/> .\n" +
-                "@prefix solid-test: <https://github.com/solid/conformance-test-harness/vocab#> .\n" +
-                "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n" +
-                "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
-                "@prefix doap: <http://usefulinc.com/ns/doap#> .\n" +
-                "@prefix earl: <http://www.w3.org/ns/earl#> .\n" +
-                "@prefix solid: <http://www.w3.org/ns/solid/terms#> ." +
-                "<bad>\n" +
-                "    a earl:Software, earl:TestSubject .");
+        final StringReader reader = new StringReader(TestData.PREFIXES + "ex:bad a earl:Software, earl:TestSubject.");
         TestData.insertData(dataRepository, reader);
-        final TargetServer targetServer = new TargetServer(iri("https://example.org/bad"));
+        final TargetServer targetServer = new TargetServer(iri(TestData.SAMPLE_NS, "bad"));
         assertNull(targetServer.getLoginEndpoint());
         assertEquals(0, targetServer.getUsers().size());
     }

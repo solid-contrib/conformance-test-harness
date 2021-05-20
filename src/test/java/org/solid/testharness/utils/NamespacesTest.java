@@ -40,7 +40,14 @@ public class NamespacesTest {
 
     @Test
     void shortenUnknown() {
-        assertEquals("http://example.org#Unknown", Namespaces.shorten(iri("http://example.org#Unknown")));
+        assertEquals("https://example.org#Unknown", Namespaces.shorten(iri("https://example.org#Unknown")));
+    }
+
+    @Test
+    void buildAllTurtlePrefixes() {
+        final String prefixes = Namespaces.generateAllTurtlePrefixes();
+        assertEquals(10, prefixes.split("\n").length);
+        assertTrue(prefixes.startsWith("@prefix "));
     }
 
     @Test

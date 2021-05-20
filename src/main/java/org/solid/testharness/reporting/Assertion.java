@@ -29,7 +29,7 @@ public class Assertion extends DataModelBase {
 
     public TestResult getResult() {
         final List<TestResult> results = getModelList(EARL.result, TestResult.class);
-        if (!results.isEmpty()) {
+        if (results != null) {
             return results.get(0);
         } else {
             return null;

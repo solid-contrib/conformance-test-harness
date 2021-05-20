@@ -3,6 +3,7 @@ package org.solid.testharness.reporting;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.utils.AbstractDataModelTests;
+import org.solid.testharness.utils.TestData;
 
 import java.util.List;
 
@@ -13,12 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class SpecificationTestCaseTest extends AbstractDataModelTests {
     @Override
     public String getData() {
-        return "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n" +
-                "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
-                "@prefix dcterms: <http://purl.org/dc/terms/> .\n" +
-                "@prefix earl: <http://www.w3.org/ns/earl#> .\n" +
-                "@prefix td: <http://www.w3.org/2006/03/test-description#> .\n" +
-                "@prefix ex: <http://example.org/> .\n" +
+        return TestData.PREFIXES +
                 "ex:test1\n" +
                 "    a td:SpecificationTestCase ;\n" +
                 "    dcterms:title \"Title\" ;\n" +

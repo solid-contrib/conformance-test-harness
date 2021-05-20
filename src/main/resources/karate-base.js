@@ -13,7 +13,7 @@ function fn() {
     }
 
     karate.configure('connectTimeout', 5000);
-    karate.configure('readTimeout', 5000);
+    karate.configure('readTimeout', 8000);
     karate.configure('ssl', true);
 
     const additionalConfig = karate.call('classpath:setup.js', target)

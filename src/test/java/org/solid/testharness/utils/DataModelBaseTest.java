@@ -29,10 +29,7 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Override
     public String getData() {
-        return "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n" +
-                "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
-                "@prefix earl: <http://www.w3.org/ns/earl#> .\n" +
-                "@prefix ex: <http://example.org/> .\n" +
+        return TestData.PREFIXES +
                 "ex:test\n" +
                 "    a earl:Software, earl:TestSubject ;\n" +
                 "    ex:hasIri ex:iri ;\n" +
@@ -48,6 +45,11 @@ class DataModelBaseTest extends AbstractDataModelTests {
                 "ex:test1 a earl:TestCase .\n" +
                 "ex:step1 a earl:Step .\n" +
                 "ex:step2 a earl:Step .";
+    }
+
+    @Test
+    void nullSubjectConstruct() {
+        assertThrows(NullPointerException.class, () -> new DataModelBase(null));
     }
 
     @Test

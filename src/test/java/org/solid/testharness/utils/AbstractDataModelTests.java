@@ -9,7 +9,7 @@ import java.io.StringReader;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class AbstractDataModelTests {
-    protected static String NS = "http://example.org/";
+    protected static String NS = TestData.SAMPLE_NS;
 
     public abstract String getData();
 
