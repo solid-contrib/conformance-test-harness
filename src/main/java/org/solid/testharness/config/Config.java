@@ -22,7 +22,6 @@ public class Config {
     private IRI testSubject;
     private URL configUrl;
     private URL testSuiteDescriptionFile;
-    private File credentialsDirectory;
     private File outputDir;
 
     // the settings are taken in the following order of preference:
@@ -39,8 +38,6 @@ public class Config {
     Optional<String> configFile;
     @ConfigProperty(name = "testSuiteDescription")
     Optional<String> testSuiteDescription;
-    @ConfigProperty(name = "credentialsDir")
-    Optional<String> credentialsPath;
 
     @Inject
     PathMappings pathMappings;
@@ -93,20 +90,6 @@ public class Config {
         this.testSuiteDescriptionFile = testSuiteDescriptionFile;
     }
 
-    public File getCredentialsDirectory() {
-        if (credentialsDirectory == null) {
-            try {
-                credentialsDirectory = Path.of(credentialsPath.get()).toFile().getCanonicalFile();
-            } catch (Exception e) {
-                throw (TestHarnessInitializationException) new TestHarnessInitializationException(
-                        "credentialsDir config is not a valid file: %s",
-                        e.toString()
-                ).initCause(e);
-            }
-        }
-        return credentialsDirectory;
-    }
-
     public File getOutputDirectory() {
         return outputDir;
     }
@@ -118,7 +101,6 @@ public class Config {
     public void logConfigSettings() {
         if (logger.isInfoEnabled()) {
             logger.info("Config url:       {}", getConfigUrl().toString());
-            logger.info("Credentials path: {}", getCredentialsDirectory().getPath());
             logger.info("Test suite:       {}", getTestSuiteDescription().toString());
             logger.info("Path mappings:    {}", pathMappings.getMappings());
             logger.info("Target server:    {}", target.orElse("not defined"));

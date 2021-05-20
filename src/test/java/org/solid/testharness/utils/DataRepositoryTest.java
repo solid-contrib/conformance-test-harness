@@ -175,7 +175,7 @@ class DataRepositoryTest {
         final DataRepository dataRepository = new DataRepository();
         final URL url = Path.of("src/test/resources/config-sample.ttl").normalize().toUri().toURL();
         dataRepository.loadTurtle(url);
-        assertEquals(55, dataRepositorySize(dataRepository));
+        assertEquals(47, dataRepositorySize(dataRepository));
     }
 
     @Test
@@ -190,7 +190,7 @@ class DataRepositoryTest {
     void loadTurtleBadData() {
         final DataRepository dataRepository = new DataRepository();
         assertThrows(TestHarnessInitializationException.class,
-                () -> dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/inrupt-alice.json"))
+                () -> dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/jsonld-sample.json"))
         );
     }
 

@@ -32,11 +32,6 @@ public class ConfigMissingTest {
     }
 
     @Test
-    void getCredentialsDirectory() {
-        assertThrows(TestHarnessInitializationException.class, () -> config.getCredentialsDirectory());
-    }
-
-    @Test
     void logConfigSettings() {
         assertDoesNotThrow(() -> config.logConfigSettings());
     }

@@ -8,12 +8,10 @@ import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestData;
 
 import javax.inject.Inject;
-import java.io.File;
 import java.io.StringReader;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @QuarkusTest
 public class TargetServerTest {
@@ -25,7 +23,6 @@ public class TargetServerTest {
 
     @Test
     public void parseTargetServer() throws Exception {
-        when(config.getCredentialsDirectory()).thenReturn(new File("src/test/resources").getCanonicalFile());
         final StringReader reader = new StringReader(TestData.PREFIXES +
                 "ex:testserver\n" +
                 "    a earl:Software, earl:TestSubject ;\n" +
@@ -42,14 +39,8 @@ public class TargetServerTest {
                 "    solid:oidcIssuer <https://inrupt.net> ;\n" +
                 "    solid:loginEndpoint <https://inrupt.net/login/password> ;\n" +
                 "    solid-test:origin <https://tester> ;\n" +
-                "    solid-test:aliceUser [\n" +
-                "        solid-test:webId <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;\n" +
-                "        solid-test:credentials \"inrupt-alice.json\"\n" +
-                "    ] ;\n" +
-                "    solid-test:bobUser [\n" +
-                "        solid-test:webId <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;\n" +
-                "        solid-test:credentials \"inrupt-bob.json\"\n" +
-                "    ] ;\n" +
+                "    solid-test:aliceUser <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;\n" +
+                "    solid-test:bobUser <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;\n" +
                 "    solid-test:maxThreads 4 ;\n" +
                 "    solid-test:features \"feature1\" ;\n" +
                 "    solid-test:serverRoot <http://localhost:3000> ;\n" +
@@ -72,27 +63,13 @@ public class TargetServerTest {
                 () -> assertEquals(false, targetServer.isDisableDPoP()),
                 () -> assertEquals("http://localhost:3000/", targetServer.getRootContainer()),
                 () -> assertEquals("/test/", targetServer.getTestContainer()),
-                () -> assertNotNull(targetServer.getUsers()),
-                () -> assertEquals(2, targetServer.getUsers().size()),
-                () -> assertNotNull(targetServer.getUsers().get(HttpConstants.ALICE)),
-                () -> assertEquals("EXTERNAL_TOKEN",
-                        targetServer.getUsers().get(HttpConstants.ALICE).getRefreshToken()),
-                () -> assertNotNull(targetServer.getUsers().get(HttpConstants.BOB)),
-                () -> assertNull(targetServer.getUsers().get(HttpConstants.BOB).getUsername()),
-                () -> assertNotNull(targetServer.getWebIds())
-        );
-        assertAll("targetServerCachedValues",
-                () -> assertNotNull(targetServer.getFeatures()),
-                () -> assertEquals("https://inrupt.net", targetServer.getSolidIdentityProvider()),
-                () -> assertEquals("https://inrupt.net/login/password", targetServer.getLoginEndpoint().toString()),
-                () -> assertEquals("http://localhost:3000", targetServer.getServerRoot()),
-                () -> assertEquals("https://tester", targetServer.getOrigin()),
-                () -> assertEquals(true, targetServer.isSetupRootAcl()),
-                () -> assertEquals(4, targetServer.getMaxThreads()),
-                () -> assertEquals(false, targetServer.isDisableDPoP()),
-                () -> assertEquals("http://localhost:3000/", targetServer.getRootContainer()),
-                () -> assertEquals("/test/", targetServer.getTestContainer()),
-                () -> assertNotNull(targetServer.getUsers())
+                () -> assertNotNull(targetServer.getWebIds()),
+                () -> assertEquals(2, targetServer.getWebIds().size()),
+                () -> assertNotNull(targetServer.getWebIds().get(HttpConstants.ALICE)),
+                () -> assertEquals("https://solid-test-suite-alice.inrupt.net/profile/card#me",
+                        targetServer.getWebIds().get(HttpConstants.ALICE)),
+                () -> assertEquals("https://solid-test-suite-bob.inrupt.net/profile/card#me",
+                        targetServer.getWebIds().get(HttpConstants.BOB))
         );
     }
 
@@ -102,6 +79,6 @@ public class TargetServerTest {
         TestData.insertData(dataRepository, reader);
         final TargetServer targetServer = new TargetServer(iri(TestData.SAMPLE_NS, "bad"));
         assertNull(targetServer.getLoginEndpoint());
-        assertEquals(0, targetServer.getUsers().size());
+        assertEquals(0, targetServer.getWebIds().size());
     }
 }

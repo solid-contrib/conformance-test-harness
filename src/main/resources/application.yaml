@@ -1,6 +1,5 @@
 # Default properties
 configFile:
-credentialsDir:
 testSuiteDescription:
 target:
 feature:

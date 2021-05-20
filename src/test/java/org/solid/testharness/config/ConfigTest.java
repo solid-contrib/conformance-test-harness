@@ -7,9 +7,7 @@ import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,13 +32,6 @@ public class ConfigTest {
     @Test
     void getTestSuiteDescriptionDefault() throws MalformedURLException {
         assertEquals(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"), config.getTestSuiteDescription());
-    }
-
-    @Test
-    void getCredentialsDirectory() throws IOException {
-        final File file = config.getCredentialsDirectory();
-        assertTrue(file.exists() && file.isDirectory());
-        assertEquals(Path.of("src/test/resources").toFile().getCanonicalFile(), file);
     }
 
     @Test

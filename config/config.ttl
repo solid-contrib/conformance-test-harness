@@ -25,14 +25,8 @@
     solid:oidcIssuer <https://inrupt.net> ;
     solid:loginEndpoint <https://inrupt.net/login/password> ;
     solid-test:origin <https://tester> ;
-    solid-test:aliceUser [
-        solid-test:webId <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;
-        solid-test:credentials "inrupt-alice.json"
-    ] ;
-    solid-test:bobUser [
-        solid-test:webId <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;
-        solid-test:credentials "inrupt-bob.json"
-    ] ;
+    solid-test:aliceUser <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;
+    solid-test:bobUser <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;
     solid-test:maxThreads 8 ;
     solid-test:features "authentication", "acl", "wac-allow" ;
     solid-test:serverRoot <https://pod-compat.inrupt.com> ;
@@ -54,14 +48,8 @@
     solid:oidcIssuer <https://inrupt.net> ;
     solid:loginEndpoint <https://inrupt.net/login/password> ;
     solid-test:origin <https://tester> ;
-    solid-test:aliceUser [
-                             solid-test:webId <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;
-                             solid-test:credentials "inrupt-alice.json"
-                         ] ;
-    solid-test:bobUser [
-                           solid-test:webId <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;
-                           solid-test:credentials "inrupt-bob.json"
-                       ] ;
+    solid-test:aliceUser <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;
+    solid-test:bobUser <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;
     solid-test:maxThreads 8 ;
     solid-test:features "authentication", "acl", "wac-allow" ;
     solid-test:serverRoot <http://localhost:3000> ;
@@ -84,14 +72,8 @@
     solid:oidcIssuer <https://inrupt.net> ;
     solid:loginEndpoint <https://inrupt.net/login/password> ;
     solid-test:origin <https://tester> ;
-    solid-test:aliceUser [
-                             solid-test:webId <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;
-                             solid-test:credentials "inrupt-alice.json"
-                         ] ;
-    solid-test:bobUser [
-                           solid-test:webId <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;
-                           solid-test:credentials "inrupt-bob.json"
-                       ] ;
+    solid-test:aliceUser <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;
+    solid-test:bobUser <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;
     solid-test:maxThreads 1 ;
     solid-test:features "authentication", "acl", "wac-allow" ;
     solid-test:serverRoot <https://solid-test-suite-alice.inrupt.net> ;

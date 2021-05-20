@@ -103,8 +103,8 @@ be made available via an IdP: alice and bob. The profiles for these users may ne
 If you are planning to use accounts that do not own PODs on the target server then you will also need to provide a container
 on the target server for the tests that has been granted full access control for the test user.
 
-There are 2 approaches to authentication, refresh tokens and session based login. If the target test server and the chosen IdP
-are compatible (which they should be) then either mechanism can be used to get the access tokens required to run the tests.
+There are 3 approaches to authentication: refresh tokens, session based login, and client credentials. If the target test server and the chosen IdP
+are compatible (which they should be) then any of the mechanisms can be used to get the access tokens required to run the tests.
 
 ### Refresh tokens
 This relies on getting a refresh token from an IdP (e.g. https://broker.pod-compat.inrupt.com/) and exchanging that for an
@@ -114,7 +114,6 @@ npx @inrupt/generate-oidc-token
 ```
 
 The configuration that must be saved for each user is:
-* WebID
 * Client Id
 * Client Secret
 * Refresh Token
@@ -128,14 +127,22 @@ This mechanism will not work for NSS until support for refresh tokens is added: 
 ### Session based login
 Some IdPs make is easy to authenticate without a browser by supporting form based login and sessions. The test harness has
 the capability to use this mechanism to login and get access tokens. The configuration that must be saved for each user is:
-* WebID
 * Username
 * Password
 
 The harness also needs to know the login path to use on the IdP and the origin that has been registered as the trusted app
 for the users.
 
-This mechanism will work in CI environments and the passwords could be passed in as external secrets.
+This mechanism will work in CI environments where the credentials can be passed in as secrets.
+
+### Client credentials 
+**NOTE: Not yet implemented**
+
+This relies on an IdP that supports this grant mechanism and which has had users pre-registered.
+
+The configuration that must be saved for each user is:
+* Client Id (a WebID)
+* Client Secret
 
 ## Usage
 
@@ -170,14 +177,8 @@ The config for the server(s) under test goes in `config.ttl`. An example of this
   solid:oidcIssuer <https://inrupt.net> ;
   solid:loginEndpoint <https://inrupt.net/login/password> ;
   solid-test:origin <https://tester> ;
-  solid-test:aliceUser [
-                         solid-test:webId <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;
-                         solid-test:credentials "inrupt-alice.json"
-                       ] ;
-  solid-test:bobUser [
-                       solid-test:webId <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;
-                       solid-test:credentials "inrupt-bob.json"
-                     ] ;
+  solid-test:aliceUser <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;
+  solid-test:bobUser <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;
   solid-test:maxThreads 8 ;
   solid-test:features "authentication", "acl", "wac-allow" ;
   solid-test:serverRoot <https://pod-compat.inrupt.com> ;
@@ -188,19 +189,20 @@ This defines a server to be tested including the user accounts, and the features
 
 There is a sample of this file in the `config/config.ttl` folder and this will be used unless you override this location as shown below.
 
-This system needs user credentials for authentication, but these should not be kept in the file itself. There is a reference to an
-external JSON file which can be shared between multiple servers and has the following format:
-```json5
-{
-  "webID":"https://pod-compat.inrupt.com/solid-test-suite-alice/profile/card#me",
-  // EITHER
-  "refreshToken": "",
-  "clientId": "",
-  "clientSecret": "",
-  // OR
-  "username": "",
-  "password": ""
-}
+This system needs user credentials for authentication as per the list above. These can be loaded from a local `.env` file or passed through environment variables.
+The possible values are:
+```
+ALICE_USERNAME=
+ALICE_PASSWORD=
+ALICE_REFRESH_TOKEN=
+ALICE_CLIENT_ID=
+ALICE_CLIENT_SECRET=
+
+BOB_USERNAME=
+BOB_PASSWORD=
+BOB_REFRESH_TOKEN=
+BOB_CLIENT_ID=
+BOB_CLIENT_SECRET=
 ```
 
 ### Execution
@@ -225,14 +227,12 @@ create `config/application.yaml` in your current working directory based on the 
 does not have to be in this directory. The command line options override any equivalent options set in any application properties file.
 An example of a minimal properties file which could be used to map test features would be:
 ```yaml
-credentialsDir: PATH_TO_CREDENTIALS
 feature:
   mappings:
     - prefix: https://github.com/solid/conformance-test-harness/example
       path: example
 ```
-The application wrapper is still under development so there will be changes to the above options and properties. 
-For example, once a new method of generating access tokens has been added, the `credentialsDir` will go. 
+The application wrapper is still under development so there will be changes to the above options and properties.  
 
 ## Test Reports
 |Report|Location|
@@ -322,7 +322,6 @@ git clone git@github.com:solid/conformance-test-harness.git
 There 5 important settings:
 * `target` - the IRI of the target server, used to select the server config from the config file
 * `configFile` - the location of the config file
-* `credentialsDir` - the location of the shared credentials files if used
 * `testSuiteDescription` - the location of the test suite description document that lists the test cases to be run
 * `feature:mappings` - maps test cases IRIs to a local file system (there can be multiple mappings). Mappings should be ordered so
 the most specific is first. This allows individual files to be mapped separately from their containing directories.
@@ -331,7 +330,6 @@ There are 2 ways to set these properties. Firstly you can provide `config/applic
 ```yaml
 target: TARGET_SERVER_IRI
 configFile: PATH_TO_CONFIG
-credentialsDir: PATH_TO_CREDENTIALS
 testSuiteDescription: PATH_TO_TESTSUITE_DOC
 feature:
   mappings:
@@ -344,25 +342,24 @@ Alternatively you can set these things on the command line:
 ```
 -Dtarget=TARGET_SERVER_IRI
 -DconfigFile=PATH_TO_CONFIG
--DcredentialsDir=PATH_TO_CREDENTIALS
--testSuiteDescription=PATH_TO_TESTSUITE_DOC
+-DtestSuiteDescription=PATH_TO_TESTSUITE_DOC
 ``` 
 
 ### Build and test
 To run the unit tests on the harness itself:
 ```shell
-mvn test
+./mvnw test
 ```
 To run the test suite with the default target server as defined in `config/application.yaml`:
 ```shell
 # this uses a profile to run the TestSuiteRunner instead of local unit tests
-mvn test -Psolid
+./mvnw test -Psolid
 ```
 To run the test suite with a specific target server:
 ```shell
-mvn test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/ess-compat
-mvn test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/css
-mvn test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/nss
+./mvnw test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/ess-compat
+./mvnw test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/css
+./mvnw test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/nss
 ```
 
 Using an IDE you can also run a specific scenario by editing the TestScenarioRunner and then running it as you would any unit test:
@@ -381,11 +378,11 @@ You can also go to the TestSuiteRunnner class and run the whole test suite in th
 ### Package
 The test harness can be packaged into a single jar:
 ```shell
-mvn package
+./mvnw package
 ```
 To quickly build this package without running the unit tests:
 ```shell
-mvn -Dmaven.test.skip=true package
+./mvnw -DskipTests package
 ```
 This creates `target/solid-conformance-test-harness-runner.jar` which can be deployed to its own directory and run as:
 ```shell
@@ -395,16 +392,21 @@ java -jar solid-conformance-test-harness-runner.jar
 ### Release
 Update CHANGELOG.md to highlight new features before starting the release.
 ```shell
-mvn release:prepare
+./mvnw release:prepare
 ```
 The first time you run this it will ask various questions to help setup `release.properties` which will be used for future releases.
 This process automatically modifies `pom.xml` to prepare a release version, commits the change and tags the repository, then sets up the 
 project ready for the ongoing development of the next version. 
 
+The final stage of deploying the package has not been set up yet but will use:
+```shell
+./mvnw release:perform
+```
+
 You can test this process, and undo the results with:
 ```shell
-mvn release:prepare -DdryRun=true
-mvn release:clean
+./mvnw release:prepare -DdryRun=true
+./mvnw release:clean
 ```
 
 Once the release has been completed you should go to the release tag in github and edit it. You can then upload

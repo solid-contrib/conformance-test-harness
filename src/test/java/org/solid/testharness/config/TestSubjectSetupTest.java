@@ -61,7 +61,7 @@ public class TestSubjectSetupTest {
 
     @Test
     void setupBadConfig() throws MalformedURLException {
-        when(config.getConfigUrl()).thenReturn(TestUtils.getFileUrl("inrupt-alice.json"));
+        when(config.getConfigUrl()).thenReturn(TestUtils.getFileUrl("jsonld-sample.json"));
         assertThrows(TestHarnessInitializationException.class, () -> testSubject.loadTestSubjectConfig());
     }
 

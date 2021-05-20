@@ -101,7 +101,7 @@ public class TestSubject {
             // CSS has no root acl by default so added here TODO: check whether this is relevant
             logger.debug("Setup root acl");
             final SolidClient solidClient = new SolidClient(HttpConstants.ALICE);
-            final String webId = requireNonNull(targetServer.getUsers().get(HttpConstants.ALICE).getWebID(),
+            final String webId = requireNonNull((String) targetServer.getWebIds().get(HttpConstants.ALICE),
                     "Alice's webID is required");
 
             try {
@@ -134,7 +134,7 @@ public class TestSubject {
         if (targetServer == null) {
             throw new TestHarnessInitializationException("No target server has been configured");
         }
-        targetServer.getUsers().keySet().forEach(user -> {
+        targetServer.getWebIds().keySet().forEach(user -> {
             try {
                 clients.put(user, authManager.authenticate(user, targetServer));
             } catch (Exception e) {
