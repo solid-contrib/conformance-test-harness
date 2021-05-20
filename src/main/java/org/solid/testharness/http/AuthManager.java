@@ -25,11 +25,11 @@ public class AuthManager {
     @ConfigPrefix("bob")
     UserCredentials bobCredentials;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Inject
+    ObjectMapper objectMapper;
+
     @Inject
     ClientRegistry clientRegistry;
-
-    private ObjectMapper objectMapper = new ObjectMapper();
 
     public SolidClient authenticate(final String user, final TargetServer targetServer) throws Exception {
         if (!targetServer.getFeatures().getOrDefault("authentication", false)) {

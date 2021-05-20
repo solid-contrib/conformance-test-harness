@@ -138,7 +138,7 @@ This mechanism will work in CI environments where the credentials can be passed 
 ### Client credentials 
 **NOTE: Not yet implemented**
 
-This relies on and IdP that supports this grant mechanism and has had users pre-registered.
+This relies on an IdP that supports this grant mechanism and which has had users pre-registered.
 
 The configuration that must be saved for each user is:
 * Client Id (a WebID)
@@ -382,7 +382,7 @@ The test harness can be packaged into a single jar:
 ```
 To quickly build this package without running the unit tests:
 ```shell
-./mvnw -Dmaven.test.skip=true package
+./mvnw -DskipTests package
 ```
 This creates `target/solid-conformance-test-harness-runner.jar` which can be deployed to its own directory and run as:
 ```shell
@@ -397,6 +397,11 @@ Update CHANGELOG.md to highlight new features before starting the release.
 The first time you run this it will ask various questions to help setup `release.properties` which will be used for future releases.
 This process automatically modifies `pom.xml` to prepare a release version, commits the change and tags the repository, then sets up the 
 project ready for the ongoing development of the next version. 
+
+The final stage of deploying the package has not been set up yet but will use:
+```shell
+./mvnw release:perform
+```
 
 You can test this process, and undo the results with:
 ```shell

@@ -46,7 +46,6 @@
         <commons.cli.version>1.4</commons.cli.version>
         <mockito.version>3.10.0</mockito.version>
         <jandex.version>2.2.3.Final</jandex.version>
-        <jackson.version>2.12.3</jackson.version>
 
         <!-- package info -->
         <package.name>${project.name}</package.name>
@@ -92,6 +91,10 @@
             <artifactId>quarkus-qute</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jackson</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.intuit.karate</groupId>
             <artifactId>karate-core</artifactId>
             <version>${karate.version}</version>
@@ -101,11 +104,6 @@
                     <artifactId>logback-classic</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>jakarta.ws.rs</groupId>
