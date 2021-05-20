@@ -2,7 +2,9 @@ package org.solid.testharness.http;
 
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
+import org.solid.testharness.utils.TestHarnessInitializationException;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpHeaders;
@@ -21,6 +23,9 @@ import static org.mockito.Mockito.*;
 class SolidClientTest {
     private static final String PREFIX = "@prefix ldp: <http://www.w3.org/ns/ldp#> .";
 
+    @Inject
+    ClientRegistry clientRegistry;
+
     @Test
     void createDefaultClient() {
         final SolidClient solidClient = new SolidClient();
@@ -32,8 +37,7 @@ class SolidClientTest {
 
     @Test
     void createMissingNamedClient() {
-        final SolidClient solidClient = new SolidClient("nobody");
-        assertNull(solidClient.getClient());
+        assertThrows(TestHarnessInitializationException.class, () -> new SolidClient("nobody"));
     }
 
     @Test
@@ -48,7 +52,7 @@ class SolidClientTest {
 
     @Test
     void createNamedClient() {
-        ClientRegistry.register("user1", new Client.Builder("user1").build());
+        clientRegistry.register("user1", new Client.Builder("user1").build());
         final SolidClient solidClient = new SolidClient("user1");
         final Client client = solidClient.getClient();
         assertNotNull(client.getHttpClient());
@@ -58,88 +62,12 @@ class SolidClientTest {
 
     @Test
     void createStatically() {
-        ClientRegistry.register("user2", new Client.Builder("user2").build());
+        clientRegistry.register("user2", new Client.Builder("user2").build());
         final SolidClient solidClient = SolidClient.create("user2");
         final Client client = solidClient.getClient();
         assertNotNull(client.getHttpClient());
         assertEquals("user2", client.getUser());
         assertNull(client.getAccessToken());
-    }
-
-    @Test
-    void setupRootAcl() throws IOException, InterruptedException {
-        final Client mockClient = mock(Client.class);
-        final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
-        final Map<String, List<String>> headerMap = Map.of("Link",
-                List.of("<http://localhost:3000/.acl>; rel=\"acl\""));
-        final HttpHeaders mockHeaders = HttpHeaders.of(headerMap, (k, v) -> true);
-        final HttpResponse<Void> mockResponseOk = mockVoidResponse(200);
-
-        when(mockClient.head(any())).thenReturn(mockResponse);
-        when(mockResponse.headers()).thenReturn(mockHeaders);
-        when(mockClient.put(eq(URI.create("http://localhost:3000/.acl")), any(),
-                eq(HttpConstants.MEDIA_TYPE_TEXT_TURTLE)))
-                .thenReturn(mockResponseOk);
-
-        final SolidClient solidClient = new SolidClient(mockClient);
-        final boolean res = solidClient.setupRootAcl("http://localhost:3000", "https://example.org/webid");
-        assertTrue(res);
-        final String expectedAcl = "@prefix acl: <http://www.w3.org/ns/auth/acl#>. " +
-                "<#alice> a acl:Authorization ; " +
-                "  acl:agent <https://example.org/webid> ;" +
-                "  acl:accessTo </>;" +
-                "  acl:default </>;" +
-                "  acl:mode acl:Read, acl:Write, acl:Control .";
-        verify(mockClient).put(URI.create("http://localhost:3000/.acl"), expectedAcl,
-                HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
-    }
-
-    @Test
-    void setupRootAclNoSlash() throws IOException, InterruptedException {
-        final Client mockClient = mock(Client.class);
-        final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
-        final Map<String, List<String>> headerMap = Map.of("Link",
-                List.of("<http://localhost:3000/.acl>; rel=\"acl\""));
-        final HttpHeaders mockHeaders = HttpHeaders.of(headerMap, (k, v) -> true);
-        final HttpResponse<Void> mockResponseOk = mockVoidResponse(200);
-
-        when(mockClient.head(any())).thenReturn(mockResponse);
-        when(mockResponse.headers()).thenReturn(mockHeaders);
-        when(mockClient.put(eq(URI.create("http://localhost:3000/.acl")), any(),
-                eq(HttpConstants.MEDIA_TYPE_TEXT_TURTLE)))
-                .thenReturn(mockResponseOk);
-
-        final SolidClient solidClient = new SolidClient(mockClient);
-        final boolean res = solidClient.setupRootAcl("http://localhost:3000/", "https://example.org/webid");
-        assertTrue(res);
-        final String expectedAcl = "@prefix acl: <http://www.w3.org/ns/auth/acl#>. " +
-                "<#alice> a acl:Authorization ; " +
-                "  acl:agent <https://example.org/webid> ;" +
-                "  acl:accessTo </>;" +
-                "  acl:default </>;" +
-                "  acl:mode acl:Read, acl:Write, acl:Control .";
-        verify(mockClient).put(URI.create("http://localhost:3000/.acl"), expectedAcl,
-                HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
-    }
-
-    @Test
-    void setupRootAclFails() throws IOException, InterruptedException {
-        final Client mockClient = mock(Client.class);
-        final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
-        final Map<String, List<String>> headerMap = Map.of("Link",
-                List.of("<http://localhost:3000/.acl>; rel=\"acl\""));
-        final HttpHeaders mockHeaders = HttpHeaders.of(headerMap, (k, v) -> true);
-        final HttpResponse<Void> mockResponseFail = mockVoidResponse(500);
-
-        when(mockClient.head(any())).thenReturn(mockResponse);
-        when(mockResponse.headers()).thenReturn(mockHeaders);
-        when(mockClient.put(eq(URI.create("http://localhost:3000/.acl")), any(),
-                eq(HttpConstants.MEDIA_TYPE_TEXT_TURTLE)))
-                .thenReturn(mockResponseFail);
-
-        final SolidClient solidClient = new SolidClient(mockClient);
-        final boolean res = solidClient.setupRootAcl("http://localhost:3000", "https://example.org/webid");
-        assertFalse(res);
     }
 
     @Test
@@ -524,7 +452,7 @@ class SolidClientTest {
 
     @Test
     void testToStringNamed() {
-        ClientRegistry.register("toStringUser", new Client.Builder("toStringUser").build());
+        clientRegistry.register("toStringUser", new Client.Builder("toStringUser").build());
         final SolidClient solidClient = new SolidClient("toStringUser");
         solidClient.getClient().setAccessToken("ACCESS");
         assertEquals("SolidClient: user=toStringUser, accessToken=ACCESS", solidClient.toString());

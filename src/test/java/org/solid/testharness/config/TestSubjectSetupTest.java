@@ -10,10 +10,8 @@ import javax.inject.Inject;
 import java.net.MalformedURLException;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @QuarkusTest
 public class TestSubjectSetupTest {
@@ -69,7 +67,14 @@ public class TestSubjectSetupTest {
     }
 
     @Test
+    void prepareServerWithoutServer() {
+        testSubject.setTargetServer(null);
+        assertThrows(TestHarnessInitializationException.class, () -> testSubject.prepareServer());
+    }
+
+    @Test
     void registerWithoutServer() {
+        testSubject.setTargetServer(null);
         assertThrows(TestHarnessInitializationException.class, () -> testSubject.registerClients());
     }
 }

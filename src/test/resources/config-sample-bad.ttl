@@ -1,0 +1,27 @@
+@base <https://github.com/solid/conformance-test-harness/> .
+@prefix solid-test: <https://github.com/solid/conformance-test-harness/vocab#> .
+
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix earl: <http://www.w3.org/ns/earl#> .
+@prefix solid: <http://www.w3.org/ns/solid/terms#> .
+
+<bad-users>
+    a earl:Software, earl:TestSubject ;
+    doap:name "Bad server" ;
+    solid-test:aliceUser [
+                             solid-test:credentials "inrupt-alice.json"
+                         ] ;
+    solid-test:setupRootAcl true .
+
+<example>
+    a earl:Software, earl:TestSubject ;
+    doap:name "Example server" ;
+    solid-test:aliceUser [
+                             solid-test:webId <https://example.org/webid> ;
+                             solid-test:credentials "inrupt-alice.json"
+                         ] ;
+    solid-test:serverRoot <http://localhost/> ;
+    solid-test:setupRootAcl true .
