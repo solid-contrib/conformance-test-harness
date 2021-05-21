@@ -28,23 +28,9 @@ class DataModelBaseTest extends AbstractDataModelTests {
     }
 
     @Override
-    public String getData() {
-        return TestData.PREFIXES +
-                "ex:test\n" +
-                "    a earl:Software, earl:TestSubject ;\n" +
-                "    ex:hasIri ex:iri ;\n" +
-                "    ex:hasString \"string\" ;\n" +
-                "    ex:hasStrings \"string1\", \"string2\" ;\n" +
-                "    ex:hasInt 1 ;\n" +
-                "    ex:hasBool true ;" +
-                "    ex:hasDate \"2021-04-08\"^^xsd:date ;\n" +
-                "    ex:hasDateTime \"2021-04-08T12:30:00.000\"^^xsd:dateTime ;\n" +
-                "    ex:hasBNode [ ex:hasString \"string\" ];\n" +
-                "    ex:hasTest ex:test1 ;\n" +
-                "    ex:hasSteps (ex:step1 ex:step2) .\n" +
-                "ex:test1 a earl:TestCase .\n" +
-                "ex:step1 a earl:Step .\n" +
-                "ex:step2 a earl:Step .";
+    public String getTestFile() {
+        return "src/test/resources/datamodelbase-testing-feature.ttl";
+
     }
 
     @Test

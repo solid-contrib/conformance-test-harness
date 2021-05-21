@@ -13,15 +13,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 class AssertionTest extends AbstractDataModelTests {
     @Override
-    public String getData() {
-        return TestData.PREFIXES + "ex:assertion1 a earl:Assertion;\n" +
-                "    earl:assertedBy " + Namespaces.TEST_HARNESS_PREFIX + ":;\n" +
-                "    earl:test ex:test;\n" +
-                "    earl:subject " + Namespaces.TEST_HARNESS_PREFIX + ":testserver;\n" +
-                "    earl:mode earl:automatic;\n" +
-                "    earl:result ex:result1 .\n" +
-                "ex:result1 a earl:TestResult.\n" +
-                "ex:assertion2 a earl:Assertion.";
+    public String getTestFile() {
+        return "src/test/resources/assertiontest-testing-feature.ttl";
     }
 
     @Test

@@ -9,6 +9,7 @@ import org.solid.common.vocab.RDF;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.net.URL;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 
@@ -42,6 +43,12 @@ public final class TestData {
     public static void insertData(final DataRepository dataRepository, final Reader reader) throws IOException {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             conn.add(reader, RDFFormat.TURTLE);
+        }
+    }
+
+    public static void insertData(final DataRepository dataRepository, final URL url) throws IOException {
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            conn.add(url, RDFFormat.TURTLE);
         }
     }
 
