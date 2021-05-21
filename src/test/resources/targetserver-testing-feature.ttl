@@ -29,3 +29,15 @@ ex:testserver
     solid-test:testContainer "/test/" ;
 #    solid-test:disableDPoP true ;
     solid-test:setupRootAcl true .
+
+ex:bad a earl:Software, earl:TestSubject .
+
+ex:test2
+    a earl:Software, earl:TestSubject ;
+    solid-test:serverRoot <http://localhost:3000/> ;
+    solid-test:testContainer "/test/" .
+
+ex:test3
+    a earl:Software, earl:TestSubject ;
+    solid-test:serverRoot <http://localhost:3000> ;
+    solid-test:testContainer "test" .

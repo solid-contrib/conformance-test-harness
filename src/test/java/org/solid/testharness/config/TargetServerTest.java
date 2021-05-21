@@ -4,14 +4,11 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.http.HttpConstants;
-import org.solid.testharness.utils.DataRepository;
-import org.solid.testharness.utils.TestData;
-import org.solid.testharness.utils.TestUtils;
+import org.solid.testharness.utils.*;
 
 import javax.inject.Inject;
-import java.io.StringReader;
-import java.net.URL;
 import java.net.URI;
+import java.net.URL;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
@@ -53,30 +50,24 @@ public class TargetServerTest {
 
     @Test
     public void parseTargetServerWithMissingElements() throws Exception {
-        final StringReader reader = new StringReader(TestData.PREFIXES + "ex:bad a earl:Software, earl:TestSubject.");
-        TestData.insertData(dataRepository, reader);
-        final TargetServer targetServer = new TargetServer(iri(TestData.SAMPLE_NS, "bad"));
-        assertNull(targetServer.getLoginEndpoint());
-        assertEquals(0, targetServer.getWebIds().size());
+        final URL testFile = TestUtils.getFileUrl("src/test/resources/targetserver-testing-feature.ttl");
+        TestData.insertData(dataRepository, testFile);
+        assertThrows(TestHarnessInitializationException.class, () -> new TargetServer(iri(TestData.SAMPLE_NS, "bad")));
     }
 
     @Test
     public void parseTestContainerWithSlashes() throws Exception {
-        final StringReader reader = new StringReader(TestData.PREFIXES + "ex:test a earl:Software, earl:TestSubject ;" +
-                "    solid-test:serverRoot <http://localhost:3000/> ;\n" +
-                "    solid-test:testContainer \"/test/\".");
-        TestData.insertData(dataRepository, reader);
-        final TargetServer targetServer = new TargetServer(iri(TestData.SAMPLE_NS, "test"));
+        final URL testFile = TestUtils.getFileUrl("src/test/resources/targetserver-testing-feature.ttl");
+        TestData.insertData(dataRepository, testFile);
+        final TargetServer targetServer = new TargetServer(iri(TestData.SAMPLE_NS, "test2"));
         assertEquals("http://localhost:3000/test/", targetServer.getTestContainer());
     }
 
     @Test
     public void parseTestContainerNoSlashes() throws Exception {
-        final StringReader reader = new StringReader(TestData.PREFIXES + "ex:test a earl:Software, earl:TestSubject ;" +
-                "    solid-test:serverRoot <http://localhost:3000> ;\n" +
-                "    solid-test:testContainer \"test/\".");
-        TestData.insertData(dataRepository, reader);
-        final TargetServer targetServer = new TargetServer(iri(TestData.SAMPLE_NS, "test"));
+        final URL testFile = TestUtils.getFileUrl("src/test/resources/targetserver-testing-feature.ttl");
+        TestData.insertData(dataRepository, testFile);
+        final TargetServer targetServer = new TargetServer(iri(TestData.SAMPLE_NS, "test3"));
         assertEquals("http://localhost:3000/test/", targetServer.getTestContainer());
     }
 }

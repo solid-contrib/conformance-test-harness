@@ -46,9 +46,12 @@ public class TargetServer extends DataModelBase {
         }
         serverRoot = URI.create(root).resolve("/");
         maxThreads = getLiteralAsInt(SOLID_TEST.maxThreads);
-        final String testContainer = getLiteralAsString(SOLID_TEST.testContainer);
+        String testContainer = getLiteralAsString(SOLID_TEST.testContainer);
         if (StringUtils.isEmpty(testContainer)) {
             throw new TestHarnessInitializationException("testContainer must be defined");
+        }
+        if (!testContainer.endsWith("/")) {
+            testContainer += "/";
         }
         this.testContainer = serverRoot.resolve(testContainer).toString();
         final String alice = getIriAsString(SOLID_TEST.aliceUser);
