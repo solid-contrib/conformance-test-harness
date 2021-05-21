@@ -1,0 +1,16 @@
+@prefix td: <http://www.w3.org/2006/03/test-description#> .
+@prefix earl: <http://www.w3.org/ns/earl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix ex: <https://example.org/> .
+
+ex:test1
+    a td:SpecificationTestCase ;
+    dcterms:title "Title" ;
+    dcterms:description "Description" ;
+    td:specificationReference ex:spec ;
+    dcterms:hasPart ex:testcase .
+ex:testcase
+    a earl:TestCase ;
+    td:reviewStatus td:accepted .
+ex:test2
+    a td:SpecificationTestCase .

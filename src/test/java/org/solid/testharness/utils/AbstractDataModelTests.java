@@ -5,20 +5,23 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 
 import java.io.IOException;
-import java.io.StringReader;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class AbstractDataModelTests {
     protected static String NS = TestData.SAMPLE_NS;
 
-    public abstract String getData();
+    public abstract String getTestFile();
 
     @BeforeAll
     void setup() throws IOException {
-        final StringReader reader = new StringReader(getData());
-        final DataRepository repository = new DataRepository();
-        repository.postConstruct();
-        TestData.insertData(repository, reader);
-        QuarkusMock.installMockForType(repository, DataRepository.class);
+        try (Reader reader = Files.newBufferedReader(Path.of(getTestFile()))) {
+            final DataRepository repository = new DataRepository();
+            repository.postConstruct();
+            TestData.insertData(repository, reader);
+            QuarkusMock.installMockForType(repository, DataRepository.class);
+        }
     }
 }

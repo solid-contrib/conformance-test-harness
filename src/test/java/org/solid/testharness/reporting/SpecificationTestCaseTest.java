@@ -3,7 +3,6 @@ package org.solid.testharness.reporting;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.utils.AbstractDataModelTests;
-import org.solid.testharness.utils.TestData;
 
 import java.util.List;
 
@@ -13,19 +12,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 class SpecificationTestCaseTest extends AbstractDataModelTests {
     @Override
-    public String getData() {
-        return TestData.PREFIXES +
-                "ex:test1\n" +
-                "    a td:SpecificationTestCase ;\n" +
-                "    dcterms:title \"Title\" ;\n" +
-                "    dcterms:description \"Description\" ;\n" +
-                "    td:specificationReference ex:spec ;\n" +
-                "    dcterms:hasPart ex:testcase ." +
-                "ex:testcase\n" +
-                "    a earl:TestCase ;\n" +
-                "    td:reviewStatus td:accepted .\n" +
-                "ex:test2\n" +
-                "    a td:SpecificationTestCase .";
+    public String getTestFile() {
+        return "src/test/resources/specificationtestcase-testing-feature.ttl";
     }
 
     @Test

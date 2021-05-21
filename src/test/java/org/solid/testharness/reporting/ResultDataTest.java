@@ -13,16 +13,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 class ResultDataTest extends AbstractDataModelTests {
     @Override
-    public String getData() {
-        return TestData.PREFIXES +
-                "<" + TestData.SAMPLE_NS + "> doap:implements <https://solidproject.org/TR/protocol#spec1> ;\n" +
-                "  dcterms:hasPart ex:test1, ex:test2 .\n" +
-                "ex:test1 a td:SpecificationTestCase .\n" +
-                "ex:test2 a td:SpecificationTestCase .";
+    public String getTestFile() {
+        return "src/test/resources/resultdata-testing-feature.ttl";
     }
 
     @Test
-    void getPrefixes() {
+    void getHtmlPrefixes() {
         final ResultData resultData = new ResultData(iri(TestData.SAMPLE_NS));
         assertEquals("rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns# " +
                 "rdfs: http://www.w3.org/2000/01/rdf-schema# " +

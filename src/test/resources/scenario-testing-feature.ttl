@@ -1,0 +1,21 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix earl: <http://www.w3.org/ns/earl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix ex: <https://example.org/> .
+
+ex:scenario1 a earl:TestCriterion, earl:TestCase;
+    dcterms:title "TITLE";
+    dcterms:isPartOf ex:parent;
+    earl:assertions ex:assertion;
+    earl:steps ex:steps .
+ex:assertion a earl:Assertion .
+ex:steps a rdf:List;
+    rdf:first ex:step1;
+    rdf:rest (ex:step2).
+ex:step1 a earl:TestStep;
+    dcterms:title "STEP1";
+    earl:outcome earl:passed .
+ex:step2 a earl:TestStep;
+    dcterms:title "STEP2";
+    earl:outcome earl:passed .
+ex:scenario2 a earl:TestCriterion, earl:TestCase.

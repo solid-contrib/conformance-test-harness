@@ -11,23 +11,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 class ScenarioTest extends AbstractDataModelTests {
     @Override
-    public String getData() {
-        return TestData.PREFIXES + "ex:scenario1 a earl:TestCriterion, earl:TestCase;\n" +
-                "    dcterms:title \"TITLE\";\n" +
-                "    dcterms:isPartOf ex:parent;\n" +
-                "    earl:assertions ex:assertion;\n" +
-                "    earl:steps ex:steps .\n" +
-                "ex:assertion a earl:Assertion .\n" +
-                "ex:steps a rdf:List;\n" +
-                "    rdf:first ex:step1;\n" +
-                "    rdf:rest (ex:step2).\n" +
-                "ex:step1 a earl:TestStep;\n" +
-                "    dcterms:title \"STEP1\";\n" +
-                "    earl:outcome earl:passed .\n" +
-                "ex:step2 a earl:TestStep;\n" +
-                "    dcterms:title \"STEP2\";\n" +
-                "    earl:outcome earl:passed .\n" +
-                "ex:scenario2 a earl:TestCriterion, earl:TestCase.\n";
+    public String getTestFile() {
+        return "src/test/resources/scenario-testing-feature.ttl";
     }
 
     @Test

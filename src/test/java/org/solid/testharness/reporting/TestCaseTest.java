@@ -4,7 +4,6 @@ import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 import org.solid.common.vocab.EARL;
 import org.solid.testharness.utils.AbstractDataModelTests;
-import org.solid.testharness.utils.TestData;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
@@ -12,25 +11,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 class TestCaseTest extends AbstractDataModelTests  {
     @Override
-    public String getData() {
-        return TestData.PREFIXES +
-                "ex:test1\n" +
-                "    a earl:TestCase, earl:TestCriterion, earl:TestFeature ;\n" +
-                "    dcterms:title \"Title\" ;\n" +
-                "    dcterms:subject \"MUST\" ;\n" +
-                "    td:reviewStatus td:unreviewed ;\n" +
-                "    earl:hasOutcome \"TBD\" ;\n" +
-                "    earl:assertions ex:assertion ;\n" +
-                "    dcterms:hasPart ex:test3 .\n" +
-                "ex:assertion a earl:Assertion .\n" +
-                "ex:test2\n" +
-                "    a earl:TestCase ;\n" +
-                "    td:reviewStatus td:accepted ;\n" +
-                "    earl:mode earl:untested .\n" +
-                "ex:test3\n" +
-                "    a earl:TestCase ;\n" +
-                "    earl:mode earl:passed .";
-
+    public String getTestFile() {
+        return "src/test/resources/testcase-testing-feature.ttl";
     }
 
     @Test

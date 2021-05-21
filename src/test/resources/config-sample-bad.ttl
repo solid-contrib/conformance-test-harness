@@ -11,17 +11,11 @@
 <bad-users>
     a earl:Software, earl:TestSubject ;
     doap:name "Bad server" ;
-    solid-test:aliceUser [
-                             solid-test:credentials "inrupt-alice.json"
-                         ] ;
     solid-test:setupRootAcl true .
 
 <example>
     a earl:Software, earl:TestSubject ;
     doap:name "Example server" ;
-    solid-test:aliceUser [
-                             solid-test:webId <https://example.org/webid> ;
-                             solid-test:credentials "inrupt-alice.json"
-                         ] ;
+    solid-test:aliceUser <https://example.org/webid> ;
     solid-test:serverRoot <http://localhost/> ;
     solid-test:setupRootAcl true .

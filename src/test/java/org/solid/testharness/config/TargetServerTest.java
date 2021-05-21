@@ -6,9 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestData;
+import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
 import java.io.StringReader;
+import java.net.URL;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,32 +25,8 @@ public class TargetServerTest {
 
     @Test
     public void parseTargetServer() throws Exception {
-        final StringReader reader = new StringReader(TestData.PREFIXES +
-                "ex:testserver\n" +
-                "    a earl:Software, earl:TestSubject ;\n" +
-                "    doap:name \"Enterprise Solid Server (Web Access Control version)\";\n" +
-                "    doap:release [\n" +
-                "        doap:name \"ESS 1.0.9\";\n" +
-                "        doap:revision \"1.0.9\";\n" +
-                "        doap:created \"2021-03-05\"^^xsd:date\n" +
-                "    ];\n" +
-                "    doap:developer <https://inrupt.com/profile/card/#us>;\n" +
-                "    doap:homepage <https://inrupt.com/products/enterprise-solid-server>;\n" +
-                "    doap:description \"A production-grade Solid server produced and supported by Inrupt.\"@en;\n" +
-                "    doap:programming-language \"Java\" ;\n" +
-                "    solid:oidcIssuer <https://inrupt.net> ;\n" +
-                "    solid:loginEndpoint <https://inrupt.net/login/password> ;\n" +
-                "    solid-test:origin <https://tester> ;\n" +
-                "    solid-test:aliceUser <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;\n" +
-                "    solid-test:bobUser <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;\n" +
-                "    solid-test:maxThreads 4 ;\n" +
-                "    solid-test:features \"feature1\" ;\n" +
-                "    solid-test:serverRoot <http://localhost:3000> ;\n" +
-                "    solid-test:podRoot <http://localhost:3000/> ;\n" +
-                "    solid-test:testContainer \"/test/\" ;\n" +
-//                "    solid-test:disableDPoP true ;\n" +
-                "    solid-test:setupRootAcl true .");
-        TestData.insertData(dataRepository, reader);
+        final URL testFile = TestUtils.getFileUrl("src/test/resources/targetserver-testing-feature.ttl");
+        TestData.insertData(dataRepository, testFile);
         final TargetServer targetServer = new TargetServer(iri(TestData.SAMPLE_NS, "testserver"));
         assertAll("targetServer",
                 () -> assertNotNull(targetServer.getFeatures()),

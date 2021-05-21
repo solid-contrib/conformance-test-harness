@@ -1,0 +1,9 @@
+@prefix td: <http://www.w3.org/2006/03/test-description#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix ex: <https://example.org/> .
+
+ex: doap:implements <https://solidproject.org/TR/protocol#spec1> ;
+    dcterms:hasPart ex:test1, ex:test2 .
+ex:test1 a td:SpecificationTestCase .
+ex:test2 a td:SpecificationTestCase .

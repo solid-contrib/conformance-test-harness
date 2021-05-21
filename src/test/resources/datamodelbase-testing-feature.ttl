@@ -1,0 +1,19 @@
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix earl: <http://www.w3.org/ns/earl#> .
+@prefix ex: <https://example.org/> .
+
+ex:test
+    a earl:Software, earl:TestSubject ;
+    ex:hasIri ex:iri ;
+    ex:hasString "string" ;
+    ex:hasStrings "string1", "string2" ;
+    ex:hasInt 1 ;
+    ex:hasBool true ;
+    ex:hasDate "2021-04-08"^^xsd:date ;
+    ex:hasDateTime "2021-04-08T12:30:00.000"^^xsd:dateTime ;
+    ex:hasBNode [ ex:hasString "string" ];
+    ex:hasTest ex:test1 ;
+    ex:hasSteps (ex:step1 ex:step2) .
+ex:test1 a earl:TestCase .
+ex:step1 a earl:Step .
+ex:step2 a earl:Step .
