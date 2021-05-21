@@ -84,7 +84,7 @@ public class SolidClient {
     }
 
     public String getContainmentData(final URI url) throws Exception {
-        final HttpResponse<String> response = client.getAsString(url);
+        final HttpResponse<String> response = client.getAsTurtle(url);
         if (!HttpUtils.isSuccessful(response.statusCode())) {
             throw new Exception("Error response=" + response.statusCode() +
                     " trying to get container members for " + url);

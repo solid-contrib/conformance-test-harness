@@ -3,6 +3,7 @@ package org.solid.testharness.config;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import org.junit.jupiter.api.Test;
+import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
@@ -44,7 +45,7 @@ public class ConfigTest {
 
     @Test
     void getSolidIdentityProvider() {
-        assertEquals(URI.create("https://idp.example.org"), config.getSolidIdentityProvider());
+        assertEquals(URI.create("https://idp.example.org/"), config.getSolidIdentityProvider());
     }
 
     @Test
@@ -70,6 +71,21 @@ public class ConfigTest {
     @Test
     void getBobWebId() {
         assertEquals("https://bob.target.example.org/profile/card#me", config.getBobWebId());
+    }
+
+    @Test
+    void getCredentialsAlice() {
+        assertNotNull(config.getCredentials(HttpConstants.ALICE));
+    }
+
+    @Test
+    void getCredentialsBob() {
+        assertNotNull(config.getCredentials(HttpConstants.BOB));
+    }
+
+    @Test
+    void getCredentialsCharlie() {
+        assertNull(config.getCredentials("charlie"));
     }
 
     @Test

@@ -12,6 +12,7 @@ public final class HttpConstants {
     public static final String HEADER_ACCEPT = "Accept";
     public static final String HEADER_LOCATION = "Location";
     public static final String HEADER_WAC_ALLOW = "wac-allow";
+    public static final String HEADER_LINK = "Link";
 
     public static final String PREFIX_DPOP = "DPoP ";
     public static final String PREFIX_BEARER = "Bearer ";
@@ -25,7 +26,7 @@ public final class HttpConstants {
     public static final String METHOD_HEAD = "HEAD";
     public static final int STATUS_OK = 200;
 
-    public static final String OPENID_CONFIGURATION = "/.well-known/openid-configuration";
+    public static final String OPENID_CONFIGURATION = ".well-known/openid-configuration";
     public static final String USER_AGENT = "User-Agent";
 
     public static final String GRANT_TYPE = "grant_type";

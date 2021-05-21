@@ -5,6 +5,7 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.solid.common.vocab.EARL;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 import org.solid.testharness.utils.TestUtils;
@@ -107,6 +108,16 @@ class TestSuiteDescriptionTest {
     }
 
     @Test
+    void getAllTestCases() throws MalformedURLException {
+        testSuiteDescription.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        final List<IRI> testCases = testSuiteDescription.getAllTestCases();
+        final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
+                "group2/feature1", "group3/feature1", "group3/feature2",
+                "group4/feature1", "group4/feature2", "group4/feature3");
+        assertThat("Group 1 matches", testCases, containsInAnyOrder(expected));
+    }
+
+    @Test
     void mapEmptyList() {
         final List<IRI> testCases = Collections.emptyList();
         assertTrue(testSuiteDescription.locateTestCases(testCases).isEmpty());
@@ -119,7 +130,7 @@ class TestSuiteDescriptionTest {
     }
 
     @Test
-    void mapFeaturePaths() throws MalformedURLException {
+    void mapFeaturePaths() {
         final List<IRI> testCases = List.of(iri("https://example.org/features/test.feature"));
         final List<String> paths = testSuiteDescription.locateTestCases(testCases);
         final String[] expected = new String[]{TestUtils.getPathUri("src/test/resources/test.feature").toString()};
@@ -127,10 +138,10 @@ class TestSuiteDescriptionTest {
     }
 
     @Test
-    void mapMissingFeaturePaths() throws MalformedURLException {
+    void mapMissingFeaturePaths() {
         final List<IRI> testCases = List.of(
                 iri("https://example.org/dummy/group1/feature1"), iri("https://example.org/dummy/group1/feature2"),
-                iri("https://example.org/dummy/group2/feature1")
+                iri("https://example.org/dummy/group1/feature3"), iri("https://example.org/dummy/group2/feature1")
         );
         final List<String> paths = testSuiteDescription.locateTestCases(testCases);
         final String[] expected = new String[]{TestUtils.getPathUri("src/test/resources/dummy-features/group1/feature1")
@@ -139,7 +150,9 @@ class TestSuiteDescriptionTest {
                 TestUtils.getPathUri("src/test/resources/dummy-features/otherExample/feature1").toString()
         };
         assertThat("Locations match", paths, containsInAnyOrder(expected));
-        // TODO: assert changes in repository
+        try (RepositoryConnection conn = repository.getConnection()) {
+            assertTrue(conn.hasStatement(null, EARL.mode, EARL.untested, false));
+        }
     }
 
     private IRI[] createIriList(final String... testCases) {

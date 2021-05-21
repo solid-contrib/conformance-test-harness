@@ -11,10 +11,11 @@ public class OidcConfiguration {
     private String registrationEndpoint;
 
     public String getIssuer() {
-        return issuer;
+        return issuer != null && !issuer.endsWith("/") ? issuer + "/" : issuer;
     }
 
-    public void set(final String issuer) {
+    @JsonSetter("issuer")
+    public void setIssuer(final String issuer) {
         this.issuer = issuer;
     }
 

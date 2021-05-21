@@ -33,14 +33,14 @@ class HttpClientTest {
                 URI.create("https://solid-test-suite-alice.inrupt.net")
         ).build();
         HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
-        List<String> links = response.headers().allValues("Link");
+        List<String> links = response.headers().allValues(HttpConstants.HEADER_LINK);
         logger.debug("NSS links {}: {}", links.size(), links);
 
         request = HttpUtils.newRequestBuilder(
                 URI.create("https://pod-compat.inrupt.com/solid-test-suite-alice/profile/card#me")
         ).build();
         response = client.send(request, HttpResponse.BodyHandlers.discarding());
-        links = response.headers().allValues("Link");
+        links = response.headers().allValues(HttpConstants.HEADER_LINK);
         logger.debug("ESS links {}: {}", links.size(), links);
     }
 

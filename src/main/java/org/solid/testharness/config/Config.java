@@ -1,9 +1,11 @@
 package org.solid.testharness.config;
 
+import io.quarkus.arc.config.ConfigPrefix;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.rdf4j.model.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -54,6 +56,12 @@ public class Config {
     String aliceWebId;
     @ConfigProperty(name = "BOB_WEBID")
     String bobWebId;
+
+    @Inject
+    UserCredentials aliceCredentials;
+
+    @ConfigPrefix("bob")
+    UserCredentials bobCredentials;
 
     @Inject
     PathMappings pathMappings;
@@ -115,7 +123,7 @@ public class Config {
     }
 
     public URI getSolidIdentityProvider() {
-        return URI.create(solidIdentityProvider);
+        return URI.create(solidIdentityProvider).resolve("/");
     }
 
     public URI getLoginEndpoint() {
@@ -139,6 +147,17 @@ public class Config {
 
     public String getBobWebId() {
         return bobWebId;
+    }
+
+    public UserCredentials getCredentials(final String user) {
+        switch (user) {
+            case HttpConstants.ALICE:
+                return aliceCredentials;
+            case HttpConstants.BOB:
+                return bobCredentials;
+            default:
+                return null;
+        }
     }
 
     public void logConfigSettings() {

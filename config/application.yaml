@@ -36,12 +36,6 @@ quarkus:
         path: src/test/resources/dummy-features/otherExample
       - prefix: https://example.org/features
         path: src/test/resources
-  solidIdentityProvider: https://idp.example.org
-  loginEndpoint: https://example.org/login/password
-  serverRoot: https://target.example.org
-  testContainer: test
-  aliceWebId: https://alice.target.example.org/profile/card#me
-  bobWebId: https://bob.target.example.org/profile/card#me
 
   quarkus:
     log:
@@ -56,11 +50,6 @@ quarkus:
   feature:
     mappings:
       - null
-  solidIdentityProvider: notnull
-  serverRoot: notnull
-  testContainer: notnull
-  aliceWebId: notnull
-  bobWebId: notnull
   quarkus:
     log:
       category:
