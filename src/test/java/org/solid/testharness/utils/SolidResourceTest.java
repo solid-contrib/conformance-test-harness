@@ -70,7 +70,7 @@ class SolidResourceTest {
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
         when(solidClient.getAclLink(headers)).thenReturn(aclUrl);
-        when(solidClient.getResourceAclLink(testUrl.toString())).thenReturn(aclUrl);
+        when(solidClient.getResourceAclLink(testUrl)).thenReturn(aclUrl);
 
         final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
@@ -84,7 +84,7 @@ class SolidResourceTest {
         final Map<String, List<String>> headerMap = Map.of("Link", List.of("<" + aclUrl + ">; rel=\"noacl\""));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
-        when(solidClient.getResourceAclLink(testUrl.toString())).thenReturn(null);
+        when(solidClient.getResourceAclLink(testUrl)).thenReturn(null);
 
         final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
@@ -110,7 +110,7 @@ class SolidResourceTest {
     void resourceExistsWithAclAfterLookup() throws Exception {
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
         final URI lookedUpAclUrl = URI.create("http://localhost/lookupedUpAcl");
-        when(solidClient.getResourceAclLink(testUrl.toString())).thenReturn(lookedUpAclUrl);
+        when(solidClient.getResourceAclLink(testUrl)).thenReturn(lookedUpAclUrl);
 
         final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
@@ -193,7 +193,7 @@ class SolidResourceTest {
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
         when(solidClient.getAclLink(headers)).thenReturn(null);
-        when(solidClient.getResourceAclLink(testUrl.toString())).thenReturn(null);
+        when(solidClient.getResourceAclLink(testUrl)).thenReturn(null);
 
         final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
@@ -208,7 +208,7 @@ class SolidResourceTest {
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
         when(solidClient.getAclLink(headers)).thenReturn(aclUrl);
-        when(solidClient.getResourceAclLink(testUrl.toString())).thenReturn(aclUrl);
+        when(solidClient.getResourceAclLink(testUrl)).thenReturn(aclUrl);
         when(solidClient.createAcl(aclUrl, "acl")).thenReturn(true);
 
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
@@ -243,7 +243,7 @@ class SolidResourceTest {
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
         when(solidClient.getAclLink(headers)).thenReturn(null);
-        when(solidClient.getResourceAclLink(testUrl.toString())).thenReturn(null);
+        when(solidClient.getResourceAclLink(testUrl)).thenReturn(null);
 
         final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);

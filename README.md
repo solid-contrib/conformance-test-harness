@@ -182,7 +182,6 @@ The config for the server(s) under test goes in `config.ttl`. An example of this
   solid-test:maxThreads 8 ;
   solid-test:features "authentication", "acl", "wac-allow" ;
   solid-test:serverRoot <https://pod-compat.inrupt.com> ;
-  solid-test:podRoot <https://pod-compat.inrupt.com/solid-test-suite-alice/> ;
   solid-test:testContainer "/solid-test-suite-alice/shared-test/" .
 ```
 This defines a server to be tested including the user accounts, and the features that the server supports.

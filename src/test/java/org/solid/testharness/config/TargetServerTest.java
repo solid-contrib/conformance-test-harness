@@ -11,6 +11,7 @@ import org.solid.testharness.utils.TestUtils;
 import javax.inject.Inject;
 import java.io.StringReader;
 import java.net.URL;
+import java.net.URI;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,13 +35,12 @@ public class TargetServerTest {
                 () -> assertNull(targetServer.getFeatures().get("feature2")),
                 () -> assertEquals("https://inrupt.net", targetServer.getSolidIdentityProvider()),
                 () -> assertEquals("https://inrupt.net/login/password", targetServer.getLoginEndpoint().toString()),
-                () -> assertEquals("http://localhost:3000", targetServer.getServerRoot()),
+                () -> assertEquals(URI.create("http://localhost:3000/"), targetServer.getServerRoot()),
                 () -> assertEquals("https://tester", targetServer.getOrigin()),
                 () -> assertEquals(true, targetServer.isSetupRootAcl()),
                 () -> assertEquals(4, targetServer.getMaxThreads()),
                 () -> assertEquals(false, targetServer.isDisableDPoP()),
-                () -> assertEquals("http://localhost:3000/", targetServer.getRootContainer()),
-                () -> assertEquals("/test/", targetServer.getTestContainer()),
+                () -> assertEquals("http://localhost:3000/test/", targetServer.getTestContainer()),
                 () -> assertNotNull(targetServer.getWebIds()),
                 () -> assertEquals(2, targetServer.getWebIds().size()),
                 () -> assertNotNull(targetServer.getWebIds().get(HttpConstants.ALICE)),
@@ -58,5 +58,25 @@ public class TargetServerTest {
         final TargetServer targetServer = new TargetServer(iri(TestData.SAMPLE_NS, "bad"));
         assertNull(targetServer.getLoginEndpoint());
         assertEquals(0, targetServer.getWebIds().size());
+    }
+
+    @Test
+    public void parseTestContainerWithSlashes() throws Exception {
+        final StringReader reader = new StringReader(TestData.PREFIXES + "ex:test a earl:Software, earl:TestSubject ;" +
+                "    solid-test:serverRoot <http://localhost:3000/> ;\n" +
+                "    solid-test:testContainer \"/test/\".");
+        TestData.insertData(dataRepository, reader);
+        final TargetServer targetServer = new TargetServer(iri(TestData.SAMPLE_NS, "test"));
+        assertEquals("http://localhost:3000/test/", targetServer.getTestContainer());
+    }
+
+    @Test
+    public void parseTestContainerNoSlashes() throws Exception {
+        final StringReader reader = new StringReader(TestData.PREFIXES + "ex:test a earl:Software, earl:TestSubject ;" +
+                "    solid-test:serverRoot <http://localhost:3000> ;\n" +
+                "    solid-test:testContainer \"test/\".");
+        TestData.insertData(dataRepository, reader);
+        final TargetServer targetServer = new TargetServer(iri(TestData.SAMPLE_NS, "test"));
+        assertEquals("http://localhost:3000/test/", targetServer.getTestContainer());
     }
 }

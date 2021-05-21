@@ -105,9 +105,7 @@ public class TestSubject {
                     "Alice's webID is required");
 
             try {
-                final URI rootAclUrl = solidClient.getResourceAclLink(
-                        targetServer.getServerRoot() + (targetServer.getServerRoot().endsWith("/") ? "" : "/")
-                );
+                final URI rootAclUrl = solidClient.getResourceAclLink(targetServer.getServerRoot());
                 if (rootAclUrl == null) {
                     throw new TestHarnessInitializationException("Failed getting the root ACL link");
                 }

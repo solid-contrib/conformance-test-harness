@@ -193,9 +193,10 @@ public class TestSubjectTest {
     @Test
     void setTargetServer() {
         final TargetServer targetServer = mock(TargetServer.class);
-        when(targetServer.getServerRoot()).thenReturn("SERVER_ROOT");
+        final URI serverRoot = URI.create("http://localhost/");
+        when(targetServer.getServerRoot()).thenReturn(serverRoot);
         testSubject.setTargetServer(targetServer);
-        assertEquals("SERVER_ROOT", testSubject.getTargetServer().getServerRoot());
+        assertEquals(serverRoot, testSubject.getTargetServer().getServerRoot());
     }
 
     @Test

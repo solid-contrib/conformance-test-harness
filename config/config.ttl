@@ -30,7 +30,6 @@
     solid-test:maxThreads 8 ;
     solid-test:features "authentication", "acl", "wac-allow" ;
     solid-test:serverRoot <https://pod-compat.inrupt.com> ;
-    solid-test:podRoot <https://pod-compat.inrupt.com/solid-test-suite-alice/> ;
     solid-test:testContainer "/solid-test-suite-alice/shared-test/" .
 
 <css>
@@ -53,7 +52,6 @@
     solid-test:maxThreads 8 ;
     solid-test:features "authentication", "acl", "wac-allow" ;
     solid-test:serverRoot <http://localhost:3000> ;
-    solid-test:podRoot <http://localhost:3000/> ;
     solid-test:testContainer "/test/" ;
     solid-test:setupRootAcl true .
 
@@ -77,5 +75,26 @@
     solid-test:maxThreads 1 ;
     solid-test:features "authentication", "acl", "wac-allow" ;
     solid-test:serverRoot <https://solid-test-suite-alice.inrupt.net> ;
-    solid-test:podRoot <https://solid-test-suite-alice.inrupt.net/> ;
     solid-test:testContainer "/private/" .
+
+#<trinpod>
+#    a earl:Software, earl:TestSubject ;
+#    doap:name "TrinPod" ;
+#    doap:release [
+#                     doap:name "" ;
+#                     doap:revision "" ;
+#                     doap:created "2021-04-12"^^xsd:date
+#                 ] ;
+#    doap:developer <https://graphmetrix.com> ;
+#    doap:homepage <https://graphmetrix.com/trinpod> ;
+#    doap:description "TrinPod™ is an Industrial strength Solid Pod with conceptual computing through Trinity AI Capable of handling a massive amount of data."@en ;
+#    doap:programming-language "Unknown" ;
+#    solid:oidcIssuer <https://inrupt.net> ;
+#    solid:loginEndpoint <https://inrupt.net/login/password> ;
+#    solid-test:origin <https://tester> ;
+#    solid-test:aliceUser <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;
+#    solid-test:bobUser <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;
+#    solid-test:maxThreads 1 ;
+#    solid-test:features "authentication", "acl", "wac-allow" ;
+#    solid-test:serverRoot <https://solidtestsuitealice.trinpod.us> ;
+#    solid-test:testContainer "/test/" .

@@ -23,6 +23,7 @@ import static java.util.Objects.requireNonNull;
 @ApplicationScoped
 public class AuthManager {
     private static final Logger logger = LoggerFactory.getLogger(AuthManager.class);
+    private static final String LOCALHOST = "localhost";
 
     @Inject
     UserCredentials aliceCredentials;
@@ -52,7 +53,7 @@ public class AuthManager {
             if (!targetServer.isDisableDPoP()) {
                 builder.withDpopSupport();
             }
-            if (targetServer.getServerRoot().contains("localhost")) {
+            if (LOCALHOST.equals(targetServer.getServerRoot().getHost())) {
                 builder.withLocalhostSupport();
             }
             authClient = builder.build();

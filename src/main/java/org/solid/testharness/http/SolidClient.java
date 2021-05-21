@@ -66,8 +66,8 @@ public class SolidClient {
         return response.headers();
     }
 
-    public URI getResourceAclLink(final String url) throws IOException, InterruptedException {
-        final HttpResponse<Void> response = client.head(URI.create(url));
+    public URI getResourceAclLink(final URI uri) throws IOException, InterruptedException {
+        final HttpResponse<Void> response = client.head(uri);
         return getAclLink(response.headers());
     }
 
