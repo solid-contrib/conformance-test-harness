@@ -24,6 +24,10 @@ public class ClientRegistry {
         registeredClientMap.put(label, client);
     }
 
+    public void unregister(final String label) {
+        registeredClientMap.remove(label);
+    }
+
     public boolean hasClient(final String label) {
         return registeredClientMap.containsKey(label);
     }

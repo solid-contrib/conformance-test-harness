@@ -31,6 +31,10 @@ public final class HttpUtils {
         return code >= 200 && code < 300;
     }
 
+    static boolean isSuccessfulOrRedirect(final int code) {
+        return code >= 200 && code < 400;
+    }
+
     public static boolean isHttpProtocol(final String protocol) {
         return "http".equals(protocol) || "https".equals(protocol);
     }
@@ -42,8 +46,7 @@ public final class HttpUtils {
     public static void logRequest(final Logger logger, final HttpRequest request) {
         if (logger.isDebugEnabled()) {
             logger.debug("REQUEST {} {}", request.method(), request.uri());
-            final HttpHeaders headers = request.headers();
-            headers.map().forEach((k, v) -> logger.debug("REQ HEADER {}: {}", k, v));
+            request.headers().map().forEach((k, v) -> logger.debug("REQ HEADER {}: {}", k, v));
         }
     }
 
@@ -51,8 +54,7 @@ public final class HttpUtils {
         if (logger.isDebugEnabled()) {
             logger.debug("RESPONSE {} {}", response.request().method(), response.uri());
             logger.debug("STATUS   {}", response.statusCode());
-            final HttpHeaders headers = response.headers();
-            headers.map().forEach((k, v) -> logger.debug("HEADER   {}: {}", k, v));
+            response.headers().map().forEach((k, v) -> logger.debug("HEADER   {}: {}", k, v));
             final T body = response.body();
             if (body != null) {
                 logger.debug("BODY     {}", body);
