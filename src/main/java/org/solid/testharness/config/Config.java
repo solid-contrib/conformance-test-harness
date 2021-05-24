@@ -9,6 +9,7 @@ import org.solid.testharness.utils.TestHarnessInitializationException;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.File;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -38,6 +39,21 @@ public class Config {
     Optional<String> configFile;
     @ConfigProperty(name = "testSuiteDescription")
     Optional<String> testSuiteDescription;
+
+    // properties normally found in environment variables or the .env file
+    @ConfigProperty(name = "SOLID_IDENTITY_PROVIDER")
+    String solidIdentityProvider;
+    @ConfigProperty(name = "LOGIN_ENDPOINT")
+    Optional<String> loginEndpoint;
+    @ConfigProperty(name = "SERVER_ROOT")
+    String serverRoot;
+    @ConfigProperty(name = "TEST_CONTAINER")
+    String testContainer;
+
+    @ConfigProperty(name = "ALICE_WEBID")
+    String aliceWebId;
+    @ConfigProperty(name = "BOB_WEBID")
+    String bobWebId;
 
     @Inject
     PathMappings pathMappings;
@@ -96,6 +112,33 @@ public class Config {
 
     public void setOutputDirectory(final File outputDir) {
         this.outputDir = outputDir;
+    }
+
+    public URI getSolidIdentityProvider() {
+        return URI.create(solidIdentityProvider);
+    }
+
+    public URI getLoginEndpoint() {
+        return loginEndpoint.map(URI::create).orElse(null);
+    }
+
+    public URI getServerRoot() {
+        return URI.create(serverRoot).resolve("/");
+    }
+
+    public String getTestContainer() {
+        if (!testContainer.endsWith("/")) {
+            testContainer += "/";
+        }
+        return getServerRoot().resolve(testContainer).toString();
+    }
+
+    public String getAliceWebId() {
+        return aliceWebId;
+    }
+
+    public String getBobWebId() {
+        return bobWebId;
     }
 
     public void logConfigSettings() {

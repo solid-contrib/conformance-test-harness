@@ -24,14 +24,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static java.util.Objects.requireNonNull;
-
 @ApplicationScoped
 public class TestSubject {
     private static final Logger logger = LoggerFactory.getLogger(TestSubject.class);
 
     private TargetServer targetServer;
     private Map<String, SolidClient> clients;
+    private Map<String, Object> webIds;
 
     @Inject
     Config config;
@@ -101,11 +100,8 @@ public class TestSubject {
             // CSS has no root acl by default so added here TODO: check whether this is relevant
             logger.debug("Setup root acl");
             final SolidClient solidClient = new SolidClient(HttpConstants.ALICE);
-            final String webId = requireNonNull((String) targetServer.getWebIds().get(HttpConstants.ALICE),
-                    "Alice's webID is required");
-
             try {
-                final URI rootAclUrl = solidClient.getResourceAclLink(targetServer.getServerRoot());
+                final URI rootAclUrl = solidClient.getResourceAclLink(config.getServerRoot());
                 if (rootAclUrl == null) {
                     throw new TestHarnessInitializationException("Failed getting the root ACL link");
                 }
@@ -114,7 +110,7 @@ public class TestSubject {
                         "  acl:agent <%s> ;" +
                         "  acl:accessTo <./>;" +
                         "  acl:default <./>;" +
-                        "  acl:mode acl:Read, acl:Write, acl:Control .", webId);
+                        "  acl:mode acl:Read, acl:Write, acl:Control .", config.getAliceWebId());
                 if (!solidClient.createAcl(rootAclUrl, acl)) {
                     throw new TestHarnessInitializationException("Failed to create root ACL");
                 }
@@ -132,7 +128,7 @@ public class TestSubject {
         if (targetServer == null) {
             throw new TestHarnessInitializationException("No target server has been configured");
         }
-        targetServer.getWebIds().keySet().forEach(user -> {
+        getWebIds().keySet().forEach(user -> {
             try {
                 clients.put(user, authManager.authenticate(user, targetServer));
             } catch (Exception e) {
@@ -154,4 +150,19 @@ public class TestSubject {
     public Map<String, SolidClient> getClients() {
         return clients;
     }
+
+    public String getTestContainer() {
+        return config.getTestContainer();
+    }
+
+    public Map<String, Object> getWebIds() {
+        if (webIds == null) {
+            webIds = Map.of(
+                    HttpConstants.ALICE, config.getAliceWebId(),
+                    HttpConstants.BOB, config.getBobWebId()
+            );
+        }
+        return webIds;
+    }
+
 }

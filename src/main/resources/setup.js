@@ -1,4 +1,4 @@
-function(target) {
+function() {
     const RDFUtils = Java.type('org.solid.testharness.utils.RDFUtils')
     const SolidResource = Java.type('org.solid.testharness.utils.SolidResource')
     const SolidContainer = Java.type('org.solid.testharness.utils.SolidContainer')
@@ -7,7 +7,7 @@ function(target) {
         SolidResource,
         SolidContainer,
         parseWacAllowHeader: (headers) => Java.type('org.solid.testharness.http.HttpUtils').parseWacAllowHeader(headers),
-        createTestContainer: (client) => SolidContainer.create(client, target.testContainer).generateChildContainer(),
+        createTestContainer: (client) => SolidContainer.create(client, rootTestContainer).generateChildContainer(),
         createOwnerAuthorization: (ownerAgent, targetUri) => `
 <#owner> a acl:Authorization;
   acl:agent <${ownerAgent}>;

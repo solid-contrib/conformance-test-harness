@@ -22,15 +22,9 @@
     doap:homepage <https://inrupt.com/products/enterprise-solid-server>;
     doap:description "A production-grade Solid server produced and supported by Inrupt."@en;
     doap:programming-language "Java" ;
-    solid:oidcIssuer <https://inrupt.net> ;
-    solid:loginEndpoint <https://inrupt.net/login/password> ;
     solid-test:origin <https://tester> ;
-    solid-test:aliceUser <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;
-    solid-test:bobUser <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;
     solid-test:maxThreads 8 ;
-    solid-test:features "authentication", "acl", "wac-allow" ;
-    solid-test:serverRoot <https://pod-compat.inrupt.com> ;
-    solid-test:testContainer "/solid-test-suite-alice/shared-test/" .
+    solid-test:features "authentication", "acl", "wac-allow" .
 
 <css>
     a earl:Software, earl:TestSubject ;
@@ -44,15 +38,9 @@
     doap:homepage <https://github.com/solid/community-server> ;
     doap:description "An open and modular implementation of the Solid specifications."@en ;
     doap:programming-language "TypeScript" ;
-    solid:oidcIssuer <https://inrupt.net> ;
-    solid:loginEndpoint <https://inrupt.net/login/password> ;
     solid-test:origin <https://tester> ;
-    solid-test:aliceUser <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;
-    solid-test:bobUser <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;
     solid-test:maxThreads 8 ;
     solid-test:features "authentication", "acl", "wac-allow" ;
-    solid-test:serverRoot <http://localhost:3000> ;
-    solid-test:testContainer "/test/" ;
     solid-test:setupRootAcl true .
 
 <nss>
@@ -67,15 +55,9 @@
     doap:homepage <https://github.com/solid/node-solid-server> ;
     doap:description "Solid server on top of the file-system in NodeJS."@en ;
     doap:programming-language "JavaScript" ;
-    solid:oidcIssuer <https://inrupt.net> ;
-    solid:loginEndpoint <https://inrupt.net/login/password> ;
     solid-test:origin <https://tester> ;
-    solid-test:aliceUser <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;
-    solid-test:bobUser <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;
     solid-test:maxThreads 1 ;
-    solid-test:features "authentication", "acl", "wac-allow" ;
-    solid-test:serverRoot <https://solid-test-suite-alice.inrupt.net> ;
-    solid-test:testContainer "/private/" .
+    solid-test:features "authentication", "acl", "wac-allow" .
 
 #<trinpod>
 #    a earl:Software, earl:TestSubject ;
@@ -89,12 +71,6 @@
 #    doap:homepage <https://graphmetrix.com/trinpod> ;
 #    doap:description "TrinPod™ is an Industrial strength Solid Pod with conceptual computing through Trinity AI Capable of handling a massive amount of data."@en ;
 #    doap:programming-language "Unknown" ;
-#    solid:oidcIssuer <https://inrupt.net> ;
-#    solid:loginEndpoint <https://inrupt.net/login/password> ;
 #    solid-test:origin <https://tester> ;
-#    solid-test:aliceUser <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;
-#    solid-test:bobUser <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;
 #    solid-test:maxThreads 1 ;
-#    solid-test:features "authentication", "acl", "wac-allow" ;
-#    solid-test:serverRoot <https://solidtestsuitealice.trinpod.us> ;
-#    solid-test:testContainer "/test/" .
+#    solid-test:features "authentication", "acl", "wac-allow" .
