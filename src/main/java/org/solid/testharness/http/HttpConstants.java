@@ -10,6 +10,7 @@ public final class HttpConstants {
     public static final String HEADER_AUTHORIZATION = "Authorization";
     public static final String HEADER_DPOP = "DPoP";
     public static final String HEADER_ACCEPT = "Accept";
+    public static final String HEADER_LOCATION = "Location";
     public static final String HEADER_WAC_ALLOW = "wac-allow";
 
     public static final String PREFIX_DPOP = "DPoP ";
@@ -29,6 +30,7 @@ public final class HttpConstants {
 
     public static final String GRANT_TYPE = "grant_type";
     public static final String CODE = "code";
+    public static final String AUTHORIZATION_METHOD = "client_secret_basic";
     public static final String AUTHORIZATION_CODE_TYPE = "authorization_code";
     public static final String REFRESH_TOKEN = "refresh_token";
     public static final String RESPONSE_TYPE = "response_type";
