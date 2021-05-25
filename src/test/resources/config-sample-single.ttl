@@ -20,13 +20,6 @@
     doap:homepage <https://inrupt.com/products/enterprise-solid-server>;
     doap:description "A production-grade Solid server produced and supported by Inrupt."@en;
     doap:programming-language "Java" ;
-    solid:oidcIssuer <https://inrupt.net> ;
-    solid:loginEndpoint <https://inrupt.net/login/password> ;
     solid-test:origin <https://tester> ;
-    solid-test:aliceUser <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;
-    solid-test:bobUser <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;
     solid-test:maxThreads 4 ;
-    solid-test:features "authentication", "acl", "wac-allow" ;
-    solid-test:serverRoot <https://pod-compat.inrupt.com> ;
-    solid-test:podRoot <https://pod-compat.inrupt.com/solid-test-suite-alice/> ;
-    solid-test:testContainer "/solid-test-suite-alice/shared-test/" .
+    solid-test:features "authentication", "acl", "wac-allow" .

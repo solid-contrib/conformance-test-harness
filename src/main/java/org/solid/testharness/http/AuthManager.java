@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.arc.config.ConfigPrefix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.testharness.config.Config;
 import org.solid.testharness.config.TargetServer;
 import org.solid.testharness.config.UserCredentials;
 import org.solid.testharness.utils.TestHarnessInitializationException;
@@ -23,6 +24,10 @@ import static java.util.Objects.requireNonNull;
 @ApplicationScoped
 public class AuthManager {
     private static final Logger logger = LoggerFactory.getLogger(AuthManager.class);
+    private static final String LOCALHOST = "localhost";
+
+    @Inject
+    Config config;
 
     @Inject
     UserCredentials aliceCredentials;
@@ -52,14 +57,13 @@ public class AuthManager {
             if (!targetServer.isDisableDPoP()) {
                 builder.withDpopSupport();
             }
-            if (targetServer.getServerRoot().contains("localhost")) {
+            if (LOCALHOST.equals(config.getServerRoot().getHost())) {
                 builder.withLocalhostSupport();
             }
             authClient = builder.build();
             clientRegistry.register(user, authClient);
 
-            final OidcConfiguration oidcConfiguration = requestOidcConfiguration(authClient,
-                    URI.create(targetServer.getSolidIdentityProvider()));
+            final OidcConfiguration oidcConfiguration = requestOidcConfiguration(authClient);
 
             final UserCredentials userConfig = HttpConstants.ALICE.equals(user)
                     ? aliceCredentials
@@ -98,7 +102,7 @@ public class AuthManager {
         logger.info("Login and get access token for {}", authClient.getUser());
         final Client client = clientRegistry.getClient(ClientRegistry.SESSION_BASED);
 
-        startLoginSession(client, userConfig, URI.create(targetServer.getLoginEndpoint()));
+        startLoginSession(client, userConfig, config.getLoginEndpoint());
 
         final String appOrigin = targetServer.getOrigin();
         final Registration clientRegistration = registerClient(client, oidcConfig, appOrigin);
@@ -114,9 +118,9 @@ public class AuthManager {
         return requestToken(authClient, oidcConfig, clientId, clientRegistration.getClientSecret(), tokenRequestData);
     }
 
-    private OidcConfiguration requestOidcConfiguration(final Client client, final URI solidIdentityProvider)
-            throws IOException, InterruptedException {
+    private OidcConfiguration requestOidcConfiguration(final Client client) throws IOException, InterruptedException {
         logger.debug("\n========== GET CONFIGURATION");
+        final URI solidIdentityProvider = config.getSolidIdentityProvider();
         final HttpRequest request = HttpUtils.newRequestBuilder(
                 solidIdentityProvider.resolve(HttpConstants.OPENID_CONFIGURATION)
         ).header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_APPLICATION_JSON).build();
@@ -162,8 +166,7 @@ public class AuthManager {
         HttpUtils.logRequest(logger, request);
         final HttpResponse<String> regResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
         HttpUtils.logResponse(logger, regResponse);
-        final Registration clientRegistration = objectMapper.readValue(regResponse.body(), Registration.class);
-        return clientRegistration;
+        return objectMapper.readValue(regResponse.body(), Registration.class);
     }
 
     private String requestAuthorizationCode(final Client client, final OidcConfiguration oidcConfig,

@@ -17,15 +17,11 @@ ex:testserver
     doap:homepage <https://inrupt.com/products/enterprise-solid-server>;
     doap:description "A production-grade Solid server produced and supported by Inrupt."@en;
     doap:programming-language "Java" ;
-    solid:oidcIssuer <https://inrupt.net> ;
-    solid:loginEndpoint <https://inrupt.net/login/password> ;
     solid-test:origin <https://tester> ;
-    solid-test:aliceUser <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;
-    solid-test:bobUser <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;
     solid-test:maxThreads 4 ;
     solid-test:features "feature1" ;
-    solid-test:serverRoot <http://localhost:3000> ;
-    solid-test:podRoot <http://localhost:3000/> ;
-    solid-test:testContainer "/test/" ;
 #    solid-test:disableDPoP true ;
     solid-test:setupRootAcl true .
+
+ex:bad a earl:Software, earl:TestSubject .
+

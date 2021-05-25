@@ -128,7 +128,7 @@ class SolidClientTest {
         when(mockClient.head(any())).thenReturn(mockResponse);
 
         final SolidClient solidClient = new SolidClient(mockClient);
-        final URI uri = solidClient.getResourceAclLink("http://localhost:3000/test");
+        final URI uri = solidClient.getResourceAclLink(URI.create("http://localhost:3000/test"));
         assertEquals(URI.create("http://localhost:3000/test.acl"), uri);
         verify(mockClient).head(URI.create("http://localhost:3000/test"));
     }
@@ -139,7 +139,7 @@ class SolidClientTest {
         when(mockClient.head(any())).thenThrow(new IOException("Failed"));
 
         final SolidClient solidClient = new SolidClient(mockClient);
-        assertThrows(IOException.class, () -> solidClient.getResourceAclLink("http://localhost:3000/test"));
+        assertThrows(IOException.class, () -> solidClient.getResourceAclLink(URI.create("http://localhost:3000/test")));
     }
 
     @Test

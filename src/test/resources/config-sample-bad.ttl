@@ -8,14 +8,8 @@
 @prefix earl: <http://www.w3.org/ns/earl#> .
 @prefix solid: <http://www.w3.org/ns/solid/terms#> .
 
-<bad-users>
-    a earl:Software, earl:TestSubject ;
-    doap:name "Bad server" ;
-    solid-test:setupRootAcl true .
-
 <example>
     a earl:Software, earl:TestSubject ;
     doap:name "Example server" ;
-    solid-test:aliceUser <https://example.org/webid> ;
-    solid-test:serverRoot <http://localhost/> ;
+    solid-test:maxThreads 8 ;
     solid-test:setupRootAcl true .

@@ -44,12 +44,16 @@ The test harness used to run Solid conformance tests and generate reports.
 
 ### Test harness
 
-The test harness controls the overall execution of a test suite. It is responsible for loading the test suite, locating the tests, creating and controlling test executors and generating test suite conformance reports.
+The test harness controls the overall execution of a test suite. It is responsible for loading the test suite, locating
+the tests, creating and controlling test executors and generating test suite conformance reports.
 
-The harness will provide different interfaces to the test suite such as a REST API and a command line interface, and will be platform agnostic. 
+The harness will provide different interfaces to the test suite such as a REST API and a command line interface, and
+will be platform agnostic. 
 
 ### Test executor
-The test executor is responsible for executing tests against a Solid server. The harness can create multiple test executors where each is responsible for executing a set of tests. Test executors do not need to run on the same host as the test harness. 
+The test executor is responsible for executing tests against a Solid server. The harness can create multiple test
+executors where each is responsible for executing a set of tests. Test executors do not need to run on the same host as
+the test harness. 
 
 ### Test suite description document
 This is an RDF document containing metadata about the test suite. The metadata includes:
@@ -61,16 +65,18 @@ This is an RDF document containing metadata about the test suite. The metadata i
 
 The test suite at any point in time may not cover all of the tests required for the specifications.
 The test harness will use the linkage between the test suite document, the RDF in the specifications and the
-available test cases to determine how much of the specifications are covered by the test suite. This will be available as a test coverage report.
+available test cases to determine how much of the specifications are covered by the test suite. This will be available
+as a test coverage report.
 
 ### Test cases
 
-The test cases will be contained in a repository and may be grouped in various ways to enable logical sets of tests to be grouped cohesively. 
+The test cases will be contained in a repository and may be grouped in various ways to enable logical sets of tests to
+be grouped cohesively. 
 
 ### Conformance report
 
-Conformance reports will be generated using EARL thereby making them available for consumption by many different tools. Output will be
-available in at least Turtle and HTML+RDFa formats.
+Conformance reports will be generated using EARL thereby making them available for consumption by many different tools.
+Output will be available in at least Turtle and HTML+RDFa formats.
 
 
 ## Component Architecture
@@ -86,8 +92,9 @@ liable to change as the project progresses.
 
 ## Prerequisites
 
-The example test cases have been run against ESS in ACL compatibility mode, CSS and NSS. They require 2 user accounts to
-be made available via an IdP: alice and bob. The profiles for these users may need additional information adding to them:
+The example test cases have been run against ESS in ACL compatibility mode, CSS and NSS. They require 2 user accounts
+to be made available via an IdP: alice and bob. The profiles for these users may need additional information adding to
+them:
 * Trusted app:
 ```
 :me acl:trustedApp [
@@ -100,15 +107,16 @@ be made available via an IdP: alice and bob. The profiles for these users may ne
 :me solid:oidcIssuer <https://inrupt.net/>;
 ```
 
-If you are planning to use accounts that do not own PODs on the target server then you will also need to provide a container
-on the target server for the tests that has been granted full access control for the test user.
+If you are planning to use accounts that do not own PODs on the target server then you will also need to provide a
+container on the target server for the tests that has been granted full access control for the test user.
 
-There are 3 approaches to authentication: refresh tokens, session based login, and client credentials. If the target test server and the chosen IdP
-are compatible (which they should be) then any of the mechanisms can be used to get the access tokens required to run the tests.
+There are 3 approaches to authentication: refresh tokens, session based login, and client credentials. If the target 
+test server and the chosen IdP are compatible (which they should be) then any of the mechanisms can be used to get the
+access tokens required to run the tests.
 
 ### Refresh tokens
-This relies on getting a refresh token from an IdP (e.g. https://broker.pod-compat.inrupt.com/) and exchanging that for an
-access token in order to run the tests. The refresh token can be created using a simple bootstrap process:
+This relies on getting a refresh token from an IdP (e.g. https://broker.pod-compat.inrupt.com/) and exchanging that for
+an access token in order to run the tests. The refresh token can be created using a simple bootstrap process:
 ```shell
 npx @inrupt/generate-oidc-token
 ```
@@ -119,19 +127,21 @@ The configuration that must be saved for each user is:
 * Refresh Token
 
 Unfortunately, this process requires a user to go the broker's web page, log in and authorize the application. Also, the
-refresh tokens expire and would need to be recreated regularly. This is not suitable for a CI environment so alternatives
-are bing considered such as a Mock IdP.
+refresh tokens expire and would need to be recreated regularly. This is not suitable for a CI environment so
+alternatives are being considered such as a Mock IdP.
 
-This mechanism will not work for NSS until support for refresh tokens is added: See https://github.com/solid/node-solid-server/issues/1533
+This mechanism will not work for NSS until support for refresh tokens is added: 
+See https://github.com/solid/node-solid-server/issues/1533
 
 ### Session based login
-Some IdPs make is easy to authenticate without a browser by supporting form based login and sessions. The test harness has
-the capability to use this mechanism to login and get access tokens. The configuration that must be saved for each user is:
+Some IdPs make is easy to authenticate without a browser by supporting form based login and sessions. The test harness 
+has the capability to use this mechanism to login and get access tokens. The configuration that must be saved for each
+user is:
 * Username
 * Password
 
-The harness also needs to know the login path to use on the IdP and the origin that has been registered as the trusted app
-for the users.
+The harness also needs to know the login path to use on the IdP and the origin that has been registered as the trusted
+app for the users.
 
 This mechanism will work in CI environments where the credentials can be passed in as secrets.
 
@@ -174,40 +184,54 @@ The config for the server(s) under test goes in `config.ttl`. An example of this
   doap:homepage <https://inrupt.com/products/enterprise-solid-server>;
   doap:description "A production-grade Solid server produced and supported by Inrupt."@en;
   doap:programming-language "Java" ;
-  solid:oidcIssuer <https://inrupt.net> ;
-  solid:loginEndpoint <https://inrupt.net/login/password> ;
   solid-test:origin <https://tester> ;
-  solid-test:aliceUser <https://solid-test-suite-alice.inrupt.net/profile/card#me> ;
-  solid-test:bobUser <https://solid-test-suite-bob.inrupt.net/profile/card#me> ;
   solid-test:maxThreads 8 ;
-  solid-test:features "authentication", "acl", "wac-allow" ;
-  solid-test:serverRoot <https://pod-compat.inrupt.com> ;
-  solid-test:podRoot <https://pod-compat.inrupt.com/solid-test-suite-alice/> ;
-  solid-test:testContainer "/solid-test-suite-alice/shared-test/" .
+  solid-test:features "authentication", "acl", "wac-allow" .
 ```
-This defines a server to be tested including the user accounts, and the features that the server supports.
+This describes the server to be tested and may be used to test multiple instances of the same Solid server 
+implementation. There is a sample of this file here: `config/config.ttl`. This will be used unless you override this
+location as shown further down this page.
 
-There is a sample of this file in the `config/config.ttl` folder and this will be used unless you override this location as shown below.
+This information does not include the configuration details needed to authenticate with server. Since this
+will be specific to each server instance, it is loaded from environment variables, or a file in the working directory
+called `.env`. It contains the following sections:
 
-This system needs user credentials for authentication as per the list above. These can be loaded from a local `.env` file or passed through environment variables.
-The possible values are:
+#### Server
 ```
-ALICE_USERNAME=
-ALICE_PASSWORD=
-ALICE_REFRESH_TOKEN=
-ALICE_CLIENT_ID=
-ALICE_CLIENT_SECRET=
+SERVER_ROOT=	# e.g. https://pod-compat.inrupt.com or https://pod-user.inrupt.net
+TEST_CONTAINER= # e.g. pod-user/test or test
+```
+These are used to construct the root location for test files e.g. `https://pod-compat.inrupt.com/pod-user/test/`
+or `https://pod-user.inrupt.net/test`
 
-BOB_USERNAME=
-BOB_PASSWORD=
-BOB_REFRESH_TOKEN=
-BOB_CLIENT_ID=
-BOB_CLIENT_SECRET=
+#### Authentication mechanism
+```
+SOLID_IDENTITY_PROVIDER=	# e.g. https://inrupt.net or https://broker.pod-compat.inrupt.com
+LOGIN_ENDPOINT=				# e.g. https://inrupt.net/login/password [this is only needed if using session login]
+```
+
+### User credentials
+The values and their usage are:
+```
+ALICE_WEBID=			# required
+ALICE_USERNAME=			# session-based login
+ALICE_PASSWORD=			# session-based login
+ALICE_REFRESH_TOKEN=	# refresh_token login
+ALICE_CLIENT_ID=		# refresh_token login
+ALICE_CLIENT_SECRET=	# refresh_token or client_credentials login
+
+BOB_WEBID=				# required
+BOB_USERNAME=			# session-based login
+BOB_PASSWORD=			# session-based login
+BOB_REFRESH_TOKEN=		# refresh_token login
+BOB_CLIENT_ID=			# refresh_token login
+BOB_CLIENT_SECRET=		# refresh_token or client_credentials login
 ```
 
 ### Execution
-The test harness is packaged into a single, executable jar which is available as an asset in the release within github: https://github.com/solid/conformance-test-harness/releases.
-The only dependency is on Java 11. You can run it and see its usage as follows:
+The test harness is packaged into a single, executable jar which is available as an asset in the release within github:
+https://github.com/solid/conformance-test-harness/releases. The only dependency is on Java 11. You can run it and see
+its usage as follows:
 ```shell
 java -jar solid-conformance-test-harness-runner.jar --help
 ```
@@ -222,10 +246,11 @@ usage: run
  -s,--suite <arg>    URL or path to test suite description
  -t,--target <arg>   target server
 ```
-If you want to control the logging output or set up mappings between URIs and local directories for test features you can also 
-create `config/application.yaml` in your current working directory based on the definition shown above. Note that the jar file
-does not have to be in this directory. The command line options override any equivalent options set in any application properties file.
-An example of a minimal properties file which could be used to map test features would be:
+If you want to control the logging output or set up mappings between URIs and local directories for test features you
+can also create `config/application.yaml` in your current working directory based on the definition shown above. Note
+that the jar file does not have to be in this directory. The command line options override any equivalent options set
+in any application properties file. An example of a minimal properties file which could be used to map test features
+would be:
 ```yaml
 feature:
   mappings:
@@ -246,19 +271,20 @@ The application wrapper is still under development so there will be changes to t
 
 ## Writing tests
 
-This section will contain guidelines for writing test cases using the KarateDSL alongside the features that the test harness provides.
+This section will contain guidelines for writing test cases using the KarateDSL alongside the features that the test
+harness provides.
 
 ### Example test cases
-In the future, all test cases will be pulled from an external repository (whether they are ultimately written in KarateDSL or RDF).
-There are currently some examples in the `example` folder to show some templates for how tests
+In the future, all test cases will be pulled from an external repository (whether they are ultimately written in
+KarateDSL or RDF). There are currently some examples in the `example` folder to show some templates for how tests
 can be defined.
-* The content negotiation tests create RDF resources of different formats, then confirm that they can be accessed as other formats.
-  It uses a Java library to convert Turtle or JSON-LD to triples to allow responses to be compared to the original test sample. Support for RDFa
-  is not consistent across all servers so that test is missed for now.
-* The protect operations tests create a resource or container and then each test sets up different ACLs for it. The tests confirm that
-  the Bob user has the correct access to the resource or container.
-* The WAC allow tests create a resource and then each test sets up different ACLs for that resource. The tests parse the WAC-Allow
-  header and confirm that the Bob user and un-authenticated users see the correct permissions.
+* The content negotiation tests create RDF resources of different formats, then confirm that they can be accessed as
+  other formats. It uses a Java library to convert Turtle or JSON-LD to triples to allow responses to be compared to the
+  original test sample. Support for RDFa is not consistent across all servers so that test is missed for now.
+* The protect operations tests create a resource or container and then each test sets up different ACLs for it. The
+  tests confirm that the Bob user has the correct access to the resource or container.
+* The WAC allow tests create a resource and then each test sets up different ACLs for that resource. The tests parse the
+  WAC-Allow header and confirm that the Bob user and un-authenticated users see the correct permissions.
 
 ### Test patterns
 
@@ -272,9 +298,10 @@ Karate based setup feature:
 * provides a link to the container created for the test to be used in teardown
 
 Javascript function setup (see wac-allow tests):
-* the setup feature contains a function used to set up the clients and a test resource - this is shared across all features in the group
-* a separate setup function in each test feature is called once for that feature to set up the ACLs - this puts the specifics of the test
-  feature into the feature file making them easier to read
+* the setup feature contains a function used to set up the clients and a test resource - this is shared across all
+  features in the group
+* a separate setup function in each test feature is called once for that feature to set up the ACLs - this puts the 
+  specifics of the test feature into the feature file making them easier to read
 
 The test files themselves:
 * run a background task for each scenario to call the necessary setup procedure
@@ -294,8 +321,8 @@ There are 3 commands to add headers to an HTTP request:
 	* Takes a JSON object containing key/value pairs to be added to the headers
 	* Takes a function which returns a JSON object containing key/value pairs to be added to the headers
 	* Often used to set up Authorization headers for set of tests
-	* If later steps need to use different headers you must either update `configure headers` or set it to null and use one
-	  of the commands below to set a new header
+	* If later steps need to use different headers you must either update `configure headers` or set it to null and use
+	  one of the commands below to set a new header
 	* Example: `* configure headers = { Authorization: 'some_token', tx_id: '1234' }` 
 * `header` - https://intuit.github.io/karate/#header
 	* Takes a function or expression that returns a header value
@@ -306,10 +333,12 @@ There are 3 commands to add headers to an HTTP request:
 	* Example: `* headers { Authorization: 'some_token', tx_id: '1234' }`
 
 #### Response status
-When you know there is only one valid status there is a shortcut but in other cases you need to allow for multiple status codes or ranges. The best options are:
+When you know there is only one valid status there is a shortcut but in other cases you need to allow for multiple
+status codes or ranges. The best options are:
 * `* status 200`
 * `* match [200, 201, 202] contains responseStatus`
-* `* match karate.range(200, 299) contains responseStatus` - note, this results in poor error messages as it lists all 100 mismatched values
+* `* match karate.range(200, 299) contains responseStatus` - note, this results in poor error messages as it lists all
+  100 mismatched values
 * `* assert responseStatus >= 200 && responseStatus < 300`
 
 ## Processes
@@ -323,10 +352,13 @@ There 5 important settings:
 * `target` - the IRI of the target server, used to select the server config from the config file
 * `configFile` - the location of the config file
 * `testSuiteDescription` - the location of the test suite description document that lists the test cases to be run
-* `feature:mappings` - maps test cases IRIs to a local file system (there can be multiple mappings). Mappings should be ordered so
-the most specific is first. This allows individual files to be mapped separately from their containing directories.
+* `feature:mappings` - maps test cases IRIs to a local file system (there can be multiple mappings). Mappings should be
+  ordered so the most specific is first. This allows individual files to be mapped separately from their containing
+  directories.
 
-There are 2 ways to set these properties. Firstly you can provide `config/application.yaml` in the working directory containing:
+There are 2 ways to set these properties. Firstly you can provide `config/application.yaml` in the working directory
+
+containing:
 ```yaml
 target: TARGET_SERVER_IRI
 configFile: PATH_TO_CONFIG
@@ -362,15 +394,17 @@ To run the test suite with a specific target server:
 ./mvnw test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/nss
 ```
 
-Using an IDE you can also run a specific scenario by editing the TestScenarioRunner and then running it as you would any unit test:
-```Java
+Using an IDE you can also run a specific scenario by editing the TestScenarioRunner and then running it as you would any
+unit test:
+```java
 String featurePath = "classpath:writing-resource/containment.feature";
 Results results = testRunner.runTest(featurePath);
 ```
 
 You can also go to the TestSuiteRunnner class and run the whole test suite in the same way.
 
-**Note:** You must configure the IDE to include the following command line option to make Quarkus use the production profile when running tests:
+**Note:** You must configure the IDE to include the following command line option to make Quarkus use the production
+profile when running tests:
 ```
 -Dquarkus.test.profile=prod
 ```
@@ -394,9 +428,9 @@ Update CHANGELOG.md to highlight new features before starting the release.
 ```shell
 ./mvnw release:prepare
 ```
-The first time you run this it will ask various questions to help setup `release.properties` which will be used for future releases.
-This process automatically modifies `pom.xml` to prepare a release version, commits the change and tags the repository, then sets up the 
-project ready for the ongoing development of the next version. 
+The first time you run this it will ask various questions to help setup `release.properties` which will be used for
+future releases. This process automatically modifies `pom.xml` to prepare a release version, commits the change and tags
+the repository, then sets up the project ready for the ongoing development of the next version. 
 
 The final stage of deploying the package has not been set up yet but will use:
 ```shell

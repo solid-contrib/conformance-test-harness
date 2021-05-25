@@ -98,7 +98,7 @@ public class SolidResource {
 
     public String getAclUrl() throws Exception {
         if (aclUrl == null && !Boolean.FALSE.equals(aclAvailable)) {
-            final URI aclLink = solidClient.getResourceAclLink(url.toString());
+            final URI aclLink = solidClient.getResourceAclLink(url);
             if (aclLink != null) {
                 aclUrl = url.resolve(aclLink);
             }

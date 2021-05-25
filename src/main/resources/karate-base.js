@@ -16,11 +16,12 @@ function fn() {
     karate.configure('readTimeout', 8000);
     karate.configure('ssl', true);
 
-    const additionalConfig = karate.call('classpath:setup.js', target)
+    const additionalConfig = karate.call('classpath:setup.js')
     return {
         target,
+        rootTestContainer: testSubject.getTestContainer(),
         ...additionalConfig,
         clients: karate.toMap(testSubject.clients),
-        webIds: target ? target.webIds : {}
+        webIds: testSubject.webIds
     };
 }

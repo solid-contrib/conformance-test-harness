@@ -32,6 +32,11 @@ public class ConfigMissingTest {
     }
 
     @Test
+    void getLoginEndpoint() {
+        assertNull(config.getLoginEndpoint());
+    }
+
+    @Test
     void logConfigSettings() {
         assertDoesNotThrow(() -> config.logConfigSettings());
     }

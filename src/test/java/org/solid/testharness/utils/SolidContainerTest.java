@@ -74,7 +74,7 @@ class SolidContainerTest {
     }
 
     @Test
-    void generateChildContainer() throws Exception {
+    void generateChildContainer() {
         final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
         final SolidContainer childContainer = container.generateChildContainer();
         assertTrue(childContainer.isContainer());
@@ -83,7 +83,7 @@ class SolidContainerTest {
     }
 
     @Test
-    void generateChildResource() throws Exception {
+    void generateChildResource() {
         final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
         final SolidResource childResource = container.generateChildResource(".suffix");
         assertFalse(childResource.isContainer());
@@ -102,7 +102,7 @@ class SolidContainerTest {
     }
 
     @Test
-    void createChildResourcException() throws Exception {
+    void createChildResourcException() {
         final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
         assertNull(container.createChildResource(".suffix", "hello", null));
     }

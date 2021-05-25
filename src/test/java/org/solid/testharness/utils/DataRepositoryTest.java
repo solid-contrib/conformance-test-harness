@@ -175,7 +175,7 @@ class DataRepositoryTest {
         final DataRepository dataRepository = new DataRepository();
         final URL url = Path.of("src/test/resources/config-sample.ttl").normalize().toUri().toURL();
         dataRepository.loadTurtle(url);
-        assertEquals(47, dataRepositorySize(dataRepository));
+        assertEquals(33, dataRepositorySize(dataRepository));
     }
 
     @Test
