@@ -35,7 +35,7 @@
         <!-- dependencies -->
         <quarkus.version>1.13.4.Final</quarkus.version>
         <karate.version>1.0.1</karate.version>
-        <junit.jupiter.version>5.7.1</junit.jupiter.version>
+        <junit.jupiter.version>5.7.2</junit.jupiter.version>
         <hamcrest.version>2.2</hamcrest.version>
         <rdf4j.version>3.6.3</rdf4j.version>
         <semargl.version>0.7</semargl.version>
