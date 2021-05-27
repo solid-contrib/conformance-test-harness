@@ -33,7 +33,7 @@
         <pmd.plugin.version>3.14.0</pmd.plugin.version>
 
         <!-- dependencies -->
-        <quarkus.version>1.13.4.Final</quarkus.version>
+        <quarkus.version>1.13.5.Final</quarkus.version>
         <karate.version>1.0.1</karate.version>
         <junit.jupiter.version>5.7.2</junit.jupiter.version>
         <hamcrest.version>2.2</hamcrest.version>
