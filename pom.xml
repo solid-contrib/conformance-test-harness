@@ -31,6 +31,7 @@
         <checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
         <checkstyle.tool.version>8.43</checkstyle.tool.version>
         <pmd.plugin.version>3.14.0</pmd.plugin.version>
+        <license.plugin.version>4.1</license.plugin.version>
 
         <!-- dependencies -->
         <quarkus.version>1.13.6.Final</quarkus.version>
@@ -323,6 +324,33 @@
                                 ${project.build.outputDirectory}/assertor.properties
                             </outputFile>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>${license.plugin.version}</version>
+                <configuration>
+                    <header>${project.basedir}/LICENSE</header>
+                    <mapping>
+                        <java>SLASHSTAR_STYLE</java>
+                    </mapping>
+                    <excludes>
+                        <exclude>**/src/main/libs/**</exclude>
+                        <exclude>**/src/main/resources/**</exclude>
+                        <exclude>**/src/test/resources/**</exclude>
+                    </excludes>
+                    <includes>
+                        <include>**/src/main/java/**</include>
+                        <include>**/src/test/java/**</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
