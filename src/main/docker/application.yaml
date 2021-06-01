@@ -1,0 +1,8 @@
+configFile: ./servers.ttl
+credentialsDir: ./tokens
+testSuiteDescription: ./example/example.ttl
+target: https://github.com/solid/conformance-test-harness/ess-compat
+feature:
+  mappings:
+    - prefix: https://github.com/solid/conformance-test-harness/example
+      path: ./example

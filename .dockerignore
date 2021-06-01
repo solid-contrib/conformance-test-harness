@@ -1,0 +1,5 @@
+*
+!target/*-runner.jar
+!example/*
+!config/config.ttl
+!src/main/docker/application.yaml

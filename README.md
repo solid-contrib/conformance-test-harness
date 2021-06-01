@@ -20,6 +20,7 @@ The test harness used to run Solid conformance tests and generate reports.
 	- [Target server configuration](#tarfget-server-configuration)
     - [Setting up the environment](#setting-up-the-environment)
 	- [Execution](#execution)
+	- [Docker](#docker)
 - [Test reports](#test-reports)
 - [Writing tests](#writing-tests)
     - [Example test cases](#example-test-cases)
@@ -258,6 +259,25 @@ feature:
       path: example
 ```
 The application wrapper is still under development so there will be changes to the above options and properties.  
+
+### Docker
+We are in the process of making a docker image available for the test harness. Currently, there are 2 docker files:
+* Dockerfile - this is just the harness
+* Dockerfile.examples - this includes the example test cases from this project
+
+Until the images are published, they must be built from this project as follows:
+```shell
+./mvnw -DskipTests package
+docker build -f src/main/docker/Dockerfile -t solid-conformance .
+docker build -f src/main/docker/Dockerfile.examples -t solid-conformance-examples .
+```
+There are many ways to configure and run tests with these docker images but there are 2 examples in this project. Both
+require the environment variables described above to be placed in a file called `env` in the directory from which you
+are going to run the tests.
+1. example.sh - This uses the test harness docker image, fetches the example tests from the project repository and sets
+   up a mapping file. The results are output to the `conformance-tests` directory into which the tests were downloaded.
+2. example2.sh - This uses the testharness with embedded examples docker image. The results are output to the current 
+   working directory.
 
 ## Test Reports
 |Report|Location|
