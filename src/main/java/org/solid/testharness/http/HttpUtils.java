@@ -4,6 +4,7 @@ import jakarta.ws.rs.core.Link;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -27,11 +28,15 @@ public final class HttpUtils {
         return HttpRequest.newBuilder(uri).setHeader(HttpConstants.USER_AGENT, getAgent());
     }
 
-    static boolean isSuccessful(final int code) {
+    public static boolean isSuccessful(final int code) {
         return code >= 200 && code < 300;
     }
 
-    static boolean isSuccessfulOrRedirect(final int code) {
+    public static boolean isRedirect(final int statusCode) {
+        return statusCode == 302;
+    }
+
+    public static boolean isSuccessfulOrRedirect(final int code) {
         return code >= 200 && code < 400;
     }
 
@@ -62,7 +67,8 @@ public final class HttpUtils {
         }
     }
 
-    public static HttpRequest.BodyPublisher ofFormData(final Map<Object, Object> data) {
+    public static HttpRequest.BodyPublisher ofFormData(@NotNull final Map<Object, Object> data) {
+        Objects.requireNonNull(data, "data is required");
         final var builder = new StringBuilder();
         for (Map.Entry<Object, Object> entry : data.entrySet()) {
             if (builder.length() > 0) {
@@ -75,11 +81,11 @@ public final class HttpUtils {
         return HttpRequest.BodyPublishers.ofString(builder.toString());
     }
 
-    static String encodeValue(final String value) {
+    static String encodeValue(@NotNull final String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
-    private static String decodeValue(final String value) {
+    private static String decodeValue(@NotNull final String value) {
         return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 
@@ -96,20 +102,21 @@ public final class HttpUtils {
                 );
     }
 
-    public static AbstractMap.SimpleImmutableEntry<String, String> splitQueryParameter(final String it) {
+    private static AbstractMap.SimpleImmutableEntry<String, String> splitQueryParameter(final String it) {
         final int idx = it.indexOf('=');
         final String key = idx > 0 ? it.substring(0, idx) : it;
         final String value = idx > 0 && it.length() > idx + 1 ? it.substring(idx + 1) : null;
         return new AbstractMap.SimpleImmutableEntry<>(
                 decodeValue(key),
-                decodeValue(value)
+                value != null ? decodeValue(value) : null
         );
     }
 
     // Link can be multi-valued (comma separated) or multi-instance so this builds a list from either form (or both)
     // TODO: This is temporary as a link can contain a comma so this is not safe - a parser is required
-    public static List<Link> parseLinkHeaders(final HttpHeaders headers) {
-        List<String> links = headers.allValues("Link");
+    public static List<Link> parseLinkHeaders(@NotNull final HttpHeaders headers) {
+        Objects.requireNonNull(headers, "headers is required");
+        List<String> links = headers.allValues(HttpConstants.HEADER_LINK);
         // TODO: the following must be applied to all link headers, then the whole list flattened
         if (links.size() == 1 && links.get(0).contains(", ")) {
             links = Arrays.asList(links.get(0).split(", "));
@@ -119,12 +126,12 @@ public final class HttpUtils {
 
     @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     // This method deliberately creates objects in a loop dependent on the structure of the header
-    public static Map<String, List<String>> parseWacAllowHeader(final Map<String, List<String>> headers) {
-        logger.debug("WAC-Allow: {}", headers.toString());
-        final Map<String, Set<String>> permissions = Map.of(
-                "user", new HashSet<String>(),
-                "public", new HashSet<String>()
-        );
+    public static Map<String, List<String>> parseWacAllowHeader(@NotNull final Map<String, List<String>> headers) {
+        Objects.requireNonNull(headers, "headers is required");
+        logger.debug("WAC-Allow: {}", headers);
+        final Map<String, Set<String>> permissions = new HashMap<>();
+        permissions.put("user", new HashSet<>());
+        permissions.put("public", new HashSet<>());
         final Optional<Map.Entry<String, List<String>>> header = headers.entrySet()
                 .stream()
                 .filter(entry -> HttpConstants.HEADER_WAC_ALLOW.equalsIgnoreCase(entry.getKey()))

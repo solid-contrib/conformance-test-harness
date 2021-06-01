@@ -66,7 +66,8 @@ class SolidResourceTest {
 
     @Test
     void resourceExistsWithAcl() throws Exception {
-        final Map<String, List<String>> headerMap = Map.of("Link", List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
+        final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
+                List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
         when(solidClient.getAclLink(headers)).thenReturn(aclUrl);
@@ -81,7 +82,8 @@ class SolidResourceTest {
 
     @Test
     void resourceExistsWithoutAcl() throws Exception {
-        final Map<String, List<String>> headerMap = Map.of("Link", List.of("<" + aclUrl + ">; rel=\"noacl\""));
+        final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
+                List.of("<" + aclUrl + ">; rel=\"noacl\""));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
         when(solidClient.getResourceAclLink(testUrl)).thenReturn(null);
@@ -189,7 +191,8 @@ class SolidResourceTest {
 
     @Test
     void setAclMissing() throws Exception {
-        final Map<String, List<String>> headerMap = Map.of("Link", List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
+        final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
+                List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
         when(solidClient.getAclLink(headers)).thenReturn(null);
@@ -204,7 +207,8 @@ class SolidResourceTest {
 
     @Test
     void setAcl() throws Exception {
-        final Map<String, List<String>> headerMap = Map.of("Link", List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
+        final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
+                List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
         when(solidClient.getAclLink(headers)).thenReturn(aclUrl);
@@ -239,7 +243,8 @@ class SolidResourceTest {
 
     @Test
     void getAclUrlMissing() throws Exception {
-        final Map<String, List<String>> headerMap = Map.of("Link", List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
+        final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
+                List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
         when(solidClient.getAclLink(headers)).thenReturn(null);

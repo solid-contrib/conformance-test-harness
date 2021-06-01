@@ -2,15 +2,29 @@ package org.solid.testharness.config;
 
 import io.quarkus.arc.config.ConfigProperties;
 
+import javax.validation.constraints.NotNull;
 import java.util.Optional;
 
 @ConfigProperties(prefix = "alice")
-public final class UserCredentials {
+public class UserCredentials {
+    @NotNull
     public Optional<String> refreshToken;
+    @NotNull
     public Optional<String> clientId;
+    @NotNull
     public Optional<String> clientSecret;
+    @NotNull
     public Optional<String> username;
+    @NotNull
     public Optional<String> password;
+
+    public UserCredentials() {
+        refreshToken = Optional.empty();
+        clientId = Optional.empty();
+        clientSecret = Optional.empty();
+        username = Optional.empty();
+        password = Optional.empty();
+    }
 
     public boolean isUsingUsernamePassword() {
         return username.isPresent() && password.isPresent();

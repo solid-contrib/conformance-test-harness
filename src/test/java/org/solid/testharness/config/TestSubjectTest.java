@@ -1,6 +1,7 @@
 package org.solid.testharness.config;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.http.*;
@@ -21,6 +22,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest
+@TestProfile(ConfigTestNormalProfile.class)
 public class TestSubjectTest {
     @Inject
     Config config;
@@ -49,7 +51,7 @@ public class TestSubjectTest {
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/example"));
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
-        final Map<String, List<String>> headerMap = Map.of("Link",
+        final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
                 List.of("<https://target.example.org/.acl>; rel=\"acl\""));
         final HttpHeaders mockHeaders = HttpHeaders.of(headerMap, (k, v) -> true);
         final HttpResponse<Void> mockResponseOk = mockVoidResponse(200);
@@ -79,7 +81,7 @@ public class TestSubjectTest {
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/example"));
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
-        final Map<String, List<String>> headerMap = Map.of("Link",
+        final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
                 List.of("<http://localhost/.acl>; rel=\"acl\""));
         final HttpHeaders mockHeaders = HttpHeaders.of(headerMap, (k, v) -> true);
         final HttpResponse<Void> mockResponseOk = mockVoidResponse(200);
@@ -99,7 +101,7 @@ public class TestSubjectTest {
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/example"));
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
-        final Map<String, List<String>> headerMap = Map.of("Link",
+        final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
                 List.of("<http://localhost/.acl>; rel=\"notacl\""));
         final HttpHeaders mockHeaders = HttpHeaders.of(headerMap, (k, v) -> true);
 
@@ -119,7 +121,7 @@ public class TestSubjectTest {
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/example"));
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
-        final Map<String, List<String>> headerMap = Map.of("Link",
+        final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
                 List.of("<http://localhost/.acl>; rel=\"acl\""));
         final HttpHeaders mockHeaders = HttpHeaders.of(headerMap, (k, v) -> true);
         final HttpResponse<Void> mockResponseOk = mockVoidResponse(500);

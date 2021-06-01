@@ -3,6 +3,7 @@ package org.solid.testharness.utils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClient;
 
 import java.net.URI;
@@ -38,7 +39,7 @@ public class SolidResource {
             final HttpHeaders headers;
             try {
                 headers = solidClient.createResource(resourceUri, body, type);
-                if (headers != null && headers.allValues("Link").size() != 0) {
+                if (headers != null && headers.allValues(HttpConstants.HEADER_LINK).size() != 0) {
                     final URI aclLink = solidClient.getAclLink(headers);
                     if (aclLink != null) {
                         logger.debug("ACL LINK {}", aclLink);

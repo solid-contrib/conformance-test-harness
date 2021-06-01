@@ -12,9 +12,6 @@ public class UserCredentialsTest {
         final UserCredentials userCredentials = new UserCredentials();
         userCredentials.username = Optional.of("USERNAME");
         userCredentials.password = Optional.of("PASSWORD");
-        userCredentials.refreshToken = Optional.empty();
-        userCredentials.clientId = Optional.empty();
-        userCredentials.clientSecret = Optional.empty();
 
         assertFalse(userCredentials.isUsingRefreshToken());
         assertTrue(userCredentials.isUsingUsernamePassword());
@@ -35,8 +32,6 @@ public class UserCredentialsTest {
     @Test
     public void refreshCredentials() {
         final UserCredentials userCredentials = new UserCredentials();
-        userCredentials.username = Optional.empty();
-        userCredentials.password = Optional.empty();
         userCredentials.refreshToken = Optional.of("TOKEN");
         userCredentials.clientId = Optional.of("CLIENT_ID");
         userCredentials.clientSecret = Optional.of("CLIENT_SECRET");
@@ -66,11 +61,6 @@ public class UserCredentialsTest {
     @Test
     public void emptyCredentials() {
         final UserCredentials userCredentials = new UserCredentials();
-        userCredentials.username = Optional.empty();
-        userCredentials.password = Optional.empty();
-        userCredentials.refreshToken = Optional.empty();
-        userCredentials.clientId = Optional.empty();
-        userCredentials.clientSecret = Optional.empty();
         assertFalse(userCredentials.isUsingRefreshToken());
         assertFalse(userCredentials.isUsingUsernamePassword());
         assertEquals("UserCredentials: username=null, password=null, " +

@@ -1,7 +1,7 @@
 package org.solid.testharness.http;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.quarkus.arc.config.ConfigPrefix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.config.Config;
@@ -28,12 +28,6 @@ public class AuthManager {
 
     @Inject
     Config config;
-
-    @Inject
-    UserCredentials aliceCredentials;
-
-    @ConfigPrefix("bob")
-    UserCredentials bobCredentials;
 
     @Inject
     ObjectMapper objectMapper;
@@ -65,13 +59,11 @@ public class AuthManager {
 
             final OidcConfiguration oidcConfiguration = requestOidcConfiguration(authClient);
 
-            final UserCredentials userConfig = HttpConstants.ALICE.equals(user)
-                    ? aliceCredentials
-                    : bobCredentials;
+            final UserCredentials userConfig = config.getCredentials(user);
             final Tokens tokens;
-            if (userConfig.isUsingUsernamePassword()) {
+            if (userConfig != null && userConfig.isUsingUsernamePassword()) {
                 tokens = loginAndGetAccessToken(authClient, userConfig, oidcConfiguration, targetServer);
-            } else if (userConfig.isUsingRefreshToken()) {
+            } else if (userConfig != null && userConfig.isUsingRefreshToken()) {
                 tokens = exchangeRefreshToken(authClient, userConfig, oidcConfiguration);
             } else {
                 logger.warn("UserCredentials for {}: {}", user, userConfig);
@@ -121,17 +113,24 @@ public class AuthManager {
     private OidcConfiguration requestOidcConfiguration(final Client client) throws IOException, InterruptedException {
         logger.debug("\n========== GET CONFIGURATION");
         final URI solidIdentityProvider = config.getSolidIdentityProvider();
-        final HttpRequest request = HttpUtils.newRequestBuilder(
-                solidIdentityProvider.resolve(HttpConstants.OPENID_CONFIGURATION)
-        ).header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_APPLICATION_JSON).build();
+        final URI openIdEndpoint = solidIdentityProvider.resolve(HttpConstants.OPENID_CONFIGURATION);
+        final HttpRequest request = HttpUtils.newRequestBuilder(openIdEndpoint)
+                .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
+                .build();
         HttpUtils.logRequest(logger, request);
         final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         HttpUtils.logResponse(logger, response);
-        final OidcConfiguration oidcConfiguration = objectMapper.readValue(response.body(), OidcConfiguration.class);
-        if (!solidIdentityProvider.toString().equals(oidcConfiguration.getIssuer())) {
-            throw new TestHarnessInitializationException("The configured issuer does not match the Solid IdP");
+        try {
+            final OidcConfiguration oidcConfig = objectMapper.readValue(response.body(), OidcConfiguration.class);
+            if (!solidIdentityProvider.toString().equals(oidcConfig.getIssuer())) {
+                throw new TestHarnessInitializationException("The configured issuer does not match the Solid IdP");
+            }
+            return oidcConfig;
+        } catch (JsonProcessingException e) {
+            throw (TestHarnessInitializationException) new TestHarnessInitializationException(
+                    "Failed to read the OpenId configuration at %s: %s", openIdEndpoint.toString(), e.toString()
+            ).initCause(e);
         }
-        return oidcConfiguration;
     }
 
     private void startLoginSession(final Client client, final UserCredentials userConfig, final URI loginEndpoint)
@@ -147,7 +146,7 @@ public class AuthManager {
         final HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
         HttpUtils.logResponse(logger, response);
         if (!HttpUtils.isSuccessfulOrRedirect(response.statusCode())) {
-            throw new TestHarnessInitializationException("Login failed with response code " + response.statusCode());
+            throw new TestHarnessInitializationException("Login failed with status code " + response.statusCode());
         }
     }
 
@@ -164,9 +163,13 @@ public class AuthManager {
                 .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
                 .build();
         HttpUtils.logRequest(logger, request);
-        final HttpResponse<String> regResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-        HttpUtils.logResponse(logger, regResponse);
-        return objectMapper.readValue(regResponse.body(), Registration.class);
+        final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpUtils.logResponse(logger, response);
+        if (!HttpUtils.isSuccessfulOrRedirect(response.statusCode())) {
+            throw new TestHarnessInitializationException("Registration failed with status code " +
+                    response.statusCode());
+        }
+        return objectMapper.readValue(response.body(), Registration.class);
     }
 
     private String requestAuthorizationCode(final Client client, final OidcConfiguration oidcConfig,
@@ -180,10 +183,10 @@ public class AuthManager {
         requestParams.put(HttpConstants.REDIRECT_URI, appOrigin);
         requestParams.put(HttpConstants.SCOPE, HttpConstants.OPENID);
         requestParams.put(HttpConstants.CLIENT_ID, clientId);
-        final String authorizaUrl = requestParams.keySet().stream()
+        final String authorizeUrl = requestParams.keySet().stream()
                 .map(key -> key + "=" + HttpUtils.encodeValue(requestParams.get(key)))
                 .collect(Collectors.joining("&", authorizeEndpoint + "?", ""));
-        URI redirectUrl = URI.create(authorizaUrl);
+        URI redirectUrl = URI.create(authorizeUrl);
 
         HttpRequest request;
         do {
@@ -192,6 +195,10 @@ public class AuthManager {
             HttpUtils.logRequest(logger, request);
             final HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
             HttpUtils.logResponse(logger, response);
+            if (!HttpUtils.isRedirect(response.statusCode())) {
+                throw new TestHarnessInitializationException("Authorization failed with status code " +
+                        response.statusCode());
+            }
             final Optional<String> locationHeader = response.headers().firstValue(HttpConstants.HEADER_LOCATION);
             redirectUrl = locationHeader.map(authorizeEndpoint::resolve).orElse(null);
         } while (redirectUrl != null && !redirectUrl.toString().startsWith(appOrigin));
@@ -229,7 +236,8 @@ public class AuthManager {
             return objectMapper.readValue(response.body(), Tokens.class);
         } else {
             logger.error("FAILED TO GET ACCESS TOKEN {}", body);
-            throw new TestHarnessInitializationException("Token exchange failed - do you need a new refresh_token");
+            throw new TestHarnessInitializationException("Token exchange failed for grant type: %s",
+                    (String) tokenRequestData.get(HttpConstants.GRANT_TYPE));
         }
     }
 
