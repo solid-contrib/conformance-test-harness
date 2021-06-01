@@ -28,6 +28,7 @@ import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.http.*;
+import org.solid.testharness.utils.SolidContainer;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 import org.solid.testharness.utils.TestUtils;
 
@@ -63,9 +64,13 @@ public class TestSubjectTest {
     void prepareServerNoRootAcl() throws Exception {
         config.setConfigUrl(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver"));
+        final Client mockClient = mock(Client.class);
+        when(clientRegistry.getClient(HttpConstants.ALICE)).thenReturn(mockClient);
+
         testSubject.loadTestSubjectConfig();
         assertDoesNotThrow(() -> testSubject.prepareServer());
-        verify(clientRegistry, never()).getClient(HttpConstants.ALICE);
+        verify(mockClient, never()).head(any());
+        assertNotNull(testSubject.getRootTestContainer());
     }
 
     @Test
@@ -77,7 +82,7 @@ public class TestSubjectTest {
         final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
                 List.of("<https://target.example.org/.acl>; rel=\"acl\""));
         final HttpHeaders mockHeaders = HttpHeaders.of(headerMap, (k, v) -> true);
-        final HttpResponse<Void> mockResponseOk = mockVoidResponse(200);
+        final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(200);
 
         when(clientRegistry.getClient(HttpConstants.ALICE)).thenReturn(mockClient);
         when(mockClient.head(any())).thenReturn(mockResponse);
@@ -107,7 +112,7 @@ public class TestSubjectTest {
         final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
                 List.of("<http://localhost/.acl>; rel=\"acl\""));
         final HttpHeaders mockHeaders = HttpHeaders.of(headerMap, (k, v) -> true);
-        final HttpResponse<Void> mockResponseOk = mockVoidResponse(200);
+        final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(200);
 
         when(clientRegistry.getClient(HttpConstants.ALICE)).thenReturn(mockClient);
         when(mockClient.head(any())).thenThrow(new IOException());
@@ -147,14 +152,14 @@ public class TestSubjectTest {
         final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
                 List.of("<http://localhost/.acl>; rel=\"acl\""));
         final HttpHeaders mockHeaders = HttpHeaders.of(headerMap, (k, v) -> true);
-        final HttpResponse<Void> mockResponseOk = mockVoidResponse(500);
+        final HttpResponse<Void> mockResponseFail = TestUtils.mockVoidResponse(500);
 
         when(clientRegistry.getClient(HttpConstants.ALICE)).thenReturn(mockClient);
         when(mockClient.head(any())).thenReturn(mockResponse);
         when(mockResponse.headers()).thenReturn(mockHeaders);
         when(mockClient.put(eq(URI.create("http://localhost/.acl")), any(),
                 eq(HttpConstants.MEDIA_TYPE_TEXT_TURTLE)))
-                .thenReturn(mockResponseOk);
+                .thenReturn(mockResponseFail);
 
         testSubject.loadTestSubjectConfig();
         final Exception exception = assertThrows(TestHarnessInitializationException.class,
@@ -239,9 +244,20 @@ public class TestSubjectTest {
         assertNotNull(clients.get(HttpConstants.BOB));
     }
 
-    private HttpResponse<Void> mockVoidResponse(final int status) {
-        final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
-        when(mockResponse.statusCode()).thenReturn(status);
-        return mockResponse;
+    @Test
+    void tearDownServer() throws Exception {
+        final SolidClient mockSolidClient = mock(SolidClient.class);
+        testSubject.setRootTestContainer(SolidContainer.create(mockSolidClient, "https://localhost/container/"));
+        assertDoesNotThrow(() -> testSubject.tearDownServer());
+        verify(mockSolidClient).deleteResourceRecursively(eq(URI.create("https://localhost/container/")));
+    }
+
+    @Test
+    void tearDownServerFails() throws Exception {
+        final SolidClient mockSolidClient = mock(SolidClient.class);
+        testSubject.setRootTestContainer(SolidContainer.create(mockSolidClient, "https://localhost/container/"));
+        doThrow(new Exception("FAIL")).when(mockSolidClient).deleteResourceRecursively(any());
+        assertDoesNotThrow(() -> testSubject.tearDownServer());
+        verify(mockSolidClient).deleteResourceRecursively(eq(URI.create("https://localhost/container/")));
     }
 }

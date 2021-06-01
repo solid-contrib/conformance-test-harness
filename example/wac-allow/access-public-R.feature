@@ -4,7 +4,7 @@ Feature: The WAC-Allow header shows user and public access modes with public rea
     * def setup =
     """
       function() {
-        const testContainer = createTestContainer(clients.alice);
+        const testContainer = createTestContainer();
         const resource = testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
         if (resource.exists()) {
           const acl = aclPrefix
@@ -19,8 +19,6 @@ Feature: The WAC-Allow header shows user and public access modes with public rea
     * assert resource.exists()
     * def resourceUrl = resource.getUrl()
     * url resourceUrl
-
-    * configure afterFeature = function() {resource.getContainer().delete()}
 
   Scenario: There is an acl on the resource containing #publicAccessTo
     Given url resource.getAclUrl()

@@ -5,8 +5,6 @@ Feature: Bob cannot read an RDF resource to which he is not granted default read
     * def resourceUrl = resource.getUrl()
     * url resourceUrl
 
-    * configure afterFeature = function() {resource.getContainer().delete()}
-
   Scenario: Bob can get the resource OPTIONS
     Given configure headers = clients.bob.getAuthHeaders('OPTIONS', resourceUrl)
     When method OPTIONS

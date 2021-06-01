@@ -5,8 +5,6 @@ Feature: Bob can only read an RDF resource to which he is only granted read acce
     * def resourceUrl = resource.getUrl()
     * url resourceUrl
 
-    * configure afterFeature = function() {resource.getContainer().delete()}
-
   Scenario: Bob can read the resource with GET
     Given configure headers = clients.bob.getAuthHeaders('GET', resourceUrl)
     When method GET

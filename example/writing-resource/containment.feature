@@ -1,12 +1,9 @@
 Feature: Creating a resource using PUT and PATCH must create intermediate containers
 
   Background: Set up clients and paths
-    * def testContainer = createTestContainer(clients.alice)
+    * def testContainer = createTestContainer()
     * def intermediateContainer = testContainer.generateChildContainer()
     * def resource = intermediateContainer.generateChildResource('.txt')
-
-    # prepare the teardown function
-    * configure afterScenario = function() {testContainer.delete()}
 
   Scenario: PUT creates a grandchild resource and intermediate containers
     * def resourceUrl = resource.getUrl()

@@ -315,7 +315,6 @@ Karate based setup feature:
 * creates Authorization headers with these tokens
 * creates any test resources required for the test
 * adds ACLs if needed
-* provides a link to the container created for the test to be used in teardown
 
 Javascript function setup (see wac-allow tests):
 * the setup feature contains a function used to set up the clients and a test resource - this is shared across all
@@ -326,7 +325,6 @@ Javascript function setup (see wac-allow tests):
 The test files themselves:
 * run a background task for each scenario to call the necessary setup procedure
 * hold the returned test context to provide access to the Authorization headers and the test container or resource paths
-* prepare the teardown function that will delete the resources created for the tests
 * provide a set of scenarios that make http requests against the test resource and validate the responses
 
 ### Tips
