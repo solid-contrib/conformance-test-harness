@@ -25,7 +25,7 @@
         <compiler-plugin.version>3.8.1</compiler-plugin.version>
         <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
         <release.plugin.version>2.5.3</release.plugin.version>
-        <jandex.maven.version>1.0.8</jandex.maven.version>
+        <jandex.maven.version>1.1.0</jandex.maven.version>
         <properties.plugin.version>1.0.0</properties.plugin.version>
         <jacoco-plugin.version>0.8.7</jacoco-plugin.version>
         <checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
