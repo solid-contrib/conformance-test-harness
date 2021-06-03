@@ -2,6 +2,7 @@
 configFile: config/config.ttl
 testSuiteDescription: example/example.ttl
 target: https://github.com/solid/conformance-test-harness/ess-compat
+#target: https://github.com/solid/conformance-test-harness/ess
 #target: https://github.com/solid/conformance-test-harness/css
 #target: https://github.com/solid/conformance-test-harness/nss
 
