@@ -57,6 +57,10 @@ public class UserCredentials {
         return refreshToken.isPresent() && clientId.isPresent() && clientSecret.isPresent();
     }
 
+    public boolean isUsingClientCredentials() {
+        return clientSecret.isPresent() && !clientId.isPresent();
+    }
+
     @Override
     public String toString() {
         if (isUsingUsernamePassword()) {
@@ -66,6 +70,10 @@ public class UserCredentials {
         } else if (isUsingRefreshToken()) {
             return String.format("UserCredentials: refreshToken=%s, clientId=%s, clientSecret=%s",
                     mask(refreshToken), mask(clientId), mask(clientSecret)
+            );
+        } else if (isUsingClientCredentials()) {
+            return String.format("UserCredentials: clientSecret=%s",
+                    mask(clientSecret)
             );
         } else {
             return String.format("UserCredentials: username=%s, password=%s, " +

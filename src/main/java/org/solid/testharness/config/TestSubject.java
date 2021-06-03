@@ -54,7 +54,6 @@ public class TestSubject {
 
     private TargetServer targetServer;
     private Map<String, SolidClient> clients;
-    private Map<String, Object> webIds;
     private SolidContainer rootTestContainer;
 
     @Inject
@@ -135,7 +134,7 @@ public class TestSubject {
                         "  acl:agent <%s> ;" +
                         "  acl:accessTo <./>;" +
                         "  acl:default <./>;" +
-                        "  acl:mode acl:Read, acl:Write, acl:Control .", config.getAliceWebId());
+                        "  acl:mode acl:Read, acl:Write, acl:Control .", config.getWebIds().get(HttpConstants.ALICE));
                 if (!solidClient.createAcl(rootAclUrl, acl)) {
                     throw new TestHarnessInitializationException("Failed to create root ACL");
                 }
@@ -155,7 +154,7 @@ public class TestSubject {
         if (targetServer == null) {
             throw new TestHarnessInitializationException("No target server has been configured");
         }
-        getWebIds().keySet().forEach(user -> {
+        config.getWebIds().keySet().forEach(user -> {
             try {
                 clients.put(user, authManager.authenticate(user, targetServer));
             } catch (Exception e) {
@@ -194,15 +193,4 @@ public class TestSubject {
     public void setRootTestContainer(final SolidContainer solidContainer) {
         rootTestContainer = solidContainer;
     }
-
-    public Map<String, Object> getWebIds() {
-        if (webIds == null) {
-            webIds = Map.of(
-                    HttpConstants.ALICE, config.getAliceWebId(),
-                    HttpConstants.BOB, config.getBobWebId()
-            );
-        }
-        return webIds;
-    }
-
 }

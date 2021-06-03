@@ -72,7 +72,7 @@ class AuthManagerTest {
 
     @Test
     void authenticateNullTarget() {
-        assertThrows(ConstraintViolationException.class, () -> authManager.authenticate("alice", null));
+        assertThrows(ConstraintViolationException.class, () -> authManager.authenticate(HttpConstants.ALICE, null));
     }
 
     @Test
@@ -161,6 +161,23 @@ class AuthManagerTest {
     }
 
     @Test
+    void authenticateRefreshCredentialsNoGrantType() {
+        final TargetServer targetServer = getMockTargetServer(false);
+        when(config.getSolidIdentityProvider()).thenReturn(baseUri.resolve("/nogranttypes/"));
+        when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
+        final UserCredentials credentials = new UserCredentials();
+        credentials.refreshToken = Optional.of("REFRESH");
+        credentials.clientId = Optional.of("CLIENTID");
+        credentials.clientSecret = Optional.of("BADSECRET");
+        when(config.getCredentials("refresh-nogrant")).thenReturn(credentials);
+
+        final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
+                () -> authManager.authenticate("refresh-nogrant", targetServer));
+        assertEquals("Identity Provider does not support grant type: " + HttpConstants.REFRESH_TOKEN,
+                exception.getMessage());
+    }
+
+    @Test
     void authenticateRefreshCredentialsFails() {
         final TargetServer targetServer = getMockTargetServer(false);
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
@@ -193,10 +210,22 @@ class AuthManagerTest {
     }
 
     @Test
+    void authenticateLoginSessionNoGrantType() {
+        final TargetServer targetServer = getMockTargetServer(false);
+        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(new Client.Builder().build());
+        setupLogin(baseUri.resolve("/nogranttypes/"), "login-nogrant", "PASSWORD");
+
+        final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
+                () -> authManager.authenticate("login-nogrant", targetServer));
+        assertEquals("Identity Provider does not support grant type: " + HttpConstants.AUTHORIZATION_CODE_TYPE,
+                exception.getMessage());
+    }
+
+    @Test
     void authenticateLoginSessionFails() {
         final TargetServer targetServer = getMockTargetServer(false);
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(new Client.Builder().build());
-        setupLogin("test8", "BADPASSWORD");
+        setupLogin(baseUri, "test8", "BADPASSWORD");
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.authenticate("test8", targetServer));
@@ -208,7 +237,7 @@ class AuthManagerTest {
         final TargetServer targetServer = getMockTargetServer(false);
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(new Client.Builder().build());
         when(targetServer.getOrigin()).thenReturn("BADORIGIN");
-        setupLogin("test9", "PASSWORD");
+        setupLogin(baseUri, "test9", "PASSWORD");
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.authenticate("test9", targetServer));
@@ -220,7 +249,7 @@ class AuthManagerTest {
         final TargetServer targetServer = getMockTargetServer(false);
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(new Client.Builder().build());
         when(targetServer.getOrigin()).thenReturn("AUTHFAIL");
-        setupLogin("test10", "PASSWORD");
+        setupLogin(baseUri, "test10", "PASSWORD");
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.authenticate("test10", targetServer));
@@ -232,7 +261,7 @@ class AuthManagerTest {
         final TargetServer targetServer = getMockTargetServer(false);
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(new Client.Builder().build());
         when(targetServer.getOrigin()).thenReturn("https://origin/noredirect");
-        setupLogin("test11", "PASSWORD");
+        setupLogin(baseUri, "test11", "PASSWORD");
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.authenticate("test11", targetServer));
@@ -244,7 +273,7 @@ class AuthManagerTest {
         final TargetServer targetServer = getMockTargetServer(false);
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(new Client.Builder().build());
         when(targetServer.getOrigin()).thenReturn("https://origin/immediate");
-        setupLogin("test12", "PASSWORD");
+        setupLogin(baseUri, "test12", "PASSWORD");
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.authenticate("test12", targetServer));
@@ -256,7 +285,7 @@ class AuthManagerTest {
         final TargetServer targetServer = getMockTargetServer(false);
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(new Client.Builder().build());
         when(targetServer.getOrigin()).thenReturn("https://origin/redirect");
-        setupLogin("test13", "PASSWORD");
+        setupLogin(baseUri, "test13", "PASSWORD");
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.authenticate("test13", targetServer));
@@ -268,7 +297,7 @@ class AuthManagerTest {
         final TargetServer targetServer = getMockTargetServer(false);
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(new Client.Builder().build());
         when(targetServer.getOrigin()).thenReturn("https://origin/badcode");
-        setupLogin("test14", "PASSWORD");
+        setupLogin(baseUri, "test14", "PASSWORD");
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.authenticate("test14", targetServer));
@@ -281,9 +310,56 @@ class AuthManagerTest {
         final TargetServer targetServer = getMockTargetServer(false);
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(new Client.Builder().build());
         when(targetServer.getOrigin()).thenReturn("https://origin/goodcode");
-        setupLogin("test15", "PASSWORD");
+        setupLogin(baseUri, "test15", "PASSWORD");
 
         final SolidClient solidClient = authManager.authenticate("test15", targetServer);
+        assertEquals("ACCESS_TOKEN", solidClient.getClient().getAccessToken());
+    }
+
+    @Test
+    void authenticateClientCredentialsNoGrantType() {
+        final TargetServer targetServer = getMockTargetServer(false);
+        when(config.getSolidIdentityProvider()).thenReturn(baseUri.resolve("/nogranttypes/"));
+        when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
+        final UserCredentials credentials = new UserCredentials();
+        credentials.clientSecret = Optional.of("BADSECRET");
+        when(config.getCredentials("client-nogrant")).thenReturn(credentials);
+
+        final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
+                () -> authManager.authenticate("client-nogrant", targetServer));
+        assertEquals("Identity Provider does not support grant type: " + HttpConstants.CLIENT_CREDENTIALS,
+                exception.getMessage());
+    }
+
+    @Test
+    void authenticateClientCredentialsFails() {
+        final TargetServer targetServer = getMockTargetServer(false);
+        when(config.getSolidIdentityProvider()).thenReturn(baseUri);
+        when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
+        when(config.getWebIds())
+                .thenReturn(Map.of("test16","https://alice.target.example.org/profile/card#me"));
+        final UserCredentials credentials = new UserCredentials();
+        credentials.clientSecret = Optional.of("BADSECRET");
+        when(config.getCredentials("test16")).thenReturn(credentials);
+
+        final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
+                () -> authManager.authenticate("test16", targetServer));
+        assertEquals("Token exchange failed for grant type: " + HttpConstants.CLIENT_CREDENTIALS,
+                exception.getMessage());
+    }
+
+    @Test
+    void authenticateClientCredentials() throws Exception {
+        final TargetServer targetServer = getMockTargetServer(false);
+        when(config.getSolidIdentityProvider()).thenReturn(baseUri);
+        when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
+        when(config.getWebIds())
+                .thenReturn(Map.of("test17","https://alice.target.example.org/profile/card#me"));
+        final UserCredentials credentials = new UserCredentials();
+        credentials.clientSecret = Optional.of("CLIENTSECRET");
+        when(config.getCredentials("test17")).thenReturn(credentials);
+
+        final SolidClient solidClient = authManager.authenticate("test17", targetServer);
         assertEquals("ACCESS_TOKEN", solidClient.getClient().getAccessToken());
     }
 
@@ -298,9 +374,9 @@ class AuthManagerTest {
         return targetServer;
     }
 
-    private void setupLogin(final String testId, final String password) {
-        when(config.getSolidIdentityProvider()).thenReturn(baseUri);
-        when(config.getLoginEndpoint()).thenReturn(baseUri.resolve("/login/password"));
+    private void setupLogin(final URI idpBaseUri, final String testId, final String password) {
+        when(config.getSolidIdentityProvider()).thenReturn(idpBaseUri);
+        when(config.getLoginEndpoint()).thenReturn(idpBaseUri.resolve("/login/password"));
         when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
         final UserCredentials credentials = new UserCredentials();
         credentials.username = Optional.of("USERNAME");

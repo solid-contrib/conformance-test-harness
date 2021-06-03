@@ -31,6 +31,8 @@ import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -38,7 +40,8 @@ class OidcConfigurationTest {
     private static final String DATA = "{\"authorization_endpoint\":\"https://example.org/authorization\"," +
             "\"issuer\":\"https://example.org\"," +
             "\"registration_endpoint\":\"https://example.org/registration\"," +
-            "\"token_endpoint\":\"https://example.org/token\"" +
+            "\"token_endpoint\":\"https://example.org/token\"," +
+            "\"grant_types_supported\":[\"authorization_code\",\"refresh_token\",\"client_credentials\"]" +
             "}";
 
     @Inject
@@ -81,5 +84,14 @@ class OidcConfigurationTest {
     @Test
     void getRegistrationEndpoint() {
         assertEquals("https://example.org/registration", oidcConfiguration.getRegistrationEndpoint());
+    }
+
+    @Test
+    void getGrantTypesSupported() {
+        final List<String> grantTypes = oidcConfiguration.getGrantTypesSupported();
+        assertEquals(3, grantTypes.size());
+        assertTrue(grantTypes.contains(HttpConstants.AUTHORIZATION_CODE_TYPE));
+        assertTrue(grantTypes.contains(HttpConstants.REFRESH_TOKEN));
+        assertTrue(grantTypes.contains(HttpConstants.CLIENT_CREDENTIALS));
     }
 }

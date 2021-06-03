@@ -6,6 +6,7 @@ function fn() {
         return {}
     }
 
+    const config = bootstrap.getConfig();
     const testSubject = bootstrap.getTestSubject();
     const target = testSubject.targetServer;
     if (target == null) {
@@ -22,6 +23,6 @@ function fn() {
         rootTestContainer: testSubject.getRootTestContainer(),
         ...additionalConfig,
         clients: karate.toMap(testSubject.clients),
-        webIds: testSubject.webIds
+        webIds: config.webIds
     };
 }

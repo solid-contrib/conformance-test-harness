@@ -112,7 +112,7 @@ If you are planning to use accounts that do not own PODs on the target server th
 container on the target server for the tests that has been granted full access control for the test user.
 
 There are 3 approaches to authentication: refresh tokens, session based login, and client credentials. If the target 
-test server and the chosen IdP are compatible (which they should be) then any of the mechanisms can be used to get the
+test server, and the chosen IdP are compatible (which they should be) then any of the mechanisms can be used to get the
 access tokens required to run the tests.
 
 ### Refresh tokens
@@ -147,13 +147,15 @@ app for the users.
 This mechanism will work in CI environments where the credentials can be passed in as secrets.
 
 ### Client credentials 
-**NOTE: Not yet implemented**
-
 This relies on an IdP that supports this grant mechanism and which has had users pre-registered.
 
 The configuration that must be saved for each user is:
-* Client Id (a WebID)
+* WebID (used as the Client Id)
 * Client Secret
+
+This mechanism will also work in CI environments where the credentials can be passed in as secrets.
+However, the access tokens provided seem to cause a 500 error on NSS so session based login in the only
+option for that server.
 
 ## Usage
 
