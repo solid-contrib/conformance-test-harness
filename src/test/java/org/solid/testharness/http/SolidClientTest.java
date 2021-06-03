@@ -223,7 +223,7 @@ class SolidClientTest {
         when(mockClient.head(any())).thenReturn(mockResponse);
         when(mockClient.put(eq(resourceAcl), eq("ACL"), eq(HttpConstants.MEDIA_TYPE_TEXT_TURTLE)))
                 .thenReturn(mockResponse);
-        when(mockResponse.statusCode()).thenReturn(500);
+        when(mockResponse.statusCode()).thenReturn(400);
 
         final SolidClient solidClient = new SolidClient(mockClient);
         final boolean res = solidClient.createAcl(resourceAcl, "ACL");
@@ -248,13 +248,13 @@ class SolidClientTest {
     void getContainmentDataFails() throws IOException, InterruptedException {
         final Client mockClient = mock(Client.class);
         final URI resourceAcl = URI.create("http://localhost:3000/test");
-        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(500, null);
+        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(400, null);
 
         when(mockClient.getAsTurtle(eq(resourceAcl))).thenReturn(mockResponse);
 
         final SolidClient solidClient = new SolidClient(mockClient);
         final Exception exception = assertThrows(Exception.class, () -> solidClient.getContainmentData(resourceAcl));
-        assertEquals("Error response=500 trying to get container members for http://localhost:3000/test",
+        assertEquals("Error response=400 trying to get container members for http://localhost:3000/test",
                 exception.getMessage());
     }
 
@@ -289,7 +289,7 @@ class SolidClientTest {
         final String data = PREFIX + "<http://localhost:3000/> ldp:contains <http://localhost:3000/test>.";
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, data);
-        final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(200);
+        final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(204);
 
         when(mockClient.deleteAsync(URI.create("http://localhost:3000/test")))
                 .thenReturn(CompletableFuture.supplyAsync(() -> mockResponseOk));
@@ -306,7 +306,7 @@ class SolidClientTest {
                 "<http://localhost:3000/test>, <http://localhost:3000/test2>.";
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, data);
-        final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(200);
+        final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(204);
 
         when(mockClient.getAsTurtle(eq(URI.create("http://localhost:3000/")))).thenReturn(mockResponse);
         when(mockClient.deleteAsync(URI.create("http://localhost:3000/test")))
@@ -328,8 +328,8 @@ class SolidClientTest {
                 "<http://localhost:3000/test>, <http://localhost:3000/test2>.";
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, data);
-        final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(200);
-        final HttpResponse<Void> mockResponseFail = TestUtils.mockVoidResponse(500);
+        final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(204);
+        final HttpResponse<Void> mockResponseFail = TestUtils.mockVoidResponse(400);
 
         when(mockClient.getAsTurtle(eq(URI.create("http://localhost:3000/")))).thenReturn(mockResponse);
         when(mockClient.deleteAsync(URI.create("http://localhost:3000/test")))
@@ -351,7 +351,7 @@ class SolidClientTest {
                 "<http://localhost:3000/test>, <http://localhost:3000/test2>.";
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, data);
-        final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(200);
+        final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(204);
         final HttpResponse<Void> mockResponseException = mock(HttpResponse.class);
         // TODO: This causes a failure in a delete but the code cannto detect which so carries on deleting other
         // resources which may fail. Better handling needed.
@@ -378,7 +378,7 @@ class SolidClientTest {
     void deleteContainerListFails() throws IOException, InterruptedException {
         final String data = PREFIX + "<http://localhost:3000/> ldp:contains <http://localhost:3000/test>.";
         final Client mockClient = mock(Client.class);
-        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(500, null);
+        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(400, null);
 
         when(mockClient.getAsTurtle(eq(URI.create("http://localhost:3000/")))).thenReturn(mockResponse);
 
@@ -394,7 +394,7 @@ class SolidClientTest {
                 "<http://localhost:3000/test>, <http://localhost:3000/test2>.";
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, data);
-        final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(200);
+        final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(204);
 
         when(mockClient.getAsTurtle(eq(URI.create("http://localhost:3000/")))).thenReturn(mockResponse);
         when(mockClient.deleteAsync(URI.create("http://localhost:3000/test")))
@@ -422,7 +422,7 @@ class SolidClientTest {
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, data);
         final HttpResponse<String> mockResponseChild = TestUtils.mockStringResponse(200, data2);
-        final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(200);
+        final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(204);
 
         when(mockClient.getAsTurtle(eq(URI.create("http://localhost:3000/")))).thenReturn(mockResponse);
         when(mockClient.getAsTurtle(eq(URI.create("http://localhost:3000/child/")))).thenReturn(mockResponseChild);
