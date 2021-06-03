@@ -76,4 +76,7 @@ public class SolidContainer extends SolidResource {
         return null;
     }
 
+    public void deleteContents() throws Exception {
+        solidClient.deleteContentsRecursively(url);
+    }
 }

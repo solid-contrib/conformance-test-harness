@@ -52,6 +52,7 @@ public class TestScenarioRunner {
 //        final String featurePath = "example/writing-resource/containment.feature";
         final String uri = Path.of(featurePath).toAbsolutePath().normalize().toUri().toString();
         final TestSuiteResults results = testRunner.runTest(uri);
+        testSubject.tearDownServer();
         assertNotNull(results);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());
     }

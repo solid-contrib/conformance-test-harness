@@ -35,6 +35,7 @@ import org.solid.testharness.http.AuthManager;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClient;
 import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.SolidContainer;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -54,6 +55,7 @@ public class TestSubject {
     private TargetServer targetServer;
     private Map<String, SolidClient> clients;
     private Map<String, Object> webIds;
+    private SolidContainer rootTestContainer;
 
     @Inject
     Config config;
@@ -119,10 +121,10 @@ public class TestSubject {
         if (targetServer == null) {
             throw new TestHarnessInitializationException("No target server has been configured");
         }
+        final SolidClient solidClient = new SolidClient(HttpConstants.ALICE);
         if (targetServer.isSetupRootAcl()) {
             // CSS has no root acl by default so added here TODO: check whether this is relevant
             logger.debug("Setup root acl");
-            final SolidClient solidClient = new SolidClient(HttpConstants.ALICE);
             try {
                 final URI rootAclUrl = solidClient.getResourceAclLink(config.getServerRoot());
                 if (rootAclUrl == null) {
@@ -143,6 +145,8 @@ public class TestSubject {
                 ).initCause(e);
             }
         }
+        // create a root container for all the test cases
+        rootTestContainer = SolidContainer.create(solidClient, config.getTestContainer()).generateChildContainer();
     }
 
     public void registerClients() {
@@ -162,6 +166,15 @@ public class TestSubject {
         });
     }
 
+    public void tearDownServer() {
+        try {
+            rootTestContainer.delete();
+        } catch (Exception e) {
+            // log failure but continue to report results
+            logger.error("Failed to delete the test containers", e);
+        }
+    }
+
     public TargetServer getTargetServer() {
         return targetServer;
     }
@@ -174,8 +187,12 @@ public class TestSubject {
         return clients;
     }
 
-    public String getTestContainer() {
-        return config.getTestContainer();
+    public SolidContainer getRootTestContainer() {
+        return rootTestContainer;
+    }
+
+    public void setRootTestContainer(final SolidContainer solidContainer) {
+        rootTestContainer = solidContainer;
     }
 
     public Map<String, Object> getWebIds() {

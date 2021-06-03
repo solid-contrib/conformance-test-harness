@@ -3,7 +3,7 @@ Feature: Set up a sample turtle file for Alice with defined access set for Bob
 
   @name=setupAccessTo # input: { bobAccessModes }
   Scenario: Create resource with access for Bob
-    * def testContainer = createTestContainer(clients.alice)
+    * def testContainer = createTestContainer()
     * def resource = testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
     * assert resource.exists()
     * def acl =
@@ -16,7 +16,7 @@ Feature: Set up a sample turtle file for Alice with defined access set for Bob
 
   @name=setupDefault # input: { bobAccessModes }
   Scenario: Create resource with default access for Bob
-    * def testContainer = createTestContainer(clients.alice)
+    * def testContainer = createTestContainer()
     * def resource = testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
     * assert resource.exists()
     * def acl =

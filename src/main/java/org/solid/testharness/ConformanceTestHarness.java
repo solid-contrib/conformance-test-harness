@@ -161,6 +161,7 @@ public class ConformanceTestHarness {
         logger.info("===================== RUN TESTS ========================");
         final TestSuiteResults results = testRunner.runTests(featurePaths,
                 testSubject.getTargetServer().getMaxThreads());
+        testSubject.tearDownServer();
 
         logger.info("===================== BUILD REPORTS ========================");
         final File outputDir = config.getOutputDirectory();

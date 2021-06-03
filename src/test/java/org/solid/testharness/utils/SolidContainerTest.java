@@ -129,4 +129,11 @@ class SolidContainerTest {
         final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
         assertNull(container.createChildResource(".suffix", "hello", null));
     }
+
+    @Test
+    void deleteContents() throws Exception {
+        final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
+        assertDoesNotThrow(() -> container.deleteContents());
+        verify(solidClient).deleteContentsRecursively(testUrl);
+    }
 }

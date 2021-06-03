@@ -19,7 +19,7 @@ function fn() {
     const additionalConfig = karate.call('classpath:setup.js')
     return {
         target,
-        rootTestContainer: testSubject.getTestContainer(),
+        rootTestContainer: testSubject.getRootTestContainer(),
         ...additionalConfig,
         clients: karate.toMap(testSubject.clients),
         webIds: testSubject.webIds

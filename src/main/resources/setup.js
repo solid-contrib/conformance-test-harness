@@ -7,7 +7,7 @@ function() {
         SolidResource,
         SolidContainer,
         parseWacAllowHeader: (headers) => Java.type('org.solid.testharness.http.HttpUtils').parseWacAllowHeader(headers),
-        createTestContainer: (client) => SolidContainer.create(client, rootTestContainer).generateChildContainer(),
+        createTestContainer: () => rootTestContainer.generateChildContainer(),
         createOwnerAuthorization: (ownerAgent, targetUri) => `
 <#owner> a acl:Authorization;
   acl:agent <${ownerAgent}>;

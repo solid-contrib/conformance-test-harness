@@ -50,5 +50,12 @@ public final class TestUtils {
         return mockResponse;
     }
 
+    public static HttpResponse<String> mockStringResponse(final int status, final String body) {
+        final HttpResponse<String> mockResponse = mock(HttpResponse.class);
+        when(mockResponse.statusCode()).thenReturn(status);
+        when(mockResponse.body()).thenReturn(body);
+        return mockResponse;
+    }
+
     private TestUtils() { }
 }
