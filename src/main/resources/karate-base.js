@@ -6,14 +6,15 @@ function fn() {
         return {}
     }
 
+    const config = bootstrap.getConfig();
     const testSubject = bootstrap.getTestSubject();
     const target = testSubject.targetServer;
     if (target == null) {
         karate.log('Check the environment properties - config is not defined');
     }
 
-    karate.configure('connectTimeout', 5000);
-    karate.configure('readTimeout', 8000);
+    karate.configure('connectTimeout', config.connectTimeout);
+    karate.configure('readTimeout', config.readTimeout);
     karate.configure('ssl', true);
 
     const additionalConfig = karate.call('classpath:setup.js')

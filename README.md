@@ -250,15 +250,19 @@ usage: run
 If you want to control the logging output or set up mappings between URIs and local directories for test features you
 can also create `config/application.yaml` in your current working directory based on the definition shown above. Note
 that the jar file does not have to be in this directory. The command line options override any equivalent options set
-in any application properties file. An example of a minimal properties file which could be used to map test features
-would be:
+in any application properties file. An example of the properties that can be set via this file is:
 ```yaml
+configFile: config/config.ttl
+testSuiteDescription: example/example.ttl
+target: https://github.com/solid/conformance-test-harness/ess-compat
 feature:
   mappings:
     - prefix: https://github.com/solid/conformance-test-harness/example
       path: example
+agent: agent-string		# default = Solid-Conformance-Test-Suite
+connectTimeout: 1000	# default = 5000
+readTimeout: 1000		# default = 5000
 ```
-The application wrapper is still under development so there will be changes to the above options and properties.  
 
 ### Docker
 We are in the process of making a docker image available for the test harness. Currently, there are 2 docker files:

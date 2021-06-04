@@ -64,4 +64,8 @@ public final class Bootstrap {
     public TestSubject getTestSubject() {
         return CDI.current().select(TestSubject.class).get();
     }
+
+    public Config getConfig() {
+        return CDI.current().select(Config.class).get();
+    }
 }
