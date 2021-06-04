@@ -246,6 +246,16 @@ class ApplicationTest {
     }
 
     @Test
+    void filtersTwice() {
+        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
+        application.run("--filter", "filter1", "--filter", "filter2");
+        verify(conformanceTestHarness).runTestSuites(captor.capture());
+        assertEquals(2, captor.getValue().size());
+        assertTrue(captor.getValue().contains("filter1"));
+        assertTrue(captor.getValue().contains("filter2"));
+    }
+
+    @Test
     void runTestSuitesNoResults() {
         when(conformanceTestHarness.runTestSuites(any())).thenReturn(null);
         assertEquals(1, application.run());
