@@ -28,6 +28,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.config.TargetServer;
 import org.solid.testharness.config.TestSubject;
@@ -46,6 +47,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -136,6 +138,24 @@ class ConformanceTestHarnessTest {
     }
 
     @Test
+    void runTestSuiteNoTestsNullFilter() {
+        mockTargetServer();
+        when(testSuiteDescription.getSupportedTestCases(any())).thenReturn(List.of(iri("file:/group1/tests")));
+        when(testSuiteDescription.locateTestCases(any())).thenReturn(Collections.emptyList());
+        assertNull(conformanceTestHarness.runTestSuites(null));
+        assertTrue(Files.notExists(tmp.resolve("report.html")));
+    }
+
+    @Test
+    void runTestSuiteNoTestsEmptyFilter() {
+        mockTargetServer();
+        when(testSuiteDescription.getSupportedTestCases(any())).thenReturn(List.of(iri("file:/group1/tests")));
+        when(testSuiteDescription.locateTestCases(any())).thenReturn(Collections.emptyList());
+        assertNull(conformanceTestHarness.runTestSuites(Collections.emptyList()));
+        assertTrue(Files.notExists(tmp.resolve("report.html")));
+    }
+
+    @Test
     void runTestSuiteInitErrpr() {
         mockTargetServer();
         when(testSuiteDescription.getSupportedTestCases(any())).thenThrow(TestHarnessInitializationException.class);
@@ -151,6 +171,57 @@ class ConformanceTestHarnessTest {
         final TestSuiteResults results = mockResults(1);
         when(testRunner.runTests(any(), anyInt())).thenReturn(results);
         assertEquals(1, conformanceTestHarness.runTestSuites().getFailCount());
+        assertTrue(Files.exists(tmp.resolve("report.html")));
+    }
+
+    @Test
+    void runTestSuiteOneFilter() {
+        mockTargetServer();
+        when(testSuiteDescription.getSupportedTestCases(any()))
+                .thenReturn(List.of(iri("file:/group1/tests"), iri("file:/group2/tests")));
+        when(testSuiteDescription.locateTestCases(any())).thenReturn(List.of("test"));
+        final TestSuiteResults results = mockResults(1);
+        when(testRunner.runTests(any(), anyInt())).thenReturn(results);
+
+        assertEquals(1, conformanceTestHarness.runTestSuites(List.of("group1")).getFailCount());
+        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
+        verify(testSuiteDescription).locateTestCases(captor.capture());
+        assertEquals(1, captor.getValue().size());
+        assertEquals(iri("file:/group1/tests"), captor.getValue().get(0));
+        assertTrue(Files.exists(tmp.resolve("report.html")));
+    }
+
+    @Test
+    void runTestSuiteTwoFilters() {
+        mockTargetServer();
+        when(testSuiteDescription.getSupportedTestCases(any()))
+                .thenReturn(List.of(iri("file:/group1/tests"), iri("file:/group2/tests"), iri("file:/example/group3")));
+        when(testSuiteDescription.locateTestCases(any())).thenReturn(List.of("test"));
+        final TestSuiteResults results = mockResults(1);
+        when(testRunner.runTests(any(), anyInt())).thenReturn(results);
+
+        assertEquals(1, conformanceTestHarness.runTestSuites(List.of("group1", "group2")).getFailCount());
+        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
+        verify(testSuiteDescription).locateTestCases(captor.capture());
+        assertEquals(2, captor.getValue().size());
+        assertEquals(iri("file:/group1/tests"), captor.getValue().get(0));
+        assertEquals(iri("file:/group2/tests"), captor.getValue().get(1));
+        assertTrue(Files.exists(tmp.resolve("report.html")));
+    }
+
+    @Test
+    void runTestSuiteFilterExcludeAll() {
+        mockTargetServer();
+        when(testSuiteDescription.getSupportedTestCases(any()))
+                .thenReturn(List.of(iri("file:/group1/tests"), iri("file:/group2/tests")));
+        when(testSuiteDescription.locateTestCases(any())).thenReturn(List.of("test"));
+        final TestSuiteResults results = mockResults(1);
+        when(testRunner.runTests(any(), anyInt())).thenReturn(results);
+
+        assertEquals(1, conformanceTestHarness.runTestSuites(List.of("missing")).getFailCount());
+        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
+        verify(testSuiteDescription).locateTestCases(captor.capture());
+        assertTrue(captor.getValue().isEmpty());
         assertTrue(Files.exists(tmp.resolve("report.html")));
     }
 

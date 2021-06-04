@@ -242,6 +242,7 @@ The command line options are:
 usage: run
  -c,--config <arg>   URL or path to test subject config (Turtle)
     --coverage       produce a coverage report
+ -f,--filter <arg>   feature filter(s)
  -h,--help           print this message
  -o,--output <arg>   output directory
  -s,--suite <arg>    URL or path to test suite description
