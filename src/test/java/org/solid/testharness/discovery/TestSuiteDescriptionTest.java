@@ -61,7 +61,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void load() throws MalformedURLException {
-        testSuiteDescription.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        testSuiteDescription.load(List.of(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl")));
         try (RepositoryConnection conn = repository.getConnection()) {
             assertFalse(conn.isEmpty());
         }
@@ -69,7 +69,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void getSupportedTestCasesNullFeatures() throws MalformedURLException {
-        testSuiteDescription.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        testSuiteDescription.load(List.of(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl")));
         final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(null);
         final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3");
         assertThat("Group 1 matches", testCases, containsInAnyOrder(expected));
@@ -77,7 +77,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void getSupportedTestCasesEmptyFeatures() throws MalformedURLException {
-        testSuiteDescription.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        testSuiteDescription.load(List.of(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl")));
         final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of());
         final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3");
         assertThat("Groups 1 matches", testCases, containsInAnyOrder(expected));
@@ -85,7 +85,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void getSupportedTestCasesOneFeature() throws MalformedURLException {
-        testSuiteDescription.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        testSuiteDescription.load(List.of(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl")));
         final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf1"));
         final IRI[] expected = createIriList(
                 "group1/feature1", "group1/feature2", "group1/feature3", "group2/feature1"
@@ -95,7 +95,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void getSupportedTestCasesFeature1And2() throws MalformedURLException {
-        testSuiteDescription.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        testSuiteDescription.load(List.of(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl")));
         final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf1", "sf2"));
         final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
                 "group2/feature1", "group3/feature1", "group3/feature2");
@@ -104,7 +104,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void getSupportedTestCasesFeature1And3() throws MalformedURLException {
-        testSuiteDescription.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        testSuiteDescription.load(List.of(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl")));
         final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf1", "sf3"));
         final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
                 "group2/feature1", "group4/feature1", "group4/feature2", "group4/feature3");
@@ -113,7 +113,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void getSupportedTestCasesAllFeatures() throws MalformedURLException {
-        testSuiteDescription.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        testSuiteDescription.load(List.of(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl")));
         final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf1", "sf2", "sf3"));
         final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
                 "group2/feature1", "group3/feature1", "group3/feature2",
@@ -124,7 +124,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void getSupportedTestCasesFeature3() throws MalformedURLException {
-        testSuiteDescription.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        testSuiteDescription.load(List.of(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl")));
         final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf3"));
         final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3");
         assertThat("Group 1 matches", testCases, containsInAnyOrder(expected));
@@ -132,7 +132,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void getAllTestCases() throws MalformedURLException {
-        testSuiteDescription.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        testSuiteDescription.load(List.of(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl")));
         final List<IRI> testCases = testSuiteDescription.getAllTestCases();
         final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
                 "group2/feature1", "group3/feature1", "group3/feature2",

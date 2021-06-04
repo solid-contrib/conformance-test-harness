@@ -104,7 +104,7 @@ public class ConformanceTestHarness {
         config.logConfigSettings();
         logger.info("===================== DISCOVER TESTS ========================");
         try {
-            testSuiteDescription.load(config.getTestSuiteDescription());
+            testSuiteDescription.load(config.getTestSources());
             final List<IRI> testCases = testSuiteDescription.getAllTestCases();
             final List<String> featurePaths = testSuiteDescription.locateTestCases(testCases);
             if (featurePaths.isEmpty()) {
@@ -135,7 +135,7 @@ public class ConformanceTestHarness {
         logger.info("===================== DISCOVER TESTS ========================");
         final List<String> featurePaths;
         try {
-            testSuiteDescription.load(config.getTestSuiteDescription());
+            testSuiteDescription.load(config.getTestSources());
             testSubject.loadTestSubjectConfig(); // TODO:is this in right place?
             // TODO: Consider running some initial tests to discover the features provided by a server
             final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(

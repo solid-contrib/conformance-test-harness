@@ -37,8 +37,6 @@ import org.solid.testharness.utils.Namespaces;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -50,9 +48,9 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 public class Application implements QuarkusApplication {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
-    public static final String CONFIG = "config";
+    public static final String SUBJECTS = "subjects";
     public static final String TARGET = "target";
-    public static final String SUITE = "suite";
+    public static final String SOURCE = "source";
     public static final String OUTPUT = "output";
     public static final String HELP = "help";
     public static final String COVERAGE = "coverage";
@@ -68,11 +66,15 @@ public class Application implements QuarkusApplication {
 
         final Options options = new Options();
         options.addOption(Option.builder().longOpt(COVERAGE).desc("produce a coverage report").build());
-        options.addOption("c", CONFIG, true, "URL or path to test subject config (Turtle)");
+        options.addOption(
+                Option.builder().longOpt(SUBJECTS).hasArg().desc("URL or path to test subject config (Turtle)").build()
+        );
         options.addOption("t", TARGET, true, "target server");
-        options.addOption("s", SUITE, true, "URL or path to test suite description");
+        options.addOption(
+                Option.builder("s").longOpt(SOURCE).desc("URL or path to test source(s)")
+                        .hasArgs().valueSeparator(',').build()
+        );
         options.addOption("o", OUTPUT, true, "output directory");
-//        options.addOption("f", "feature", true, "feature filter");
         options.addOption("h", HELP, false, "print this message");
 
         final CommandLineParser parser = new DefaultParser();
@@ -94,44 +96,34 @@ public class Application implements QuarkusApplication {
                         logger.error("{}", formatter);
                         return 1;
                     }
-                    config.setOutputDirectory(outputDir);
+                }
+                config.setOutputDirectory(outputDir);
 
-                    if (line.hasOption(SUITE)) {
-                        final URL url = createUrl(line.getOptionValue(SUITE), SUITE, formatter);
-                        if (url == null) {
-                            logger.error("{}", formatter);
-                            return 1;
-                        }
-                        config.setTestSuiteDescription(url);
-                        logger.debug("Suite = {}", config.getTestSuiteDescription().toString());
+                if (line.hasOption(SOURCE)) {
+                    config.setTestSources(Arrays.asList(line.getOptionValues(SOURCE)));
+                    logger.debug("Suite = {}", config.getTestSources().toString());
+                }
+
+                conformanceTestHarness.initialize();
+
+                if (line.hasOption(COVERAGE)) {
+                    return conformanceTestHarness.createCoverageReport() ? 0 : 1;
+                } else {
+                    if (line.hasOption(TARGET) && !StringUtils.isEmpty(line.getOptionValue(TARGET))) {
+                        final String target = line.getOptionValue(TARGET);
+                        final IRI testSubject = target.contains(":")
+                                ? iri(target)
+                                : iri(Namespaces.TEST_HARNESS_URI, target);
+                        logger.debug("Target: {}", testSubject);
+                        config.setTestSubject(testSubject);
+                    }
+                    if (line.hasOption(SUBJECTS)) {
+                        config.setSubjectsUrl(line.getOptionValue(SUBJECTS));
+                        logger.debug("Subjects = {}", config.getSubjectsUrl().toString());
                     }
 
-                    conformanceTestHarness.initialize();
-
-                    if (line.hasOption(COVERAGE)) {
-                        return conformanceTestHarness.createCoverageReport() ? 0 : 1;
-                    } else {
-                        if (line.hasOption(TARGET) && !StringUtils.isEmpty(line.getOptionValue(TARGET))) {
-                            final String target = line.getOptionValue(TARGET);
-                            final IRI testSubject = target.contains(":")
-                                    ? iri(target)
-                                    : iri(Namespaces.TEST_HARNESS_URI, target);
-                            logger.debug("Target: {}", testSubject);
-                            config.setTestSubject(testSubject);
-                        }
-                        if (line.hasOption(CONFIG)) {
-                            final URL url = createUrl(line.getOptionValue(CONFIG), CONFIG, formatter);
-                            if (url == null) {
-                                logger.error("{}", formatter);
-                                return 1;
-                            }
-                            config.setConfigUrl(url);
-                            logger.debug("Config = {}", config.getConfigUrl().toString());
-                        }
-
-                        final TestSuiteResults results = conformanceTestHarness.runTestSuites();
-                        return results != null && results.getFailCount() == 0 ? 0 : 1;
-                    }
+                    final TestSuiteResults results = conformanceTestHarness.runTestSuites();
+                    return results != null && results.getFailCount() == 0 ? 0 : 1;
                 }
             }
         } catch (Exception e) {
@@ -162,20 +154,5 @@ public class Application implements QuarkusApplication {
             return false;
         }
         return true;
-    }
-
-    private URL createUrl(final String path, final String param, final Formatter error) {
-        if (!StringUtils.isEmpty(path)) {
-            try {
-                if (path.startsWith("file:") || path.startsWith("http:") || path.startsWith("https:")) {
-                    return new URL(path);
-                } else {
-                    return Path.of(path).toAbsolutePath().normalize().toUri().toURL();
-                }
-            } catch (MalformedURLException e) {
-                error.format("%s '%s' is not a valid file path or URL: %s", param, path, e);
-            }
-        }
-        return null;
     }
 }

@@ -1,7 +1,4 @@
 # Default properties
-configFile:
-testSuiteDescription:
-target:
 feature:
   mappings:
     - null

@@ -111,44 +111,55 @@ class ApplicationTest {
 
     @Test
     void suiteBadUrl() {
-        assertEquals(1, application.run("--suite", "http://domain:-100/invalid"));
+        assertEquals(1, application.run("--source", "http://domain:-100/invalid"));
     }
 
     @Test
     void suiteFile() throws MalformedURLException {
         when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
-        assertEquals(0, application.run("--suite", "suitefile", "--coverage"));
-        final URL url = Path.of("suitefile").toAbsolutePath().normalize().toUri().toURL();
-        assertEquals(url, config.getTestSuiteDescription());
+        assertEquals(0, application.run("--source", "specfile", "--coverage"));
+        final URL url = Path.of("specfile").toAbsolutePath().normalize().toUri().toURL();
+        assertEquals(url, config.getTestSources().get(0));
     }
 
     @Test
     void suiteUrl() throws MalformedURLException {
         when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
-        assertEquals(0, application.run("--suite", "file://test/file", "--coverage"));
+        assertEquals(0, application.run("--source", "file://test/file", "--coverage"));
         final URL url = new URL("file://test/file");
-        assertEquals(url, config.getTestSuiteDescription());
+        assertEquals(url, config.getTestSources().get(0));
     }
 
     @Test
     void suiteUrl2() throws MalformedURLException {
         when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
-        assertEquals(0, application.run("--suite", "http://example.org", "--coverage"));
+        assertEquals(0, application.run("--source", "http://example.org", "--coverage"));
         final URL url = new URL("http://example.org");
-        assertEquals(url, config.getTestSuiteDescription());
+        assertEquals(url, config.getTestSources().get(0));
     }
 
     @Test
     void suiteUrl3() throws MalformedURLException {
         when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
-        assertEquals(0, application.run("--suite", "https://example.org", "--coverage"));
+        assertEquals(0, application.run("--source", "https://example.org", "--coverage"));
         final URL url = new URL("https://example.org");
-        assertEquals(url, config.getTestSuiteDescription());
+        assertEquals(url, config.getTestSources().get(0));
+    }
+
+    @Test
+    void suiteUrls() throws MalformedURLException {
+        when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
+        assertEquals(0, application.run("--source", "https://example.org/1",
+                "--source", "https://example.org/2",
+                "--coverage"));
+        assertEquals(2, config.getTestSources().size());
+        assertEquals(new URL("https://example.org/1"), config.getTestSources().get(0));
+        assertEquals(new URL("https://example.org/2"), config.getTestSources().get(1));
     }
 
     @Test
     void suiteBlank() {
-        assertEquals(1, application.run("--suite", ""));
+        assertEquals(1, application.run("--source", ""));
     }
 
     @Test
@@ -176,44 +187,44 @@ class ApplicationTest {
     }
 
     @Test
-    void configBlank() {
-        assertEquals(1, application.run("--config", ""));
+    void subjectsBlank() {
+        assertEquals(1, application.run("--subjects", ""));
     }
 
     @Test
-    void configFile() throws MalformedURLException {
+    void subjectsFile() throws MalformedURLException {
         final TestSuiteResults results = mockResults(0);
         when(conformanceTestHarness.runTestSuites()).thenReturn(results);
-        assertEquals(0, application.run("--config", "configfile"));
-        final URL url = Path.of("configfile").toAbsolutePath().normalize().toUri().toURL();
-        assertEquals(url, config.getConfigUrl());
+        assertEquals(0, application.run("--subjects", "subjectsfile"));
+        final URL url = Path.of("subjectsfile").toAbsolutePath().normalize().toUri().toURL();
+        assertEquals(url, config.getSubjectsUrl());
     }
 
     @Test
-    void configUrl() throws MalformedURLException {
+    void subjectsUrl() throws MalformedURLException {
         final TestSuiteResults results = mockResults(0);
         when(conformanceTestHarness.runTestSuites()).thenReturn(results);
-        assertEquals(0, application.run("--config", "file://test/file"));
+        assertEquals(0, application.run("--subjects", "file://test/file"));
         final URL url = new URL("file://test/file");
-        assertEquals(url, config.getConfigUrl());
+        assertEquals(url, config.getSubjectsUrl());
     }
 
     @Test
-    void configUrl2() throws MalformedURLException {
+    void subjectsUrl2() throws MalformedURLException {
         final TestSuiteResults results = mockResults(0);
         when(conformanceTestHarness.runTestSuites()).thenReturn(results);
-        assertEquals(0, application.run("--config", "http://example.org"));
+        assertEquals(0, application.run("--subjects", "http://example.org"));
         final URL url = new URL("http://example.org");
-        assertEquals(url, config.getConfigUrl());
+        assertEquals(url, config.getSubjectsUrl());
     }
 
     @Test
-    void configUrl3() throws MalformedURLException {
+    void subjectsUrl3() throws MalformedURLException {
         final TestSuiteResults results = mockResults(0);
         when(conformanceTestHarness.runTestSuites()).thenReturn(results);
-        assertEquals(0, application.run("--config", "https://example.org"));
+        assertEquals(0, application.run("--subjects", "https://example.org"));
         final URL url = new URL("https://example.org");
-        assertEquals(url, config.getConfigUrl());
+        assertEquals(url, config.getSubjectsUrl());
     }
 
     @Test

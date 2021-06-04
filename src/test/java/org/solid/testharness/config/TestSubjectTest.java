@@ -62,7 +62,7 @@ public class TestSubjectTest {
 
     @Test
     void prepareServerNoRootAcl() throws Exception {
-        config.setConfigUrl(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
+        config.setSubjectsUrl("src/test/resources/config-sample.ttl");
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver"));
         final Client mockClient = mock(Client.class);
         when(clientRegistry.getClient(HttpConstants.ALICE)).thenReturn(mockClient);
@@ -75,7 +75,7 @@ public class TestSubjectTest {
 
     @Test
     void prepareServerWithRootAcl() throws IOException, InterruptedException {
-        config.setConfigUrl(TestUtils.getFileUrl("src/test/resources/config-sample-bad.ttl"));
+        config.setSubjectsUrl("src/test/resources/config-sample-bad.ttl");
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/example"));
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
@@ -105,7 +105,7 @@ public class TestSubjectTest {
 
     @Test
     void prepareServerWithRootAclThrows() throws IOException, InterruptedException {
-        config.setConfigUrl(TestUtils.getFileUrl("src/test/resources/config-sample-bad.ttl"));
+        config.setSubjectsUrl("src/test/resources/config-sample-bad.ttl");
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/example"));
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
@@ -125,7 +125,7 @@ public class TestSubjectTest {
 
     @Test
     void prepareServerWithRootAclNoLink() throws IOException, InterruptedException {
-        config.setConfigUrl(TestUtils.getFileUrl("src/test/resources/config-sample-bad.ttl"));
+        config.setSubjectsUrl("src/test/resources/config-sample-bad.ttl");
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/example"));
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
@@ -145,7 +145,7 @@ public class TestSubjectTest {
 
     @Test
     void prepareServerWithRootAclFails() throws IOException, InterruptedException {
-        config.setConfigUrl(TestUtils.getFileUrl("src/test/resources/config-sample-bad.ttl"));
+        config.setSubjectsUrl("src/test/resources/config-sample-bad.ttl");
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/example"));
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
@@ -169,7 +169,7 @@ public class TestSubjectTest {
 
     @Test
     void registerClients() throws Exception {
-        config.setConfigUrl(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
+        config.setSubjectsUrl("src/test/resources/config-sample.ttl");
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver"));
         final Client mockClient = mock(Client.class);
         when(authManager.authenticate(anyString(), any(TargetServer.class))).thenReturn(new SolidClient(mockClient));
@@ -182,7 +182,7 @@ public class TestSubjectTest {
 
     @Test
     void registerClientsWithAuthException() throws Exception {
-        config.setConfigUrl(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
+        config.setSubjectsUrl("src/test/resources/config-sample.ttl");
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver"));
         when(authManager.authenticate(anyString(), any(TargetServer.class)))
                 .thenThrow(new Exception("Failed as expected"));
@@ -192,7 +192,7 @@ public class TestSubjectTest {
 
     @Test
     void getTargetServer() throws Exception {
-        config.setConfigUrl(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
+        config.setSubjectsUrl("src/test/resources/config-sample.ttl");
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver"));
         testSubject.loadTestSubjectConfig();
         final TargetServer targetServer = testSubject.getTargetServer();
@@ -202,7 +202,7 @@ public class TestSubjectTest {
 
     @Test
     void getTargetServer2() throws Exception {
-        config.setConfigUrl(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
+        config.setSubjectsUrl("src/test/resources/config-sample.ttl");
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver2"));
         testSubject.loadTestSubjectConfig();
         final TargetServer targetServer = testSubject.getTargetServer();
@@ -220,7 +220,7 @@ public class TestSubjectTest {
 
     @Test
     void getTargetServerDefault() throws Exception {
-        config.setConfigUrl(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
+        config.setSubjectsUrl("src/test/resources/config-sample.ttl");
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver"));
         testSubject.loadTestSubjectConfig();
         final TargetServer targetServer = testSubject.getTargetServer();
@@ -229,7 +229,7 @@ public class TestSubjectTest {
 
     @Test
     void getClients() throws Exception {
-        config.setConfigUrl(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
+        config.setSubjectsUrl("src/test/resources/config-sample.ttl");
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver"));
         final Client mockClient = mock(Client.class);
         when(authManager.authenticate(anyString(), any(TargetServer.class))).thenReturn(new SolidClient(mockClient));
