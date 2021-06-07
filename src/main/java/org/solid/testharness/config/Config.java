@@ -67,6 +67,13 @@ public class Config {
     @ConfigProperty(name = "testSuiteDescription")
     Optional<String> testSuiteDescription;
 
+    @ConfigProperty(name = "agent", defaultValue = "Solid-Conformance-Test-Suite")
+    String agent;
+    @ConfigProperty(name = "connectTimeout", defaultValue = "5000")
+    Integer connectTimeout;
+    @ConfigProperty(name = "readTimeout", defaultValue = "5000")
+    Integer readTimeout;
+
     // properties normally found in environment variables or the .env file
     @ConfigProperty(name = "SOLID_IDENTITY_PROVIDER")
     String solidIdentityProvider;
@@ -185,6 +192,18 @@ public class Config {
             );
         }
         return webIds;
+    }
+
+    public String getAgent() {
+        return agent;
+    }
+
+    public Integer getConnectTimeout() {
+        return connectTimeout;
+    }
+
+    public Integer getReadTimeout() {
+        return readTimeout;
     }
 
     public void logConfigSettings() {

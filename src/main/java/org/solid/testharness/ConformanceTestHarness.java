@@ -53,6 +53,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 
@@ -131,6 +132,10 @@ public class ConformanceTestHarness {
     }
 
     public TestSuiteResults runTestSuites() {
+        return this.runTestSuites(null);
+    }
+
+    public TestSuiteResults runTestSuites(final List<String> filters) {
         config.logConfigSettings();
         logger.info("===================== DISCOVER TESTS ========================");
         final List<String> featurePaths;
@@ -143,7 +148,14 @@ public class ConformanceTestHarness {
             );
             logger.info("==== TEST CASES FOUND: {} - {}", testCases.size(), testCases);
 
-            featurePaths = testSuiteDescription.locateTestCases(testCases);
+            final List<IRI> filteredTestCases = testCases.stream()
+                    .filter(tc -> filters == null || filters.isEmpty() ||
+                            filters.stream().anyMatch(f -> tc.stringValue().contains(f))
+                    )
+                    .collect(Collectors.toList());
+            logger.info("==== FILTERED TEST CASES: {} - {}", filteredTestCases.size(), filteredTestCases);
+
+            featurePaths = testSuiteDescription.locateTestCases(filteredTestCases);
             if (featurePaths.isEmpty()) {
                 logger.warn("There are no tests available");
                 return null;
