@@ -40,6 +40,9 @@ quarkus:
         path: src/test/resources/dummy-features/otherExample
       - prefix: https://example.org/features
         path: src/test/resources
+  agent: AGENT
+  connectTimeout: 1000
+  readTimeout: 1000
 
   quarkus:
     log:

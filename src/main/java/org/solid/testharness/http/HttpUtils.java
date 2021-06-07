@@ -26,7 +26,9 @@ package org.solid.testharness.http;
 import jakarta.ws.rs.core.Link;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.testharness.config.Config;
 
+import javax.enterprise.inject.spi.CDI;
 import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -35,6 +37,7 @@ import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,13 +45,20 @@ import java.util.stream.Collectors;
 
 public final class HttpUtils {
     private static final Logger logger = LoggerFactory.getLogger(HttpUtils.class);
+    private static Config config;
 
     public static String getAgent() {
-        return System.getProperty("agent", "Solid-Conformance-Test-Suite");
+        return getConfig().getAgent();
+    }
+
+    public static Duration getConnectTimeout() {
+        return Duration.ofMillis(getConfig().getConnectTimeout());
     }
 
     public static HttpRequest.Builder newRequestBuilder(final URI uri) {
-        return HttpRequest.newBuilder(uri).setHeader(HttpConstants.USER_AGENT, getAgent());
+        return HttpRequest.newBuilder(uri)
+                .timeout(Duration.ofMillis(getConfig().getReadTimeout()))
+                .setHeader(HttpConstants.USER_AGENT, getAgent());
     }
 
     public static boolean isSuccessful(final int code) {
@@ -144,7 +154,7 @@ public final class HttpUtils {
         if (links.size() == 1 && links.get(0).contains(", ")) {
             links = Arrays.asList(links.get(0).split(", "));
         }
-        return links.stream().map(link -> Link.valueOf(link)).collect(Collectors.toList());
+        return links.stream().map(Link::valueOf).collect(Collectors.toList());
     }
 
     @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
@@ -178,8 +188,17 @@ public final class HttpUtils {
             logger.error("WAC-Allow header missing");
         }
         return permissions.entrySet().stream().collect(Collectors.toMap(
-                entry -> entry.getKey(),
+                Map.Entry::getKey,
                 entry -> List.copyOf(entry.getValue())));
+    }
+
+    private static Config getConfig() {
+        synchronized (HttpUtils.class) {
+            if (config == null) {
+                config = CDI.current().select(Config.class).get();
+            }
+            return config;
+        }
     }
 
     private HttpUtils() { }

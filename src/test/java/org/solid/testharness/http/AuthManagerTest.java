@@ -49,6 +49,7 @@ import static org.mockito.Mockito.*;
 @QuarkusTestResource(AuthenticationResource.class)
 class AuthManagerTest {
     private URI baseUri;
+    private Client client;
 
     @Inject
     AuthManager authManager;
@@ -62,6 +63,10 @@ class AuthManagerTest {
     @BeforeEach
     void setup() {
         System.clearProperty("jdk.internal.httpclient.disableHostnameVerification");
+        when(config.getConnectTimeout()).thenReturn(2000);
+        when(config.getReadTimeout()).thenReturn(2000);
+        when(config.getAgent()).thenReturn("AGENT");
+        client = new Client.Builder().build();
     }
 
     @Test
@@ -77,7 +82,7 @@ class AuthManagerTest {
 
     @Test
     void authenticateNonAuthenticatingTarget() throws Exception {
-        when(clientRegistry.getClient(ClientRegistry.DEFAULT)).thenReturn(new Client.Builder().build());
+        when(clientRegistry.getClient(ClientRegistry.DEFAULT)).thenReturn(client);
         final TargetServer targetServer = mock(TargetServer.class);
         when(targetServer.getFeatures()).thenReturn(Collections.emptyMap());
         final SolidClient solidClient = authManager.authenticate("ignored", targetServer);
@@ -86,9 +91,10 @@ class AuthManagerTest {
 
     @Test
     void authenticateAlreadyExists() throws Exception {
+        final Client client = new Client.Builder("existing").build();
         final TargetServer targetServer = getMockTargetServer(true);
         when(clientRegistry.hasClient("existing")).thenReturn(true);
-        when(clientRegistry.getClient("existing")).thenReturn(new Client.Builder("existing").build());
+        when(clientRegistry.getClient("existing")).thenReturn(client);
         final SolidClient solidClient = authManager.authenticate("existing", targetServer);
         assertEquals("existing", solidClient.getClient().getUser());
         verify(config, never()).getCredentials("existing");
@@ -195,7 +201,7 @@ class AuthManagerTest {
     @Test
     void authenticateLoginSessionFails() {
         final TargetServer targetServer = getMockTargetServer(false);
-        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(new Client.Builder().build());
+        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
         setupLogin("test8", "BADPASSWORD");
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
@@ -206,7 +212,7 @@ class AuthManagerTest {
     @Test
     void authenticateLoginRegisterFails() {
         final TargetServer targetServer = getMockTargetServer(false);
-        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(new Client.Builder().build());
+        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
         when(targetServer.getOrigin()).thenReturn("BADORIGIN");
         setupLogin("test9", "PASSWORD");
 
@@ -218,7 +224,7 @@ class AuthManagerTest {
     @Test
     void authenticateLoginAuthorizationFails() {
         final TargetServer targetServer = getMockTargetServer(false);
-        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(new Client.Builder().build());
+        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
         when(targetServer.getOrigin()).thenReturn("AUTHFAIL");
         setupLogin("test10", "PASSWORD");
 
@@ -230,7 +236,7 @@ class AuthManagerTest {
     @Test
     void authenticateLoginAuthorizationFailsWithoutRedirect() {
         final TargetServer targetServer = getMockTargetServer(false);
-        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(new Client.Builder().build());
+        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
         when(targetServer.getOrigin()).thenReturn("https://origin/noredirect");
         setupLogin("test11", "PASSWORD");
 
@@ -242,7 +248,7 @@ class AuthManagerTest {
     @Test
     void authenticateLoginNoRedirectFailsNoCode() {
         final TargetServer targetServer = getMockTargetServer(false);
-        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(new Client.Builder().build());
+        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
         when(targetServer.getOrigin()).thenReturn("https://origin/immediate");
         setupLogin("test12", "PASSWORD");
 
@@ -254,7 +260,7 @@ class AuthManagerTest {
     @Test
     void authenticateLoginOneRedirectFailsNoCode() {
         final TargetServer targetServer = getMockTargetServer(false);
-        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(new Client.Builder().build());
+        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
         when(targetServer.getOrigin()).thenReturn("https://origin/redirect");
         setupLogin("test13", "PASSWORD");
 
@@ -266,7 +272,7 @@ class AuthManagerTest {
     @Test
     void authenticateLoginTokenFails() throws Exception {
         final TargetServer targetServer = getMockTargetServer(false);
-        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(new Client.Builder().build());
+        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
         when(targetServer.getOrigin()).thenReturn("https://origin/badcode");
         setupLogin("test14", "PASSWORD");
 
@@ -279,7 +285,7 @@ class AuthManagerTest {
     @Test
     void authenticateLoginTokenSucceeds() throws Exception {
         final TargetServer targetServer = getMockTargetServer(false);
-        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(new Client.Builder().build());
+        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
         when(targetServer.getOrigin()).thenReturn("https://origin/goodcode");
         setupLogin("test15", "PASSWORD");
 

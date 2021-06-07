@@ -41,6 +41,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Formatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 
@@ -54,6 +56,7 @@ public class Application implements QuarkusApplication {
     public static final String OUTPUT = "output";
     public static final String HELP = "help";
     public static final String COVERAGE = "coverage";
+    public static final String FILTER = "filter";
 
     @Inject
     Config config;
@@ -75,6 +78,9 @@ public class Application implements QuarkusApplication {
                         .hasArgs().valueSeparator(',').build()
         );
         options.addOption("o", OUTPUT, true, "output directory");
+        options.addOption(
+                Option.builder("f").longOpt(FILTER).desc("feature filter(s)").hasArgs().valueSeparator(',').build()
+        );
         options.addOption("h", HELP, false, "print this message");
 
         final CommandLineParser parser = new DefaultParser();
@@ -121,8 +127,15 @@ public class Application implements QuarkusApplication {
                         config.setSubjectsUrl(line.getOptionValue(SUBJECTS));
                         logger.debug("Subjects = {}", config.getSubjectsUrl().toString());
                     }
+                    List<String> filters = null;
+                    if (line.hasOption(FILTER)) {
+                        filters = Arrays.stream(line.getOptionValues(FILTER))
+                                .filter(s -> !StringUtils.isBlank(s))
+                                .collect(Collectors.toList());
+                        logger.debug("Filters = {}", filters);
+                    }
 
-                    final TestSuiteResults results = conformanceTestHarness.runTestSuites();
+                    final TestSuiteResults results = conformanceTestHarness.runTestSuites(filters);
                     return results != null && results.getFailCount() == 0 ? 0 : 1;
                 }
             }

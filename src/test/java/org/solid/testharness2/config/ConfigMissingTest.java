@@ -63,4 +63,19 @@ public class ConfigMissingTest {
     void logConfigSettings() {
         assertDoesNotThrow(() -> config.logConfigSettings());
     }
+
+    @Test
+    void getAgent() {
+        assertEquals("Solid-Conformance-Test-Suite", config.getAgent());
+    }
+
+    @Test
+    void getConnectTimeout() {
+        assertEquals(5000, config.getConnectTimeout());
+    }
+
+    @Test
+    void getReadTimeout() {
+        assertEquals(5000, config.getReadTimeout());
+    }
 }

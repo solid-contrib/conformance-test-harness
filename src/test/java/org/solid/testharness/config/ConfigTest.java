@@ -115,4 +115,19 @@ public class ConfigTest {
     void logConfigSettings() {
         assertDoesNotThrow(() -> config.logConfigSettings());
     }
+
+    @Test
+    void getAgent() {
+        assertEquals("AGENT", config.getAgent());
+    }
+
+    @Test
+    void getConnectTimeout() {
+        assertEquals(1000, config.getConnectTimeout());
+    }
+
+    @Test
+    void getReadTimeout() {
+        assertEquals(1000, config.getReadTimeout());
+    }
 }

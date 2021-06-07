@@ -23,6 +23,7 @@
  */
 package org.solid.testharness.http;
 
+import io.quarkus.test.junit.QuarkusTest;
 import jakarta.ws.rs.core.Link;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -39,26 +40,17 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@QuarkusTest
 class HttpUtilsTest {
-
-    @Test
-    void getAgentDefault() {
-        System.clearProperty("agent");
-        assertEquals("Solid-Conformance-Test-Suite", HttpUtils.getAgent());
-        System.getProperty("agent", "Solid-Conformance-Test-Suite");
-    }
-
     @Test
     void getAgent() {
-        System.setProperty("agent", "Agent");
-        assertEquals("Agent", HttpUtils.getAgent());
+        assertEquals("AGENT", HttpUtils.getAgent());
     }
 
     @Test
     void newRequestBuilder() {
-        System.setProperty("agent", "TestAgent");
         final HttpRequest request = HttpUtils.newRequestBuilder(URI.create("http://example.org")).build();
-        assertEquals("TestAgent", request.headers().firstValue(HttpConstants.USER_AGENT).get());
+        assertEquals("AGENT", request.headers().firstValue(HttpConstants.USER_AGENT).get());
     }
 
     @Test

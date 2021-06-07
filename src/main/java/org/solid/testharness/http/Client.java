@@ -39,7 +39,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -54,8 +53,6 @@ import static org.apache.commons.text.CharacterPredicates.LETTERS;
 // Duplicate string are null check error messages for same parameter
 public class Client {
     private static final Logger logger = LoggerFactory.getLogger(Client.class);
-
-    private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(5);
 
     private HttpClient httpClient;
     private String accessToken;
@@ -79,7 +76,7 @@ public class Client {
             this.user = user;
             clientBuilder = HttpClient.newBuilder()
                     .version(HttpClient.Version.HTTP_1_1)
-                    .connectTimeout(CONNECT_TIMEOUT);
+                    .connectTimeout(HttpUtils.getConnectTimeout());
         }
 
         public Builder withSessionSupport() {
