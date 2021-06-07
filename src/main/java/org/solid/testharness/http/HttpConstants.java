@@ -56,12 +56,14 @@ public final class HttpConstants {
     public static final String CODE = "code";
     public static final String AUTHORIZATION_METHOD = "client_secret_basic";
     public static final String AUTHORIZATION_CODE_TYPE = "authorization_code";
+    public static final String CLIENT_CREDENTIALS = "client_credentials";
     public static final String REFRESH_TOKEN = "refresh_token";
     public static final String RESPONSE_TYPE = "response_type";
     public static final String REDIRECT_URI = "redirect_uri";
     public static final String SCOPE = "scope";
     public static final String OPENID = "openid";
     public static final String CLIENT_ID = "client_id";
+    public static final String CLIENT_SECRET = "client_secret";
 
     private HttpConstants() { }
 }

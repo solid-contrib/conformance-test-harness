@@ -26,12 +26,16 @@ package org.solid.testharness.http;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
+import java.util.Collections;
+import java.util.List;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OidcConfiguration {
     private String issuer;
     private String authorizeEndpoint;
     private String tokenEndpoint;
     private String registrationEndpoint;
+    private List<String> grantTypesSupported = Collections.emptyList();
 
     public String getIssuer() {
         return issuer != null && !issuer.endsWith("/") ? issuer + "/" : issuer;
@@ -67,5 +71,14 @@ public class OidcConfiguration {
     @JsonSetter("registration_endpoint")
     public void setRegistrationEndpoint(final String registrationEndpoint) {
         this.registrationEndpoint = registrationEndpoint;
+    }
+
+    @JsonSetter("grant_types_supported")
+    public void setGrantTypesSupported(final List<String> grantTypesSupported) {
+        this.grantTypesSupported = grantTypesSupported;
+    }
+
+    public List<String> getGrantTypesSupported() {
+        return grantTypesSupported;
     }
 }

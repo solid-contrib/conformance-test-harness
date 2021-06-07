@@ -87,13 +87,9 @@ public class ConfigTest {
     }
 
     @Test
-    void getAliceWebId() {
-        assertEquals("https://alice.target.example.org/profile/card#me", config.getAliceWebId());
-    }
-
-    @Test
-    void getBobWebId() {
-        assertEquals("https://bob.target.example.org/profile/card#me", config.getBobWebId());
+    void getWebIds() {
+        assertEquals("https://alice.target.example.org/profile/card#me",config.getWebIds().get(HttpConstants.ALICE));
+        assertEquals("https://bob.target.example.org/profile/card#me", config.getWebIds().get(HttpConstants.BOB));
     }
 
     @Test

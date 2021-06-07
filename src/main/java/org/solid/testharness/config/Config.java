@@ -37,6 +37,7 @@ import java.io.File;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
@@ -49,6 +50,7 @@ public class Config {
     private URL configUrl;
     private URL testSuiteDescriptionFile;
     private File outputDir;
+    private Map<String, Object> webIds;
 
     // the settings are taken in the following order of preference:
     //   system property
@@ -171,14 +173,6 @@ public class Config {
         return getServerRoot().resolve(testContainer).toString();
     }
 
-    public String getAliceWebId() {
-        return aliceWebId;
-    }
-
-    public String getBobWebId() {
-        return bobWebId;
-    }
-
     public UserCredentials getCredentials(final String user) {
         switch (user) {
             case HttpConstants.ALICE:
@@ -188,6 +182,16 @@ public class Config {
             default:
                 return null;
         }
+    }
+
+    public Map<String, Object> getWebIds() {
+        if (webIds == null) {
+            webIds = Map.of(
+                    HttpConstants.ALICE, aliceWebId,
+                    HttpConstants.BOB, bobWebId
+            );
+        }
+        return webIds;
     }
 
     public String getAgent() {
