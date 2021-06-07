@@ -23,6 +23,6 @@ function fn() {
         rootTestContainer: testSubject.getRootTestContainer(),
         ...additionalConfig,
         clients: karate.toMap(testSubject.clients),
-        webIds: testSubject.webIds
+        webIds: config.webIds
     };
 }

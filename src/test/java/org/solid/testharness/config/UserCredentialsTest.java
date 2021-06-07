@@ -38,6 +38,7 @@ public class UserCredentialsTest {
 
         assertFalse(userCredentials.isUsingRefreshToken());
         assertTrue(userCredentials.isUsingUsernamePassword());
+        assertFalse(userCredentials.isUsingClientCredentials());
         assertEquals("UserCredentials: username=***, password=***", userCredentials.toString());
     }
 
@@ -60,6 +61,7 @@ public class UserCredentialsTest {
         userCredentials.clientSecret = Optional.of("CLIENT_SECRET");
         assertTrue(userCredentials.isUsingRefreshToken());
         assertFalse(userCredentials.isUsingUsernamePassword());
+        assertFalse(userCredentials.isUsingClientCredentials());
         assertEquals("UserCredentials: refreshToken=***, clientId=***, clientSecret=***",
                 userCredentials.toString());
     }
@@ -79,6 +81,16 @@ public class UserCredentialsTest {
         userCredentials.clientId = Optional.of("CLIENT_ID");
         userCredentials.clientSecret = Optional.of("CLIENT_SECRET");
         assertFalse(userCredentials.isUsingRefreshToken());
+    }
+
+    @Test
+    public void clientCredentials() {
+        final UserCredentials userCredentials = new UserCredentials();
+        userCredentials.clientSecret = Optional.of("CLIENT_SECRET");
+        assertTrue(userCredentials.isUsingClientCredentials());
+        assertFalse(userCredentials.isUsingRefreshToken());
+        assertFalse(userCredentials.isUsingUsernamePassword());
+        assertEquals("UserCredentials: clientSecret=***", userCredentials.toString());
     }
 
     @Test

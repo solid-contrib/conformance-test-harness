@@ -40,6 +40,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -53,6 +54,7 @@ public class Config {
     private URL subjectsUrl;
     private List<URL> testSources;
     private File outputDir;
+    private Map<String, Object> webIds;
 
     // the settings are taken in the following order of preference:
     //   system property
@@ -167,14 +169,6 @@ public class Config {
         return getServerRoot().resolve(testContainer).toString();
     }
 
-    public String getAliceWebId() {
-        return aliceWebId;
-    }
-
-    public String getBobWebId() {
-        return bobWebId;
-    }
-
     public UserCredentials getCredentials(final String user) {
         switch (user) {
             case HttpConstants.ALICE:
@@ -184,6 +178,16 @@ public class Config {
             default:
                 return null;
         }
+    }
+
+    public Map<String, Object> getWebIds() {
+        if (webIds == null) {
+            webIds = Map.of(
+                    HttpConstants.ALICE, aliceWebId,
+                    HttpConstants.BOB, bobWebId
+            );
+        }
+        return webIds;
     }
 
     public String getAgent() {

@@ -88,6 +88,8 @@ public class AuthManager {
                 tokens = loginAndGetAccessToken(authClient, userConfig, oidcConfiguration, targetServer);
             } else if (userConfig != null && userConfig.isUsingRefreshToken()) {
                 tokens = exchangeRefreshToken(authClient, userConfig, oidcConfiguration);
+            } else if (userConfig != null && userConfig.isUsingClientCredentials()) {
+                tokens = clientCredentialsAccessToken(authClient, userConfig, oidcConfiguration, user);
             } else {
                 logger.warn("UserCredentials for {}: {}", user, userConfig);
                 throw new TestHarnessInitializationException("Neither login credentials nor refresh token details " +
@@ -104,19 +106,45 @@ public class AuthManager {
     private Tokens exchangeRefreshToken(final Client authClient, final UserCredentials userConfig,
                                         final OidcConfiguration oidcConfig) throws Exception {
         logger.info("Exchange refresh token for {}", authClient.getUser());
+        if (!oidcConfig.getGrantTypesSupported().contains(HttpConstants.REFRESH_TOKEN)) {
+            throw new TestHarnessInitializationException("Identity Provider does not support grant type: %s",
+                    HttpConstants.REFRESH_TOKEN);
+        }
         final Map<Object, Object> data = Map.of(
                 HttpConstants.GRANT_TYPE, HttpConstants.REFRESH_TOKEN,
                 HttpConstants.REFRESH_TOKEN, userConfig.refreshToken
         );
-        return requestToken(authClient, oidcConfig, userConfig.clientId.get(), userConfig.clientSecret.get(), data);
+        final String authHeader = HttpConstants.PREFIX_BASIC +
+                base64Encode(userConfig.clientId.get() + ':' + userConfig.clientSecret.get());
+        return requestToken(authClient, oidcConfig, authHeader, data);
+    }
+
+    private Tokens clientCredentialsAccessToken(final Client authClient, final UserCredentials userConfig,
+                                        final OidcConfiguration oidcConfig, final String user) throws Exception {
+        logger.info("Use client credentials to get access token for {}", authClient.getUser());
+        if (!oidcConfig.getGrantTypesSupported().contains(HttpConstants.CLIENT_CREDENTIALS)) {
+            throw new TestHarnessInitializationException("Identity Provider does not support grant type: %s",
+                    HttpConstants.CLIENT_CREDENTIALS);
+        }
+
+        final Map<Object, Object> data = Map.of(
+                HttpConstants.GRANT_TYPE, HttpConstants.CLIENT_CREDENTIALS,
+                HttpConstants.CLIENT_ID, config.getWebIds().get(user),
+                HttpConstants.CLIENT_SECRET, userConfig.clientSecret.get()
+        );
+        return requestToken(authClient, oidcConfig, null, data);
     }
 
     private Tokens loginAndGetAccessToken(final Client authClient, final UserCredentials userConfig,
                                           final OidcConfiguration oidcConfig, final TargetServer targetServer)
             throws Exception {
         logger.info("Login and get access token for {}", authClient.getUser());
-        final Client client = clientRegistry.getClient(ClientRegistry.SESSION_BASED);
+        if (!oidcConfig.getGrantTypesSupported().contains(HttpConstants.AUTHORIZATION_CODE_TYPE)) {
+            throw new TestHarnessInitializationException("Identity Provider does not support grant type: %s",
+                    HttpConstants.AUTHORIZATION_CODE_TYPE);
+        }
 
+        final Client client = clientRegistry.getClient(ClientRegistry.SESSION_BASED);
         startLoginSession(client, userConfig, config.getLoginEndpoint());
 
         final String appOrigin = targetServer.getOrigin();
@@ -130,7 +158,9 @@ public class AuthManager {
         tokenRequestData.put(HttpConstants.CODE, authCode);
         tokenRequestData.put(HttpConstants.REDIRECT_URI, appOrigin);
         tokenRequestData.put(HttpConstants.CLIENT_ID, clientId);
-        return requestToken(authClient, oidcConfig, clientId, clientRegistration.getClientSecret(), tokenRequestData);
+        final String authHeader = HttpConstants.PREFIX_BASIC +
+                base64Encode(clientId + ':' + clientRegistration.getClientSecret());
+        return requestToken(authClient, oidcConfig, authHeader, tokenRequestData);
     }
 
     private OidcConfiguration requestOidcConfiguration(final Client client) throws IOException, InterruptedException {
@@ -239,18 +269,20 @@ public class AuthManager {
         return authCode;
     }
 
-    private Tokens requestToken(final Client authClient, final OidcConfiguration oidcConfig, final String clientId,
-                                final String clientSecret, final Map<Object, Object> tokenRequestData
+    private Tokens requestToken(final Client authClient, final OidcConfiguration oidcConfig, final String authHeader,
+                                final Map<Object, Object> tokenRequestData
     ) throws IOException, InterruptedException {
         logger.debug("\n========== ACCESS TOKEN");
-        final HttpRequest request = authClient.signRequest(
+        final HttpRequest.Builder requestBuilder = authClient.signRequest(
                 HttpUtils.newRequestBuilder(URI.create(oidcConfig.getTokenEndpoint()))
-                        .header(HttpConstants.HEADER_AUTHORIZATION, HttpConstants.PREFIX_BASIC +
-                                base64Encode(clientId + ':' + clientSecret))
                         .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED)
                         .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
                         .POST(HttpUtils.ofFormData(tokenRequestData))
-        ).build();
+        );
+        if (authHeader != null) {
+            requestBuilder.header(HttpConstants.HEADER_AUTHORIZATION, authHeader);
+        }
+        final HttpRequest request = requestBuilder.build();
         HttpUtils.logRequest(logger, request);
         final HttpResponse<String> response = authClient.send(request, HttpResponse.BodyHandlers.ofString());
         HttpUtils.logResponse(logger, response);

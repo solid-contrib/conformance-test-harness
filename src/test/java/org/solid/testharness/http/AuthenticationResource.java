@@ -37,6 +37,7 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.absent;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 
@@ -60,7 +61,7 @@ public class AuthenticationResource implements QuarkusTestResourceLifecycleManag
         wireMockServer = new WireMockServer(WireMockConfiguration.options()
                 .dynamicPort());
 // logging the requests helps when debugging tests
-//        wireMockServer.addMockServiceRequestListener(AuthenticationResource::requestReceived);
+        wireMockServer.addMockServiceRequestListener(AuthenticationResource::requestReceived);
 
         wireMockServer.start();
 
@@ -76,6 +77,11 @@ public class AuthenticationResource implements QuarkusTestResourceLifecycleManag
                 .willReturn(WireMock.aResponse()
                         .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
                         .withBody(getDiscoveryDocument(wireMockServer.baseUrl()))));
+
+        wireMockServer.stubFor(WireMock.get(WireMock.urlEqualTo("/nogranttypes/" + HttpConstants.OPENID_CONFIGURATION))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
+                        .withBody(getDiscoveryDocumentNoGrants(wireMockServer.baseUrl() + "/nogranttypes/"))));
 
         // refresh token fails with bad authentication
         wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/token"))
@@ -189,6 +195,23 @@ public class AuthenticationResource implements QuarkusTestResourceLifecycleManag
                         .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
                         .withBody(ACCESS_TOKEN)));
 
+        // client credentials token fails with bad secret
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/token"))
+                .withHeader(HttpConstants.HEADER_AUTHORIZATION, absent())
+                .withRequestBody(containing(HttpConstants.GRANT_TYPE + "=" + HttpConstants.CLIENT_CREDENTIALS))
+                .withRequestBody(containing(HttpConstants.CLIENT_SECRET + "=" + "BADSECRET"))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(403)));
+
+        // client credentials token succeeds with good secret
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/token"))
+                .withHeader(HttpConstants.HEADER_AUTHORIZATION, absent())
+                .withRequestBody(containing(HttpConstants.GRANT_TYPE + "=" + HttpConstants.CLIENT_CREDENTIALS))
+                .withRequestBody(containing(HttpConstants.CLIENT_SECRET + "=" + "CLIENTSECRET"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
+                        .withBody(ACCESS_TOKEN)));
+
         return Collections.emptyMap();
     }
 
@@ -216,6 +239,16 @@ public class AuthenticationResource implements QuarkusTestResourceLifecycleManag
     }
 
     String getDiscoveryDocument(final String baseUrl) {
+        return "{" +
+                "\"issuer\": \"" + baseUrl + "\"," +
+                "\"authorization_endpoint\": \"" + baseUrl + "/authorization\"," +
+                "\"token_endpoint\": \"" + baseUrl + "/token\"," +
+                "\"registration_endpoint\": \"" + baseUrl + "/register\"," +
+                "\"grant_types_supported\":[\"authorization_code\",\"refresh_token\",\"client_credentials\"]" +
+                "}";
+    }
+
+    String getDiscoveryDocumentNoGrants(final String baseUrl) {
         return "{" +
                 "\"issuer\": \"" + baseUrl + "\"," +
                 "\"authorization_endpoint\": \"" + baseUrl + "/authorization\"," +

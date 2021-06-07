@@ -41,7 +41,7 @@ public class Registration {
         return clientId;
     }
 
-    @JsonSetter("client_id")
+    @JsonSetter(HttpConstants.CLIENT_ID)
     public void setClientId(final String clientId) {
         this.clientId = clientId;
     }
@@ -50,7 +50,7 @@ public class Registration {
         return clientSecret;
     }
 
-    @JsonSetter("client_secret")
+    @JsonSetter(HttpConstants.CLIENT_SECRET)
     public void setClientSecret(final String clientSecret) {
         this.clientSecret = clientSecret;
     }
