@@ -28,6 +28,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.reporting.TestSuiteResults;
 import org.solid.testharness.utils.Namespaces;
@@ -39,6 +40,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
@@ -154,7 +156,7 @@ class ApplicationTest {
     @Test
     void targetBlank() {
         final TestSuiteResults results = mockResults(0);
-        when(conformanceTestHarness.runTestSuites()).thenReturn(results);
+        when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
         assertEquals(0, application.run("--target", ""));
         assertEquals(iri(Namespaces.TEST_HARNESS_URI, "testserver"), config.getTestSubject());
     }
@@ -162,7 +164,7 @@ class ApplicationTest {
     @Test
     void target() {
         final TestSuiteResults results = mockResults(0);
-        when(conformanceTestHarness.runTestSuites()).thenReturn(results);
+        when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
         assertEquals(0, application.run("--target", "test"));
         assertEquals(iri(Namespaces.TEST_HARNESS_URI, "test"), config.getTestSubject());
     }
@@ -170,7 +172,7 @@ class ApplicationTest {
     @Test
     void targetIri() {
         final TestSuiteResults results = mockResults(0);
-        when(conformanceTestHarness.runTestSuites()).thenReturn(results);
+        when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
         assertEquals(0, application.run("--target", "http://example.org/test"));
         assertEquals(iri("http://example.org/test"), config.getTestSubject());
     }
@@ -183,7 +185,7 @@ class ApplicationTest {
     @Test
     void configFile() throws MalformedURLException {
         final TestSuiteResults results = mockResults(0);
-        when(conformanceTestHarness.runTestSuites()).thenReturn(results);
+        when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
         assertEquals(0, application.run("--config", "configfile"));
         final URL url = Path.of("configfile").toAbsolutePath().normalize().toUri().toURL();
         assertEquals(url, config.getConfigUrl());
@@ -192,7 +194,7 @@ class ApplicationTest {
     @Test
     void configUrl() throws MalformedURLException {
         final TestSuiteResults results = mockResults(0);
-        when(conformanceTestHarness.runTestSuites()).thenReturn(results);
+        when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
         assertEquals(0, application.run("--config", "file://test/file"));
         final URL url = new URL("file://test/file");
         assertEquals(url, config.getConfigUrl());
@@ -201,7 +203,7 @@ class ApplicationTest {
     @Test
     void configUrl2() throws MalformedURLException {
         final TestSuiteResults results = mockResults(0);
-        when(conformanceTestHarness.runTestSuites()).thenReturn(results);
+        when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
         assertEquals(0, application.run("--config", "http://example.org"));
         final URL url = new URL("http://example.org");
         assertEquals(url, config.getConfigUrl());
@@ -210,22 +212,59 @@ class ApplicationTest {
     @Test
     void configUrl3() throws MalformedURLException {
         final TestSuiteResults results = mockResults(0);
-        when(conformanceTestHarness.runTestSuites()).thenReturn(results);
+        when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
         assertEquals(0, application.run("--config", "https://example.org"));
         final URL url = new URL("https://example.org");
         assertEquals(url, config.getConfigUrl());
     }
 
     @Test
+    void filtersBlank() {
+        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
+        application.run("--filter", "");
+        verify(conformanceTestHarness).runTestSuites(captor.capture());
+        assertTrue(captor.getValue().isEmpty());
+    }
+
+    @Test
+    void filters1() {
+        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
+        application.run("--filter", "filter1");
+        verify(conformanceTestHarness).runTestSuites(captor.capture());
+        assertEquals(1, captor.getValue().size());
+        assertTrue(captor.getValue().contains("filter1"));
+    }
+
+    @Test
+    void filters2() {
+        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
+        application.run("--filter", "filter1,filter2");
+        verify(conformanceTestHarness).runTestSuites(captor.capture());
+        assertEquals(2, captor.getValue().size());
+        assertTrue(captor.getValue().contains("filter1"));
+        assertTrue(captor.getValue().contains("filter2"));
+    }
+
+    @Test
+    void filtersTwice() {
+        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
+        application.run("--filter", "filter1", "--filter", "filter2");
+        verify(conformanceTestHarness).runTestSuites(captor.capture());
+        assertEquals(2, captor.getValue().size());
+        assertTrue(captor.getValue().contains("filter1"));
+        assertTrue(captor.getValue().contains("filter2"));
+    }
+
+    @Test
     void runTestSuitesNoResults() {
-        when(conformanceTestHarness.runTestSuites()).thenReturn(null);
+        when(conformanceTestHarness.runTestSuites(any())).thenReturn(null);
         assertEquals(1, application.run());
     }
 
     @Test
     void runTestSuitesFailures() {
         final TestSuiteResults results = mockResults(1);
-        when(conformanceTestHarness.runTestSuites()).thenReturn(results);
+        when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
         assertEquals(1, application.run());
     }
 
