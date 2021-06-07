@@ -83,12 +83,14 @@ public class TestSuiteDescription {
             "} ";
 
     /**
-     * Load data from the URL.
-     * @param url starting point for discovering tests
+     * Load data from the list of URLs.
+     * @param urlList starting points for discovering tests
      */
-    public void load(final URL url) {
+    public void load(final List<URL> urlList) {
         // TODO: Search for linked test suite documents or specifications and load data from them as well
-        dataRepository.loadTurtle(url);
+        for (final URL url: urlList) {
+            dataRepository.loadTurtle(url);
+        }
     }
 
     /**

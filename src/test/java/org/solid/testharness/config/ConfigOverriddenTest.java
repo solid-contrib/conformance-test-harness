@@ -29,11 +29,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
 import javax.inject.Inject;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.List;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -42,10 +41,10 @@ public class ConfigOverriddenTest {
     Config config;
 
     @BeforeAll
-    void setup() throws MalformedURLException {
+    void setup() {
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver2"));
-        config.setConfigUrl(new URL("https://example.org/config.ttl"));
-        config.setTestSuiteDescription(new URL("https://example.org/testsuite.ttl"));
+        config.setSubjectsUrl("https://example.org/config.ttl");
+        config.setTestSources(List.of("https://example.org/testsuite.ttl"));
     }
 
     @Test
@@ -56,12 +55,12 @@ public class ConfigOverriddenTest {
     }
 
     @Test
-    void getConfigUrlChanged() throws MalformedURLException {
-        assertEquals("https://example.org/config.ttl", config.getConfigUrl().toString());
+    void getSubjectsUrlChanged() {
+        assertEquals("https://example.org/config.ttl", config.getSubjectsUrl().toString());
     }
 
     @Test
-    void getTestSuiteDescriptionChanged() throws MalformedURLException {
-        assertEquals("https://example.org/testsuite.ttl", config.getTestSuiteDescription().toString());
+    void getTestSourcesChanged() {
+        assertEquals("[https://example.org/testsuite.ttl]", config.getTestSources().toString());
     }
 }

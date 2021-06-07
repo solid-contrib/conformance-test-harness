@@ -46,13 +46,13 @@ public class TestSubjectSetupTest {
 
     @Test
     void setupMissingTarget() throws MalformedURLException {
-        when(config.getConfigUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
+        when(config.getSubjectsUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
         assertThrows(TestHarnessInitializationException.class, () -> testSubject.loadTestSubjectConfig());
     }
 
     @Test
     void setupMissingTargetSingleConfig() throws MalformedURLException {
-        when(config.getConfigUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/config-sample-single.ttl"));
+        when(config.getSubjectsUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/config-sample-single.ttl"));
         testSubject.loadTestSubjectConfig();
         final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
@@ -61,7 +61,7 @@ public class TestSubjectSetupTest {
 
     @Test
     void setupTargetMultipleConfig() throws MalformedURLException {
-        when(config.getConfigUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
+        when(config.getSubjectsUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
         when(config.getTestSubject()).thenReturn(iri("https://github.com/solid/conformance-test-harness/testserver"));
         testSubject.loadTestSubjectConfig();
         final TargetServer targetServer = testSubject.getTargetServer();
@@ -71,20 +71,20 @@ public class TestSubjectSetupTest {
 
     @Test
     void setupDifferentTargetSingleConfig() throws MalformedURLException {
-        when(config.getConfigUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/config-sample-single.ttl"));
+        when(config.getSubjectsUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/config-sample-single.ttl"));
         when(config.getTestSubject()).thenReturn(iri("https://github.com/solid/conformance-test-harness/missing"));
         assertThrows(TestHarnessInitializationException.class, () -> testSubject.loadTestSubjectConfig());
     }
 
     @Test
     void setupConfigWithoutServer() throws MalformedURLException {
-        when(config.getConfigUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/harness-sample.ttl"));
+        when(config.getSubjectsUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/harness-sample.ttl"));
         assertThrows(TestHarnessInitializationException.class, () -> testSubject.loadTestSubjectConfig());
     }
 
     @Test
     void setupBadConfig() throws MalformedURLException {
-        when(config.getConfigUrl()).thenReturn(TestUtils.getFileUrl("jsonld-sample.json"));
+        when(config.getSubjectsUrl()).thenReturn(TestUtils.getFileUrl("jsonld-sample.json"));
         assertThrows(TestHarnessInitializationException.class, () -> testSubject.loadTestSubjectConfig());
     }
 

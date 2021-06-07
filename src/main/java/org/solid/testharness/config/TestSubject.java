@@ -65,8 +65,8 @@ public class TestSubject {
 
     public void loadTestSubjectConfig()  {
         final IRI configuredTestSubject = config.getTestSubject();
-        try (final InputStream is = config.getConfigUrl().openStream()) {
-            final Model model = Rio.parse(is, config.getConfigUrl().toString(), RDFFormat.TURTLE);
+        try (final InputStream is = config.getSubjectsUrl().openStream()) {
+            final Model model = Rio.parse(is, config.getSubjectsUrl().toString(), RDFFormat.TURTLE);
             final Set<Resource> testSubjects = model.filter(null, RDF.type, EARL.TestSubject).subjects();
             if (testSubjects.isEmpty()) {
                 throw new TestHarnessInitializationException("No TestSubjects were found in the config file");
@@ -95,7 +95,7 @@ public class TestSubject {
         } catch (IOException e) {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException(
                     "Failed to read config file %s: %s",
-                    config.getConfigUrl().toString(), e.toString()
+                    config.getSubjectsUrl().toString(), e.toString()
             ).initCause(e);
         }
     }

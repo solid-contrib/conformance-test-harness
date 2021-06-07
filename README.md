@@ -242,12 +242,12 @@ java -jar solid-conformance-test-harness-runner.jar --help
 The command line options are:
 ```
 usage: run
- -c,--config <arg>   URL or path to test subject config (Turtle)
     --coverage       produce a coverage report
  -f,--filter <arg>   feature filter(s)
  -h,--help           print this message
  -o,--output <arg>   output directory
- -s,--suite <arg>    URL or path to test suite description
+ -s,--source <arg>   URL or path to test source(s)
+    --subjects <arg> URL or path to test subject config (Turtle)
  -t,--target <arg>   target server
 ```
 If you want to control the logging output or set up mappings between URIs and local directories for test features you
@@ -255,8 +255,9 @@ can also create `config/application.yaml` in your current working directory base
 that the jar file does not have to be in this directory. The command line options override any equivalent options set
 in any application properties file. An example of the properties that can be set via this file is:
 ```yaml
-configFile: config/config.ttl
-testSuiteDescription: example/example.ttl
+subjects: config/config.ttl
+sources:
+  - example/example.ttl
 target: https://github.com/solid/conformance-test-harness/ess-compat
 feature:
   mappings:
@@ -373,33 +374,32 @@ git clone git@github.com:solid/conformance-test-harness.git
 ```
 
 ### Setting up the environment
-There 5 important settings:
+There are 4 important settings:
 * `target` - the IRI of the target server, used to select the server config from the config file
-* `configFile` - the location of the config file
-* `testSuiteDescription` - the location of the test suite description document that lists the test cases to be run
+* `subjects` - the location of the file describing test subjects
+* `sources` - the locations of annotated specification documents that list the test cases to be run
 * `feature:mappings` - maps test cases IRIs to a local file system (there can be multiple mappings). Mappings should be
   ordered so the most specific is first. This allows individual files to be mapped separately from their containing
   directories.
 
 There are 2 ways to set these properties. Firstly you can provide `config/application.yaml` in the working directory
-
 containing:
 ```yaml
 target: TARGET_SERVER_IRI
-configFile: PATH_TO_CONFIG
-testSuiteDescription: PATH_TO_TESTSUITE_DOC
+subjects: PATH_TO_SUBJECTS_DOC
+sources:
+	- PATH_TO_SPECIFATION_DOC
+	- PATH_TO_SPECIFATION_DOC
 feature:
   mappings:
     - prefix: https://github.com/solid/conformance-test-harness/example
       path: example
 ```
 This method works well when running your tests in an IDE as it doesn't require anything adding to the command line.
-
-Alternatively you can set these things on the command line:
+Alternatively you can set these as command line options as described later. There is an additional option for use
+during development - you can select a target using:
 ```
 -Dtarget=TARGET_SERVER_IRI
--DconfigFile=PATH_TO_CONFIG
--DtestSuiteDescription=PATH_TO_TESTSUITE_DOC
 ``` 
 
 ### Build and test

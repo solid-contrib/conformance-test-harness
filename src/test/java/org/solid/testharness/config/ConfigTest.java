@@ -49,13 +49,13 @@ public class ConfigTest {
     }
 
     @Test
-    void getConfigUrlDefault() throws MalformedURLException {
-        assertEquals(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"), config.getConfigUrl());
+    void getSubjectsUrlDefault() throws MalformedURLException {
+        assertEquals(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"), config.getSubjectsUrl());
     }
 
     @Test
-    void getTestSuiteDescriptionDefault() throws MalformedURLException {
-        assertEquals(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"), config.getTestSuiteDescription());
+    void getTestSourcesDefault() throws MalformedURLException {
+        assertEquals(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"), config.getTestSources().get(0));
     }
 
     @Test

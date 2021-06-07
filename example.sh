@@ -19,8 +19,9 @@ rm temp.zip
 
 # set up the configuration to reference and map the files above
 cat > ./config/application.yaml <<EOF
-configFile: ./servers.ttl
-testSuiteDescription: ./example/example.ttl
+subjects: ./servers.ttl
+sources:
+  - ./example/example.ttl
 target: https://github.com/solid/conformance-test-harness/ess-compat
 
 feature:

@@ -24,6 +24,7 @@
 package org.solid.testharness.config;
 
 import io.quarkus.arc.config.ConfigPrefix;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.rdf4j.model.IRI;
 import org.slf4j.Logger;
@@ -34,11 +35,14 @@ import org.solid.testharness.utils.TestHarnessInitializationException;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 
@@ -47,8 +51,8 @@ public class Config {
     private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
     private IRI testSubject;
-    private URL configUrl;
-    private URL testSuiteDescriptionFile;
+    private URL subjectsUrl;
+    private List<URL> testSources;
     private File outputDir;
     private Map<String, Object> webIds;
 
@@ -62,10 +66,10 @@ public class Config {
 
     @ConfigProperty(name = "target")
     Optional<String> target;
-    @ConfigProperty(name = "configFile")
-    Optional<String> configFile;
-    @ConfigProperty(name = "testSuiteDescription")
-    Optional<String> testSuiteDescription;
+    @ConfigProperty(name = "subjects")
+    Optional<String> subjectsFile;
+    @ConfigProperty(name = "sources")
+    Optional<List<String>> sourceList;
 
     @ConfigProperty(name = "agent", defaultValue = "Solid-Conformance-Test-Suite")
     String agent;
@@ -109,41 +113,33 @@ public class Config {
         this.testSubject = testSubject;
     }
 
-    public URL getConfigUrl() {
-        if (configUrl == null) {
-            try {
-                configUrl = Path.of(configFile.get()).toAbsolutePath().normalize().toUri().toURL();
-            } catch (Exception e) {
-                throw (TestHarnessInitializationException) new TestHarnessInitializationException(
-                        "configFile config is not a valid file or URL: %s",
-                        e.toString()
-                ).initCause(e);
+    public URL getSubjectsUrl() {
+        if (subjectsUrl == null) {
+            if (!sourceList.isPresent()) {
+                throw new TestHarnessInitializationException("config option or subjects config is required");
             }
+            this.subjectsUrl = createUrl(subjectsFile.get(), "subjects");
         }
-        return configUrl;
+        return subjectsUrl;
     }
 
-    public void setConfigUrl(final URL configUrl) {
-        this.configUrl = configUrl;
+    public void setSubjectsUrl(final String subjectsUrl) {
+        this.subjectsUrl = createUrl(subjectsUrl, "subjects");
     }
 
-    public URL getTestSuiteDescription()  {
-        if (testSuiteDescriptionFile == null) {
-            try {
-                testSuiteDescriptionFile = Path.of(testSuiteDescription.get()).toAbsolutePath()
-                        .normalize().toUri().toURL();
-            } catch (Exception e) {
-                throw (TestHarnessInitializationException) new TestHarnessInitializationException(
-                        "testSuiteDescription config not a valid file or URL: %s",
-                        e.toString()
-                ).initCause(e);
+    public List<URL> getTestSources()  {
+        if (testSources == null) {
+            if (!sourceList.isPresent()) {
+                throw new TestHarnessInitializationException("source option or sources config is required");
             }
+            this.testSources = sourceList.get().stream()
+                    .map(ts -> createUrl(ts, "sources")).collect(Collectors.toList());
         }
-        return testSuiteDescriptionFile;
+        return testSources;
     }
 
-    public void setTestSuiteDescription(final URL testSuiteDescriptionFile) {
-        this.testSuiteDescriptionFile = testSuiteDescriptionFile;
+    public void setTestSources(final List<String> testSourceList) {
+        this.testSources = testSourceList.stream().map(ts -> createUrl(ts, "source")).collect(Collectors.toList());
     }
 
     public File getOutputDirectory() {
@@ -208,10 +204,29 @@ public class Config {
 
     public void logConfigSettings() {
         if (logger.isInfoEnabled()) {
-            logger.info("Config url:       {}", getConfigUrl().toString());
-            logger.info("Test suite:       {}", getTestSuiteDescription().toString());
-            logger.info("Path mappings:    {}", pathMappings.getMappings());
-            logger.info("Target server:    {}", target.orElse("not defined"));
+            logger.info("Subjects URL:   {}", getSubjectsUrl().toString());
+            logger.info("Sources:        {}", getTestSources().toString());
+            logger.info("Path mappings:  {}", pathMappings.getMappings());
+            logger.info("Target server:  {}", target.orElse("not defined"));
         }
+    }
+
+    private URL createUrl(final String url, final String param) {
+        if (!StringUtils.isEmpty(url)) {
+            try {
+                if (url.startsWith("file:") || url.startsWith("http:") || url.startsWith("https:")) {
+                    return new URL(url);
+                } else {
+                    return Path.of(url).toAbsolutePath().normalize().toUri().toURL();
+                }
+            } catch (MalformedURLException e) {
+                throw (TestHarnessInitializationException) new TestHarnessInitializationException(
+                        "%s - %s is not a valid file or URL: %s",
+                        param, url,
+                        e.toString()
+                ).initCause(e);
+            }
+        }
+        return null;
     }
 }

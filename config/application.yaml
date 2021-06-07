@@ -1,6 +1,7 @@
 # local override of properties
-configFile: config/config.ttl
-testSuiteDescription: example/example.ttl
+subjects: config/config.ttl
+sources:
+  - example/example.ttl
 target: https://github.com/solid/conformance-test-harness/ess-compat
 #target: https://github.com/solid/conformance-test-harness/ess
 #target: https://github.com/solid/conformance-test-harness/css
@@ -27,8 +28,9 @@ quarkus:
 
 # Test profile
 "%test":
-  configFile: src/test/resources/config-sample.ttl
-  testSuiteDescription: src/test/resources/testsuite-sample.ttl
+  subjects: src/test/resources/config-sample.ttl
+  sources:
+   - src/test/resources/testsuite-sample.ttl
   target: https://github.com/solid/conformance-test-harness/testserver
   feature:
     mappings:
@@ -49,8 +51,8 @@ quarkus:
           level: DEBUG
 
 "%blank":
-  configFile:
-  testSuiteDescription:
+  subjects:
+  sources: []
   target:
   feature:
     mappings:

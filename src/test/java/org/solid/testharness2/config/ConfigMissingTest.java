@@ -45,13 +45,13 @@ public class ConfigMissingTest {
     }
 
     @Test
-    void getConfigUrl() {
-        assertThrows(TestHarnessInitializationException.class, () -> config.getConfigUrl());
+    void getSubjectsUrl() {
+        assertThrows(TestHarnessInitializationException.class, () -> config.getSubjectsUrl());
     }
 
     @Test
-    void getTestSuiteDescription() {
-        assertThrows(TestHarnessInitializationException.class, () -> config.getTestSuiteDescription());
+    void getTestSources() {
+        assertThrows(TestHarnessInitializationException.class, () -> config.getTestSources());
     }
 
     @Test
