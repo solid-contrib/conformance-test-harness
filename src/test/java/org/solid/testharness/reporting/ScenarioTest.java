@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ScenarioTest extends AbstractDataModelTests {
     @Override
     public String getTestFile() {
-        return "src/test/resources/scenario-testing-feature.ttl";
+        return "src/test/resources/reporting/scenario-testing-feature.ttl";
     }
 
     @Test

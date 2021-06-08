@@ -32,7 +32,7 @@ quarkus:
 
 # Test profile
 "%test":
-  subjects: src/test/resources/config-sample.ttl
+  subjects: src/test/resources/config/config-sample.ttl
   sources:
     - https://example.org/specification-sample-1.ttl
     - https://example.org/specification-sample-2.ttl

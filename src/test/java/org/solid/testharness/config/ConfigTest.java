@@ -50,7 +50,7 @@ public class ConfigTest {
 
     @Test
     void getSubjectsUrlDefault() throws MalformedURLException {
-        assertEquals(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"), config.getSubjectsUrl());
+        assertEquals(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"), config.getSubjectsUrl());
     }
 
     @Test

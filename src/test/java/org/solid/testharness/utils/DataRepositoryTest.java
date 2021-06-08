@@ -196,7 +196,7 @@ class DataRepositoryTest {
     @Test
     void loadTurtle() throws MalformedURLException {
         final DataRepository dataRepository = new DataRepository();
-        final URL url = Path.of("src/test/resources/config-sample.ttl").normalize().toUri().toURL();
+        final URL url = Path.of("src/test/resources/config/config-sample.ttl").normalize().toUri().toURL();
         dataRepository.load(url);
         assertEquals(33, dataRepositorySize(dataRepository));
     }

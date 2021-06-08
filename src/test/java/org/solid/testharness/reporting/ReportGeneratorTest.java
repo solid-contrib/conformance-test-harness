@@ -65,11 +65,11 @@ class ReportGeneratorTest {
 
     @Test
     void buildHtmlResultReport() throws IOException {
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/harness-sample.ttl"));
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/testsuite-results-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/reporting/testsuite-results-sample.ttl"));
         final StringWriter sw = new StringWriter();
         reportGenerator.buildHtmlResultReport(sw);
 //        logger.debug("OUTPUT:\n{}", sw);
@@ -78,10 +78,10 @@ class ReportGeneratorTest {
 
     @Test
     void buildHtmlCoverageReport() throws IOException {
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/harness-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/coverage-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/reporting/coverage-sample.ttl"));
         final StringWriter sw = new StringWriter();
         reportGenerator.buildHtmlCoverageReport(sw);
 //        logger.debug("OUTPUT:\n{}", sw);
@@ -91,11 +91,11 @@ class ReportGeneratorTest {
     @Test
     void buildHtmlResultReportFile() throws IOException {
         final File reportFile = new File("target/example-result-report.html");
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/harness-sample.ttl"));
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/testsuite-results-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/reporting/testsuite-results-sample.ttl"));
         final Writer wr = Files.newBufferedWriter(reportFile.toPath());
         reportGenerator.buildHtmlResultReport(wr);
         wr.close();
@@ -105,10 +105,10 @@ class ReportGeneratorTest {
     @Test
     void buildHtmlCoverageReportFile() throws IOException {
         final File reportFile = new File("target/example-coverage-report.html");
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/harness-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/coverage-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/reporting/coverage-sample.ttl"));
         final Writer wr = Files.newBufferedWriter(reportFile.toPath());
         reportGenerator.buildHtmlCoverageReport(wr);
         wr.close();

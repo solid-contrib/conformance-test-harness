@@ -52,7 +52,7 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Override
     public String getTestFile() {
-        return "src/test/resources/datamodelbase-testing-feature.ttl";
+        return "src/test/resources/reporting/datamodelbase-testing-feature.ttl";
 
     }
 

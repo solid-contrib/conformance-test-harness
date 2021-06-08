@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TestCaseTest extends AbstractDataModelTests  {
     @Override
     public String getTestFile() {
-        return "src/test/resources/testcase-testing-feature.ttl";
+        return "src/test/resources/reporting/testcase-testing-feature.ttl";
     }
 
     @Test

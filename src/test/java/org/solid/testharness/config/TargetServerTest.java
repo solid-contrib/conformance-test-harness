@@ -40,7 +40,7 @@ public class TargetServerTest {
 
     @Test
     public void parseTargetServer() throws Exception {
-        final URL testFile = TestUtils.getFileUrl("src/test/resources/targetserver-testing-feature.ttl");
+        final URL testFile = TestUtils.getFileUrl("src/test/resources/config/targetserver-testing-feature.ttl");
         TestData.insertData(dataRepository, testFile);
         final TargetServer targetServer = new TargetServer(iri(TestData.SAMPLE_NS, "testserver"));
         assertAll("targetServer",
@@ -56,7 +56,7 @@ public class TargetServerTest {
 
     @Test
     public void parseTargetServerWithBadThreads() throws Exception {
-        final URL testFile = TestUtils.getFileUrl("src/test/resources/targetserver-testing-feature.ttl");
+        final URL testFile = TestUtils.getFileUrl("src/test/resources/config/targetserver-testing-feature.ttl");
         TestData.insertData(dataRepository, testFile);
         assertThrows(TestHarnessInitializationException.class, () -> new TargetServer(iri(TestData.SAMPLE_NS, "bad")));
     }

@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class AssertionTest extends AbstractDataModelTests {
     @Override
     public String getTestFile() {
-        return "src/test/resources/assertiontest-testing-feature.ttl";
+        return "src/test/resources/reporting/assertiontest-testing-feature.ttl";
     }
 
     @Test
