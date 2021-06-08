@@ -197,7 +197,7 @@ class DataRepositoryTest {
     void loadTurtle() throws MalformedURLException {
         final DataRepository dataRepository = new DataRepository();
         final URL url = Path.of("src/test/resources/config-sample.ttl").normalize().toUri().toURL();
-        dataRepository.loadTurtle(url);
+        dataRepository.load(url);
         assertEquals(33, dataRepositorySize(dataRepository));
     }
 
@@ -205,7 +205,7 @@ class DataRepositoryTest {
     void loadTurtleBadUrl() {
         final DataRepository dataRepository = new DataRepository();
         assertThrows(TestHarnessInitializationException.class,
-                () -> dataRepository.loadTurtle(new URL("file:/missing.txt"))
+                () -> dataRepository.load(new URL("file:/missing.txt"))
         );
     }
 
@@ -213,14 +213,14 @@ class DataRepositoryTest {
     void loadTurtleBadData() {
         final DataRepository dataRepository = new DataRepository();
         assertThrows(TestHarnessInitializationException.class,
-                () -> dataRepository.loadTurtle(TestUtils.getFileUrl("src/test/resources/jsonld-sample.json"))
+                () -> dataRepository.load(TestUtils.getFileUrl("src/test/resources/jsonld-sample.json"))
         );
     }
 
     @Test
     void loadRdfa() throws MalformedURLException {
         final DataRepository dataRepository = new DataRepository();
-        dataRepository.loadRdfa(TestUtils.getFileUrl("src/test/resources/rdfa-sample.html"), TestData.SAMPLE_BASE);
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/rdfa-sample.html"), TestData.SAMPLE_BASE);
         assertEquals(1, dataRepositorySize(dataRepository));
     }
 
@@ -228,7 +228,7 @@ class DataRepositoryTest {
     void loadRdfaBadUrl() {
         final DataRepository dataRepository = new DataRepository();
         assertThrows(TestHarnessInitializationException.class,
-                () -> dataRepository.loadRdfa(new URL("file:/missing.txt"), TestData.SAMPLE_BASE)
+                () -> dataRepository.load(new URL("file:/missing.txt"), TestData.SAMPLE_BASE)
         );
     }
 
@@ -236,7 +236,7 @@ class DataRepositoryTest {
     void loadRdfaBadData() {
         final DataRepository dataRepository = new DataRepository();
         assertThrows(TestHarnessInitializationException.class,
-                () -> dataRepository.loadRdfa(TestUtils.getFileUrl("src/test/resources/jsonld-sample.json"),
+                () -> dataRepository.load(TestUtils.getFileUrl("src/test/resources/jsonld-sample.json"),
                         TestData.SAMPLE_BASE)
         );
     }

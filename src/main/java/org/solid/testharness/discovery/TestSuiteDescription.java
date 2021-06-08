@@ -89,7 +89,7 @@ public class TestSuiteDescription {
     public void load(final List<URL> urlList) {
         // TODO: Search for linked test suite documents or specifications and load data from them as well
         for (final URL url: urlList) {
-            dataRepository.loadTurtle(url);
+            dataRepository.load(url);
         }
     }
 
