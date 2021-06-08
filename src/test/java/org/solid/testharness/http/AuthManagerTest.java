@@ -218,7 +218,7 @@ class AuthManagerTest {
     @Test
     void authenticateLoginSessionNoGrantType() {
         final TargetServer targetServer = getMockTargetServer(false);
-        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(new Client.Builder().build());
+        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
         setupLogin(baseUri.resolve("/nogranttypes/"), "login-nogrant", "PASSWORD");
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
