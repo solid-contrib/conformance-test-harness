@@ -1,0 +1,29 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+      xmlns:spec="http://www.w3.org/ns/spec#">
+<body about="https://example.org/specification1" typeof="spec:Specification">
+<section>
+    <h1>Contents</h1>
+    <p>See also<a rel="rdfs:seeAlso" href="https://example.org/manifests/test-manifest-sample-1.ttl">Test Manifest</a></p>
+    <ul>
+        <li rel="spec:requirement" resource="https://example.org/specification1#spec1">Requirement 1</li>
+        <li rel="spec:requirement" resource="https://example.org/specification1#spec2">Requirement 2</li>
+        <li rel="spec:requirement" resource="https://example.org/specification1#spec3">Requirement 3</li>
+    </ul>
+</section>
+<section about="https://example.org/specification1#spec1" typeof="spec:NormativeRequirement">
+    <h1>Requirement 1</h1>
+    <dl><dt>Role</dt><dd property="spec:conformanceRole" resource="spec:ServerConformanceClass">Server</dd></dl>
+    <dl><dt>Level</dt><dd property="spec:normativeConformanceLevel" resource="spec:ConformanceMust">MUST</dd></dl>
+</section>
+<section about="https://example.org/specification1#spec2" typeof="spec:NormativeRequirement">
+    <h1>Requirement 2</h1>
+    <dl><dt>Role</dt><dd property="spec:conformanceRole" resource="spec:ServerConformanceClass">Server</dd></dl>
+    <dl><dt>Level</dt><dd property="spec:normativeConformanceLevel" resource="spec:ConformanceMust">MUST</dd></dl>
+</section>
+<section about="https://example.org/specification1#spec3" typeof="spec:NormativeRequirement">
+    <h1>Requirement 3</h1>
+    <dl><dt>Role</dt><dd property="spec:conformanceRole" resource="spec:ServerConformanceClass">Server</dd></dl>
+    <dl><dt>Level</dt><dd property="spec:normativeConformanceLevel" resource="spec:ConformanceMust">MUST</dd></dl>
+</section>
+</body>
+</html>

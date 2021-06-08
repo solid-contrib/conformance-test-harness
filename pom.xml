@@ -48,6 +48,7 @@
         <mockito.version>3.11.0</mockito.version>
         <jandex.version>2.3.0.Final</jandex.version>
         <wiremock.version>2.27.2</wiremock.version>
+        <solid.vocab.version>0.0.7</solid.vocab.version>
 
         <!-- package info -->
         <package.name>${project.name}</package.name>
@@ -193,9 +194,9 @@
         <dependency>
             <groupId>org.solid.common.vocab</groupId>
             <artifactId>generated-vocab-common</artifactId>
-            <version>0.0.6</version>
+            <version>${solid.vocab.version}</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/libs/generated-vocab-common-0.0.6.jar</systemPath>
+            <systemPath>${project.basedir}/src/main/libs/generated-vocab-common-${solid.vocab.version}.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

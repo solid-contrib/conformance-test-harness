@@ -27,10 +27,7 @@ import com.intuit.karate.Suite;
 import com.intuit.karate.core.FeatureResult;
 import com.intuit.karate.core.ScenarioResult;
 import org.eclipse.rdf4j.RDF4JException;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.util.RDFCollections;
@@ -39,9 +36,7 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFWriter;
-import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
@@ -51,10 +46,7 @@ import org.solid.common.vocab.EARL;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
+import java.io.*;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
@@ -87,19 +79,15 @@ public class DataRepository implements Repository {
         logger.debug("INITIALIZE DATA REPOSITORY");
     }
 
-    public void loadTurtle(final URL url) {
-        loadData(url, null, RDFFormat.TURTLE);
+    public void load(final URL url) {
+        load(url, null);
     }
 
-    public void loadRdfa(final URL url, final String baseUri) {
-        loadData(url, baseUri, RDFFormat.RDFA);
-    }
-
-    public void loadData(final URL url, final String baseUri, final RDFFormat format) {
+    public void load(final URL url, final String baseUri) {
         try (RepositoryConnection conn = getConnection()) {
             try {
-                logger.info("Loading {} from {}", format.getName(), url.toString());
-                conn.add(url, baseUri, format);
+                logger.info("Loading {}", url.toString());
+                conn.add(url, baseUri, null);
                 logger.debug("Loaded data into repository, size={}", conn.size());
             } catch (IOException e) {
                 throw (TestHarnessInitializationException) new TestHarnessInitializationException(
@@ -107,7 +95,7 @@ public class DataRepository implements Repository {
                         url.toString(), e.toString()
                 ).initCause(e);
             }
-        } catch (RDF4JException e) {
+        } catch (RDF4JException | UnsupportedRDFormatException e) {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException(
                     "Failed to parse data: %s", e.toString()
             ).initCause(e);

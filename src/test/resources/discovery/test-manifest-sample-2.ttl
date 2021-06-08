@@ -1,0 +1,45 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix earl: <http://www.w3.org/ns/earl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix td: <http://www.w3.org/2006/03/test-description#> .
+
+@prefix manifest: <https://example.org/manifests/test-manifest-sample-2.ttl#> .
+
+# to be removed
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+manifest: doap:implements <https://solidproject.org/TR/protocol> ;
+          dcterms:hasPart manifest:group4 .
+
+manifest:group4
+    a td:SpecificationTestCase ;
+    dcterms:title "Group 4"@en ;
+    dcterms:description "Description 4"@en ;
+    td:specificationReference <https://example.org/specification2#spec1> ;
+    td:preCondition "sf1", "sf3" ;
+    dcterms:hasPart
+        <https://example.org/dummy/group4/feature1>,
+        <https://example.org/dummy/group4/feature2>,
+        <https://example.org/dummy/group4/feature3>
+.
+
+<https://example.org/dummy/group4/feature1>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:accepted ;
+    dcterms:title "Group 4 Test case 1" .
+
+<https://example.org/dummy/group4/feature2>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:accepted ;
+    dcterms:title "Group 4 Test case 2" .
+
+<https://example.org/dummy/group4/feature3>
+    a td:TestCase ;
+    dcterms:subject "MUST" ;
+    td:reviewStatus td:unreviewed ;
+    dcterms:title "Group 4 Test case 3" .
+
+

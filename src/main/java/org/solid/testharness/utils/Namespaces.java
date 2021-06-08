@@ -83,6 +83,7 @@ public final class Namespaces {
     static {
         namespaceMap = new HashMap<>();
         namespaceMap.put(TEST_HARNESS_PREFIX, new Namespace(TEST_HARNESS_PREFIX, TEST_HARNESS_URI));
+        namespaceMap.put(SPEC.PREFIX, new Namespace(SPEC.PREFIX, SPEC.NAMESPACE));
         namespaceMap.put(EARL.PREFIX, new Namespace(EARL.PREFIX, EARL.NAMESPACE));
         namespaceMap.put(DOAP.PREFIX, new Namespace(DOAP.PREFIX, DOAP.NAMESPACE));
         namespaceMap.put(SOLID.PREFIX, new Namespace(SOLID.PREFIX, SOLID.NAMESPACE));

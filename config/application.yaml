@@ -12,6 +12,10 @@ feature:
   mappings:
     - prefix: https://github.com/solid/conformance-test-harness/example
       path: example
+    - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/solid
+      path: example/solid
+    - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/web
+      path: example/web
 
 # Logging
 quarkus:
@@ -30,7 +34,8 @@ quarkus:
 "%test":
   subjects: src/test/resources/config-sample.ttl
   sources:
-   - src/test/resources/testsuite-sample.ttl
+    - https://example.org/specification-sample-1.ttl
+    - https://example.org/specification-sample-2.ttl
   target: https://github.com/solid/conformance-test-harness/testserver
   feature:
     mappings:
@@ -40,6 +45,13 @@ quarkus:
         path: src/test/resources/dummy-features/otherExample
       - prefix: https://example.org/features
         path: src/test/resources
+      - prefix: https://example.org/specification
+        path: src/test/resources/discovery/specification
+      - prefix: https://example.org/manifests
+        path: src/test/resources/discovery
+      - prefix: https://example.org/badmapping
+        path: http://example.org:-1/
+
   agent: AGENT
   connectTimeout: 1000
   readTimeout: 1000

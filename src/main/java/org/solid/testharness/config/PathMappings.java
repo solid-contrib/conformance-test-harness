@@ -26,9 +26,12 @@ package org.solid.testharness.config;
 import io.quarkus.arc.config.ConfigProperties;
 import org.eclipse.rdf4j.model.IRI;
 import org.solid.testharness.http.HttpUtils;
+import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.validation.constraints.NotNull;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
@@ -77,6 +80,24 @@ public class PathMappings {
         return URI.create(mapping != null ? location.replace(mapping.prefix, mapping.path) : location);
     }
 
+    public URL mapIri(final IRI iri) {
+        return toUrl(iri.stringValue());
+    }
+
+    public URL mapUrl(final URL url) {
+        return toUrl(url.toString());
+    }
+
+    private URL toUrl(final String location) {
+        final Mapping mapping = mappings.stream().filter(m -> location.startsWith(m.prefix)).findFirst().orElse(null);
+        try {
+            return new URL(mapping != null ? location.replace(mapping.prefix, mapping.path) : location);
+        } catch (MalformedURLException e) {
+            throw (TestHarnessInitializationException) new TestHarnessInitializationException("Bad URL mapping: %s",
+                    e.toString()).initCause(e);
+        }
+    }
+
     public static class Mapping {
         private String prefix;
         private String path;
@@ -98,7 +119,11 @@ public class PathMappings {
         }
 
         public void setPath(final String path) {
-            this.path = Path.of(path).toAbsolutePath().normalize().toUri().toString();
+            if (path.matches("^(https?|file):/.*")) {
+                this.path = path;
+            } else {
+                this.path = Path.of(path).toAbsolutePath().normalize().toUri().toString();
+            }
             if (this.path.endsWith("/")) {
                 this.path = this.path.substring(0, this.path.length() - 1);
             }
