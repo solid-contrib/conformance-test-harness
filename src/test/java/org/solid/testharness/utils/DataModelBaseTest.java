@@ -245,9 +245,15 @@ class DataModelBaseTest extends AbstractDataModelTests {
         final LocalDateTime dateTime = dataModelBase.getLiteralAsDateTime(iri(NS, "hasDateTime"));
         assertThat("DateTime matches", dateTime.isEqual(LocalDateTime.parse("2021-04-08T12:30:00.000")));
     }
+
     @Test
     void getMissingLiteralAsDateTime() {
         assertNull(dataModelBase.getLiteralAsDateTime(iri(NS, "hasMissingDateTime")));
+    }
+
+    @Test
+    void getAnchor() {
+        assertEquals("test", dataModelBase.getAnchor());
     }
 
     class TestClass extends DataModelBase {

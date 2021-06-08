@@ -37,10 +37,7 @@ import javax.validation.constraints.NotNull;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
@@ -55,18 +52,21 @@ public class DataModelBase {
 
     public enum ConstructMode {
         SHALLOW,
+        INC_PARENTS,
         DEEP,
         LIST;
     }
 
-    private static final String SERVER_GRAPH = "CONSTRUCT {<%s> ?p ?o} WHERE {<%s> ?p ?o}";
-    private static final String SERVER_GRAPH_2 = "CONSTRUCT {<%s> ?p ?o. ?o ?p1 ?o1} " +
-            "WHERE {<%s> ?p ?o. OPTIONAL {?o ?p1 ?o1}}";
+    private static final String SERVER_GRAPH = "CONSTRUCT {?s ?p ?o} WHERE {BIND(<%s> as ?s) ?s ?p ?o}";
+    private static final String SERVER_GRAPH_2 = "CONSTRUCT {?s ?p ?o. ?o ?p1 ?o1} " +
+            "WHERE {BIND(<%s> as ?s) ?s ?p ?o. OPTIONAL {?o ?p1 ?o1}}";
+    private static final String SERVER_GRAPH_PARENT = "CONSTRUCT {?s ?p ?o. ?s1 ?p1 ?s} " +
+            "WHERE {BIND(<%s> as ?s) ?s ?p ?o. OPTIONAL {?s1 ?p1 ?s}}";
     private static final String SERVER_GRAPH_LIST = "CONSTRUCT {" +
-            "  <%s> ?p ?o. ?o ?p1 ?o1 . " +
+            "  ?s ?p ?o. ?o ?p1 ?o1 . " +
             "  ?listRest rdf:first ?head ; rdf:rest ?tail ." +
             "} WHERE {" +
-            "  <%s> ?p ?o." +
+            "  BIND(<%s> as ?s) ?s ?p ?o." +
             "  OPTIONAL {?o ?p1 ?o1 . ?o rdf:rest* ?listRest . ?listRest rdf:first ?head ; rdf:rest ?tail .}" +
             "}";
 
@@ -82,6 +82,9 @@ public class DataModelBase {
             case DEEP:
                 query = SERVER_GRAPH_2;
                 break;
+            case INC_PARENTS:
+                query = SERVER_GRAPH_PARENT;
+                break;
             case LIST:
                 query = SERVER_GRAPH_LIST;
                 break;
@@ -90,7 +93,7 @@ public class DataModelBase {
                 break;
         }
         model = Repositories.graphQuery(dataRepository,
-                String.format(query, subject, subject),
+                String.format(query, subject),
                 QueryResults::asModel
         );
     }
@@ -112,6 +115,10 @@ public class DataModelBase {
         return values.stream().map(v -> Namespaces.shorten((IRI)v)).collect(Collectors.joining(" "));
     }
 
+    public String getAnchor() {
+        return subject.getLocalName();
+    }
+
     protected String getIriAsString(final IRI predicate) {
         final Set<Value> values = model.filter(subject, predicate, null).objects();
         if (!values.isEmpty()) {
@@ -123,17 +130,7 @@ public class DataModelBase {
     protected <T extends DataModelBase> List<T> getModelList(final IRI predicate, final Class<T> clazz) {
         final Set<Value> values = model.filter(subject, predicate, null).objects();
         if (!values.isEmpty()) {
-            return values.stream().filter(Value::isIRI).map(v -> {
-                try {
-                    return clazz.getDeclaredConstructor(IRI.class).newInstance((IRI)v);
-                } catch (InstantiationException | IllegalAccessException |
-                        InvocationTargetException | NoSuchMethodException e) {
-                    logger.error("Failed to create instance of {}", clazz.getName());
-                    throw (RuntimeException) new RuntimeException(
-                            "Failed to create instance of " + clazz.getName()
-                    ).initCause(e);
-                }
-            }).collect(Collectors.toList());
+            return getModelList(clazz, values);
         }
         return null;
     }
@@ -141,20 +138,33 @@ public class DataModelBase {
     protected <T extends DataModelBase> List<T> getModelCollectionList(final IRI predicate, final Class<T> clazz) {
         final Resource node = Models.objectResource(model.filter(subject, predicate, null)).orElse(null);
         if (node != null) {
-            final List<Value> values = RDFCollections.asValues(model, node, new ArrayList<Value>());
-            return values.stream().filter(Value::isIRI).map(v -> {
-                try {
-                    return clazz.getDeclaredConstructor(IRI.class).newInstance((IRI) v);
-                } catch (InstantiationException | IllegalAccessException |
-                        InvocationTargetException | NoSuchMethodException e) {
-                    logger.error("Failed to create instance of {}", clazz.getName());
-                    throw (RuntimeException) new RuntimeException(
-                            "Failed to create instance of " + clazz.getName()
-                    ).initCause(e);
-                }
-            }).collect(Collectors.toList());
+            final List<Value> values = RDFCollections.asValues(model, node, new ArrayList<>());
+            return getModelList(clazz, values);
         }
         return null;
+    }
+
+    protected <T extends DataModelBase> List<T> getModelListByObject(final IRI predicate, final Class<T> clazz) {
+        final Set<Value> values = model.filter(null, predicate, subject).subjects()
+                .stream().map(o -> (Value) o).collect(Collectors.toSet());
+        if (!values.isEmpty()) {
+            return getModelList(clazz, values);
+        }
+        return null;
+    }
+
+    private <T extends DataModelBase> List<T> getModelList(final Class<T> clazz, final Collection<Value> values) {
+        return values.stream().filter(Value::isIRI).map(v -> {
+            try {
+                return clazz.getDeclaredConstructor(IRI.class).newInstance((IRI) v);
+            } catch (InstantiationException | IllegalAccessException |
+                    InvocationTargetException | NoSuchMethodException e) {
+                logger.error("Failed to create instance of {}", clazz.getName());
+                throw (RuntimeException) new RuntimeException(
+                        "Failed to create instance of " + clazz.getName()
+                ).initCause(e);
+            }
+        }).collect(Collectors.toList());
     }
 
     protected IRI getAsIri(final IRI predicate) {

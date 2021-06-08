@@ -26,8 +26,8 @@ package org.solid.testharness.reporting;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.utils.AbstractDataModelTests;
-import org.solid.testharness.utils.TestData;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
@@ -42,7 +42,7 @@ class ResultDataTest extends AbstractDataModelTests {
 
     @Test
     void getHtmlPrefixes() {
-        final ResultData resultData = new ResultData(iri(TestData.SAMPLE_NS));
+        final ResultData resultData = new ResultData(Collections.emptyList());
         assertEquals("rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns# " +
                 "rdfs: http://www.w3.org/2000/01/rdf-schema# " +
                 "xsd: http://www.w3.org/2001/XMLSchema# " +
@@ -51,26 +51,25 @@ class ResultDataTest extends AbstractDataModelTests {
                 "solid: http://www.w3.org/ns/solid/terms# " +
                 "solid-test: https://github.com/solid/conformance-test-harness/vocab# " +
                 "earl: http://www.w3.org/ns/earl# " +
-                "td: http://www.w3.org/2006/03/test-description#", resultData.getPrefixes());
+                "td: http://www.w3.org/2006/03/test-description# " +
+                "spec: http://www.w3.org/ns/spec#", resultData.getPrefixes());
     }
 
     @Test
-    void getSpecificationTestCases() {
-        final ResultData resultData = new ResultData(iri(TestData.SAMPLE_NS));
-        final List<SpecificationTestCase> testCases = resultData.getSpecificationTestCases();
-        assertNotNull(testCases);
-        assertEquals(2, testCases.size());
-    }
-
-    @Test
-    void getSpecification() {
-        final ResultData resultData = new ResultData(iri(TestData.SAMPLE_NS));
-        assertEquals("https://solidproject.org/TR/protocol#spec1", resultData.getSpecification());
+    void getSpecifications() {
+        final ResultData resultData = new ResultData(
+                List.of(iri("https://example.org/specification1"), iri("https://example.org/specification2"))
+        );
+        final List<Specification> specifications = resultData.getSpecifications();
+        assertNotNull(specifications);
+        assertEquals(2, specifications.size());
+        assertEquals(3, specifications.get(0).getSpecificationRequirements().size());
+        assertEquals(1, specifications.get(1).getSpecificationRequirements().size());
     }
 
     @Test
     void getAssertor() {
-        final ResultData resultData = new ResultData(iri(TestData.SAMPLE_NS));
+        final ResultData resultData = new ResultData(Collections.emptyList());
         assertNotNull(resultData.getAssertor());
     }
 }

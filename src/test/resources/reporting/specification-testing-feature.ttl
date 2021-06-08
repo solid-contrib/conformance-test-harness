@@ -8,9 +8,3 @@
                      <https://example.org/specification1#spec3> ;
     rdfs:seeAlso <https://example.org/manifests/test-manifest.ttl>
 .
-
-<https://example.org/specification2>
-    a spec:Specification ;
-    spec:requirement <https://example.org/specification2#spec1> ;
-    rdfs:seeAlso <https://example.org/manifests/test-manifest2.ttl>
-.

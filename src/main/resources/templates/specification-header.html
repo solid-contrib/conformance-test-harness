@@ -1,0 +1,13 @@
+<h2>Specifications under test</h2>
+{#if specifications}
+<ul>
+  {#each specifications}
+  <li><a href="{it.subject}" typeof="{it.typesList}" title="Specification link">{it.subject}</a>
+    {#if it.manifest} - Test manifest: <a href="{it.manifest}" rel="rdfs:seeAlso" title="Manifest link">{it.manifest}</a>{/if}
+  </li>
+  {/each}
+</ul>
+{#else}
+<p>No specifications found.</p>
+{/if}
+{#with assertor}{#include assertor /}{/with}

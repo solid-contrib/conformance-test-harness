@@ -23,31 +23,33 @@
  */
 package org.solid.testharness.reporting;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.solid.common.vocab.DCTERMS;
-import org.solid.common.vocab.TD;
-import org.solid.testharness.utils.DataModelBase;
+import io.quarkus.test.junit.QuarkusTest;
+import org.junit.jupiter.api.Test;
+import org.solid.testharness.utils.AbstractDataModelTests;
 
 import java.util.List;
 
-public class SpecificationTestCase extends DataModelBase {
-    public SpecificationTestCase(final IRI subject) {
-        super(subject);
+import static org.eclipse.rdf4j.model.util.Values.iri;
+import static org.junit.jupiter.api.Assertions.*;
+
+@QuarkusTest
+class SpecificationTest extends AbstractDataModelTests {
+    @Override
+    public String getTestFile() {
+        return "src/test/resources/reporting/specification-testing-feature.ttl";
     }
 
-    public String getTitle() {
-        return getLiteralAsString(DCTERMS.title);
+    @Test
+    void getManifest() {
+        final Specification specification = new Specification(iri(NS, "specification1"));
+        assertEquals("https://example.org/manifests/test-manifest.ttl", specification.getManifest());
     }
 
-    public String getDescription() {
-        return getLiteralAsString(DCTERMS.description);
-    }
-
-    public String getSpecificationReference() {
-        return getIriAsString(TD.specificationReference);
-    }
-
-    public List<TestCase> getTestCases() {
-        return getModelList(DCTERMS.hasPart, TestCase.class);
+    @Test
+    void getSpecificationRequirements() {
+        final Specification specification = new Specification(iri(NS, "specification1"));
+        final List<SpecificationRequirement> specificationRequirements = specification.getSpecificationRequirements();
+        assertEquals(3, specificationRequirements.size());
+        assertEquals("https://example.org/specification1#spec1", specificationRequirements.get(0).getSubject());
     }
 }

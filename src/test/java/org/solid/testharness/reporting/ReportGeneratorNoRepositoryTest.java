@@ -28,7 +28,6 @@ import io.quarkus.test.junit.mockito.InjectMock;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.junit.jupiter.api.Test;
-import org.solid.common.vocab.DOAP;
 import org.solid.testharness.utils.DataRepository;
 
 import javax.inject.Inject;
@@ -56,7 +55,7 @@ class ReportGeneratorNoRepositoryTest {
     void buildHtmlCoverageReportBadResult() {
         final RepositoryConnection conn = mock(RepositoryConnection.class);
         when(dataRepository.getConnection()).thenReturn(conn);
-        when(conn.getStatements(null, DOAP.implements_, null)).thenThrow(new RepositoryException("BAD RESULT"));
+        when(conn.prepareTupleQuery(any())).thenThrow(new RepositoryException("BAD RESULT"));
         final StringWriter sw = new StringWriter();
         assertThrows(RepositoryException.class, () -> reportGenerator.buildHtmlCoverageReport(sw));
     }

@@ -91,7 +91,8 @@ public class PathMappings {
     private URL toUrl(final String location) {
         final Mapping mapping = mappings.stream().filter(m -> location.startsWith(m.prefix)).findFirst().orElse(null);
         try {
-            return new URL(mapping != null ? location.replace(mapping.prefix, mapping.path) : location);
+            return new URL(
+                    mapping != null ? location.replace(mapping.prefix, mapping.path) : location);
         } catch (MalformedURLException e) {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException("Bad URL mapping: %s",
                     e.toString()).initCause(e);

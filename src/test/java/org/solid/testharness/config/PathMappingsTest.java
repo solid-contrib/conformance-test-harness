@@ -65,7 +65,7 @@ class PathMappingsTest {
                 pathMappingString("https://example.org/features", "src/test/resources"),
                 pathMappingString("https://example.org/specification", "src/test/resources/discovery/specification"),
                 pathMappingString("https://example.org/manifests", "src/test/resources/discovery"),
-                pathMappingString("https://example.org/badmapping", "http://example.org:-1")
+                pathMappingString("https://example.org/badmapping", "https://example.org:-1")
                 )) + "]", pathMappings.toString());
     }
 
@@ -163,6 +163,18 @@ class PathMappingsTest {
     void mapFeatureIri() {
         final URI path = pathMappings.mapFeatureIri(iri("https://example.org/dummy/group1/test.feature"));
         assertEquals(TestUtils.getPathUri("src/test/resources/dummy-features/group1/test.feature"), path);
+    }
+
+    @Test
+    void mapIri() throws MalformedURLException {
+        final URL url = pathMappings.mapIri(iri("https://example.org/manifests/test-manifest-sample-1.ttl"));
+        assertEquals(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"), url);
+    }
+
+    @Test
+    void mapIriNoMapping() throws MalformedURLException {
+        final URL url = pathMappings.mapIri(iri("https://example.org/unknown/test.ttl"));
+        assertEquals(new URL("https://example.org/unknown/test.ttl"), url);
     }
 
     @Test

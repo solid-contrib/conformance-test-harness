@@ -7,11 +7,6 @@
 
 @prefix manifest: <https://example.org/manifests/test-manifest-sample-1.ttl#> .
 
-# to be removed
-@prefix doap: <http://usefulinc.com/ns/doap#> .
-manifest: doap:implements <https://example.org/specification1> ;
-          dcterms:hasPart manifest:group1, manifest:group2, manifest:group3 .
-
 manifest:group1
     a td:SpecificationTestCase ;
     dcterms:title "Group 1"@en ;

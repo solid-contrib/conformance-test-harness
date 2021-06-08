@@ -34,14 +34,14 @@
   spec:normativeConformanceLevel spec:ConformanceMust ;
 .
 
-<https://solidproject.org/TR/protocol#test-server-header-put-content-type>
-  a spec:NormativeRequirement ;
-  spec:conformanceRole spec:ServerConformanceClass ;
-  spec:normativeConformanceLevel spec:ConformanceMust ;
-  spec:httpRequest [
-    http:mthd httpm:PUT
-  ];
-  spec:httpRequestHeader [
-    http:hdrName httph:content-type
-  ];
-.
+#<https://solidproject.org/TR/protocol#test-server-header-put-content-type>
+#  a spec:NormativeRequirement ;
+#  spec:conformanceRole spec:ServerConformanceClass ;
+#  spec:normativeConformanceLevel spec:ConformanceMust ;
+#  spec:httpRequest [
+#    http:mthd httpm:PUT
+#  ];
+#  spec:httpRequestHeader [
+#    http:hdrName httph:content-type
+#  ];
+#.

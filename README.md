@@ -250,10 +250,11 @@ usage: run
     --subjects <arg> URL or path to test subject config (Turtle)
  -t,--target <arg>   target server
 ```
-If you want to control the logging output or set up mappings between URIs and local directories for test features you
-can also create `config/application.yaml` in your current working directory based on the definition shown above. Note
-that the jar file does not have to be in this directory. The command line options override any equivalent options set
-in any application properties file. An example of the properties that can be set via this file is:
+If you want to control the logging output or set up mappings between URIs and local directories for test features or 
+source documents, you can also create `config/application.yaml` in your current working directory based on the 
+definition shown above. Note that the jar file does not have to be in this directory. The command line options override
+any equivalent options set in any application properties file. An example of the properties that can be set via this
+file is:
 ```yaml
 subjects: config/config.ttl
 sources:
