@@ -54,8 +54,9 @@ public class ConfigTest {
     }
 
     @Test
-    void getTestSourcesDefault() throws MalformedURLException {
-        assertEquals(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"), config.getTestSources().get(0));
+    void getTestSourcesDefault() {
+        assertEquals("https://example.org/specification-sample-1.ttl", config.getTestSources().get(0).toString());
+        assertEquals("https://example.org/specification-sample-2.ttl", config.getTestSources().get(1).toString());
     }
 
     @Test

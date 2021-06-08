@@ -27,10 +27,13 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import org.eclipse.rdf4j.model.IRI;
 import org.junit.jupiter.api.Test;
+import org.solid.testharness.utils.TestHarnessInitializationException;
 import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +50,7 @@ class PathMappingsTest {
     void getMappings() {
         final List<PathMappings.Mapping> mappings = pathMappings.getMappings();
         assertNotNull(mappings);
-        assertEquals(3, mappings.size());
+        assertEquals(6, mappings.size());
         assertEquals("https://example.org/dummy/group1", mappings.get(0).getPrefix());
         assertEquals(
                 TestUtils.getPathUri("src/test/resources/dummy-features/group1").toString(), mappings.get(0).getPath()
@@ -56,13 +59,18 @@ class PathMappingsTest {
 
     @Test
     void testToString() {
-        assertEquals("[https://example.org/dummy/group1 => " +
-                TestUtils.getPathUri("src/test/resources/dummy-features/group1") + ", " +
-                "https://example.org/dummy/group2 => " +
-                TestUtils.getPathUri("src/test/resources/dummy-features/otherExample") + ", " +
-                "https://example.org/features => " + TestUtils.getPathUri("src/test/resources") + "]",
-                pathMappings.toString()
-        );
+        assertEquals("[" + String.join(", ", List.of(
+                pathMappingString("https://example.org/dummy/group1", "src/test/resources/dummy-features/group1"),
+                pathMappingString("https://example.org/dummy/group2", "src/test/resources/dummy-features/otherExample"),
+                pathMappingString("https://example.org/features", "src/test/resources"),
+                pathMappingString("https://example.org/specification", "src/test/resources/discovery/specification"),
+                pathMappingString("https://example.org/manifests", "src/test/resources/discovery"),
+                pathMappingString("https://example.org/badmapping", "http://example.org:-1")
+                )) + "]", pathMappings.toString());
+    }
+
+    private String pathMappingString(final String prefix, final String path) {
+        return prefix + " => " + (path.startsWith("http") ? path : TestUtils.getPathUri(path));
     }
 
     @Test
@@ -155,6 +163,18 @@ class PathMappingsTest {
     void mapFeatureIri() {
         final URI path = pathMappings.mapFeatureIri(iri("https://example.org/dummy/group1/test.feature"));
         assertEquals(TestUtils.getPathUri("src/test/resources/dummy-features/group1/test.feature"), path);
+    }
+
+    @Test
+    void mapUrl() throws MalformedURLException {
+        final URL url = pathMappings.mapUrl(new URL("https://example.org/specification-sample-1.ttl"));
+        assertEquals(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"), url);
+    }
+
+    @Test
+    void mapUrlFail() {
+        assertThrows(TestHarnessInitializationException.class,
+                () -> pathMappings.mapUrl(new URL("https://example.org/badmapping-sample-1.ttl")));
     }
 
     @Test

@@ -32,9 +32,7 @@ import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.solid.common.vocab.DCTERMS;
-import org.solid.common.vocab.EARL;
-import org.solid.common.vocab.TD;
+import org.solid.common.vocab.*;
 import org.solid.testharness.config.PathMappings;
 import org.solid.testharness.http.HttpUtils;
 import org.solid.testharness.utils.DataRepository;
@@ -61,14 +59,13 @@ public class TestSuiteDescription {
     @Inject
     PathMappings pathMappings;
 
-    // TODO: This currently finds all td:SpecificationTestCase. It should pay attention to:
-    //   manifest: dcterms:hasPart manifest:testgroup
-    // This will give the developer a simple way to control which tests groups are run, either by changing the file
-    // or specifying on the comment line. It may also help if loading >1 test suite description
-    private static final String PREFIXES = String.format("PREFIX %s: <%s>\nPREFIX %s: <%s>\n",
-            TD.PREFIX, TD.NAMESPACE, DCTERMS.PREFIX, DCTERMS.NAMESPACE);
+    private static final String PREFIXES = String.format("PREFIX %s: <%s>\nPREFIX %s: <%s>\nPREFIX %s: <%s>\n",
+            TD.PREFIX, TD.NAMESPACE, DCTERMS.PREFIX, DCTERMS.NAMESPACE, SPEC.PREFIX, SPEC.NAMESPACE);
+
     private static final String SELECT_SUPPORTED_TEST_CASES = PREFIXES +
             "SELECT DISTINCT ?feature WHERE {" +
+//            "  ?spec spec:requirement ?specRef ." +
+//            "  ?group td:specificationReference ?specRef ." +
             "  ?group a td:SpecificationTestCase ." +
             "  ?group dcterms:hasPart ?feature ." +
             "  ?feature a td:TestCase ." +
@@ -77,9 +74,16 @@ public class TestSuiteDescription {
 
     private static final String SELECT_ALL_TEST_CASES = PREFIXES +
             "SELECT DISTINCT ?feature WHERE {" +
+//            "  ?spec spec:requirement ?specRef ." +
+//            "  ?group td:specificationReference ?specRef ." +
             "  ?group a td:SpecificationTestCase ." +
             "  ?group dcterms:hasPart ?feature ." +
             "  ?feature a td:TestCase ." +
+            "} ";
+
+    private static final String SELECT_REFERENCED_MANIFESTS = PREFIXES +
+            "SELECT DISTINCT ?manifest WHERE {" +
+            "  ?spec a spec:Specification; rdfs:seeAlso ?manifest ." +
             "} ";
 
     /**
@@ -87,9 +91,11 @@ public class TestSuiteDescription {
      * @param urlList starting points for discovering tests
      */
     public void load(final List<URL> urlList) {
-        // TODO: Search for linked test suite documents or specifications and load data from them as well
         for (final URL url: urlList) {
-            dataRepository.load(url);
+            dataRepository.load(pathMappings.mapUrl(url));
+        }
+        for (final IRI manifest: selectResources(SELECT_REFERENCED_MANIFESTS)) {
+            dataRepository.load(pathMappings.mapIri(manifest));
         }
     }
 
@@ -102,11 +108,11 @@ public class TestSuiteDescription {
         final String serverFeatureList = serverFeatures != null && !serverFeatures.isEmpty()
                 ? "\"" + String.join("\", \"", serverFeatures) + "\""
                 : "";
-        return selectTestCases(String.format(SELECT_SUPPORTED_TEST_CASES, serverFeatureList));
+        return selectResources(String.format(SELECT_SUPPORTED_TEST_CASES, serverFeatureList));
     }
 
     public List<IRI> getAllTestCases() {
-        return selectTestCases(SELECT_ALL_TEST_CASES);
+        return selectResources(SELECT_ALL_TEST_CASES);
     }
 
     public List<String> locateTestCases(final List<IRI> testCases) {
@@ -136,21 +142,21 @@ public class TestSuiteDescription {
         }
     }
 
-    private List<IRI> selectTestCases(final String query) {
-        final List<IRI> testCases = new ArrayList<>();
+    private List<IRI> selectResources(final String query) {
+        final List<IRI> resources = new ArrayList<>();
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             final TupleQuery tupleQuery = conn.prepareTupleQuery(query);
             try (TupleQueryResult result = tupleQuery.evaluate()) {
                 while (result.hasNext()) {
                     final BindingSet bindingSet = result.next();
-                    final Value featureIri = bindingSet.getValue("feature");
-                    testCases.add((IRI)featureIri);
+                    final Value resourceIri = bindingSet.iterator().next().getValue();
+                    resources.add((IRI)resourceIri);
                 }
             }
         } catch (RDF4JException e) {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException(e.toString())
                     .initCause(e);
         }
-        return testCases;
+        return resources;
     }
 }

@@ -1,0 +1,39 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix http: <http://www.w3.org/2011/http#> .
+@prefix httpm: <http://www.w3.org/2011/http-methods#> .
+@prefix httph: <http://www.w3.org/2011/http-headers#> .
+@prefix spec: <http://www.w3.org/ns/spec#> .
+
+<https://example.org/specification1>
+    a spec:Specification ;
+    spec:requirement <https://example.org/specification1#spec1>,
+                     <https://example.org/specification1#spec2>,
+                     <https://example.org/specification1#spec3> ;
+    rdfs:seeAlso <https://example.org/manifests/test-manifest-sample-1.ttl>
+.
+
+<https://example.org/specification1#spec1>
+    a spec:NormativeRequirement ;
+    spec:conformanceRole spec:ServerConformanceClass ;
+    spec:normativeConformanceLevel spec:ConformanceMust ;
+    spec:httpRequest [
+        http:mthd httpm:PUT
+    ];
+    spec:httpRequestHeader [
+        http:hdrName httph:content-type
+    ]
+.
+
+<https://example.org/specification1#spec2>
+    a spec:NormativeRequirement ;
+    spec:conformanceRole spec:ServerConformanceClass ;
+    spec:normativeConformanceLevel spec:ConformanceMust
+.
+
+<https://example.org/specification1#spec3>
+    a spec:NormativeRequirement ;
+    spec:conformanceRole spec:ServerConformanceClass ;
+    spec:normativeConformanceLevel spec:ConformanceMust
+.

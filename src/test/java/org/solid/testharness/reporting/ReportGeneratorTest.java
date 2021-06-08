@@ -67,7 +67,8 @@ class ReportGeneratorTest {
     void buildHtmlResultReport() throws IOException {
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/harness-sample.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/testsuite-results-sample.ttl"));
         final StringWriter sw = new StringWriter();
         reportGenerator.buildHtmlResultReport(sw);
@@ -78,7 +79,8 @@ class ReportGeneratorTest {
     @Test
     void buildHtmlCoverageReport() throws IOException {
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/harness-sample.ttl"));
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/coverage-sample.ttl"));
         final StringWriter sw = new StringWriter();
         reportGenerator.buildHtmlCoverageReport(sw);
@@ -91,7 +93,8 @@ class ReportGeneratorTest {
         final File reportFile = new File("target/example-result-report.html");
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/harness-sample.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/config-sample.ttl"));
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/testsuite-results-sample.ttl"));
         final Writer wr = Files.newBufferedWriter(reportFile.toPath());
         reportGenerator.buildHtmlResultReport(wr);
@@ -103,7 +106,8 @@ class ReportGeneratorTest {
     void buildHtmlCoverageReportFile() throws IOException {
         final File reportFile = new File("target/example-coverage-report.html");
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/harness-sample.ttl"));
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/testsuite-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/coverage-sample.ttl"));
         final Writer wr = Files.newBufferedWriter(reportFile.toPath());
         reportGenerator.buildHtmlCoverageReport(wr);
