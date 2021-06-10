@@ -98,6 +98,10 @@
             <artifactId>quarkus-jackson</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-container-image-jib</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.intuit.karate</groupId>
             <artifactId>karate-core</artifactId>
             <version>${karate.version}</version>
@@ -481,6 +485,15 @@
                         <version>${surefire-plugin.version}</version>
                         <configuration>
                             <excludedGroups>solid</excludedGroups>
+                            <environmentVariables>
+                                <SERVER_ROOT>https://example.org</SERVER_ROOT>
+                                <TEST_CONTAINER>/solid-test-suite-alice/shared-test/</TEST_CONTAINER>
+                                <SOLID_IDENTITY_PROVIDER>https://broker.example.org/</SOLID_IDENTITY_PROVIDER>
+                                <ALICE_WEBID>https://example.org/solid-test-suite-alice/profile/card#me</ALICE_WEBID>
+                                <ALICE_CLIENT_SECRET>ALICE_SECRET</ALICE_CLIENT_SECRET>
+                                <BOB_WEBID>https://example.org/solid-test-suite-bob/profile/card#me</BOB_WEBID>
+                                <BOB_CLIENT_SECRET>BOB_SECRET</BOB_CLIENT_SECRET>
+                            </environmentVariables>
                         </configuration>
                     </plugin>
                 </plugins>

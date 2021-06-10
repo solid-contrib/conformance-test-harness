@@ -74,9 +74,9 @@ public class ConformanceTestHarness {
     @Inject
     DataRepository dataRepository;
 
+    @SuppressWarnings("PMD.UseProperClassLoader") // this is not J2EE and the suggestion fails
     public void initialize() throws IOException {
-        try (final InputStream is = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("assertor.properties")) {
+        try (final InputStream is = getClass().getClassLoader().getResourceAsStream("assertor.properties")) {
             final Properties properties = new Properties();
             properties.load(is);
             final IRI assertor = iri(Namespaces.TEST_HARNESS_URI);
