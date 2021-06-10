@@ -69,6 +69,8 @@ class ReportGeneratorTest {
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-2.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-2.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/reporting/testsuite-results-sample.ttl"));
         final StringWriter sw = new StringWriter();
         reportGenerator.buildHtmlResultReport(sw);
@@ -81,6 +83,8 @@ class ReportGeneratorTest {
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-2.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-2.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/reporting/coverage-sample.ttl"));
         final StringWriter sw = new StringWriter();
         reportGenerator.buildHtmlCoverageReport(sw);
@@ -95,6 +99,8 @@ class ReportGeneratorTest {
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-2.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-2.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/reporting/testsuite-results-sample.ttl"));
         final Writer wr = Files.newBufferedWriter(reportFile.toPath());
         reportGenerator.buildHtmlResultReport(wr);
@@ -108,6 +114,8 @@ class ReportGeneratorTest {
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-2.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-2.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/reporting/coverage-sample.ttl"));
         final Writer wr = Files.newBufferedWriter(reportFile.toPath());
         reportGenerator.buildHtmlCoverageReport(wr);
@@ -123,14 +131,14 @@ class ReportGeneratorTest {
     @Test
     void buildHtmlCoverageReportEmpty() {
         final StringWriter sw = new StringWriter();
-        assertThrows(NullPointerException.class, () -> reportGenerator.buildHtmlCoverageReport(sw));
+        assertDoesNotThrow(() -> reportGenerator.buildHtmlCoverageReport(sw));
     }
 
     @Test
     void buildHtmlCoverageReportBadSubject() throws IOException {
-        TestData.insertData(dataRepository, TestData.PREFIXES + "_:b0 doap:implements ex:spec .");
+        TestData.insertData(dataRepository, TestData.PREFIXES + "_:b0 a spec:Specification .");
         final StringWriter sw = new StringWriter();
-        assertThrows(NullPointerException.class, () -> reportGenerator.buildHtmlCoverageReport(sw));
+        assertThrows(ClassCastException.class, () -> reportGenerator.buildHtmlCoverageReport(sw));
     }
 }
 

@@ -1,7 +1,8 @@
 # local override of properties
 subjects: config/config.ttl
 sources:
-  - example/example.ttl
+  - https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/solid-protocol-spec.ttl
+  - https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/web-access-control-spec.ttl
 target: https://github.com/solid/conformance-test-harness/ess-compat
 #target: https://github.com/solid/conformance-test-harness/ess
 #target: https://github.com/solid/conformance-test-harness/css
@@ -50,7 +51,7 @@ quarkus:
       - prefix: https://example.org/manifests
         path: src/test/resources/discovery
       - prefix: https://example.org/badmapping
-        path: http://example.org:-1/
+        path: https://example.org:-1/
 
   agent: AGENT
   connectTimeout: 1000

@@ -7,11 +7,6 @@
 
 @prefix manifest: <https://example.org/manifests/test-manifest-sample-2.ttl#> .
 
-# to be removed
-@prefix doap: <http://usefulinc.com/ns/doap#> .
-manifest: doap:implements <https://solidproject.org/TR/protocol> ;
-          dcterms:hasPart manifest:group4 .
-
 manifest:group4
     a td:SpecificationTestCase ;
     dcterms:title "Group 4"@en ;

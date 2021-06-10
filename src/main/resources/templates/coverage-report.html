@@ -14,36 +14,48 @@
 <body about="{subject}" prefix="{prefixes}">
 <header>
     <h1>Solid Specification - Conformance Test Suite Coverage Report</h1>
-    <h2>
-        <dl><dt>Specification under test</dt><dd><a href="{specification}" rel="doap:implements" title="Specification link">{specification}</a></dd></dl>
-    </h2>
-    {#with assertor}{#include assertor /}{/with}
+    {#include specification-header /}
 </header>
 
 <main>
-    {#if specificationTestCases}
-    {#each specificationTestCases}
-    <div property="dcterms:hasPart" resource="{it.subject}">
-        <section about="{it.subject}" typeof="{it.typesList}">
-            <h3 property="dcterms:title">{it.title}</h3>
-            <p property="dcterms:description">{it.description}</p>
-            <table>
-                <tr>
-                    <th>TestCase</th>
-                    <th>Title</th>
-                    <th>Level</th>
-                    <th>Status</th>
-                    <th>Implemented</th>
-                </tr>
-                {#each it.testCases}
-                    {#include testcase coverageMode=true /}
-                {/each}
-            </table>
-        </section>
-    </div>
+    {#if specifications}
+    {#each specifications}
+    <section about="{it.subject}" typeof="{it.typesList}">
+        <h2>Specification: {it.subject}</h2>
+        {#if it.specificationRequirements}
+        {#each it.specificationRequirements}
+        <div about="{it.subject}" rel="spec:requirement" typeof="{it.typesList}">
+            <dl><dt>Conformance Role</dt><dd>{it.conformanceRole}</dd></dl>
+            <dl><dt>Conformance Level</dt><dd>{it.conformanceLevel}</dd></dl>
+            {#with it.specificationTestCase}
+            <div about="{subject}" rev="td:specificationReference" resource="{it.subject}" typeof="{it.typesList}">
+                <h3 property="dcterms:title">{title}</h3>
+                <p property="dcterms:description">{description}</p>
+                {#if testCases}
+                <table>
+                    <tr>
+                        <th>TestCase</th>
+                        <th>Title</th>
+                        <th>Level</th>
+                        <th>Status</th>
+                        <th>Implemented</th>
+                    </tr>
+                    {#each testCases}
+                        {#include testcase coverageMode=true /}
+                    {/each}
+                </table>
+                {#else}
+                <p>No test cases found</p>
+                {/if}
+            </div>
+            {/with}
+        </div>
+        {/each}
+        {#else}
+        <p>No tests were discovered.</p>
+        {/if}
+    </section>
     {/each}
-    {#else}
-    <p>No tests were discovered.</p>
     {/if}
 </main>
 </body>

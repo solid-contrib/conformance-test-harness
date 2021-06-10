@@ -14,52 +14,61 @@
 <body about="{subject}" prefix="{prefixes}">
 <header>
     <h1>Solid Specification - Conformance Test Suite Results</h1>
-    <h2>
-        <dl><dt>Specification under test</dt><dd><a href="{specification}" rel="doap:implements" title="Specification link">{specification}</a></dd></dl>
-    </h2>
-    {#with assertor}{#include assertor /}{/with}
-
+    {#include specification-header /}
     <h2>Target server description - TODO</h2>
 </header>
 
 <main>
-    {#if specificationTestCases}
-    <h2>Results by test feature</h2>
-    {#each specificationTestCases}
-    <div property="dcterms:hasPart" resource="{it.subject}">
-        <section about="{it.subject}" typeof="{it.typesList}">
-            <h3 property="dcterms:title">{it.title}</h3>
-            <p property="dcterms:description">{it.description}</p>
-            <table>
-                <tr>
-                    <th>TestCase</th>
-                    <th>Title</th>
-                    <th>Level</th>
-                    <th>Status</th>
-                    <th>Target</th>
-                    <th>Outcome</th>
-                    <th>Timestamp</th>
-                    <th>Scenario link</th>
-                </tr>
-                {#let anchor=it.anchor}
-                {#each it.testCases}
-                    {#include testcase link=anchor /}
-                {/each}
-                {/let}
-            </table>
-        </section>
-    </div>
-    {/each}
+    {#if specifications}
+    {#each specifications}
+    <section about="{it.subject}" typeof="{it.typesList}">
+        <h2>Specification: {it.subject}</h2>
+        {#if it.specificationRequirements}
+        <h2>Results by test feature</h2>
+        {#each it.specificationRequirements}
+        <div about="{it.subject}" rel="spec:requirement" typeof="{it.typesList}">
+            <h3>Requirement: {it.subject}</h3>
+            <dl><dt>Conformance Role</dt><dd>{it.conformanceRole}</dd></dl>
+            <dl><dt>Conformance Level</dt><dd>{it.conformanceLevel}</dd></dl>
+            {#with it.specificationTestCase}
+            <div about="{subject}" rev="td:specificationReference" resource="{it.subject}" typeof="{it.typesList}">
+                <h3 property="dcterms:title">{title}</h3>
+                <p property="dcterms:description">{description}</p>
+                {#if testCases}
+                <table>
+                    <tr>
+                        <th>TestCase</th>
+                        <th>Title</th>
+                        <th>Level</th>
+                        <th>Status</th>
+                        <th>Target</th>
+                        <th>Outcome</th>
+                        <th>Timestamp</th>
+                        <th>Scenario link</th>
+                    </tr>
+                    {#each testCases}
+                        {#include testcase link=anchor /}
+                    {/each}
+                </table>
+                {#else}
+                <p>No test cases found</p>
+                {/if}
+            </div>
+            {/with}
+        </div>
+        {/each}
 
-    <hr/>
-    <h2>Results by test scenario</h2>
-    {#each specificationTestCases}
-    <div id="scenarios-{it.anchor}" property="dcterms:hasPart" resource="{it.subject}">
-        <section about="{it.subject}" typeof="{it.typesList}">
-            <h3 property="dcterms:title">{it.title}</h3>
-            {#each it.testCases}
-            {#if it.scenarios}
+        <hr/>
+        <h2>Results by test scenario</h2>
+        {#for requirement in it.specificationRequirements}
+        {#let stc=requirement.specificationTestCase}
+        <div id="scenarios-{stc.anchor}" property="dcterms:hasPart" resource="{stc.subject}">
+            <section about="{stc.subject}" typeof="{stc.typesList}">
+                <h3 property="dcterms:title">{stc.title}</h3>
+                {#if stc.testCases}
+                {#each stc.testCases}
                 <h3 property="dcterms:title">{it.title}</h3>
+                {#if it.scenarios}
                 <table>
                     <tr>
                         <th>Scenario</th>
@@ -71,14 +80,24 @@
                     {#include scenario /}
                     {/each}
                 </table>
-            {/if}
-            {/each}
-        </section>
-    </div>
+                {#else}
+                <p>No scenario results were discovered.</p>
+                {/if}
+                {/each}
+                {#else}
+                <p>No test cases were found.</p>
+                {/if}
+            </section>
+        </div>
+        {/let}
+        {/for}
+        {#else}
+        <p>No tests were discovered.</p>
+        {/if}
+    </section>
     {/each}
-    {#else}
-    <p>No tests were discovered.</p>
     {/if}
+
 </main>
 </body>
 </html>

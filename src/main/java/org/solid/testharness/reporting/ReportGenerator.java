@@ -28,10 +28,10 @@ import io.quarkus.qute.Template;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.solid.common.vocab.DOAP;
+import org.solid.common.vocab.RDF;
+import org.solid.common.vocab.SPEC;
 import org.solid.testharness.utils.DataRepository;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -39,6 +39,8 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class ReportGenerator {
@@ -63,31 +65,22 @@ public class ReportGenerator {
     }
 
     public void buildHtmlCoverageReport(final Writer writer) throws IOException {
-        final IRI testSuite = getTestSuiteNamespace();
-        writer.write(coverageTemplate.data(new ResultData(testSuite)).render());
+        writer.write(coverageTemplate.data(new ResultData(getSpecifications())).render());
         writer.flush();
     }
 
     public void buildHtmlResultReport(final Writer writer) throws IOException {
-        final IRI testSuite = getTestSuiteNamespace();
-        writer.write(resultTemplate.data(new ResultData(testSuite)).render());
+        writer.write(resultTemplate.data(new ResultData(getSpecifications())).render());
         writer.flush();
     }
 
-    private IRI getTestSuiteNamespace() {
-        try (
-                RepositoryConnection conn = dataRepository.getConnection();
-                RepositoryResult<Statement> statements = conn.getStatements(null, DOAP.implements_, null)
-        ) {
-            // TODO: if we use multiple test suites this will need to iterate
-            if (statements.hasNext()) {
-                final Statement st = statements.next();
-                return st.getSubject().isIRI() ? (IRI) st.getSubject() : null;
-            }
+    private List<IRI> getSpecifications() {
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            return conn.getStatements(null, RDF.type, SPEC.Specification).stream()
+                    .map(Statement::getSubject)
+                    .map(IRI.class::cast)
+                    .collect(Collectors.toList());
         }
-        // Jacoco reports only 50% of branches tested but this is not solvable
-        // See : https://github.com/cobertura/cobertura/issues/289
-        return null;
     }
 }
 

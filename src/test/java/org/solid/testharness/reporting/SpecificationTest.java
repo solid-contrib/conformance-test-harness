@@ -24,40 +24,32 @@
 package org.solid.testharness.reporting;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.RepositoryException;
 import org.junit.jupiter.api.Test;
-import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.AbstractDataModelTests;
 
-import javax.inject.Inject;
-import java.io.StringWriter;
+import java.util.List;
 
+import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @QuarkusTest
-class ReportGeneratorNoRepositoryTest {
-    @InjectMock
-    DataRepository dataRepository;
-
-    @Inject
-    ReportGenerator reportGenerator;
-
-    @Test
-    void buildHtmlCoverageReportBadRepository() {
-        when(dataRepository.getConnection()).thenThrow(new RepositoryException("BAD REPOSITORY"));
-        final StringWriter sw = new StringWriter();
-        assertThrows(RepositoryException.class, () -> reportGenerator.buildHtmlCoverageReport(sw));
+class SpecificationTest extends AbstractDataModelTests {
+    @Override
+    public String getTestFile() {
+        return "src/test/resources/reporting/specification-testing-feature.ttl";
     }
 
     @Test
-    void buildHtmlCoverageReportBadResult() {
-        final RepositoryConnection conn = mock(RepositoryConnection.class);
-        when(dataRepository.getConnection()).thenReturn(conn);
-        when(conn.getStatements(any(), any(), any())).thenThrow(new RepositoryException("BAD RESULT"));
-        final StringWriter sw = new StringWriter();
-        assertThrows(RepositoryException.class, () -> reportGenerator.buildHtmlCoverageReport(sw));
+    void getManifest() {
+        final Specification specification = new Specification(iri(NS, "specification1"));
+        assertEquals("https://example.org/manifests/test-manifest.ttl", specification.getManifest());
+    }
+
+    @Test
+    void getSpecificationRequirements() {
+        final Specification specification = new Specification(iri(NS, "specification1"));
+        final List<SpecificationRequirement> specificationRequirements = specification.getSpecificationRequirements();
+        assertEquals(3, specificationRequirements.size());
+        assertEquals("https://example.org/specification1#spec1", specificationRequirements.get(0).getSubject());
     }
 }
-

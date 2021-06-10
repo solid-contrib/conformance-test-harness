@@ -25,10 +25,8 @@ package org.solid.testharness.discovery;
 
 import org.eclipse.rdf4j.RDF4JException;
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.query.BindingSet;
-import org.eclipse.rdf4j.query.TupleQuery;
-import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,33 +57,6 @@ public class TestSuiteDescription {
     @Inject
     PathMappings pathMappings;
 
-    private static final String PREFIXES = String.format("PREFIX %s: <%s>\nPREFIX %s: <%s>\nPREFIX %s: <%s>\n",
-            TD.PREFIX, TD.NAMESPACE, DCTERMS.PREFIX, DCTERMS.NAMESPACE, SPEC.PREFIX, SPEC.NAMESPACE);
-
-    private static final String SELECT_SUPPORTED_TEST_CASES = PREFIXES +
-            "SELECT DISTINCT ?feature WHERE {" +
-//            "  ?spec spec:requirement ?specRef ." +
-//            "  ?group td:specificationReference ?specRef ." +
-            "  ?group a td:SpecificationTestCase ." +
-            "  ?group dcterms:hasPart ?feature ." +
-            "  ?feature a td:TestCase ." +
-            "  FILTER NOT EXISTS { ?group td:preCondition ?precondition FILTER(?precondition NOT IN (%s))}" +
-            "} ";
-
-    private static final String SELECT_ALL_TEST_CASES = PREFIXES +
-            "SELECT DISTINCT ?feature WHERE {" +
-//            "  ?spec spec:requirement ?specRef ." +
-//            "  ?group td:specificationReference ?specRef ." +
-            "  ?group a td:SpecificationTestCase ." +
-            "  ?group dcterms:hasPart ?feature ." +
-            "  ?feature a td:TestCase ." +
-            "} ";
-
-    private static final String SELECT_REFERENCED_MANIFESTS = PREFIXES +
-            "SELECT DISTINCT ?manifest WHERE {" +
-            "  ?spec a spec:Specification; rdfs:seeAlso ?manifest ." +
-            "} ";
-
     /**
      * Load data from the list of URLs.
      * @param urlList starting points for discovering tests
@@ -94,8 +65,17 @@ public class TestSuiteDescription {
         for (final URL url: urlList) {
             dataRepository.load(pathMappings.mapUrl(url));
         }
-        for (final IRI manifest: selectResources(SELECT_REFERENCED_MANIFESTS)) {
-            dataRepository.load(pathMappings.mapIri(manifest));
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            conn.getStatements(null, RDF.type, SPEC.Specification).stream()
+                    .map(Statement::getSubject)
+                    .flatMap(s -> conn.getStatements(s, RDFS.seeAlso, null).stream())
+                    .map(Statement::getObject)
+                    .filter(Value::isIRI)
+                    .map(IRI.class::cast)
+                    .forEach(o -> dataRepository.load(pathMappings.mapIri(o)));
+        } catch (RDF4JException e) {
+            throw (TestHarnessInitializationException) new TestHarnessInitializationException(e.toString())
+                    .initCause(e);
         }
     }
 
@@ -105,14 +85,11 @@ public class TestSuiteDescription {
      * @return List of features
      */
     public List<IRI> getSupportedTestCases(final Set<String> serverFeatures) {
-        final String serverFeatureList = serverFeatures != null && !serverFeatures.isEmpty()
-                ? "\"" + String.join("\", \"", serverFeatures) + "\""
-                : "";
-        return selectResources(String.format(SELECT_SUPPORTED_TEST_CASES, serverFeatureList));
+        return getFilteredTestCases(serverFeatures, true);
     }
 
     public List<IRI> getAllTestCases() {
-        return selectResources(SELECT_ALL_TEST_CASES);
+        return getFilteredTestCases(null, false);
     }
 
     public List<String> locateTestCases(final List<IRI> testCases) {
@@ -142,21 +119,36 @@ public class TestSuiteDescription {
         }
     }
 
-    private List<IRI> selectResources(final String query) {
-        final List<IRI> resources = new ArrayList<>();
+    private List<IRI> getFilteredTestCases(final Set<String> serverFeatures, final boolean applyFilters) {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
-            final TupleQuery tupleQuery = conn.prepareTupleQuery(query);
-            try (TupleQueryResult result = tupleQuery.evaluate()) {
-                while (result.hasNext()) {
-                    final BindingSet bindingSet = result.next();
-                    final Value resourceIri = bindingSet.iterator().next().getValue();
-                    resources.add((IRI)resourceIri);
-                }
-            }
+            return conn.getStatements(null, SPEC.requirement, null).stream()
+                    .map(Statement::getObject)
+                    .filter(Value::isIRI)
+                    .map(IRI.class::cast)
+                    // get groups that reference the specification requirement
+                    .flatMap(specRef -> conn.getStatements(null, TD.specificationReference, specRef).stream())
+                    .map(Statement::getSubject)
+                    // filter groups based on preConditions
+                    // - either no preCondition exists or the preconditions are all in serverFeatures
+                    .filter(group -> !applyFilters ||
+                            !conn.getStatements(group, TD.preCondition, null).hasNext() ||
+                            conn.getStatements(group, TD.preCondition, null).stream()
+                                    .map(Statement::getObject)
+                                    .filter(Value::isLiteral)
+                                    .map(Value::stringValue)
+                                    .allMatch(serverFeature ->
+                                            serverFeatures != null && serverFeatures.contains(serverFeature)
+                                    )
+                    )
+                    // get features in each group
+                    .flatMap(group -> conn.getStatements(group, DCTERMS.hasPart, null).stream())
+                    .map(Statement::getObject)
+                    .filter(Value::isIRI)
+                    .map(IRI.class::cast)
+                    .collect(Collectors.toList());
         } catch (RDF4JException e) {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException(e.toString())
                     .initCause(e);
         }
-        return resources;
     }
 }

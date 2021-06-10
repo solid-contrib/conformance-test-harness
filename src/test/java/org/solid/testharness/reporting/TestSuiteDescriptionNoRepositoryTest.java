@@ -33,6 +33,7 @@ import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.inject.Inject;
+import java.net.URL;
 import java.util.List;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
@@ -46,6 +47,14 @@ class TestSuiteDescriptionNoRepositoryTest {
 
     @Inject
     TestSuiteDescription testSuiteDescription;
+
+    @Test
+    void loadException() {
+        when(dataRepository.getConnection()).thenThrow(new RepositoryException("BAD REPOSITORY"));
+        assertThrows(TestHarnessInitializationException.class,
+                () -> testSuiteDescription.load(List.of(new URL("https://example.org/specification-sample-1.ttl"))));
+
+    }
 
     @Test
     void locateTestCasesException() {

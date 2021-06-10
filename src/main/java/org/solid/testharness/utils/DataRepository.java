@@ -31,7 +31,6 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.util.RDFCollections;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
@@ -43,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.DCTERMS;
 import org.solid.common.vocab.EARL;
+import org.solid.common.vocab.RDF;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -119,17 +119,17 @@ public class DataRepository implements Repository {
             final IRI featureAssertion = createSkolemizedBlankNode(featureIri);
             final IRI featureResult = createSkolemizedBlankNode(featureIri);
             conn.add(builder.subject(featureIri)
-                    .add(RDF.TYPE, EARL.TestCriterion)
-                    .add(RDF.TYPE, EARL.TestFeature)
+                    .add(RDF.type, EARL.TestCriterion)
+                    .add(RDF.type, EARL.TestFeature)
                     .add(DCTERMS.title, fr.getFeature().getName())
                     .add(EARL.assertions, featureAssertion)
-                    .add(featureAssertion, RDF.TYPE, EARL.Assertion)
+                    .add(featureAssertion, RDF.type, EARL.Assertion)
                     .add(featureAssertion, EARL.assertedBy, assertor)
                     .add(featureAssertion, EARL.test, featureIri)
                     .add(featureAssertion, EARL.subject, testSubject)
                     .add(featureAssertion, EARL.mode, EARL.automatic)
                     .add(featureAssertion, EARL.result, featureResult)
-                    .add(featureResult, RDF.TYPE, EARL.TestResult)
+                    .add(featureResult, RDF.type, EARL.TestResult)
                     .add(featureResult, EARL.outcome, fr.isFailed() ? EARL.failed : EARL.passed)
                     .add(featureResult, DCTERMS.date, new Date((long) (startTime + fr.getDurationMillis())))
                     .build());
@@ -139,18 +139,18 @@ public class DataRepository implements Repository {
                 final IRI scenarioResult = createSkolemizedBlankNode(featureIri);
                 builder = new ModelBuilder();
                 conn.add(builder.subject(scenarioIri)
-                        .add(RDF.TYPE, EARL.TestCriterion)
-                        .add(RDF.TYPE, EARL.TestCase)
+                        .add(RDF.type, EARL.TestCriterion)
+                        .add(RDF.type, EARL.TestCase)
                         .add(DCTERMS.title, sr.getScenario().getName())
                         .add(DCTERMS.isPartOf, featureIri)
                         .add(EARL.assertions, scenarioAssertion)
-                        .add(scenarioAssertion, RDF.TYPE, EARL.Assertion)
+                        .add(scenarioAssertion, RDF.type, EARL.Assertion)
                         .add(scenarioAssertion, EARL.assertedBy, assertor)
                         .add(scenarioAssertion, EARL.test, scenarioIri)
                         .add(scenarioAssertion, EARL.subject, testSubject)
                         .add(scenarioAssertion, EARL.mode, EARL.automatic)
                         .add(scenarioAssertion, EARL.result, scenarioResult)
-                        .add(scenarioResult, RDF.TYPE, EARL.TestResult)
+                        .add(scenarioResult, RDF.type, EARL.TestResult)
                         .add(scenarioResult, EARL.outcome, sr.isFailed() ? EARL.failed : EARL.passed)
                         .add(scenarioResult, DCTERMS.date, new Date((long) (startTime + sr.getDurationMillis())))
                         .add(featureIri, DCTERMS.hasPart, scenarioIri)
@@ -160,7 +160,7 @@ public class DataRepository implements Repository {
                         final IRI step = createSkolemizedBlankNode(featureIri);
                         final ModelBuilder stepBuilder = new ModelBuilder();
                         stepBuilder.subject(step)
-                                .add(RDF.TYPE, EARL.TestStep)
+                                .add(RDF.type, EARL.TestStep)
                                 .add(DCTERMS.title, str.getStep().getPrefix() + " " + str.getStep().getText())
                                 .add(EARL.outcome, EARL_RESULT.get(str.getResult().getStatus()));
                         if (!str.getStepLog().isEmpty()) {
