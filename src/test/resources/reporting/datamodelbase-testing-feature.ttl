@@ -17,3 +17,15 @@ ex:test
 ex:test1 a earl:TestCase .
 ex:step1 a earl:Step .
 ex:step2 a earl:Step .
+
+ex:requirement
+    a ex:NormativeRequirement ;
+    ex:conformanceRole ex:ServerConformanceClass ;
+    ex:normativeConformanceLevel ex:ConformanceMust
+.
+
+ex:group1
+    a ex:SpecificationTestCase ;
+    ex:title "Group 1"@en ;
+    ex:specificationReference ex:requirement
+.

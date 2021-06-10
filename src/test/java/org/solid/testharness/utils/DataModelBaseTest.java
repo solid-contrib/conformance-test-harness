@@ -35,6 +35,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -53,7 +54,6 @@ class DataModelBaseTest extends AbstractDataModelTests {
     @Override
     public String getTestFile() {
         return "src/test/resources/reporting/datamodelbase-testing-feature.ttl";
-
     }
 
     @Test
@@ -84,8 +84,22 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void sizeList() {
-        final DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.LIST);
-        assertEquals(17, listModel.size());
+        final DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.DEEP_WITH_LISTS);
+        assertEquals(19, listModel.size());
+    }
+
+    @Test
+    void sizeRequirement() {
+        final DataModelBase reqModel = new DataModelBase(iri(NS, "requirement"),
+                DataModelBase.ConstructMode.SHALLOW);
+        assertEquals(3, reqModel.size());
+    }
+
+    @Test
+    void sizeRequirementIncRefs() {
+        final DataModelBase reqModel = new DataModelBase(iri(NS, "requirement"),
+                DataModelBase.ConstructMode.INC_REFS);
+        assertEquals(4, reqModel.size());
     }
 
     @Test
@@ -124,7 +138,7 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void getModelCollectionList() {
-        final DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.LIST);
+        final DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.DEEP_WITH_LISTS);
         final List<Step> models = listModel.getModelCollectionList(iri(NS, "hasSteps"), Step.class);
         assertNotNull(models);
         assertEquals(2, models.size());
@@ -133,14 +147,14 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void getEmptyModelCollectionList() {
-        final DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.LIST);
+        final DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.DEEP_WITH_LISTS);
         final List<Step> models = listModel.getModelCollectionList(iri(NS, "hasSteps2"), Step.class);
         assertNull(models);
     }
 
     @Test
     void getBadModelCollectionList() {
-        final DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.LIST);
+        final DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.DEEP_WITH_LISTS);
         assertThrows(RuntimeException.class,
                 () -> listModel.getModelCollectionList(iri(NS, "hasSteps"), TestClass.class)
         );
@@ -260,5 +274,9 @@ class DataModelBaseTest extends AbstractDataModelTests {
         public TestClass() {
             super(null);
         }
+    }
+
+    private String modelToString(final DataModelBase data) {
+        return data.model.stream().map(Object::toString).collect(Collectors.joining("\n"));
     }
 }

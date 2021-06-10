@@ -55,7 +55,7 @@ class ReportGeneratorNoRepositoryTest {
     void buildHtmlCoverageReportBadResult() {
         final RepositoryConnection conn = mock(RepositoryConnection.class);
         when(dataRepository.getConnection()).thenReturn(conn);
-        when(conn.prepareTupleQuery(any())).thenThrow(new RepositoryException("BAD RESULT"));
+        when(conn.getStatements(any(), any(), any())).thenThrow(new RepositoryException("BAD RESULT"));
         final StringWriter sw = new StringWriter();
         assertThrows(RepositoryException.class, () -> reportGenerator.buildHtmlCoverageReport(sw));
     }

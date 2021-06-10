@@ -27,12 +27,12 @@ import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.util.Values;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.DOAP;
 import org.solid.common.vocab.EARL;
+import org.solid.common.vocab.RDF;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.discovery.TestSuiteDescription;
@@ -85,7 +85,7 @@ public class ConformanceTestHarness {
                 final ModelBuilder builder = new ModelBuilder();
                 final BNode bnode = Values.bnode();
                 conn.add(builder.subject(assertor)
-                        .add(RDF.TYPE, EARL.Software)
+                        .add(RDF.type, EARL.Software)
                         .add(DOAP.name, properties.getProperty("package.name"))
                         .add(DOAP.description, properties.getProperty("package.description"))
                         .add(DOAP.created, Date.from(

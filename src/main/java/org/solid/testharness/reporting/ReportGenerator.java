@@ -26,10 +26,11 @@ package org.solid.testharness.reporting;
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.common.vocab.RDF;
 import org.solid.common.vocab.SPEC;
 import org.solid.testharness.utils.DataRepository;
 
@@ -75,9 +76,10 @@ public class ReportGenerator {
 
     private List<IRI> getSpecifications() {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
-            final String queryString = "SELECT ?spec WHERE {?spec a <" + SPEC.Specification.stringValue() + ">}";
-            final TupleQuery tupleQuery = conn.prepareTupleQuery(queryString);
-            return tupleQuery.evaluate().stream().map(bs -> (IRI) bs.getValue("spec")).collect(Collectors.toList());
+            return conn.getStatements(null, RDF.type, SPEC.Specification).stream()
+                    .map(Statement::getSubject)
+                    .map(IRI.class::cast)
+                    .collect(Collectors.toList());
         }
     }
 }

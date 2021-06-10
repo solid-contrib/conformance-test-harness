@@ -29,12 +29,12 @@ import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.util.Values;
-import org.eclipse.rdf4j.model.vocabulary.FOAF;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.common.vocab.FOAF;
+import org.solid.common.vocab.RDF;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -261,7 +261,7 @@ class DataRepositoryTest {
         final DataRepository dataRepository = new DataRepository();
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             final Statement st = Values.getValueFactory()
-                    .createStatement(iri(TestData.SAMPLE_NS, "bob"), RDF.TYPE, FOAF.PERSON);
+                    .createStatement(iri(TestData.SAMPLE_NS, "bob"), RDF.type, FOAF.Person);
             conn.add(st);
         }
         return dataRepository;

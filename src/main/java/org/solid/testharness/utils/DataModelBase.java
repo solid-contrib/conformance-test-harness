@@ -23,14 +23,18 @@
  */
 package org.solid.testharness.utils;
 
+import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.util.RDFCollections;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.QueryResults;
-import org.eclipse.rdf4j.repository.util.Repositories;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryResult;
+import org.eclipse.rdf4j.repository.util.Connections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.common.vocab.RDF;
 
 import javax.enterprise.inject.spi.CDI;
 import javax.validation.constraints.NotNull;
@@ -52,23 +56,10 @@ public class DataModelBase {
 
     public enum ConstructMode {
         SHALLOW,
-        INC_PARENTS,
+        INC_REFS,
         DEEP,
-        LIST;
+        DEEP_WITH_LISTS;
     }
-
-    private static final String SERVER_GRAPH = "CONSTRUCT {?s ?p ?o} WHERE {BIND(<%s> as ?s) ?s ?p ?o}";
-    private static final String SERVER_GRAPH_2 = "CONSTRUCT {?s ?p ?o. ?o ?p1 ?o1} " +
-            "WHERE {BIND(<%s> as ?s) ?s ?p ?o. OPTIONAL {?o ?p1 ?o1}}";
-    private static final String SERVER_GRAPH_PARENT = "CONSTRUCT {?s ?p ?o. ?s1 ?p1 ?s} " +
-            "WHERE {BIND(<%s> as ?s) ?s ?p ?o. OPTIONAL {?s1 ?p1 ?s}}";
-    private static final String SERVER_GRAPH_LIST = "CONSTRUCT {" +
-            "  ?s ?p ?o. ?o ?p1 ?o1 . " +
-            "  ?listRest rdf:first ?head ; rdf:rest ?tail ." +
-            "} WHERE {" +
-            "  BIND(<%s> as ?s) ?s ?p ?o." +
-            "  OPTIONAL {?o ?p1 ?o1 . ?o rdf:rest* ?listRest . ?listRest rdf:first ?head ; rdf:rest ?tail .}" +
-            "}";
 
     protected DataModelBase(final IRI subject) {
         this(subject, ConstructMode.SHALLOW);
@@ -77,25 +68,32 @@ public class DataModelBase {
         requireNonNull(subject, "subject is required");
         final DataRepository dataRepository = CDI.current().select(DataRepository.class).get();
         this.subject = subject;
-        final String query;
-        switch (mode) {
-            case DEEP:
-                query = SERVER_GRAPH_2;
-                break;
-            case INC_PARENTS:
-                query = SERVER_GRAPH_PARENT;
-                break;
-            case LIST:
-                query = SERVER_GRAPH_LIST;
-                break;
-            default:
-                query = SERVER_GRAPH;
-                break;
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            model = QueryResults.asModel(conn.getStatements(subject, null, null));
+            final List<Statement> additions = new ArrayList<>();
+            if (mode == ConstructMode.DEEP || mode == ConstructMode.DEEP_WITH_LISTS) {
+                // add triples referenced by the objects found so far
+                model.objects().stream()
+                        .filter(Value::isResource)
+                        .map(Resource.class::cast)
+                        .forEach(o -> additions.addAll(Iterations.asList(conn.getStatements(o, null, null))));
+            }
+            if (mode == ConstructMode.DEEP_WITH_LISTS) {
+                // add any RDF lists referenced by objects found so far
+                model.objects().stream()
+                        .filter(Value::isResource)
+                        .map(o -> conn.getStatements((Resource) o, RDF.first, null))
+                        .filter(RepositoryResult::hasNext)
+                        .map(RepositoryResult::next)
+                        .map(Statement::getSubject)
+                        .forEach(s -> additions.addAll(Connections.getRDFCollection(conn, s, new LinkedHashModel())));
+            }
+            if (mode == ConstructMode.INC_REFS) {
+                // add triples that reference the subject
+                additions.addAll(Iterations.asList(conn.getStatements(null, null, subject)));
+            }
+            model.addAll(additions);
         }
-        model = Repositories.graphQuery(dataRepository,
-                String.format(query, subject),
-                QueryResults::asModel
-        );
     }
 
     public IRI getSubjectIri() {
@@ -111,7 +109,7 @@ public class DataModelBase {
     }
 
     public String getTypesList() {
-        final Set<Value> values = model.filter(subject, RDF.TYPE, null).objects();
+        final Set<Value> values = model.filter(subject, RDF.type, null).objects();
         return values.stream().map(v -> Namespaces.shorten((IRI)v)).collect(Collectors.joining(" "));
     }
 

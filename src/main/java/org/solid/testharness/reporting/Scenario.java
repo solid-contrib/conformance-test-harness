@@ -32,7 +32,7 @@ import java.util.List;
 
 public class Scenario extends DataModelBase {
     public Scenario(final IRI subject) {
-        super(subject, ConstructMode.LIST);
+        super(subject, ConstructMode.DEEP_WITH_LISTS);
     }
 
     public String getTitle() {

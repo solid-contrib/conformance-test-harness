@@ -32,7 +32,7 @@ import java.util.List;
 
 public class SpecificationRequirement extends DataModelBase {
     public SpecificationRequirement(final IRI subject) {
-        super(subject, ConstructMode.INC_PARENTS);
+        super(subject, ConstructMode.INC_REFS);
     }
 
     public String getConformanceRole() {
