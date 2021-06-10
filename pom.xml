@@ -34,7 +34,7 @@
         <license.plugin.version>4.1</license.plugin.version>
 
         <!-- dependencies -->
-        <quarkus.version>1.13.6.Final</quarkus.version>
+        <quarkus.version>1.13.7.Final</quarkus.version>
         <karate.version>1.0.1</karate.version>
         <junit.jupiter.version>5.7.2</junit.jupiter.version>
         <hamcrest.version>2.2</hamcrest.version>
