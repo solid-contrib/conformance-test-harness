@@ -41,7 +41,7 @@
         <rdf4j.version>3.7.0</rdf4j.version>
         <semargl.version>0.7</semargl.version>
         <jakarta.version>3.0.0</jakarta.version>
-        <jose4j.version>0.7.7</jose4j.version>
+        <jose4j.version>0.7.8</jose4j.version>
         <commons.text.version>1.9</commons.text.version>
         <commons.lang.version>3.12.0</commons.lang.version>
         <commons.cli.version>1.4</commons.cli.version>
