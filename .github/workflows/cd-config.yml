@@ -24,11 +24,11 @@ jobs:
 
       # Use a cache for the local Maven repository
       - name: Cache Maven packages
-          uses: actions/cache@v2
-          with:
-            path: ~/.m2
-            key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-            restore-keys: ${{ runner.os }}-m2
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
       # Build the software
       - name: Build with Maven
