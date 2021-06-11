@@ -91,7 +91,7 @@ public class Application implements QuarkusApplication {
                 formatter.printHelp( "run", options );
             } else {
                 final File outputDir;
-                if (line.hasOption(OUTPUT) && !StringUtils.isEmpty(line.getOptionValue(OUTPUT))) {
+                if (line.hasOption(OUTPUT) && !StringUtils.isBlank(line.getOptionValue(OUTPUT))) {
                     outputDir = Path.of(line.getOptionValue(OUTPUT)).toAbsolutePath().normalize().toFile();
                     logger.debug("Output = {}", outputDir.getPath());
                 } else {
@@ -106,7 +106,9 @@ public class Application implements QuarkusApplication {
                 config.setOutputDirectory(outputDir);
 
                 if (line.hasOption(SOURCE)) {
-                    config.setTestSources(Arrays.asList(line.getOptionValues(SOURCE)));
+                    config.setTestSources(Arrays.stream(line.getOptionValues(SOURCE))
+                            .filter(s -> !StringUtils.isBlank(s))
+                            .collect(Collectors.toList()));
                     logger.debug("Suite = {}", config.getTestSources().toString());
                 }
 
@@ -115,7 +117,8 @@ public class Application implements QuarkusApplication {
                 if (line.hasOption(COVERAGE)) {
                     return conformanceTestHarness.createCoverageReport() ? 0 : 1;
                 } else {
-                    if (line.hasOption(TARGET) && !StringUtils.isEmpty(line.getOptionValue(TARGET))) {
+                    logger.debug("TARGET SETTING {}", line.getOptionValue(TARGET));
+                    if (line.hasOption(TARGET) && !StringUtils.isBlank(line.getOptionValue(TARGET))) {
                         final String target = line.getOptionValue(TARGET);
                         final IRI testSubject = target.contains(":")
                                 ? iri(target)
@@ -125,7 +128,7 @@ public class Application implements QuarkusApplication {
                     }
                     if (line.hasOption(SUBJECTS)) {
                         config.setSubjectsUrl(line.getOptionValue(SUBJECTS));
-                        logger.debug("Subjects = {}", config.getSubjectsUrl().toString());
+                        logger.debug("Subjects = {}", config.getSubjectsUrl());
                     }
                     List<String> filters = null;
                     if (line.hasOption(FILTER)) {

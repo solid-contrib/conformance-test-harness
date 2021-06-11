@@ -39,9 +39,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
@@ -115,7 +113,7 @@ public class Config {
 
     public URL getSubjectsUrl() {
         if (subjectsUrl == null) {
-            if (!sourceList.isPresent()) {
+            if (!subjectsFile.isPresent()) {
                 throw new TestHarnessInitializationException("config option or subjects config is required");
             }
             this.subjectsUrl = createUrl(subjectsFile.get(), "subjects");
@@ -139,6 +137,7 @@ public class Config {
     }
 
     public void setTestSources(final List<String> testSourceList) {
+        Objects.requireNonNull(testSourceList, "testSourceList is required");
         this.testSources = testSourceList.stream().map(ts -> createUrl(ts, "source")).collect(Collectors.toList());
     }
 
@@ -212,7 +211,7 @@ public class Config {
     }
 
     private URL createUrl(final String url, final String param) {
-        if (!StringUtils.isEmpty(url)) {
+        if (!StringUtils.isBlank(url)) {
             try {
                 if (url.startsWith("file:") || url.startsWith("http:") || url.startsWith("https:")) {
                     return new URL(url);
