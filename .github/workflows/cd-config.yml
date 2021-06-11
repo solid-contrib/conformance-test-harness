@@ -33,3 +33,18 @@ jobs:
       # Build the software
       - name: Build with Maven
         run: mvn -B -ntp clean package
+
+      # Deploy the docker container
+      - name: Publish the Docker containers
+        run: |
+          # Login to the docker repository
+          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+
+          # Deploy the image
+          mvn package -DskipTests -Dquarkus.container-image.image="docker.io/solidconformancetestbeta/conformance-test-harness" -Dquarkus.docker.dockerfile-jvm-path=src/main/docker/Dockerfile
+
+          # Deploy the image with examples
+          mvn package -DskipTests -Dquarkus.container-image.image="docker.io/solidconformancetestbeta/conformance-test-harness-examples" -Dquarkus.docker.dockerfile-jvm-path=src/main/docker/Dockerfile.examples
+        env:
+          QUARKUS_CONTAINER_IMAGE_BUILD: "true"
+          QUARKUS_CONTAINER_IMAGE_PUSH: "true"
