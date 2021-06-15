@@ -1,0 +1,7 @@
+FROM node:latest
+RUN git clone https://github.com/solid/community-server
+WORKDIR community-server
+RUN git checkout main
+RUN npm ci
+EXPOSE 3000
+CMD npm start -- --baseUrl=http://server:3000/
