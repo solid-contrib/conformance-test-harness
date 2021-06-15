@@ -38,7 +38,6 @@ docker run -d --name=server --network=testnet -p 3000:3000 -it css:latest
 
 # run the tests in the test harness
 docker pull solidconformancetestbeta/conformance-test-harness
-docker run -i --rm -v "$(pwd)":/data --env-file=css.env solidconformancetestbeta/conformance-test-harness --coverage
 docker run -i --rm -v "$(pwd)":/data --env-file=css.env --network=testnet solidconformancetestbeta/conformance-test-harness
 docker stop server
 docker rm server

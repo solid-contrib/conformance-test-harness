@@ -81,7 +81,7 @@ public class Config {
     String solidIdentityProvider;
     @ConfigProperty(name = "LOGIN_ENDPOINT")
     Optional<String> loginEndpoint;
-    @ConfigProperty(name = "SERVER_ROOT")
+    @ConfigProperty(name = "RESOURCE_SERVER_ROOT")
     String serverRoot;
     @ConfigProperty(name = "TEST_CONTAINER")
     String testContainer;

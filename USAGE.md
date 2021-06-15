@@ -12,7 +12,7 @@ have full control over the container, either because `alice` owns the POD or bec
 granted full control access.   
 
 # Configuration
-The test harness relies on uyp to 4 sources of configuration, depending on how the data is likely to be used
+The test harness relies on up to 4 sources of configuration, depending on how the data is likely to be used
 and how dynamic it is. They are as follows (in order of least dynamic to most).
 
 ## Test subject description
@@ -28,7 +28,7 @@ An examnple of this file is provided, containing descriptions of the following S
 
 There are some test subject specific configuration properties in this file:
 ```
-  solid-test:origin <https://tester>   # registered origin for session-based lgin
+  solid-test:origin <https://tester>   # registered origin for session-based login
   solid-test:maxThreads 8              # number of threads for running tests in parallel  
   solid-test:features "authentication", "acl", "wac-allow"  # server capabilities
 ```
@@ -66,7 +66,7 @@ readTimeout: 1000		# default = 5000
 The test harness needs to know the root URL of the server being tested and the path to the container in which test files
 will be created.
 ```
-SERVER_ROOT=	# e.g. https://pod-compat.inrupt.com or https://pod-user.inrupt.net
+RESOURCE_SERVER_ROOT=	# e.g. https://pod-compat.inrupt.com or https://pod-user.inrupt.net
 TEST_CONTAINER= # e.g. pod-user/test or test
 ```
 These are used to construct the root location for test files e.g. `https://pod-compat.inrupt.com/pod-user/test/`
@@ -169,7 +169,7 @@ in the test subject configuration file describing the server under test.
 
 This mechanism will work in CI environments where the credentials can be passed in as secrets.
 
-### Command line options
+## Command line options
 
 The command line options are:
 ```
@@ -181,18 +181,20 @@ usage: run
  -s,--source <arg>   URL or path to test source(s)
     --subjects <arg> URL or path to test subject config (Turtle)
  -t,--target <arg>   target server
+    --tests          produce a test report
 ```
+If neither `--coverage` nor `--tests` is specified then the default action is to run the tests and produce both reports.
 
-## Execution
+# Execution
 
-### Running in a container
+## Running in a container
 The simplest way to run the test harness is via the docker image published to
 https://hub.docker.com/repository/docker/solidconformancetestbeta/conformance-test-harness
 
 The following examples demonstrate how a script can fetch example tests and configuration files from the repository and
 run tests against a publicly available server or one that is also running in a container.
 
-#### ESS (ACL compatibility mode)
+### ESS (ACL compatibility mode)
 Create a file for environment variables e.g. `ess-compat.env` with the following contents (based on the 
 client_credentials option):
 ```shell
@@ -201,7 +203,7 @@ ALICE_WEBID=
 ALICE_CLIENT_SECRET=
 BOB_WEBID=
 BOB_CLIENT_SECRET=
-SERVER_ROOT=https://pod-compat.inrupt.com
+RESOURCE_SERVER_ROOT=https://pod-compat.inrupt.com
 TEST_CONTAINER=/pod-owner/shared-test/
 ```
 Next create a script based on the following:
@@ -242,13 +244,12 @@ EOF
 
 # run the tests in the test harness
 docker pull solidconformancetestbeta/conformance-test-harness
-docker run -i --rm -v "$(pwd)":/data --env-file=ess-compat.env solidconformancetestbeta/conformance-test-harness --coverage
 docker run -i --rm -v "$(pwd)":/data --env-file=ess-compat.env solidconformancetestbeta/conformance-test-harness
 ```
 
 Run `./ess-compat.sh` and the reports will be created in the current directory. 
 
-#### CSS in a container
+### CSS in a container
 Create a file for environment variables e.g. `css.env` with the following contents (based on the client_credentials
 option):
 ```shell
@@ -257,7 +258,7 @@ ALICE_WEBID=
 ALICE_CLIENT_SECRET=
 BOB_WEBID=
 BOB_CLIENT_SECRET=
-SERVER_ROOT=http://server:3000
+RESOURCE_SERVER_ROOT=http://server:3000
 TEST_CONTAINER=/test/
 ```
 Note that when using a container you can't use http://localhost:3000 as this will not be accessible to the test harness
@@ -316,7 +317,6 @@ docker run -d --name=server --network=testnet -p 3000:3000 -it css:latest
 
 # run the tests in the test harness
 docker pull solidconformancetestbeta/conformance-test-harness
-docker run -i --rm -v "$(pwd)":/data --env-file=css.env solidconformancetestbeta/conformance-test-harness --coverage
 docker run -i --rm -v "$(pwd)":/data --env-file=css.env --network=testnet solidconformancetestbeta/conformance-test-harness
 docker stop server
 docker rm server
@@ -324,7 +324,7 @@ docker rm server
 
 Run `./css.sh` and the reports will be created in the current directory.
 
-### Local execution
+## Local execution
 The test harness is packaged into a single, executable jar which is available as an asset in the release within github:
 https://github.com/solid/conformance-test-harness/releases. The only dependency is on Java 11. You can run it and see
 its usage as follows:
@@ -332,7 +332,7 @@ its usage as follows:
 java -jar solid-conformance-test-harness-runner.jar --help
 ```
 
-## Reports
+# Reports
 |Report|Location|
 |------|--------|
 |Coverage (HTML+RDFa)|`coverage.html`|

@@ -20,7 +20,7 @@ subjects: ./test-subjects.ttl
 sources:
   - https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/solid-protocol-spec.ttl
   - https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/web-access-control-spec.ttl
-target: https://github.com/solid/conformance-test-harness/ess-compat
+target: https://github.com/solid/conformance-test-harness/ess
 
 feature:
   mappings:
@@ -34,4 +34,4 @@ EOF
 
 # run the tests in the test harness
 docker pull solidconformancetestbeta/conformance-test-harness
-docker run -i --rm -v "$(pwd)":/data --env-file=ess-compat.env solidconformancetestbeta/conformance-test-harness
+docker run -i --rm -v "$(pwd)":/data --env-file=ess.env solidconformancetestbeta/conformance-test-harness
