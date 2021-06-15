@@ -46,11 +46,3 @@ jobs:
           QUARKUS_CONTAINER_IMAGE_BUILD: "true"
           QUARKUS_CONTAINER_IMAGE_PUSH: "true"
 
-      # Push the README file
-      - name: Docker Hub Description
-        uses: peter-evans/dockerhub-description@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: solidconformancetestbeta/conformance-test-harness
-          readme-filepath: ./USAGE.md
