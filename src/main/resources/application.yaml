@@ -9,6 +9,6 @@ quarkus:
     level: INFO
     category:
       "com.intuit.karate":
-        level: DEBUG
+        level: INFO
       "org.solid.testharness":
         level: INFO

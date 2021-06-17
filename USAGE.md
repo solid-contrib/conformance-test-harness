@@ -37,7 +37,7 @@ There are some test subject specific configuration properties in this file:
 This file can have various formats though the example provided is YAML. It can be used in place of 
 command line settings if desired but is only required if you want to override default settings or
 map URLs or source files to a local file system. It can also control the level of logging but this
-is not normally required.
+is better controlled in the environment variables.
 
 The file has a specific location: `config/application.yaml` in your current working directory.
 ```yaml
@@ -61,6 +61,41 @@ readTimeout: 1000		# default = 5000
 ```
 
 ## Environment variables
+
+### Logging
+By default, the test harness only provides minimal logging. If you want to see the HTTP request/response exchanges in
+the logs you can set `DEBUG` level for the categories shown below:
+* `com.intuit.karate` - HTTP interactions within test cases. **Note**: If this is not set to `DEBUG` the log entries are also
+  excluded from the reports.
+* `org.solid.testharness.http.Client` - HTTP interactions during container and resource set up.
+* `org.solid.testharness.http.AuthManager` - HTTP interactions during the authentication flow before testing starts.
+
+In the environment file this looks like this:
+```
+quarkus.log.category."com.intuit.karate".level=DEBUG
+quarkus.log.category."org.solid.testharness.http.Client".level=DEBUG
+quarkus.log.category."org.solid.testharness.http.AuthManager".level=DEBUG
+```
+**Note**: Tokens in responses or authorization headers as masked as a security measure.
+
+There is a special logging category called `ResultLogger` which outputs a summary of the results in JSON format at 
+`INFO` level (not necessarily in the older below):
+```json
+{
+  "scenariosPassed":0,
+  "scenariosFailed":0,
+  "featuresPassed":0,
+  "featuresSkipped":0,
+  "featuresFailed":0,
+  "elapsedTime":1000.0,
+  "totalTime":1000.0,
+  "resultDate":"2021-06-17 09:12:31 am"
+}
+```
+This results in a log entry such as:
+```
+2021-06-17 11:43:04,742 INFO  [ResultLogger] (main) {"resultDate":"2021-06-17 11:43:04 am","featuresFailed":0,"elapsedTime":7552.0,"scenariosPassed":4,"featuresSkipped":0,"totalTime":14401.0,"scenariosFailed":0,"featuresPassed":2}
+```
 
 ### Server
 The test harness needs to know the root URL of the server being tested and the path to the container in which test files

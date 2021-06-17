@@ -159,6 +159,47 @@ class HttpUtilsTest {
     }
 
     @Test
+    void maskHeaderAuth() {
+        assertEquals("Bearer ***abcdef", HttpUtils.maskHeader("AUTHORIZATION", "Bearer xxxxxabcdef"));
+    }
+
+    @Test
+    void maskHeaderAuthNoMatch() {
+        assertEquals("abcdef", HttpUtils.maskHeader("AUTHORIZATION", "abcdef"));
+    }
+
+    @Test
+    void maskHeaderDpop() {
+        assertEquals("***abcdef", HttpUtils.maskHeader("DPOP", "xxxxxabcdef"));
+    }
+
+    @Test
+    void maskHeaderDpopNoMatch() {
+        assertEquals("abcde", HttpUtils.maskHeader("DPOP", "abcde"));
+    }
+
+    @Test
+    void maskHeaderOther() {
+        assertEquals("Other", HttpUtils.maskHeader("OTHER", "Other"));
+    }
+
+    @Test
+    void maskBodyTokens() {
+        assertEquals("{\"access_token\":\"***abcdef\",\"id_token\":\"***ghijkl\"}",
+                HttpUtils.maskBody("{\"access_token\":\"xxxxxabcdef\",\"id_token\":\"xxxxxghijkl\"}"));
+    }
+
+    @Test
+    void maskBodyText() {
+        assertEquals("Other", HttpUtils.maskBody("Other"));
+    }
+
+    @Test
+    void maskBodyJson() {
+        assertEquals("{\"key\":\"value\"}", HttpUtils.maskBody("{\"key\":\"value\"}"));
+    }
+
+    @Test
     void ofFormDataSingle() {
         assertEquals(4, HttpUtils.ofFormData(Map.of("ab", 1)).contentLength());
     }

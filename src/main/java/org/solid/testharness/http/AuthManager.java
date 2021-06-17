@@ -95,10 +95,7 @@ public class AuthManager {
                 throw new TestHarnessInitializationException("Neither login credentials nor refresh token details " +
                         "provided for " + user);
             }
-
-            final String accessToken = tokens.getAccessToken();
-            logger.debug("access_token ({}) {}", user, accessToken);
-            authClient.setAccessToken(accessToken);
+            authClient.setAccessToken(tokens.getAccessToken());
         }
         return new SolidClient(authClient);
     }

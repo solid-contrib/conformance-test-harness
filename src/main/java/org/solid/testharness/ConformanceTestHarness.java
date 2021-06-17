@@ -58,8 +58,10 @@ import java.util.stream.Collectors;
 import static org.eclipse.rdf4j.model.util.Values.iri;
 
 @ApplicationScoped
+@SuppressWarnings("PMD.MoreThanOneLogger")  // Additional logger provided for JSON output
 public class ConformanceTestHarness {
     private static final Logger logger = LoggerFactory.getLogger(ConformanceTestHarness.class);
+    private static final Logger resultLogger = LoggerFactory.getLogger("ResultLogger");
 
     @Inject
     Config config;
@@ -177,6 +179,7 @@ public class ConformanceTestHarness {
         final File outputDir = config.getOutputDirectory();
         logger.info("Reports location: {}", outputDir.getPath());
         try {
+            resultLogger.info(results.toJson());
             final File reportTurtleFile = new File(outputDir, "report.ttl");
             logger.info("Report Turtle file: {}", reportTurtleFile.getPath());
             reportGenerator.buildTurtleReport(Files.newBufferedWriter(reportTurtleFile.toPath()));
@@ -184,7 +187,6 @@ public class ConformanceTestHarness {
             final File reportHtmlFile = new File(outputDir, "report.html");
             logger.info("Report HTML/RDFa file: {}", reportHtmlFile.getPath());
             reportGenerator.buildHtmlResultReport(Files.newBufferedWriter(reportHtmlFile.toPath()));
-//            resultProcessor.printReportToConsole();
         } catch (Exception e) {
             logger.error("Failed to write reports", e);
         }
