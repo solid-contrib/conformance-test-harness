@@ -56,6 +56,7 @@ public class Application implements QuarkusApplication {
     public static final String OUTPUT = "output";
     public static final String HELP = "help";
     public static final String COVERAGE = "coverage";
+    public static final String TESTS = "tests";
     public static final String FILTER = "filter";
 
     @Inject
@@ -69,6 +70,7 @@ public class Application implements QuarkusApplication {
 
         final Options options = new Options();
         options.addOption(Option.builder().longOpt(COVERAGE).desc("produce a coverage report").build());
+        options.addOption(Option.builder().longOpt(TESTS).desc("produce a test report").build());
         options.addOption(
                 Option.builder().longOpt(SUBJECTS).hasArg().desc("URL or path to test subject config (Turtle)").build()
         );
@@ -112,11 +114,8 @@ public class Application implements QuarkusApplication {
                     logger.debug("Suite = {}", config.getTestSources().toString());
                 }
 
-                conformanceTestHarness.initialize();
-
-                if (line.hasOption(COVERAGE)) {
-                    return conformanceTestHarness.createCoverageReport() ? 0 : 1;
-                } else {
+                List<String> filters = null;
+                if (line.hasOption(TESTS) || !line.hasOption(COVERAGE)) {
                     logger.debug("TARGET SETTING {}", line.getOptionValue(TARGET));
                     if (line.hasOption(TARGET) && !StringUtils.isBlank(line.getOptionValue(TARGET))) {
                         final String target = line.getOptionValue(TARGET);
@@ -130,17 +129,29 @@ public class Application implements QuarkusApplication {
                         config.setSubjectsUrl(line.getOptionValue(SUBJECTS));
                         logger.debug("Subjects = {}", config.getSubjectsUrl());
                     }
-                    List<String> filters = null;
                     if (line.hasOption(FILTER)) {
                         filters = Arrays.stream(line.getOptionValues(FILTER))
                                 .filter(s -> !StringUtils.isBlank(s))
                                 .collect(Collectors.toList());
                         logger.debug("Filters = {}", filters);
                     }
+                }
 
+                conformanceTestHarness.initialize();
+
+                if (line.hasOption(COVERAGE) || !line.hasOption(TESTS)) {
+                    final boolean success = conformanceTestHarness.createCoverageReport();
+                    if (!success) {
+                        return 1;
+                    }
+                }
+                if (line.hasOption(TESTS) || !line.hasOption(COVERAGE)) {
                     final TestSuiteResults results = conformanceTestHarness.runTestSuites(filters);
                     return results != null && results.getFailCount() == 0 ? 0 : 1;
+                } else {
+                    return 0;
                 }
+
             }
         } catch (Exception e) {
             logger.error("Application initialization failed.  Reason: {}", e.toString());

@@ -486,7 +486,7 @@
                         <configuration>
                             <excludedGroups>solid</excludedGroups>
                             <environmentVariables>
-                                <SERVER_ROOT>https://example.org</SERVER_ROOT>
+                                <RESOURCE_SERVER_ROOT>https://example.org</RESOURCE_SERVER_ROOT>
                                 <TEST_CONTAINER>/solid-test-suite-alice/shared-test/</TEST_CONTAINER>
                                 <SOLID_IDENTITY_PROVIDER>https://broker.example.org/</SOLID_IDENTITY_PROVIDER>
                                 <ALICE_WEBID>https://example.org/solid-test-suite-alice/profile/card#me</ALICE_WEBID>

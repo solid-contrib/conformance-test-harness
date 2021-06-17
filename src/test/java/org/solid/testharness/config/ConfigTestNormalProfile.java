@@ -40,7 +40,7 @@ public class ConfigTestNormalProfile implements QuarkusTestProfile {
         return Map.of(
                 "SOLID_IDENTITY_PROVIDER", "https://idp.example.org",
                 "LOGIN_ENDPOINT", "https://example.org/login/password",
-                "SERVER_ROOT", "https://target.example.org",
+                "RESOURCE_SERVER_ROOT", "https://target.example.org",
                 "TEST_CONTAINER", "test",
                 "ALICE_WEBID", "https://alice.target.example.org/profile/card#me",
                 "BOB_WEBID", "https://bob.target.example.org/profile/card#me"

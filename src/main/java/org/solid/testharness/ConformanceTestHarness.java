@@ -99,13 +99,13 @@ public class ConformanceTestHarness {
                         .build());
             }
         }
+        config.logConfigSettings();
+        testSuiteDescription.load(config.getTestSources());
     }
 
     public boolean createCoverageReport() {
-        config.logConfigSettings();
         logger.info("===================== DISCOVER TESTS ========================");
         try {
-            testSuiteDescription.load(config.getTestSources());
             final List<IRI> testCases = testSuiteDescription.getAllTestCases();
             final List<String> featurePaths = testSuiteDescription.locateTestCases(testCases);
             if (featurePaths.isEmpty()) {
@@ -136,12 +136,10 @@ public class ConformanceTestHarness {
     }
 
     public TestSuiteResults runTestSuites(final List<String> filters) {
-        config.logConfigSettings();
         logger.info("===================== DISCOVER TESTS ========================");
         final List<String> featurePaths;
         try {
-            testSuiteDescription.load(config.getTestSources());
-            testSubject.loadTestSubjectConfig(); // TODO:is this in right place?
+            testSubject.loadTestSubjectConfig();
             // TODO: Consider running some initial tests to discover the features provided by a server
             final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(
                     testSubject.getTargetServer().getFeatures().keySet()

@@ -154,6 +154,7 @@ class ApplicationTest {
     @Test
     void targetBlank() {
         final TestSuiteResults results = mockResults(0);
+        when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
         when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
         assertEquals(0, application.run("--target", ""));
         verify(config, never()).setTestSubject(any());
@@ -163,7 +164,7 @@ class ApplicationTest {
     void target() {
         final TestSuiteResults results = mockResults(0);
         when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
-        assertEquals(0, application.run("--target", "test"));
+        assertEquals(0, application.run("--tests", "--target", "test"));
         verify(config).setTestSubject(iri(Namespaces.TEST_HARNESS_URI, "test"));
     }
 
@@ -171,7 +172,7 @@ class ApplicationTest {
     void targetIri() {
         final TestSuiteResults results = mockResults(0);
         when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
-        assertEquals(0, application.run("--target", "http://example.org/test"));
+        assertEquals(0, application.run("--tests", "--target", "http://example.org/test"));
         verify(config).setTestSubject(iri("http://example.org/test"));
     }
 
@@ -192,14 +193,14 @@ class ApplicationTest {
     void subjectsSet() {
         final TestSuiteResults results = mockResults(0);
         when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
-        assertEquals(0, application.run("--subjects", "subjectsfile"));
+        assertEquals(0, application.run("--tests", "--subjects", "subjectsfile"));
         verify(config).setSubjectsUrl("subjectsfile");
     }
 
     @Test
     void filtersBlank() {
         final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
-        application.run("--filter", "");
+        application.run("--tests", "--filter", "");
         verify(conformanceTestHarness).runTestSuites(captor.capture());
         assertTrue(captor.getValue().isEmpty());
     }
@@ -207,7 +208,7 @@ class ApplicationTest {
     @Test
     void filters1() {
         final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
-        application.run("--filter", "filter1");
+        application.run("--tests", "--filter", "filter1");
         verify(conformanceTestHarness).runTestSuites(captor.capture());
         assertEquals(1, captor.getValue().size());
         assertTrue(captor.getValue().contains("filter1"));
@@ -216,7 +217,7 @@ class ApplicationTest {
     @Test
     void filters2() {
         final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
-        application.run("--filter", "filter1,filter2");
+        application.run("--tests", "--filter", "filter1,filter2");
         verify(conformanceTestHarness).runTestSuites(captor.capture());
         assertEquals(2, captor.getValue().size());
         assertTrue(captor.getValue().contains("filter1"));
@@ -226,7 +227,7 @@ class ApplicationTest {
     @Test
     void filtersTwice() {
         final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
-        application.run("--filter", "filter1", "--filter", "filter2");
+        application.run("--tests", "--filter", "filter1", "--filter", "filter2");
         verify(conformanceTestHarness).runTestSuites(captor.capture());
         assertEquals(2, captor.getValue().size());
         assertTrue(captor.getValue().contains("filter1"));
@@ -236,20 +237,40 @@ class ApplicationTest {
     @Test
     void runTestSuitesNoResults() {
         when(conformanceTestHarness.runTestSuites(any())).thenReturn(null);
-        assertEquals(1, application.run());
+        assertEquals(1, application.run("--tests"));
     }
 
     @Test
     void runTestSuitesFailures() {
         final TestSuiteResults results = mockResults(1);
         when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
-        assertEquals(1, application.run());
+        assertEquals(1, application.run("--tests"));
     }
 
     @Test
-    void coverageReport() {
+    void coverageReportOnly() {
         when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
         assertEquals(0, application.run("--coverage"));
+    }
+
+    @Test
+    void coverageAndTestReportNoOptions() {
+        when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
+        final TestSuiteResults results = mockResults(0);
+        when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
+        assertEquals(0, application.run());
+        verify(conformanceTestHarness).createCoverageReport();
+        verify(conformanceTestHarness).runTestSuites(any());
+    }
+
+    @Test
+    void coverageAndTestReportBothOptions() {
+        when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
+        final TestSuiteResults results = mockResults(0);
+        when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
+        assertEquals(0, application.run("--coverage", "--tests"));
+        verify(conformanceTestHarness).createCoverageReport();
+        verify(conformanceTestHarness).runTestSuites(any());
     }
 
     @Test
