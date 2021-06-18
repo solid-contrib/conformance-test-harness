@@ -23,12 +23,17 @@
  */
 package org.solid.testharness.reporting;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.intuit.karate.Results;
+import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@QuarkusTest
 class TestSuiteResultsTest {
     @Test
     void getErrorMessages() {
@@ -44,6 +49,20 @@ class TestSuiteResultsTest {
         when(results.getFailCount()).thenReturn(1);
         final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
         assertEquals(1, testSuiteResults.getFailCount());
+    }
+
+    @Test
+    void toJson() throws JsonProcessingException {
+        final Results results = mock(Results.class);
+        when(results.getFeaturesPassed()).thenReturn(10);
+        when(results.getFeaturesFailed()).thenReturn(0);
+        when(results.toKarateJson()).thenReturn(Map.of("featuresSkipped", 0));
+        when(results.getScenariosPassed()).thenReturn(20);
+        when(results.getScenariosFailed()).thenReturn(0);
+        when(results.getElapsedTime()).thenReturn(1000d);
+        when(results.getTimeTakenMillis()).thenReturn(1000d);
+        final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
+        assertTrue(testSuiteResults.toJson().contains("\"featuresPassed\":10"));
     }
 
     @Test

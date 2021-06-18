@@ -18,19 +18,6 @@ feature:
     - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/web
       path: example/web
 
-# Logging
-quarkus:
-  log:
-    category:
-      "org.solid.testharness":
-        level: DEBUG # to increase overall logging for development
-      "org.solid.testharness.http.AuthManager":
-        level: INFO # but keep only higher level for authentication
-#      "org.solid.testharness.utils":
-#        level: INFO
-#      "org.solid.testharness.http.Client":
-#        level: DEBUG
-
 # Test profile
 "%test":
   subjects: src/test/resources/config/config-sample.ttl
@@ -56,12 +43,6 @@ quarkus:
   agent: AGENT
   connectTimeout: 1000
   readTimeout: 1000
-
-  quarkus:
-    log:
-      category:
-        "org.solid.testharness.http.AuthManager":
-          level: DEBUG
 
 "%blank":
   subjects:

@@ -246,6 +246,13 @@ class ConformanceTestHarnessTest {
 
     private TestSuiteResults mockResults(final int failures) {
         final Results results = mock(Results.class);
+        when(results.getFeaturesPassed()).thenReturn(10);
+        when(results.getFeaturesFailed()).thenReturn(0);
+        when(results.toKarateJson()).thenReturn(Map.of("featuresSkipped", 0));
+        when(results.getScenariosPassed()).thenReturn(20);
+        when(results.getScenariosFailed()).thenReturn(failures);
+        when(results.getElapsedTime()).thenReturn(1000d);
+        when(results.getTimeTakenMillis()).thenReturn(1000d);
         when(results.getFailCount()).thenReturn(failures);
         return new TestSuiteResults(results);
     }

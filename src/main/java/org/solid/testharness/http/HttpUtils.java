@@ -24,6 +24,7 @@
 package org.solid.testharness.http;
 
 import jakarta.ws.rs.core.Link;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.config.Config;
@@ -46,6 +47,10 @@ import java.util.stream.Collectors;
 public final class HttpUtils {
     private static final Logger logger = LoggerFactory.getLogger(HttpUtils.class);
     private static Config config;
+
+    private static Pattern AUTH_HEADER = Pattern.compile("^(\\S+)\\s.*([^\"]{6})$");
+    private static Pattern DPOP_HEADER = Pattern.compile("^.*([^\"]{6})$");
+    private static Pattern BODY_TOKENS = Pattern.compile("_token\"\\s*:\\s*\"[^\"]+([^\"]{6})\"");
 
     public static String getAgent() {
         return getConfig().getAgent();
@@ -83,8 +88,8 @@ public final class HttpUtils {
 
     public static void logRequest(final Logger logger, final HttpRequest request) {
         if (logger.isDebugEnabled()) {
-            logger.debug("REQUEST {} {}", request.method(), request.uri());
-            request.headers().map().forEach((k, v) -> logger.debug("REQ HEADER {}: {}", k, v));
+            logger.debug("REQUEST  {} {}", request.method(), request.uri());
+            logHeaders(logger, request.headers().map());
         }
     }
 
@@ -92,12 +97,42 @@ public final class HttpUtils {
         if (logger.isDebugEnabled()) {
             logger.debug("RESPONSE {} {}", response.request().method(), response.uri());
             logger.debug("STATUS   {}", response.statusCode());
-            response.headers().map().forEach((k, v) -> logger.debug("HEADER   {}: {}", k, v));
+            logHeaders(logger, response.headers().map());
             final T body = response.body();
             if (body != null) {
-                logger.debug("BODY     {}", body);
+                logger.debug("BODY     {}", maskBody((String)body));
             }
         }
+    }
+
+    private static void logHeaders(final Logger logger, final Map<String, List<String>> headerMap) {
+        headerMap.forEach((key, values)
+                -> values.forEach(value -> logger.debug("HEADER   {}: {}", key, maskHeader(key, value)))
+        );
+    }
+
+    public static String maskHeader(final String header, final String value) {
+        if (header.equalsIgnoreCase(HttpConstants.HEADER_AUTHORIZATION)) {
+            final Matcher matcher = AUTH_HEADER.matcher(value);
+            if (matcher.matches()) {
+                return matcher.group(1) + " ***" + matcher.group(2);
+            }
+        }
+        if (header.equalsIgnoreCase(HttpConstants.HEADER_DPOP)) {
+            final Matcher matcher = DPOP_HEADER.matcher(value);
+            if (matcher.matches()) {
+                return "***" + matcher.group(1);
+            }
+        }
+        return value;
+    }
+
+    public static String maskBody(final String body) {
+        if (!StringUtils.isBlank(body) && body.charAt(0) == '{') {
+            final Matcher matcher = BODY_TOKENS.matcher(body);
+            return matcher.replaceAll("_token\":\"***$1\"");
+        }
+        return body;
     }
 
     public static HttpRequest.BodyPublisher ofFormData(@NotNull final Map<Object, Object> data) {
