@@ -45,7 +45,7 @@
         <commons.text.version>1.9</commons.text.version>
         <commons.lang.version>3.12.0</commons.lang.version>
         <commons.cli.version>1.4</commons.cli.version>
-        <mockito.version>3.11.1</mockito.version>
+        <mockito.version>3.11.2</mockito.version>
         <jandex.version>2.3.0.Final</jandex.version>
         <wiremock.version>2.27.2</wiremock.version>
         <solid.vocab.version>0.0.7</solid.vocab.version>
