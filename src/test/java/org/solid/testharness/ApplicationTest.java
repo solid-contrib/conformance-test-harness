@@ -251,6 +251,7 @@ class ApplicationTest {
     void coverageReportOnly() {
         when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
         assertEquals(0, application.run("--coverage"));
+        verify(conformanceTestHarness).createCoverageReport();
     }
 
     @Test
@@ -259,7 +260,7 @@ class ApplicationTest {
         final TestSuiteResults results = mockResults(0);
         when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
         assertEquals(0, application.run());
-        verify(conformanceTestHarness).createCoverageReport();
+        verify(conformanceTestHarness, never()).createCoverageReport();
         verify(conformanceTestHarness).runTestSuites(any());
     }
 
@@ -269,7 +270,7 @@ class ApplicationTest {
         final TestSuiteResults results = mockResults(0);
         when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
         assertEquals(0, application.run("--coverage", "--tests"));
-        verify(conformanceTestHarness).createCoverageReport();
+        verify(conformanceTestHarness, never()).createCoverageReport();
         verify(conformanceTestHarness).runTestSuites(any());
     }
 

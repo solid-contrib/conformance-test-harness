@@ -216,7 +216,7 @@ usage: run
  -s,--source <arg>   URL or path to test source(s)
     --subjects <arg> URL or path to test subject config (Turtle)
  -t,--target <arg>   target server
-    --tests          produce a test report
+    --tests          produce test and coverage reports
 ```
 If neither `--coverage` nor `--tests` is specified then the default action is to run the tests and produce both reports.
 
