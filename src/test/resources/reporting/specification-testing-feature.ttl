@@ -1,10 +1,9 @@
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix spec: <http://www.w3.org/ns/spec#> .
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix spec: <http://www.w3.org/ns/spec#>
+prefix ex: <https://example.org/>
 
-<https://example.org/specification1>
+ex:specification1
     a spec:Specification ;
     spec:requirement <https://example.org/specification1#spec1>,
                      <https://example.org/specification1#spec2>,
-                     <https://example.org/specification1#spec3> ;
-    rdfs:seeAlso <https://example.org/manifests/test-manifest.ttl>
-.
+                     <https://example.org/specification1#spec3>.

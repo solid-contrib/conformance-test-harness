@@ -1,9 +1,9 @@
-@prefix solid-test: <https://github.com/solid/conformance-test-harness/vocab#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix earl: <http://www.w3.org/ns/earl#> .
-@prefix doap: <http://usefulinc.com/ns/doap#> .
-@prefix solid: <http://www.w3.org/ns/solid/terms#> .
-@prefix ex: <https://example.org/> .
+prefix solid-test: <https://github.com/solid/conformance-test-harness/vocab#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix earl: <http://www.w3.org/ns/earl#>
+prefix doap: <http://usefulinc.com/ns/doap#>
+prefix solid: <http://www.w3.org/ns/solid/terms#>
+prefix ex: <https://example.org/>
 
 ex:testserver
     a earl:Software, earl:TestSubject ;

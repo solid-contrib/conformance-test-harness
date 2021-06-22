@@ -1,6 +1,6 @@
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix earl: <http://www.w3.org/ns/earl#> .
-@prefix ex: <https://example.org/> .
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix earl: <http://www.w3.org/ns/earl#>
+prefix ex: <https://example.org/>
 
 ex:test
     a earl:Software, earl:TestSubject ;
@@ -10,7 +10,7 @@ ex:test
     ex:hasInt 1 ;
     ex:hasBool true ;
     ex:hasDate "2021-04-08"^^xsd:date ;
-    ex:hasDateTime "2021-04-08T12:30:00.000"^^xsd:dateTime ;
+    ex:hasDateTime "2021-04-08T12:30:00.000Z"^^xsd:dateTime ;
     ex:hasBNode [ ex:hasString "string" ];
     ex:hasTest ex:test1 ;
     ex:hasSteps (ex:step1 ex:step2) .
@@ -25,7 +25,7 @@ ex:requirement
 .
 
 ex:group1
-    a ex:SpecificationTestCase ;
+    a ex:TestCase ;
     ex:title "Group 1"@en ;
-    ex:specificationReference ex:requirement
+    ex:requirementReference ex:requirement
 .

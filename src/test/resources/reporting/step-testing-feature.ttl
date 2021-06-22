@@ -1,0 +1,16 @@
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix earl: <http://www.w3.org/ns/earl#>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix ex: <https://example.org/>
+
+ex:step1
+    a prov:Activity;
+    dcterms:title "TITLE";
+    prov:used <https://example.org/test.feature#line=11> ;
+    prov:generated ex:scenario1-output1 ;
+    prov:wasInformedBy ex:scenario1 .
+
+ex:step1-output1 a prov:Entity .
+
+ex:step2 a prov:Activity.
