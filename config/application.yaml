@@ -1,8 +1,10 @@
 # local override of properties
 subjects: config/config.ttl
 sources:
-  - https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/solid-protocol-spec.ttl
-  - https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/web-access-control-spec.ttl
+  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/solid-protocol-test-manifest.ttl
+  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/web-access-control-test-manifest.ttl
+  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/solid-protocol-spec.ttl
+  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/web-access-control-spec.ttl
 target: https://github.com/solid/conformance-test-harness/ess-compat
 #target: https://github.com/solid/conformance-test-harness/ess
 #target: https://github.com/solid/conformance-test-harness/css
@@ -11,17 +13,15 @@ target: https://github.com/solid/conformance-test-harness/ess-compat
 # mapping feature URIs
 feature:
   mappings:
-    - prefix: https://github.com/solid/conformance-test-harness/example
+    - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/example/main
       path: example
-    - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/solid
-      path: example/solid
-    - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/web
-      path: example/web
 
 # Test profile
 "%test":
   subjects: src/test/resources/config/config-sample.ttl
   sources:
+    - https://example.org/test-manifest-sample-1.ttl
+    - https://example.org/test-manifest-sample-2.ttl
     - https://example.org/specification-sample-1.ttl
     - https://example.org/specification-sample-2.ttl
   target: https://github.com/solid/conformance-test-harness/testserver
@@ -35,8 +35,8 @@ feature:
         path: src/test/resources
       - prefix: https://example.org/specification
         path: src/test/resources/discovery/specification
-      - prefix: https://example.org/manifests
-        path: src/test/resources/discovery
+      - prefix: https://example.org/test
+        path: src/test/resources/discovery/test
       - prefix: https://example.org/badmapping
         path: https://example.org:-1/
 
