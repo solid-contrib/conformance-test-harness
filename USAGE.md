@@ -44,8 +44,10 @@ The file has a specific location: `config/application.yaml` in your current work
 # The first 3 can be ignored if using the command line settings: subjects, source and target 
 subjects: test-subjects.ttl
 sources:
-  - example/solid-protocol-spec.ttl
-  - example/web-access-control-spec.ttl
+  - example/protocol/solid-protocol-test-manifest.ttl
+  - example/web-access-control/web-access-control-test-manifest.ttl
+  - example/protocol/solid-protocol-spec.ttl
+  - example/web-access-control/web-access-control-spec.ttl
 target: https://github.com/solid/conformance-test-harness/ess-compat
 
 # To map URLs to local files:
@@ -263,18 +265,16 @@ rm temp.zip
 cat > ./config/application.yaml <<EOF
 subjects: ./test-subjects.ttl
 sources:
-  - https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/solid-protocol-spec.ttl
-  - https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/web-access-control-spec.ttl
+  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/solid-protocol-test-manifest.ttl
+  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/web-access-control-test-manifest.ttl
+  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/solid-protocol-spec.ttl
+  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/web-access-control-spec.ttl
 target: https://github.com/solid/conformance-test-harness/ess-compat
 
 feature:
   mappings:
-    - prefix: https://github.com/solid/conformance-test-harness/example
+    - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/example/main
       path: ./example
-    - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/solid
-      path: ./example/solid
-    - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/web
-      path: ./example/web
 EOF
 
 # run the tests in the test harness
@@ -332,18 +332,16 @@ rm temp.zip
 cat > ./config/application.yaml <<EOF
 subjects: ./test-subjects.ttl
 sources:
-  - https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/solid-protocol-spec.ttl
-  - https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/web-access-control-spec.ttl
+  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/solid-protocol-test-manifest.ttl
+  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/web-access-control-test-manifest.ttl
+  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/solid-protocol-spec.ttl
+  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/web-access-control-spec.ttl
 target: https://github.com/solid/conformance-test-harness/css
 
 feature:
   mappings:
-    - prefix: https://github.com/solid/conformance-test-harness/example
+    - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/example/main
       path: ./example
-    - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/solid
-      path: ./example/solid
-    - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/web
-      path: ./example/web
 EOF
 
 # build and run CSS in a container
