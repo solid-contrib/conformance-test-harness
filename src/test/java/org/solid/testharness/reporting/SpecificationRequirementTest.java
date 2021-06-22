@@ -29,6 +29,8 @@ import org.junit.jupiter.api.Test;
 import org.solid.common.vocab.SPEC;
 import org.solid.testharness.utils.AbstractDataModelTests;
 
+import java.util.List;
+
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -55,17 +57,24 @@ class SpecificationRequirementTest extends AbstractDataModelTests {
     }
 
     @Test
-    void getSpecificationTestCase() {
+    void getExcerpt() {
         final SpecificationRequirement requirement = new SpecificationRequirement(REQUIREMENT);
-        final SpecificationTestCase specificationTestCase = requirement.getSpecificationTestCase();
-        assertNotNull(specificationTestCase);
-        assertEquals("Group 1", specificationTestCase.getTitle());
+        assertEquals("excerpt of requirement 1", requirement.getExcerpt());
     }
 
     @Test
-    void getSpecificationTestCaseMissing() {
+    void getTestCase() {
+        final SpecificationRequirement requirement = new SpecificationRequirement(REQUIREMENT);
+        final List<TestCase> testCases = requirement.getTestCases();
+        assertNotNull(testCases);
+        assertEquals(1, testCases.size());
+        assertEquals("Group 1", testCases.get(0).getTitle());
+    }
+
+    @Test
+    void getTestCaseMissing() {
         final SpecificationRequirement requirement = new SpecificationRequirement(REQUIREMENT2);
-        final SpecificationTestCase specificationTestCase = requirement.getSpecificationTestCase();
-        assertNull(specificationTestCase);
+        final List<TestCase> testCases = requirement.getTestCases();
+        assertNull(testCases);
     }
 }

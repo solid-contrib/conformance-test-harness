@@ -35,6 +35,9 @@ import java.util.stream.Collectors;
 public final class Namespaces {
     private static Map<String, Namespace> namespaceMap;
 
+    public static final String RESULTS_URI = "https://github.com/solid/implementation-reports/" +
+            UUID.randomUUID() + "#";
+    public static final String RESULTS_PREFIX = "results";
     public static final String TEST_HARNESS_URI = "https://github.com/solid/conformance-test-harness/";
     public static final String TEST_HARNESS_PREFIX = "test-harness";
     public static final String TURTLE_PREFIX_FORMAT = "@prefix %s: <%s> .\n";
@@ -82,6 +85,7 @@ public final class Namespaces {
 
     static {
         namespaceMap = new HashMap<>();
+        namespaceMap.put(RESULTS_PREFIX, new Namespace(RESULTS_PREFIX, RESULTS_URI));
         namespaceMap.put(TEST_HARNESS_PREFIX, new Namespace(TEST_HARNESS_PREFIX, TEST_HARNESS_URI));
         namespaceMap.put(SPEC.PREFIX, new Namespace(SPEC.PREFIX, SPEC.NAMESPACE));
         namespaceMap.put(EARL.PREFIX, new Namespace(EARL.PREFIX, EARL.NAMESPACE));
@@ -91,6 +95,7 @@ public final class Namespaces {
         namespaceMap.put(DCTERMS.PREFIX, new Namespace(DCTERMS.PREFIX, DCTERMS.NAMESPACE));
         namespaceMap.put(XSD.PREFIX, new Namespace(XSD.PREFIX, XSD.NAMESPACE));
         namespaceMap.put(TD.PREFIX, new Namespace(TD.PREFIX, TD.NAMESPACE));
+        namespaceMap.put(PROV.PREFIX, new Namespace(PROV.PREFIX, PROV.NAMESPACE));
         namespaceMap.put(RDF.PREFIX, new Namespace(RDF.PREFIX, RDF.NAMESPACE));
         namespaceMap.put(RDFS.PREFIX, new Namespace(RDFS.PREFIX, RDFS.NAMESPACE));
     }

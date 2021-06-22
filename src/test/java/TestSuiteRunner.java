@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +35,7 @@ import org.solid.testharness.utils.DataRepository;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -58,7 +60,9 @@ public class TestSuiteRunner {
     @Test
     void testSuite() throws IOException {
         conformanceTestHarness.initialize();
-        final TestSuiteResults results = conformanceTestHarness.runTestSuites();
+        final List<String> filters = null;
+//        final List<String> filters = List.of("turtle");
+        final TestSuiteResults results = conformanceTestHarness.runTestSuites(filters);
         assertNotNull(results);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());
     }

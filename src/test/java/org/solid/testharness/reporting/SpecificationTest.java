@@ -40,12 +40,6 @@ class SpecificationTest extends AbstractDataModelTests {
     }
 
     @Test
-    void getManifest() {
-        final Specification specification = new Specification(iri(NS, "specification1"));
-        assertEquals("https://example.org/manifests/test-manifest.ttl", specification.getManifest());
-    }
-
-    @Test
     void getSpecificationRequirements() {
         final Specification specification = new Specification(iri(NS, "specification1"));
         final List<SpecificationRequirement> specificationRequirements = specification.getSpecificationRequirements();

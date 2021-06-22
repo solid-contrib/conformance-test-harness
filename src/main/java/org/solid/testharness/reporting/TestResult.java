@@ -28,19 +28,18 @@ import org.solid.common.vocab.DCTERMS;
 import org.solid.common.vocab.EARL;
 import org.solid.testharness.utils.DataModelBase;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 public class TestResult extends DataModelBase  {
     public TestResult(final IRI subject) {
-        super(subject, ConstructMode.DEEP);
+        super(subject);
     }
 
     public String getOutcome() {
         return getIriAsString(EARL.outcome);
     }
 
-    public LocalDateTime getDate() {
+    public ZonedDateTime getDate() {
         return getLiteralAsDateTime(DCTERMS.date);
     }
-
 }

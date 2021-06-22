@@ -32,7 +32,7 @@ import org.solid.testharness.reporting.Step;
 import org.solid.testharness.reporting.TestCase;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -256,8 +256,8 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void getLiteralAsDateTime() {
-        final LocalDateTime dateTime = dataModelBase.getLiteralAsDateTime(iri(NS, "hasDateTime"));
-        assertThat("DateTime matches", dateTime.isEqual(LocalDateTime.parse("2021-04-08T12:30:00.000")));
+        final ZonedDateTime dateTime = dataModelBase.getLiteralAsDateTime(iri(NS, "hasDateTime"));
+        assertThat("DateTime matches", dateTime.isEqual(ZonedDateTime.parse("2021-04-08T12:30:00.000Z")));
     }
 
     @Test

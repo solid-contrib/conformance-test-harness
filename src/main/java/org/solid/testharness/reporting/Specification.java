@@ -24,7 +24,6 @@
 package org.solid.testharness.reporting;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.solid.common.vocab.RDFS;
 import org.solid.common.vocab.SPEC;
 import org.solid.testharness.utils.DataModelBase;
 
@@ -33,10 +32,6 @@ import java.util.List;
 public class Specification extends DataModelBase {
     public Specification(final IRI subject) {
         super(subject);
-    }
-
-    public String getManifest() {
-        return getIriAsString(RDFS.seeAlso);
     }
 
     public List<SpecificationRequirement> getSpecificationRequirements() {

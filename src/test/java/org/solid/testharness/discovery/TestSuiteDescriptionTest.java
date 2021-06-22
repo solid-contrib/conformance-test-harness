@@ -25,11 +25,13 @@ package org.solid.testharness.discovery;
 
 import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.query.BooleanQuery;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.solid.common.vocab.EARL;
+import org.solid.common.vocab.RDF;
+import org.solid.common.vocab.SPEC;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 import org.solid.testharness.utils.TestUtils;
@@ -49,9 +51,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 class TestSuiteDescriptionTest {
-    private static final String PREFIXES = "PREFIX td: <http://www.w3.org/2006/03/test-description#>\n" +
-            "PREFIX spec: <http://www.w3.org/ns/spec#>\n";
-
     @Inject
     DataRepository repository;
     @Inject
@@ -65,47 +64,59 @@ class TestSuiteDescriptionTest {
     }
 
     @Test
-    void loadOneSpec() throws MalformedURLException {
-        testSuiteDescription.load(List.of(new URL("https://example.org/specification-sample-1.ttl")));
-        assertTrue(ask("ASK {<https://example.org/specification1> a spec:Specification}"));
-        assertTrue(ask("ASK {<https://example.org/manifests/test-manifest-sample-1.ttl#group1> " +
-                        "td:specificationReference <https://example.org/specification1#spec1>}"));
-        assertFalse(ask("ASK {<https://example.org/specification2> a spec:Specification}"));
-        assertFalse(ask("ASK {<https://example.org/manifests/test-manifest-sample-2.ttl#group4> " +
-                "td:specificationReference <https://example.org/specification2#spec1>}"));
+    void loadOneManifest() throws Exception {
+        testSuiteDescription.load(List.of(
+                new URL("https://example.org/test-manifest-sample-1.ttl"),
+                new URL("https://example.org/specification-sample-1.ttl")
+        ));
+        assertTrue(ask(iri("https://example.org/specification1"), RDF.type, SPEC.Specification));
+        assertTrue(ask(iri("https://example.org/test-manifest-sample-1.ttl#group1-feature1"),
+                SPEC.requirementReference, iri("https://example.org/specification1#spec1")));
+        assertFalse(ask(iri("https://example.org/specification2"), RDF.type, SPEC.Specification));
+        assertFalse(ask(iri("https://example.org/test-manifest-sample-2.ttl#group4-feature1"),
+                SPEC.requirementReference, iri("https://example.org/specification2#spec1")));
     }
 
     @Test
-    void loadTwoSpec() throws MalformedURLException {
-        testSuiteDescription.load(List.of(new URL("https://example.org/specification-sample-1.ttl"),
-                new URL("https://example.org/specification-sample-2.ttl"))
-        );
-        assertTrue(ask("ASK {<https://example.org/specification1> a spec:Specification}"));
-        assertTrue(ask("ASK {<https://example.org/manifests/test-manifest-sample-1.ttl#group1> " +
-                "td:specificationReference <https://example.org/specification1#spec1>}"));
-        assertTrue(ask("ASK {<https://example.org/specification2> a spec:Specification}"));
-        assertTrue(ask("ASK {<https://example.org/manifests/test-manifest-sample-2.ttl#group4> " +
-                "td:specificationReference <https://example.org/specification2#spec1>}"));
+    void loadTwoManifest() throws MalformedURLException {
+        testSuiteDescription.load(List.of(
+                new URL("https://example.org/test-manifest-sample-1.ttl"),
+                new URL("https://example.org/test-manifest-sample-2.ttl"),
+                new URL("https://example.org/specification-sample-1.ttl"),
+                new URL("https://example.org/specification-sample-2.ttl")
+        ));
+        assertTrue(ask(iri("https://example.org/specification1"), RDF.type, SPEC.Specification));
+        assertTrue(ask(iri("https://example.org/test-manifest-sample-1.ttl#group1-feature1"),
+                SPEC.requirementReference, iri("https://example.org/specification1#spec1")));
+        assertTrue(ask(iri("https://example.org/specification2"), RDF.type, SPEC.Specification));
+        assertTrue(ask(iri("https://example.org/test-manifest-sample-2.ttl#group4-feature1"),
+                SPEC.requirementReference, iri("https://example.org/specification2#spec1")));
     }
 
     @Test
-    void loadTwoSpecMixed() throws MalformedURLException {
-        testSuiteDescription.load(List.of(new URL("https://example.org/specification-sample-1.html"),
-                new URL("https://example.org/specification-sample-2.ttl"))
-        );
-        assertTrue(ask("ASK {<https://example.org/specification1> a spec:Specification}"));
-        assertTrue(ask("ASK {<https://example.org/manifests/test-manifest-sample-1.ttl#group1> " +
-                "td:specificationReference <https://example.org/specification1#spec1>}"));
-        assertTrue(ask("ASK {<https://example.org/specification2> a spec:Specification}"));
-        assertTrue(ask("ASK {<https://example.org/manifests/test-manifest-sample-2.ttl#group4> " +
-                "td:specificationReference <https://example.org/specification2#spec1>}"));
+    void loadTwoManifestMixed() throws MalformedURLException {
+        testSuiteDescription.load(List.of(
+                new URL("https://example.org/test-manifest-sample-1.ttl"),
+                new URL("https://example.org/test-manifest-sample-2.ttl"),
+                new URL("https://example.org/specification-sample-1.html"),
+                new URL("https://example.org/specification-sample-2.ttl")
+        ));
+        assertTrue(ask(iri("https://example.org/specification1"), RDF.type, SPEC.Specification));
+        assertTrue(ask(iri("https://example.org/test-manifest-sample-1.ttl#group1-feature1"),
+                SPEC.requirementReference, iri("https://example.org/specification1#spec1")));
+        assertTrue(ask(iri("https://example.org/specification2"), RDF.type, SPEC.Specification));
+        assertTrue(ask(iri("https://example.org/test-manifest-sample-2.ttl#group4-feature1"),
+                SPEC.requirementReference, iri("https://example.org/specification2#spec1")));
     }
 
     @Test
     void getSupportedTestCasesNullFeatures() throws MalformedURLException {
-        testSuiteDescription.load(List.of(new URL("https://example.org/specification-sample-1.ttl"),
-                new URL("https://example.org/specification-sample-2.ttl"))
-        );
+        testSuiteDescription.load(List.of(
+                new URL("https://example.org/test-manifest-sample-1.ttl"),
+                new URL("https://example.org/test-manifest-sample-2.ttl"),
+                new URL("https://example.org/specification-sample-1.ttl"),
+                new URL("https://example.org/specification-sample-2.ttl")
+        ));
         final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(null);
         final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3");
         assertThat("Group 1 matches", testCases, containsInAnyOrder(expected));
@@ -113,9 +124,12 @@ class TestSuiteDescriptionTest {
 
     @Test
     void getSupportedTestCasesEmptyFeatures() throws MalformedURLException {
-        testSuiteDescription.load(List.of(new URL("https://example.org/specification-sample-1.ttl"),
-                new URL("https://example.org/specification-sample-2.ttl"))
-        );
+        testSuiteDescription.load(List.of(
+                new URL("https://example.org/test-manifest-sample-1.ttl"),
+                new URL("https://example.org/test-manifest-sample-2.ttl"),
+                new URL("https://example.org/specification-sample-1.ttl"),
+                new URL("https://example.org/specification-sample-2.ttl")
+        ));
         final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of());
         final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3");
         assertThat("Groups 1 matches", testCases, containsInAnyOrder(expected));
@@ -123,9 +137,12 @@ class TestSuiteDescriptionTest {
 
     @Test
     void getSupportedTestCasesOneFeature() throws MalformedURLException {
-        testSuiteDescription.load(List.of(new URL("https://example.org/specification-sample-1.ttl"),
-                new URL("https://example.org/specification-sample-2.ttl"))
-        );
+        testSuiteDescription.load(List.of(
+                new URL("https://example.org/test-manifest-sample-1.ttl"),
+                new URL("https://example.org/test-manifest-sample-2.ttl"),
+                new URL("https://example.org/specification-sample-1.ttl"),
+                new URL("https://example.org/specification-sample-2.ttl")
+        ));
         final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf1"));
         final IRI[] expected = createIriList(
                 "group1/feature1", "group1/feature2", "group1/feature3", "group2/feature1"
@@ -135,9 +152,12 @@ class TestSuiteDescriptionTest {
 
     @Test
     void getSupportedTestCasesFeature1And2() throws MalformedURLException {
-        testSuiteDescription.load(List.of(new URL("https://example.org/specification-sample-1.ttl"),
-                new URL("https://example.org/specification-sample-2.ttl"))
-        );
+        testSuiteDescription.load(List.of(
+                new URL("https://example.org/test-manifest-sample-1.ttl"),
+                new URL("https://example.org/test-manifest-sample-2.ttl"),
+                new URL("https://example.org/specification-sample-1.ttl"),
+                new URL("https://example.org/specification-sample-2.ttl")
+        ));
         final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf1", "sf2"));
         final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
                 "group2/feature1", "group3/feature1", "group3/feature2");
@@ -146,9 +166,12 @@ class TestSuiteDescriptionTest {
 
     @Test
     void getSupportedTestCasesFeature1And3() throws MalformedURLException {
-        testSuiteDescription.load(List.of(new URL("https://example.org/specification-sample-1.ttl"),
-                new URL("https://example.org/specification-sample-2.ttl"))
-        );
+        testSuiteDescription.load(List.of(
+                new URL("https://example.org/test-manifest-sample-1.ttl"),
+                new URL("https://example.org/test-manifest-sample-2.ttl"),
+                new URL("https://example.org/specification-sample-1.ttl"),
+                new URL("https://example.org/specification-sample-2.ttl")
+        ));
         final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf1", "sf3"));
         final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
                 "group2/feature1", "group4/feature1", "group4/feature2", "group4/feature3");
@@ -157,9 +180,12 @@ class TestSuiteDescriptionTest {
 
     @Test
     void getSupportedTestCasesAllFeatures() throws MalformedURLException {
-        testSuiteDescription.load(List.of(new URL("https://example.org/specification-sample-1.ttl"),
-                new URL("https://example.org/specification-sample-2.ttl"))
-        );
+        testSuiteDescription.load(List.of(
+                new URL("https://example.org/test-manifest-sample-1.ttl"),
+                new URL("https://example.org/test-manifest-sample-2.ttl"),
+                new URL("https://example.org/specification-sample-1.ttl"),
+                new URL("https://example.org/specification-sample-2.ttl")
+        ));
         final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf1", "sf2", "sf3"));
         final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
                 "group2/feature1", "group3/feature1", "group3/feature2",
@@ -170,9 +196,12 @@ class TestSuiteDescriptionTest {
 
     @Test
     void getSupportedTestCasesFeature3() throws MalformedURLException {
-        testSuiteDescription.load(List.of(new URL("https://example.org/specification-sample-1.ttl"),
-                new URL("https://example.org/specification-sample-2.ttl"))
-        );
+        testSuiteDescription.load(List.of(
+                new URL("https://example.org/test-manifest-sample-1.ttl"),
+                new URL("https://example.org/test-manifest-sample-2.ttl"),
+                new URL("https://example.org/specification-sample-1.ttl"),
+                new URL("https://example.org/specification-sample-2.ttl")
+        ));
         final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf3"));
         final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3");
         assertThat("Group 1 matches", testCases, containsInAnyOrder(expected));
@@ -180,9 +209,12 @@ class TestSuiteDescriptionTest {
 
     @Test
     void getAllTestCases() throws MalformedURLException {
-        testSuiteDescription.load(List.of(new URL("https://example.org/specification-sample-1.ttl"),
-                new URL("https://example.org/specification-sample-2.ttl"))
-        );
+        testSuiteDescription.load(List.of(
+                new URL("https://example.org/test-manifest-sample-1.ttl"),
+                new URL("https://example.org/test-manifest-sample-2.ttl"),
+                new URL("https://example.org/specification-sample-1.ttl"),
+                new URL("https://example.org/specification-sample-2.ttl")
+        ));
         final List<IRI> testCases = testSuiteDescription.getAllTestCases();
         final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
                 "group2/feature1", "group3/feature1", "group3/feature2",
@@ -223,19 +255,19 @@ class TestSuiteDescriptionTest {
                 TestUtils.getPathUri("src/test/resources/dummy-features/otherExample/feature1").toString()
         };
         assertThat("Locations match", paths, containsInAnyOrder(expected));
-        try (RepositoryConnection conn = repository.getConnection()) {
-            assertTrue(conn.hasStatement(null, EARL.mode, EARL.untested, false));
-        }
+        // TODO: Test for titles being inserted once this is implemented
+//        try (RepositoryConnection conn = repository.getConnection()) {
+//            assertTrue(conn.hasStatement(null, EARL.mode, EARL.untested, false));
+//        }
     }
 
     private IRI[] createIriList(final String... testCases) {
         return Stream.of(testCases).map(s -> iri("https://example.org/dummy/" + s)).toArray(IRI[]::new);
     }
 
-    private boolean ask(final String query) {
+    private boolean ask(final Resource subject, final IRI predicate, final Value object) {
         try (RepositoryConnection conn = repository.getConnection()) {
-            final BooleanQuery booleanQuery = conn.prepareBooleanQuery(PREFIXES + query);
-            return booleanQuery.evaluate();
+            return conn.hasStatement(subject, predicate, object, false);
         }
     }
 }

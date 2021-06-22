@@ -25,7 +25,6 @@ package org.solid.testharness.reporting;
 
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
-import org.solid.common.vocab.EARL;
 import org.solid.testharness.utils.AbstractDataModelTests;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
@@ -45,9 +44,15 @@ class TestCaseTest extends AbstractDataModelTests  {
     }
 
     @Test
-    void getLevel() {
+    void getTestScript() {
         final TestCase testCase = new TestCase(iri(NS, "test1"));
-        assertEquals("MUST", testCase.getLevel());
+        assertEquals("https://example.org/test3.feature", testCase.getTestScript());
+    }
+
+    @Test
+    void getRequirementReference() {
+        final TestCase testCase = new TestCase(iri(NS, "test1"));
+        assertEquals("https://example.org/specification1#requriement1", testCase.getRequirementReference());
     }
 
     @Test
@@ -75,25 +80,13 @@ class TestCaseTest extends AbstractDataModelTests  {
     }
 
     @Test
-    void isImplementedPassed() {
-        final TestCase testCase = new TestCase(iri(NS, "test3"));
-        assertTrue(testCase.isImplemented());
-    }
-
-    @Test
-    void getModeAsIri() {
-        final TestCase testCase = new TestCase(iri(NS, "test3"));
-        assertEquals(EARL.passed, testCase.getModeAsIri());
-    }
-
-    @Test
-    void getAssertionNull() {
+    void getAssertion() {
         final TestCase testCase = new TestCase(iri(NS, "test1"));
         assertNotNull(testCase.getAssertion());
     }
 
     @Test
-    void getAssertion() {
+    void getAssertionNull() {
         final TestCase testCase = new TestCase(iri(NS, "test2"));
         assertNull(testCase.getAssertion());
     }

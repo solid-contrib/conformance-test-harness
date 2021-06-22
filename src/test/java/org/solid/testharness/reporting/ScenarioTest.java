@@ -26,7 +26,8 @@ package org.solid.testharness.reporting;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.utils.AbstractDataModelTests;
-import org.solid.testharness.utils.TestData;
+
+import java.time.ZonedDateTime;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,21 +46,33 @@ class ScenarioTest extends AbstractDataModelTests {
     }
 
     @Test
-    void getParent() {
+    void getScriptLocation() {
         final Scenario scenario = new Scenario(iri(NS, "scenario1"));
-        assertEquals(TestData.SAMPLE_BASE + "/parent", scenario.getParent());
+        assertEquals("https://example.org/test.feature#line=10,15", scenario.getUsed());
     }
 
     @Test
-    void getAssertion() {
+    void getStartTime() {
         final Scenario scenario = new Scenario(iri(NS, "scenario1"));
-        assertNotNull(scenario.getAssertion());
+        assertTrue(scenario.getStartTime().isEqual(ZonedDateTime.parse("2021-04-15T13:00:00-04:00")));
     }
 
     @Test
-    void getNoAssertion() {
+    void getEndTime() {
+        final Scenario scenario = new Scenario(iri(NS, "scenario1"));
+        assertTrue(scenario.getEndTime().isEqual(ZonedDateTime.parse("2021-04-15T13:01:00-04:00")));
+    }
+
+    @Test
+    void getGeneratedOutput() {
+        final Scenario scenario = new Scenario(iri(NS, "scenario1"));
+        assertNotNull(scenario.getGeneratedOutput());
+    }
+
+    @Test
+    void getNoGeneratedOutput() {
         final Scenario scenario = new Scenario(iri(NS, "scenario2"));
-        assertNull(scenario.getAssertion());
+        assertNull(scenario.getGeneratedOutput());
     }
 
     @Test

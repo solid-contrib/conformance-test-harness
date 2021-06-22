@@ -25,9 +25,10 @@ package org.solid.testharness.reporting;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.solid.common.vocab.DCTERMS;
-import org.solid.common.vocab.EARL;
+import org.solid.common.vocab.PROV;
 import org.solid.testharness.utils.DataModelBase;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 public class Scenario extends DataModelBase {
@@ -39,20 +40,27 @@ public class Scenario extends DataModelBase {
         return getLiteralAsString(DCTERMS.title);
     }
 
-    public String getParent() {
-        return getIriAsString(DCTERMS.isPartOf);
+    public String getUsed() {
+        return getIriAsString(PROV.used);
     }
 
-    public Assertion getAssertion() {
-        final List<Assertion> assertions = getModelList(EARL.assertions, Assertion.class);
-        if (assertions != null) {
-            return assertions.get(0);
+    public ZonedDateTime getStartTime() {
+        return getLiteralAsDateTime(PROV.startedAtTime);
+    }
+    public ZonedDateTime getEndTime() {
+        return getLiteralAsDateTime(PROV.endedAtTime);
+    }
+
+    public GeneratedOutput getGeneratedOutput() {
+        final List<GeneratedOutput> generatedOutputs = getModelList(PROV.generated, GeneratedOutput.class);
+        if (generatedOutputs != null) {
+            return generatedOutputs.get(0);
         } else {
             return null;
         }
     }
 
     public List<Step> getSteps() {
-        return getModelCollectionList(EARL.steps, Step.class);
+        return getModelCollectionList(DCTERMS.hasPart, Step.class);
     }
 }

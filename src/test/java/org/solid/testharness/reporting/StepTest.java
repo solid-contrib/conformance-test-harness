@@ -24,41 +24,58 @@
 package org.solid.testharness.reporting;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.repository.RepositoryException;
 import org.junit.jupiter.api.Test;
-import org.solid.testharness.discovery.TestSuiteDescription;
-import org.solid.testharness.utils.DataRepository;
-import org.solid.testharness.utils.TestHarnessInitializationException;
-
-import javax.inject.Inject;
-import java.util.List;
+import org.solid.testharness.utils.AbstractDataModelTests;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @QuarkusTest
-class TestSuiteDescriptionNoRepositoryTest {
-    @InjectMock
-    DataRepository dataRepository;
-
-    @Inject
-    TestSuiteDescription testSuiteDescription;
-
-    @Test
-    void locateTestCasesException() {
-        when(dataRepository.getConnection()).thenThrow(new RepositoryException("BAD REPOSITORY"));
-        final List<IRI> testCases = List.of(iri("https://example.org/dummy/group3/feature1"));
-        assertThrows(TestHarnessInitializationException.class, () -> testSuiteDescription.locateTestCases(testCases));
+class StepTest extends AbstractDataModelTests {
+    @Override
+    public String getTestFile() {
+        return "src/test/resources/reporting/step-testing-feature.ttl";
     }
 
     @Test
-    void getAllTestCasesException() {
-        when(dataRepository.getConnection()).thenThrow(new RepositoryException("BAD REPOSITORY"));
-        final List<IRI> testCases = List.of(iri("https://example.org/dummy/group3/feature1"));
-        assertThrows(TestHarnessInitializationException.class, () -> testSuiteDescription.getAllTestCases());
+    void getTitle() {
+        final Step step = new Step(iri(NS, "step1"));
+        assertEquals("TITLE", step.getTitle());
+    }
+
+    @Test
+    void getScriptLocation() {
+        final Step step = new Step(iri(NS, "step1"));
+        assertEquals("https://example.org/test.feature#line=11", step.getUsed());
+    }
+
+    @Test
+    void getScenario() {
+        final Step step = new Step(iri(NS, "step1"));
+        assertEquals("https://example.org/scenario1", step.getScenario());
+    }
+
+    @Test
+    void isNotBackground() {
+        final Step step = new Step(iri(NS, "step1"));
+        assertFalse(step.isBackground());
+    }
+
+    @Test
+    void isBackground() {
+        final Step step = new Step(iri(NS, "step2"));
+        assertTrue(step.isBackground());
+    }
+
+    @Test
+    void getGeneratedOutput() {
+        final Step step = new Step(iri(NS, "step1"));
+        assertNotNull(step.getGeneratedOutput());
+    }
+
+    @Test
+    void getNoGeneratedOutput() {
+        final Step step = new Step(iri(NS, "step2"));
+        assertNull(step.getGeneratedOutput());
     }
 }
-
