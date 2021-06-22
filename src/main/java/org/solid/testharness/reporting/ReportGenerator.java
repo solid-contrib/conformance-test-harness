@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.RDF;
 import org.solid.common.vocab.SPEC;
+import org.solid.common.vocab.TD;
 import org.solid.testharness.utils.DataRepository;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -65,18 +66,27 @@ public class ReportGenerator {
     }
 
     public void buildHtmlCoverageReport(final Writer writer) throws IOException {
-        writer.write(coverageTemplate.data(new ResultData(getSpecifications())).render());
+        writer.write(coverageTemplate.data(new ResultData(getSpecifications(), getTestCases())).render());
         writer.flush();
     }
 
     public void buildHtmlResultReport(final Writer writer) throws IOException {
-        writer.write(resultTemplate.data(new ResultData(getSpecifications())).render());
+        writer.write(resultTemplate.data(new ResultData(getSpecifications(), getTestCases())).render());
         writer.flush();
     }
 
     private List<IRI> getSpecifications() {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             return conn.getStatements(null, RDF.type, SPEC.Specification).stream()
+                    .map(Statement::getSubject)
+                    .map(IRI.class::cast)
+                    .collect(Collectors.toList());
+        }
+    }
+
+    private List<IRI> getTestCases() {
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            return conn.getStatements(null, RDF.type, TD.TestCase).stream()
                     .map(Statement::getSubject)
                     .map(IRI.class::cast)
                     .collect(Collectors.toList());

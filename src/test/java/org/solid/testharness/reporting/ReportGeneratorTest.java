@@ -29,9 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.solid.testharness.utils.DataRepository;
-import org.solid.testharness.utils.TestData;
-import org.solid.testharness.utils.TestUtils;
+import org.solid.testharness.utils.*;
 
 import javax.inject.Inject;
 import java.io.*;
@@ -64,18 +62,28 @@ class ReportGeneratorTest {
     }
 
     @Test
-    void buildHtmlResultReport() throws IOException {
+    void buildHtmlResultReport() throws Exception {
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-2.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-2.ttl"));
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/reporting/testsuite-results-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/reporting/testsuite-results-sample.ttl"),
+                TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl").toString());
         final StringWriter sw = new StringWriter();
         reportGenerator.buildHtmlResultReport(sw);
-//        logger.debug("OUTPUT:\n{}", sw);
-        assertTrue(sw.toString().length() > 1);
+        final String report = sw.toString();
+        logger.debug("OUTPUT:\n{}", report);
+        assertTrue(report.length() > 1);
+        assertTrue(report.contains("about=\"https://github.com/solid/implementation-reports/"));
+        assertTrue(report.contains("about=\"" + Namespaces.TEST_HARNESS_URI + "\" typeof=\"earl:Software\""));
+        // TODO: ASSERT:
+        /*
+        spec & manifest links
+        spec section <section about="https://example.org/specification1" typeof="spec:Specification">
+
+         */
     }
 
     @Test
@@ -85,7 +93,6 @@ class ReportGeneratorTest {
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-2.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-2.ttl"));
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/reporting/coverage-sample.ttl"));
         final StringWriter sw = new StringWriter();
         reportGenerator.buildHtmlCoverageReport(sw);
 //        logger.debug("OUTPUT:\n{}", sw);
@@ -101,7 +108,8 @@ class ReportGeneratorTest {
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-2.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-2.ttl"));
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/reporting/testsuite-results-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/reporting/testsuite-results-sample.ttl"),
+                TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl").toString());
         final Writer wr = Files.newBufferedWriter(reportFile.toPath());
         reportGenerator.buildHtmlResultReport(wr);
         wr.close();
@@ -116,7 +124,6 @@ class ReportGeneratorTest {
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-2.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-2.ttl"));
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/reporting/coverage-sample.ttl"));
         final Writer wr = Files.newBufferedWriter(reportFile.toPath());
         reportGenerator.buildHtmlCoverageReport(wr);
         wr.close();
