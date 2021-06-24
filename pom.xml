@@ -25,9 +25,7 @@
         <compiler-plugin.version>3.8.1</compiler-plugin.version>
         <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
         <release.plugin.version>2.5.3</release.plugin.version>
-        <jandex.maven.version>1.1.0</jandex.maven.version>
         <properties.plugin.version>1.0.0</properties.plugin.version>
-        <jacoco-plugin.version>0.8.7</jacoco-plugin.version>
         <checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
         <checkstyle.tool.version>8.43</checkstyle.tool.version>
         <pmd.plugin.version>3.14.0</pmd.plugin.version>
@@ -36,17 +34,13 @@
         <!-- dependencies -->
         <quarkus.version>1.13.7.Final</quarkus.version>
         <karate.version>1.0.1</karate.version>
-        <junit.jupiter.version>5.7.2</junit.jupiter.version>
         <hamcrest.version>2.2</hamcrest.version>
         <rdf4j.version>3.7.1</rdf4j.version>
         <semargl.version>0.7</semargl.version>
         <jakarta.version>3.0.0</jakarta.version>
         <jose4j.version>0.7.8</jose4j.version>
         <commons.text.version>1.9</commons.text.version>
-        <commons.lang.version>3.12.0</commons.lang.version>
         <commons.cli.version>1.4</commons.cli.version>
-        <mockito.version>3.11.2</mockito.version>
-        <jandex.version>2.3.0.Final</jandex.version>
         <wiremock.version>2.27.2</wiremock.version>
         <solid.vocab.version>0.0.8</solid.vocab.version>
 
@@ -135,7 +129,6 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>${commons.lang.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-cli</groupId>
@@ -203,12 +196,6 @@
             <systemPath>${project.basedir}/src/main/libs/generated-vocab-common-${solid.vocab.version}.jar</systemPath>
         </dependency>
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.jupiter.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit5</artifactId>
             <scope>test</scope>
@@ -221,13 +208,11 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -235,12 +220,6 @@
             <artifactId>hamcrest-core</artifactId>
             <version>${hamcrest.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss</groupId>
-            <artifactId>jandex</artifactId>
-            <version>${jandex.version}</version>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
@@ -256,19 +235,6 @@
             </testResource>
         </testResources>
         <plugins>
-            <plugin>
-                <groupId>org.jboss.jandex</groupId>
-                <artifactId>jandex-maven-plugin</artifactId>
-                <version>${jandex.maven.version}</version>
-                <executions>
-                    <execution>
-                        <id>make-index</id>
-                        <goals>
-                            <goal>jandex</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
@@ -362,7 +328,6 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco-plugin.version}</version>
                 <configuration>
                     <excludes>
                         <!-- class not tested as it is not possible to simulate the exceptions -->
