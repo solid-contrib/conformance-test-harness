@@ -40,7 +40,7 @@ import javax.enterprise.inject.spi.CDI;
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -215,15 +215,8 @@ public class DataModelBase {
                 v.getDay())).orElse(null);
     }
 
-    protected LocalDateTime getLiteralAsDateTime(final IRI predicate) {
+    protected ZonedDateTime getLiteralAsDateTime(final IRI predicate) {
         final Optional<Literal> value = Models.getPropertyLiteral(model, subject, predicate);
-        return value.map(Literal::calendarValue).map(v -> LocalDateTime.of(
-                v.getYear(),
-                v.getMonth(),
-                v.getDay(),
-                v.getHour(),
-                v.getMinute(),
-                v.getSecond(),
-                v.getMillisecond())).orElse(null);
+        return value.map(Literal::stringValue).map(v -> ZonedDateTime.parse(v)).orElse(null);
     }
 }

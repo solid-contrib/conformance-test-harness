@@ -51,20 +51,20 @@ class PathMappingsTest {
         final List<PathMappings.Mapping> mappings = pathMappings.getMappings();
         assertNotNull(mappings);
         assertEquals(6, mappings.size());
-        assertEquals("https://example.org/dummy/group1", mappings.get(0).getPrefix());
+        assertEquals("https://example.org/test/group1", mappings.get(0).getPrefix());
         assertEquals(
-                TestUtils.getPathUri("src/test/resources/dummy-features/group1").toString(), mappings.get(0).getPath()
+                TestUtils.getPathUri("src/test/resources/test-features/group1").toString(), mappings.get(0).getPath()
         );
     }
 
     @Test
     void testToString() {
         assertEquals("[" + String.join(", ", List.of(
-                pathMappingString("https://example.org/dummy/group1", "src/test/resources/dummy-features/group1"),
-                pathMappingString("https://example.org/dummy/group2", "src/test/resources/dummy-features/otherExample"),
+                pathMappingString("https://example.org/test/group1", "src/test/resources/test-features/group1"),
+                pathMappingString("https://example.org/test/group2", "src/test/resources/test-features/otherExample"),
                 pathMappingString("https://example.org/features", "src/test/resources"),
                 pathMappingString("https://example.org/specification", "src/test/resources/discovery/specification"),
-                pathMappingString("https://example.org/manifests", "src/test/resources/discovery"),
+                pathMappingString("https://example.org/test-manifest", "src/test/resources/discovery/test-manifest"),
                 pathMappingString("https://example.org/badmapping", "https://example.org:-1")
                 )) + "]", pathMappings.toString());
     }
@@ -76,10 +76,10 @@ class PathMappingsTest {
     @Test
     void setAbsoluteMapping() {
         final List<PathMappings.Mapping> mappings = List.of(
-                PathMappings.Mapping.create("https://example.org/dummy/group1", "/src/test/resources")
+                PathMappings.Mapping.create("https://example.org/test/group1", "/src/test/resources")
         );
         pathMappings.setMappings(mappings);
-        assertEquals("[https://example.org/dummy/group1 => " + TestUtils.getPathUri("/src/test/resources") + "]",
+        assertEquals("[https://example.org/test/group1 => " + TestUtils.getPathUri("/src/test/resources") + "]",
                 pathMappings.toString()
         );
     }
@@ -87,10 +87,10 @@ class PathMappingsTest {
     @Test
     void setSingleMapping() {
         final List<PathMappings.Mapping> mappings = List.of(
-                PathMappings.Mapping.create("https://example.org/dummy/group1", "src/test/resources")
+                PathMappings.Mapping.create("https://example.org/test/group1", "src/test/resources")
         );
         pathMappings.setMappings(mappings);
-        assertEquals("[https://example.org/dummy/group1 => " + TestUtils.getPathUri("src/test/resources") + "]",
+        assertEquals("[https://example.org/test/group1 => " + TestUtils.getPathUri("src/test/resources") + "]",
                 pathMappings.toString()
         );
     }
@@ -98,10 +98,10 @@ class PathMappingsTest {
     @Test
     void setSingleMappingSlashes() {
         final List<PathMappings.Mapping> mappings = List.of(
-                PathMappings.Mapping.create("https://example.org/dummy/group1/", "src/test/resources/")
+                PathMappings.Mapping.create("https://example.org/test/group1/", "src/test/resources/")
         );
         pathMappings.setMappings(mappings);
-        assertEquals("[https://example.org/dummy/group1 => " + TestUtils.getPathUri("src/test/resources") + "]",
+        assertEquals("[https://example.org/test/group1 => " + TestUtils.getPathUri("src/test/resources") + "]",
                 pathMappings.toString()
         );
     }
@@ -109,12 +109,12 @@ class PathMappingsTest {
     @Test
     void setSingleFeatureMapping() {
         final List<PathMappings.Mapping> mappings = List.of(
-                PathMappings.Mapping.create("https://example.org/dummy/group1/test.feature",
+                PathMappings.Mapping.create("https://example.org/test/group1/test.feature",
                         "src/test/resources/test.feature"
                 )
         );
         pathMappings.setMappings(mappings);
-        assertEquals("[https://example.org/dummy/group1/test.feature => " +
+        assertEquals("[https://example.org/test/group1/test.feature => " +
                 TestUtils.getPathUri("src/test/resources/test.feature") + "]", pathMappings.toString());
     }
 
@@ -133,8 +133,8 @@ class PathMappingsTest {
 
     @Test
     void unmapFeaturePath() {
-        final IRI iri = pathMappings.unmapFeaturePath("src/test/resources/dummy-features/group1/test.feature");
-        assertEquals(iri("https://example.org/dummy/group1/test.feature"), iri);
+        final IRI iri = pathMappings.unmapFeaturePath("src/test/resources/test-features/group1/test.feature");
+        assertEquals(iri("https://example.org/test/group1/test.feature"), iri);
     }
 
     @Test
@@ -161,13 +161,13 @@ class PathMappingsTest {
 
     @Test
     void mapFeatureIri() {
-        final URI path = pathMappings.mapFeatureIri(iri("https://example.org/dummy/group1/test.feature"));
-        assertEquals(TestUtils.getPathUri("src/test/resources/dummy-features/group1/test.feature"), path);
+        final URI path = pathMappings.mapFeatureIri(iri("https://example.org/test/group1/test.feature"));
+        assertEquals(TestUtils.getPathUri("src/test/resources/test-features/group1/test.feature"), path);
     }
 
     @Test
     void mapIri() throws MalformedURLException {
-        final URL url = pathMappings.mapIri(iri("https://example.org/manifests/test-manifest-sample-1.ttl"));
+        final URL url = pathMappings.mapIri(iri("https://example.org/test-manifest-sample-1.ttl"));
         assertEquals(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"), url);
     }
 

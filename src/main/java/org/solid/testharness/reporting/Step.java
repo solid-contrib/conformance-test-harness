@@ -25,21 +25,38 @@ package org.solid.testharness.reporting;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.solid.common.vocab.DCTERMS;
-import org.solid.common.vocab.EARL;
+import org.solid.common.vocab.PROV;
 import org.solid.testharness.utils.DataModelBase;
+
+import java.util.List;
 
 public class Step extends DataModelBase {
     public Step(final IRI subject) {
-        super(subject);
+        super(subject, ConstructMode.DEEP);
     }
 
     public String getTitle() {
         return getLiteralAsString(DCTERMS.title);
     }
-    public String getOutcome() {
-        return getIriAsString(EARL.outcome);
+
+    public String getUsed() {
+        return getIriAsString(PROV.used);
     }
-    public String getInfo() {
-        return getLiteralAsString(EARL.info);
+
+    public boolean isBackground() {
+        return getAsIri(PROV.wasInformedBy) == null;
+    }
+
+    public String getScenario() {
+        return getIriAsString(PROV.wasInformedBy);
+    }
+
+    public GeneratedOutput getGeneratedOutput() {
+        final List<GeneratedOutput> generatedOutputs = getModelList(PROV.generated, GeneratedOutput.class);
+        if (generatedOutputs != null) {
+            return generatedOutputs.get(0);
+        } else {
+            return null;
+        }
     }
 }

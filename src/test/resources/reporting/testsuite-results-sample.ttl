@@ -1,118 +1,84 @@
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix earl: <http://www.w3.org/ns/earl#> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix doap: <http://usefulinc.com/ns/doap#> .
-@prefix td: <http://www.w3.org/2006/03/test-description#> .
-@prefix test-harness: <https://github.com/solid/conformance-test-harness/> .
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix earl: <http://www.w3.org/ns/earl#>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix doap: <http://usefulinc.com/ns/doap#>
+prefix td: <http://www.w3.org/2006/03/test-description#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix test-harness: <https://github.com/solid/conformance-test-harness/>
 
-<https://example.org/dummy/group1/feature1>
-    a earl:TestCriterion, earl:TestFeature ;
-    dcterms:title "Group 1 Test case 1" ;
-    earl:assertions <https://example.org/dummy/group1/feature1/genid/node1f273av6vx11> ;
-    dcterms:hasPart <https://example.org/dummy/group1/feature1/genid/node1f273av6vx13>,
-                    <https://example.org/dummy/group1/feature1/scenario2>.
+prefix results: <https://github.com/solid/implementation-reports/uuid#>
+prefix manifest: <#>
 
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx11>
+manifest:group1-feature1
+    dcterms:hasPart results:node1f273av6vx13,
+                    results:node1f273av6vx42.
+
+# Assertion for the TestCase
+results:node1f273av6vx11
     a earl:Assertion;
     earl:assertedBy <https://github.com/solid/conformance-test-harness/>;
-    earl:test <https://example.org/dummy/group1/feature1>;
+    earl:test manifest:group1-feature1;
     earl:subject test-harness:testserver;
     earl:mode earl:automatic;
-    earl:result <https://example.org/dummy/group1/feature1/genid/node1f273av6vx12> .
+    earl:result results:node1f273av6vx12 .
 
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx12>
+results:node1f273av6vx12
     a earl:TestResult;
     earl:outcome earl:passed;
-    dcterms:date "2021-04-01T17:13:01.628+01:00"^^xsd:dateTime .
+    dcterms:date "2021-04-01T17:13:01.628001Z"^^xsd:dateTime .
 
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx13>
-    a earl:TestCriterion, earl:TestCase;
-    dcterms:title "Group 1 Test case 1 Test 1";
-    dcterms:isPartOf <https://example.org/dummy/group1/feature1>;
-    earl:assertions <https://example.org/dummy/group1/feature1/genid/node1f273av6vx14>;
-    earl:steps <https://example.org/dummy/group1/feature1/genid/node1f273av6vx29> .
+# Scenario 1
+results:node1f273av6vx13
+    a prov:Activity;
+    dcterms:title "Group 1 Test case 1 Scenario 1";
+    prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=10,15> ;
+    prov:startedAtTime "2021-04-15T13:00:00-04:00"^^xsd:dateTime ;
+    prov:endedAtTime   "2021-04-15T13:01:00-04:00"^^xsd:dateTime ;
+    prov:generated results:node1f273av6vx14 ;
+    dcterms:hasPart results:node1f273av6vx29 .
 
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx14>
-    a earl:Assertion;
-    earl:assertedBy <https://github.com/solid/conformance-test-harness/>;
-    earl:test <https://example.org/dummy/group1/feature1/genid/node1f273av6vx13>;
-    earl:subject test-harness:testserver;
-    earl:mode earl:automatic;
-    earl:result <https://example.org/dummy/group1/feature1/genid/node1f273av6vx15> .
+results:node1f273av6vx14
+    a prov:Entity ;
+    prov:generatedAtTime "2021-04-01T17:12:59.933001Z"^^xsd:dateTime ;
+    prov:value earl:passed .
 
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx15>
-    a earl:TestResult;
-    earl:outcome earl:passed;
-    dcterms:date "2021-04-01T17:12:59.933+01:00"^^xsd:dateTime .
-
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx29>
+# Step list
+results:node1f273av6vx29
     a rdf:List;
-    rdf:first <https://example.org/dummy/group1/feature1/genid/node1f273av6vx16>;
-    rdf:rest (<https://example.org/dummy/group1/feature1/genid/node1f273av6vx17>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx18>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx19>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx20>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx21>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx22>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx23>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx24>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx25>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx26>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx27>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx28>) .
+    rdf:first results:node1f273av6vx16;
+    rdf:rest (results:node1f273av6vx17
+                 results:node1f273av6vx18) .
 
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx16>
-    a earl:TestStep;
+results:node1f273av6vx16
+    a prov:Activity;
     dcterms:title "* def testContainer = createTestContainer(clients.alice)";
-    earl:outcome earl:passed .
+    prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=11> ;
+    prov:generated results:node1f273av6vx16a .
 
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx17>
-    a earl:TestStep;
-    dcterms:title "* def exampleTurtle = karate.readAsString('../fixtures/example.ttl')";
-    earl:outcome earl:passed .
+results:node1f273av6vx16a a prov:Entity; prov:value earl:passed .
 
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx18>
-    a earl:TestStep;
-    dcterms:title "* def resource = testContainer.createChildResource('.ttl', exampleTurtle, 'text/turtle');";
-    earl:outcome earl:passed .
-
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx19>
-    a earl:TestStep;
-    dcterms:title "* assert resource.exists()";
-    earl:outcome earl:passed .
-
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx20>
-    a earl:TestStep;
-    dcterms:title "* def expected = RDFUtils.turtleToTripleArray(exampleTurtle, resource.getUrl())";
-    earl:outcome earl:passed .
-
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx21>
-    a earl:TestStep;
-    dcterms:title "* configure headers = clients.alice.getAuthHeaders('GET', resource.getUrl())";
-    earl:outcome earl:passed .
-
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx22>
-    a earl:TestStep;
-    dcterms:title "* url resource.getUrl()";
-    earl:outcome earl:passed .
-
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx23>
-    a earl:TestStep;
-    dcterms:title "* configure afterFeature = function() {resource.getContainer().delete()}";
-    earl:outcome earl:passed .
-
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx24>
-    a earl:TestStep;
+results:node1f273av6vx17
+    a prov:Activity;
     dcterms:title "Given header Accept = 'application/ld+json'";
-    earl:outcome earl:passed .
+    prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=19> ;
+    prov:wasInformedBy results:node1f273av6vx13 ;
+    prov:generated results:node1f273av6vx17a .
 
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx25>
-    a earl:TestStep;
+results:node1f273av6vx17a a prov:Entity; prov:value earl:passed .
+
+results:node1f273av6vx18
+    a prov:Activity;
     dcterms:title "When method GET";
-    earl:outcome earl:passed;
-    earl:info """17:13:00.420 request:
+    prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=20> ;
+    prov:wasInformedBy results:node1f273av6vx13 ;
+    prov:generated results:node1f273av6vx18a .
+
+results:node1f273av6vx18a
+    a prov:Entity ;
+    prov:value earl:passed ;
+    dcterms:description """17:13:00.420 request:
 1 > GET https://pod-compat.inrupt.com/solid-test-suite-alice/shared-test/e76ea929-dfa2-4e89-8add-39aa75435a24/7528a979-8253-4e47-a9b1-1cf936c1814f.ttl
 1 > Accept: application/ld+json
 1 > Authorization: DPoP eyJhbGciOiJSUzI1NiIsImtpZCI6IlJTZFhXUEplV0pJIn0.eyJpc3MiOiJodHRwczovL2lucnVwdC5uZXQiLCJhdWQiOiJzb2xpZCIsInN1YiI6Imh0dHBzOi8vc29saWQtdGVzdC1zdWl0ZS1hbGljZS5pbnJ1cHQubmV0L3Byb2ZpbGUvY2FyZCNtZSIsImV4cCI6MTYxODUwMzE3OCwiaWF0IjoxNjE3MjkzNTc4LCJqdGkiOiI0ZTA4ODVjNjExOGE1YTVkIiwiY25mIjp7ImprdCI6IlJXSkpxelF3RmNNWGRyNGIxMHNubFVMemlmd1lyMUpTYy1QTVctaUdVNUEifSwiY2xpZW50X2lkIjoiNDgzNTIyYjNlYzE0ZjVkMGExMjgwYzE1MjJhMGZhN2EiLCJ3ZWJpZCI6Imh0dHBzOi8vc29saWQtdGVzdC1zdWl0ZS1hbGljZS5pbnJ1cHQubmV0L3Byb2ZpbGUvY2FyZCNtZSJ9.Zocnp0HEyD8pb2iU7tZOYMigqnkGQ1L-nzqSR5geea9MW9aOSNy7u0uYGunU3dnXLBT7lkog6O3f174cVk5NFyJ6T8GmrostRCBM99g74Q-iVXK5-mCOiHadMxMFOkv2LRNDIVAr_uoS4VSK6Ic2VOovg_hkh8PvvW_oBVEhFCUQLhpdq_B-30DcU2upmoo6Pn9wiIluhouxbhaZhnpLgKizw58vB75d7HVCqT1YnFh93Ah3_VoBFYz2ELXSQPNzWUedCMuHU11ZrA3W4AFbA4-6sQJEMI479CQKNIh-A27dcytzbuwMHZHnhkZ_coHJ6FSbxzBsx9TojyDQ-prP3Q
@@ -140,93 +106,56 @@
 1 < Allow: GET,HEAD,OPTIONS,PATCH,PUT,DELETE
 1 < Strict-Transport-Security: max-age=15724800; includeSubDomains
 {\"@graph\":[{\"@id\":\"http:\\/\\/example.org\\/#hello\",\"linked\":\"http:\\/\\/example.org\\/#world\"},{\"@type\":\"ldp:RDFSource\",\"@id\":\"https:\\/\\/pod-compat.inrupt.com\\/solid-test-suite-alice\\/shared-test\\/e76ea929-dfa2-4e89-8add-39aa75435a24\\/7528a979-8253-4e47-a9b1-1cf936c1814f.ttl\"}],\"@context\":{\"as\":\"https:\\/\\/www.w3.org\\/ns\\/activitystreams#\",\"rdf\":\"http:\\/\\/www.w3.org\\/1999\\/02\\/22-rdf-syntax-ns#\",\"xsd\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\",\"ldp\":\"http:\\/\\/www.w3.org\\/ns\\/ldp#\",\"skos\":\"http:\\/\\/www.w3.org\\/2004\\/02\\/skos\\/core#\",\"rdfs\":\"http:\\/\\/www.w3.org\\/2000\\/01\\/rdf-schema#\",\"acl\":\"http:\\/\\/www.w3.org\\/ns\\/auth\\/acl#\",\"vcard\":\"http:\\/\\/www.w3.org\\/2006\\/vcard\\/ns#\",\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\"linked\":{\"@type\":\"@id\",\"@id\":\"http:\\/\\/example.org\\/#linked\"},\"dc\":\"http:\\/\\/purl.org\\/dc\\/terms\\/\",\"acp\":\"http:\\/\\/www.w3.org\\/ns\\/solid\\/acp#\"}}
-""" .
+""".
 
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx26>
-    a earl:TestStep;
-    dcterms:title "Then status 200";
-    earl:outcome earl:passed .
+# Scenario 2
+results:node1f273av6vx42
+    a prov:Activity;
+    dcterms:title "Group 1 Test case 1 Scenario 2";
+    prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=25,35> ;
+    prov:startedAtTime "2021-04-15T13:02:00-04:00"^^xsd:dateTime ;
+    prov:endedAtTime   "2021-04-15T13:04:00-04:00"^^xsd:dateTime ;
+    prov:generated results:node1f273av6vx43 ;
+    dcterms:hasPart results:node1f273av6vx58 .
 
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx27>
-    a earl:TestStep;
-    dcterms:title "And match header Content-Type contains 'application/ld+json'";
-    earl:outcome earl:passed .
+results:node1f273av6vx43
+    a prov:Entity ;
+    prov:generatedAtTime "2021-04-01T17:12:59.933001Z"^^xsd:dateTime ;
+    prov:value earl:passed .
 
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx28>
-    a earl:TestStep;
-    dcterms:title "And match RDFUtils.jsonLdToTripleArray(JSON.stringify(response), resource.getUrl()) contains expected";
-    earl:outcome earl:passed .
+results:node1f273av6vx58
+    a rdf:List;
+    rdf:first results:node1f273av6vx45;
+    rdf:rest (results:node1f273av6vx53
+             results:node1f273av6vx54
+             results:node1f273av6vx55) .
 
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx42>
-    a earl:TestCriterion, earl:TestCase;
-    dcterms:title "Group 1 Test case 1 Test 2";
-    dcterms:isPartOf <https://example.org/dummy/group1/feature1>;
-    earl:assertions <https://example.org/dummy/group1/feature1/genid/node1f273av6vx43>;
-    earl:steps <https://example.org/dummy/group1/feature1/genid/node1f273av6vx58> .
-
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx43>
-    a earl:Assertion;
-    earl:assertedBy <https://github.com/solid/conformance-test-harness/>;
-    earl:test <https://example.org/dummy/group1/feature1/genid/node1f273av6vx42>;
-    earl:subject test-harness:testserver;
-    earl:mode earl:automatic;
-    earl:result <https://example.org/dummy/group1/feature1/genid/node1f273av6vx44> .
-
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx44>
-    a earl:TestResult;
-    earl:outcome earl:passed;
-    dcterms:date "2021-04-01T17:12:59.884+01:00"^^xsd:dateTime .
-
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx45>
-    a earl:TestStep;
+results:node1f273av6vx45
+    a prov:Activity;
     dcterms:title "* def testContainer = createTestContainer(clients.alice)";
-    earl:outcome earl:passed .
+    prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=26> ;
+    prov:generated results:node1f273av6vx45a .
 
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx46>
-    a earl:TestStep;
-    dcterms:title "* def exampleTurtle = karate.readAsString('../fixtures/example.ttl')";
-    earl:outcome earl:passed .
+results:node1f273av6vx45a a prov:Entity; prov:value earl:passed .
 
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx47>
-    a earl:TestStep;
-    dcterms:title "* def resource = testContainer.createChildResource('.ttl', exampleTurtle, 'text/turtle');";
-    earl:outcome earl:passed .
-
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx48>
-    a earl:TestStep;
-    dcterms:title "* assert resource.exists()";
-    earl:outcome earl:passed .
-
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx49>
-    a earl:TestStep;
-    dcterms:title "* def expected = RDFUtils.turtleToTripleArray(exampleTurtle, resource.getUrl())";
-    earl:outcome earl:passed .
-
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx50>
-    a earl:TestStep;
-    dcterms:title "* configure headers = clients.alice.getAuthHeaders('GET', resource.getUrl())";
-    earl:outcome earl:passed .
-
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx51>
-    a earl:TestStep;
-    dcterms:title "* url resource.getUrl()";
-    earl:outcome earl:passed .
-
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx52>
-    a earl:TestStep;
-    dcterms:title "* configure afterFeature = function() {resource.getContainer().delete()}";
-    earl:outcome earl:passed .
-
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx53>
-    a earl:TestStep;
+results:node1f273av6vx53
+    a prov:Activity;
     dcterms:title "Given header Accept = 'text/turtle'";
-    earl:outcome earl:passed .
+    prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=34> ;
+    prov:wasInformedBy results:node1f273av6vx42 ;
+    prov:generated results:node1f273av6vx53a .
 
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx54>
-    a earl:TestStep;
+results:node1f273av6vx53a a prov:Entity; prov:value earl:passed .
+
+results:node1f273av6vx54
+    a prov:Activity;
     dcterms:title "When method GET";
-    earl:outcome earl:passed;
-    earl:info """17:13:00.420 request:
+    prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=35> ;
+    prov:wasInformedBy results:node1f273av6vx42 ;
+    prov:generated results:node1f273av6vx54a .
+
+results:node1f273av6vx54a a prov:Entity; prov:value earl:passed ;
+    dcterms:description """17:13:00.420 request:
 1 > GET https://pod-compat.inrupt.com/solid-test-suite-alice/shared-test/9d43a8d2-14f9-4881-b1f7-30bad84f086b/2d836d5d-d41b-4d98-bd90-4a79edaa9ac4.ttl
 1 > Accept: text/turtle
 1 > Authorization: DPoP eyJhbGciOiJSUzI1NiIsImtpZCI6IlJTZFhXUEplV0pJIn0.eyJpc3MiOiJodHRwczovL2lucnVwdC5uZXQiLCJhdWQiOiJzb2xpZCIsInN1YiI6Imh0dHBzOi8vc29saWQtdGVzdC1zdWl0ZS1hbGljZS5pbnJ1cHQubmV0L3Byb2ZpbGUvY2FyZCNtZSIsImV4cCI6MTYxODUwMzE3OCwiaWF0IjoxNjE3MjkzNTc4LCJqdGkiOiI0ZTA4ODVjNjExOGE1YTVkIiwiY25mIjp7ImprdCI6IlJXSkpxelF3RmNNWGRyNGIxMHNubFVMemlmd1lyMUpTYy1QTVctaUdVNUEifSwiY2xpZW50X2lkIjoiNDgzNTIyYjNlYzE0ZjVkMGExMjgwYzE1MjJhMGZhN2EiLCJ3ZWJpZCI6Imh0dHBzOi8vc29saWQtdGVzdC1zdWl0ZS1hbGljZS5pbnJ1cHQubmV0L3Byb2ZpbGUvY2FyZCNtZSJ9.Zocnp0HEyD8pb2iU7tZOYMigqnkGQ1L-nzqSR5geea9MW9aOSNy7u0uYGunU3dnXLBT7lkog6O3f174cVk5NFyJ6T8GmrostRCBM99g74Q-iVXK5-mCOiHadMxMFOkv2LRNDIVAr_uoS4VSK6Ic2VOovg_hkh8PvvW_oBVEhFCUQLhpdq_B-30DcU2upmoo6Pn9wiIluhouxbhaZhnpLgKizw58vB75d7HVCqT1YnFh93Ah3_VoBFYz2ELXSQPNzWUedCMuHU11ZrA3W4AFbA4-6sQJEMI479CQKNIh-A27dcytzbuwMHZHnhkZ_coHJ6FSbxzBsx9TojyDQ-prP3Q
@@ -254,83 +183,13 @@
 1 < Allow: GET,HEAD,OPTIONS,PATCH,PUT,DELETE
 1 < Strict-Transport-Security: max-age=15724800; includeSubDomains
 
-""" .
+""".
 
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx55>
-    a earl:TestStep;
+results:node1f273av6vx55
+    a prov:Activity;
     dcterms:title "Then status 200";
-    earl:outcome earl:passed .
+    prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=36> ;
+    prov:wasInformedBy results:node1f273av6vx42 ;
+    prov:generated results:node1f273av6vx55a .
 
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx56>
-    a earl:TestStep;
-    dcterms:title "And match header Content-Type contains 'text/turtle'";
-    earl:outcome earl:passed .
-
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx57>
-    a earl:TestStep;
-    dcterms:title "And match RDFUtils.turtleToTripleArray(response, resource.getUrl()) contains expected";
-    earl:outcome earl:passed .
-
-<https://example.org/dummy/group1/feature1/genid/node1f273av6vx58>
-    a rdf:List;
-    rdf:first <https://example.org/dummy/group1/feature1/genid/node1f273av6vx45>;
-    rdf:rest (<https://example.org/dummy/group1/feature1/genid/node1f273av6vx46>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx47>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx48>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx49>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx50>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx51>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx52>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx53>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx54>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx55>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx56>
-                 <https://example.org/dummy/group1/feature1/genid/node1f273av6vx57>) .
-
-<https://example.org/dummy/group1/feature2>
-    a earl:TestCriterion, earl:TestFeature ;
-    dcterms:subject "MUST" ;
-    td:reviewStatus td:accepted ;
-    dcterms:title "Group 1 Test case 2" .
-
-<https://example.org/dummy/group1/feature3>
-    a earl:TestCriterion, earl:TestFeature ;
-    dcterms:subject "MAY" ;
-    td:reviewStatus td:unreviewed ;
-    dcterms:title "Group 1 Test case 3" .
-
-<https://example.org/dummy/group2/feature1>
-    a earl:TestCriterion, earl:TestFeature ;
-    dcterms:subject "MUST" ;
-    td:reviewStatus td:accepted ;
-    dcterms:title "Group 2 Test case 1" .
-
-<https://example.org/dummy/group3/feature1>
-    a earl:TestCriterion, earl:TestFeature ;
-    dcterms:subject "MUST" ;
-    td:reviewStatus td:accepted ;
-    dcterms:title "Group 3 Test case 1" .
-
-<https://example.org/dummy/group3/feature2>
-    a earl:TestCriterion, earl:TestFeature ;
-    dcterms:subject "MUST" ;
-    td:reviewStatus td:accepted ;
-    dcterms:title "Group 3 Test case 2" .
-
-<https://example.org/dummy/group4/feature1>
-    a earl:TestCriterion, earl:TestFeature ;
-    dcterms:subject "MUST" ;
-    td:reviewStatus td:accepted ;
-    dcterms:title "Group 4 Test case 1" .
-
-<https://example.org/dummy/group4/feature2>
-    a earl:TestCriterion, earl:TestFeature ;
-    dcterms:subject "MUST" ;
-    td:reviewStatus td:accepted ;
-    dcterms:title "Group 4 Test case 2" .
-
-<https://example.org/dummy/group4/feature3>
-    a earl:TestCriterion, earl:TestFeature ;
-    dcterms:subject "MUST" ;
-    td:reviewStatus td:unreviewed ;
-    dcterms:title "Group 4 Test case 3" .
+results:node1f273av6vx55a a prov:Entity; prov:value earl:failed .

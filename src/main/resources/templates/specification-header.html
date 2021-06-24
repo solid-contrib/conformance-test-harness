@@ -3,7 +3,7 @@
 <ul>
   {#each specifications}
   <li><a href="{it.subject}" typeof="{it.typesList}" title="Specification link">{it.subject}</a>
-    {#if it.manifest} - Test manifest: <a href="{it.manifest}" rel="rdfs:seeAlso" title="Manifest link">{it.manifest}</a>{/if}
+    {#if it.manifest} - Test manifest: <a href="{it.manifest}" rel="rdfs:seeAlso" title="Manifest link">{it.manifest}</a>{#else}TODO: LOCATE MANIFEST{/if}
   </li>
   {/each}
 </ul>

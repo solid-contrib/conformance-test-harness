@@ -35,12 +35,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.FOAF;
 import org.solid.common.vocab.RDF;
+import org.solid.common.vocab.SPEC;
 
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
@@ -55,6 +58,7 @@ class DataRepositoryTest {
     private static final IRI assertor = iri(TestData.SAMPLE_NS, "testharness");
     private static final IRI testSubject = iri(TestData.SAMPLE_NS, "test");
     private static final IRI featureIri = iri(TestData.SAMPLE_NS, "feature");
+    private static final IRI testCaseIri = iri(TestData.SAMPLE_NS, "testCase");
 
     @Test
     void addFeatureResult() throws Exception {
@@ -62,19 +66,28 @@ class DataRepositoryTest {
         dataRepository.postConstruct();
         dataRepository.setAssertor(assertor);
         dataRepository.setTestSubject(testSubject);
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            conn.add(testCaseIri, SPEC.testScript, featureIri);
+        }
+
         final Suite suite = Suite.forTempUse();
         final Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
         final Scenario scenario1 = mock(Scenario.class);
         when(scenario1.getName()).thenReturn("SCENARIO 1");
+        when(scenario1.getUriToLineNumber()).thenReturn(new URI("https://example.org/features#line=1"));
         final Scenario scenario2 = mock(Scenario.class);
         when(scenario2.getName()).thenReturn("SCENARIO 2");
+        when(scenario2.getUriToLineNumber()).thenReturn(new URI("https://example.org/features#line=2"));
         final Step step1 = mock(Step.class);
         when(step1.getPrefix()).thenReturn("When");
         when(step1.getText()).thenReturn("method GET");
+        when(step1.getDebugInfo()).thenReturn("line");
+        when(step1.isBackground()).thenReturn(true);
         final Step step2 = mock(Step.class);
         when(step2.getPrefix()).thenReturn("Then");
         when(step2.getText()).thenReturn("Status 200");
+        when(step2.getDebugInfo()).thenReturn("line");
         final Result res1 = mock(Result.class);
         when(res1.getStatus()).thenReturn("passed");
         final Result res2 = mock(Result.class);
@@ -89,11 +102,15 @@ class DataRepositoryTest {
         final ScenarioResult sr1 = mock(ScenarioResult.class);
         when(sr1.getScenario()).thenReturn(scenario1);
         when(sr1.isFailed()).thenReturn(true);
+        when(sr1.getStartTime()).thenReturn(123456789l);
+        when(sr1.getEndTime()).thenReturn(123456789l);
         when(sr1.getDurationMillis()).thenReturn(2000.0);
 
         final ScenarioResult sr2 = mock(ScenarioResult.class);
         when(sr2.getScenario()).thenReturn(scenario2);
         when(sr2.isFailed()).thenReturn(false);
+        when(sr1.getStartTime()).thenReturn(123456789l);
+        when(sr1.getEndTime()).thenReturn(123456789l);
         when(sr2.getDurationMillis()).thenReturn(3000.0);
 
         when(fr.getScenarioResults()).thenReturn(List.of(sr1, sr2));
@@ -111,8 +128,9 @@ class DataRepositoryTest {
         dataRepository.addFeatureResult(suite, fr, featureIri);
         final StringWriter sw = new StringWriter();
         dataRepository.export(sw);
-        assertTrue(sw.toString().contains(featureIri.stringValue()));
         assertTrue(sw.toString().contains("dcterms:title \"FEATURE NAME\""));
+        assertTrue(sw.toString().contains("earl:outcome earl:failed"));
+        assertTrue(sw.toString().contains("prov:value earl:passed"));
     }
 
     @Test
@@ -121,21 +139,62 @@ class DataRepositoryTest {
         dataRepository.postConstruct();
         dataRepository.setAssertor(assertor);
         dataRepository.setTestSubject(testSubject);
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            conn.add(testCaseIri, SPEC.testScript, featureIri);
+        }
+
         final Suite suite = Suite.forTempUse();
         final Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
         final FeatureResult fr = mock(FeatureResult.class);
         when(fr.getDisplayName()).thenReturn("DISPLAY_NAME");
         when(fr.getFeature()).thenReturn(feature);
-        when(fr.isFailed()).thenReturn(false);
+        when(fr.isFailed()).thenReturn(true);
         when(fr.getDurationMillis()).thenReturn(1000.0);
-        when(fr.getScenarioResults()).thenReturn(null);
+        when(fr.getScenarioResults()).thenReturn(Collections.emptyList());
 
         dataRepository.addFeatureResult(suite, fr, featureIri);
         final StringWriter sw = new StringWriter();
         dataRepository.export(sw);
-        assertTrue(sw.toString().contains(featureIri.stringValue()));
         assertTrue(sw.toString().contains("dcterms:title \"FEATURE NAME\""));
+        assertTrue(sw.toString().contains("earl:outcome earl:failed"));
+    }
+
+    @Test
+    void addFeatureResultNoTestCase() throws Exception {
+        final DataRepository dataRepository = new DataRepository();
+        dataRepository.postConstruct();
+        dataRepository.setAssertor(assertor);
+        dataRepository.setTestSubject(testSubject);
+
+        final Suite suite = Suite.forTempUse();
+        final Feature feature = mock(Feature.class);
+        when(feature.getName()).thenReturn("FEATURE NAME");
+        final Scenario scenario1 = mock(Scenario.class);
+        when(scenario1.getName()).thenReturn("SCENARIO 1");
+        when(scenario1.getUriToLineNumber()).thenReturn(new URI("https://example.org/features#line=1"));
+
+        final FeatureResult fr = mock(FeatureResult.class);
+        when(fr.getDisplayName()).thenReturn("DISPLAY_NAME");
+        when(fr.getFeature()).thenReturn(feature);
+        when(fr.isFailed()).thenReturn(true);
+        when(fr.getDurationMillis()).thenReturn(1000.0);
+
+        final ScenarioResult sr1 = mock(ScenarioResult.class);
+        when(sr1.getScenario()).thenReturn(scenario1);
+        when(sr1.isFailed()).thenReturn(true);
+        when(sr1.getStartTime()).thenReturn(123456789l);
+        when(sr1.getEndTime()).thenReturn(123456789l);
+        when(sr1.getDurationMillis()).thenReturn(2000.0);
+
+        when(fr.getScenarioResults()).thenReturn(List.of(sr1));
+        when(sr1.getStepResults()).thenReturn(Collections.emptyList());
+
+        dataRepository.addFeatureResult(suite, fr, featureIri);
+        final StringWriter sw = new StringWriter();
+        dataRepository.export(sw);
+        assertFalse(sw.toString().contains("dcterms:title \"FEATURE NAME\""));
+        assertTrue(sw.toString().contains("earl:outcome earl:failed"));
     }
 
     @Test

@@ -1,0 +1,57 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix td: <http://www.w3.org/2006/03/test-description#> .
+prefix spec: <http://www.w3.org/ns/spec#>
+
+prefix manifest: <#>
+
+manifest:content-negotiation-jsonld
+  a td:TestCase ;
+  spec:requirementReference <https://solidproject.org/TR/protocol#resource-representations> ;
+  td:reviewStatus td:accepted ;
+  spec:testScript
+    <https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/content-negotiation/content-negotiation-jsonld.feature> .
+
+manifest:content-negotiation-turtle
+  a td:TestCase ;
+  spec:requirementReference <https://solidproject.org/TR/protocol#resource-representations> ;
+  td:reviewStatus td:accepted ;
+  spec:testScript
+    <https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/content-negotiation/content-negotiation-turtle.feature> .
+
+manifest:content-negotiation-rdfa
+  a td:TestCase ;
+  td:reviewStatus td:unreviewed .
+
+manifest:writing-resource-containment
+  a td:TestCase ;
+  spec:requirementReference <https://solidproject.org/TR/protocol#writing-resources> ;
+  td:reviewStatus td:accepted ;
+  spec:testScript
+    <https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/writing-resource/containment.feature> .
+
+manifest:wac-allow-access-Bob-W-public-RA
+  a td:TestCase ;
+  spec:requirementReference <https://solidproject.org/TR/protocol#web-access-control> ;
+  td:reviewStatus td:accepted ;
+  td:preCondition "authentication", "acl", "wac-allow" ;
+  spec:testScript
+    <https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/wac-allow/access-Bob-W-public-RA.feature> .
+
+manifest:wac-allow-default-Bob-W-public-RA
+  a td:TestCase ;
+  spec:requirementReference <https://solidproject.org/TR/protocol#web-access-control> ;
+  td:reviewStatus td:accepted ;
+  td:preCondition "authentication", "acl", "wac-allow" ;
+  spec:testScript
+    <https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/wac-allow/default-Bob-W-public-RA.feature> .
+
+manifest:wac-allow-access-public-R
+  a td:TestCase ;
+  spec:requirementReference <https://solidproject.org/TR/protocol#web-access-control> ;
+  td:reviewStatus td:unreviewed ;
+  td:preCondition "authentication", "acl", "wac-allow" ;
+  spec:testScript
+    <https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/wac-allow/access-public-R.feature> .

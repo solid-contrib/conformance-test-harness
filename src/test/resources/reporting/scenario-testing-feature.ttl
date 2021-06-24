@@ -1,21 +1,26 @@
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix earl: <http://www.w3.org/ns/earl#> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix ex: <https://example.org/> .
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix earl: <http://www.w3.org/ns/earl#>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix ex: <https://example.org/>
 
-ex:scenario1 a earl:TestCriterion, earl:TestCase;
+ex:scenario1 a prov:Activity;
     dcterms:title "TITLE";
-    dcterms:isPartOf ex:parent;
-    earl:assertions ex:assertion;
-    earl:steps ex:steps .
-ex:assertion a earl:Assertion .
+    prov:used <https://example.org/test.feature#line=10,15> ;
+    prov:startedAtTime "2021-04-15T13:00:00-04:00"^^xsd:dateTime ;
+    prov:endedAtTime   "2021-04-15T13:01:00-04:00"^^xsd:dateTime ;
+    prov:generated ex:scenario1-output1 ;
+    dcterms:hasPart ex:steps .
+
+ex:scenario1-output1 a prov:Entity .
+
 ex:steps a rdf:List;
     rdf:first ex:step1;
     rdf:rest (ex:step2).
-ex:step1 a earl:TestStep;
-    dcterms:title "STEP1";
-    earl:outcome earl:passed .
-ex:step2 a earl:TestStep;
-    dcterms:title "STEP2";
-    earl:outcome earl:passed .
-ex:scenario2 a earl:TestCriterion, earl:TestCase.
+ex:step1 a prov:Activity;
+    dcterms:title "STEP1" .
+ex:step2 a prov:Activity;
+    dcterms:title "STEP2" .
+
+ex:scenario2 a prov:Activity.

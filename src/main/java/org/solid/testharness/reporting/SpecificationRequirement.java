@@ -25,7 +25,6 @@ package org.solid.testharness.reporting;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.solid.common.vocab.SPEC;
-import org.solid.common.vocab.TD;
 import org.solid.testharness.utils.DataModelBase;
 
 import java.util.List;
@@ -43,14 +42,12 @@ public class SpecificationRequirement extends DataModelBase {
         return getIriAsString(SPEC.normativeConformanceLevel);
     }
 
-    public SpecificationTestCase getSpecificationTestCase() {
-        final List<SpecificationTestCase> specificationTestCases = getModelListByObject(TD.specificationReference,
-                SpecificationTestCase.class);
-        if (specificationTestCases != null) {
-            return specificationTestCases.get(0);
-        } else {
-            return null;
-        }
+    public String getExcerpt() {
+        return getIriAsString(SPEC.excerpt);
+    }
+
+    public List<TestCase> getTestCases() {
+        return getModelListByObject(SPEC.requirementReference, TestCase.class);
     }
 }
 

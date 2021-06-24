@@ -36,19 +36,30 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 public class ResultData {
     private Assertor assertor;
     private List<Specification> specifications;
+    private List<TestCase> testCases;
 
-    public ResultData(final List<IRI> specifications) {
+    public ResultData(final List<IRI> specifications, final List<IRI> testCases) {
         assertor = new Assertor(iri(Namespaces.TEST_HARNESS_URI));
         this.specifications = specifications.stream().map(Specification::new).collect(Collectors.toList());
+        this.testCases = testCases.stream().map(TestCase::new).collect(Collectors.toList());
+    }
+
+    public String getSubject() {
+        return Namespaces.RESULTS_URI;
     }
 
     public String getPrefixes() {
         return Namespaces.generateHtmlPrefixes(List.of(RDF.PREFIX, RDFS.PREFIX, XSD.PREFIX, DCTERMS.PREFIX, DOAP.PREFIX,
-                SOLID.PREFIX, SOLID_TEST.PREFIX, EARL.PREFIX, TD.PREFIX, SPEC.PREFIX));
+                SOLID.PREFIX, SOLID_TEST.PREFIX, EARL.PREFIX, TD.PREFIX, PROV.PREFIX, SPEC.PREFIX,
+                Namespaces.RESULTS_PREFIX));
     }
 
     public List<Specification> getSpecifications() {
         return specifications;
+    }
+
+    public List<TestCase> getTestCases() {
+        return testCases;
     }
 
     public Assertor getAssertor() {

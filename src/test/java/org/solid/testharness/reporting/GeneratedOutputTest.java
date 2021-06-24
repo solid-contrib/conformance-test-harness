@@ -25,50 +25,42 @@ package org.solid.testharness.reporting;
 
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
+import org.solid.common.vocab.EARL;
 import org.solid.testharness.utils.AbstractDataModelTests;
 
-import java.util.List;
+import java.time.ZonedDateTime;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
-class SpecificationTestCaseTest extends AbstractDataModelTests {
+class GeneratedOutputTest extends AbstractDataModelTests {
     @Override
     public String getTestFile() {
-        return "src/test/resources/reporting/specificationtestcase-testing-feature.ttl";
+        return "src/test/resources/reporting/generatedoutput-testing-feature.ttl";
     }
 
     @Test
-    void getTitle() {
-        final SpecificationTestCase specificationTestCase = new SpecificationTestCase(iri(NS, "test1"));
-        assertEquals("Title", specificationTestCase.getTitle());
+    void getTimestamp() {
+        final GeneratedOutput generatedOutput = new GeneratedOutput(iri(NS, "scenario1-output"));
+        assertTrue(generatedOutput.getTimestamp().isEqual(ZonedDateTime.parse("2021-04-06T17:41:20.889001Z")));
+    }
+
+    @Test
+    void getValue() {
+        final GeneratedOutput generatedOutput = new GeneratedOutput(iri(NS, "scenario1-output"));
+        assertEquals(EARL.passed.stringValue(), generatedOutput.getValue());
     }
 
     @Test
     void getDescription() {
-        final SpecificationTestCase specificationTestCase = new SpecificationTestCase(iri(NS, "test1"));
-        assertEquals("Description", specificationTestCase.getDescription());
+        final GeneratedOutput generatedOutput = new GeneratedOutput(iri(NS, "scenario1-output"));
+        assertTrue(generatedOutput.getDescription().contains("GET https"));
     }
 
     @Test
-    void getSpecificationReference() {
-        final SpecificationTestCase specificationTestCase = new SpecificationTestCase(iri(NS, "test1"));
-        assertEquals(NS + "spec", specificationTestCase.getSpecificationReference());
-    }
-
-    @Test
-    void getTestCases() {
-        final SpecificationTestCase specificationTestCase = new SpecificationTestCase(iri(NS, "test1"));
-        final List<TestCase> testCases = specificationTestCase.getTestCases();
-        assertNotNull(testCases);
-        assertEquals(1, testCases.size());
-    }
-
-    @Test
-    void getEmptyTestCases() {
-        final SpecificationTestCase specificationTestCase = new SpecificationTestCase(iri(NS, "test2"));
-        final List<TestCase> testCases = specificationTestCase.getTestCases();
-        assertNull(testCases);
+    void getNoDescription() {
+        final GeneratedOutput generatedOutput = new GeneratedOutput(iri(NS, "scenario1-step1-output"));
+        assertNull(generatedOutput.getDescription());
     }
 }

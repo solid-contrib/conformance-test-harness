@@ -21,81 +21,77 @@
 <main>
     {#if specifications}
     {#each specifications}
-    <section about="{it.subject}" typeof="{it.typesList}">
+    <section about="{it.subject}" typeof="{it.typesList}" class="spec">
         <h2>Specification: {it.subject}</h2>
         {#if it.specificationRequirements}
-        <h2>Results by test feature</h2>
+        <h2>Results by specification requirement</h2>
         {#each it.specificationRequirements}
         <div about="{it.subject}" rel="spec:requirement" typeof="{it.typesList}">
+            <div class="splitBox">
+                <div class="col">
             <h3>Requirement: {it.subject}</h3>
-            <dl><dt>Conformance Role</dt><dd>{it.conformanceRole}</dd></dl>
-            <dl><dt>Conformance Level</dt><dd>{it.conformanceLevel}</dd></dl>
-            {#with it.specificationTestCase}
-            <div about="{subject}" rev="td:specificationReference" resource="{it.subject}" typeof="{it.typesList}">
-                <h3 property="dcterms:title">{title}</h3>
-                <p property="dcterms:description">{description}</p>
-                {#if testCases}
-                <table>
-                    <tr>
-                        <th>TestCase</th>
-                        <th>Title</th>
-                        <th>Level</th>
-                        <th>Status</th>
-                        <th>Target</th>
-                        <th>Outcome</th>
-                        <th>Timestamp</th>
-                        <th>Scenario link</th>
-                    </tr>
-                    {#each testCases}
-                        {#include testcase link=anchor /}
-                    {/each}
-                </table>
-                {#else}
-                <p>No test cases found</p>
-                {/if}
+            <dl><dt>Conformance Role</dt><dd property="spec:conformanceRole">{it.conformanceRole}</dd></dl>
+            <dl><dt>Conformance Level</dt><dd property="spec:normativeConformanceLevel">{it.conformanceLevel}</dd></dl>
+                </div>
+                <div class="col">
+            {#if it.excerpt}
+            <h3>Excerpt</h3>
+            <p property="spec:excerpt">{it.excerpt}</p>
+            {/if}
+                </div>
             </div>
-            {/with}
+            {#if it.testCases}
+            <table>
+                <tr>
+                    <th>TestCase</th>
+                    <th>Title</th>
+                    <th>Script</th>
+                    <th>Status</th>
+                    <th>Target</th>
+                    <th>Outcome</th>
+                    <th>Timestamp</th>
+                    <th>Scenario link</th>
+                </tr>
+                {#each it.testCases}
+                    {#include testcase /}
+                {/each}
+            </table>
+            {#else}
+            <p>No test cases found</p>
+            {/if}
         </div>
         {/each}
-
-        <hr/>
-        <h2>Results by test scenario</h2>
-        {#for requirement in it.specificationRequirements}
-        {#let stc=requirement.specificationTestCase}
-        <div id="scenarios-{stc.anchor}" property="dcterms:hasPart" resource="{stc.subject}">
-            <section about="{stc.subject}" typeof="{stc.typesList}">
-                <h3 property="dcterms:title">{stc.title}</h3>
-                {#if stc.testCases}
-                {#each stc.testCases}
-                <h3 property="dcterms:title">{it.title}</h3>
-                {#if it.scenarios}
-                <table>
-                    <tr>
-                        <th>Scenario</th>
-                        <th>Outcome</th>
-                        <th>Timestamp</th>
-                        <th>Scenario link</th>
-                    </tr>
-                    {#each it.scenarios}
-                    {#include scenario /}
-                    {/each}
-                </table>
-                {#else}
-                <p>No scenario results were discovered.</p>
-                {/if}
-                {/each}
-                {#else}
-                <p>No test cases were found.</p>
-                {/if}
-            </section>
-        </div>
-        {/let}
-        {/for}
         {#else}
         <p>No tests were discovered.</p>
         {/if}
     </section>
     {/each}
+    {/if}
+
+    {#if testCases}
+    <section>
+        <h2>Results by test case</h2>
+        {#for testCase in testCases}
+        {#if testCase.scenarios}
+        <section id="scenarios-{testCase.anchor}" about="{testCase.subject}" typeof="{testCase.typesList}">
+            <h3 property="dcterms:title">{testCase.title}</h3>
+            <table>
+                <tr>
+                    <th>Scenario</th>
+                    <th>Location</th>
+                    <th>Outcome</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Steps</th>
+                </tr>
+                {#each testCase.scenarios}
+                {#include scenario /}
+                {/each}
+            </table>
+        </section>
+        {/if}
+        {/for}
+    </section>
     {/if}
 
 </main>

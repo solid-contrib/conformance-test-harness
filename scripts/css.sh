@@ -18,18 +18,16 @@ rm temp.zip
 cat > ./config/application.yaml <<EOF
 subjects: ./test-subjects.ttl
 sources:
-  - https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/solid-protocol-spec.ttl
-  - https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/web-access-control-spec.ttl
+  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/solid-protocol-test-manifest.ttl
+  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/web-access-control-test-manifest.ttl
+  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/solid-protocol-spec.ttl
+  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/web-access-control-spec.ttl
 target: https://github.com/solid/conformance-test-harness/css
 
 feature:
   mappings:
-    - prefix: https://github.com/solid/conformance-test-harness/example
+    - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/example/main
       path: ./example
-    - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/solid
-      path: ./example/solid
-    - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/main/example/web
-      path: ./example/web
 EOF
 
 # build and run CSS in a container

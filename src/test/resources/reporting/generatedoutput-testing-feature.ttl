@@ -1,0 +1,46 @@
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix td: <http://www.w3.org/2006/03/test-description#>
+prefix earl: <http://www.w3.org/ns/earl#>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix spec: <http://www.w3.org/ns/spec#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix ex: <https://example.org/>
+
+ex:scenario1-output
+    a prov:Entity ;
+    prov:generatedAtTime "2021-04-06T17:41:20.889001Z"^^xsd:dateTime ;
+    prov:value earl:passed ;
+    dcterms:description """17:13:00.420 request:
+1 > GET https://pod-compat.inrupt.com/solid-test-suite-alice/shared-test/9d43a8d2-14f9-4881-b1f7-30bad84f086b/2d836d5d-d41b-4d98-bd90-4a79edaa9ac4.ttl
+1 > Accept: text/turtle
+1 > Authorization: DPoP eyJhbGciOiJSUzI1NiIsImtpZCI6IlJTZFhXUEplV0pJIn0.eyJpc3MiOiJodHRwczovL2lucnVwdC5uZXQiLCJhdWQiOiJzb2xpZCIsInN1YiI6Imh0dHBzOi8vc29saWQtdGVzdC1zdWl0ZS1hbGljZS5pbnJ1cHQubmV0L3Byb2ZpbGUvY2FyZCNtZSIsImV4cCI6MTYxODUwMzE3OCwiaWF0IjoxNjE3MjkzNTc4LCJqdGkiOiI0ZTA4ODVjNjExOGE1YTVkIiwiY25mIjp7ImprdCI6IlJXSkpxelF3RmNNWGRyNGIxMHNubFVMemlmd1lyMUpTYy1QTVctaUdVNUEifSwiY2xpZW50X2lkIjoiNDgzNTIyYjNlYzE0ZjVkMGExMjgwYzE1MjJhMGZhN2EiLCJ3ZWJpZCI6Imh0dHBzOi8vc29saWQtdGVzdC1zdWl0ZS1hbGljZS5pbnJ1cHQubmV0L3Byb2ZpbGUvY2FyZCNtZSJ9.Zocnp0HEyD8pb2iU7tZOYMigqnkGQ1L-nzqSR5geea9MW9aOSNy7u0uYGunU3dnXLBT7lkog6O3f174cVk5NFyJ6T8GmrostRCBM99g74Q-iVXK5-mCOiHadMxMFOkv2LRNDIVAr_uoS4VSK6Ic2VOovg_hkh8PvvW_oBVEhFCUQLhpdq_B-30DcU2upmoo6Pn9wiIluhouxbhaZhnpLgKizw58vB75d7HVCqT1YnFh93Ah3_VoBFYz2ELXSQPNzWUedCMuHU11ZrA3W4AFbA4-6sQJEMI479CQKNIh-A27dcytzbuwMHZHnhkZ_coHJ6FSbxzBsx9TojyDQ-prP3Q
+1 > User-Agent: Solid-Conformance-Test-Suite
+1 > DPoP: eyJhbGciOiJSUzI1NiIsInR5cCI6ImRwb3Arand0IiwiandrIjp7Imt0eSI6IlJTQSIsImtpZCI6ImJpVnhTNVZpZm1BdiIsInVzZSI6InNpZyIsImFsZyI6IlJTMjU2IiwibiI6Im43SGJwSXdNVzBNZ0RsdUtBZmF5a1l0bGlCNE41QTJoOUdUUnN5em5IMEVwSERKaVg5aWQ3dFg0SUZRWmlPbmtmczA1NVk5bElxNFBVWHVieVVaUE5NZ1lmMXdPUTV0U2gtRWNDdndTdFY2YUpBaGZFUGRtUWo4NkxZTFppcEJ3NEpvanRJYWx4QmJDUTFDSXI3WUxrMFlqYnRIUTFHcFNKdEw3eWdPV05XbWUyV0dlRXM3MWdlX1BCeUFkQVpRWWs3ZHE3VVRNNzlaV3lKb3Eya3pqcnQ2anJyaEsyMk5qa2ptQ0I4al9ubUtlNzByYl9ieHJkb2loNGVrQmJLRk5yNm1iQXlGemVJc1ljbWlzREVqRHN5aDhyM1B6T3gyNFBrMmNiYlJMWE81N0pXc3ZhMndONVRvZFI4MnI1bFhIR3pld2doQzZnNTA2MXZVS2dmSVlwUSIsImUiOiJBUUFCIn19.eyJqdGkiOiJmYWM0NGNiNi05ZGMxLTQ3NTctYTYwZi0zYTk1ZDBlZjA4NWYiLCJodG0iOiJHRVQiLCJodHUiOiJodHRwczovL3BvZC1jb21wYXQuaW5ydXB0LmNvbS9zb2xpZC10ZXN0LXN1aXRlLWFsaWNlL3NoYXJlZC10ZXN0LzlkNDNhOGQyLTE0ZjktNDg4MS1iMWY3LTMwYmFkODRmMDg2Yi8yZDgzNmQ1ZC1kNDFiLTRkOTgtYmQ5MC00YTc5ZWRhYTlhYzQudHRsIiwiaWF0IjoxNjE3MjkzNTgwfQ.Ybv6ZGA2qlHys6V-ci0Pm0gA2gwCU9A3ziDeJt54FgNnxm85zVquX6kLdzJf2YaepjnMVrYp5iiGZ4rrOupvpz2kxqnZulQgRai0nDFSO3MSBmq6H6wchCTB2xxC6jppjMNzjd2vYDCdFrJ1LEH_7vialbOs14-AaGZtvK1U8Ied4S9f7tAgHBHcHUa8ClkQI4YASWyrgs0bjeMftyLLri4DiKH_SHLR7vIgkkKSSiaYOcFcol7DuduHU79wCegAjUbY7kw1L3EeMGflytpUFNfc_I1-mTbTCuBM8f-GYqCybR9bSh3CuBWaJbtfkjyi6jCcUtceHzca62jT_wmLQg
+1 > Host: pod-compat.inrupt.com
+1 > Connection: Keep-Alive
+1 > Accept-Encoding: gzip,deflate
+
+
+17:13:01.052 response time in milliseconds: 628
+1 < 200
+1 < Date: Thu, 01 Apr 2021 16:13:00 GMT
+1 < Content-Type: text/turtle; charset=UTF-8
+1 < Transfer-Encoding: chunked
+1 < Connection: keep-alive
+1 < Cache-Control: must-revalidate, no-transform, max-age=0, private
+1 < ETag: \"7d709b4468d24d25b1061f3ecba8f997ca46eb6b3c9ffcda75da620d3e536876\"
+1 < WAC-Allow: user=\"read control write\"
+1 < Set-Cookie: ess-session-jwk=eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ.Wo7cZWckqN4Y1FHUoJrl4MJfcvpXTWjSwocx-uuTNt3SPNTgK5MVNB0ysd-Qdqlh_sjb1YpIY9_o-xfPUQsz6KA2P4752CLP0qdfAYU8t7Fnlg9WNYRbqKV9P91pRlnPMebUvhQHmgU4uSYheiZeqoDEnVfFRpfnYDn8awnheDc1yAy1gtwXRyCGZfDBnVXvPabjbZtX4Zk3TS6xtDhFuC1yXSt19hF-JoO6TeYdYmGNUSHUgNYBR36z2BVq2E6gEbx0BldSpdDZZ6mCm3OEofSpeMPwWdu-sds6gO4_yBlC6NZwuogTJQsgxsZVQTTPAd8oF4V2_XeZstGo27S3uKx12Dd1_0b-SMCuKM4XLwSb7t8Vh8JZ46VQWp6P2-5RkzTpJB0pmDkZ6T8l_sjj0URvnNImXeoZSeTByMyxdHHV33_xw-3AmaQu-jvHFsmF-WtTpCNveXisY_zPCSre-L-SJwjmU_vhJZeHnH7OEElyW4xTRLEEiYdYIEKvkvlyvSQoT7EP1_lhLGIZg8RpN7PB3CqhMMKaDaC5pvAVSE_Kiy4WxuQVh4shGN3Gjt_an6bizZh0yuaksvljZgtOyv7QhEfyzfS_EsWYSrpFTyZwtivo1aQkkBjMFyBH41KShqcnJiFuSOApBqVhoqUNJdUBeXFJMfhyVuG1edVf7Qs.xtXeTgPdqX-7kT89.xWUZ41q738GvX515eziPpEjBPZN8Yl8BYz77MmG-hzrITlNIjrEkGsWa2X4Pv-KEz7AecqjOvvbWPnoM49DAbbu_lMP-a2xxAPlWPv9w4nh7YG18vW0gGIJKA-fSKDAXMCrRNlFDoPD_IPLChUFdOWmKL2cSo6I00uTPSsN37t8HfRzu44lmZQMRdRmz963A9Jp4mfDPq6h56yvLzTAQk6FuSFZBuWyaVL3X4uDnYCWI-Ecin15k7Yf14pIwYLNZL_7TM7sWdqw5GQB3haQFCY8QZmiAAVsu-wH6vo0pDY2t5n9cz0ieOEMjML-ZevWGBA.hrarppJksutq96l6PZGLOg; Path=/; Domain=pod-compat.inrupt.com; Secure; HttpOnly; Expires=Thu, 01 Apr 2021 16:43:00 GMT; SameSite=None;
+1 < Vary: Accept,Origin,Accept-Datetime,Prefer
+1 < Accept-Patch: application/sparql-update
+1 < Last-Modified: Thu, 01 Apr 2021 16:13:00 GMT
+1 < Link: [</solid-test-suite-alice/shared-test/9d43a8d2-14f9-4881-b1f7-30bad84f086b/2d836d5d-d41b-4d98-bd90-4a79edaa9ac4.ttl?ext=shex>; rel=\"http://www.w3.org/ns/shex#Schema\", <http://www.w3.org/ns/ldp#Resource>; rel=\"type\", <https://pod-compat.inrupt.com/solid-test-suite-alice/profile/card#me>; rel=\"http://www.w3.org/ns/solid/terms#podOwner\", <https://pod-compat.inrupt.com/solid-test-suite-alice/shared-test/9d43a8d2-14f9-4881-b1f7-30bad84f086b/2d836d5d-d41b-4d98-bd90-4a79edaa9ac4.ttl>; rel=\"original timegate\", <http://www.w3.org/ns/ldp#RDFSource>; rel=\"type\", <https://pod-compat.inrupt.com/solid-test-suite-alice/shared-test/9d43a8d2-14f9-4881-b1f7-30bad84f086b/2d836d5d-d41b-4d98-bd90-4a79edaa9ac4.ttl>; rel=\"self\", </solid-test-suite-alice/shared-test/9d43a8d2-14f9-4881-b1f7-30bad84f086b/2d836d5d-d41b-4d98-bd90-4a79edaa9ac4.ttl?ext=acl>; rel=\"acl\"]
+1 < Allow: GET,HEAD,OPTIONS,PATCH,PUT,DELETE
+1 < Strict-Transport-Security: max-age=15724800; includeSubDomains
+
+""" .
+
+ex:scenario1-step1-output
+    a prov:Entity ;
+    prov:generatedAtTime "2021-04-06T17:41:20.889001Z"^^xsd:dateTime ;
+    prov:value earl:passed .

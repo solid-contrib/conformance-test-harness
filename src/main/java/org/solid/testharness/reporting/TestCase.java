@@ -24,9 +24,7 @@
 package org.solid.testharness.reporting;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.solid.common.vocab.DCTERMS;
-import org.solid.common.vocab.EARL;
-import org.solid.common.vocab.TD;
+import org.solid.common.vocab.*;
 import org.solid.testharness.utils.DataModelBase;
 
 import java.util.List;
@@ -41,32 +39,31 @@ public class TestCase extends DataModelBase {
     );
 
     public TestCase(final IRI subject) {
-        super(subject);
+        super(subject, ConstructMode.INC_REFS);
     }
 
     public String getTitle() {
         return getLiteralAsString(DCTERMS.title);
     }
 
-    public String getLevel() {
-        return getLiteralAsString(DCTERMS.subject);
-    }
-
     public String getStatus() {
         return statusLookup.get(getAsIri(TD.reviewStatus));
     }
 
-    public boolean isImplemented() {
-        final IRI mode = getAsIri(EARL.mode);
-        return mode == null || !mode.equals(EARL.untested);
+    public String getTestScript() {
+        return getIriAsString(SPEC.testScript);
     }
 
-    public IRI getModeAsIri() {
-        return getAsIri(EARL.mode);
+    public String getRequirementReference() {
+        return getIriAsString(SPEC.requirementReference);
+    }
+
+    public boolean isImplemented() {
+        return getIriAsString(SPEC.testScript) != null;
     }
 
     public Assertion getAssertion() {
-        final List<Assertion> assertions = getModelList(EARL.assertions, Assertion.class);
+        final List<Assertion> assertions = getModelListByObject(EARL.test, Assertion.class);
         if (assertions != null) {
             return assertions.get(0);
         } else {

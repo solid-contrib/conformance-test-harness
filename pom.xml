@@ -48,7 +48,7 @@
         <mockito.version>3.11.2</mockito.version>
         <jandex.version>2.3.0.Final</jandex.version>
         <wiremock.version>2.27.2</wiremock.version>
-        <solid.vocab.version>0.0.7</solid.vocab.version>
+        <solid.vocab.version>0.0.8</solid.vocab.version>
 
         <!-- package info -->
         <package.name>${project.name}</package.name>

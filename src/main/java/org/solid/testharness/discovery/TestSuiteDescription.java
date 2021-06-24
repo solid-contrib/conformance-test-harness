@@ -63,19 +63,7 @@ public class TestSuiteDescription {
      */
     public void load(final List<URL> urlList) {
         for (final URL url: urlList) {
-            dataRepository.load(pathMappings.mapUrl(url));
-        }
-        try (RepositoryConnection conn = dataRepository.getConnection()) {
-            conn.getStatements(null, RDF.type, SPEC.Specification).stream()
-                    .map(Statement::getSubject)
-                    .flatMap(s -> conn.getStatements(s, RDFS.seeAlso, null).stream())
-                    .map(Statement::getObject)
-                    .filter(Value::isIRI)
-                    .map(IRI.class::cast)
-                    .forEach(o -> dataRepository.load(pathMappings.mapIri(o)));
-        } catch (RDF4JException e) {
-            throw (TestHarnessInitializationException) new TestHarnessInitializationException(e.toString())
-                    .initCause(e);
+            dataRepository.load(pathMappings.mapUrl(url), url.toString());
         }
     }
 
@@ -97,6 +85,7 @@ public class TestSuiteDescription {
             return Collections.EMPTY_LIST;
         }
         try (RepositoryConnection conn = dataRepository.getConnection()) {
+            // keep this connection for when we read the Feature file titles and add to the TestCase
             return testCases.stream().map(t -> {
                 final URI mappedLocation = pathMappings.mapFeatureIri(t);
                 if (HttpUtils.isHttpProtocol(mappedLocation.getScheme())) {
@@ -106,8 +95,7 @@ public class TestSuiteDescription {
                 final File file = new File(mappedLocation.getPath());
                 if (!file.exists()) {
                     // TODO: if starter feature files are auto-generated, read for @ignore as well
-                    logger.warn("FEATURE NOT IMPLEMENTED: {}", mappedLocation);
-                    conn.add(t, EARL.mode, EARL.untested);
+                    logger.warn("FEATURE NOT FOUND: {}", mappedLocation);
                     return null;
                 } else {
                     return mappedLocation.toString();
@@ -121,18 +109,14 @@ public class TestSuiteDescription {
 
     private List<IRI> getFilteredTestCases(final Set<String> serverFeatures, final boolean applyFilters) {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
-            return conn.getStatements(null, SPEC.requirement, null).stream()
-                    .map(Statement::getObject)
-                    .filter(Value::isIRI)
-                    .map(IRI.class::cast)
-                    // get groups that reference the specification requirement
-                    .flatMap(specRef -> conn.getStatements(null, TD.specificationReference, specRef).stream())
+            // get test cases
+            return conn.getStatements(null, RDF.type, TD.TestCase).stream()
                     .map(Statement::getSubject)
-                    // filter groups based on preConditions
+                    // filter test cases based on preConditions
                     // - either no preCondition exists or the preconditions are all in serverFeatures
-                    .filter(group -> !applyFilters ||
-                            !conn.getStatements(group, TD.preCondition, null).hasNext() ||
-                            conn.getStatements(group, TD.preCondition, null).stream()
+                    .filter(tc -> !applyFilters ||
+                            !conn.getStatements(tc, TD.preCondition, null).hasNext() ||
+                            conn.getStatements(tc, TD.preCondition, null).stream()
                                     .map(Statement::getObject)
                                     .filter(Value::isLiteral)
                                     .map(Value::stringValue)
@@ -141,7 +125,7 @@ public class TestSuiteDescription {
                                     )
                     )
                     // get features in each group
-                    .flatMap(group -> conn.getStatements(group, DCTERMS.hasPart, null).stream())
+                    .flatMap(tc -> conn.getStatements(tc, SPEC.testScript, null).stream())
                     .map(Statement::getObject)
                     .filter(Value::isIRI)
                     .map(IRI.class::cast)

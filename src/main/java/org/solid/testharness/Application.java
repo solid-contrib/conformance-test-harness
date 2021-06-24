@@ -70,7 +70,7 @@ public class Application implements QuarkusApplication {
 
         final Options options = new Options();
         options.addOption(Option.builder().longOpt(COVERAGE).desc("produce a coverage report").build());
-        options.addOption(Option.builder().longOpt(TESTS).desc("produce a test report").build());
+        options.addOption(Option.builder().longOpt(TESTS).desc("produce test and coverage reports").build());
         options.addOption(
                 Option.builder().longOpt(SUBJECTS).hasArg().desc("URL or path to test subject config (Turtle)").build()
         );
@@ -139,7 +139,7 @@ public class Application implements QuarkusApplication {
 
                 conformanceTestHarness.initialize();
 
-                if (line.hasOption(COVERAGE) || !line.hasOption(TESTS)) {
+                if (line.hasOption(COVERAGE) && !line.hasOption(TESTS)) {
                     final boolean success = conformanceTestHarness.createCoverageReport();
                     if (!success) {
                         return 1;

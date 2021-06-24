@@ -1,14 +1,14 @@
-@base <https://github.com/solid/conformance-test-harness/> .
-@prefix test-harness: <https://github.com/solid/conformance-test-harness/> .
-@prefix solid-test: <https://github.com/solid/conformance-test-harness/vocab#> .
+base <https://github.com/solid/conformance-test-harness/>
+prefix test-harness: <https://github.com/solid/conformance-test-harness/>
+prefix solid-test: <https://github.com/solid/conformance-test-harness/vocab#>
 
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix doap: <http://usefulinc.com/ns/doap#> .
-@prefix earl: <http://www.w3.org/ns/earl#> .
-@prefix solid: <http://www.w3.org/ns/solid/terms#> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix doap: <http://usefulinc.com/ns/doap#>
+prefix earl: <http://www.w3.org/ns/earl#>
+prefix solid: <http://www.w3.org/ns/solid/terms#>
+prefix dcterms: <http://purl.org/dc/terms/>
 
 <ess-compat>
     a earl:Software, earl:TestSubject ;

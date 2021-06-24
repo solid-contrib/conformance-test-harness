@@ -55,8 +55,10 @@ public class ConfigTest {
 
     @Test
     void getTestSourcesDefault() {
-        assertEquals("https://example.org/specification-sample-1.ttl", config.getTestSources().get(0).toString());
-        assertEquals("https://example.org/specification-sample-2.ttl", config.getTestSources().get(1).toString());
+        assertEquals("https://example.org/test-manifest-sample-1.ttl", config.getTestSources().get(0).toString());
+        assertEquals("https://example.org/test-manifest-sample-2.ttl", config.getTestSources().get(1).toString());
+        assertEquals("https://example.org/specification-sample-1.ttl", config.getTestSources().get(2).toString());
+        assertEquals("https://example.org/specification-sample-2.ttl", config.getTestSources().get(3).toString());
     }
 
     @Test

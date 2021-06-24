@@ -1,8 +1,9 @@
 {#with it}
 <tr id="{subject}" about="{subject}" typeof="{typesList}">
     <td property="dcterms:title">{title}</td>
-    <td property="earl:result">
-        {#switch assertion.result.outcome}
+    <td property="prov:used">{used}</td>
+    <td property="prov:generated">
+        {#switch generatedOutput.value}
         {#case 'http://www.w3.org/ns/earl#passed'}
         ✔
         {#case 'http://www.w3.org/ns/earl#failed'}
@@ -11,20 +12,34 @@
         o
         {/switch}
     </td>
-    <td><time datatype="xsd:dateTime" datetime="{assertion.result.date}" property="dcterms:date">{assertion.result.date}</time></td>
+    <td><time datatype="xsd:dateTime" datetime="{startTime}" property="prov:startedAtTime">{startTime}</time></td>
+    <td><time datatype="xsd:dateTime" datetime="{endTime}" property="prov:endedAtTime">{endTime}</time></td>
     <td>
         {#if steps}
         <table>
             <tr>
                 <th>Step</th>
+                <th>Location</th>
                 <th>Outcome</th>
                 <th>Info</th>
             </tr>
             {#each steps}
-            <tr>
+            <tr class="{it.background ? 'backgroundStep' : 'scenarioStep'}">
                 <td>{it.title}</td>
-                <td>{it.outcome}</td>
-                <td><pre>{it.info}</pre></td>
+                <td property="prov:used">{it.used}</td>
+                <td property="prov:generated" resource="{it.generatedOutput.subject}" typeof="{it.generatedOutput.typesList}">
+                    {#switch it.generatedOutput.value}
+                    {#case 'http://www.w3.org/ns/earl#passed'}
+                    ✔
+                    {#case 'http://www.w3.org/ns/earl#failed'}
+                    ✗
+                    {#else}
+                    o
+                    {/switch}
+                </td>
+                <td property="prov:generated" resource="{it.generatedOutput.subject}" typeof="{it.generatedOutput.typesList}">
+                    <pre>{it.generatedOutput.description}</pre>
+                </td>
             </tr>
             {/each}
         </table>

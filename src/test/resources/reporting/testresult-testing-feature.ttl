@@ -1,0 +1,9 @@
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix earl: <http://www.w3.org/ns/earl#>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix ex: <https://example.org/>
+
+ex:result1
+    a earl:TestResult ;
+    earl:outcome earl:passed;
+    dcterms:date "2021-04-06T17:41:20.889001Z"^^xsd:dateTime .

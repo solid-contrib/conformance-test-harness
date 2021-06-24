@@ -41,35 +41,49 @@ class ResultDataTest extends AbstractDataModelTests {
     }
 
     @Test
+    void getSubject() {
+        final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList());
+        assertTrue(resultData.getSubject().startsWith("https://github.com/solid/implementation-reports/"));
+    }
+
+    @Test
     void getHtmlPrefixes() {
-        final ResultData resultData = new ResultData(Collections.emptyList());
-        assertEquals("rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns# " +
-                "rdfs: http://www.w3.org/2000/01/rdf-schema# " +
-                "xsd: http://www.w3.org/2001/XMLSchema# " +
-                "dcterms: http://purl.org/dc/terms/ " +
-                "doap: http://usefulinc.com/ns/doap# " +
-                "solid: http://www.w3.org/ns/solid/terms# " +
-                "solid-test: https://github.com/solid/conformance-test-harness/vocab# " +
-                "earl: http://www.w3.org/ns/earl# " +
-                "td: http://www.w3.org/2006/03/test-description# " +
-                "spec: http://www.w3.org/ns/spec#", resultData.getPrefixes());
+        final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList());
+        final String prefixes = resultData.getPrefixes();
+        assertTrue(prefixes.contains("rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
+        assertTrue(prefixes.contains("rdfs: http://www.w3.org/2000/01/rdf-schema#"));
+        assertTrue(prefixes.contains("xsd: http://www.w3.org/2001/XMLSchema#"));
+        assertTrue(prefixes.contains("dcterms: http://purl.org/dc/terms/"));
+        assertTrue(prefixes.contains("doap: http://usefulinc.com/ns/doap#"));
+        assertTrue(prefixes.contains("solid: http://www.w3.org/ns/solid/terms#"));
+        assertTrue(prefixes.contains("solid-test: https://github.com/solid/conformance-test-harness/vocab#"));
+        assertTrue(prefixes.contains("earl: http://www.w3.org/ns/earl#"));
+        assertTrue(prefixes.contains("td: http://www.w3.org/2006/03/test-description#"));
+        assertTrue(prefixes.contains("prov: http://www.w3.org/ns/prov#"));
+        assertTrue(prefixes.contains("spec: http://www.w3.org/ns/spec#"));
+        assertTrue(prefixes.contains("results: https://github.com/solid/implementation-reports/"));
     }
 
     @Test
     void getSpecifications() {
         final ResultData resultData = new ResultData(
-                List.of(iri("https://example.org/specification1"), iri("https://example.org/specification2"))
+                List.of(iri("https://example.org/specification1"), iri("https://example.org/specification2")),
+                List.of(iri("https://example.org/test1"))
         );
         final List<Specification> specifications = resultData.getSpecifications();
         assertNotNull(specifications);
         assertEquals(2, specifications.size());
         assertEquals(3, specifications.get(0).getSpecificationRequirements().size());
         assertEquals(1, specifications.get(1).getSpecificationRequirements().size());
+        final List<TestCase> testCases = resultData.getTestCases();
+        assertNotNull(testCases);
+        assertEquals(1, testCases.size());
+        assertEquals("https://example.org/specification1#spec1", testCases.get(0).getRequirementReference());
     }
 
     @Test
     void getAssertor() {
-        final ResultData resultData = new ResultData(Collections.emptyList());
+        final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList());
         assertNotNull(resultData.getAssertor());
     }
 }

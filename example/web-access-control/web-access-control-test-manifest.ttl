@@ -1,0 +1,44 @@
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix td: <http://www.w3.org/2006/03/test-description#>
+prefix spec: <http://www.w3.org/ns/spec#>
+
+prefix manifest: <#>
+
+manifest:protected-operation-not-read-resource-access-AWC
+  a td:TestCase ;
+  spec:requirementReference <https://github.com/solid/web-access-control-spec#modes-of-access> ;
+  td:reviewStatus td:accepted ;
+  dcterms:title "Cannot read a resource for which read access is not granted" ;
+  td:preCondition "authentication", "acl" ;
+  spec:testScript
+    <https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/protected-operation/not-read-resource-access-AWC.feature> .
+
+manifest:protected-operation-not-read-resource-default-AWC
+  a td:TestCase ;
+  spec:requirementReference <https://github.com/solid/web-access-control-spec#modes-of-access> ;
+  td:reviewStatus td:accepted ;
+  dcterms:title "Cannot read a resource for which default read access is not granted" ;
+  td:preCondition "authentication", "acl" ;
+  spec:testScript
+    <https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/protected-operation/not-read-resource-default-AWC.feature> .
+
+manifest:protected-operation-read-resource-access-R
+  a td:TestCase ;
+  spec:requirementReference <https://github.com/solid/web-access-control-spec#modes-of-access> ;
+  td:reviewStatus td:unreviewed ;
+  dcterms:title "Can only read a resource for which only read access is granted" ;
+  td:preCondition "authentication", "acl" ;
+  spec:testScript
+    <https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/protected-operation/read-resource-access-R.feature> .
+
+manifest:protected-operation-read-resource-default-R
+  a td:TestCase ;
+  spec:requirementReference <https://github.com/solid/web-access-control-spec#modes-of-access> ;
+  td:reviewStatus td:unreviewed ;
+  dcterms:title "Can only read a resource for which only default read access is granted" ;
+  td:preCondition "authentication", "acl" ;
+  spec:testScript
+    <https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/protected-operation/read-resource-default-R.feature> .

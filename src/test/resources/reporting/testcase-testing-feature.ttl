@@ -1,23 +1,26 @@
-@prefix td: <http://www.w3.org/2006/03/test-description#> .
-@prefix earl: <http://www.w3.org/ns/earl#> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix ex: <https://example.org/> .
+prefix td: <http://www.w3.org/2006/03/test-description#>
+prefix earl: <http://www.w3.org/ns/earl#>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix spec: <http://www.w3.org/ns/spec#>
+prefix ex: <https://example.org/>
 
 ex:test1
-    a earl:TestCase, earl:TestCriterion, earl:TestFeature ;
+    a td:TestCase ;
+    spec:requirementReference <https://example.org/specification1#requriement1> ;
     dcterms:title "Title" ;
-    dcterms:subject "MUST" ;
     td:reviewStatus td:unreviewed ;
-    earl:hasOutcome "TBD" ;
-    earl:assertions ex:assertion ;
-    dcterms:hasPart ex:test3 .
-ex:assertion a earl:Assertion .
-ex:test2
-    a earl:TestCase ;
-    td:reviewStatus td:accepted ;
-    earl:mode earl:untested .
-ex:test3
-    a earl:TestCase ;
-    earl:mode earl:passed .
+    spec:testScript <https://example.org/test3.feature> ;
+    dcterms:hasPart ex:scenario1 .
 
+ex:assertion
+    a earl:Assertion ;
+    earl:test ex:test1.
+
+ex:scenario1
+    a prov:Activity .
+
+ex:test2
+    a td:TestCase ;
+    td:reviewStatus td:accepted .
 

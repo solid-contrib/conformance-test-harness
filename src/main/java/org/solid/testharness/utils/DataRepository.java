@@ -40,9 +40,7 @@ import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.solid.common.vocab.DCTERMS;
-import org.solid.common.vocab.EARL;
-import org.solid.common.vocab.RDF;
+import org.solid.common.vocab.*;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -55,6 +53,7 @@ import java.util.stream.Collectors;
 
 import static org.eclipse.rdf4j.model.util.Values.bnode;
 import static org.eclipse.rdf4j.model.util.Values.iri;
+import static org.eclipse.rdf4j.model.util.Values.literal;
 
 @ApplicationScoped
 public class DataRepository implements Repository {
@@ -64,8 +63,6 @@ public class DataRepository implements Repository {
     // TODO: Determine if this should be a separate IRI to the base
     private IRI assertor;
     private IRI testSubject;
-
-    public static final String GENID = "/genid/";
 
     public static Map<String, IRI> EARL_RESULT = Map.of(
             "passed", EARL.passed,
@@ -110,78 +107,105 @@ public class DataRepository implements Repository {
         this.assertor = assertor;
     }
 
-    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
-    // This method creates an unknown number of objects in a loop dependent on the test cases
     public void addFeatureResult(final Suite suite, final FeatureResult fr, final IRI featureIri) {
         final long startTime = suite.startTime;
         try (RepositoryConnection conn = getConnection()) {
-            ModelBuilder builder = new ModelBuilder();
-            final IRI featureAssertion = createSkolemizedBlankNode(featureIri);
-            final IRI featureResult = createSkolemizedBlankNode(featureIri);
-            conn.add(builder.subject(featureIri)
-                    .add(RDF.type, EARL.TestCriterion)
-                    .add(RDF.type, EARL.TestFeature)
-                    .add(DCTERMS.title, fr.getFeature().getName())
-                    .add(EARL.assertions, featureAssertion)
-                    .add(featureAssertion, RDF.type, EARL.Assertion)
-                    .add(featureAssertion, EARL.assertedBy, assertor)
-                    .add(featureAssertion, EARL.test, featureIri)
-                    .add(featureAssertion, EARL.subject, testSubject)
-                    .add(featureAssertion, EARL.mode, EARL.automatic)
-                    .add(featureAssertion, EARL.result, featureResult)
-                    .add(featureResult, RDF.type, EARL.TestResult)
-                    .add(featureResult, EARL.outcome, fr.isFailed() ? EARL.failed : EARL.passed)
-                    .add(featureResult, DCTERMS.date, new Date((long) (startTime + fr.getDurationMillis())))
-                    .build());
+            final IRI testCaseIri = getTestCase(conn, featureIri);
+            if (testCaseIri != null) {
+                conn.add(testCaseIri, DCTERMS.title, literal(fr.getFeature().getName()));
+            }
+            createAssertion(conn, fr, startTime, testCaseIri);
             for (ScenarioResult sr: fr.getScenarioResults()) {
-                final IRI scenarioIri = createSkolemizedBlankNode(featureIri);
-                final IRI scenarioAssertion = createSkolemizedBlankNode(featureIri);
-                final IRI scenarioResult = createSkolemizedBlankNode(featureIri);
-                builder = new ModelBuilder();
-                conn.add(builder.subject(scenarioIri)
-                        .add(RDF.type, EARL.TestCriterion)
-                        .add(RDF.type, EARL.TestCase)
-                        .add(DCTERMS.title, sr.getScenario().getName())
-                        .add(DCTERMS.isPartOf, featureIri)
-                        .add(EARL.assertions, scenarioAssertion)
-                        .add(scenarioAssertion, RDF.type, EARL.Assertion)
-                        .add(scenarioAssertion, EARL.assertedBy, assertor)
-                        .add(scenarioAssertion, EARL.test, scenarioIri)
-                        .add(scenarioAssertion, EARL.subject, testSubject)
-                        .add(scenarioAssertion, EARL.mode, EARL.automatic)
-                        .add(scenarioAssertion, EARL.result, scenarioResult)
-                        .add(scenarioResult, RDF.type, EARL.TestResult)
-                        .add(scenarioResult, EARL.outcome, sr.isFailed() ? EARL.failed : EARL.passed)
-                        .add(scenarioResult, DCTERMS.date, new Date((long) (startTime + sr.getDurationMillis())))
-                        .add(featureIri, DCTERMS.hasPart, scenarioIri)
-                        .build());
-                if (!sr.getStepResults().isEmpty()) {
-                    final List<Resource> steps = sr.getStepResults().stream().map(str -> {
-                        final IRI step = createSkolemizedBlankNode(featureIri);
-                        final ModelBuilder stepBuilder = new ModelBuilder();
-                        stepBuilder.subject(step)
-                                .add(RDF.type, EARL.TestStep)
-                                .add(DCTERMS.title, str.getStep().getPrefix() + " " + str.getStep().getText())
-                                .add(EARL.outcome, EARL_RESULT.get(str.getResult().getStatus()));
-                        if (!str.getStepLog().isEmpty()) {
-                            stepBuilder.add(EARL.info, str.getStepLog());
-                        }
-                        conn.add(stepBuilder.build());
-                        return step;
-                    }).collect(Collectors.toList());
-                    final Resource head = createSkolemizedBlankNode(featureIri);
-                    final Model stepList = RDFCollections.asRDF(steps, head, new LinkedHashModel());
-                    stepList.add(scenarioIri, EARL.steps, head);
-                    conn.add(stepList);
-                }
+                createScenarioActivity(conn, sr, testCaseIri);
             }
         } catch (Exception e) {
-            logger.error("Failed to load feature result: {}", e.toString());
+            logger.error("Failed to load feature result", e);
         }
     }
 
-    private IRI createSkolemizedBlankNode(final IRI base) {
-        return iri(base.stringValue() + GENID + bnode().getID());
+    private IRI getTestCase(final RepositoryConnection conn, final IRI featureIri) {
+        return conn.getStatements(null, SPEC.testScript, featureIri).stream()
+                .map(Statement::getSubject)
+                .filter(Value::isIRI)
+                .map(IRI.class::cast)
+                .findFirst().orElse(null);
+    }
+
+    private void createAssertion(final RepositoryConnection conn, final FeatureResult fr, final long startTime,
+                                 final IRI testCaseIri) {
+        final IRI featureAssertion = createNode();
+        final ModelBuilder builder = new ModelBuilder();
+        final IRI featureResult = createNode();
+        conn.add(builder.subject(featureAssertion)
+                .add(RDF.type, EARL.Assertion)
+                .add(EARL.assertedBy, assertor)
+                .add(EARL.subject, testSubject)
+                .add(EARL.mode, EARL.automatic)
+                .add(EARL.result, featureResult)
+                .add(featureResult, RDF.type, EARL.TestResult)
+                .add(featureResult, EARL.outcome, fr.isFailed() ? EARL.failed : EARL.passed)
+                .add(featureResult, DCTERMS.date, new Date((long) (startTime + fr.getDurationMillis())))
+                .build());
+        if (testCaseIri != null) {
+            conn.add(featureAssertion, EARL.test, testCaseIri);
+        }
+    }
+
+    private void createScenarioActivity(final RepositoryConnection conn, final ScenarioResult sr,
+                                        final IRI testCaseIri) {
+        final ModelBuilder builder;
+        final IRI scenarioIri = createNode();
+        final IRI scenarioResultIri = createNode();
+        builder = new ModelBuilder();
+        conn.add(builder.subject(scenarioIri)
+                .add(RDF.type, PROV.Activity)
+                .add(DCTERMS.title, sr.getScenario().getName())
+                .add(PROV.used, sr.getScenario().getUriToLineNumber())
+                .add(PROV.startedAtTime, new Date(sr.getStartTime()))
+                .add(PROV.endedAtTime, new Date(sr.getEndTime()))
+                .add(PROV.generated, scenarioResultIri)
+                .add(scenarioResultIri, RDF.type, PROV.Entity)
+                .add(scenarioResultIri, PROV.generatedAtTime, new Date(sr.getEndTime()))
+                .add(scenarioResultIri, PROV.value, sr.isFailed() ? EARL.failed : EARL.passed)
+                .build());
+        if (testCaseIri != null) {
+            conn.add(testCaseIri, DCTERMS.hasPart, scenarioIri);
+        }
+        if (!sr.getStepResults().isEmpty()) {
+            createStepActivityList(conn, sr, scenarioIri);
+        }
+    }
+
+    private void createStepActivityList(final RepositoryConnection conn, final ScenarioResult sr,
+                                        final IRI scenarioIri) {
+        final List<Resource> steps = sr.getStepResults().stream().map(str -> {
+            final IRI stepIri = createNode();
+            final IRI stepResultIri = createNode();
+            final ModelBuilder stepBuilder = new ModelBuilder();
+            stepBuilder.subject(stepIri)
+                    .add(RDF.type, PROV.Activity)
+                    .add(DCTERMS.title, str.getStep().getPrefix() + " " + str.getStep().getText())
+                    .add(PROV.used, str.getStep().getDebugInfo())
+                    .add(PROV.generated, stepResultIri)
+                    .add(stepResultIri, RDF.type, PROV.Entity)
+                    .add(stepResultIri, PROV.value, EARL_RESULT.get(str.getResult().getStatus()));
+            if (!str.getStepLog().isEmpty()) {
+                stepBuilder.add(stepResultIri, DCTERMS.description, str.getStepLog());
+            }
+            if (!str.getStep().isBackground()) {
+                stepBuilder.add(stepIri, PROV.wasInformedBy, scenarioIri);
+            }
+            conn.add(stepBuilder.build());
+            return stepIri;
+        }).collect(Collectors.toList());
+        final Resource head = createNode();
+        final Model stepList = RDFCollections.asRDF(steps, head, new LinkedHashModel());
+        stepList.add(scenarioIri, DCTERMS.hasPart, head);
+        conn.add(stepList);
+    }
+
+    private IRI createNode() {
+        return iri(Namespaces.RESULTS_URI, bnode().getID());
     }
 
     public void export(final Writer wr) throws Exception {
