@@ -32,9 +32,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.solid.common.vocab.RDF;
 import org.solid.common.vocab.SPEC;
-import org.solid.testharness.utils.DataRepository;
-import org.solid.testharness.utils.TestHarnessInitializationException;
-import org.solid.testharness.utils.TestUtils;
+import org.solid.testharness.utils.*;
 
 import javax.inject.Inject;
 import java.net.MalformedURLException;
@@ -45,6 +43,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
+import static org.eclipse.rdf4j.model.util.Values.literal;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.*;
@@ -59,6 +58,7 @@ class TestSuiteDescriptionTest {
     @BeforeEach
     void setUp() {
         try (RepositoryConnection conn = repository.getConnection()) {
+            Namespaces.addToRepository(repository);
             conn.clear();
         }
     }
@@ -91,6 +91,14 @@ class TestSuiteDescriptionTest {
         assertTrue(ask(iri("https://example.org/specification2"), RDF.type, SPEC.Specification));
         assertTrue(ask(iri("https://example.org/test-manifest-sample-2.ttl#group4-feature1"),
                 SPEC.requirementReference, iri("https://example.org/specification2#spec1")));
+    }
+
+    @Test
+    void loadRdfa() throws MalformedURLException {
+        testSuiteDescription.load(List.of(new URL("https://example.org/specification-sample-1.html")));
+        assertTrue(ask(iri("https://example.org/specification1"), RDF.type, SPEC.Specification));
+        assertTrue(ask(iri("https://example.org/specification1#spec1"), SPEC.excerpt,
+                literal("text of requirement 1")));
     }
 
     @Test
@@ -230,7 +238,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void mapRemoteFeaturePaths() {
-        final List<IRI> testCases = List.of(iri("https://example.org/dummy/group3/feature1"));
+        final List<IRI> testCases = List.of(iri("https://example.org/test/group3/feature1"));
         assertThrows(TestHarnessInitializationException.class, () -> testSuiteDescription.locateTestCases(testCases));
     }
 
@@ -245,14 +253,14 @@ class TestSuiteDescriptionTest {
     @Test
     void mapMissingFeaturePaths() {
         final List<IRI> testCases = List.of(
-                iri("https://example.org/dummy/group1/feature1"), iri("https://example.org/dummy/group1/feature2"),
-                iri("https://example.org/dummy/group1/feature3"), iri("https://example.org/dummy/group2/feature1")
+                iri("https://example.org/test/group1/feature1"), iri("https://example.org/test/group1/feature2"),
+                iri("https://example.org/test/group1/feature3"), iri("https://example.org/test/group2/feature1")
         );
         final List<String> paths = testSuiteDescription.locateTestCases(testCases);
-        final String[] expected = new String[]{TestUtils.getPathUri("src/test/resources/dummy-features/group1/feature1")
+        final String[] expected = new String[]{TestUtils.getPathUri("src/test/resources/test-features/group1/feature1")
                 .toString(),
-                TestUtils.getPathUri("src/test/resources/dummy-features/group1/feature2").toString(),
-                TestUtils.getPathUri("src/test/resources/dummy-features/otherExample/feature1").toString()
+                TestUtils.getPathUri("src/test/resources/test-features/group1/feature2").toString(),
+                TestUtils.getPathUri("src/test/resources/test-features/otherExample/feature1").toString()
         };
         assertThat("Locations match", paths, containsInAnyOrder(expected));
         // TODO: Test for titles being inserted once this is implemented
@@ -262,7 +270,7 @@ class TestSuiteDescriptionTest {
     }
 
     private IRI[] createIriList(final String... testCases) {
-        return Stream.of(testCases).map(s -> iri("https://example.org/dummy/" + s)).toArray(IRI[]::new);
+        return Stream.of(testCases).map(s -> iri("https://example.org/test/" + s)).toArray(IRI[]::new);
     }
 
     private boolean ask(final Resource subject, final IRI predicate, final Value object) {

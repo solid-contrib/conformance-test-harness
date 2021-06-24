@@ -27,16 +27,16 @@ feature:
   target: https://github.com/solid/conformance-test-harness/testserver
   feature:
     mappings:
-      - prefix: https://example.org/dummy/group1
-        path: src/test/resources/dummy-features/group1
-      - prefix: https://example.org/dummy/group2
-        path: src/test/resources/dummy-features/otherExample
+      - prefix: https://example.org/test/group1
+        path: src/test/resources/test-features/group1
+      - prefix: https://example.org/test/group2
+        path: src/test/resources/test-features/otherExample
       - prefix: https://example.org/features
         path: src/test/resources
       - prefix: https://example.org/specification
         path: src/test/resources/discovery/specification
-      - prefix: https://example.org/test
-        path: src/test/resources/discovery/test
+      - prefix: https://example.org/test-manifest
+        path: src/test/resources/discovery/test-manifest
       - prefix: https://example.org/badmapping
         path: https://example.org:-1/
 

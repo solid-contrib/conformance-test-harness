@@ -27,7 +27,7 @@ results:node1f273av6vx11
 results:node1f273av6vx12
     a earl:TestResult;
     earl:outcome earl:passed;
-    dcterms:date "2021-04-01T17:13:01.628+01:00"^^xsd:dateTime .
+    dcterms:date "2021-04-01T17:13:01.628001Z"^^xsd:dateTime .
 
 # Scenario 1
 results:node1f273av6vx13
@@ -41,7 +41,7 @@ results:node1f273av6vx13
 
 results:node1f273av6vx14
     a prov:Entity ;
-    prov:generatedAtTime "2021-04-01T17:12:59.933+01:00"^^xsd:dateTime ;
+    prov:generatedAtTime "2021-04-01T17:12:59.933001Z"^^xsd:dateTime ;
     prov:value earl:passed .
 
 # Step list
@@ -120,7 +120,7 @@ results:node1f273av6vx42
 
 results:node1f273av6vx43
     a prov:Entity ;
-    prov:generatedAtTime "2021-04-01T17:12:59.933+01:00"^^xsd:dateTime ;
+    prov:generatedAtTime "2021-04-01T17:12:59.933001Z"^^xsd:dateTime ;
     prov:value earl:passed .
 
 results:node1f273av6vx58

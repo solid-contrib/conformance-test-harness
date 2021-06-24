@@ -8,7 +8,7 @@ prefix ex: <https://example.org/>
 
 ex:scenario1-output
     a prov:Entity ;
-    prov:generatedAtTime "2021-04-06T17:41:20.889+01:00"^^xsd:dateTime ;
+    prov:generatedAtTime "2021-04-06T17:41:20.889001Z"^^xsd:dateTime ;
     prov:value earl:passed ;
     dcterms:description """17:13:00.420 request:
 1 > GET https://pod-compat.inrupt.com/solid-test-suite-alice/shared-test/9d43a8d2-14f9-4881-b1f7-30bad84f086b/2d836d5d-d41b-4d98-bd90-4a79edaa9ac4.ttl
@@ -42,5 +42,5 @@ ex:scenario1-output
 
 ex:scenario1-step1-output
     a prov:Entity ;
-    prov:generatedAtTime "2021-04-06T17:41:20.889+01:00"^^xsd:dateTime ;
+    prov:generatedAtTime "2021-04-06T17:41:20.889001Z"^^xsd:dateTime ;
     prov:value earl:passed .

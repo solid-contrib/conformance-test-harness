@@ -50,14 +50,14 @@ class TestSuiteDescriptionNoRepositoryTest {
     @Test
     void locateTestCasesException() {
         when(dataRepository.getConnection()).thenThrow(new RepositoryException("BAD REPOSITORY"));
-        final List<IRI> testCases = List.of(iri("https://example.org/dummy/group3/feature1"));
+        final List<IRI> testCases = List.of(iri("https://example.org/test/group3/feature1"));
         assertThrows(TestHarnessInitializationException.class, () -> testSuiteDescription.locateTestCases(testCases));
     }
 
     @Test
     void getAllTestCasesException() {
         when(dataRepository.getConnection()).thenThrow(new RepositoryException("BAD REPOSITORY"));
-        final List<IRI> testCases = List.of(iri("https://example.org/dummy/group3/feature1"));
+        final List<IRI> testCases = List.of(iri("https://example.org/test/group3/feature1"));
         assertThrows(TestHarnessInitializationException.class, () -> testSuiteDescription.getAllTestCases());
     }
 }

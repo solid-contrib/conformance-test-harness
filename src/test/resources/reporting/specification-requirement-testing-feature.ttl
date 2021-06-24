@@ -18,7 +18,7 @@ manifest:group1
     spec:requirementReference <https://example.org/specification#requirement> ;
     td:reviewStatus td:accepted ;
     dcterms:title "Group 1"@en ;
-    spec:testScript <https://example.org/dummy/group1/feature1>
+    spec:testScript <https://example.org/test/group1/feature1>
 .
 
 <https://example.org/specification#requirement2>

@@ -26,6 +26,6 @@ class TestResultTest extends AbstractDataModelTests {
     @Test
     void getDate() {
         final TestResult testResult = new TestResult(iri(NS, "result1"));
-        assertTrue(testResult.getDate().isEqual(ZonedDateTime.parse("2021-04-06T17:41:20.889+01:00")));
+        assertTrue(testResult.getDate().isEqual(ZonedDateTime.parse("2021-04-06T17:41:20.889001Z")));
     }
 }

@@ -43,7 +43,7 @@ class GeneratedOutputTest extends AbstractDataModelTests {
     @Test
     void getTimestamp() {
         final GeneratedOutput generatedOutput = new GeneratedOutput(iri(NS, "scenario1-output"));
-        assertTrue(generatedOutput.getTimestamp().isEqual(ZonedDateTime.parse("2021-04-06T17:41:20.889+01:00")));
+        assertTrue(generatedOutput.getTimestamp().isEqual(ZonedDateTime.parse("2021-04-06T17:41:20.889001Z")));
     }
 
     @Test

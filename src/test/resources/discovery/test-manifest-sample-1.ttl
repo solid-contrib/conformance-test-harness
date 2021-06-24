@@ -13,21 +13,21 @@ manifest:group1-feature1
     spec:requirementReference <https://example.org/specification1#spec1> ;
     td:reviewStatus td:accepted ;
     dcterms:title "Group 1 Test case 1" ;
-    spec:testScript <https://example.org/dummy/group1/feature1> .
+    spec:testScript <https://example.org/test/group1/feature1> .
 
 manifest:group1-feature2
     a td:TestCase ;
     spec:requirementReference <https://example.org/specification1#spec1> ;
     td:reviewStatus td:accepted ;
     dcterms:title "Group 1 Test case 2" ;
-    spec:testScript <https://example.org/dummy/group1/feature2> .
+    spec:testScript <https://example.org/test/group1/feature2> .
 
 manifest:group1-feature3
     a td:TestCase ;
     spec:requirementReference <https://example.org/specification1#spec1> ;
     td:reviewStatus td:unreviewed ;
     dcterms:title "Group 1 Test case 3" ;
-    spec:testScript <https://example.org/dummy/group1/feature3> .
+    spec:testScript <https://example.org/test/group1/feature3> .
 
 manifest:group2-feature1
     a td:TestCase ;
@@ -35,7 +35,7 @@ manifest:group2-feature1
     td:reviewStatus td:accepted ;
     dcterms:title "Group 2 Test case 1" ;
     td:preCondition "sf1" ;
-    spec:testScript <https://example.org/dummy/group2/feature1> .
+    spec:testScript <https://example.org/test/group2/feature1> .
 
 manifest:group3-feature1
     a td:TestCase ;
@@ -43,7 +43,7 @@ manifest:group3-feature1
     td:reviewStatus td:accepted ;
     dcterms:title "Group 3 Test case 1" ;
     td:preCondition "sf1", "sf2" ;
-    spec:testScript <https://example.org/dummy/group3/feature1> .
+    spec:testScript <https://example.org/test/group3/feature1> .
 
 manifest:group3-feature2
     a td:TestCase ;
@@ -51,4 +51,4 @@ manifest:group3-feature2
     td:reviewStatus td:accepted ;
     dcterms:title "Group 3 Test case 2" ;
     td:preCondition "sf1", "sf2" ;
-    spec:testScript <https://example.org/dummy/group3/feature2> .
+    spec:testScript <https://example.org/test/group3/feature2> .
