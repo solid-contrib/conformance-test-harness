@@ -1,4 +1,4 @@
-name: Solid Conformance Test Harness
+name: GitHub CD
 
 on:
   push:
