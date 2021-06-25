@@ -89,7 +89,7 @@ public class AuthManager {
             } else if (userConfig != null && userConfig.isUsingRefreshToken()) {
                 tokens = exchangeRefreshToken(authClient, userConfig, oidcConfiguration);
             } else if (userConfig != null && userConfig.isUsingClientCredentials()) {
-                tokens = clientCredentialsAccessToken(authClient, userConfig, oidcConfiguration, user);
+                tokens = clientCredentialsAccessToken(authClient, userConfig, oidcConfiguration);
             } else {
                 logger.warn("UserCredentials for {}: {}", user, userConfig);
                 throw new TestHarnessInitializationException("Neither login credentials nor refresh token details " +
@@ -109,15 +109,15 @@ public class AuthManager {
         }
         final Map<Object, Object> data = Map.of(
                 HttpConstants.GRANT_TYPE, HttpConstants.REFRESH_TOKEN,
-                HttpConstants.REFRESH_TOKEN, userConfig.refreshToken
+                HttpConstants.REFRESH_TOKEN, userConfig.refreshToken()
         );
         final String authHeader = HttpConstants.PREFIX_BASIC +
-                base64Encode(userConfig.clientId.get() + ':' + userConfig.clientSecret.get());
+                base64Encode(userConfig.clientId().get() + ':' + userConfig.clientSecret().get());
         return requestToken(authClient, oidcConfig, authHeader, data);
     }
 
     private Tokens clientCredentialsAccessToken(final Client authClient, final UserCredentials userConfig,
-                                        final OidcConfiguration oidcConfig, final String user) throws Exception {
+                                        final OidcConfiguration oidcConfig) throws Exception {
         logger.info("Use client credentials to get access token for {}", authClient.getUser());
         if (!oidcConfig.getGrantTypesSupported().contains(HttpConstants.CLIENT_CREDENTIALS)) {
             throw new TestHarnessInitializationException("Identity Provider does not support grant type: %s",
@@ -126,8 +126,8 @@ public class AuthManager {
 
         final Map<Object, Object> data = Map.of(
                 HttpConstants.GRANT_TYPE, HttpConstants.CLIENT_CREDENTIALS,
-                HttpConstants.CLIENT_ID, config.getWebIds().get(user),
-                HttpConstants.CLIENT_SECRET, userConfig.clientSecret.get()
+                HttpConstants.CLIENT_ID, userConfig.webId(),
+                HttpConstants.CLIENT_SECRET, userConfig.clientSecret().get()
         );
         return requestToken(authClient, oidcConfig, null, data);
     }
@@ -186,8 +186,8 @@ public class AuthManager {
     private void startLoginSession(final Client client, final UserCredentials userConfig, final URI loginEndpoint)
             throws IOException, InterruptedException {
         final Map<Object, Object> data = new HashMap<>();
-        data.put(HttpConstants.USERNAME, userConfig.username.get());
-        data.put(HttpConstants.PASSWORD, userConfig.password.get());
+        data.put(HttpConstants.USERNAME, userConfig.username().get());
+        data.put(HttpConstants.PASSWORD, userConfig.password().get());
         final HttpRequest request = HttpUtils.newRequestBuilder(loginEndpoint)
                 .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED)
                 .POST(HttpUtils.ofFormData(data))

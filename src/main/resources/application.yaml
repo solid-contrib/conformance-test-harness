@@ -1,9 +1,4 @@
-# Default properties
-feature:
-  mappings:
-    - null
-
-# Logging
+# Default logging
 quarkus:
   log:
     level: INFO

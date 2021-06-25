@@ -42,8 +42,8 @@ public class ConfigTestNormalProfile implements QuarkusTestProfile {
                 "LOGIN_ENDPOINT", "https://example.org/login/password",
                 "RESOURCE_SERVER_ROOT", "https://target.example.org",
                 "TEST_CONTAINER", "test",
-                "ALICE_WEBID", "https://alice.target.example.org/profile/card#me",
-                "BOB_WEBID", "https://bob.target.example.org/profile/card#me"
+                "USERS_ALICE_WEBID", "https://example.org/solid-test-suite-alice/profile/card#me",
+                "USERS_BOB_WEBID", "https://example.org/solid-test-suite-bob/profile/card#me"
         );
     }
 

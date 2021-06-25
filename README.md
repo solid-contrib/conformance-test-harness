@@ -165,7 +165,7 @@ There are 4 important settings:
 * `target` - the IRI of the target server, used to select the server config from the config file
 * `subjects` - the location of the file describing test subjects
 * `sources` - the locations of annotated specification documents that list the test cases to be run
-* `feature:mappings` - maps test cases IRIs to a local file system (there can be multiple mappings). Mappings should be
+* `mappings` - maps test cases IRIs to a local file system (there can be multiple mappings). Mappings should be
   ordered so the most specific is first. This allows individual files to be mapped separately from their containing
   directories.
 
@@ -177,10 +177,9 @@ subjects: PATH_TO_SUBJECTS_DOC
 sources:
 	- PATH_TO_SPECIFATION_DOC
 	- PATH_TO_SPECIFATION_DOC
-feature:
-  mappings:
-    - prefix: https://github.com/solid/conformance-test-harness/example
-      path: example
+mappings:
+- prefix: https://github.com/solid/conformance-test-harness/example
+  path: example
 ```
 This method works well when running your tests in an IDE as it doesn't require anything adding to the command line.
 Alternatively you can set these as command line options as described later. There is an additional option for use

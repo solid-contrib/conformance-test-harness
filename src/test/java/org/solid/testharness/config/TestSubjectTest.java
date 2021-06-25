@@ -34,6 +34,7 @@ import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpResponse;
@@ -48,7 +49,7 @@ import static org.mockito.Mockito.*;
 @QuarkusTest
 @TestProfile(ConfigTestNormalProfile.class)
 public class TestSubjectTest {
-    @Inject
+    @InjectMock
     Config config;
 
     @Inject
@@ -61,13 +62,20 @@ public class TestSubjectTest {
     ClientRegistry clientRegistry;
 
     @Test
+    void prepareServerWithoutServer() {
+        testSubject.setTargetServer(null);
+        assertThrows(TestHarnessInitializationException.class, () -> testSubject.prepareServer());
+    }
+
+    @Test
     void prepareServerNoRootAcl() throws Exception {
-        config.setSubjectsUrl("src/test/resources/config/config-sample.ttl");
-        config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver"));
+        final TargetServer targetServer = mock(TargetServer.class);
+        testSubject.setTargetServer(targetServer);
+        when(targetServer.isSetupRootAcl()).thenReturn(false);
         final Client mockClient = mock(Client.class);
         when(clientRegistry.getClient(HttpConstants.ALICE)).thenReturn(mockClient);
+        when(config.getTestContainer()).thenReturn("https://server/test/");
 
-        testSubject.loadTestSubjectConfig();
         assertDoesNotThrow(() -> testSubject.prepareServer());
         verify(mockClient, never()).head(any());
         assertNotNull(testSubject.getRootTestContainer());
@@ -75,8 +83,12 @@ public class TestSubjectTest {
 
     @Test
     void prepareServerWithRootAcl() throws IOException, InterruptedException {
-        config.setSubjectsUrl("src/test/resources/config/config-sample-bad.ttl");
-        config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/example"));
+        final TargetServer targetServer = mock(TargetServer.class);
+        testSubject.setTargetServer(targetServer);
+        when(targetServer.isSetupRootAcl()).thenReturn(true);
+        when(config.getWebIds())
+                .thenReturn(Map.of(HttpConstants.ALICE, "https://alice.target.example.org/profile/card#me"));
+        when(config.getTestContainer()).thenReturn("https://server/test/");
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
         final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
@@ -91,7 +103,6 @@ public class TestSubjectTest {
                 eq(HttpConstants.MEDIA_TYPE_TEXT_TURTLE)))
                 .thenReturn(mockResponseOk);
 
-        testSubject.loadTestSubjectConfig();
         assertDoesNotThrow(() -> testSubject.prepareServer());
         final String expectedAcl = "@prefix acl: <http://www.w3.org/ns/auth/acl#>. " +
                 "<#alice> a acl:Authorization ; " +
@@ -105,8 +116,12 @@ public class TestSubjectTest {
 
     @Test
     void prepareServerWithRootAclThrows() throws IOException, InterruptedException {
-        config.setSubjectsUrl("src/test/resources/config/config-sample-bad.ttl");
-        config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/example"));
+        final TargetServer targetServer = mock(TargetServer.class);
+        testSubject.setTargetServer(targetServer);
+        when(targetServer.isSetupRootAcl()).thenReturn(true);
+        when(config.getWebIds())
+                .thenReturn(Map.of(HttpConstants.ALICE, "https://alice.target.example.org/profile/card#me"));
+        when(config.getTestContainer()).thenReturn("https://server/test/");
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
         final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
@@ -117,7 +132,6 @@ public class TestSubjectTest {
         when(clientRegistry.getClient(HttpConstants.ALICE)).thenReturn(mockClient);
         when(mockClient.head(any())).thenThrow(new IOException());
 
-        testSubject.loadTestSubjectConfig();
         final Exception exception = assertThrows(TestHarnessInitializationException.class,
                 () -> testSubject.prepareServer());
         assertEquals("Failed to create root ACL: java.io.IOException", exception.getMessage());
@@ -125,8 +139,12 @@ public class TestSubjectTest {
 
     @Test
     void prepareServerWithRootAclNoLink() throws IOException, InterruptedException {
-        config.setSubjectsUrl("src/test/resources/config/config-sample-bad.ttl");
-        config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/example"));
+        final TargetServer targetServer = mock(TargetServer.class);
+        testSubject.setTargetServer(targetServer);
+        when(targetServer.isSetupRootAcl()).thenReturn(true);
+        when(config.getWebIds())
+                .thenReturn(Map.of(HttpConstants.ALICE, "https://alice.target.example.org/profile/card#me"));
+        when(config.getTestContainer()).thenReturn("https://server/test/");
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
         final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
@@ -137,7 +155,6 @@ public class TestSubjectTest {
         when(mockClient.head(any())).thenReturn(mockResponse);
         when(mockResponse.headers()).thenReturn(mockHeaders);
 
-        testSubject.loadTestSubjectConfig();
         final Exception exception = assertThrows(TestHarnessInitializationException.class,
                 () -> testSubject.prepareServer());
         assertEquals("Failed getting the root ACL link", exception.getMessage());
@@ -145,8 +162,12 @@ public class TestSubjectTest {
 
     @Test
     void prepareServerWithRootAclFails() throws IOException, InterruptedException {
-        config.setSubjectsUrl("src/test/resources/config/config-sample-bad.ttl");
-        config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/example"));
+        final TargetServer targetServer = mock(TargetServer.class);
+        testSubject.setTargetServer(targetServer);
+        when(targetServer.isSetupRootAcl()).thenReturn(true);
+        when(config.getWebIds())
+                .thenReturn(Map.of(HttpConstants.ALICE, "https://alice.target.example.org/profile/card#me"));
+        when(config.getTestContainer()).thenReturn("https://server/test/");
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
         final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
@@ -161,39 +182,46 @@ public class TestSubjectTest {
                 eq(HttpConstants.MEDIA_TYPE_TEXT_TURTLE)))
                 .thenReturn(mockResponseFail);
 
-        testSubject.loadTestSubjectConfig();
         final Exception exception = assertThrows(TestHarnessInitializationException.class,
                 () -> testSubject.prepareServer());
         assertEquals("Failed to create root ACL", exception.getMessage());
     }
 
     @Test
-    void registerClients() throws Exception {
-        config.setSubjectsUrl("src/test/resources/config/config-sample.ttl");
-        config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver"));
-        final Client mockClient = mock(Client.class);
-        when(authManager.authenticate(anyString(), any(TargetServer.class))).thenReturn(new SolidClient(mockClient));
-        testSubject.loadTestSubjectConfig();
-        testSubject.registerClients();
-        final Map<String, SolidClient> clients = testSubject.getClients();
-        assertNotNull(clients);
-        assertEquals(2, clients.size());
-    }
-
-    @Test
-    void registerClientsWithAuthException() throws Exception {
-        config.setSubjectsUrl("src/test/resources/config/config-sample.ttl");
-        config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver"));
-        when(authManager.authenticate(anyString(), any(TargetServer.class)))
-                .thenThrow(new Exception("Failed as expected"));
-        testSubject.loadTestSubjectConfig();
+    void registerWithoutServer() {
+        testSubject.setTargetServer(null);
         assertThrows(TestHarnessInitializationException.class, () -> testSubject.registerClients());
     }
 
     @Test
-    void getTargetServer() throws Exception {
-        config.setSubjectsUrl("src/test/resources/config/config-sample.ttl");
-        config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver"));
+    void registerClientsAndGet() throws Exception {
+        final TargetServer targetServer = mock(TargetServer.class);
+        testSubject.setTargetServer(targetServer);
+        when(config.getWebIds())
+                .thenReturn(Map.of(HttpConstants.ALICE, "https://alice.target.example.org/profile/card#me"));
+        final Client mockClient = mock(Client.class);
+        when(authManager.authenticate(anyString(), any(TargetServer.class))).thenReturn(new SolidClient(mockClient));
+        testSubject.registerClients();
+        final Map<String, SolidClient> clients = testSubject.getClients();
+        assertNotNull(clients);
+        assertEquals(1, clients.size());
+    }
+
+    @Test
+    void registerClientsWithAuthException() throws Exception {
+        final TargetServer targetServer = mock(TargetServer.class);
+        testSubject.setTargetServer(targetServer);
+        when(config.getWebIds())
+                .thenReturn(Map.of(HttpConstants.ALICE, "https://alice.target.example.org/profile/card#me"));
+        when(authManager.authenticate(anyString(), any(TargetServer.class)))
+                .thenThrow(new Exception("Failed as expected"));
+        assertThrows(TestHarnessInitializationException.class, () -> testSubject.registerClients());
+    }
+
+    @Test
+    void loadTestSubjectConfigTarget1() throws MalformedURLException {
+        when(config.getSubjectsUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"));
+        when(config.getTestSubject()).thenReturn(iri("https://github.com/solid/conformance-test-harness/testserver"));
         testSubject.loadTestSubjectConfig();
         final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
@@ -201,9 +229,9 @@ public class TestSubjectTest {
     }
 
     @Test
-    void getTargetServer2() throws Exception {
-        config.setSubjectsUrl("src/test/resources/config/config-sample.ttl");
-        config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver2"));
+    void loadTestSubjectConfigTarget2() throws Exception {
+        when(config.getSubjectsUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"));
+        when(config.getTestSubject()).thenReturn(iri("https://github.com/solid/conformance-test-harness/testserver2"));
         testSubject.loadTestSubjectConfig();
         final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
@@ -220,28 +248,17 @@ public class TestSubjectTest {
 
     @Test
     void getTargetServerDefault() throws Exception {
-        config.setSubjectsUrl("src/test/resources/config/config-sample.ttl");
-        config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver"));
+        when(config.getSubjectsUrl())
+                .thenReturn(TestUtils.getFileUrl("src/test/resources/config/config-sample-single.ttl"));
         testSubject.loadTestSubjectConfig();
         final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
+        assertEquals("https://github.com/solid/conformance-test-harness/default", targetServer.getSubject());
     }
 
     @Test
-    void getClients() throws Exception {
-        config.setSubjectsUrl("src/test/resources/config/config-sample.ttl");
-        config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver"));
-        final Client mockClient = mock(Client.class);
-        when(authManager.authenticate(anyString(), any(TargetServer.class))).thenReturn(new SolidClient(mockClient));
-        testSubject.loadTestSubjectConfig();
-        testSubject.registerClients();
-        final Map<String, SolidClient> clients = testSubject.getClients();
-        assertNotNull(clients);
-        assertEquals(2, clients.size());
-        assertTrue(clients.containsKey(HttpConstants.ALICE));
-        assertNotNull(clients.get(HttpConstants.ALICE));
-        assertTrue(clients.containsKey(HttpConstants.BOB));
-        assertNotNull(clients.get(HttpConstants.BOB));
+    void getClientsNull() throws Exception {
+        assertNull(testSubject.getClients());
     }
 
     @Test

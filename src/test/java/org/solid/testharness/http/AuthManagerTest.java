@@ -29,9 +29,7 @@ import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.solid.testharness.config.Config;
-import org.solid.testharness.config.TargetServer;
-import org.solid.testharness.config.UserCredentials;
+import org.solid.testharness.config.*;
 import org.solid.testharness.utils.TestData;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
@@ -160,7 +158,7 @@ class AuthManagerTest {
         final TargetServer targetServer = getMockTargetServer(false);
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
         when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
-        when(config.getCredentials("test5")).thenReturn(new UserCredentials());
+        when(config.getCredentials("test5")).thenReturn(new TestCredentials());
 
         assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.authenticate("test5", targetServer));
@@ -171,7 +169,7 @@ class AuthManagerTest {
         final TargetServer targetServer = getMockTargetServer(false);
         when(config.getSolidIdentityProvider()).thenReturn(baseUri.resolve("/nogranttypes/"));
         when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
-        final UserCredentials credentials = new UserCredentials();
+        final TestCredentials credentials = new TestCredentials();
         credentials.refreshToken = Optional.of("REFRESH");
         credentials.clientId = Optional.of("CLIENTID");
         credentials.clientSecret = Optional.of("BADSECRET");
@@ -188,7 +186,7 @@ class AuthManagerTest {
         final TargetServer targetServer = getMockTargetServer(false);
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
         when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
-        final UserCredentials credentials = new UserCredentials();
+        final TestCredentials credentials = new TestCredentials();
         credentials.refreshToken = Optional.of("REFRESH");
         credentials.clientId = Optional.of("CLIENTID");
         credentials.clientSecret = Optional.of("BADSECRET");
@@ -205,7 +203,7 @@ class AuthManagerTest {
         final TargetServer targetServer = getMockTargetServer(false);
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
         when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
-        final UserCredentials credentials = new UserCredentials();
+        final TestCredentials credentials = new TestCredentials();
         credentials.refreshToken = Optional.of("REFRESH");
         credentials.clientId = Optional.of("CLIENTID");
         credentials.clientSecret = Optional.of("CLIENTSECRET");
@@ -327,7 +325,7 @@ class AuthManagerTest {
         final TargetServer targetServer = getMockTargetServer(false);
         when(config.getSolidIdentityProvider()).thenReturn(baseUri.resolve("/nogranttypes/"));
         when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
-        final UserCredentials credentials = new UserCredentials();
+        final TestCredentials credentials = new TestCredentials();
         credentials.clientSecret = Optional.of("BADSECRET");
         when(config.getCredentials("client-nogrant")).thenReturn(credentials);
 
@@ -342,9 +340,8 @@ class AuthManagerTest {
         final TargetServer targetServer = getMockTargetServer(false);
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
         when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
-        when(config.getWebIds())
-                .thenReturn(Map.of("test16","https://alice.target.example.org/profile/card#me"));
-        final UserCredentials credentials = new UserCredentials();
+        final TestCredentials credentials = new TestCredentials();
+        credentials.webId = "https://alice.target.example.org/profile/card#me";
         credentials.clientSecret = Optional.of("BADSECRET");
         when(config.getCredentials("test16")).thenReturn(credentials);
 
@@ -359,9 +356,8 @@ class AuthManagerTest {
         final TargetServer targetServer = getMockTargetServer(false);
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
         when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
-        when(config.getWebIds())
-                .thenReturn(Map.of("test17","https://alice.target.example.org/profile/card#me"));
-        final UserCredentials credentials = new UserCredentials();
+        final TestCredentials credentials = new TestCredentials();
+        credentials.webId = "https://alice.target.example.org/profile/card#me";
         credentials.clientSecret = Optional.of("CLIENTSECRET");
         when(config.getCredentials("test17")).thenReturn(credentials);
 
@@ -384,7 +380,7 @@ class AuthManagerTest {
         when(config.getSolidIdentityProvider()).thenReturn(idpBaseUri);
         when(config.getLoginEndpoint()).thenReturn(idpBaseUri.resolve("/login/password"));
         when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
-        final UserCredentials credentials = new UserCredentials();
+        final TestCredentials credentials = new TestCredentials();
         credentials.username = Optional.of("USERNAME");
         credentials.password = Optional.of(password);
         when(config.getCredentials(testId)).thenReturn(credentials);

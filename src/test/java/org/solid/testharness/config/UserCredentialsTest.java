@@ -32,19 +32,19 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserCredentialsTest {
     @Test
     public void loginCredentials() {
-        final UserCredentials userCredentials = new UserCredentials();
+        final TestCredentials userCredentials = new TestCredentials();
         userCredentials.username = Optional.of("USERNAME");
         userCredentials.password = Optional.of("PASSWORD");
 
         assertFalse(userCredentials.isUsingRefreshToken());
         assertTrue(userCredentials.isUsingUsernamePassword());
         assertFalse(userCredentials.isUsingClientCredentials());
-        assertEquals("UserCredentials: username=***, password=***", userCredentials.toString());
+        assertEquals("UserCredentials: username=***, password=***", userCredentials.stringValue());
     }
 
     @Test
     public void partialLoginCredentials() {
-        final UserCredentials userCredentials = new UserCredentials();
+        final TestCredentials userCredentials = new TestCredentials();
         userCredentials.username = Optional.of("USERNAME");
         userCredentials.password = Optional.empty();
         assertFalse(userCredentials.isUsingUsernamePassword());
@@ -55,7 +55,7 @@ public class UserCredentialsTest {
 
     @Test
     public void refreshCredentials() {
-        final UserCredentials userCredentials = new UserCredentials();
+        final TestCredentials userCredentials = new TestCredentials();
         userCredentials.refreshToken = Optional.of("TOKEN");
         userCredentials.clientId = Optional.of("CLIENT_ID");
         userCredentials.clientSecret = Optional.of("CLIENT_SECRET");
@@ -63,12 +63,12 @@ public class UserCredentialsTest {
         assertFalse(userCredentials.isUsingUsernamePassword());
         assertFalse(userCredentials.isUsingClientCredentials());
         assertEquals("UserCredentials: refreshToken=***, clientId=***, clientSecret=***",
-                userCredentials.toString());
+                userCredentials.stringValue());
     }
 
     @Test
     public void partialRefreshCredentials() {
-        final UserCredentials userCredentials = new UserCredentials();
+        final TestCredentials userCredentials = new TestCredentials();
         userCredentials.refreshToken = Optional.of("TOKEN");
         userCredentials.clientId = Optional.of("CLIENT_ID");
         userCredentials.clientSecret = Optional.empty();
@@ -85,20 +85,20 @@ public class UserCredentialsTest {
 
     @Test
     public void clientCredentials() {
-        final UserCredentials userCredentials = new UserCredentials();
+        final TestCredentials userCredentials = new TestCredentials();
         userCredentials.clientSecret = Optional.of("CLIENT_SECRET");
         assertTrue(userCredentials.isUsingClientCredentials());
         assertFalse(userCredentials.isUsingRefreshToken());
         assertFalse(userCredentials.isUsingUsernamePassword());
-        assertEquals("UserCredentials: clientSecret=***", userCredentials.toString());
+        assertEquals("UserCredentials: clientSecret=***", userCredentials.stringValue());
     }
 
     @Test
     public void emptyCredentials() {
-        final UserCredentials userCredentials = new UserCredentials();
+        final TestCredentials userCredentials = new TestCredentials();
         assertFalse(userCredentials.isUsingRefreshToken());
         assertFalse(userCredentials.isUsingUsernamePassword());
         assertEquals("UserCredentials: username=null, password=null, " +
-                "refreshToken=null, clientId=null, clientSecret=null", userCredentials.toString());
+                "refreshToken=null, clientId=null, clientSecret=null", userCredentials.stringValue());
     }
 }
