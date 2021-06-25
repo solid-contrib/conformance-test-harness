@@ -24,10 +24,9 @@ sources:
   - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/web-access-control-spec.ttl
 target: https://github.com/solid/conformance-test-harness/css
 
-feature:
-  mappings:
-    - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/example/main
-      path: ./example
+mappings:
+  - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/example/main
+    path: ./example
 EOF
 
 # build and run CSS in a container

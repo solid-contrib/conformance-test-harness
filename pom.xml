@@ -30,6 +30,7 @@
         <checkstyle.tool.version>8.43</checkstyle.tool.version>
         <pmd.plugin.version>3.14.0</pmd.plugin.version>
         <license.plugin.version>4.1</license.plugin.version>
+        <jacoco-plugin.version>0.8.7</jacoco-plugin.version>
 
         <!-- dependencies -->
         <quarkus.version>2.0.0.Final</quarkus.version>
@@ -328,6 +329,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco-plugin.version}</version>
                 <configuration>
                     <excludes>
                         <!-- class not tested as it is not possible to simulate the exceptions -->
@@ -454,10 +456,10 @@
                                 <RESOURCE_SERVER_ROOT>https://example.org</RESOURCE_SERVER_ROOT>
                                 <TEST_CONTAINER>/solid-test-suite-alice/shared-test/</TEST_CONTAINER>
                                 <SOLID_IDENTITY_PROVIDER>https://broker.example.org/</SOLID_IDENTITY_PROVIDER>
-                                <ALICE_WEBID>https://example.org/solid-test-suite-alice/profile/card#me</ALICE_WEBID>
-                                <ALICE_CLIENT_SECRET>ALICE_SECRET</ALICE_CLIENT_SECRET>
-                                <BOB_WEBID>https://example.org/solid-test-suite-bob/profile/card#me</BOB_WEBID>
-                                <BOB_CLIENT_SECRET>BOB_SECRET</BOB_CLIENT_SECRET>
+                                <USERS_ALICE_WEBID>https://example.org/solid-test-suite-alice/profile/card#me</USERS_ALICE_WEBID>
+                                <USERS_ALICE_CLIENTSECRET>ALICE_SECRET</USERS_ALICE_CLIENTSECRET>
+                                <USERS_BOB_WEBID>https://example.org/solid-test-suite-bob/profile/card#me</USERS_BOB_WEBID>
+                                <USERS_BOB_CLIENTSECRET>BOB_SECRET</USERS_BOB_CLIENTSECRET>
                             </environmentVariables>
                         </configuration>
                     </plugin>
@@ -477,7 +479,7 @@
                                 <include>TestSuiteRunner</include>
                             </includes>
                             <systemPropertyVariables>
-                                <quarkus.test.profile>prod</quarkus.test.profile>
+                                <quarkus.test.profile>local</quarkus.test.profile>
                             </systemPropertyVariables>
                         </configuration>
                     </plugin>

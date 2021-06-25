@@ -23,7 +23,6 @@
  */
 package org.solid.testharness.config;
 
-import io.quarkus.arc.config.ConfigPrefix;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.rdf4j.model.IRI;
@@ -86,16 +85,8 @@ public class Config {
     @ConfigProperty(name = "TEST_CONTAINER")
     String testContainer;
 
-    @ConfigProperty(name = "ALICE_WEBID")
-    String aliceWebId;
-    @ConfigProperty(name = "BOB_WEBID")
-    String bobWebId;
-
     @Inject
-    UserCredentials aliceCredentials;
-
-    @ConfigPrefix("bob")
-    UserCredentials bobCredentials;
+    Users users;
 
     @Inject
     PathMappings pathMappings;
@@ -171,19 +162,20 @@ public class Config {
     public UserCredentials getCredentials(final String user) {
         switch (user) {
             case HttpConstants.ALICE:
-                return aliceCredentials;
+                return users.alice();
             case HttpConstants.BOB:
-                return bobCredentials;
+                return users.bob();
             default:
                 return null;
         }
     }
 
+    // used to provide the test features with the web IDs
     public Map<String, Object> getWebIds() {
         if (webIds == null) {
             webIds = Map.of(
-                    HttpConstants.ALICE, aliceWebId,
-                    HttpConstants.BOB, bobWebId
+                    HttpConstants.ALICE, users.alice().webId(),
+                    HttpConstants.BOB, users.bob().webId()
             );
         }
         return webIds;
@@ -205,7 +197,7 @@ public class Config {
         if (logger.isInfoEnabled()) {
             logger.info("Subjects URL:   {}", getSubjectsUrl().toString());
             logger.info("Sources:        {}", getTestSources().toString());
-            logger.info("Path mappings:  {}", pathMappings.getMappings());
+            logger.info("Path mappings:  {}", pathMappings.stringValue());
             logger.info("Target server:  {}", target.orElse("not defined"));
         }
     }

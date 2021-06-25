@@ -23,45 +23,33 @@
  */
 package org.solid.testharness.config;
 
-import io.quarkus.arc.config.ConfigProperties;
+import io.smallrye.config.ConfigMapping;
+import io.smallrye.config.WithConverter;
+import io.smallrye.config.WithParentName;
+import org.eclipse.microprofile.config.spi.Converter;
 import org.eclipse.rdf4j.model.IRI;
 import org.solid.testharness.http.HttpUtils;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
-import javax.validation.constraints.NotNull;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static java.util.Objects.requireNonNull;
 import static org.eclipse.rdf4j.model.util.Values.iri;
 
-@ConfigProperties(prefix = "feature")
-public class PathMappings {
-    private List<Mapping> mappings = Collections.emptyList();
+@ConfigMapping(prefix = "mappings")
+public interface PathMappings {
+    @WithParentName
+    List<PathMapping> mappings();
 
-    public void setMappings(@NotNull final List<Mapping> mappings) {
-        requireNonNull(mappings, "mappings must not be null");
-        if (mappings.size() == 1 && mappings.get(0) == null) {
-            this.mappings = Collections.emptyList();
-        } else {
-            this.mappings = mappings;
-        }
+    default String stringValue() {
+        return mappings().stream().map(PathMapping::stringValue).collect(Collectors.toList()).toString();
     }
 
-    public List<Mapping> getMappings() {
-        return mappings;
-    }
-
-    @Override
-    public String toString() {
-        return mappings.toString();
-    }
-
-    public IRI unmapFeaturePath(final String path) {
+    default IRI unmapFeaturePath(final String path) {
         URI uri = URI.create(path);
         if (HttpUtils.isHttpProtocol(uri.getScheme())) {
             return iri(uri.toString());
@@ -70,76 +58,93 @@ public class PathMappings {
             uri = Path.of(path).toAbsolutePath().normalize().toUri();
         }
         final String finalPath = uri.toString();
-        final Mapping mapping = mappings.stream().filter(m -> finalPath.startsWith(m.path)).findFirst().orElse(null);
-        return mapping != null ? iri(finalPath.replace(mapping.path, mapping.prefix)) : null;
+        final PathMapping mapping = mappings().stream()
+                .filter(m -> finalPath.startsWith(m.path())).findFirst().orElse(null);
+        return mapping != null ? iri(finalPath.replace(mapping.path(), mapping.prefix())) : null;
     }
 
-    public URI mapFeatureIri(final IRI featureIri) {
+    default URI mapFeatureIri(final IRI featureIri) {
         final String location = featureIri.stringValue();
-        final Mapping mapping = mappings.stream().filter(m -> location.startsWith(m.prefix)).findFirst().orElse(null);
-        return URI.create(mapping != null ? location.replace(mapping.prefix, mapping.path) : location);
+        final PathMapping mapping = mappings().stream()
+                .filter(m -> location.startsWith(m.prefix())).findFirst().orElse(null);
+        return URI.create(mapping != null ? location.replace(mapping.prefix(), mapping.path()) : location);
     }
 
-    public URL mapIri(final IRI iri) {
+    default URL mapIri(final IRI iri) {
         return toUrl(iri.stringValue());
     }
 
-    public URL mapUrl(final URL url) {
+    default URL mapUrl(final URL url) {
         return toUrl(url.toString());
     }
 
-    private URL toUrl(final String location) {
-        final Mapping mapping = mappings.stream().filter(m -> location.startsWith(m.prefix)).findFirst().orElse(null);
+    default URL toUrl(final String location) {
+        final PathMapping mapping = mappings().stream()
+                .filter(m -> location.startsWith(m.prefix())).findFirst().orElse(null);
         try {
             return new URL(
-                    mapping != null ? location.replace(mapping.prefix, mapping.path) : location);
+                    mapping != null ? location.replace(mapping.prefix(), mapping.path()) : location);
         } catch (MalformedURLException e) {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException("Bad URL mapping: %s",
                     e.toString()).initCause(e);
         }
     }
 
-    public static class Mapping {
-        private String prefix;
-        private String path;
+//    public void setMappings(@NotNull final List<PathMapping> mappings) {
+//        requireNonNull(mappings, "mappings must not be null");
+//        if (mappings.size() == 1 && mappings.get(0) == null) {
+//            this.mappings = Collections.emptyList();
+//        } else {
+//            this.mappings = mappings;
+//        }
+//    }
 
-        public String getPrefix() {
-            return prefix;
-        }
+    interface PathMapping {
+        @WithConverter(PrefixConverter.class)
+        String prefix();
 
-        public String getPath() {
-            return path;
-        }
+        @WithConverter(PathConverter.class)
+        String path();
 
-        public void setPrefix(final String prefix) {
-            if (prefix.endsWith("/")) {
-                this.prefix = prefix.substring(0, prefix.length() - 1);
-            } else {
-                this.prefix = prefix;
-            }
+        default String stringValue() {
+            return String.format("%s => %s", prefix(), path());
         }
+//        public static PathMapping create(final String prefix, final String path) {
+//            final PathMapping mapping = new PathMapping();
+//            mapping.setPrefix(prefix);
+//            mapping.setPath(path);
+//            return mapping;
+//        }
+    }
 
-        public void setPath(final String path) {
-            if (path.matches("^(https?|file):/.*")) {
-                this.path = path;
-            } else {
-                this.path = Path.of(path).toAbsolutePath().normalize().toUri().toString();
-            }
-            if (this.path.endsWith("/")) {
-                this.path = this.path.substring(0, this.path.length() - 1);
-            }
-        }
-
-        public static Mapping create(final String prefix, final String path) {
-            final Mapping mapping = new Mapping();
-            mapping.setPrefix(prefix);
-            mapping.setPath(path);
-            return mapping;
-        }
+    class PathConverter implements Converter<String> {
+        private static final long serialVersionUID = 6105901390387650548L;
 
         @Override
-        public String toString() {
-            return String.format("%s => %s", prefix, path);
+        public String convert(final String value) {
+            String path;
+            if (value.matches("^(https?|file):/.*")) {
+                path = value;
+            } else {
+                path = Path.of(value).toAbsolutePath().normalize().toUri().toString();
+            }
+            if (path.endsWith("/")) {
+                path = path.substring(0, path.length() - 1);
+            }
+            return path;
+        }
+    }
+
+    class PrefixConverter implements Converter<String> {
+        private static final long serialVersionUID = -5363627210557105464L;
+
+        @Override
+        public String convert(final String value) {
+            if (value.endsWith("/")) {
+                return value.substring(0, value.length() - 1);
+            } else {
+                return value;
+            }
         }
     }
 }

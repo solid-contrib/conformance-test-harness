@@ -90,16 +90,4 @@ public class TestSubjectSetupTest {
         when(config.getSubjectsUrl()).thenReturn(TestUtils.getFileUrl("jsonld-sample.json"));
         assertThrows(TestHarnessInitializationException.class, () -> testSubject.loadTestSubjectConfig());
     }
-
-    @Test
-    void registerWithoutServer() {
-        testSubject.setTargetServer(null);
-        assertThrows(TestHarnessInitializationException.class, () -> testSubject.registerClients());
-    }
-
-    @Test
-    void prepareServerWithoutServer() {
-        testSubject.setTargetServer(null);
-        assertThrows(TestHarnessInitializationException.class, () -> testSubject.prepareServer());
-    }
 }

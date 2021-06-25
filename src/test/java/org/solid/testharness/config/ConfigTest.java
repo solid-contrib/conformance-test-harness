@@ -91,8 +91,10 @@ public class ConfigTest {
 
     @Test
     void getWebIds() {
-        assertEquals("https://alice.target.example.org/profile/card#me",config.getWebIds().get(HttpConstants.ALICE));
-        assertEquals("https://bob.target.example.org/profile/card#me", config.getWebIds().get(HttpConstants.BOB));
+        assertEquals("https://example.org/solid-test-suite-alice/profile/card#me",
+                config.getWebIds().get(HttpConstants.ALICE));
+        assertEquals("https://example.org/solid-test-suite-bob/profile/card#me",
+                config.getWebIds().get(HttpConstants.BOB));
     }
 
     @Test

@@ -23,10 +23,12 @@
  */
 package org.solid.testharness;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+@Disabled
 class ApplicationMainTest {
     @Test
     void main() {

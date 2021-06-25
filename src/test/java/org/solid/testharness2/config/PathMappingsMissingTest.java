@@ -44,12 +44,12 @@ class PathMappingsMissingTest {
 
     @Test
     void getMappings() {
-        assertTrue(pathMappings.getMappings().isEmpty());
+        assertTrue(pathMappings.mappings().isEmpty());
     }
 
     @Test
     void testToString() {
-        assertEquals("[]", pathMappings.toString());
+        assertEquals("[]", pathMappings.stringValue());
     }
 
     @Test

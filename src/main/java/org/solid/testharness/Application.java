@@ -65,7 +65,7 @@ public class Application implements QuarkusApplication {
     ConformanceTestHarness conformanceTestHarness;
 
     @Override
-    public int run(final String... args) {
+    public int run(final String... args) throws Exception {
         logger.debug("Args: {}", Arrays.toString(args));
 
         final Options options = new Options();
@@ -91,6 +91,7 @@ public class Application implements QuarkusApplication {
             if (line.hasOption(HELP)) {
                 final HelpFormatter formatter = new HelpFormatter();
                 formatter.printHelp( "run", options );
+                return 0;
             } else {
                 final File outputDir;
                 if (line.hasOption(OUTPUT) && !StringUtils.isBlank(line.getOptionValue(OUTPUT))) {
@@ -160,7 +161,9 @@ public class Application implements QuarkusApplication {
     }
 
     public static void main(final String... args) {
+        logger.error("STARTING");
         Quarkus.run(Application.class, args);
+        logger.error("STOPPING");
     }
 
     private boolean validateOutputDir(final Path dir, final Formatter error) {

@@ -51,10 +51,9 @@ sources:
 target: https://github.com/solid/conformance-test-harness/ess-compat
 
 # To map URLs to local files:
-feature:
-  mappings:
-    - prefix: https://github.com/solid/conformance-test-harness/example
-      path: ./example
+mappings:
+  - prefix: https://github.com/solid/conformance-test-harness/example
+    path: ./example
 
 # Other configuration to override defaults
 agent: agent-string		# default = Solid-Conformance-Test-Suite
@@ -113,8 +112,8 @@ or `https://pod-user.inrupt.net/test`
 The following are mandatory settings for all authentication mechanisms:
 ```shell
 SOLID_IDENTITY_PROVIDER=	# e.g. https://inrupt.net or https://broker.pod-compat.inrupt.com
-ALICE_WEBID=
-BOB_WEBID=
+USERS_ALICE_WEBID=
+USERS_BOB_WEBID=
 ```
 
 There are 3 options for obtaining access tokens when running tests:
@@ -132,8 +131,8 @@ The configuration that must be saved for each user is:
 
 The additional environment variables required are:
 ```shell
-ALICE_CLIENT_SECRET=
-BOB_CLIENT_SECRET=
+USERS_ALICE_CLIENTSECRET=
+USERS_BOB_CLIENTSECRET=
 ```
 
 This mechanism works well in CI environments where the credentials can be passed in as secrets.
@@ -155,12 +154,12 @@ The configuration that must be saved for each user is:
 
 The additional environment variables required are:
 ```shell
-ALICE_REFRESH_TOKEN=
-ALICE_CLIENT_ID=
-ALICE_CLIENT_SECRET=
-BOB_REFRESH_TOKEN=
-BOB_CLIENT_ID=
-BOB_CLIENT_SECRET=
+USERS_ALICE_REFRESHTOKEN=
+USERS_ALICE_CLIENTID=
+USERS_ALICE_CLIENTSECRET=
+USERS_BOB_REFRESHTOKEN=
+USERS_BOB_CLIENTID=
+USERS_BOB_CLIENTSECRET=
 ```
 
 Unfortunately, this process requires a user to go the broker's web page, log in and authorize the application. Also, the
@@ -195,10 +194,10 @@ A URL for the login form is also required.
 The additional environment variables required are:
 ```shell
 LOGIN_ENDPOINT=		# e.g. https://inrupt.net/login/password
-ALICE_USERNAME=
-ALICE_PASSWORD=
-BOB_USERNAME=
-BOB_PASSWORD=
+USERS_ALICE_USERNAME=
+USERS_ALICE_PASSWORD=
+USERS_BOB_USERNAME=
+USERS_BOB_PASSWORD=
 ```
 
 The harness also needs to know the origin that has been registered as the trusted app for the users. This is included
@@ -236,10 +235,10 @@ Create a file for environment variables e.g. `ess-compat.env` with the following
 client_credentials option):
 ```shell
 SOLID_IDENTITY_PROVIDER=
-ALICE_WEBID=
-ALICE_CLIENT_SECRET=
-BOB_WEBID=
-BOB_CLIENT_SECRET=
+USERS_ALICE_WEBID=
+USERS_ALICE_CLIENTSECRET=
+USERS_BOB_WEBID=
+USERS_BOB_CLIENTSECRET=
 RESOURCE_SERVER_ROOT=https://pod-compat.inrupt.com
 TEST_CONTAINER=/pod-owner/shared-test/
 ```
@@ -271,10 +270,9 @@ sources:
   - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/web-access-control-spec.ttl
 target: https://github.com/solid/conformance-test-harness/ess-compat
 
-feature:
-  mappings:
-    - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/example/main
-      path: ./example
+mappings:
+  - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/example/main
+    path: ./example
 EOF
 
 # run the tests in the test harness
@@ -289,10 +287,10 @@ Create a file for environment variables e.g. `css.env` with the following conten
 option):
 ```shell
 SOLID_IDENTITY_PROVIDER=
-ALICE_WEBID=
-ALICE_CLIENT_SECRET=
-BOB_WEBID=
-BOB_CLIENT_SECRET=
+USERS_ALICE_WEBID=
+USERS_ALICE_CLIENTSECRET=
+USERS_BOB_WEBID=
+USERS_BOB_CLIENTSECRET=
 RESOURCE_SERVER_ROOT=http://server:3000
 TEST_CONTAINER=/test/
 ```
@@ -338,10 +336,9 @@ sources:
   - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/web-access-control-spec.ttl
 target: https://github.com/solid/conformance-test-harness/css
 
-feature:
-  mappings:
-    - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/example/main
-      path: ./example
+mappings:
+  - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/example/main
+    path: ./example
 EOF
 
 # build and run CSS in a container
