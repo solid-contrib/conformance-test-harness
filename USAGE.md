@@ -17,29 +17,54 @@ and how dynamic it is. They are as follows (in order of least dynamic to most).
 
 ## Test subject description
 This is a Turtle file which describes the test subject and it's capabilities, primarily using
-[EARL](http://www.w3.org/ns/earl#) and [DOAP](http://usefulinc.com/ns/doap#) vocabularies.
-An examnple of this file is provided, containing descriptions of the following Solid implementations:
-* CSS - [Community Solid Server](https://github.com/solid/community-server)
-* ESS (2 versions) - [Enterprise Solid Server](https://inrupt.com/products/enterprise-solid-server)
-    * Access Control Policies (ACP)
-    * Compatibility mode for Web Access Controls (ACL)
-* NSS - [Node Solid Server] (https://github.com/solid/node-solid-server)
-* Other implementations will follow
+[EARL](http://www.w3.org/ns/earl#) and [DOAP](http://usefulinc.com/ns/doap#) vocabularies. It takes the following form:
+```
+<https://github.com/solid/conformance-test-harness/css>
+    a earl:Software, earl:TestSubject ;
+    doap:name "Community Solid Server" ;
+    doap:release [
+                     doap:name "CSS 0.9.0" ;
+                     doap:revision "0.9.0" ;
+                     doap:created "2021-05-04"^^xsd:date
+                 ] ;
+    doap:developer <https://github.com/solid> ;
+    doap:homepage <https://github.com/solid/community-server> ;
+    doap:description "An open and modular implementation of the Solid specifications."@en ;
+    doap:programming-language "TypeScript" ;
+    solid-test:origin <https://tester> ;
+    solid-test:maxThreads 8 ;
+    solid-test:features "authentication", "acl", "wac-allow" ;
+    solid-test:setupRootAcl true .
+```
+**NOTE**: The test subject identifier is simply an IRI - it is not meant to be resolvable and can be anything as long as you
+specify it on the command line when running tests.
 
 There are some test subject specific configuration properties in this file:
 ```
   solid-test:origin <https://tester>   # registered origin for session-based login
   solid-test:maxThreads 8              # number of threads for running tests in parallel  
   solid-test:features "authentication", "acl", "wac-allow"  # server capabilities
+  solid-test:setupRootAcl true         # this tells the server to setup an ACL on the root (used by CSS)
 ```
+An example of this file is provided in the test repository (https://github.com/solid/specification-tests),
+containing descriptions of the following Solid implementations:
+* CSS - [Community Solid Server](https://github.com/solid/community-server)
+* ESS (2 versions) - [Enterprise Solid Server](https://inrupt.com/products/enterprise-solid-server)
+  * Access Control Policies (ACP)
+  * Compatibility mode for Web Access Controls (ACL)
+* NSS - [Node Solid Server] (https://github.com/solid/node-solid-server)
+* Other implementations will follow
+
+You could either use this file and choose which server you are targeting when you run the test harness or you could 
+provide your own version of the file.
 
 ## Test harness configuration
 This file can have various formats though the example provided is YAML. It can be used in place of 
 command line settings if desired but is only required if you want to override default settings or
 map URLs or source files to a local file system. It can also control the level of logging but this
-is better controlled in the environment variables.
+is better controlled via environment variables.
 
-The file has a specific location: `config/application.yaml` in your current working directory.
+The file must be in a specific location: `config/application.yaml` in your current working directory.
 ```yaml
 # The first 3 can be ignored if using the command line settings: subjects, source and target 
 subjects: test-subjects.ttl
@@ -50,7 +75,7 @@ sources:
   - example/web-access-control/web-access-control-spec.ttl
 target: https://github.com/solid/conformance-test-harness/ess-compat
 
-# To map URLs to local files:
+# To map URLs from the manifest to local files:
 mappings:
   - prefix: https://github.com/solid/conformance-test-harness/example
     path: ./example
@@ -66,8 +91,8 @@ readTimeout: 1000		# default = 5000
 ### Logging
 By default, the test harness only provides minimal logging. If you want to see the HTTP request/response exchanges in
 the logs you can set `DEBUG` level for the categories shown below:
-* `com.intuit.karate` - HTTP interactions within test cases. **Note**: If this is not set to `DEBUG` the log entries are also
-  excluded from the reports.
+* `com.intuit.karate` - HTTP interactions within test cases. **Note**: If this is not set to `DEBUG` the log entries are
+  also excluded from the reports.
 * `org.solid.testharness.http.Client` - HTTP interactions during container and resource set up.
 * `org.solid.testharness.http.AuthManager` - HTTP interactions during the authentication flow before testing starts.
 
@@ -105,8 +130,14 @@ will be created.
 RESOURCE_SERVER_ROOT=	# e.g. https://pod-compat.inrupt.com or https://pod-user.inrupt.net
 TEST_CONTAINER= # e.g. pod-user/test or test
 ```
-These are used to construct the root location for test files e.g. `https://pod-compat.inrupt.com/pod-user/test/`
-or `https://pod-user.inrupt.net/test`
+These are used to construct the root location for any files created and destroyed by the tests
+e.g. `https://pod-compat.inrupt.com/pod-user/test/` or `https://pod-user.inrupt.net/test`.
+
+There are 2 reasons that the test container is defined like this:
+1. Different implementations construct the pod location from the WebID in different ways, as in the 2 examples above.
+2. If tests were run in the pod owned by the `alice` user, the test container could be created by the test harness but
+   this is not possible if you are using a WebID from a different server's IdP. In this case you need to grant the test 
+   user full access to a container in which files can be created. 
 
 ### Authentication
 The following are mandatory settings for all authentication mechanisms:
@@ -227,8 +258,33 @@ If neither `--coverage` nor `--tests` is specified then the default action is to
 The simplest way to run the test harness is via the docker image published to
 https://hub.docker.com/repository/docker/solidconformancetestbeta/conformance-test-harness
 
-The following examples demonstrate how a script can fetch example tests and configuration files from the repository and
-run tests against a publicly available server or one that is also running in a container.
+For ease of use the image includes the tests, manifest files and test subject configuration files from 
+https://github.com/solid/specification-tests. To use this image you just need to provide an environment file for the 
+server you are testing and select the test subject using the `target` option on the commandline.
+
+The image works with the following internal structure:
+* /app/harness - contains the executable jar file
+* /app/config - contains the default application.yaml file
+* /data - contains the contents of the https://github.com/solid/specification-tests test repository
+* /reports - the directory into which reports are written
+
+If you want to see the reports the `/reports` directory must be mapped to a local volume. Alternatively you could use 
+this image in your own image which could send the reports to an external location such as AWS S3.
+
+If you want to run different tests or supply a different config file you can mount local directories in place of other
+internal ones. e.g.
+```
+docker run -i --rm \
+  -v "$(pwd)"/tests:/data \
+  -v "$(pwd)"/config:/app/config \
+  -v "$(pwd)"/reports/local:/reports \
+  --env-file=ess.env solidconformancetestbeta/conformance-test-harness \ 
+  --output=/reports \
+  --target=...
+```
+
+The following examples demonstrate how a script can work with this image and run tests against a publicly available
+server or one that is also running in a container.
 
 ### ESS (ACL compatibility mode)
 Create a file for environment variables e.g. `ess-compat.env` with the following contents (based on the 
@@ -246,41 +302,21 @@ Next create a script based on the following:
 ```shell
 #!/bin/bash
 
-# This uses the test harness docker image and pulls tests from a repository.
+# This uses the test harness docker image with the default tests pulled from a repository.
 # Environment variables are defined in an `env` file in the directory from which you run this script.
 
-mkdir config
-
-# get the example tests and configuration from the repository
-wget -q https://github.com/solid/conformance-test-harness/archive/refs/heads/main.zip -O temp.zip
-unzip -q temp.zip "conformance-test-harness-main/example/*"
-mv conformance-test-harness-main/example ./example
-unzip -q temp.zip "conformance-test-harness-main/config/config.ttl"
-mv conformance-test-harness-main/config/config.ttl ./test-subjects.ttl
-rm -fr ./conformance-test-harness-main/
-rm temp.zip
-
-# set up the configuration to reference and map the files above
-cat > ./config/application.yaml <<EOF
-subjects: ./test-subjects.ttl
-sources:
-  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/solid-protocol-test-manifest.ttl
-  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/web-access-control-test-manifest.ttl
-  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/solid-protocol-spec.ttl
-  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/web-access-control-spec.ttl
-target: https://github.com/solid/conformance-test-harness/ess-compat
-
-mappings:
-  - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/example/main
-    path: ./example
-EOF
-
-# run the tests in the test harness
+mkdir reports/ess-compat
 docker pull solidconformancetestbeta/conformance-test-harness
-docker run -i --rm -v "$(pwd)":/data --env-file=ess-compat.env solidconformancetestbeta/conformance-test-harness
+docker run -i --rm \
+  -v "$(pwd)"/reports/ess-compat:/reports \
+  --env-file=ess-compat.env solidconformancetestbeta/conformance-test-harness \
+  --output=/reports --target=ess-compat
 ```
 
-Run `./ess-compat.sh` and the reports will be created in the current directory. 
+Run `./ess-compat.sh` and the reports will be created in the specified directory.
+
+To run against the ACP version ESS you would just need to supply a different environment file and set the target as
+`ess`.
 
 ### CSS in a container
 Create a file for environment variables e.g. `css.env` with the following contents (based on the client_credentials
@@ -312,34 +348,10 @@ Finally, create a script based on the following:
 ```shell
 #!/bin/bash
 
-# This uses the test harness docker image and pulls tests from a repository.
+# This uses the test harness docker image with the default tests pulled from a repository.
 # Environment variables are defined in the file `env` in the directory from which you run this script.
 
-mkdir config
-
-# get the example tests from the repository
-wget -q https://github.com/solid/conformance-test-harness/archive/refs/heads/main.zip -O temp.zip
-unzip -q temp.zip "conformance-test-harness-main/example/*"
-mv conformance-test-harness-main/example ./example
-unzip -q temp.zip "conformance-test-harness-main/config/config.ttl"
-mv conformance-test-harness-main/config/config.ttl ./test-subjects.ttl
-rm -fr ./conformance-test-harness-main/
-rm temp.zip
-
-# set up the configuration to reference and map the files above
-cat > ./config/application.yaml <<EOF
-subjects: ./test-subjects.ttl
-sources:
-  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/solid-protocol-test-manifest.ttl
-  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/web-access-control-test-manifest.ttl
-  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/solid-protocol-spec.ttl
-  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/web-access-control-spec.ttl
-target: https://github.com/solid/conformance-test-harness/css
-
-mappings:
-  - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/example/main
-    path: ./example
-EOF
+mkdir -p reports/css
 
 # build and run CSS in a container
 docker build -f Dockerfile.css -t css:latest .
@@ -347,13 +359,49 @@ docker run -d --name=server --network=testnet -p 3000:3000 -it css:latest
 
 # run the tests in the test harness
 docker pull solidconformancetestbeta/conformance-test-harness
-docker run -i --rm -v "$(pwd)":/data --env-file=css.env --network=testnet solidconformancetestbeta/conformance-test-harness
+docker run -i --rm \
+  -v "$(pwd)"/reports/css:/reports \
+  --env-file=css.env --network=testnet solidconformancetestbeta/conformance-test-harness \
+  --output=/reports --target=css
 docker stop server
 docker rm server
 ```
 
-Run `./css.sh` and the reports will be created in the current directory.
+Run `./css.sh` and the reports will be created in the specified directory.
 
+### Providing your own tests and configuration
+To use the image to run a set of local tests:
+* Create a directory such as `tests`
+* This should contain the tests, manifest files and a test subject configuration file e.g.:
+  * protocol/test.feature
+  * solid-protocol-test-manifest.ttl
+  * test-subjects.ttl
+* Create a directory called `config`
+* Create the file `config/application.yaml` e.g.
+  ```
+    subjects: /data/test-subjects.ttl
+    sources:
+      - /data/solid-protocol-test-manifest.ttl
+      - /data/solid-protocol-spec.ttl
+    target: https://github.com/solid/conformance-test-harness/ess
+    mappings:
+      - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol
+        path: /data
+  ```
+  * Note that the paths are internal paths in the test harness image so you next need to map them in the command line
+  * You can set the default target here rather than on the command line - this has to be a URI from the test-subjects.ttl
+    file
+  * The mapping prefix is whatever you have used within the test manifest file
+* The command line needs to map the local directories into the image to replace the internal directories:
+  ```
+  docker run -i --rm \
+    -v "$(pwd)"/tests:/data 
+    -v "$(pwd)"/config:/app/config \
+    -v "$(pwd)"/reports/local:/reports \
+    --env-file=ess.env solidconformancetestbeta/conformance-test-harness \
+    --output=/reports --targ
+  ```
+  
 ## Local execution
 The test harness is packaged into a single, executable jar which is available as an asset in the release within github:
 https://github.com/solid/conformance-test-harness/releases. The only dependency is on Java 11. You can run it and see
@@ -368,5 +416,3 @@ java -jar solid-conformance-test-harness-runner.jar --help
 |Coverage (HTML+RDFa)|`coverage.html`|
 |Results (HTML+RDFa)|`report.html`|
 |Results (Turtle)|`report.ttl`|
-|Summary report|`target/karate-reports/karate-summary.html`|
-|Timeline|`target/karate-reports/karate-timeline.html`|

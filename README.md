@@ -222,6 +222,14 @@ profile when running tests:
 -Dquarkus.test.profile=prod
 ```
 
+When you run the tests form JUnit (as above) some additional reports are created by Karate which can be useful for
+developers:
+
+|Report|Location|
+|------|--------|
+|Summary report|`target/karate-reports/karate-summary.html`|
+|Timeline|`target/karate-reports/karate-timeline.html`|
+
 ### Package
 The test harness can be packaged into a single jar:
 ```shell

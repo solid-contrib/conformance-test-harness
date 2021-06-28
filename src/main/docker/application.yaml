@@ -1,10 +1,10 @@
-subjects: ./servers.ttl
+subjects: /data/test-subjects.ttl
 sources:
-  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/solid-protocol-test-manifest.ttl
-  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/web-access-control-test-manifest.ttl
-  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/solid-protocol-spec.ttl
-  - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/web-access-control-spec.ttl
+  - /data/protocol/solid-protocol-test-manifest.ttl
+  - /data/web-access-control/web-access-control-test-manifest.ttl
+  - /data/protocol/solid-protocol-spec.ttl
+  - /data/web-access-control/web-access-control-spec.ttl
 target: https://github.com/solid/conformance-test-harness/ess-compat
 mappings:
-  - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/example/main
-    path: example
+  - prefix: https://github.com/solid/specification-tests/
+    path: /data/

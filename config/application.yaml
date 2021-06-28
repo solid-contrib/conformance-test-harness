@@ -1,6 +1,6 @@
 "%local":
   # local override of properties
-  subjects: config/config.ttl
+  subjects: config/test-subjects.ttl
   sources:
     - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/solid-protocol-test-manifest.ttl
     - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/web-access-control-test-manifest.ttl
