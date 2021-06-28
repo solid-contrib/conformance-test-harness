@@ -43,7 +43,7 @@ public class ConfigOverriddenTest {
     @BeforeAll
     void setup() {
         config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver2"));
-        config.setSubjectsUrl("https://example.org/config.ttl");
+        config.setSubjectsUrl("https://example.org/test-subjects.ttl");
         config.setTestSources(List.of("https://example.org/testsuite.ttl"));
     }
 
@@ -56,7 +56,7 @@ public class ConfigOverriddenTest {
 
     @Test
     void getSubjectsUrlChanged() {
-        assertEquals("https://example.org/config.ttl", config.getSubjectsUrl().toString());
+        assertEquals("https://example.org/test-subjects.ttl", config.getSubjectsUrl().toString());
     }
 
     @Test

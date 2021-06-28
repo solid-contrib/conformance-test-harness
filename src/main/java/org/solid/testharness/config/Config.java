@@ -93,6 +93,7 @@ public class Config {
 
     public IRI getTestSubject() {
         if (testSubject == null && target.isPresent()) {
+            logger.debug("Use config to set target: {}", target.get());
             testSubject = iri(target.get());
         }
         return testSubject;
@@ -198,7 +199,7 @@ public class Config {
             logger.info("Subjects URL:   {}", getSubjectsUrl().toString());
             logger.info("Sources:        {}", getTestSources().toString());
             logger.info("Path mappings:  {}", pathMappings.stringValue());
-            logger.info("Target server:  {}", target.orElse("not defined"));
+            logger.info("Target server:  {}", getTestSubject());
         }
     }
 
