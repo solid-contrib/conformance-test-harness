@@ -135,6 +135,15 @@ public class Client {
         return httpClient.send(request, responseBodyHandler);
     }
 
+    public <T> HttpResponse<T> sendAuthorized(@NotNull final HttpRequest.Builder requestBuilder,
+                                              @NotNull final HttpResponse.BodyHandler<T> responseBodyHandler)
+            throws IOException, InterruptedException {
+        requireNonNull(requestBuilder, "requestBuilder is required");
+        requireNonNull(responseBodyHandler, "responseBodyHandler is required");
+        final HttpRequest request = authorize(requestBuilder).build();
+        return httpClient.send(request, responseBodyHandler);
+    }
+
     public HttpResponse<String> getAsTurtle(@NotNull final URI url) throws IOException, InterruptedException {
         requireNonNull(url, "url is required");
         final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
@@ -177,6 +186,11 @@ public class Client {
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding());
     }
 
+    /**
+     * Sign a request using a DPoP token.
+     * @param builder Request builder containing request to be signed
+     * @return The builder with the DPoP header added
+     */
     public HttpRequest.Builder signRequest(@NotNull final HttpRequest.Builder builder) {
         requireNonNull(builder, "builder is required");
         if (!dpopSupported) return builder;
@@ -185,6 +199,13 @@ public class Client {
         return builder.header(HttpConstants.HEADER_DPOP, dpopToken);
     }
 
+    /**
+     * Return a map of authentication headers depending on the client's authentication options. This is normally used
+     * within Karate test features to add headers to a request.
+     * @param method HTTP method of request
+     * @param uri URI of request
+     * @return Map of authentication and agent headers
+     */
     public Map<String, String> getAuthHeaders(@NotNull final String method, @NotNull final String uri) {
         requireNonNull(method, "method is required");
         requireNonNull(uri, "uri is required");
@@ -201,6 +222,11 @@ public class Client {
         return headers;
     }
 
+    /**
+     * Sign and add authentication headers to a request.
+     * @param builder Request builder containing request to be signed
+     * @return The builder with the Authorization and DPoP headers added
+     */
     private HttpRequest.Builder authorize(@NotNull final HttpRequest.Builder builder) {
         requireNonNull(builder, "builder is required");
         if (accessToken == null) return builder;

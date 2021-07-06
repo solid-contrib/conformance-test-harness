@@ -25,9 +25,11 @@ package org.solid.testharness.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.testharness.http.HttpUtils;
 import org.solid.testharness.http.SolidClient;
 
 import java.net.URI;
+import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,7 +45,7 @@ public class SolidContainer extends SolidResource {
     }
 
     public List<String> listMembers() throws Exception {
-        return parseMembers(solidClient.getContainmentData(url));
+        return parseMembers(solidClient.getContentAsTurtle(url));
     }
 
     public List<String> parseMembers(final String data) throws Exception {
@@ -55,6 +57,22 @@ public class SolidContainer extends SolidResource {
             throw new IllegalArgumentException("A container url must end with /");
         }
         return url;
+    }
+
+    public SolidContainer instantiate() {
+        try {
+            final HttpResponse<String> response = solidClient.createContainer(this.url);
+            if (HttpUtils.isSuccessful(response.statusCode())) {
+                return this;
+            } else {
+                logger.error("Failed to create " + url.toString() + ", response = " + response.statusCode());
+                logger.error("Response: " + response.body());
+                return null;
+            }
+        } catch (Exception e) {
+            logger.error("createContainer: " + url.toString() + " failed", e);
+            return null;
+        }
     }
 
     public SolidContainer generateChildContainer() {

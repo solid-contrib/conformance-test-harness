@@ -163,6 +163,9 @@ public class ConformanceTestHarness {
                 logger.info("==== RUNNING {} TEST CASES: {}", featurePaths.size(), featurePaths);
             }
 
+            if (config.getUserRegistrationEndpoint() != null) {
+                testSubject.registerUsers();
+            }
             testSubject.registerClients();
             testSubject.prepareServer();
         } catch (TestHarnessInitializationException e) {

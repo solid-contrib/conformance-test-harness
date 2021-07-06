@@ -46,6 +46,9 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 @ApplicationScoped
 public class Config {
     private static final Logger logger = LoggerFactory.getLogger(Config.class);
+    private static final String SLASH = "/";
+    private static final List<String> TRUSTED_HOSTS = List.of("localhost", "server");
+    public static final Integer DEFAULT_TIMEOUT = 5000;
 
     private IRI testSubject;
     private URL subjectsUrl;
@@ -84,6 +87,8 @@ public class Config {
     String serverRoot;
     @ConfigProperty(name = "TEST_CONTAINER")
     String testContainer;
+    @ConfigProperty(name = "USER_REGISTRATION_ENDPOINT")
+    Optional<String> userRegistrationEndpoint;
 
     @Inject
     Users users;
@@ -142,20 +147,28 @@ public class Config {
     }
 
     public URI getSolidIdentityProvider() {
-        return URI.create(solidIdentityProvider).resolve("/");
+        return URI.create(solidIdentityProvider).resolve(SLASH);
     }
 
     public URI getLoginEndpoint() {
         return loginEndpoint.map(URI::create).orElse(null);
     }
 
+    public URI getUserRegistrationEndpoint() {
+        return userRegistrationEndpoint.map(URI::create).orElse(null);
+    }
+
     public URI getServerRoot() {
-        return URI.create(serverRoot).resolve("/");
+        return URI.create(serverRoot).resolve(SLASH);
+    }
+
+    public boolean overridingTrust() {
+        return TRUSTED_HOSTS.contains(getServerRoot().getHost());
     }
 
     public String getTestContainer() {
-        if (!testContainer.endsWith("/")) {
-            testContainer += "/";
+        if (!testContainer.endsWith(SLASH)) {
+            testContainer += SLASH;
         }
         return getServerRoot().resolve(testContainer).toString();
     }

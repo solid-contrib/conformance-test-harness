@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.http.HttpHeaders;
+import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
@@ -89,6 +90,16 @@ public class SolidClient {
         return response.headers();
     }
 
+    public HttpResponse<String> createContainer(final URI url) throws Exception {
+        final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
+                .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_TEXT_TURTLE)
+                .header(HttpConstants.HEADER_LINK, HttpConstants.CONTAINER_LINK)
+                .PUT(HttpRequest.BodyPublishers.noBody());
+        final HttpResponse<String> response = client.sendAuthorized(builder, HttpResponse.BodyHandlers.ofString());
+        HttpUtils.logResponse(logger, response);
+        return response;
+    }
+
     public URI getResourceAclLink(final URI uri) throws IOException, InterruptedException {
         final HttpResponse<Void> response = client.head(uri);
         return getAclLink(response.headers());
@@ -106,11 +117,17 @@ public class SolidClient {
         return HttpUtils.isSuccessful(response.statusCode());
     }
 
-    public String getContainmentData(final URI url) throws Exception {
+    public String getAcl(final URI url) throws IOException, InterruptedException {
+        logger.debug("ACL: for {}", url);
+        final HttpResponse<String> response = client.getAsTurtle(url);
+        return response.body();
+    }
+
+    public String getContentAsTurtle(final URI url) throws Exception {
         final HttpResponse<String> response = client.getAsTurtle(url);
         if (!HttpUtils.isSuccessful(response.statusCode())) {
             throw new Exception("Error response=" + response.statusCode() +
-                    " trying to get container members for " + url);
+                    " trying to get content for " + url);
         }
         return response.body();
     }
@@ -147,7 +164,7 @@ public class SolidClient {
             // get all members
             final List<URI> members;
             try {
-                members = parseMembers(getContainmentData(url), url).stream()
+                members = parseMembers(getContentAsTurtle(url), url).stream()
                         .map(URI::create)
                         .collect(Collectors.toList());
             } catch (Exception e) {
