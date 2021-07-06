@@ -24,7 +24,9 @@
 package org.solid.testharness.http;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import org.junit.jupiter.api.Test;
+import org.solid.testharness.config.ConfigTestNormalProfile;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 import org.solid.testharness.utils.TestUtils;
 
@@ -44,6 +46,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest
+@TestProfile(ConfigTestNormalProfile.class)
 class SolidClientTest {
     private static final String PREFIX = "@prefix ldp: <http://www.w3.org/ns/ldp#> .";
 
@@ -107,10 +110,7 @@ class SolidClientTest {
     @Test
     void createResource() throws Exception {
         final Client mockClient = mock(Client.class);
-        final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
-        final HttpHeaders mockHeaders = HttpHeaders.of(Collections.emptyMap(), (k, v) -> true);
-        when(mockResponse.headers()).thenReturn(mockHeaders);
-        when(mockResponse.statusCode()).thenReturn(200);
+        final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(200);
         when(mockClient.put(eq(URI.create("http://localhost:3000/test")), eq("DATA"),
                 eq(HttpConstants.MEDIA_TYPE_TEXT_PLAIN)))
                 .thenReturn(mockResponse);
@@ -124,6 +124,33 @@ class SolidClientTest {
 
     @Test
     void createResourceFails() throws Exception {
+        final Client mockClient = mock(Client.class);
+        final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(412);
+        when(mockClient.put(eq(URI.create("http://localhost:3000/test")), eq("DATA"),
+                eq(HttpConstants.MEDIA_TYPE_TEXT_PLAIN)))
+                .thenReturn(mockResponse);
+
+        final SolidClient solidClient = new SolidClient(mockClient);
+        final Exception exception = assertThrows(Exception.class,
+                () -> solidClient.createResource(URI.create("http://localhost:3000/test"), "DATA",
+                        HttpConstants.MEDIA_TYPE_TEXT_PLAIN)
+        );
+        assertEquals("Failed to create resource - status=412", exception.getMessage());
+    }
+
+    @Test
+    void createContainer() throws Exception {
+        final Client mockClient = mock(Client.class);
+        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(201, "");
+        doReturn(mockResponse).when(mockClient).sendAuthorized(any(), any());
+
+        final SolidClient solidClient = new SolidClient(mockClient);
+        final HttpResponse<String> response = solidClient.createContainer(URI.create("http://localhost:3000/test/"));
+        assertEquals(201, response.statusCode());
+    }
+
+    @Test
+    void createContainerFails() throws Exception {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
         final HttpHeaders mockHeaders = HttpHeaders.of(Collections.emptyMap(), (k, v) -> true);
@@ -144,11 +171,8 @@ class SolidClientTest {
     @Test
     void getResourceAclLink() throws IOException, InterruptedException {
         final Client mockClient = mock(Client.class);
-        final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
-        final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
-                List.of("<http://localhost:3000/test.acl>; rel=\"acl\""));
-        final HttpHeaders mockHeaders = HttpHeaders.of(headerMap, (k, v) -> true);
-        when(mockResponse.headers()).thenReturn(mockHeaders);
+        final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204, Map.of(HttpConstants.HEADER_LINK,
+                List.of("<http://localhost:3000/test.acl>; rel=\"acl\"")));
         when(mockClient.head(any())).thenReturn(mockResponse);
 
         final SolidClient solidClient = new SolidClient(mockClient);
@@ -202,11 +226,9 @@ class SolidClientTest {
     void createAcl() throws IOException, InterruptedException {
         final URI resourceAcl = URI.create("http://localhost:3000/test.acl");
         final Client mockClient = mock(Client.class);
-        final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
-
+        final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(200);
         when(mockClient.put(eq(resourceAcl), eq("ACL"), eq(HttpConstants.MEDIA_TYPE_TEXT_TURTLE)))
                 .thenReturn(mockResponse);
-        when(mockResponse.statusCode()).thenReturn(200);
 
         final SolidClient solidClient = new SolidClient(mockClient);
         final boolean res = solidClient.createAcl(resourceAcl, "ACL");
@@ -215,15 +237,26 @@ class SolidClientTest {
     }
 
     @Test
+    void getAcl() throws IOException, InterruptedException {
+        final URI resourceAcl = URI.create("http://localhost:3000/test.acl");
+        final Client mockClient = mock(Client.class);
+        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "ACL CONTENT");
+        when(mockClient.getAsTurtle(any())).thenReturn(mockResponse);
+
+        final SolidClient solidClient = new SolidClient(mockClient);
+        final String res = solidClient.getAcl(resourceAcl);
+        assertEquals("ACL CONTENT", res);
+    }
+
+    @Test
     void createAclFails() throws IOException, InterruptedException {
         final Client mockClient = mock(Client.class);
-        final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
+        final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(400);
         final URI resourceAcl = URI.create("http://localhost:3000/test.acl");
 
         when(mockClient.head(any())).thenReturn(mockResponse);
         when(mockClient.put(eq(resourceAcl), eq("ACL"), eq(HttpConstants.MEDIA_TYPE_TEXT_TURTLE)))
                 .thenReturn(mockResponse);
-        when(mockResponse.statusCode()).thenReturn(400);
 
         final SolidClient solidClient = new SolidClient(mockClient);
         final boolean res = solidClient.createAcl(resourceAcl, "ACL");
@@ -240,7 +273,7 @@ class SolidClientTest {
         when(mockClient.getAsTurtle(eq(resourceAcl))).thenReturn(mockResponse);
 
         final SolidClient solidClient = new SolidClient(mockClient);
-        assertEquals("TEST", solidClient.getContainmentData(resourceAcl));
+        assertEquals("TEST", solidClient.getContentAsTurtle(resourceAcl));
         verify(mockClient).getAsTurtle(resourceAcl);
     }
 
@@ -253,8 +286,8 @@ class SolidClientTest {
         when(mockClient.getAsTurtle(eq(resourceAcl))).thenReturn(mockResponse);
 
         final SolidClient solidClient = new SolidClient(mockClient);
-        final Exception exception = assertThrows(Exception.class, () -> solidClient.getContainmentData(resourceAcl));
-        assertEquals("Error response=400 trying to get container members for http://localhost:3000/test",
+        final Exception exception = assertThrows(Exception.class, () -> solidClient.getContentAsTurtle(resourceAcl));
+        assertEquals("Error response=400 trying to get content for http://localhost:3000/test",
                 exception.getMessage());
     }
 
@@ -353,7 +386,7 @@ class SolidClientTest {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, data);
         final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(204);
         final HttpResponse<Void> mockResponseException = mock(HttpResponse.class);
-        // TODO: This causes a failure in a delete but the code cannto detect which so carries on deleting other
+        // TODO: This causes a failure in a delete but the code cannot detect which so carries on deleting other
         // resources which may fail. Better handling needed.
         when(mockResponseException.statusCode()).thenThrow(new RuntimeException("FAIL"));
 

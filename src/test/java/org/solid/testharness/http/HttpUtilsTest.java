@@ -113,7 +113,7 @@ class HttpUtilsTest {
     }
 
     @Test
-    void logResponsetDisabled() {
+    void logResponseDisabled() {
         final Logger logger = mock(Logger.class);
         final HttpResponse<String> response = mock(HttpResponse.class);
         when(logger.isDebugEnabled()).thenReturn(false);
@@ -192,6 +192,11 @@ class HttpUtilsTest {
     @Test
     void maskBodyText() {
         assertEquals("Other", HttpUtils.maskBody("Other"));
+    }
+
+    @Test
+    void maskBodyBlank() {
+        assertEquals("", HttpUtils.maskBody(""));
     }
 
     @Test

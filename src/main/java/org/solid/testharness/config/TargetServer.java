@@ -44,6 +44,15 @@ public class TargetServer extends DataModelBase {
     private Boolean setupRootAcl;
     private Boolean disableDPoP;
 
+    public TargetServer(final IRI subject, final String origin, final Map<String, Boolean> features) {
+        super(subject, ConstructMode.DEEP);
+        this.origin = origin;
+        this.features = features;
+        this.maxThreads = 8;
+        this.setupRootAcl = false;
+        this.disableDPoP = false;
+    }
+
     public TargetServer(final IRI subject) {
         super(subject, ConstructMode.DEEP);
         logger.debug("Retrieved {} statements for {}", super.size(), subject);

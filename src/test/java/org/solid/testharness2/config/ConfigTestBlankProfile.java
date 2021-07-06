@@ -32,6 +32,6 @@ public class ConfigTestBlankProfile implements QuarkusTestProfile {
         return "blank";
     }
     public Map<String, String> getConfigOverrides() {
-        return Map.of("LOGIN_ENDPOINT", "");
+        return Map.of("LOGIN_ENDPOINT", "", "USER_REGISTRATION_ENDPOINT", "");
     }
 }

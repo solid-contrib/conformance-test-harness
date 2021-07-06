@@ -60,6 +60,11 @@ public class ConfigMissingTest {
     }
 
     @Test
+    void getUserRegistrationEndpoint() {
+        assertNull(config.getUserRegistrationEndpoint());
+    }
+
+    @Test
     void logConfigSettings() {
         assertDoesNotThrow(() -> config.logConfigSettings());
     }

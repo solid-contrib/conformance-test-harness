@@ -29,6 +29,7 @@ import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClient;
 
 import java.net.URI;
+import java.net.http.HttpResponse;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -70,14 +71,14 @@ class SolidContainerTest {
     @Test
     void listMembers() throws Exception {
         when(solidClient.parseMembers("containmentData", testUrl)).thenReturn(List.of("member"));
-        when(solidClient.getContainmentData(testUrl)).thenReturn("containmentData");
+        when(solidClient.getContentAsTurtle(testUrl)).thenReturn("containmentData");
         final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
         assertEquals("member", container.listMembers().get(0));
     }
 
     @Test
     void listMembersException() throws Exception {
-        when(solidClient.getContainmentData(testUrl)).thenThrow(new Exception("Error"));
+        when(solidClient.getContentAsTurtle(testUrl)).thenThrow(new Exception("Error"));
         final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
         assertThrows(Exception.class, () -> container.listMembers());
     }
@@ -94,6 +95,29 @@ class SolidContainerTest {
         when(solidClient.parseMembers("containmentData", testUrl)).thenThrow(new Exception("Error"));
         final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
         assertThrows(Exception.class, () -> container.parseMembers("containmentData"));
+    }
+
+    @Test
+    void instantiate() throws Exception {
+        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "");
+        when(solidClient.createContainer(any())).thenReturn(mockResponse);
+        final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
+        assertNotNull(container.instantiate());
+    }
+
+    @Test
+    void instantiateBadResponse() throws Exception {
+        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(400, "BAD RESPONSE");
+        when(solidClient.createContainer(any())).thenReturn(mockResponse);
+        final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
+        assertNull(container.instantiate());
+    }
+
+    @Test
+    void instantiateException() throws Exception {
+        when(solidClient.createContainer(any())).thenThrow(new Exception("FAIL"));
+        final SolidContainer container = SolidContainer.create(solidClient, testUrl.toString());
+        assertNull(container.instantiate());
     }
 
     @Test

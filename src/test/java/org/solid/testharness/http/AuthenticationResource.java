@@ -65,6 +65,12 @@ public class AuthenticationResource implements QuarkusTestResourceLifecycleManag
 
         wireMockServer.start();
 
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/400/idp/register"))
+                .willReturn(WireMock.aResponse().withStatus(400)));
+
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/idp/register"))
+                .willReturn(WireMock.aResponse().withStatus(200)));
+
         wireMockServer.stubFor(WireMock.get(WireMock.urlEqualTo("/404/" + HttpConstants.OPENID_CONFIGURATION))
                 .willReturn(WireMock.aResponse().withStatus(404)));
 
@@ -138,6 +144,35 @@ public class AuthenticationResource implements QuarkusTestResourceLifecycleManag
                 .withQueryParam(HttpConstants.REDIRECT_URI, containing("noredirect"))
                 .withQueryParam(HttpConstants.CLIENT_ID, equalTo("CLIENTID"))
                 .willReturn(WireMock.aResponse()
+                        .withStatus(302)));
+
+        // authorization will get immediate response for login with a bad form
+        wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/authorization"))
+                .withQueryParam(HttpConstants.REDIRECT_URI, equalTo("https://origin/badform"))
+                .withQueryParam(HttpConstants.CLIENT_ID, equalTo("CLIENTID"))
+                .willReturn(WireMock.aResponse()
+                    .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_TEXT_HTML)
+                    .withBody("BADFORM")));
+
+        // authorization will get immediate response for login with a good form
+        wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/authorization"))
+                .withQueryParam(HttpConstants.REDIRECT_URI, equalTo("https://origin/form"))
+                .withQueryParam(HttpConstants.CLIENT_ID, equalTo("CLIENTID"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_TEXT_HTML)
+                        .withBody("form action=\"/idp/login\"")));
+
+        // authorization will get bad auth response after bad login
+        wireMockServer.stubFor(WireMock.post(WireMock.urlPathEqualTo("/idp/login"))
+                .withRequestBody(containing(HttpConstants.PASSWORD + "=BADPASSWORD"))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(401)));
+
+        // authorization will get no code after good login
+        wireMockServer.stubFor(WireMock.post(WireMock.urlPathEqualTo("/idp/login"))
+                .withRequestBody(containing(HttpConstants.PASSWORD + "=PASSWORD"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpConstants.HEADER_LOCATION, "https://origin/form?code=badcode")
                         .withStatus(302)));
 
         // authorization will get immediate response but no authorization code

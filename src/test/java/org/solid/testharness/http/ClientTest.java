@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -127,6 +128,41 @@ class ClientTest {
         final Client client = new Client.Builder().build();
         final HttpRequest request = HttpRequest.newBuilder(baseUri.resolve("/get/fault")).build();
         assertThrows(IOException.class, () -> client.send(request, HttpResponse.BodyHandlers.ofString()));
+    }
+
+    @Test
+    void sendAuthorized() throws IOException, InterruptedException, JoseException {
+        final Client client = new Client.Builder().withDpopSupport().build();
+        client.setAccessToken("ACCESS");
+        final HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(URI.create(TestData.SAMPLE_BASE));
+        final HttpResponse<String> response = client.sendAuthorized(requestBuilder,
+                HttpResponse.BodyHandlers.ofString());
+        final Map<String, List<String>> headers = response.request().headers().map();
+        assertTrue(headers.containsKey(HttpConstants.HEADER_AUTHORIZATION));
+        assertTrue(headers.get(HttpConstants.HEADER_AUTHORIZATION).get(0).startsWith(HttpConstants.PREFIX_DPOP));
+        assertTrue(headers.containsKey(HttpConstants.HEADER_DPOP));
+    }
+
+    @Test
+    void sendAuthorizedNullRequestBuilder() {
+        final Client client = new Client.Builder().build();
+        assertThrows(NullPointerException.class,
+                () -> client.sendAuthorized(null, HttpResponse.BodyHandlers.ofString()));
+    }
+
+    @Test
+    void sendAuthorizedNullHandler() {
+        final Client client = new Client.Builder().build();
+        final HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(baseUri);
+        assertThrows(NullPointerException.class, () -> client.sendAuthorized(requestBuilder, null));
+    }
+
+    @Test
+    void sendAuthorizedFail() {
+        final Client client = new Client.Builder().build();
+        final HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(baseUri.resolve("/get/fault"));
+        assertThrows(IOException.class,
+                () -> client.sendAuthorized(requestBuilder, HttpResponse.BodyHandlers.ofString()));
     }
 
     @Test
