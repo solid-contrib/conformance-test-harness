@@ -281,6 +281,37 @@ class SolidResourceTest {
     }
 
     @Test
+    void getContentAsTurtle() throws Exception {
+        when(solidClient.getContentAsTurtle(testUrl)).thenReturn("CONTENT");
+        final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
+        assertEquals("CONTENT", resource.getContentAsTurtle());
+    }
+
+    @Test
+    void getContentAsTurtleEmpty() throws Exception {
+        when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN))
+                .thenThrow(new Exception("FAIL"));
+        final SolidResource resource = new SolidResource(solidClient, testUrl.toString(),"hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
+        assertEquals("", resource.getContentAsTurtle());
+    }
+
+    @Test
+    void getAccessControls() throws Exception {
+        when(solidClient.getResourceAclLink(testUrl)).thenReturn(aclUrl);
+        when(solidClient.getAcl(aclUrl)).thenReturn("ACL");
+        final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
+        assertEquals("ACL", resource.getAccessControls());
+    }
+
+    @Test
+    void getAccessControlsMissing() throws Exception {
+        when(solidClient.getResourceAclLink(testUrl)).thenReturn(null);
+        final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
+        assertEquals("", resource.getAccessControls());
+    }
+
+    @Test
     void delete() throws Exception {
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
         final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",

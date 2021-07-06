@@ -131,6 +131,14 @@ public class SolidResource {
         return aclUrl != null ? aclUrl.toString() : null;
     }
 
+    public String getContentAsTurtle() throws Exception {
+        return url != null ? solidClient.getContentAsTurtle(url) : "";
+    }
+
+    public String getAccessControls() throws Exception {
+        return getAclUrl() != null ? solidClient.getAcl(aclUrl) : "";
+    }
+
     public void delete() throws Exception {
         solidClient.deleteResourceRecursively(url);
     }

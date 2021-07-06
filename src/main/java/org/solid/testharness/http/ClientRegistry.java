@@ -23,8 +23,11 @@
  */
 package org.solid.testharness.http;
 
+import org.solid.testharness.config.Config;
+
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,11 +39,19 @@ public class ClientRegistry {
     public static final String DEFAULT = "default";
     public static final String SESSION_BASED = "session";
 
+    @Inject
+    Config config;
+
     @PostConstruct
     void postConstruct() {
         registeredClientMap = Collections.synchronizedMap(new HashMap<>());
-        register(DEFAULT, new Client.Builder().build());
-        register(SESSION_BASED, new Client.Builder().withSessionSupport().build());
+        if (config.overridingTrust()) {
+            register(DEFAULT, new Client.Builder().withLocalhostSupport().build());
+            register(SESSION_BASED, new Client.Builder().withLocalhostSupport().withSessionSupport().build());
+        } else {
+            register(DEFAULT, new Client.Builder().build());
+            register(SESSION_BASED, new Client.Builder().withSessionSupport().build());
+        }
     }
 
     public void register(final String label, final Client client) {

@@ -25,7 +25,9 @@ package org.solid.testharness.http;
 
 public final class HttpConstants {
     public static final String USERNAME = "username";
+    public static final String EMAIL = "email";
     public static final String PASSWORD = "password";
+    public static final String CONFIRM_PASSWORD = "confirmPassword";
     public static final String ALICE = "alice";
     public static final String BOB = "bob";
 
@@ -45,6 +47,7 @@ public final class HttpConstants {
     public static final String MEDIA_TYPE_APPLICATION_JSON = "application/json";
     public static final String MEDIA_TYPE_TEXT_PLAIN = "text/plain";
     public static final String MEDIA_TYPE_TEXT_TURTLE = "text/turtle";
+    public static final String MEDIA_TYPE_TEXT_HTML = "text/html";
 
     public static final String METHOD_HEAD = "HEAD";
     public static final int STATUS_OK = 200;
@@ -64,6 +67,8 @@ public final class HttpConstants {
     public static final String OPENID = "openid";
     public static final String CLIENT_ID = "client_id";
     public static final String CLIENT_SECRET = "client_secret";
+
+    public static final String CONTAINER_LINK = "<http://www.w3.org/ns/ldp#BasicContainer>; rel=\"type\"";
 
     private HttpConstants() { }
 }

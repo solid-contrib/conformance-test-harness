@@ -167,6 +167,17 @@ public class ConfigLogicTest {
     }
 
     @Test
+    void overridingTrust() {
+        final Config config = new Config();
+        config.serverRoot = "https://localhost/";
+        assertTrue(config.overridingTrust());
+        config.serverRoot = "https://server/";
+        assertTrue(config.overridingTrust());
+        config.serverRoot = "https://example.org/";
+        assertFalse(config.overridingTrust());
+    }
+
+    @Test
     public void getTestContainerWithSlashes() {
         final Config config = new Config();
         config.serverRoot = "https://localhost/";
@@ -187,5 +198,12 @@ public class ConfigLogicTest {
         final Config config = new Config();
         config.loginEndpoint = Optional.empty();
         assertEquals(null, config.getLoginEndpoint());
+    }
+
+    @Test
+    public void getUserRegistrationEndpointNull() {
+        final Config config = new Config();
+        config.userRegistrationEndpoint = Optional.empty();
+        assertEquals(null, config.getUserRegistrationEndpoint());
     }
 }

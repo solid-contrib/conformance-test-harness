@@ -122,7 +122,6 @@ public class TestSubject {
         }
         final SolidClient solidClient = new SolidClient(HttpConstants.ALICE);
         if (targetServer.isSetupRootAcl()) {
-            // CSS has no root acl by default so added here TODO: check whether this is relevant
             logger.debug("Setup root acl");
             try {
                 final URI rootAclUrl = solidClient.getResourceAclLink(config.getServerRoot());
@@ -144,8 +143,32 @@ public class TestSubject {
                 ).initCause(e);
             }
         }
-        // create a root container for all the test cases
-        rootTestContainer = SolidContainer.create(solidClient, config.getTestContainer()).generateChildContainer();
+        try {
+            final SolidContainer rootContainer = SolidContainer.create(solidClient, config.getTestContainer());
+            logger.debug("Root container content: {}", rootContainer.getContentAsTurtle());
+            logger.debug("Root container access controls: {}", rootContainer.getAccessControls());
+
+            // create a root container for all the test cases
+            rootTestContainer = SolidContainer.create(solidClient, config.getTestContainer())
+                    .generateChildContainer().instantiate();
+            logger.debug("Test container content: {}", rootTestContainer.getContentAsTurtle());
+            logger.debug("Test container access controls: {}", rootTestContainer.getAccessControls());
+        } catch (Exception e) {
+            throw (TestHarnessInitializationException) new TestHarnessInitializationException(
+                    "Failed to prepare server: %s", e.toString()
+            ).initCause(e);
+        }
+    }
+
+    public void registerUsers() {
+        try {
+            authManager.registerUser(HttpConstants.ALICE);
+            authManager.registerUser(HttpConstants.BOB);
+        } catch (Exception e) {
+            throw (TestHarnessInitializationException) new TestHarnessInitializationException(
+                    "Failed to register users: %s", e.toString()
+            ).initCause(e);
+        }
     }
 
     public void registerClients() {

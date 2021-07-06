@@ -24,21 +24,45 @@
 package org.solid.testharness.http;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectMock;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.solid.testharness.config.Config;
 
 import javax.inject.Inject;
+import javax.net.ssl.SSLContext;
+import java.security.NoSuchAlgorithmException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @QuarkusTest
 class ClientRegistryTest {
     @Inject
     ClientRegistry clientRegistry;
 
+    @InjectMock
+    Config config;
+
+    @BeforeEach
+    void setup() {
+        when(config.getReadTimeout()).thenReturn(5000);
+        when(config.getAgent()).thenReturn("AGENT");
+    }
+
     @Test
     void register() {
         clientRegistry.register("registerTest", new Client.Builder("registerTest").build());
         assertEquals("registerTest", clientRegistry.getClient("registerTest").getUser());
+    }
+
+    @Test
+    void registerTrustedLocal() throws NoSuchAlgorithmException {
+        final SSLContext defaultContext = SSLContext.getDefault();
+        assertEquals(defaultContext, clientRegistry.getClient(ClientRegistry.DEFAULT).getHttpClient().sslContext());
+        when(config.overridingTrust()).thenReturn(true);
+        clientRegistry.postConstruct();
+        assertNotEquals(defaultContext, clientRegistry.getClient(ClientRegistry.DEFAULT).getHttpClient().sslContext());
     }
 
     @Test

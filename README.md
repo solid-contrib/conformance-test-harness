@@ -244,6 +244,12 @@ This creates `target/solid-conformance-test-harness-runner.jar` which can be dep
 java -jar solid-conformance-test-harness-runner.jar
 ```
 
+### Test docker image
+To build a local copy of the docker image for testing:
+```
+docker build -f src/main/docker/Dockerfile -t testharness .
+```
+
 ### Release
 Update CHANGELOG.md to highlight new features before starting the release.
 ```shell

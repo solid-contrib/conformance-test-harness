@@ -26,8 +26,12 @@ package org.solid.testharness.utils;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.net.http.HttpHeaders;
 import java.net.http.HttpResponse;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.*;
 
@@ -45,15 +49,28 @@ public final class TestUtils {
     }
 
     public static HttpResponse<Void> mockVoidResponse(final int status) {
+        return mockVoidResponse(status, Collections.emptyMap());
+    }
+
+    public static HttpResponse<Void> mockVoidResponse(final int status, final Map<String, List<String>> headers) {
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(status);
+        final HttpHeaders mockHeaders = HttpHeaders.of(headers, (k, v) -> true);
+        when(mockResponse.headers()).thenReturn(mockHeaders);
         return mockResponse;
     }
 
     public static HttpResponse<String> mockStringResponse(final int status, final String body) {
+        return mockStringResponse(status, body, Collections.emptyMap());
+    }
+
+    public static HttpResponse<String> mockStringResponse(final int status, final String body,
+                                                          final Map<String, List<String>> headers) {
         final HttpResponse<String> mockResponse = mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(status);
         when(mockResponse.body()).thenReturn(body);
+        final HttpHeaders mockHeaders = HttpHeaders.of(headers, (k, v) -> true);
+        when(mockResponse.headers()).thenReturn(mockHeaders);
         return mockResponse;
     }
 

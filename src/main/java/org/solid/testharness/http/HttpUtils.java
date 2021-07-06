@@ -57,7 +57,9 @@ public final class HttpUtils {
     }
 
     public static Duration getConnectTimeout() {
-        return Duration.ofMillis(getConfig().getConnectTimeout());
+        return Duration.ofMillis(getConfig().getConnectTimeout() > 0
+                ? getConfig().getConnectTimeout()
+                : Config.DEFAULT_TIMEOUT);
     }
 
     public static HttpRequest.Builder newRequestBuilder(final URI uri) {

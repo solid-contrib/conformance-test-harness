@@ -80,6 +80,11 @@ public class ConfigTest {
     }
 
     @Test
+    void getUserRegistrationEndpoint() {
+        assertEquals(URI.create("https://example.org/idp/register"), config.getUserRegistrationEndpoint());
+    }
+
+    @Test
     void getServerRoot() {
         assertEquals(URI.create("https://target.example.org/"), config.getServerRoot());
     }

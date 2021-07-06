@@ -41,6 +41,7 @@ import org.solid.testharness.utils.TestHarnessInitializationException;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -156,7 +157,21 @@ class ConformanceTestHarnessTest {
     }
 
     @Test
-    void runTestSuiteInitErrpr() {
+    void runTestSuiteWithRegistration() {
+        mockTargetServer();
+        when(config.getUserRegistrationEndpoint()).thenReturn(URI.create("https://example.org/register"));
+        when(testSuiteDescription.getSupportedTestCases(any())).thenReturn(Collections.emptyList());
+        when(testSuiteDescription.locateTestCases(any())).thenReturn(List.of("test"));
+
+        final TestSuiteResults results = mockResults(1);
+        when(testRunner.runTests(any(), anyInt())).thenReturn(results);
+        assertEquals(1, conformanceTestHarness.runTestSuites().getFailCount());
+        assertTrue(Files.exists(tmp.resolve("report.html")));
+        verify(testSubject).registerUsers();
+    }
+
+    @Test
+    void runTestSuiteInitError() {
         mockTargetServer();
         when(testSuiteDescription.getSupportedTestCases(any())).thenThrow(TestHarnessInitializationException.class);
         assertNull(conformanceTestHarness.runTestSuites());

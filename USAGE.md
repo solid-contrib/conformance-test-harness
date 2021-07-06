@@ -34,17 +34,17 @@ This is a Turtle file which describes the test subject and it's capabilities, pr
     solid-test:origin <https://tester> ;
     solid-test:maxThreads 8 ;
     solid-test:features "authentication", "acl", "wac-allow" ;
-    solid-test:setupRootAcl true .
+    solid-test:setupRootAcl false .
 ```
-**NOTE**: The test subject identifier is simply an IRI - it is not meant to be resolvable and can be anything as long as you
-specify it on the command line when running tests.
+**NOTE**: The test subject identifier is simply an IRI - it is not meant to be resolvable and can be anything as long as
+you specify it on the command line when running tests.
 
 There are some test subject specific configuration properties in this file:
 ```
   solid-test:origin <https://tester>   # registered origin for session-based login
   solid-test:maxThreads 8              # number of threads for running tests in parallel  
   solid-test:features "authentication", "acl", "wac-allow"  # server capabilities
-  solid-test:setupRootAcl true         # this tells the server to setup an ACL on the root (used by CSS)
+  solid-test:setupRootAcl true         # this tells the server to setup an ACL on the root (not needed by any current implementation)
 ```
 An example of this file is provided in the test repository (https://github.com/solid/specification-tests),
 containing descriptions of the following Solid implementations:
@@ -73,6 +73,7 @@ sources:
   - example/web-access-control/web-access-control-test-manifest.ttl
   - example/protocol/solid-protocol-spec.ttl
   - example/web-access-control/web-access-control-spec.ttl
+# The target is just an IRI and is not expected to resolve to anything - the namespace used below is likely to change
 target: https://github.com/solid/conformance-test-harness/ess-compat
 
 # To map URLs from the manifest to local files:
@@ -127,11 +128,11 @@ This results in a log entry such as:
 The test harness needs to know the root URL of the server being tested and the path to the container in which test files
 will be created.
 ```
-RESOURCE_SERVER_ROOT=	# e.g. https://pod-compat.inrupt.com or https://pod-user.inrupt.net
+RESOURCE_SERVER_ROOT=	# e.g. https://pod.inrupt.com or https://pod-user.inrupt.net
 TEST_CONTAINER= # e.g. pod-user/test or test
 ```
 These are used to construct the root location for any files created and destroyed by the tests
-e.g. `https://pod-compat.inrupt.com/pod-user/test/` or `https://pod-user.inrupt.net/test`.
+e.g. `https://pod.inrupt.com/pod-user/test/` or `https://pod-user.inrupt.net/test`.
 
 There are 2 reasons that the test container is defined like this:
 1. Different implementations construct the pod location from the WebID in different ways, as in the 2 examples above.
@@ -142,15 +143,16 @@ There are 2 reasons that the test container is defined like this:
 ### Authentication
 The following are mandatory settings for all authentication mechanisms:
 ```shell
-SOLID_IDENTITY_PROVIDER=	# e.g. https://inrupt.net or https://broker.pod-compat.inrupt.com
+SOLID_IDENTITY_PROVIDER=	# e.g. https://inrupt.net or https://broker.pod.inrupt.com
 USERS_ALICE_WEBID=
 USERS_BOB_WEBID=
 ```
 
-There are 3 options for obtaining access tokens when running tests:
+There are 4 options for obtaining access tokens when running tests:
 * Client credentials
 * Refresh tokens
 * Session-based login
+* Register users locally (and login during the authorization code request)
 
 #### Client credentials
 The simplest authentication mechanism is based on the Solid Identity Provider offering the
@@ -171,7 +173,7 @@ However, the access tokens provided seem to cause a 500 error on NSS so session 
 option for that server.
 
 #### Refresh tokens
-This relies on getting a refresh token from an IdP (e.g. https://broker.pod-compat.inrupt.com/) and
+This relies on getting a refresh token from an IdP (e.g. https://broker.pod.inrupt.com/) and
 exchanging that for an access token in order to run the tests. The refresh token can be created using a
 simple bootstrap process:
 ```shell
@@ -236,6 +238,34 @@ in the test subject configuration file describing the server under test.
 
 This mechanism will work in CI environments where the credentials can be passed in as secrets.
 
+### Register users locally
+If an implementation supports user registration (including creating a pod) then the harness can use this to create the
+users before running the tests. This can be very useful in a CI environment where the server is created and destroyed
+during the process.
+
+**NOTE**: There is currently no standard for this process so the current implementation only works with CSS. Other
+implementations will be added as required.
+
+The configuration that must be saved for each user is:
+* Username
+* Password
+
+A URL for the user registration form is also required.
+
+The additional environment variables required are:
+```shell
+USER_REGISTRATION_ENDPOINT=		# e.g. https://localhost:3000/idp/register
+USERS_ALICE_USERNAME=
+USERS_ALICE_PASSWORD=
+USERS_BOB_USERNAME=
+USERS_BOB_PASSWORD=
+```
+
+The harness also needs to know the origin that the IdP server will redirect to (the same as the trusted app in the 
+previous section). This is included in the test subject configuration file describing the server under test.
+
+This mechanism will work in CI environments where the credentials can be passed in as secrets.
+
 ## Command line options
 
 The command line options are:
@@ -295,7 +325,7 @@ USERS_ALICE_WEBID=
 USERS_ALICE_CLIENTSECRET=
 USERS_BOB_WEBID=
 USERS_BOB_CLIENTSECRET=
-RESOURCE_SERVER_ROOT=https://pod-compat.inrupt.com
+RESOURCE_SERVER_ROOT=https://dev-wac.inrupt.com
 TEST_CONTAINER=/pod-owner/shared-test/
 ```
 Next create a script based on the following:
@@ -319,29 +349,31 @@ To run against the ACP version ESS you would just need to supply a different env
 `ess`.
 
 ### CSS in a container
-Create a file for environment variables e.g. `css.env` with the following contents (based on the client_credentials
-option):
+This assumes you have an image of CSS available. If it has not been published you can build your own:
 ```shell
-SOLID_IDENTITY_PROVIDER=
-USERS_ALICE_WEBID=
-USERS_ALICE_CLIENTSECRET=
-USERS_BOB_WEBID=
-USERS_BOB_CLIENTSECRET=
-RESOURCE_SERVER_ROOT=http://server:3000
-TEST_CONTAINER=/test/
+git clone https://github.com/solid/community-server
+cd community-server
+docker build --rm -f Dockerfile -t css:latest .
 ```
-Note that when using a container you can't use http://localhost:3000 as this will not be accessible to the test harness
-container.
 
-Next create `Dockerfile.css` to build and run CSS at the base URL defined above:
-```dockerfile
-FROM node:latest
-RUN git clone https://github.com/solid/community-server
-WORKDIR community-server
-RUN git checkout main
-RUN npm ci
-EXPOSE 3000
-CMD npm start -- --baseUrl=http://server:3000/
+Note that when using a container you can't use http://localhost:3000 as this will not be accessible to the test harness
+container. Once you switch to a named container you will also need to switch to https and add a self-signed certificate
+due to restrictions with DPoP.
+
+Create a file for environment variables e.g. `css.env` with the following contents (based on the local user registration
+option).
+
+```shell
+SOLID_IDENTITY_PROVIDER=        # e.g. https://server/idp
+USER_REGISTRATION_ENDPOINT=     # e.g. https://server/idp/register
+USERS_ALICE_WEBID=              # e.g. https://server/alice/profile/card#me
+USERS_ALICE_USERNAME=
+USERS_ALICE_PASSWORD=
+USERS_BOB_WEBID=                # e.g. https://server/bob/profile/card#me
+USERS_BOB_USERNAME=
+USERS_BOB_PASSWORD=
+RESOURCE_SERVER_ROOT=           # e.g. https://server
+TEST_CONTAINER=                 # e.g. /alice/
 ```
 
 Finally, create a script based on the following:
@@ -351,13 +383,85 @@ Finally, create a script based on the following:
 # This uses the test harness docker image with the default tests pulled from a repository.
 # Environment variables are defined in the file `env` in the directory from which you run this script.
 
-mkdir -p reports/css
+mkdir -p reports/css config
 
-# build and run CSS in a container
-docker build -f Dockerfile.css -t css:latest .
-docker run -d --name=server --network=testnet -p 3000:3000 -it css:latest
+# Create the configuration file needed to run CSS in https mode
+cat > ./config/css-config.json <<EOF
+{
+  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^1.0.0/components/context.jsonld",
+  "import": [
+    "files-scs:config/app/app/default.json",
+    "files-scs:config/app/init/default.json",
+    "files-scs:config/http/handler/default.json",
+    "files-scs:config/http/middleware/websockets.json",
+    "files-scs:config/http/static/default.json",
+    "files-scs:config/identity/email/default.json",
+    "files-scs:config/identity/handler/default.json",
+    "files-scs:config/identity/ownership/token.json",
+    "files-scs:config/identity/pod/static.json",
+    "files-scs:config/ldp/authentication/dpop-bearer.json",
+    "files-scs:config/ldp/authorization/webacl.json",
+    "files-scs:config/ldp/handler/default.json",
+    "files-scs:config/ldp/metadata-parser/default.json",
+    "files-scs:config/ldp/metadata-writer/default.json",
+    "files-scs:config/ldp/permissions/acl.json",
+    "files-scs:config/storage/key-value/memory.json",
+    "files-scs:config/storage/resource-store/file.json",
+    "files-scs:config/util/auxiliary/acl.json",
+    "files-scs:config/util/identifiers/suffix.json",
+    "files-scs:config/util/index/default.json",
+    "files-scs:config/util/logging/winston.json",
+    "files-scs:config/util/representation-conversion/default.json",
+    "files-scs:config/util/resource-locker/memory.json",
+    "files-scs:config/util/variables/default.json"
+  ],
+  "@graph": [
+    {
+      "comment": [
+        "An example of what a config could look like if HTTPS is required.",
+        "The http/server-factory import above has been omitted since that feature is set below."
+      ]
+    },
+    {
+      "comment": "The key/cert values should be replaces with paths to the correct files. The 'options' block can be removed if not needed.",
+      "@id": "urn:solid-server:default:ServerFactory",
+      "@type": "WebSocketServerFactory",
+      "baseServerFactory": {
+        "@id": "urn:solid-server:default:HttpServerFactory",
+        "@type": "BaseHttpServerFactory",
+        "handler": { "@id": "urn:solid-server:default:HttpHandler" },
+        "options_showStackTrace": { "@id": "urn:solid-server:default:variable:showStackTrace" },
+        "options_https": true,
+        "options_key": "/config/server.key",
+        "options_cert": "/config/server.cert"
+      },
+      "webSocketHandler": {
+        "@type": "UnsecureWebSocketsProtocol",
+        "source": { "@id": "urn:solid-server:default:ResourceStore" }
+      }
+    }
+  ]
+}
+EOF
 
-# run the tests in the test harness
+# Create a self-signed certificate
+openssl req -new -x509 -days 365 -nodes \
+  -out config/server.cert \
+  -keyout config/server.key \
+  -subj "/C=US/ST=California/L=Los Angeles/O=Security/OU=IT Department/CN=server"
+
+# run CSS in a container enabling self-signed certificates
+docker run -d --name=server --network=testnet --env NODE_TLS_REJECT_UNAUTHORIZED=0 \
+  -v "$(pwd)"/config:/config -p 443:443 -it css:latest \
+  -c /config/css-config.json --port=443 --baseUrl=https://server/
+# Wait for it to be ready
+until $(curl --output /dev/null --silent --head --fail -k https://server); do
+  printf '.'
+  sleep 1
+done
+echo 'CSS is running'
+
+# Run the tests in the test harness
 docker pull solidconformancetestbeta/conformance-test-harness
 docker run -i --rm \
   -v "$(pwd)"/reports/css:/reports \
@@ -367,7 +471,7 @@ docker stop server
 docker rm server
 ```
 
-Run `./css.sh` and the reports will be created in the specified directory.
+Run this script, and the reports will be created in the specified directory.
 
 ### Providing your own tests and configuration
 To use the image to run a set of local tests:

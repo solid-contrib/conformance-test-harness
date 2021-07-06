@@ -29,6 +29,7 @@ import org.solid.testharness.utils.*;
 
 import javax.inject.Inject;
 import java.net.URL;
+import java.util.Map;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,6 +38,22 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TargetServerTest {
     @Inject
     DataRepository dataRepository;
+
+    @Test
+    public void constructor() {
+        final TargetServer targetServer = new TargetServer(
+                iri("https://github.com/solid/conformance-test-harness/css"), "https://tester",
+                Map.of("authentication", true, "acl", true, "wac-allow", true));
+        assertAll("targetServer",
+                () -> assertNotNull(targetServer.getFeatures()),
+                () -> assertEquals(true, targetServer.getFeatures().get("authentication")),
+                () -> assertNull(targetServer.getFeatures().get("feature2")),
+                () -> assertEquals("https://tester", targetServer.getOrigin()),
+                () -> assertEquals(false, targetServer.isSetupRootAcl()),
+                () -> assertEquals(8, targetServer.getMaxThreads()),
+                () -> assertEquals(false, targetServer.isDisableDPoP())
+        );
+    }
 
     @Test
     public void parseTargetServer() throws Exception {
