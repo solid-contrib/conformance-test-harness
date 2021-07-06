@@ -238,7 +238,7 @@ in the test subject configuration file describing the server under test.
 
 This mechanism will work in CI environments where the credentials can be passed in as secrets.
 
-### Register users locally
+#### Register users locally
 If an implementation supports user registration (including creating a pod) then the harness can use this to create the
 users before running the tests. This can be very useful in a CI environment where the server is created and destroyed
 during the process.
@@ -315,6 +315,18 @@ docker run -i --rm \
 
 The following examples demonstrate how a script can work with this image and run tests against a publicly available
 server or one that is also running in a container.
+
+Note that when you run the server in a container there are some important things to remember:
+* You cannot use localhost so you need to name your instance and use that name to access it from the test container. The
+  test harness is set up to allow the name `server` so the URL will be https://server.
+* Now that you are using a domain name you may hit the problem that DPoP verification requires https unless you are using
+  localhost hence using https in the above URL.
+* Since you are using https you also need to provide an SSL certificate to the server. It is quite easy to generate this
+  as a self-signed certificate (as seen in the CSS example below).
+* At this point you may find an issue with DPoP verification rejecting self-signed certificates. The test harness is set
+  up to detect when you are using https://server and will allow self-signed certificates. You may find that the server
+  being tested needs the same capability. For a Node based server this is done by adding `NODE_TLS_REJECT_UNAUTHORIZED=0`
+  to the environment before running the server.
 
 ### ESS (ACL compatibility mode)
 Create a file for environment variables e.g. `ess-compat.env` with the following contents (based on the 
