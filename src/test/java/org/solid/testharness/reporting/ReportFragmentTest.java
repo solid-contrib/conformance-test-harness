@@ -209,13 +209,13 @@ class ReportFragmentTest {
     void assertionHeader() throws IOException {
         final IRI assertorIri = iri("https://github.com/solid/conformance-test-harness/");
         final Assertor assertor = new Assertor(assertorIri);
-        logger.debug("Assertor Model:\n{}", TestUtils.toTurtle(assertor.getModel()));
+        logger.info("Assertor Model:\n{}", TestUtils.toTurtle(assertor.getModel()));
 
         final String report = render("assertor", assertor);
-        logger.debug("Report:\n{}", report);
+        logger.info("Report:\n{}", report);
 
         final Model reportModel = RDFUtils.parseRdfa(report, "https://example.org");
-        logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
+        logger.info("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         assertTrue(Models.isomorphic(reportModel, assertor.getModel()));
     }
@@ -227,13 +227,13 @@ class ReportFragmentTest {
         testSubject.getModel().remove(null, SOLID_TEST.features, null);
         testSubject.getModel().remove(null, SOLID_TEST.maxThreads, null);
         testSubject.getModel().remove(null, SOLID_TEST.origin, null);
-        logger.debug("TestSubject Model:\n{}", TestUtils.toTurtle(testSubject.getModel()));
+        logger.info("TestSubject Model:\n{}", TestUtils.toTurtle(testSubject.getModel()));
 
         final String report = render("testSubject", testSubject);
-        logger.debug("Report:\n{}", report);
+        logger.info("Report:\n{}", report);
 
         final Model reportModel = RDFUtils.parseRdfa(report, "https://example.org");
-        logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
+        logger.info("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         assertTrue(Models.isomorphic(reportModel, testSubject.getModel()));
     }
