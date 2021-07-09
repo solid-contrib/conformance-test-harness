@@ -1,0 +1,20 @@
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix doap: <http://usefulinc.com/ns/doap#>
+prefix earl: <http://www.w3.org/ns/earl#>
+prefix ex: <https://example.org/>
+
+ex:testSubject1 a earl:Software ;
+   doap:name "TESTER1" ;
+   doap:description "DESCRIPTION" ;
+   doap:programming-language "LANG" ;
+   doap:developer <https://example.org/profile/card/#us>;
+   doap:homepage <https://example.org/testSubject1> ;
+   doap:release [
+                    doap:name "RELEASE_NAME";
+                    doap:revision "0.0.1-SNAPSHOT" ;
+                    doap:created "2021-03-05"^^xsd:date
+                ] .
+
+ex:testSubject2 a earl:Software.

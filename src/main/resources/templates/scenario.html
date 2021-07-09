@@ -1,22 +1,22 @@
 {#with it}
 <tr id="{subject}" about="{subject}" typeof="{typesList}">
     <td property="dcterms:title">{title}</td>
-    <td property="prov:used">{used}</td>
-    <td property="prov:generated">
+    <td rel="prov:used" resource="{used}">{used}</td>
+    <td rel="prov:generated" resource="{generatedOutput.subject}">
+        <span about="{generatedOutput.subject}" typeof="{generatedOutput.typesList}" rel="prov:value" resource="{generatedOutput.value}"></span>
+        <time about="{generatedOutput.subject}" property="prov:generatedAtTime" datatype="xsd:dateTime" datetime="{generatedOutput.timestamp}"/>
         {#switch generatedOutput.value}
-        {#case 'http://www.w3.org/ns/earl#passed'}
-        ✔
-        {#case 'http://www.w3.org/ns/earl#failed'}
-        ✗
-        {#else}
-        o
+        {#case 'http://www.w3.org/ns/earl#passed'}✔
+        {#case 'http://www.w3.org/ns/earl#failed'}✗
+        {#else}o
         {/switch}
     </td>
     <td><time datatype="xsd:dateTime" datetime="{startTime}" property="prov:startedAtTime">{startTime}</time></td>
     <td><time datatype="xsd:dateTime" datetime="{endTime}" property="prov:endedAtTime">{endTime}</time></td>
     <td>
         {#if steps}
-        <table>
+        <div >
+        <table rel="dcterms:hasPart" inlist="">
             <tr>
                 <th>Step</th>
                 <th>Location</th>
@@ -24,25 +24,10 @@
                 <th>Info</th>
             </tr>
             {#each steps}
-            <tr class="{it.background ? 'backgroundStep' : 'scenarioStep'}">
-                <td>{it.title}</td>
-                <td property="prov:used">{it.used}</td>
-                <td property="prov:generated" resource="{it.generatedOutput.subject}" typeof="{it.generatedOutput.typesList}">
-                    {#switch it.generatedOutput.value}
-                    {#case 'http://www.w3.org/ns/earl#passed'}
-                    ✔
-                    {#case 'http://www.w3.org/ns/earl#failed'}
-                    ✗
-                    {#else}
-                    o
-                    {/switch}
-                </td>
-                <td property="prov:generated" resource="{it.generatedOutput.subject}" typeof="{it.generatedOutput.typesList}">
-                    <pre>{it.generatedOutput.description}</pre>
-                </td>
-            </tr>
+            {#include step /}
             {/each}
         </table>
+        </div>
         {/if}
     </td>
 </tr>

@@ -25,6 +25,7 @@ package org.solid.testharness.reporting;
 
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
+import org.solid.common.vocab.TD;
 import org.solid.testharness.utils.AbstractDataModelTests;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
@@ -58,13 +59,13 @@ class TestCaseTest extends AbstractDataModelTests  {
     @Test
     void getStatusUnreviewed() {
         final TestCase testCase = new TestCase(iri(NS, "test1"));
-        assertEquals("Unreviewed", testCase.getStatus());
+        assertEquals(TD.unreviewed.stringValue(), testCase.getStatus());
     }
 
     @Test
     void getStatusAccepted() {
         final TestCase testCase = new TestCase(iri(NS, "test2"));
-        assertEquals("Accepted", testCase.getStatus());
+        assertEquals(TD.accepted.stringValue(), testCase.getStatus());
     }
 
     @Test

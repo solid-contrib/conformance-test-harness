@@ -1,7 +1,18 @@
-<dl>
-    <dt><!--  id="{count}" subject ordinal -->
-        <a href="{subject}">
-            <span about="{subject}" property="doap:name">{doap:name}</span>
-        </a>
-    </dt>
-</dl>
+<h2>Test subject description</h2>
+{#with it}
+<section about="{subject}" typeof="{typesList}">
+    <h2 property="doap:name">{softwareName}</h2>
+    <p property="doap:description">{description}</p>
+    <dl><dt>By</dt><dd><a href="{developer}" rel="doap:developer" title="Software developer">{developer}</a></dd></dl>
+    <dl><dt>Homepage</dt><dd><a href="{homepage}" rel="doap:homepage" title="Software homepage">{homepage}</a></dd></dl>
+    <dl><dt>Programming Language</dt><dd property="doap:programming-language">{programmingLanguage}</dd></dl>
+    <dl>
+        <dt>Version</dt>
+        <dd property="doap:release" resource="_:rel">
+            <span about="_:rel" property="doap:name">{releaseName}</span>
+            <time about="_:rel" datatype="xsd:date" datetime="{createdDate}" property="doap:created"> ({createdDate})</time>
+            <span about="_:rel" property="doap:revision" content="{revision}"></span>
+        </dd>
+    </dl>
+</section>
+{/with}

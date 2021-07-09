@@ -1,28 +1,42 @@
 {#with it}
 <tr id="{subject}" about="{subject}" typeof="{typesList}">
-    <td><a href="{subject}">{subject}</a></td>
+    <td>
+        <a href="{subject}">{subject}</a>
+        <span rel="spec:requirementReference" resource="{requirementReference}"></span>
+    </td>
     <td property="dcterms:title">{title}</td>
-    <td property="spec:testScript">
+    <td>
         {#if isImplemented}
-        <a href="{testScript}">{testScript}</a>
+        <a rel="spec:testScript" href="{testScript}">{testScript}</a>
         {#else}Not yet implemented{/if}
     </td>
-    <td property="td:reviewStatus">{status}</td>
+    <td rel="td:reviewStatus" resource="{status}">
+        {#switch status}
+        {#case 'http://www.w3.org/2006/03/test-description#unreviewed'}Unreviewed
+        {#case 'http://www.w3.org/2006/03/test-description#accepted'}Accepted
+        {/switch}
+    </td>
     {#if coverageMode}
     <td>{isImplemented ? '✔' : '✗'}</td>
     {#else if isImplemented && assertion}
-    <td property="earl:subject"><a href="{assertion.testSubject}">{assertion.testSubject}</a></td>
-    <td property="earl:result">
+    <td rev="earl:test" resource="{assertion.subject}">
+        <div about="{assertion.subject}" typeof="{assertion.typesList}">
+            <a rel="earl:subject" href="{assertion.testSubject}">{assertion.testSubject}</a>
+            <span rel="earl:assertedBy" resource="{assertion.assertedBy}"></span>
+            <span rel="earl:mode" resource="{assertion.mode}"></span>
+        </div>
+    </td>
+    <td about="{assertion.subject}" rel="earl:result" resource="{assertion.result.subject}">
+        <span about="{assertion.result.subject}" typeof="{assertion.result.typesList}" rel="earl:outcome" resource="{assertion.result.outcome}"></span>
         {#switch assertion.result.outcome}
-        {#case 'http://www.w3.org/ns/earl#passed'}
-        ✔
-        {#case 'http://www.w3.org/ns/earl#failed'}
-        ✗
-        {#else}
-        o
+        {#case 'http://www.w3.org/ns/earl#passed'}✔
+        {#case 'http://www.w3.org/ns/earl#failed'}✗
+        {#else}o
         {/switch}
     </td>
-    <td><time datatype="xsd:dateTime" datetime="{assertion.result.date}" property="dcterms:date">{assertion.result.date}</time></td>
+    <td>
+        <time about="{assertion.result.subject}" datatype="xsd:dateTime" datetime="{assertion.result.date}" property="dcterms:date">{assertion.result.date}</time>
+    </td>
     <td>
         {#if scenarios}
         <a href="#scenarios-{anchor}">Scenarios</a>

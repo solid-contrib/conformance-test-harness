@@ -23,47 +23,60 @@
  */
 package org.solid.testharness.reporting;
 
+import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
-import org.solid.common.vocab.*;
+import org.solid.common.vocab.DOAP;
 import org.solid.testharness.utils.DataModelBase;
 
-import java.util.List;
+import java.time.LocalDate;
 
-public class TestCase extends DataModelBase {
-    public TestCase(final IRI subject) {
-        super(subject, ConstructMode.INC_REFS);
+public class TestSubject extends DataModelBase  {
+    public TestSubject(final IRI subject) {
+        super(subject, ConstructMode.DEEP);
     }
 
-    public String getTitle() {
-        return getLiteralAsString(DCTERMS.title);
+    public String getSoftwareName() {
+        return getLiteralAsString(DOAP.name);
     }
 
-    public String getStatus() {
-        return getIriAsString(TD.reviewStatus);
+    public String getDescription() {
+        return getLiteralAsString(DOAP.description);
     }
 
-    public String getTestScript() {
-        return getIriAsString(SPEC.testScript);
+    public String getProgrammingLanguage() {
+        return getLiteralAsString(DOAP.programming_language);
     }
 
-    public String getRequirementReference() {
-        return getIriAsString(SPEC.requirementReference);
+    public String getDeveloper() {
+        return getIriAsString(DOAP.developer);
     }
 
-    public boolean isImplemented() {
-        return getIriAsString(SPEC.testScript) != null;
+    public String getHomepage() {
+        return getIriAsString(DOAP.homepage);
     }
 
-    public Assertion getAssertion() {
-        final List<Assertion> assertions = getModelListByObject(EARL.test, Assertion.class);
-        if (assertions != null) {
-            return assertions.get(0);
-        } else {
+    public String getReleaseName() {
+        final BNode release = getAsBNode(DOAP.release);
+        if (release == null) {
             return null;
         }
+        return getLiteralAsString(release, DOAP.name);
     }
 
-    public List<Scenario> getScenarios() {
-        return getModelList(DCTERMS.hasPart, Scenario.class);
+    public String getRevision() {
+        final BNode release = getAsBNode(DOAP.release);
+        if (release == null) {
+            return null;
+        }
+        return getLiteralAsString(release, DOAP.revision);
     }
+
+    public LocalDate getCreatedDate() {
+        final BNode release = getAsBNode(DOAP.release);
+        if (release == null) {
+            return null;
+        }
+        return getLiteralAsDate(release, DOAP.created);
+    }
+
 }

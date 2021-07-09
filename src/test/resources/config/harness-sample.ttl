@@ -5,8 +5,8 @@
 @prefix earl: <http://www.w3.org/ns/earl#> .
 
 <https://github.com/solid/conformance-test-harness/> a earl:Software ;
-   doap:name "Solid Specification Conformance Test Harness"@en ;
-   doap:description "A test harness that will run suites of tests related to Solid specifications."@en ;
+   doap:name "Solid Specification Conformance Test Harness" ;
+   doap:description "A test harness that will run suites of tests related to Solid specifications." ;
    doap:created "2021-02-16"^^xsd:date ;
    doap:developer <https://inrupt.com/profile/card/#us>;
    doap:homepage <https://github.com/solid/conformance-test-harness> ;

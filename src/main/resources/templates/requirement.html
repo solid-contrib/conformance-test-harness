@@ -1,0 +1,33 @@
+{#with it}
+<div class="splitBox" about="{subject}" typeof="{typesList}">
+  <div class="col">
+    <h3>Requirement: <a href="{subject}">{subject}</a></h3>
+    <dl>
+      <dt>Conformance Role</dt>
+      <dd rel="spec:conformanceRole" resource="{conformanceRole}">
+        {#switch conformanceRole}
+        {#case 'http://www.w3.org/ns/spec#ServerConformanceClass'}Server
+        {#case 'http://www.w3.org/ns/spec#ClientConformanceClass'}Client
+        {/switch}
+      </dd>
+    </dl>
+    <dl>
+      <dt>Conformance Level</dt>
+      <dd property="spec:normativeConformanceLevel" resource="{conformanceLevel}">
+        {#switch conformanceLevel}
+        {#case 'http://www.w3.org/ns/spec#ConformanceMust'}MUST
+        {#case 'http://www.w3.org/ns/spec#ConformanceMustNot'}MUST NOT
+        {/switch}
+      </dd>
+    </dl>
+  </div>
+  <div class="col">
+    {#if excerpt}
+    <h3>Excerpt</h3>
+    <p property="spec:excerpt">{excerpt}</p>
+    {/if}
+  </div>
+</div>
+{/with}
+{#insert/}
+
