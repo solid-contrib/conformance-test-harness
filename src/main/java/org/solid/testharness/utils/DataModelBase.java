@@ -108,6 +108,10 @@ public class DataModelBase {
         return model.size();
     }
 
+    public Model getModel() {
+        return model;
+    }
+
     public String getTypesList() {
         final Set<Value> values = model.filter(subject, RDF.type, null).objects();
         return values.stream().map(v -> Namespaces.shorten((IRI)v)).collect(Collectors.joining(" "));
@@ -207,12 +211,16 @@ public class DataModelBase {
         return value.map(Literal::booleanValue).orElse(false);
     }
 
-    protected LocalDate getLiteralAsDate(final IRI predicate) {
+    protected LocalDate getLiteralAsDate(final Resource subject, final IRI predicate) {
         final Optional<Literal> value = Models.getPropertyLiteral(model, subject, predicate);
         return value.map(Literal::calendarValue).map(v -> LocalDate.of(
                 v.getYear(),
                 v.getMonth(),
                 v.getDay())).orElse(null);
+    }
+
+    protected LocalDate getLiteralAsDate(final IRI predicate) {
+        return getLiteralAsDate(subject, predicate);
     }
 
     protected ZonedDateTime getLiteralAsDateTime(final IRI predicate) {
