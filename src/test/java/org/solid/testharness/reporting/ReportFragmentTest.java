@@ -30,6 +30,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.util.Models;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +71,9 @@ class ReportFragmentTest {
     @BeforeAll
     void setup() throws MalformedURLException {
         testTemplate = engine.getTemplate("src/test/resources/reporting/test.html");
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            conn.clear();
+        }
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
@@ -209,13 +213,13 @@ class ReportFragmentTest {
     void assertionHeader() throws IOException {
         final IRI assertorIri = iri("https://github.com/solid/conformance-test-harness/");
         final Assertor assertor = new Assertor(assertorIri);
-        logger.info("Assertor Model:\n{}", TestUtils.toTurtle(assertor.getModel()));
+        logger.debug("Assertor Model:\n{}", TestUtils.toTurtle(assertor.getModel()));
 
         final String report = render("assertor", assertor);
-        logger.info("Report:\n{}", report);
+        logger.debug("Report:\n{}", report);
 
         final Model reportModel = RDFUtils.parseRdfa(report, "https://example.org");
-        logger.info("Report Model:\n{}", TestUtils.toTurtle(reportModel));
+        logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         assertTrue(Models.isomorphic(reportModel, assertor.getModel()));
     }
@@ -227,13 +231,13 @@ class ReportFragmentTest {
         testSubject.getModel().remove(null, SOLID_TEST.features, null);
         testSubject.getModel().remove(null, SOLID_TEST.maxThreads, null);
         testSubject.getModel().remove(null, SOLID_TEST.origin, null);
-        logger.info("TestSubject Model:\n{}", TestUtils.toTurtle(testSubject.getModel()));
+        logger.debug("TestSubject Model:\n{}", TestUtils.toTurtle(testSubject.getModel()));
 
         final String report = render("testSubject", testSubject);
-        logger.info("Report:\n{}", report);
+        logger.debug("Report:\n{}", report);
 
         final Model reportModel = RDFUtils.parseRdfa(report, "https://example.org");
-        logger.info("Report Model:\n{}", TestUtils.toTurtle(reportModel));
+        logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         assertTrue(Models.isomorphic(reportModel, testSubject.getModel()));
     }
