@@ -37,6 +37,8 @@ import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
+import org.eclipse.rdf4j.rio.helpers.RDFaParserSettings;
+import org.eclipse.rdf4j.rio.helpers.RDFaVersion;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,6 +86,9 @@ public class DataRepository implements Repository {
         try (RepositoryConnection conn = getConnection()) {
             try {
                 logger.info("Loading {}", url.toString());
+                final ParserConfig parserConfig = new ParserConfig();
+                parserConfig.set(RDFaParserSettings.RDFA_COMPATIBILITY, RDFaVersion.RDFA_1_1);
+                conn.setParserConfig(parserConfig);
                 conn.add(url, baseUri, null);
                 logger.debug("Loaded data into repository, size={}", conn.size());
             } catch (IOException e) {
@@ -198,9 +203,11 @@ public class DataRepository implements Repository {
             conn.add(stepBuilder.build());
             return stepIri;
         }).collect(Collectors.toList());
-        final Resource head = createNode();
+        final Resource head = bnode();
         final Model stepList = RDFCollections.asRDF(steps, head, new LinkedHashModel());
         stepList.add(scenarioIri, DCTERMS.hasPart, head);
+        // remove the list type as it is inferred anyway and RDFa @inlist does not generate it
+        stepList.remove(head, RDF.type, RDF.List);
         conn.add(stepList);
     }
 

@@ -33,9 +33,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.solid.common.vocab.FOAF;
-import org.solid.common.vocab.RDF;
-import org.solid.common.vocab.SPEC;
+import org.solid.common.vocab.*;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -277,10 +275,16 @@ class DataRepositoryTest {
     }
 
     @Test
-    void loadRdfa() throws MalformedURLException {
+    void loadRdfa() throws Exception {
         final DataRepository dataRepository = new DataRepository();
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            conn.setNamespace(DCTERMS.PREFIX, DCTERMS.NAMESPACE);
+        }
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/rdfa-sample.html"), TestData.SAMPLE_BASE);
         assertEquals(1, dataRepositorySize(dataRepository));
+        final StringWriter sw = new StringWriter();
+        dataRepository.export(sw);
+        assertTrue(sw.toString().contains("<https://example.org/doc> dcterms:title \"TITLE\" ."));
     }
 
     @Test
