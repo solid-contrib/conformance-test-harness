@@ -20,6 +20,10 @@
     {#if testSubject}
     {#with testSubject}{#include test-subject /}{/with}
     {/if}
+    {! SUMMARY !}
+    {#if testSuiteResults}
+    {#with testSuiteResults}{#include results-summary /}{/with}
+    {/if}
     {! REQUIREMENT !}
     {#if specificationRequirements}
     {#each specificationRequirements}

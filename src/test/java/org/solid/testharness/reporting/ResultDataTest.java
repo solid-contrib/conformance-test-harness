@@ -42,13 +42,13 @@ class ResultDataTest extends AbstractDataModelTests {
 
     @Test
     void getSubject() {
-        final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList());
+        final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList(), null);
         assertTrue(resultData.getSubject().startsWith("https://github.com/solid/implementation-reports/"));
     }
 
     @Test
     void getHtmlPrefixes() {
-        final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList());
+        final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList(), null);
         final String prefixes = resultData.getPrefixes();
         assertTrue(prefixes.contains("rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
         assertTrue(prefixes.contains("rdfs: http://www.w3.org/2000/01/rdf-schema#"));
@@ -68,7 +68,7 @@ class ResultDataTest extends AbstractDataModelTests {
     void getSpecifications() {
         final ResultData resultData = new ResultData(
                 List.of(iri("https://example.org/specification1"), iri("https://example.org/specification2")),
-                List.of(iri("https://example.org/test1"))
+                List.of(iri("https://example.org/test1")), null
         );
         final List<Specification> specifications = resultData.getSpecifications();
         assertNotNull(specifications);
@@ -83,13 +83,20 @@ class ResultDataTest extends AbstractDataModelTests {
 
     @Test
     void getAssertor() {
-        final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList());
+        final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList(), null);
         assertNotNull(resultData.getAssertor());
     }
 
     @Test
     void getTestSubject() {
-        final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList());
+        final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList(), null);
         assertNotNull(resultData.getTestSubject());
+    }
+
+    @Test
+    void getTestSuiteResults() {
+        final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList(),
+                new TestSuiteResults(null));
+        assertNotNull(resultData.getTestSuiteResults());
     }
 }

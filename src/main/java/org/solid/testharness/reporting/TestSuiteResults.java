@@ -35,6 +35,7 @@ import java.util.Map;
 
 public class TestSuiteResults {
     Results results;
+    long startTime;
 
     public TestSuiteResults(final Results results) {
         this.results = results;
@@ -48,6 +49,42 @@ public class TestSuiteResults {
         return this.results.getFailCount();
     }
 
+    public int getFeatureFailCount() {
+        return this.results.getFeaturesFailed();
+    }
+
+    public int getFeaturePassCount() {
+        return this.results.getFeaturesPassed();
+    }
+
+    public int getFeatureTotal() {
+        return this.results.getFeaturesTotal();
+    }
+
+    public int getScenarioFailCount() {
+        return this.results.getScenariosFailed();
+    }
+
+    public int getScenarioPassCount() {
+        return this.results.getScenariosPassed();
+    }
+
+    public int getScenarioTotal() {
+        return this.results.getScenariosTotal();
+    }
+
+    public void setStartTime(final long startTime) {
+        this.startTime = startTime;
+    }
+
+    public long getElapsedTime() {
+        return System.currentTimeMillis() - startTime;
+    }
+
+    public Date getResultDate() {
+        return new Date(this.results.getEndTime());
+    }
+
     public String toJson() throws JsonProcessingException {
         final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a", Locale.getDefault());
         final ObjectMapper objectMapper = CDI.current().select(ObjectMapper.class).get();
@@ -59,7 +96,7 @@ public class TestSuiteResults {
         "scenariosFailed", this.results.getScenariosFailed(),
         "elapsedTime", this.results.getElapsedTime(),
         "totalTime", this.results.getTimeTakenMillis(),
-        "resultDate", sdf.format(new Date())
+        "resultDate", sdf.format(getResultDate())
         ));
     }
 

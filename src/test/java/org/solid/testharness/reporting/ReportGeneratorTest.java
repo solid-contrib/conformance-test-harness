@@ -23,6 +23,7 @@
  */
 package org.solid.testharness.reporting;
 
+import com.intuit.karate.Results;
 import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
@@ -47,6 +48,7 @@ import java.util.stream.Collectors;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @QuarkusTest
 class ReportGeneratorTest {
@@ -82,6 +84,10 @@ class ReportGeneratorTest {
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-2.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/reporting/testsuite-results-sample.ttl"),
                 TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl").toString());
+        final Results results = mock(Results.class);
+        when(results.getErrorMessages()).thenReturn("ERRORS");
+        reportGenerator.setResults(new TestSuiteResults(results));
+
         final StringWriter sw = new StringWriter();
         reportGenerator.buildHtmlResultReport(sw);
         final String report = sw.toString();
@@ -211,6 +217,15 @@ class ReportGeneratorTest {
         TestData.insertData(dataRepository, TestData.PREFIXES + "_:b0 a spec:Specification .");
         final StringWriter sw = new StringWriter();
         assertThrows(ClassCastException.class, () -> reportGenerator.buildHtmlCoverageReport(sw));
+    }
+
+    @Test
+    void setTime() {
+        final TestSuiteResults testSuiteResults = new TestSuiteResults(null);
+        final long startTime = System.currentTimeMillis();
+        reportGenerator.setStartTime(startTime);
+        reportGenerator.setResults(testSuiteResults);
+        assertTrue(testSuiteResults.getElapsedTime() >= 0);
     }
 }
 
