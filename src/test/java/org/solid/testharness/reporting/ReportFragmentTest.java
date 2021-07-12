@@ -263,7 +263,7 @@ class ReportFragmentTest {
         final String report = render("testSuiteResults", testSuiteResults);
 
         final String reportStripped = StringUtils.normalizeSpace(report);
-        assertTrue(reportStripped.contains("datetime=\"Thu Jan 01 01:00:00"));
+        assertThat(reportStripped, matchesPattern(".*datetime=\"Thu Jan 01 \\d\\d:00:00 \\s\\s\\s 1970.*"));
         assertThat(reportStripped, matchesPattern(".*<dd>[0-9]+ ms</dd>.*"));
         assertTrue(reportStripped.contains("<td>1</td> <td>2</td> <td>3</td>"));
         assertTrue(reportStripped.contains("<td>4</td> <td>5</td> <td>6</td>"));
