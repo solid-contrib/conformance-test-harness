@@ -1,0 +1,24 @@
+{#with it}
+<tr class="{background ? 'backgroundStep' : 'scenarioStep'}" about="{subject}" typeof="{typesList}">
+    <td property="dcterms:title">{title}</td>
+    <td rel="prov:used" resource="{used}">{used}</td>
+    <td rel="prov:generated" resource="{generatedOutput.subject}">
+        <span about="{generatedOutput.subject}" typeof="{generatedOutput.typesList}" rel="prov:value" resource="{generatedOutput.value}"></span>
+        {#switch generatedOutput.value}
+        {#case 'http://www.w3.org/ns/earl#passed'}✔
+        {#case 'http://www.w3.org/ns/earl#failed'}✗
+        {#else}o
+        {/switch}
+    </td>
+    <td>
+        {#if generatedOutput.description}
+        <div about="{generatedOutput.subject}">
+            <pre property="dcterms:description" datatype="xsd:string">{generatedOutput.description}</pre>
+        </div>
+        {/if}
+        {#if scenario}
+        <span rel="prov:wasInformedBy" resource="{scenario}"></span>
+        {/if}
+    </td>
+</tr>
+{/with}

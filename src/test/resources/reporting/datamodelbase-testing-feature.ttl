@@ -11,7 +11,7 @@ ex:test
     ex:hasBool true ;
     ex:hasDate "2021-04-08"^^xsd:date ;
     ex:hasDateTime "2021-04-08T12:30:00.000Z"^^xsd:dateTime ;
-    ex:hasBNode [ ex:hasString "string" ];
+    ex:hasBNode [ ex:hasString "string"; ex:hasDate "2021-07-09"^^xsd:date];
     ex:hasTest ex:test1 ;
     ex:hasSteps (ex:step1 ex:step2) .
 ex:test1 a earl:TestCase .

@@ -24,6 +24,7 @@
 package org.solid.testharness.utils;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -41,7 +42,7 @@ public final class Namespaces {
     public static final String TEST_HARNESS_URI = "https://github.com/solid/conformance-test-harness/";
     public static final String TEST_HARNESS_PREFIX = "test-harness";
     public static final String TURTLE_PREFIX_FORMAT = "@prefix %s: <%s> .\n";
-    public static final String HTML_PREFIX_FORMAT = "%s: %s";
+    public static final String RDFA_PREFIX_FORMAT = "%s: %s";
 
     public static String shorten(final IRI iri) {
         final String term = iri.stringValue();
@@ -67,13 +68,13 @@ public final class Namespaces {
                 .collect(Collectors.joining());
     }
 
-    public static String generateHtmlPrefixes(final Collection<String> prefixes) {
+    public static String generateRdfaPrefixes(final Collection<String> prefixes) {
         if (prefixes == null || prefixes.isEmpty()) {
             return "";
         }
         return prefixes.stream()
                 .filter(p -> namespaceMap.containsKey(p))
-                .map(p -> String.format(HTML_PREFIX_FORMAT, p, namespaceMap.get(p).iri))
+                .map(p -> String.format(RDFA_PREFIX_FORMAT, p, namespaceMap.get(p).iri))
                 .collect(Collectors.joining(" "));
     }
 
@@ -81,6 +82,10 @@ public final class Namespaces {
         try (RepositoryConnection conn = repository.getConnection()) {
             namespaceMap.forEach((k, v) -> conn.setNamespace(k, v.iri));
         }
+    }
+
+    public static void addToModel(final Model model) {
+        namespaceMap.forEach((k, v) -> model.setNamespace(k, v.iri));
     }
 
     static {

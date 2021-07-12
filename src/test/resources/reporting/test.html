@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<body about="{subject}" prefix="{prefixes}">
+    {! HEADER !}
+    {#if specifications}
+    {#include specification-header /}
+    {#each specifications}
+    <div about="{it.subject}">
+        {#each it.specificationRequirements.orEmpty}
+        <div rel="spec:requirement" resource="{it.subject}"/>
+        {/each}
+    </div>
+    {/each}
+    {/if}
+    {! ASSERTOR !}
+    {#if assertor}
+    {#with assertor}{#include assertor /}{/with}
+    {/if}
+    {! TEST SUBJECT !}
+    {#if testSubject}
+    {#with testSubject}{#include test-subject /}{/with}
+    {/if}
+    {! REQUIREMENT !}
+    {#if specificationRequirements}
+    {#each specificationRequirements}
+    {#include requirement}
+    {#if it.testCases}
+    <table>
+        <tr>
+            <th>TestCase</th>
+            <th>Title</th>
+            <th>Script</th>
+            <th>Status</th>
+            <th>Target</th>
+            <th>Outcome</th>
+            <th>Timestamp</th>
+            <th>Scenario link</th>
+        </tr>
+        {#each it.testCases}
+        {#include testcase /}
+        {/each}
+    </table>
+    {#else}
+    <p>No test cases found</p>
+    {/if}
+    {/include}
+    {/each}
+    {/if}
+    {! TESTCASE !}
+    {#if testCases}
+    <table>
+        <tr>
+            <th>TestCase</th>
+            <th>Title</th>
+            <th>Script</th>
+            <th>Status</th>
+            <th>Target</th>
+            <th>Outcome</th>
+            <th>Timestamp</th>
+            <th>Scenario link</th>
+        </tr>
+        {#each testCases}
+        {#include testcase /}
+        {/each}
+    </table>
+    {/if}
+    {! SCENARIO !}
+    {#if scenarios}
+    <table>
+        <tr>
+            <th>Scenario</th>
+            <th>Location</th>
+            <th>Outcome</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Steps</th>
+        </tr>
+        {#each scenarios}
+        {#include scenario /}
+        {/each}
+    </table>
+    {/if}
+    {! STEP !}
+    {#if steps}
+    <table>
+        <tr>
+            <th>Step</th>
+            <th>Location</th>
+            <th>Outcome</th>
+            <th>Info</th>
+        </tr>
+        {#each steps}
+        {#include step /}
+        {/each}
+    </table>
+    {/if}
+</body>
+</html>

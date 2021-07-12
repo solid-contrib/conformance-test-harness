@@ -26,8 +26,10 @@ package org.solid.testharness.reporting;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.solid.common.vocab.*;
+import org.solid.testharness.config.Config;
 import org.solid.testharness.utils.Namespaces;
 
+import javax.enterprise.inject.spi.CDI;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,11 +37,14 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 
 public class ResultData {
     private Assertor assertor;
+    private TestSubject testSubject;
     private List<Specification> specifications;
     private List<TestCase> testCases;
 
     public ResultData(final List<IRI> specifications, final List<IRI> testCases) {
         assertor = new Assertor(iri(Namespaces.TEST_HARNESS_URI));
+        final Config config = CDI.current().select(Config.class).get();
+        testSubject = new TestSubject(config.getTestSubject());
         this.specifications = specifications.stream().map(Specification::new).collect(Collectors.toList());
         this.testCases = testCases.stream().map(TestCase::new).collect(Collectors.toList());
     }
@@ -49,7 +54,7 @@ public class ResultData {
     }
 
     public String getPrefixes() {
-        return Namespaces.generateHtmlPrefixes(List.of(RDF.PREFIX, RDFS.PREFIX, XSD.PREFIX, DCTERMS.PREFIX, DOAP.PREFIX,
+        return Namespaces.generateRdfaPrefixes(List.of(RDF.PREFIX, RDFS.PREFIX, XSD.PREFIX, DCTERMS.PREFIX, DOAP.PREFIX,
                 SOLID.PREFIX, SOLID_TEST.PREFIX, EARL.PREFIX, TD.PREFIX, PROV.PREFIX, SPEC.PREFIX,
                 Namespaces.RESULTS_PREFIX));
     }
@@ -64,5 +69,9 @@ public class ResultData {
 
     public Assertor getAssertor() {
         return assertor;
+    }
+
+    public TestSubject getTestSubject() {
+        return testSubject;
     }
 }

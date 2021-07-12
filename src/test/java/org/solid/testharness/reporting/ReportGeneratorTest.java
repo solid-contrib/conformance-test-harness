@@ -24,17 +24,28 @@
 package org.solid.testharness.reporting;
 
 import io.quarkus.test.junit.QuarkusTest;
+import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.util.Models;
+import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.util.RepositoryUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.common.vocab.DOAP;
+import org.solid.common.vocab.SOLID_TEST;
+import org.solid.common.vocab.TD;
 import org.solid.testharness.utils.*;
 
 import javax.inject.Inject;
 import java.io.*;
 import java.nio.file.Files;
+import java.util.stream.Collectors;
 
+import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -84,6 +95,60 @@ class ReportGeneratorTest {
         spec section <section about="https://example.org/specification1" typeof="spec:Specification">
 
          */
+    }
+
+    @Test
+    void isIsomorphic() throws Exception {
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-2.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-2.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/reporting/testsuite-results-sample.ttl"),
+                TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl").toString());
+
+        // remove unused parts of test model
+        final Model resultModel;
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            resultModel = QueryResults.asModel(conn.getStatements(null, null, null));
+            resultModel.remove(null, SOLID_TEST.features, null);
+            resultModel.remove(null, SOLID_TEST.maxThreads, null);
+            resultModel.remove(null, SOLID_TEST.origin, null);
+            final Value bnode = resultModel.getStatements(
+                    iri("https://github.com/solid/conformance-test-harness/testserver2"),
+                    DOAP.release, null
+            ).iterator().next().getObject();
+            if (bnode != null && bnode.isBNode()) {
+                resultModel.remove((BNode) bnode, null, null);
+            }
+            resultModel.remove(iri("https://github.com/solid/conformance-test-harness/testserver2"), null, null);
+            resultModel.remove(null, TD.preCondition, null);
+            logger.debug("Results contains {} triples", resultModel.size());
+        }
+
+        final StringWriter sw = new StringWriter();
+        reportGenerator.buildHtmlResultReport(sw);
+        final String report = sw.toString();
+//        logger.debug("OUTPUT:\n{}", report);
+        final Model reportModel = RDFUtils.parseRdfa(report, "https://example.org");
+//        logger.debug("TURTLE:\n{}", TestUtils.toTurtle(reportModel));
+        logger.debug("Report contains {} triples", reportModel.size());
+        logger.debug("Report is isomorphic with results: {}", Models.isomorphic(reportModel, resultModel));
+
+        if (!Models.isomorphic(reportModel, resultModel)) {
+            logger.debug("\n== DIFFERENCE EXTRA IN REPORT ==\n{}", RepositoryUtil.difference(reportModel, resultModel)
+                    .stream().map(s -> String.format("%s %s %s", s.getSubject(), s.getPredicate(), s.getObject()))
+                    .collect(Collectors.joining("\n"))
+            );
+
+            logger.debug("\n== DIFFERENCE MISSING IN REPORT ==\n{}", RepositoryUtil.difference(resultModel, reportModel)
+                    .stream().map(s -> String.format("%s %s %s", s.getSubject(), s.getPredicate(), s.getObject()))
+                    .collect(Collectors.joining("\n"))
+            );
+        }
+
+        assertTrue(Models.isomorphic(reportModel, resultModel));
     }
 
     @Test

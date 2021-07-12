@@ -47,7 +47,7 @@ class DataModelBaseTest extends AbstractDataModelTests {
     DataModelBase dataModelBase;
 
     @BeforeAll
-    void getModel() {
+    void setupModel() {
         dataModelBase = new DataModelBase(iri(NS, "test"));
     }
 
@@ -72,6 +72,11 @@ class DataModelBaseTest extends AbstractDataModelTests {
     }
 
     @Test
+    void getModel() {
+        assertEquals(13, dataModelBase.getModel().size());
+    }
+
+    @Test
     void sizeShallow() {
         assertEquals(13, dataModelBase.size());
     }
@@ -79,13 +84,13 @@ class DataModelBaseTest extends AbstractDataModelTests {
     @Test
     void sizeDeep() {
         final DataModelBase deepModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.DEEP);
-        assertEquals(17, deepModel.size());
+        assertEquals(18, deepModel.size());
     }
 
     @Test
     void sizeList() {
         final DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.DEEP_WITH_LISTS);
-        assertEquals(19, listModel.size());
+        assertEquals(20, listModel.size());
     }
 
     @Test
@@ -247,6 +252,15 @@ class DataModelBaseTest extends AbstractDataModelTests {
     void getLiteralAsDate() {
         final LocalDate date = dataModelBase.getLiteralAsDate(iri(NS, "hasDate"));
         assertThat("Date matches", date.isEqual(LocalDate.parse("2021-04-08")));
+    }
+
+    @Test
+    void getLiteralAsDateFromBNode() {
+        final DataModelBase deepModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.DEEP);
+        final BNode node = deepModel.getAsBNode(iri(NS, "hasBNode"));
+        assertNotNull(node);
+        final LocalDate date = deepModel.getLiteralAsDate(node, iri(NS, "hasDate"));
+        assertThat("Date matches", date.isEqual(LocalDate.parse("2021-07-09")));
     }
 
     @Test

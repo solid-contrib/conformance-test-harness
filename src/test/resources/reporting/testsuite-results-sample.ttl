@@ -34,10 +34,10 @@ results:node1f273av6vx13
     a prov:Activity;
     dcterms:title "Group 1 Test case 1 Scenario 1";
     prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=10,15> ;
-    prov:startedAtTime "2021-04-15T13:00:00-04:00"^^xsd:dateTime ;
-    prov:endedAtTime   "2021-04-15T13:01:00-04:00"^^xsd:dateTime ;
+    prov:startedAtTime "2021-04-15T13:00:01-04:00"^^xsd:dateTime ;
+    prov:endedAtTime   "2021-04-15T13:01:01-04:00"^^xsd:dateTime ;
     prov:generated results:node1f273av6vx14 ;
-    dcterms:hasPart results:node1f273av6vx29 .
+    dcterms:hasPart (results:node1f273av6vx16 results:node1f273av6vx17 results:node1f273av6vx18).
 
 results:node1f273av6vx14
     a prov:Entity ;
@@ -45,12 +45,6 @@ results:node1f273av6vx14
     prov:value earl:passed .
 
 # Step list
-results:node1f273av6vx29
-    a rdf:List;
-    rdf:first results:node1f273av6vx16;
-    rdf:rest (results:node1f273av6vx17
-                 results:node1f273av6vx18) .
-
 results:node1f273av6vx16
     a prov:Activity;
     dcterms:title "* def testContainer = createTestContainer(clients.alice)";
@@ -113,22 +107,15 @@ results:node1f273av6vx42
     a prov:Activity;
     dcterms:title "Group 1 Test case 1 Scenario 2";
     prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=25,35> ;
-    prov:startedAtTime "2021-04-15T13:02:00-04:00"^^xsd:dateTime ;
-    prov:endedAtTime   "2021-04-15T13:04:00-04:00"^^xsd:dateTime ;
+    prov:startedAtTime "2021-04-15T13:02:01-04:00"^^xsd:dateTime ;
+    prov:endedAtTime   "2021-04-15T13:04:01-04:00"^^xsd:dateTime ;
     prov:generated results:node1f273av6vx43 ;
-    dcterms:hasPart results:node1f273av6vx58 .
+    dcterms:hasPart (results:node1f273av6vx45 results:node1f273av6vx53 results:node1f273av6vx54 results:node1f273av6vx55) .
 
 results:node1f273av6vx43
     a prov:Entity ;
     prov:generatedAtTime "2021-04-01T17:12:59.933001Z"^^xsd:dateTime ;
     prov:value earl:passed .
-
-results:node1f273av6vx58
-    a rdf:List;
-    rdf:first results:node1f273av6vx45;
-    rdf:rest (results:node1f273av6vx53
-             results:node1f273av6vx54
-             results:node1f273av6vx55) .
 
 results:node1f273av6vx45
     a prov:Activity;

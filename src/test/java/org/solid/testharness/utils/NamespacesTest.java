@@ -24,6 +24,8 @@
 package org.solid.testharness.utils;
 
 import io.quarkus.test.junit.QuarkusTest;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.junit.jupiter.api.Test;
 import org.solid.common.vocab.DOAP;
 import org.solid.common.vocab.EARL;
@@ -49,6 +51,14 @@ public class NamespacesTest {
         final StringWriter sw = new StringWriter();
         dataRepository.export(sw);
         assertTrue(sw.toString().contains("earl:Software"));
+    }
+
+    @Test
+    void addToModel() {
+        final Model model = new LinkedHashModel();
+        assertEquals(0, model.getNamespaces().size());
+        Namespaces.addToModel(model);
+        assertNotEquals(0, model.getNamespaces().size());
     }
 
     @Test
@@ -97,19 +107,19 @@ public class NamespacesTest {
     @Test
     void buildHtmlPrefixesNullOrEmpty() {
         final List<String> empty = null;
-        assertEquals("", Namespaces.generateHtmlPrefixes(empty));
-        assertEquals("", Namespaces.generateHtmlPrefixes(List.of()));
+        assertEquals("", Namespaces.generateRdfaPrefixes(empty));
+        assertEquals("", Namespaces.generateRdfaPrefixes(List.of()));
     }
 
     @Test
     void buildHtmlPrefixes1() {
-        assertEquals("earl: http://www.w3.org/ns/earl#", Namespaces.generateHtmlPrefixes(List.of(EARL.PREFIX)));
+        assertEquals("earl: http://www.w3.org/ns/earl#", Namespaces.generateRdfaPrefixes(List.of(EARL.PREFIX)));
     }
 
     @Test
     void buildHtmlPrefixes2() {
         assertEquals("earl: http://www.w3.org/ns/earl# doap: http://usefulinc.com/ns/doap#",
-                Namespaces.generateHtmlPrefixes(List.of(EARL.PREFIX, DOAP.PREFIX))
+                Namespaces.generateRdfaPrefixes(List.of(EARL.PREFIX, DOAP.PREFIX))
         );
     }
 }

@@ -24,9 +24,7 @@
 
 import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.solid.testharness.ConformanceTestHarness;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.reporting.TestSuiteResults;
@@ -68,6 +66,7 @@ public class TestSuiteRunner {
     }
 
     @Test
+    @Disabled
     void testSuiteCoverage() throws Exception {
         conformanceTestHarness.initialize();
         assertTrue(conformanceTestHarness.createCoverageReport());

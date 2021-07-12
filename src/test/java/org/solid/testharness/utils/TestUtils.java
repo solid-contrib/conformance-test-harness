@@ -23,6 +23,13 @@
  */
 package org.solid.testharness.utils;
 
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFWriter;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
+
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -72,6 +79,26 @@ public final class TestUtils {
         final HttpHeaders mockHeaders = HttpHeaders.of(headers, (k, v) -> true);
         when(mockResponse.headers()).thenReturn(mockHeaders);
         return mockResponse;
+    }
+
+    public static String toTurtle(final Model model) {
+        Namespaces.addToModel(model);
+        final StringWriter sw = new StringWriter();
+        final RDFWriter rdfWriter = Rio.createWriter(RDFFormat.TURTLE, sw);
+        rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true)
+                .set(BasicWriterSettings.INLINE_BLANK_NODES, true);
+        Rio.write(model, rdfWriter);
+        return sw.toString();
+    }
+
+    public static String toTriples(final Model model) {
+        Namespaces.addToModel(model);
+        final StringWriter sw = new StringWriter();
+        final RDFWriter rdfWriter = Rio.createWriter(RDFFormat.NTRIPLES, sw);
+        rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true)
+                .set(BasicWriterSettings.INLINE_BLANK_NODES, true);
+        Rio.write(model, rdfWriter);
+        return sw.toString();
     }
 
     private TestUtils() { }

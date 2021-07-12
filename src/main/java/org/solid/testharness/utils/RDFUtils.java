@@ -24,9 +24,15 @@
 package org.solid.testharness.utils;
 
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.rio.ParserConfig;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.helpers.ParseErrorLogger;
+import org.eclipse.rdf4j.rio.helpers.RDFaParserSettings;
+import org.eclipse.rdf4j.rio.helpers.RDFaVersion;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Arrays;
@@ -48,10 +54,17 @@ public final class RDFUtils {
     }
 
     public static List<String> rdfaToTripleArray(final String data, final String baseUri) throws Exception {
-        final Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.RDFA);
+        final Model model = parseRdfa(data, baseUri);
         final StringWriter sw = new StringWriter();
         Rio.write(model, sw, RDFFormat.NTRIPLES);
         return Arrays.asList(sw.toString().split("\n"));
+    }
+
+    public static Model parseRdfa(final String data, final String baseUri) throws IOException {
+        final ParserConfig parserConfig = new ParserConfig();
+        parserConfig.set(RDFaParserSettings.RDFA_COMPATIBILITY, RDFaVersion.RDFA_1_1);
+        return Rio.parse(new StringReader(data), baseUri, RDFFormat.RDFA,
+                parserConfig, SimpleValueFactory.getInstance(), new ParseErrorLogger());
     }
 
     private RDFUtils() { }
