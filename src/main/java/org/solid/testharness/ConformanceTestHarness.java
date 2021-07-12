@@ -78,6 +78,7 @@ public class ConformanceTestHarness {
 
     @SuppressWarnings("PMD.UseProperClassLoader") // this is not J2EE and the suggestion fails
     public void initialize() throws IOException {
+        reportGenerator.setStartTime(System.currentTimeMillis());
         try (final InputStream is = getClass().getClassLoader().getResourceAsStream("assertor.properties")) {
             final Properties properties = new Properties();
             properties.load(is);
@@ -163,6 +164,7 @@ public class ConformanceTestHarness {
                 logger.info("==== RUNNING {} TEST CASES: {}", featurePaths.size(), featurePaths);
             }
 
+            logger.info("===================== REGISTER CLIENTS ========================");
             if (config.getUserRegistrationEndpoint() != null) {
                 testSubject.registerUsers();
             }
@@ -176,6 +178,9 @@ public class ConformanceTestHarness {
         logger.info("===================== RUN TESTS ========================");
         final TestSuiteResults results = testRunner.runTests(featurePaths,
                 testSubject.getTargetServer().getMaxThreads());
+        reportGenerator.setResults(results);
+
+        logger.info("===================== DELETING TEST RESOURCES ========================");
         testSubject.tearDownServer();
 
         logger.info("===================== BUILD REPORTS ========================");

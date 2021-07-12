@@ -28,6 +28,7 @@ import com.intuit.karate.Results;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
+import java.util.Date;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,9 +47,74 @@ class TestSuiteResultsTest {
     @Test
     void getFailCount() {
         final Results results = mock(Results.class);
-        when(results.getFailCount()).thenReturn(1);
+        when(results.getFailCount()).thenReturn(10);
         final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
-        assertEquals(1, testSuiteResults.getFailCount());
+        assertEquals(10, testSuiteResults.getFailCount());
+    }
+
+    @Test
+    void getFeatureFailCount() {
+        final Results results = mock(Results.class);
+        when(results.getFeaturesFailed()).thenReturn(1);
+        final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
+        assertEquals(1, testSuiteResults.getFeatureFailCount());
+    }
+
+    @Test
+    void getFeaturePassCount() {
+        final Results results = mock(Results.class);
+        when(results.getFeaturesPassed()).thenReturn(2);
+        final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
+        assertEquals(2, testSuiteResults.getFeaturePassCount());
+    }
+
+    @Test
+    void getFeatureTotal() {
+        final Results results = mock(Results.class);
+        when(results.getFeaturesTotal()).thenReturn(3);
+        final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
+        assertEquals(3, testSuiteResults.getFeatureTotal());
+    }
+
+    @Test
+    void getScenarioFailCount() {
+        final Results results = mock(Results.class);
+        when(results.getScenariosFailed()).thenReturn(4);
+        final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
+        assertEquals(4, testSuiteResults.getScenarioFailCount());
+    }
+
+    @Test
+    void getScenarioPassCount() {
+        final Results results = mock(Results.class);
+        when(results.getScenariosPassed()).thenReturn(5);
+        final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
+        assertEquals(5, testSuiteResults.getScenarioPassCount());
+    }
+
+    @Test
+    void getScenarioTotal() {
+        final Results results = mock(Results.class);
+        when(results.getScenariosTotal()).thenReturn(6);
+        final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
+        assertEquals(6, testSuiteResults.getScenarioTotal());
+    }
+
+    @Test
+    void getElapsedTime() {
+        final TestSuiteResults testSuiteResults = new TestSuiteResults(null);
+        final long startTime = System.currentTimeMillis();
+        testSuiteResults.setStartTime(startTime);
+        assertTrue(testSuiteResults.getElapsedTime() >= 0);
+    }
+
+    @Test
+    void getResultDate() {
+        final Results results = mock(Results.class);
+        final Date now = new Date();
+        when(results.getEndTime()).thenReturn(now.getTime());
+        final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
+        assertTrue(testSuiteResults.getResultDate().equals(now));
     }
 
     @Test

@@ -23,10 +23,12 @@
  */
 package org.solid.testharness.reporting;
 
+import com.intuit.karate.Results;
 import io.quarkus.qute.Engine;
 import io.quarkus.qute.EngineBuilder;
 import io.quarkus.qute.Template;
 import io.quarkus.test.junit.QuarkusTest;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.util.Models;
@@ -46,10 +48,14 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -242,8 +248,29 @@ class ReportFragmentTest {
         assertTrue(Models.isomorphic(reportModel, testSubject.getModel()));
     }
 
+    @Test
+    void testResultsSummary() {
+        final Results results = mock(Results.class);
+        when(results.getFeaturesPassed()).thenReturn(1);
+        when(results.getFeaturesFailed()).thenReturn(2);
+        when(results.getFeaturesTotal()).thenReturn(3);
+        when(results.getScenariosPassed()).thenReturn(4);
+        when(results.getScenariosFailed()).thenReturn(5);
+        when(results.getScenariosTotal()).thenReturn(6);
+        when(results.getEndTime()).thenReturn(new Date(0).getTime());
+        final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
+        testSuiteResults.setStartTime(System.currentTimeMillis() - 1000);
+        final String report = render("testSuiteResults", testSuiteResults);
+
+        final String reportStripped = StringUtils.normalizeSpace(report);
+        assertTrue(reportStripped.contains("datetime=\"Thu Jan 01 01:00:00 GMT 1970\""));
+        assertThat(reportStripped, matchesPattern(".*<dd>[0-9]+ ms</dd>.*"));
+        assertTrue(reportStripped.contains("<td>1</td> <td>2</td> <td>3</td>"));
+        assertTrue(reportStripped.contains("<td>4</td> <td>5</td> <td>6</td>"));
+    }
+
     private String render(final String key, final Object object) {
-        final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList());
+        final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList(), null);
         return testTemplate.data(
                 "subject", resultData.getSubject(),
                 "prefixes", resultData.getPrefixes(),

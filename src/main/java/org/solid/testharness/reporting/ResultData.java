@@ -40,13 +40,15 @@ public class ResultData {
     private TestSubject testSubject;
     private List<Specification> specifications;
     private List<TestCase> testCases;
+    private TestSuiteResults testSuiteResults;
 
-    public ResultData(final List<IRI> specifications, final List<IRI> testCases) {
+    public ResultData(final List<IRI> specifications, final List<IRI> testCases, final TestSuiteResults results) {
         assertor = new Assertor(iri(Namespaces.TEST_HARNESS_URI));
         final Config config = CDI.current().select(Config.class).get();
         testSubject = new TestSubject(config.getTestSubject());
         this.specifications = specifications.stream().map(Specification::new).collect(Collectors.toList());
         this.testCases = testCases.stream().map(TestCase::new).collect(Collectors.toList());
+        this.testSuiteResults = results;
     }
 
     public String getSubject() {
@@ -73,5 +75,9 @@ public class ResultData {
 
     public TestSubject getTestSubject() {
         return testSubject;
+    }
+
+    public TestSuiteResults getTestSuiteResults() {
+        return testSuiteResults;
     }
 }

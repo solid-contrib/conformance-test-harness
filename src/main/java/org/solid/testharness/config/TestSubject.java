@@ -172,7 +172,6 @@ public class TestSubject {
     }
 
     public void registerClients() {
-        logger.info("===================== REGISTER CLIENTS ========================");
         clients = new HashMap<>();
         if (targetServer == null) {
             throw new TestHarnessInitializationException("No target server has been configured");

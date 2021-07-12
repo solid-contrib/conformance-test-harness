@@ -1,0 +1,37 @@
+{#with it}
+<section>
+    <h2>Results summary</h2>
+    <dl>
+        <dt>Test date</dt>
+        <dd><time datatype="xsd:date" datetime="{resultDate}">{resultDate}</time></dd>
+    </dl>
+    <dl>
+        <dt>Time taken</dt>
+        <dd>{elapsedTime} ms</dd>
+    </dl>
+    <table>
+        <thead>
+        <tr>
+            <th></th>
+            <th>Passed</th>
+            <th>Failed</th>
+            <th>Total</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Features (test cases)</td>
+            <td>{featurePassCount}</td>
+            <td>{featureFailCount}</td>
+            <td>{featureTotal}</td>
+        </tr>
+        <tr>
+            <td>Scenarios (tests)</td>
+            <td>{scenarioPassCount}</td>
+            <td>{scenarioFailCount}</td>
+            <td>{scenarioTotal}</td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+{/with}

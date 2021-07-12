@@ -55,6 +55,9 @@ public class ReportGenerator {
     @Location("result-report.html")
     Template resultTemplate;
 
+    private TestSuiteResults testSuiteResults;
+    private long startTime;
+
     public void buildTurtleReport(final Writer writer) throws Exception {
         dataRepository.export(writer);
     }
@@ -66,12 +69,13 @@ public class ReportGenerator {
     }
 
     public void buildHtmlCoverageReport(final Writer writer) throws IOException {
-        writer.write(coverageTemplate.data(new ResultData(getSpecifications(), getTestCases())).render());
+        writer.write(coverageTemplate.data(new ResultData(getSpecifications(), getTestCases(), null)).render());
         writer.flush();
     }
 
     public void buildHtmlResultReport(final Writer writer) throws IOException {
-        writer.write(resultTemplate.data(new ResultData(getSpecifications(), getTestCases())).render());
+        writer.write(resultTemplate.data(new ResultData(getSpecifications(), getTestCases(), testSuiteResults))
+                .render());
         writer.flush();
     }
 
@@ -92,5 +96,13 @@ public class ReportGenerator {
                     .collect(Collectors.toList());
         }
     }
-}
 
+    public void setStartTime(final long startTime) {
+        this.startTime = startTime;
+    }
+
+    public void setResults(final TestSuiteResults testSuiteResults) {
+        this.testSuiteResults = testSuiteResults;
+        this.testSuiteResults.setStartTime(startTime);
+    }
+}
