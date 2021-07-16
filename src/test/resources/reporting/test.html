@@ -24,24 +24,41 @@
     {#if testSuiteResults}
     {#with testSuiteResults}{#include results-summary /}{/with}
     {/if}
-    {! REQUIREMENT !}
-    {#if specificationRequirements}
-    {#each specificationRequirements}
+    {! REQUIREMENT - RESULTS !}
+    {#if coverageMode == false}
+    {#each specificationRequirements.orEmpty}
     {#include requirement}
     {#if it.testCases}
     <table>
         <tr>
-            <th>TestCase</th>
             <th>Title</th>
-            <th>Script</th>
-            <th>Status</th>
-            <th>Target</th>
+            <th>Details</th>
             <th>Outcome</th>
-            <th>Timestamp</th>
-            <th>Scenario link</th>
+            <th>Scenarios</th>
         </tr>
         {#each it.testCases}
-        {#include testcase /}
+        {#include testcase coverageMode=false /}
+        {/each}
+    </table>
+    {#else}
+    <p>No test cases found</p>
+    {/if}
+    {/include}
+    {/each}
+    {/if}
+    {! REQUIREMENT - COVERAGE !}
+    {#if coverageMode == true}
+    {#each specificationRequirements.orEmpty}
+    {#include requirement}
+    {#if it.testCases}
+    <table>
+        <tr>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Implemented</th>
+        </tr>
+        {#each it.testCases}
+        {#include testcase coverageMode=true /}
         {/each}
     </table>
     {#else}
@@ -54,35 +71,23 @@
     {#if testCases}
     <table>
         <tr>
-            <th>TestCase</th>
             <th>Title</th>
-            <th>Script</th>
-            <th>Status</th>
-            <th>Target</th>
+            <th>Details</th>
             <th>Outcome</th>
-            <th>Timestamp</th>
-            <th>Scenario link</th>
+            <th>Scenarios</th>
         </tr>
         {#each testCases}
-        {#include testcase /}
+        {#include testcase coverageMode=false /}
         {/each}
     </table>
     {/if}
     {! SCENARIO !}
     {#if scenarios}
-    <table>
-        <tr>
-            <th>Scenario</th>
-            <th>Location</th>
-            <th>Outcome</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Steps</th>
-        </tr>
+    <section>
         {#each scenarios}
         {#include scenario /}
         {/each}
-    </table>
+    </section>
     {/if}
     {! STEP !}
     {#if steps}

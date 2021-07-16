@@ -161,9 +161,7 @@ public class Application implements QuarkusApplication {
     }
 
     public static void main(final String... args) {
-        logger.error("STARTING");
         Quarkus.run(Application.class, args);
-        logger.error("STOPPING");
     }
 
     private boolean validateOutputDir(final Path dir, final Formatter error) {

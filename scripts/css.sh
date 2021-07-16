@@ -71,6 +71,7 @@ openssl req -new -x509 -days 365 -nodes \
   -subj "/C=US/ST=California/L=Los Angeles/O=Security/OU=IT Department/CN=server"
 
 # run CSS in a container enabling self-signed certificates
+docker network create testnet
 docker run -d --name=server --network=testnet --env NODE_TLS_REJECT_UNAUTHORIZED=0 \
   -v "$(pwd)"/config:/config -p 443:443 -it css:latest \
   -c /config/css-config.json --port=443 --baseUrl=https://server/
@@ -89,3 +90,4 @@ docker run -i --rm \
   --output=/reports --target=css
 docker stop server
 docker rm server
+docker network rm testnet

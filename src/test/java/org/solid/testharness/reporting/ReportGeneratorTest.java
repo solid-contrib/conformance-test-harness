@@ -104,7 +104,7 @@ class ReportGeneratorTest {
     }
 
     @Test
-    void isIsomorphic() throws Exception {
+    void resultsIsIsomorphic() throws Exception {
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
@@ -168,6 +168,44 @@ class ReportGeneratorTest {
         reportGenerator.buildHtmlCoverageReport(sw);
 //        logger.debug("OUTPUT:\n{}", sw);
         assertTrue(sw.toString().length() > 1);
+    }
+
+    @Test
+    void coverageIsIsomorphic() throws Exception {
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-2.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-2.ttl"));
+
+        // remove unused parts of test model
+        final Model resultModel;
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            resultModel = QueryResults.asModel(conn.getStatements(null, null, null));
+            resultModel.remove(null, TD.preCondition, null);
+        }
+
+        final StringWriter sw = new StringWriter();
+        reportGenerator.buildHtmlCoverageReport(sw);
+        final String report = sw.toString();
+//        logger.debug("OUTPUT:\n{}", report);
+        final Model reportModel = RDFUtils.parseRdfa(report, "https://example.org");
+//        logger.debug("TURTLE:\n{}", TestUtils.toTurtle(reportModel));
+        logger.debug("Report contains {} triples", reportModel.size());
+        logger.debug("Report is isomorphic with results: {}", Models.isomorphic(reportModel, resultModel));
+
+        if (!Models.isomorphic(reportModel, resultModel)) {
+            logger.debug("\n== DIFFERENCE EXTRA IN REPORT ==\n{}", RepositoryUtil.difference(reportModel, resultModel)
+                    .stream().map(s -> String.format("%s %s %s", s.getSubject(), s.getPredicate(), s.getObject()))
+                    .collect(Collectors.joining("\n"))
+            );
+
+            logger.debug("\n== DIFFERENCE MISSING IN REPORT ==\n{}", RepositoryUtil.difference(resultModel, reportModel)
+                    .stream().map(s -> String.format("%s %s %s", s.getSubject(), s.getPredicate(), s.getObject()))
+                    .collect(Collectors.joining("\n"))
+            );
+        }
+
+        assertTrue(Models.isomorphic(reportModel, resultModel));
     }
 
     @Test

@@ -1,31 +1,54 @@
 {#with it}
 <tr id="{subject}" about="{subject}" typeof="{typesList}">
     <td>
-        <a href="{subject}">{subject}</a>
+        <span property="dcterms:title">{title}</span>
+        <span>[<a href="{subject}" title="{subject}">manifest</a>]</span>
+        {#if isImplemented}
+        <span rel="spec:testScript">[<a href="{testScript}" title="{testScript}">source</a>]</span>
+        {/if}
         <span rel="spec:requirementReference" resource="{requirementReference}"></span>
     </td>
-    <td property="dcterms:title">{title}</td>
     <td>
-        {#if isImplemented}
-        <a rel="spec:testScript" href="{testScript}">{testScript}</a>
-        {#else}Not yet implemented{/if}
+        {#if coverageMode == true}
+        <span rel="td:reviewStatus" resource="{status}">
+            {#switch status}
+            {#case 'http://www.w3.org/2006/03/test-description#unreviewed'}Unreviewed
+            {#case 'http://www.w3.org/2006/03/test-description#accepted'}Accepted
+            {/switch}
+        </span>
+        {#else}
+        <dl><dt>Status</dt><dd rel="td:reviewStatus" resource="{status}">
+            {#switch status}
+            {#case 'http://www.w3.org/2006/03/test-description#unreviewed'}Unreviewed
+            {#case 'http://www.w3.org/2006/03/test-description#accepted'}Accepted
+            {/switch}
+        </dd></dl>
+        {/if}
+
+        {#if assertion && coverageMode == false}
+        <div rev="earl:test" resource="{assertion.subject}">
+            <div about="{assertion.subject}" typeof="{assertion.typesList}">
+                <span rel="earl:subject" resource="{assertion.testSubject}"></span>
+                <span rel="earl:assertedBy" resource="{assertion.assertedBy}"></span>
+                <dl><dt>Mode</dt><dd rel="earl:mode" resource="{assertion.mode}">
+                    {#switch assertion.mode}
+                    {#case 'http://www.w3.org/ns/earl#automatic'}Automatic
+                    {#case 'http://www.w3.org/ns/earl#manual'}Manual
+                    {#case 'http://www.w3.org/ns/earl#semiAuto'}Semi-Automatic
+                    {#case 'http://www.w3.org/ns/earl#undisclosed'}Undisclosed
+                    {#case 'http://www.w3.org/ns/earl#unknownMode'}Unknown
+                    {/switch}
+                </dd></dl>
+            </div>
+            <dl><dt>Timestamp</dt><dd>
+                <time about="{assertion.result.subject}" datatype="xsd:dateTime" datetime="{assertion.result.date}" property="dcterms:date">{assertion.result.date}</time>
+            </dd></dl>
+        </div>
+        {/if}
     </td>
-    <td rel="td:reviewStatus" resource="{status}">
-        {#switch status}
-        {#case 'http://www.w3.org/2006/03/test-description#unreviewed'}Unreviewed
-        {#case 'http://www.w3.org/2006/03/test-description#accepted'}Accepted
-        {/switch}
-    </td>
-    {#if coverageMode}
+    {#if coverageMode == true}
     <td>{isImplemented ? '✔' : '✗'}</td>
     {#else if isImplemented && assertion}
-    <td rev="earl:test" resource="{assertion.subject}">
-        <div about="{assertion.subject}" typeof="{assertion.typesList}">
-            <a rel="earl:subject" href="{assertion.testSubject}">{assertion.testSubject}</a>
-            <span rel="earl:assertedBy" resource="{assertion.assertedBy}"></span>
-            <span rel="earl:mode" resource="{assertion.mode}"></span>
-        </div>
-    </td>
     <td about="{assertion.subject}" rel="earl:result" resource="{assertion.result.subject}">
         <span about="{assertion.result.subject}" typeof="{assertion.result.typesList}" rel="earl:outcome" resource="{assertion.result.outcome}"></span>
         {#switch assertion.result.outcome}
@@ -35,12 +58,9 @@
         {/switch}
     </td>
     <td>
-        <time about="{assertion.result.subject}" datatype="xsd:dateTime" datetime="{assertion.result.date}" property="dcterms:date">{assertion.result.date}</time>
-    </td>
-    <td>
-        {#if scenarios}
-        <a href="#scenarios-{anchor}">Scenarios</a>
-        {/if}
+        {#each scenarios.orEmpty}
+        <ul><li><a href="#scenario-{it.anchor}">{it.title}</a></li></ul>
+        {/each}
     </td>
     {#else}
     <td></td>

@@ -463,6 +463,7 @@ openssl req -new -x509 -days 365 -nodes \
   -subj "/C=US/ST=California/L=Los Angeles/O=Security/OU=IT Department/CN=server"
 
 # run CSS in a container enabling self-signed certificates
+docker network create testnet
 docker run -d --name=server --network=testnet --env NODE_TLS_REJECT_UNAUTHORIZED=0 \
   -v "$(pwd)"/config:/config -p 443:443 -it css:latest \
   -c /config/css-config.json --port=443 --baseUrl=https://server/
@@ -481,6 +482,7 @@ docker run -i --rm \
   --output=/reports --target=css
 docker stop server
 docker rm server
+docker network rm testnet
 ```
 
 Run this script, and the reports will be created in the specified directory.
@@ -501,7 +503,7 @@ To use the image to run a set of local tests:
       - /data/solid-protocol-spec.ttl
     target: https://github.com/solid/conformance-test-harness/ess
     mappings:
-      - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol
+      - prefix: https://github.com/solid/conformance-test-harness/example/protocol
         path: /data
   ```
   * Note that the paths are internal paths in the test harness image so you next need to map them in the command line

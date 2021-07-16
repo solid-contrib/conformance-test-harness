@@ -166,7 +166,7 @@ class ReportFragmentTest {
         requirement.getModel().remove(null, null, requirementIri);
         logger.debug("SpecificationRequirement Model:\n{}", TestUtils.toTurtle(requirement.getModel()));
 
-        final String report = render("specificationRequirements", List.of(requirement));
+        final String report = render("specificationRequirements", List.of(requirement), "coverageMode", false);
         logger.debug("Report:\n{}", report);
 
         final Model reportModel = RDFUtils.parseRdfa(report, "https://example.org");
@@ -191,7 +191,7 @@ class ReportFragmentTest {
         requirement.getModel().remove(null, DCTERMS.hasPart, null);
         logger.debug("SpecificationRequirement Model:\n{}", TestUtils.toTurtle(requirement.getModel()));
 
-        final String report = render("specificationRequirements", List.of(requirement));
+        final String report = render("specificationRequirements", List.of(requirement), "coverageMode", false);
         logger.debug("Report:\n{}", report);
 
         final Model reportModel = RDFUtils.parseRdfa(report, "https://example.org");
@@ -269,12 +269,44 @@ class ReportFragmentTest {
         assertTrue(reportStripped.contains("<td>4</td> <td>5</td> <td>6</td>"));
     }
 
+    @Test
+    void requirementCoverageReportWithTestCases() throws IOException {
+        final IRI requirementIri = iri("https://example.org/specification1#spec1");
+        final SpecificationRequirement requirement = new SpecificationRequirement(requirementIri);
+        requirement.getModel().remove(null, SPEC.requirement, requirementIri);
+        for (TestCase testCase: requirement.getTestCases()) {
+            requirement.getModel().addAll(testCase.getModel());
+            requirement.getModel().remove(null, null, testCase.getSubjectIri());
+
+        }
+        requirement.getModel().remove(null, DCTERMS.hasPart, null);
+        logger.debug("SpecificationRequirement Model:\n{}", TestUtils.toTurtle(requirement.getModel()));
+
+        final String report = render("specificationRequirements", List.of(requirement), "coverageMode", true);
+        logger.debug("Report:\n{}", report);
+
+        final Model reportModel = RDFUtils.parseRdfa(report, "https://example.org");
+        logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
+
+        assertTrue(Models.isomorphic(reportModel, requirement.getModel()));
+    }
+
     private String render(final String key, final Object object) {
         final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList(), null);
         return testTemplate.data(
                 "subject", resultData.getSubject(),
                 "prefixes", resultData.getPrefixes(),
                 key, object
+        ).render();
+    }
+
+    private String render(final String key1, final Object object1, final String key2, final Object object2) {
+        final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList(), null);
+        return testTemplate.data(
+                "subject", resultData.getSubject(),
+                "prefixes", resultData.getPrefixes(),
+                key1, object1,
+                key2, object2
         ).render();
     }
 }
