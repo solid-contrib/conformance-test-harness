@@ -10,6 +10,4 @@ prefix solid: <http://www.w3.org/ns/solid/terms#>
 
 <example>
     a earl:Software, earl:TestSubject ;
-    doap:name "Example server" ;
-    solid-test:maxThreads 8 ;
-    solid-test:setupRootAcl true .
+    doap:name "Example server" .

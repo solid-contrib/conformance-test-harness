@@ -31,20 +31,14 @@ This is a Turtle file which describes the test subject and it's capabilities, pr
     doap:homepage <https://github.com/solid/community-server> ;
     doap:description "An open and modular implementation of the Solid specifications."@en ;
     doap:programming-language "TypeScript" ;
-    solid-test:origin <https://tester> ;
-    solid-test:maxThreads 8 ;
-    solid-test:features "authentication", "acl", "wac-allow" ;
-    solid-test:setupRootAcl false .
+    solid-test:features "authentication", "acl", "wac-allow" .
 ```
 **NOTE**: The test subject identifier is simply an IRI - it is not meant to be resolvable and can be anything as long as
 you specify it on the command line when running tests.
 
 There are some test subject specific configuration properties in this file:
 ```
-  solid-test:origin <https://tester>   # registered origin for session-based login
-  solid-test:maxThreads 8              # number of threads for running tests in parallel  
   solid-test:features "authentication", "acl", "wac-allow"  # server capabilities
-  solid-test:setupRootAcl true         # this tells the server to setup an ACL on the root (not needed by any current implementation)
 ```
 An example of this file is provided in the test repository (https://github.com/solid/specification-tests),
 containing descriptions of the following Solid implementations:
@@ -85,6 +79,8 @@ mappings:
 agent: agent-string		# default = Solid-Conformance-Test-Suite
 connectTimeout: 1000	# default = 5000
 readTimeout: 1000		# default = 5000
+maxThreads: 4           # default = 8, number of threads for running tests in parallel  
+origin: https://test    # default = https://tester, origin used for OIDC registration
 ```
 
 ## Environment variables
@@ -124,12 +120,20 @@ This results in a log entry such as:
 2021-06-17 11:43:04,742 INFO  [ResultLogger] (main) {"resultDate":"2021-06-17 11:43:04 am","featuresFailed":0,"elapsedTime":7552.0,"scenariosPassed":4,"featuresSkipped":0,"totalTime":14401.0,"scenariosFailed":0,"featuresPassed":2}
 ```
 
+### Parallel testing
+By default the test harness will run tests in parallel (defaulting to 8 threads). You can either override this in the 
+yaml config file as mentioned previously or you can do it with environment variables e.g.
+```
+MAXTHREADS=2
+```
+
 ### Server
 The test harness needs to know the root URL of the server being tested and the path to the container in which test files
-will be created.
+will be created. It can also create a root ACL if the filesystem is initially open.
 ```
 RESOURCE_SERVER_ROOT=	# e.g. https://pod.inrupt.com or https://pod-user.inrupt.net
-TEST_CONTAINER= # e.g. pod-user/test or test
+TEST_CONTAINER=         # e.g. pod-user/test or test
+SETUPROOTACL=           # boolean this tells the server to setup an ACL on the root
 ```
 These are used to construct the root location for any files created and destroyed by the tests
 e.g. `https://pod.inrupt.com/pod-user/test/` or `https://pod-user.inrupt.net/test`.
@@ -210,7 +214,7 @@ added to their profiles.
 ```
 :me acl:trustedApp [
   acl:mode acl:Read, acl:Write;
-  acl:origin <https://tester>  # or whatever origin is defined in the test subject config file
+  acl:origin <https://tester>  # or whatever origin is defined in the test harness configuration
 ];
 ```
 * Solid Identity Provider: (where the URL is the IdP of this account) - NSS does not add this to new profiles by default
@@ -231,10 +235,8 @@ USERS_ALICE_USERNAME=
 USERS_ALICE_PASSWORD=
 USERS_BOB_USERNAME=
 USERS_BOB_PASSWORD=
+ORIGIN=             # optional as it defaults to https://tester
 ```
-
-The harness also needs to know the origin that has been registered as the trusted app for the users. This is included
-in the test subject configuration file describing the server under test.
 
 This mechanism will work in CI environments where the credentials can be passed in as secrets.
 
@@ -259,10 +261,8 @@ USERS_ALICE_USERNAME=
 USERS_ALICE_PASSWORD=
 USERS_BOB_USERNAME=
 USERS_BOB_PASSWORD=
-```
-
-The harness also needs to know the origin that the IdP server will redirect to (the same as the trusted app in the 
-previous section). This is included in the test subject configuration file describing the server under test.
+ORIGIN=                         # optional as it defaults to https://tester
+# ```
 
 This mechanism will work in CI environments where the credentials can be passed in as secrets.
 

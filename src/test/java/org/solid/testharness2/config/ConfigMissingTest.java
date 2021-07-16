@@ -83,4 +83,18 @@ public class ConfigMissingTest {
     void getReadTimeout() {
         assertEquals(5000, config.getReadTimeout());
     }
-}
+
+    @Test
+    public void getMaxThreads() {
+        assertEquals(8, config.getMaxThreads());
+    }
+
+    @Test
+    public void getOrigin() {
+        assertEquals("https://tester", config.getOrigin());
+    }
+
+    @Test
+    public void isSetupRootAcl() {
+        assertFalse(config.isSetupRootAcl());
+    }}

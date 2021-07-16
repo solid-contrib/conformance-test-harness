@@ -269,7 +269,6 @@ class ConformanceTestHarnessTest {
     private void mockTargetServer() {
         final TargetServer targetServer = mock(TargetServer.class);
         when(targetServer.getFeatures()).thenReturn(Map.of("feature", false));
-        when(targetServer.getMaxThreads()).thenReturn(1);
         when(testSubject.getTargetServer()).thenReturn(targetServer);
     }
 

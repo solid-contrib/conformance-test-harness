@@ -36,6 +36,7 @@ import java.net.URI;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
 @TestProfile(ConfigTestNormalProfile.class)
@@ -135,6 +136,21 @@ public class ConfigTest {
     @Test
     void getReadTimeout() {
         assertEquals(1000, config.getReadTimeout());
+    }
+
+    @Test
+    public void getMaxThreads() {
+        assertEquals(4, config.getMaxThreads());
+    }
+
+    @Test
+    public void getOrigin() {
+        assertEquals("https://testharness", config.getOrigin());
+    }
+
+    @Test
+    public void isSetupRootAcl() {
+        assertTrue(config.isSetupRootAcl());
     }
 
     @Test

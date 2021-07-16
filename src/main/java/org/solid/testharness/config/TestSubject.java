@@ -91,7 +91,6 @@ public class TestSubject {
             targetServer = new TargetServer(testSubject);
             dataRepository.setTestSubject(testSubject);
             logger.debug("TestSubject {}", targetServer.getSubject());
-            logger.debug("Max threads: {}", targetServer.getMaxThreads());
         } catch (IOException e) {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException(
                     "Failed to read config file %s: %s",
@@ -121,7 +120,7 @@ public class TestSubject {
             throw new TestHarnessInitializationException("No target server has been configured");
         }
         final SolidClient solidClient = new SolidClient(HttpConstants.ALICE);
-        if (targetServer.isSetupRootAcl()) {
+        if (config.isSetupRootAcl()) {
             logger.debug("Setup root acl");
             try {
                 final URI rootAclUrl = solidClient.getResourceAclLink(config.getServerRoot());

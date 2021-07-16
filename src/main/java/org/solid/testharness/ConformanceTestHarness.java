@@ -177,8 +177,7 @@ public class ConformanceTestHarness {
         }
 
         logger.info("===================== RUN TESTS ========================");
-        final TestSuiteResults results = testRunner.runTests(featurePaths,
-                testSubject.getTargetServer().getMaxThreads());
+        final TestSuiteResults results = testRunner.runTests(featurePaths, config.getMaxThreads());
         reportGenerator.setResults(results);
 
         if (!config.isSkipTearDown()) {

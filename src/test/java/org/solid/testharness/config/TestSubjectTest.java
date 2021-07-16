@@ -71,7 +71,7 @@ public class TestSubjectTest {
     void prepareServerNoRootAcl() throws Exception {
         final TargetServer targetServer = mock(TargetServer.class);
         testSubject.setTargetServer(targetServer);
-        when(targetServer.isSetupRootAcl()).thenReturn(false);
+        when(config.isSetupRootAcl()).thenReturn(false);
         when(config.getTestContainer()).thenReturn("https://server/test/");
         when(config.getReadTimeout()).thenReturn(5000);
         when(config.getAgent()).thenReturn("AGENT");
@@ -93,7 +93,7 @@ public class TestSubjectTest {
     void prepareServerNoRootAclThrows() throws Exception {
         final TargetServer targetServer = mock(TargetServer.class);
         testSubject.setTargetServer(targetServer);
-        when(targetServer.isSetupRootAcl()).thenReturn(false);
+        when(config.isSetupRootAcl()).thenReturn(false);
         when(config.getTestContainer()).thenReturn("https://server/test/");
         when(config.getReadTimeout()).thenReturn(5000);
         when(config.getAgent()).thenReturn("AGENT");
@@ -113,7 +113,7 @@ public class TestSubjectTest {
     void prepareServerWithRootAcl() throws IOException, InterruptedException {
         final TargetServer targetServer = mock(TargetServer.class);
         testSubject.setTargetServer(targetServer);
-        when(targetServer.isSetupRootAcl()).thenReturn(true);
+        when(config.isSetupRootAcl()).thenReturn(true);
         when(config.getWebIds())
                 .thenReturn(Map.of(HttpConstants.ALICE, "https://alice.target.example.org/profile/card#me"));
         when(config.getTestContainer()).thenReturn("https://server/test/");
@@ -149,7 +149,7 @@ public class TestSubjectTest {
     void prepareServerWithRootAclThrows() throws IOException, InterruptedException {
         final TargetServer targetServer = mock(TargetServer.class);
         testSubject.setTargetServer(targetServer);
-        when(targetServer.isSetupRootAcl()).thenReturn(true);
+        when(config.isSetupRootAcl()).thenReturn(true);
         when(config.getWebIds())
                 .thenReturn(Map.of(HttpConstants.ALICE, "https://alice.target.example.org/profile/card#me"));
         when(config.getTestContainer()).thenReturn("https://server/test/");
@@ -174,7 +174,7 @@ public class TestSubjectTest {
     void prepareServerWithRootAclNoLink() throws IOException, InterruptedException {
         final TargetServer targetServer = mock(TargetServer.class);
         testSubject.setTargetServer(targetServer);
-        when(targetServer.isSetupRootAcl()).thenReturn(true);
+        when(config.isSetupRootAcl()).thenReturn(true);
         when(config.getWebIds())
                 .thenReturn(Map.of(HttpConstants.ALICE, "https://alice.target.example.org/profile/card#me"));
         when(config.getTestContainer()).thenReturn("https://server/test/");
@@ -197,7 +197,7 @@ public class TestSubjectTest {
     void prepareServerWithRootAclFails() throws IOException, InterruptedException {
         final TargetServer targetServer = mock(TargetServer.class);
         testSubject.setTargetServer(targetServer);
-        when(targetServer.isSetupRootAcl()).thenReturn(true);
+        when(config.isSetupRootAcl()).thenReturn(true);
         when(config.getWebIds())
                 .thenReturn(Map.of(HttpConstants.ALICE, "https://alice.target.example.org/profile/card#me"));
         when(config.getTestContainer()).thenReturn("https://server/test/");
@@ -287,9 +287,9 @@ public class TestSubjectTest {
     @Test
     void setTargetServer() {
         final TargetServer targetServer = mock(TargetServer.class);
-        when(targetServer.getOrigin()).thenReturn("http://test");
+        when(targetServer.getFeatures()).thenReturn(Map.of("feature1", true));
         testSubject.setTargetServer(targetServer);
-        assertEquals("http://test", testSubject.getTargetServer().getOrigin());
+        assertTrue(testSubject.getTargetServer().getFeatures().get("feature1"));
     }
 
     @Test

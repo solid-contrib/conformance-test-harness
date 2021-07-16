@@ -104,7 +104,7 @@ class AuthManagerTest {
     @Test
     void authenticateAlreadyExists() throws Exception {
         final Client client = new Client.Builder("existing").build();
-        final TargetServer targetServer = getMockTargetServer(true);
+        final TargetServer targetServer = getMockTargetServer();
         when(clientRegistry.hasClient("existing")).thenReturn(true);
         when(clientRegistry.getClient("existing")).thenReturn(client);
         final SolidClient solidClient = authManager.authenticate("existing", targetServer);
@@ -113,23 +113,8 @@ class AuthManagerTest {
     }
 
     @Test
-    void authenticateNoDpopNoOidc() {
-        final TargetServer targetServer = getMockTargetServer(true);
-        when(config.getSolidIdentityProvider()).thenReturn(baseUri.resolve("/404/"));
-        when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
-
-        assertThrows(TestHarnessInitializationException.class,
-                () -> authManager.authenticate("test1", targetServer));
-
-        final ArgumentCaptor<Client> argumentCaptor = ArgumentCaptor.forClass(Client.class);
-        verify(clientRegistry).register(eq("test1"), argumentCaptor.capture());
-        assertEquals("Client: user=test1, dPoP=false, session=false, local=false",
-                argumentCaptor.getValue().toString());
-    }
-
-    @Test
-    void authenticateDpopLocalhostNoOidc() {
-        final TargetServer targetServer = getMockTargetServer(false);
+    void authenticateLocalhostNoOidc() {
+        final TargetServer targetServer = getMockTargetServer();
         when(config.getSolidIdentityProvider()).thenReturn(baseUri.resolve("/404/"));
         when(config.getServerRoot()).thenReturn(URI.create("https://localhost"));
         when(config.overridingTrust()).thenReturn(true);
@@ -143,8 +128,8 @@ class AuthManagerTest {
     }
 
     @Test
-    void authenticateDpopLocalhostBadIssuer() {
-        final TargetServer targetServer = getMockTargetServer(false);
+    void authenticateLocalhostBadIssuer() {
+        final TargetServer targetServer = getMockTargetServer();
         when(config.getSolidIdentityProvider()).thenReturn(baseUri.resolve("/badissuer/"));
         when(config.getServerRoot()).thenReturn(URI.create("http://localhost"));
         when(config.overridingTrust()).thenReturn(true);
@@ -160,7 +145,7 @@ class AuthManagerTest {
 
     @Test
     void authenticateNullCredentials() {
-        final TargetServer targetServer = getMockTargetServer(false);
+        final TargetServer targetServer = getMockTargetServer();
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
         when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
         when(config.getCredentials("test4")).thenReturn(null);
@@ -171,7 +156,7 @@ class AuthManagerTest {
 
     @Test
     void authenticateMissingCredentials() {
-        final TargetServer targetServer = getMockTargetServer(false);
+        final TargetServer targetServer = getMockTargetServer();
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
         when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
         when(config.getCredentials("test5")).thenReturn(new TestCredentials());
@@ -182,7 +167,7 @@ class AuthManagerTest {
 
     @Test
     void authenticateRefreshCredentialsNoGrantType() {
-        final TargetServer targetServer = getMockTargetServer(false);
+        final TargetServer targetServer = getMockTargetServer();
         when(config.getSolidIdentityProvider()).thenReturn(baseUri.resolve("/nogranttypes/"));
         when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
         final TestCredentials credentials = new TestCredentials();
@@ -199,7 +184,7 @@ class AuthManagerTest {
 
     @Test
     void authenticateRefreshCredentialsFails() {
-        final TargetServer targetServer = getMockTargetServer(false);
+        final TargetServer targetServer = getMockTargetServer();
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
         when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
         final TestCredentials credentials = new TestCredentials();
@@ -216,7 +201,7 @@ class AuthManagerTest {
 
     @Test
     void authenticateRefreshCredentials() throws Exception {
-        final TargetServer targetServer = getMockTargetServer(false);
+        final TargetServer targetServer = getMockTargetServer();
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
         when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
         final TestCredentials credentials = new TestCredentials();
@@ -231,7 +216,7 @@ class AuthManagerTest {
 
     @Test
     void authenticateLoginSessionNoGrantType() {
-        final TargetServer targetServer = getMockTargetServer(false);
+        final TargetServer targetServer = getMockTargetServer();
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
         setupLogin(baseUri.resolve("/nogranttypes/"), "login-nogrant", "PASSWORD", "/login/password", null);
 
@@ -243,9 +228,9 @@ class AuthManagerTest {
 
     @Test
     void authenticateLoginSessionWithUserRegistrationFails() {
-        final TargetServer targetServer = getMockTargetServer(false);
+        final TargetServer targetServer = getMockTargetServer();
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
-        when(targetServer.getOrigin()).thenReturn("BADORIGIN");
+        when(config.getOrigin()).thenReturn("BADORIGIN");
         when(config.overridingTrust()).thenReturn(true);
         setupLogin(baseUri, "test18", "PASSWORD", null, "/idp/register");
 
@@ -257,7 +242,7 @@ class AuthManagerTest {
 
     @Test
     void authenticateLoginSessionFails() {
-        final TargetServer targetServer = getMockTargetServer(false);
+        final TargetServer targetServer = getMockTargetServer();
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
         when(config.overridingTrust()).thenReturn(false);
         setupLogin(baseUri, "test8", "BADPASSWORD", "/login/password", null);
@@ -269,9 +254,9 @@ class AuthManagerTest {
 
     @Test
     void authenticateLoginRegisterFails() {
-        final TargetServer targetServer = getMockTargetServer(false);
+        final TargetServer targetServer = getMockTargetServer();
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
-        when(targetServer.getOrigin()).thenReturn("BADORIGIN");
+        when(config.getOrigin()).thenReturn("BADORIGIN");
         setupLogin(baseUri, "test9", "PASSWORD", "/login/password", null);
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
@@ -281,9 +266,9 @@ class AuthManagerTest {
 
     @Test
     void authenticateLoginAuthorizationFails() {
-        final TargetServer targetServer = getMockTargetServer(false);
+        final TargetServer targetServer = getMockTargetServer();
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
-        when(targetServer.getOrigin()).thenReturn("AUTHFAIL");
+        when(config.getOrigin()).thenReturn("AUTHFAIL");
         setupLogin(baseUri, "test10", "PASSWORD", "/login/password", null);
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
@@ -293,9 +278,9 @@ class AuthManagerTest {
 
     @Test
     void authenticateLoginAuthorizationFailsNoForm() {
-        final TargetServer targetServer = getMockTargetServer(false);
+        final TargetServer targetServer = getMockTargetServer();
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
-        when(targetServer.getOrigin()).thenReturn("https://origin/badform");
+        when(config.getOrigin()).thenReturn("https://origin/badform");
         setupLogin(baseUri, "test19", "PASSWORD", null, "/idp/register");
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
@@ -306,9 +291,9 @@ class AuthManagerTest {
 
     @Test
     void authenticateLoginAuthorizationFailsFormBadLogin() {
-        final TargetServer targetServer = getMockTargetServer(false);
+        final TargetServer targetServer = getMockTargetServer();
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
-        when(targetServer.getOrigin()).thenReturn("https://origin/form");
+        when(config.getOrigin()).thenReturn("https://origin/form");
         setupLogin(baseUri, "test20", "BADPASSWORD", null, "/idp/register");
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
@@ -319,9 +304,9 @@ class AuthManagerTest {
 
     @Test
     void authenticateLoginAuthorizationFailsFormGoodLoginBadCode() {
-        final TargetServer targetServer = getMockTargetServer(false);
+        final TargetServer targetServer = getMockTargetServer();
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
-        when(targetServer.getOrigin()).thenReturn("https://origin/form");
+        when(config.getOrigin()).thenReturn("https://origin/form");
         setupLogin(baseUri, "test21", "PASSWORD", null, "/idp/register");
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
@@ -332,9 +317,9 @@ class AuthManagerTest {
 
     @Test
     void authenticateLoginAuthorizationFailsWithoutRedirect() {
-        final TargetServer targetServer = getMockTargetServer(false);
+        final TargetServer targetServer = getMockTargetServer();
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
-        when(targetServer.getOrigin()).thenReturn("https://origin/noredirect");
+        when(config.getOrigin()).thenReturn("https://origin/noredirect");
         setupLogin(baseUri, "test11", "PASSWORD", "/login/password", null);
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
@@ -344,9 +329,9 @@ class AuthManagerTest {
 
     @Test
     void authenticateLoginNoRedirectFailsNoCode() {
-        final TargetServer targetServer = getMockTargetServer(false);
+        final TargetServer targetServer = getMockTargetServer();
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
-        when(targetServer.getOrigin()).thenReturn("https://origin/immediate");
+        when(config.getOrigin()).thenReturn("https://origin/immediate");
         setupLogin(baseUri, "test12", "PASSWORD", "/login/password", null);
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
@@ -356,9 +341,9 @@ class AuthManagerTest {
 
     @Test
     void authenticateLoginOneRedirectFailsNoCode() {
-        final TargetServer targetServer = getMockTargetServer(false);
+        final TargetServer targetServer = getMockTargetServer();
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
-        when(targetServer.getOrigin()).thenReturn("https://origin/redirect");
+        when(config.getOrigin()).thenReturn("https://origin/redirect");
         setupLogin(baseUri, "test13", "PASSWORD", "/login/password", null);
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
@@ -367,10 +352,10 @@ class AuthManagerTest {
     }
 
     @Test
-    void authenticateLoginTokenFails() throws Exception {
-        final TargetServer targetServer = getMockTargetServer(false);
+    void authenticateLoginTokenFails() {
+        final TargetServer targetServer = getMockTargetServer();
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
-        when(targetServer.getOrigin()).thenReturn("https://origin/badcode");
+        when(config.getOrigin()).thenReturn("https://origin/badcode");
         setupLogin(baseUri, "test14", "PASSWORD", "/login/password", null);
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
@@ -381,9 +366,9 @@ class AuthManagerTest {
 
     @Test
     void authenticateLoginTokenSucceeds() throws Exception {
-        final TargetServer targetServer = getMockTargetServer(false);
+        final TargetServer targetServer = getMockTargetServer();
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
-        when(targetServer.getOrigin()).thenReturn("https://origin/goodcode");
+        when(config.getOrigin()).thenReturn("https://origin/goodcode");
         setupLogin(baseUri, "test15", "PASSWORD", "/login/password", null);
 
         final SolidClient solidClient = authManager.authenticate("test15", targetServer);
@@ -392,7 +377,7 @@ class AuthManagerTest {
 
     @Test
     void authenticateClientCredentialsNoGrantType() {
-        final TargetServer targetServer = getMockTargetServer(false);
+        final TargetServer targetServer = getMockTargetServer();
         when(config.getSolidIdentityProvider()).thenReturn(baseUri.resolve("/nogranttypes/"));
         when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
         final TestCredentials credentials = new TestCredentials();
@@ -407,7 +392,7 @@ class AuthManagerTest {
 
     @Test
     void authenticateClientCredentialsFails() {
-        final TargetServer targetServer = getMockTargetServer(false);
+        final TargetServer targetServer = getMockTargetServer();
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
         when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
         final TestCredentials credentials = new TestCredentials();
@@ -423,7 +408,7 @@ class AuthManagerTest {
 
     @Test
     void authenticateClientCredentials() throws Exception {
-        final TargetServer targetServer = getMockTargetServer(false);
+        final TargetServer targetServer = getMockTargetServer();
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
         when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
         final TestCredentials credentials = new TestCredentials();
@@ -439,10 +424,9 @@ class AuthManagerTest {
         this.baseUri = baseUri;
     }
 
-    private TargetServer getMockTargetServer(final boolean disableDpop) {
+    private TargetServer getMockTargetServer() {
         final TargetServer targetServer = mock(TargetServer.class);
         when(targetServer.getFeatures()).thenReturn(Map.of("authentication", true));
-        when(targetServer.isDisableDPoP()).thenReturn(disableDpop);
         return targetServer;
     }
 
