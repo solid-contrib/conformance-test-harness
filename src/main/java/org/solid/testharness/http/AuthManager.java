@@ -63,7 +63,7 @@ public class AuthManager {
     ClientRegistry clientRegistry;
 
     public void registerUser(@NotNull final String user) throws Exception {
-        logger.info("Register user {}", user);
+        logger.info("Registering user {} at {}", user, config.getUserRegistrationEndpoint());
         final UserCredentials userConfig = config.getCredentials(user);
         final Client client = clientRegistry.getClient(ClientRegistry.DEFAULT);
 
@@ -96,10 +96,7 @@ public class AuthManager {
             authClient = clientRegistry.getClient(user);
         } else {
             logger.debug("Build new client for {}", user);
-            final Client.Builder builder = new Client.Builder(user);
-            if (!targetServer.isDisableDPoP()) {
-                builder.withDpopSupport();
-            }
+            final Client.Builder builder = new Client.Builder(user).withDpopSupport();
             if (config.overridingTrust()) {
                 builder.withLocalhostSupport();
             }
@@ -177,7 +174,7 @@ public class AuthManager {
             startLoginSession(client, userConfig, config.getLoginEndpoint());
         }
 
-        final String appOrigin = targetServer.getOrigin();
+        final String appOrigin = config.getOrigin();
         final Registration clientRegistration = registerClient(client, oidcConfig, appOrigin);
         final String clientId = clientRegistration.getClientId();
 

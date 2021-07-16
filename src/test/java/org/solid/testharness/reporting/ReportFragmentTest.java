@@ -235,8 +235,6 @@ class ReportFragmentTest {
         final IRI testSubjectIri = iri("https://github.com/solid/conformance-test-harness/testserver");
         final TestSubject testSubject = new TestSubject(testSubjectIri);
         testSubject.getModel().remove(null, SOLID_TEST.features, null);
-        testSubject.getModel().remove(null, SOLID_TEST.maxThreads, null);
-        testSubject.getModel().remove(null, SOLID_TEST.origin, null);
         logger.debug("TestSubject Model:\n{}", TestUtils.toTurtle(testSubject.getModel()));
 
         final String report = render("testSubject", testSubject);

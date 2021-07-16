@@ -237,6 +237,14 @@ class ApplicationTest {
     void runTestSuitesNoResults() throws Exception {
         when(conformanceTestHarness.runTestSuites(any())).thenReturn(null);
         assertEquals(1, application.run("--tests"));
+        verify(config, never()).setSkipTearDown(true);
+    }
+
+    @Test
+    void runTestSuitesNoTearDown() throws Exception {
+        when(conformanceTestHarness.runTestSuites(any())).thenReturn(null);
+        assertEquals(1, application.run("--tests", "--skip-teardown"));
+        verify(config).setSkipTearDown(true);
     }
 
     @Test

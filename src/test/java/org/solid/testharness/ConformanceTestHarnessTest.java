@@ -187,6 +187,20 @@ class ConformanceTestHarnessTest {
         when(testRunner.runTests(any(), anyInt())).thenReturn(results);
         assertEquals(1, conformanceTestHarness.runTestSuites().getFailCount());
         assertTrue(Files.exists(tmp.resolve("report.html")));
+        verify(testSubject).tearDownServer();
+    }
+
+    @Test
+    void runTestSuiteNoTearDown() {
+        mockTargetServer();
+        when(config.isSkipTearDown()).thenReturn(true);
+        when(testSuiteDescription.getSupportedTestCases(any())).thenReturn(Collections.emptyList());
+        when(testSuiteDescription.locateTestCases(any())).thenReturn(List.of("test"));
+        final TestSuiteResults results = mockResults(1);
+        when(testRunner.runTests(any(), anyInt())).thenReturn(results);
+        assertEquals(1, conformanceTestHarness.runTestSuites().getFailCount());
+        assertTrue(Files.exists(tmp.resolve("report.html")));
+        verify(testSubject, never()).tearDownServer();
     }
 
     @Test
@@ -255,7 +269,6 @@ class ConformanceTestHarnessTest {
     private void mockTargetServer() {
         final TargetServer targetServer = mock(TargetServer.class);
         when(targetServer.getFeatures()).thenReturn(Map.of("feature", false));
-        when(targetServer.getMaxThreads()).thenReturn(1);
         when(testSubject.getTargetServer()).thenReturn(targetServer);
     }
 

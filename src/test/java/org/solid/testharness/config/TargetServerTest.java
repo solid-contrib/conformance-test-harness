@@ -42,16 +42,12 @@ public class TargetServerTest {
     @Test
     public void constructor() {
         final TargetServer targetServer = new TargetServer(
-                iri("https://github.com/solid/conformance-test-harness/css"), "https://tester",
+                iri("https://github.com/solid/conformance-test-harness/css"),
                 Map.of("authentication", true, "acl", true, "wac-allow", true));
         assertAll("targetServer",
                 () -> assertNotNull(targetServer.getFeatures()),
                 () -> assertEquals(true, targetServer.getFeatures().get("authentication")),
-                () -> assertNull(targetServer.getFeatures().get("feature2")),
-                () -> assertEquals("https://tester", targetServer.getOrigin()),
-                () -> assertEquals(false, targetServer.isSetupRootAcl()),
-                () -> assertEquals(8, targetServer.getMaxThreads()),
-                () -> assertEquals(false, targetServer.isDisableDPoP())
+                () -> assertNull(targetServer.getFeatures().get("feature2"))
         );
     }
 
@@ -63,18 +59,7 @@ public class TargetServerTest {
         assertAll("targetServer",
                 () -> assertNotNull(targetServer.getFeatures()),
                 () -> assertEquals(true, targetServer.getFeatures().get("feature1")),
-                () -> assertNull(targetServer.getFeatures().get("feature2")),
-                () -> assertEquals("https://tester", targetServer.getOrigin()),
-                () -> assertEquals(true, targetServer.isSetupRootAcl()),
-                () -> assertEquals(4, targetServer.getMaxThreads()),
-                () -> assertEquals(false, targetServer.isDisableDPoP())
+                () -> assertNull(targetServer.getFeatures().get("feature2"))
         );
-    }
-
-    @Test
-    public void parseTargetServerWithBadThreads() throws Exception {
-        final URL testFile = TestUtils.getFileUrl("src/test/resources/config/targetserver-testing-feature.ttl");
-        TestData.insertData(dataRepository, testFile);
-        assertThrows(TestHarnessInitializationException.class, () -> new TargetServer(iri(TestData.SAMPLE_NS, "bad")));
     }
 }

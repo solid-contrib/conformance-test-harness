@@ -119,8 +119,6 @@ class ReportGeneratorTest {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             resultModel = QueryResults.asModel(conn.getStatements(null, null, null));
             resultModel.remove(null, SOLID_TEST.features, null);
-            resultModel.remove(null, SOLID_TEST.maxThreads, null);
-            resultModel.remove(null, SOLID_TEST.origin, null);
             final Value bnode = resultModel.getStatements(
                     iri("https://github.com/solid/conformance-test-harness/testserver2"),
                     DOAP.release, null

@@ -77,6 +77,12 @@ public class Config {
     Integer connectTimeout;
     @ConfigProperty(name = "readTimeout", defaultValue = "5000")
     Integer readTimeout;
+    @ConfigProperty(name = "maxThreads", defaultValue = "8")
+    Integer maxThreads;
+    @ConfigProperty(name = "origin", defaultValue = "https://tester")
+    String origin;
+    @ConfigProperty(name = "setupRootAcl", defaultValue = "false")
+    Boolean setupRootAcl;
 
     // properties normally found in environment variables or the .env file
     @ConfigProperty(name = "SOLID_IDENTITY_PROVIDER")
@@ -95,6 +101,8 @@ public class Config {
 
     @Inject
     PathMappings pathMappings;
+
+    private boolean skipTearDown;
 
     public IRI getTestSubject() {
         if (testSubject == null && target.isPresent()) {
@@ -205,6 +213,26 @@ public class Config {
 
     public Integer getReadTimeout() {
         return readTimeout;
+    }
+
+    public Integer getMaxThreads() {
+        return maxThreads;
+    }
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public boolean isSetupRootAcl() {
+        return setupRootAcl;
+    }
+
+    public void setSkipTearDown(final boolean skipTearDown) {
+        this.skipTearDown = skipTearDown;
+    }
+
+    public boolean isSkipTearDown() {
+        return skipTearDown;
     }
 
     public void logConfigSettings() {

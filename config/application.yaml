@@ -41,6 +41,9 @@
   agent: AGENT
   connectTimeout: 1000
   readTimeout: 1000
+  maxThreads: 4
+  origin: https://testharness
+  setupRootAcl: true
 
 "%blank":
   quarkus:

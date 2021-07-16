@@ -17,11 +17,7 @@ ex:testserver
     doap:homepage <https://inrupt.com/products/enterprise-solid-server>;
     doap:description "A production-grade Solid server produced and supported by Inrupt.";
     doap:programming-language "Java" ;
-    solid-test:origin <https://tester> ;
-    solid-test:maxThreads 4 ;
-    solid-test:features "feature1" ;
-#    solid-test:disableDPoP true ;
-    solid-test:setupRootAcl true .
+    solid-test:features "feature1" .
 
 ex:bad a earl:Software, earl:TestSubject .
 

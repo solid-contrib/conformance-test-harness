@@ -22,8 +22,6 @@ prefix dcterms: <http://purl.org/dc/terms/>
     doap:homepage <https://inrupt.com/products/enterprise-solid-server>;
     doap:description "A production-grade Solid server produced and supported by Inrupt."@en;
     doap:programming-language "Java" ;
-    solid-test:origin <https://tester> ;
-    solid-test:maxThreads 8 ;
     solid-test:features "authentication", "acl", "wac-allow" .
 
 <ess>
@@ -38,8 +36,6 @@ prefix dcterms: <http://purl.org/dc/terms/>
     doap:homepage <https://inrupt.com/products/enterprise-solid-server>;
     doap:description "A production-grade Solid server produced and supported by Inrupt."@en;
     doap:programming-language "Java" ;
-    solid-test:origin <https://tester> ;
-    solid-test:maxThreads 8 ;
     solid-test:features "authentication", "wac-allow" .
 
 <css>
@@ -54,10 +50,7 @@ prefix dcterms: <http://purl.org/dc/terms/>
     doap:homepage <https://github.com/solid/community-server> ;
     doap:description "An open and modular implementation of the Solid specifications."@en ;
     doap:programming-language "TypeScript" ;
-    solid-test:origin <https://tester> ;
-    solid-test:maxThreads 8 ;
-    solid-test:features "authentication", "acl", "wac-allow" ;
-    solid-test:setupRootAcl false .
+    solid-test:features "authentication", "acl", "wac-allow" .
 
 <nss>
     a earl:Software, earl:TestSubject ;
@@ -71,8 +64,6 @@ prefix dcterms: <http://purl.org/dc/terms/>
     doap:homepage <https://github.com/solid/node-solid-server> ;
     doap:description "Solid server on top of the file-system in NodeJS."@en ;
     doap:programming-language "JavaScript" ;
-    solid-test:origin <https://tester> ;
-    solid-test:maxThreads 1 ;
     solid-test:features "authentication", "acl", "wac-allow" .
 
 #<trinpod>
@@ -87,6 +78,4 @@ prefix dcterms: <http://purl.org/dc/terms/>
 #    doap:homepage <https://graphmetrix.com/trinpod> ;
 #    doap:description "TrinPod™ is an Industrial strength Solid Pod with conceptual computing through Trinity AI Capable of handling a massive amount of data."@en ;
 #    doap:programming-language "Unknown" ;
-#    solid-test:origin <https://tester> ;
-#    solid-test:maxThreads 1 ;
 #    solid-test:features "authentication", "acl", "wac-allow" .
