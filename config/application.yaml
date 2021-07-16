@@ -2,10 +2,10 @@
   # local override of properties
   subjects: config/test-subjects.ttl
   sources:
-    - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/solid-protocol-test-manifest.ttl
-    - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/web-access-control-test-manifest.ttl
-    - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/solid-protocol-spec.ttl
-    - https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/web-access-control-spec.ttl
+    - https://github.com/solid/conformance-test-harness/example/protocol/solid-protocol-test-manifest.ttl
+    - https://github.com/solid/conformance-test-harness/example/web-access-control/web-access-control-test-manifest.ttl
+    - https://github.com/solid/conformance-test-harness/example/protocol/solid-protocol-spec.ttl
+    - https://github.com/solid/conformance-test-harness/example/web-access-control/web-access-control-spec.ttl
   target: https://github.com/solid/conformance-test-harness/ess-compat
   #target: https://github.com/solid/conformance-test-harness/ess
   #target: https://github.com/solid/conformance-test-harness/css
@@ -13,7 +13,7 @@
 
   # mapping feature URIs
   mappings:
-    - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/example/main
+    - prefix: https://github.com/solid/conformance-test-harness/example
       path: example
 
 # Test profile

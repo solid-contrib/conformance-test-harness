@@ -503,7 +503,7 @@ To use the image to run a set of local tests:
       - /data/solid-protocol-spec.ttl
     target: https://github.com/solid/conformance-test-harness/ess
     mappings:
-      - prefix: https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol
+      - prefix: https://github.com/solid/conformance-test-harness/example/protocol
         path: /data
   ```
   * Note that the paths are internal paths in the test harness image so you next need to map them in the command line

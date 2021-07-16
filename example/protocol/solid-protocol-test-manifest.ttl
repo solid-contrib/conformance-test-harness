@@ -12,14 +12,14 @@ manifest:content-negotiation-jsonld
   spec:requirementReference <https://solidproject.org/TR/protocol#resource-representations> ;
   td:reviewStatus td:accepted ;
   spec:testScript
-    <https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/content-negotiation/content-negotiation-jsonld.feature> .
+    <https://github.com/solid/conformance-test-harness/example/protocol/content-negotiation/content-negotiation-jsonld.feature> .
 
 manifest:content-negotiation-turtle
   a td:TestCase ;
   spec:requirementReference <https://solidproject.org/TR/protocol#resource-representations> ;
   td:reviewStatus td:accepted ;
   spec:testScript
-    <https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/content-negotiation/content-negotiation-turtle.feature> .
+    <https://github.com/solid/conformance-test-harness/example/protocol/content-negotiation/content-negotiation-turtle.feature> .
 
 manifest:content-negotiation-rdfa
   a td:TestCase ;
@@ -30,7 +30,7 @@ manifest:writing-resource-containment
   spec:requirementReference <https://solidproject.org/TR/protocol#writing-resources> ;
   td:reviewStatus td:accepted ;
   spec:testScript
-    <https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/writing-resource/containment.feature> .
+    <https://github.com/solid/conformance-test-harness/example/protocol/writing-resource/containment.feature> .
 
 manifest:wac-allow-access-Bob-W-public-RA
   a td:TestCase ;
@@ -38,7 +38,7 @@ manifest:wac-allow-access-Bob-W-public-RA
   td:reviewStatus td:accepted ;
   td:preCondition "authentication", "acl", "wac-allow" ;
   spec:testScript
-    <https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/wac-allow/access-Bob-W-public-RA.feature> .
+    <https://github.com/solid/conformance-test-harness/example/protocol/wac-allow/access-Bob-W-public-RA.feature> .
 
 manifest:wac-allow-default-Bob-W-public-RA
   a td:TestCase ;
@@ -46,7 +46,7 @@ manifest:wac-allow-default-Bob-W-public-RA
   td:reviewStatus td:accepted ;
   td:preCondition "authentication", "acl", "wac-allow" ;
   spec:testScript
-    <https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/wac-allow/default-Bob-W-public-RA.feature> .
+    <https://github.com/solid/conformance-test-harness/example/protocol/wac-allow/default-Bob-W-public-RA.feature> .
 
 manifest:wac-allow-access-public-R
   a td:TestCase ;
@@ -54,4 +54,4 @@ manifest:wac-allow-access-public-R
   td:reviewStatus td:unreviewed ;
   td:preCondition "authentication", "acl", "wac-allow" ;
   spec:testScript
-    <https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/protocol/wac-allow/access-public-R.feature> .
+    <https://github.com/solid/conformance-test-harness/example/protocol/wac-allow/access-public-R.feature> .

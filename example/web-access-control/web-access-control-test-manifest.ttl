@@ -13,7 +13,7 @@ manifest:protected-operation-not-read-resource-access-AWC
   td:reviewStatus td:accepted ;
   td:preCondition "authentication", "acl" ;
   spec:testScript
-    <https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/protected-operation/not-read-resource-access-AWC.feature> .
+    <https://github.com/solid/conformance-test-harness/example/web-access-control/protected-operation/not-read-resource-access-AWC.feature> .
 
 manifest:protected-operation-not-read-resource-default-AWC
   a td:TestCase ;
@@ -21,7 +21,7 @@ manifest:protected-operation-not-read-resource-default-AWC
   td:reviewStatus td:accepted ;
   td:preCondition "authentication", "acl" ;
   spec:testScript
-    <https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/protected-operation/not-read-resource-default-AWC.feature> .
+    <https://github.com/solid/conformance-test-harness/example/web-access-control/protected-operation/not-read-resource-default-AWC.feature> .
 
 manifest:protected-operation-read-resource-access-R
   a td:TestCase ;
@@ -29,7 +29,7 @@ manifest:protected-operation-read-resource-access-R
   td:reviewStatus td:unreviewed ;
   td:preCondition "authentication", "acl" ;
   spec:testScript
-    <https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/protected-operation/read-resource-access-R.feature> .
+    <https://github.com/solid/conformance-test-harness/example/web-access-control/protected-operation/read-resource-access-R.feature> .
 
 manifest:protected-operation-read-resource-default-R
   a td:TestCase ;
@@ -37,4 +37,4 @@ manifest:protected-operation-read-resource-default-R
   td:reviewStatus td:unreviewed ;
   td:preCondition "authentication", "acl" ;
   spec:testScript
-    <https://raw.githubusercontent.com/solid/conformance-test-harness/example/main/web-access-control/protected-operation/read-resource-default-R.feature> .
+    <https://github.com/solid/conformance-test-harness/example/web-access-control/protected-operation/read-resource-default-R.feature> .
