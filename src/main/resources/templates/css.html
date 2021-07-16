@@ -1,35 +1,15 @@
 <style type="text/css">
   /*<![CDATA[*/
-  /* Sections */
-  header {
-      border-bottom: navy solid medium;
-  }
-  section.spec {
-      border-bottom: navy solid medium;
-  }
-  section {
-      border-bottom: navy solid thin;
-      padding-bottom: 8px;
+  @import url("https://dokie.li/media/css/basic.css");
+
+  /* More screen width */
+  @media screen and (min-width: 100em) {
+      body {
+          max-width:90em;
+      }
   }
 
-  .splitBox {
-      display: flex;
-      margin-top: 4px;
-  }
-
-  .col {
-      width: 50%;
-      border: cadetblue solid thin;
-      padding: 4px;
-
-  }
-
-  table {
-    border-collapse: collapse;
-  }
-  table, th, td {
-    border: 1px solid black;
-  }
+  /* Definitions */
   dl dt, dl dd {
       display:inline;
   }
@@ -42,9 +22,41 @@
   dd {
       margin:0;
   }
+  td dl {
+      margin-top: 0px;
+      margin-bottom: 0px;
+  }
 
+  /* Table styling */
   tr.backgroundStep {
-      background-color: #f2f2f2;
+      color: darkgrey;
+  }
+
+  td, th {
+      border: 1px solid #ccc;
+      border-left-color: #eee;
+      border-right-color: #eee;
+      padding:0.25em;
+  }
+
+  th.title {
+      width: 40%
+  }
+  th.scenarios {
+      width: 40%
+  }
+
+  /* Split box for requirement headers */
+  .splitBox {
+      display: flex;
+      margin-top: 4px;
+  }
+
+  .col {
+      width: 50%;
+      border: 1px #eee solid;
+      padding: 4px;
+
   }
   /*]]>*/
 </style>

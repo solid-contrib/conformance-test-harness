@@ -1,37 +1,32 @@
 <!DOCTYPE html>
 <html prefix="{prefixes}">
 <head>
+    <meta charset="utf-8" />
     <title>Solid Specification - Conformance Test Suite Coverage Report</title>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <!--
-    <link rel="shortcut icon" type="image/png" href="/inrupt.png"/>
-    <link rel="stylesheet" type="text/css" href="/inrupt.css"/>
-    -->
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     {#include css /}
     {#include js /}
 </head>
 
 <body about="{subject}">
-<header>
-    <h1>Solid Specification - Conformance Test Suite Coverage Report</h1>
-    {#include specification-header /}
-</header>
+<h1>Solid Specification - Conformance Test Suite Coverage Report</h1>
+{#include specification-header /}
 
 <main>
-    {#if specifications}
-    {#each specifications}
-    <section about="{it.subject}" typeof="{it.typesList}" class="spec">
-        <h2>Specification: {it.subject}</h2>
+<article>
+    <h2>Test coverage by specification requirement</h2>
+    {#each specifications.orEmpty}
+    <section about="{it.subject}" class="spec">
         {#if it.specificationRequirements}
+        {#let specLink=it.subject}
         {#each it.specificationRequirements}
         <div rel="spec:requirement">
         {#include requirement}
             {#if it.testCases}
-            <table>
+            <table about="{it.subject}">
                 <tr>
-                    <th>TestCase</th>
                     <th>Title</th>
-                    <th>Level</th>
                     <th>Status</th>
                     <th>Implemented</th>
                 </tr>
@@ -44,13 +39,15 @@
             {/if}
         {/include}
         </div>
+        <br/>
         {/each}
+        {/let}
         {#else}
         <p>No tests were discovered.</p>
         {/if}
     </section>
     {/each}
-    {/if}
+</article>
 </main>
 </body>
 </html>

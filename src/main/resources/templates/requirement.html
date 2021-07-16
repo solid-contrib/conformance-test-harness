@@ -1,7 +1,8 @@
 {#with it}
 <div class="splitBox" about="{subject}" typeof="{typesList}">
   <div class="col">
-    <h3>Requirement: <a href="{subject}">{subject}</a></h3>
+    <dl><dt>Specification</dt><dd><a href="{specLink}" title="Specification link">{specLink}</a></dd></dl>
+    <dl><dt>Requirement</dt><dd><a href="{subject}" title="Requirement link">{subject}</a></dd></dl>
     <dl>
       <dt>Conformance Role</dt>
       <dd rel="spec:conformanceRole" resource="{conformanceRole}">
@@ -23,8 +24,7 @@
   </div>
   <div class="col">
     {#if excerpt}
-    <h3>Excerpt</h3>
-    <p property="spec:excerpt">{excerpt}</p>
+    <dl><dt>Excerpt</dt><dd property="spec:excerpt">{excerpt}</dd></dl>
     {/if}
   </div>
 </div>

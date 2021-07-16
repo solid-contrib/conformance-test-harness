@@ -1,7 +1,8 @@
 {#with it}
 <section about="{subject}" typeof="{typesList}">
-    <h2 property="doap:name">{softwareName}</h2>
-    <p property="doap:description">{description}</p>
+    <h2>Assertor</h2>
+    <dl><dt>Name</dt><dd property="doap:name">{softwareName}</dd></dl>
+    <dl><dt>Description</dt><dd property="doap:description">{description}</dd></dl>
     <dl><dt>Created</dt><dd><time datatype="xsd:date" datetime="{createdDate}" property="doap:created">{createdDate}</time></dd></dl>
     <dl><dt>By</dt><dd><a href="{developer}" rel="doap:developer" title="Software developer">{developer}</a></dd></dl>
     <dl><dt>Homepage</dt><dd><a href="{homepage}" rel="doap:homepage" title="Software homepage">{homepage}</a></dd></dl>

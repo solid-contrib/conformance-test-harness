@@ -1,48 +1,43 @@
 <!DOCTYPE html>
 <html prefix="{prefixes}">
 <head>
+    <meta charset="utf-8" />
     <title>Solid Specification - Conformance Test Suite Results</title>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <!--
-    <link rel="shortcut icon" type="image/png" href="/inrupt.png"/>
-    <link rel="stylesheet" type="text/css" href="/inrupt.css"/>
-    -->
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     {#include css /}
     {#include js /}
 </head>
 
 <body about="{subject}">
-<header>
-    <h1>Solid Specification - Conformance Test Suite Results</h1>
-    {#include specification-header /}
-    {#with testSubject}{#include test-subject /}{/with}
-    {#with testSuiteResults}{#include results-summary /}{/with}
-</header>
+<h1>Solid Specification - Conformance Test Suite Results</h1>
+{#include specification-header /}
+{#if assertor}
+{#with assertor}{#include assertor /}{/with}
+{/if}
+{#with testSubject}{#include test-subject /}{/with}
+{#with testSuiteResults}{#include results-summary /}{/with}
 
 <main>
-    {#if specifications}
-    {#each specifications}
+<article>
+    <h2>Results by specification requirement</h2>
+    {#each specifications.orEmpty}
     <section about="{it.subject}" class="spec">
-        <h2>Specification: {it.subject}</h2>
         {#if it.specificationRequirements}
-        <h2>Results by specification requirement</h2>
+        {#let specLink=it.subject}
         {#each it.specificationRequirements}
         <div rel="spec:requirement">
         {#include requirement}
             {#if it.testCases}
             <table about="{it.subject}">
                 <tr>
-                    <th>TestCase</th>
-                    <th>Title</th>
-                    <th>Script</th>
-                    <th>Status</th>
-                    <th>Target</th>
-                    <th>Outcome</th>
-                    <th>Timestamp</th>
-                    <th>Scenario link</th>
+                    <th class="title">Title</th>
+                    <th class="details">Details</th>
+                    <th class="outcome">Outcome</th>
+                    <th class="scenarios">Test Scenarios</th>
                 </tr>
                 {#each it.testCases}
-                {#include testcase /}
+                {#include testcase coverageMode=false /}
                 {/each}
             </table>
             {#else}
@@ -50,40 +45,34 @@
             {/if}
         {/include}
         </div>
+        <br/>
         {/each}
+        {/let}
         {#else}
         <p>No tests were discovered.</p>
         {/if}
     </section>
     {/each}
-    {/if}
 
     {#if testCases}
     <section>
         <h2>Results by test case</h2>
         {#for testCase in testCases}
         {#if testCase.scenarios}
-        <section id="scenarios-{testCase.anchor}" about="{testCase.subject}">
+        <section about="{testCase.subject}">
             <h3>{testCase.title}</h3>
-            <table rel="dcterms:hasPart">
-                <tr>
-                    <th>Scenario</th>
-                    <th>Location</th>
-                    <th>Outcome</th>
-                    <th>Start</th>
-                    <th>End</th>
-                    <th>Steps</th>
-                </tr>
+            <section rel="dcterms:hasPart">
                 {#each testCase.scenarios}
                 {#include scenario /}
                 {/each}
-            </table>
+            </section>
         </section>
         {/if}
         {/for}
     </section>
     {/if}
 
+</article>
 </main>
 </body>
 </html>

@@ -1,7 +1,9 @@
 {#with it}
 <tr class="{background ? 'backgroundStep' : 'scenarioStep'}" about="{subject}" typeof="{typesList}">
     <td property="dcterms:title">{title}</td>
-    <td rel="prov:used" resource="{used}">{used}</td>
+    <td>
+        <div rel="prov:used" resource="{used}" title="{used}">[line]</div>
+    </td>
     <td rel="prov:generated" resource="{generatedOutput.subject}">
         <span about="{generatedOutput.subject}" typeof="{generatedOutput.typesList}" rel="prov:value" resource="{generatedOutput.value}"></span>
         {#switch generatedOutput.value}
