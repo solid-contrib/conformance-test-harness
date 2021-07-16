@@ -96,6 +96,8 @@ public class Config {
     @Inject
     PathMappings pathMappings;
 
+    private boolean skipTearDown;
+
     public IRI getTestSubject() {
         if (testSubject == null && target.isPresent()) {
             logger.debug("Use config to set target: {}", target.get());
@@ -233,5 +235,13 @@ public class Config {
             }
         }
         return null;
+    }
+
+    public void setSkipTearDown(final boolean skipTearDown) {
+        this.skipTearDown = skipTearDown;
+    }
+
+    public boolean isSkipTearDown() {
+        return skipTearDown;
     }
 }

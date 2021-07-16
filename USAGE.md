@@ -275,6 +275,7 @@ usage: run
  -f,--filter <arg>   feature filter(s)
  -h,--help           print this message
  -o,--output <arg>   output directory
+    --skip-teardown  skip teardown (when server itself is being stopped)
  -s,--source <arg>   URL or path to test source(s)
     --subjects <arg> URL or path to test subject config (Turtle)
  -t,--target <arg>   target server

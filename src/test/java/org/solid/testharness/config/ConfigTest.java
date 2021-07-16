@@ -136,4 +136,10 @@ public class ConfigTest {
     void getReadTimeout() {
         assertEquals(1000, config.getReadTimeout());
     }
-}
+
+    @Test
+    void setSkipTearDown() {
+        assertFalse(config.isSkipTearDown());
+        config.setSkipTearDown(true);
+        assertTrue(config.isSkipTearDown());
+    }}

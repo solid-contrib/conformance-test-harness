@@ -63,7 +63,7 @@ public class AuthManager {
     ClientRegistry clientRegistry;
 
     public void registerUser(@NotNull final String user) throws Exception {
-        logger.info("Register user {}", user);
+        logger.info("Registering user {} at {}", user, config.getUserRegistrationEndpoint());
         final UserCredentials userConfig = config.getCredentials(user);
         final Client client = clientRegistry.getClient(ClientRegistry.DEFAULT);
 

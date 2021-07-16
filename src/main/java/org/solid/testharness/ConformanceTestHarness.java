@@ -165,6 +165,7 @@ public class ConformanceTestHarness {
             }
 
             logger.info("===================== REGISTER CLIENTS ========================");
+            logger.info("Test subject: {}", config.getServerRoot());
             if (config.getUserRegistrationEndpoint() != null) {
                 testSubject.registerUsers();
             }
@@ -180,8 +181,10 @@ public class ConformanceTestHarness {
                 testSubject.getTargetServer().getMaxThreads());
         reportGenerator.setResults(results);
 
-        logger.info("===================== DELETING TEST RESOURCES ========================");
-        testSubject.tearDownServer();
+        if (!config.isSkipTearDown()) {
+            logger.info("===================== DELETING TEST RESOURCES ========================");
+            testSubject.tearDownServer();
+        }
 
         logger.info("===================== BUILD REPORTS ========================");
         final File outputDir = config.getOutputDirectory();

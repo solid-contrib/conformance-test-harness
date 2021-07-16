@@ -58,6 +58,7 @@ public class Application implements QuarkusApplication {
     public static final String COVERAGE = "coverage";
     public static final String TESTS = "tests";
     public static final String FILTER = "filter";
+    public static final String SKIP_TEARDOWN = "skip-teardown";
 
     @Inject
     Config config;
@@ -71,6 +72,8 @@ public class Application implements QuarkusApplication {
         final Options options = new Options();
         options.addOption(Option.builder().longOpt(COVERAGE).desc("produce a coverage report").build());
         options.addOption(Option.builder().longOpt(TESTS).desc("produce test and coverage reports").build());
+        options.addOption(Option.builder().longOpt(SKIP_TEARDOWN)
+                .desc("skip teardown (when server itself is being stopped)").build());
         options.addOption(
                 Option.builder().longOpt(SUBJECTS).hasArg().desc("URL or path to test subject config (Turtle)").build()
         );
@@ -135,6 +138,10 @@ public class Application implements QuarkusApplication {
                                 .filter(s -> !StringUtils.isBlank(s))
                                 .collect(Collectors.toList());
                         logger.debug("Filters = {}", filters);
+                    }
+                    if (line.hasOption(SKIP_TEARDOWN)) {
+                        config.setSkipTearDown(true);
+                        logger.debug("Skip teardown = true");
                     }
                 }
 
