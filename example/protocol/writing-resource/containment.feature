@@ -16,6 +16,7 @@ Feature: Creating a resource using PUT and PATCH must create intermediate contai
     * def parentUrl = intermediateContainer.getUrl()
     Given url parentUrl
     And configure headers = clients.alice.getAuthHeaders('GET', parentUrl)
+    And header Accept = 'text/turtle'
     When method GET
     Then status 200
     And match intermediateContainer.parseMembers(response) contains resource.getUrl()
@@ -23,6 +24,7 @@ Feature: Creating a resource using PUT and PATCH must create intermediate contai
     * def grandParentUrl = testContainer.getUrl()
     Given url grandParentUrl
     And configure headers = clients.alice.getAuthHeaders('GET', grandParentUrl)
+    And header Accept = 'text/turtle'
     When method GET
     Then status 200
     And match testContainer.parseMembers(response) contains intermediateContainer.getUrl()
@@ -39,6 +41,7 @@ Feature: Creating a resource using PUT and PATCH must create intermediate contai
     * def parentUrl = intermediateContainer.getUrl()
     Given url parentUrl
     And configure headers = clients.alice.getAuthHeaders('GET', parentUrl)
+    And header Accept = 'text/turtle'
     When method GET
     Then status 200
     And match intermediateContainer.parseMembers(response) contains resource.getUrl()
@@ -46,6 +49,7 @@ Feature: Creating a resource using PUT and PATCH must create intermediate contai
     * def grandParentUrl = testContainer.getUrl()
     Given url grandParentUrl
     And configure headers = clients.alice.getAuthHeaders('GET', grandParentUrl)
+    And header Accept = 'text/turtle'
     When method GET
     Then status 200
     And match testContainer.parseMembers(response) contains intermediateContainer.getUrl()

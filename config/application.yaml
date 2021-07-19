@@ -10,6 +10,7 @@
   #target: https://github.com/solid/conformance-test-harness/ess
   #target: https://github.com/solid/conformance-test-harness/css
   #target: https://github.com/solid/conformance-test-harness/nss
+#  target: https://github.com/solid/conformance-test-harness/trinpod
 
   # mapping feature URIs
   mappings:

@@ -90,15 +90,6 @@ public interface PathMappings {
         }
     }
 
-//    public void setMappings(@NotNull final List<PathMapping> mappings) {
-//        requireNonNull(mappings, "mappings must not be null");
-//        if (mappings.size() == 1 && mappings.get(0) == null) {
-//            this.mappings = Collections.emptyList();
-//        } else {
-//            this.mappings = mappings;
-//        }
-//    }
-
     interface PathMapping {
         @WithConverter(PrefixConverter.class)
         String prefix();
@@ -109,12 +100,6 @@ public interface PathMappings {
         default String stringValue() {
             return String.format("%s => %s", prefix(), path());
         }
-//        public static PathMapping create(final String prefix, final String path) {
-//            final PathMapping mapping = new PathMapping();
-//            mapping.setPrefix(prefix);
-//            mapping.setPath(path);
-//            return mapping;
-//        }
     }
 
     class PathConverter implements Converter<String> {

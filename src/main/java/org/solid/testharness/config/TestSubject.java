@@ -142,6 +142,7 @@ public class TestSubject {
                 ).initCause(e);
             }
         }
+        logger.debug("\n========== CHECK TEST SUBJECT ROOT");
         try {
             final SolidContainer rootContainer = SolidContainer.create(solidClient, config.getTestContainer());
             logger.debug("Root container content: {}", rootContainer.getContentAsTurtle());

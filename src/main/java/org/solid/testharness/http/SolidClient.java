@@ -43,12 +43,13 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import static org.eclipse.rdf4j.model.util.Values.iri;
 
 public class SolidClient {
     private static final Logger logger = LoggerFactory.getLogger(SolidClient.class);
@@ -107,8 +108,9 @@ public class SolidClient {
 
     public URI getAclLink(final HttpHeaders headers) {
         final List<Link> links = HttpUtils.parseLinkHeaders(headers);
-        final Optional<Link> aclLink = links.stream().filter(link -> link.getRels().contains("acl")).findFirst();
-        return aclLink.map(Link::getUri).orElse(null);
+        final Link aclLink = links.stream().filter(link -> link.getRels().contains("acl"))
+                .reduce((first, second) -> second).orElse(null);
+        return aclLink != null ? aclLink.getUri() : null;
     }
 
     public boolean createAcl(final URI url, final String acl) throws IOException, InterruptedException {
@@ -140,7 +142,7 @@ public class SolidClient {
             logger.error("RDF Parse Error: {} in {}", e, data);
             throw (Exception) new Exception("Bad container listing").initCause(e);
         }
-        final Set<Value> resources = model.filter(null, LDP.CONTAINS, null).objects();
+        final Set<Value> resources = model.filter(iri(url.toString()), LDP.CONTAINS, null).objects();
         return resources.stream().map(Object::toString).collect(Collectors.toList());
     }
 
