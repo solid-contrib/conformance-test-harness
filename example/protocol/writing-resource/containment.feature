@@ -8,14 +8,14 @@ Feature: Creating a resource using PUT and PATCH must create intermediate contai
   Scenario: PUT creates a grandchild resource and intermediate containers
     * def resourceUrl = resource.getUrl()
     Given url resourceUrl
-    And configure headers = clients.alice.getAuthHeaders('PUT', resourceUrl)
+    And headers clients.alice.getAuthHeaders('PUT', resourceUrl)
     And request "Hello"
     When method PUT
     Then assert responseStatus >= 200 && responseStatus < 300
 
     * def parentUrl = intermediateContainer.getUrl()
     Given url parentUrl
-    And configure headers = clients.alice.getAuthHeaders('GET', parentUrl)
+    And headers clients.alice.getAuthHeaders('GET', parentUrl)
     And header Accept = 'text/turtle'
     When method GET
     Then status 200
@@ -23,7 +23,7 @@ Feature: Creating a resource using PUT and PATCH must create intermediate contai
 
     * def grandParentUrl = testContainer.getUrl()
     Given url grandParentUrl
-    And configure headers = clients.alice.getAuthHeaders('GET', grandParentUrl)
+    And headers clients.alice.getAuthHeaders('GET', grandParentUrl)
     And header Accept = 'text/turtle'
     When method GET
     Then status 200
@@ -32,7 +32,7 @@ Feature: Creating a resource using PUT and PATCH must create intermediate contai
   Scenario: PATCH creates a grandchild resource and intermediate containers
     * def resourceUrl = resource.getUrl()
     Given url resourceUrl
-    And configure headers = clients.alice.getAuthHeaders('PATCH', resourceUrl)
+    And headers clients.alice.getAuthHeaders('PATCH', resourceUrl)
     And header Content-Type = "application/sparql-update"
     And request 'INSERT DATA { <#hello> <#linked> <#world> . }'
     When method PATCH
@@ -40,7 +40,7 @@ Feature: Creating a resource using PUT and PATCH must create intermediate contai
 
     * def parentUrl = intermediateContainer.getUrl()
     Given url parentUrl
-    And configure headers = clients.alice.getAuthHeaders('GET', parentUrl)
+    And headers clients.alice.getAuthHeaders('GET', parentUrl)
     And header Accept = 'text/turtle'
     When method GET
     Then status 200
@@ -48,7 +48,7 @@ Feature: Creating a resource using PUT and PATCH must create intermediate contai
 
     * def grandParentUrl = testContainer.getUrl()
     Given url grandParentUrl
-    And configure headers = clients.alice.getAuthHeaders('GET', grandParentUrl)
+    And headers clients.alice.getAuthHeaders('GET', grandParentUrl)
     And header Accept = 'text/turtle'
     When method GET
     Then status 200

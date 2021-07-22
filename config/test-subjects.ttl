@@ -77,5 +77,5 @@ prefix dcterms: <http://purl.org/dc/terms/>
     doap:developer <https://graphmetrix.com> ;
     doap:homepage <https://graphmetrix.com/trinpod> ;
     doap:description "TrinPod™ is an Industrial strength Solid Pod with conceptual computing through Trinity AI Capable of handling a massive amount of data."@en ;
-    doap:programming-language "Unknown" ;
+    doap:programming-language "Common Lisp" ;
     solid-test:features "authentication", "acl", "wac-allow" .

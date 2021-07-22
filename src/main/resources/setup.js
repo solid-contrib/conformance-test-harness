@@ -60,28 +60,28 @@ function() {
             return acl
         },
         aclPrefix: '@prefix acl: <http://www.w3.org/ns/auth/acl#>.\n@prefix foaf: <http://xmlns.com/foaf/0.1/>.',
-        createBobAccessToAuthorization: (webID, resourcePath, modes) => createAuthorization({
+        createBobAccessToAuthorization: (webID, resourceUri, modes) => createAuthorization({
             authUri: '#bobAccessTo',
             agents: webID,
-            accessToTargets: resourcePath,
+            accessToTargets: resourceUri,
             modes: modes
         }),
-        createBobDefaultAuthorization: (webID, resourcePath, modes) => createAuthorization({
+        createBobDefaultAuthorization: (webID, resourceUri, modes) => createAuthorization({
             authUri: '#bobDefault',
             agents: webID,
-            defaultTargets: resourcePath,
+            defaultTargets: resourceUri,
             modes: modes
         }),
-        createPublicAccessToAuthorization: (resourcePath, modes) => createAuthorization({
+        createPublicAccessToAuthorization: (resourceUri, modes) => createAuthorization({
             authUri: '#publicAccessTo',
             publicAccess: true,
-            accessToTargets: resourcePath,
+            accessToTargets: resourceUri,
             modes: modes
         }),
-        createPublicDefaultAuthorization: (resourcePath, modes) => createAuthorization({
+        createPublicDefaultAuthorization: (resourceUri, modes) => createAuthorization({
             authUri: '#publicDefault',
             publicAccess: true,
-            defaultTargets: resourcePath,
+            defaultTargets: resourceUri,
             modes: modes
         }),
         pause: (pause) => java.lang.Thread.sleep(pause)

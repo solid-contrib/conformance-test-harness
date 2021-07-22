@@ -8,9 +8,10 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
         const resource = testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
         if (resource.exists()) {
           const acl = aclPrefix
-            + createOwnerAuthorization(webIds.alice, resource.getPath())
-            + createBobAccessToAuthorization(webIds.bob, resource.getPath(), 'acl:Write')
-            + createPublicAccessToAuthorization(resource.getPath(), 'acl:Read, acl:Append')
+            + createOwnerAuthorization(webIds.alice, resource.getUrl())
+            + createBobAccessToAuthorization(webIds.bob, resource.getUrl(), 'acl:Write')
+            + createPublicAccessToAuthorization(resource.getUrl(), 'acl:Read, acl:Append')
+          karate.log('ACL: ' + acl);
           resource.setAcl(acl);
         }
         return resource;
@@ -23,7 +24,7 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
 
   Scenario: There is an acl on the resource containing #bobAccessTo
     Given url resource.getAclUrl()
-    And configure headers = clients.alice.getAuthHeaders('GET', resource.getAclUrl())
+    And headers clients.alice.getAuthHeaders('GET', resource.getAclUrl())
     And header Accept = 'text/turtle'
     When method GET
     Then status 200
@@ -32,13 +33,13 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
 
   Scenario: There is no acl on the parent
     Given url resource.getContainer().getAclUrl()
-    And configure headers = clients.alice.getAuthHeaders('HEAD', resource.getContainer().getAclUrl())
+    And headers clients.alice.getAuthHeaders('HEAD', resource.getContainer().getAclUrl())
     And header Accept = 'text/turtle'
     When method HEAD
     Then status 404
 
   Scenario: Bob calls GET and the header shows RWA access for user, RA for public
-    Given configure headers = clients.bob.getAuthHeaders('GET', resourceUrl)
+    Given headers clients.bob.getAuthHeaders('GET', resourceUrl)
     When method GET
     Then status 200
     And match header WAC-Allow != null
@@ -47,7 +48,7 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     And match result.public contains only ['read', 'append']
 
   Scenario: Bob calls HEAD and the header shows RWA access for user, RA for public
-    Given configure headers = clients.bob.getAuthHeaders('HEAD', resourceUrl)
+    Given headers clients.bob.getAuthHeaders('HEAD', resourceUrl)
     When method HEAD
     Then status 200
     And match header WAC-Allow != null
