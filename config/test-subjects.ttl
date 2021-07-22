@@ -66,16 +66,16 @@ prefix dcterms: <http://purl.org/dc/terms/>
     doap:programming-language "JavaScript" ;
     solid-test:features "authentication", "acl", "wac-allow" .
 
-#<trinpod>
-#    a earl:Software, earl:TestSubject ;
-#    doap:name "TrinPod" ;
-#    doap:release [
-#                     doap:name "" ;
-#                     doap:revision "" ;
-#                     doap:created "2021-04-12"^^xsd:date
-#                 ] ;
-#    doap:developer <https://graphmetrix.com> ;
-#    doap:homepage <https://graphmetrix.com/trinpod> ;
-#    doap:description "TrinPod™ is an Industrial strength Solid Pod with conceptual computing through Trinity AI Capable of handling a massive amount of data."@en ;
-#    doap:programming-language "Unknown" ;
-#    solid-test:features "authentication", "acl", "wac-allow" .
+<trinpod>
+    a earl:Software, earl:TestSubject ;
+    doap:name "TrinPod" ;
+    doap:release [
+                     doap:name "TrinPod-Server" ;
+                     doap:revision "2.2.74" ;
+                     doap:created "2021-07-19"^^xsd:date
+                 ] ;
+    doap:developer <https://graphmetrix.com> ;
+    doap:homepage <https://graphmetrix.com/trinpod> ;
+    doap:description "TrinPod™ is an Industrial strength Solid Pod with conceptual computing through Trinity AI Capable of handling a massive amount of data."@en ;
+    doap:programming-language "Common Lisp" ;
+    solid-test:features "authentication", "acl", "wac-allow" .

@@ -518,7 +518,7 @@ To use the image to run a set of local tests:
     -v "$(pwd)"/config:/app/config \
     -v "$(pwd)"/reports/local:/reports \
     --env-file=ess.env solidconformancetestbeta/conformance-test-harness \
-    --output=/reports --targ
+    --output=/reports --target=ess-compat
   ```
   
 ## Local execution

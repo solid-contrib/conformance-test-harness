@@ -6,7 +6,7 @@ Feature: Requests support content negotiation for Turtle resource
     * def resource = testContainer.createChildResource('.ttl', exampleTurtle, 'text/turtle');
     * assert resource.exists()
     * def expected = RDFUtils.turtleToTripleArray(exampleTurtle, resource.getUrl())
-    * configure headers = clients.alice.getAuthHeaders('GET', resource.getUrl())
+    * headers clients.alice.getAuthHeaders('GET', resource.getUrl())
     * url resource.getUrl()
 
   Scenario: Alice can read the TTL example as JSON-LD

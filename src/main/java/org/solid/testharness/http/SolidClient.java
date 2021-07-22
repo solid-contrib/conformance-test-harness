@@ -50,6 +50,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static org.eclipse.rdf4j.model.util.Values.iri;
+
 public class SolidClient {
     private static final Logger logger = LoggerFactory.getLogger(SolidClient.class);
 
@@ -140,7 +142,7 @@ public class SolidClient {
             logger.error("RDF Parse Error: {} in {}", e, data);
             throw (Exception) new Exception("Bad container listing").initCause(e);
         }
-        final Set<Value> resources = model.filter(null, LDP.CONTAINS, null).objects();
+        final Set<Value> resources = model.filter(iri(url.toString()), LDP.CONTAINS, null).objects();
         return resources.stream().map(Object::toString).collect(Collectors.toList());
     }
 

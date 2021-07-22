@@ -6,7 +6,7 @@ Feature: Requests support content negotiation for JSON-LD resource
     * def resource = testContainer.createChildResource('.json', exampleJson, 'application/ld+json');
     * assert resource.exists()
     * def expected = RDFUtils.jsonLdToTripleArray(exampleJson, resource.getUrl())
-    * configure headers = clients.alice.getAuthHeaders('GET', resource.getUrl())
+    * headers clients.alice.getAuthHeaders('GET', resource.getUrl())
     * url resource.getUrl()
 
   Scenario: Alice can read the JSON-LD example as JSON-LD
