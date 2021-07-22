@@ -31,9 +31,7 @@ Feature: The WAC-Allow header shows user and public access modes with public rea
     # This was a quick check but relies on the representation of the ACL not changing
     # It should really ASK {?s acl:accessTo <target>; acl:agentClass foaf:Agent ; acl:mode acl:Read .}
 #    And match response contains 'publicAccessTo'
-    And match response contains 'acl:agentClass foaf:Agent'
-    And match response contains 'acl:mode acl:Read'
-
+    And match response contains 'foaf:Agent'
 
   Scenario: There is no acl on the parent
     Given url resource.getContainer().getAclUrl()

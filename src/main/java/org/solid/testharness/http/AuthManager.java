@@ -108,7 +108,7 @@ public class AuthManager {
             final UserCredentials userConfig = config.getCredentials(user);
             final Tokens tokens;
             if (userConfig != null && userConfig.isUsingUsernamePassword()) {
-                tokens = loginAndGetAccessToken(authClient, userConfig, oidcConfiguration, targetServer);
+                tokens = loginAndGetAccessToken(authClient, userConfig, oidcConfiguration);
             } else if (userConfig != null && userConfig.isUsingRefreshToken()) {
                 tokens = exchangeRefreshToken(authClient, userConfig, oidcConfiguration);
             } else if (userConfig != null && userConfig.isUsingClientCredentials()) {
@@ -156,7 +156,7 @@ public class AuthManager {
     }
 
     private Tokens loginAndGetAccessToken(final Client authClient, final UserCredentials userConfig,
-                                          final OidcConfiguration oidcConfig, final TargetServer targetServer)
+                                          final OidcConfiguration oidcConfig)
             throws Exception {
         logger.info("Login and get access token for {}", authClient.getUser());
         if (!oidcConfig.getGrantTypesSupported().contains(HttpConstants.AUTHORIZATION_CODE_TYPE)) {

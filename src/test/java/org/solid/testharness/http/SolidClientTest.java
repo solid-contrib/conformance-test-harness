@@ -295,7 +295,8 @@ class SolidClientTest {
     void parseMembers() throws Exception {
         final String data = PREFIX + "<http://localhost:3000/> ldp:contains <http://localhost:3000/test/>.";
         final SolidClient solidClient = new SolidClient();
-        final List<String> members = solidClient.parseMembers(data, URI.create("http://localhost:3000/test/"));
+        final List<String> members = solidClient.parseMembers(data, URI.create("http://localhost:3000/"));
+        System.out.println(members);
         assertFalse(members.isEmpty());
         assertEquals("http://localhost:3000/test/", members.get(0));
     }
@@ -304,7 +305,7 @@ class SolidClientTest {
     void parseMembersEmpty() throws Exception {
         final String data = PREFIX + "<http://localhost:3000/> a ldp:Container.";
         final SolidClient solidClient = new SolidClient();
-        final List<String> members = solidClient.parseMembers(data, URI.create("http://localhost:3000/test/"));
+        final List<String> members = solidClient.parseMembers(data, URI.create("http://localhost:3000/"));
         assertTrue(members.isEmpty());
     }
 
@@ -312,7 +313,7 @@ class SolidClientTest {
     void parseMembersFails() {
         final SolidClient solidClient = new SolidClient();
         final Exception exception = assertThrows(Exception.class,
-                () -> solidClient.parseMembers("BAD", URI.create("http://localhost:3000/test/"))
+                () -> solidClient.parseMembers("BAD", URI.create("http://localhost:3000/"))
         );
         assertEquals("Bad container listing", exception.getMessage());
     }

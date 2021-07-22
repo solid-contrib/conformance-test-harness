@@ -43,6 +43,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -108,9 +109,8 @@ public class SolidClient {
 
     public URI getAclLink(final HttpHeaders headers) {
         final List<Link> links = HttpUtils.parseLinkHeaders(headers);
-        final Link aclLink = links.stream().filter(link -> link.getRels().contains("acl"))
-                .reduce((first, second) -> second).orElse(null);
-        return aclLink != null ? aclLink.getUri() : null;
+        final Optional<Link> aclLink = links.stream().filter(link -> link.getRels().contains("acl")).findFirst();
+        return aclLink.map(Link::getUri).orElse(null);
     }
 
     public boolean createAcl(final URI url, final String acl) throws IOException, InterruptedException {
