@@ -86,73 +86,7 @@ liable to change as the project progresses.
 
 ## Writing tests
 
-This section will contain guidelines for writing test cases using the KarateDSL alongside the features that the test
-harness provides.
-
-### Example test cases
-In the future, all test cases will be pulled from an external repository (whether they are ultimately written in
-KarateDSL or RDF). There are currently some examples in the `example` folder to show some templates for how tests
-can be defined.
-* The content negotiation tests create RDF resources of different formats, then confirm that they can be accessed as
-  other formats. It uses a Java library to convert Turtle or JSON-LD to triples to allow responses to be compared to the
-  original test sample. Support for RDFa is not consistent across all servers so that test is missed for now.
-* The protect operations tests create a resource or container and then each test sets up different ACLs for it. The
-  tests confirm that the Bob user has the correct access to the resource or container.
-* The WAC allow tests create a resource and then each test sets up different ACLs for that resource. The tests parse the
-  WAC-Allow header and confirm that the Bob user and un-authenticated users see the correct permissions.
-
-### Test patterns
-
-Each group of tests is created in its own folder with a shared setup feature. There are 2 variants of this demonstrated.
-
-Karate based setup feature:
-* fetches any access tokens that are required
-* creates Authorization headers with these tokens
-* creates any test resources required for the test
-* adds ACLs if needed
-
-Javascript function setup (see wac-allow tests):
-* the setup feature contains a function used to set up the clients and a test resource - this is shared across all
-  features in the group
-* a separate setup function in each test feature is called once for that feature to set up the ACLs - this puts the 
-  specifics of the test feature into the feature file making them easier to read
-
-The test files themselves:
-* run a background task for each scenario to call the necessary setup procedure
-* hold the returned test context to provide access to the Authorization headers and the test container or resource paths
-* provide a set of scenarios that make http requests against the test resource and validate the responses
-
-### Tips
-
-The full KarateDSL documentation is at: https://intuit.github.io/karate/
-
-#### Request headers
-
-There are 3 commands to add headers to an HTTP request:
-* `configure headers` - https://intuit.github.io/karate/#configure-headers
-	* Typically used in the `Background` section to set up headers for the whole feature file
-	* Takes a JSON object containing key/value pairs to be added to the headers
-	* Takes a function which returns a JSON object containing key/value pairs to be added to the headers
-	* Often used to set up Authorization headers for set of tests
-	* If later steps need to use different headers you must either update `configure headers` or set it to null and use
-	  one of the commands below to set a new header
-	* Example: `* configure headers = { Authorization: 'some_token', tx_id: '1234' }` 
-* `header` - https://intuit.github.io/karate/#header
-	* Takes a function or expression that returns a header value
-	* Example: `* header Accept = 'application/json'`
-* `headers` - https://intuit.github.io/karate/#headers
-    * Takes a JSON object containing key/value pairs to be added to the headers
-	* Note this is a shortcut command, not an expression as in the previous cases
-	* Example: `* headers { Authorization: 'some_token', tx_id: '1234' }`
-
-#### Response status
-When you know there is only one valid status there is a shortcut but in other cases you need to allow for multiple
-status codes or ranges. The best options are:
-* `* status 200`
-* `* match [200, 201, 202] contains responseStatus`
-* `* match karate.range(200, 299) contains responseStatus` - note, this results in poor error messages as it lists all
-  100 mismatched values
-* `* assert responseStatus >= 200 && responseStatus < 300`
+See notes in the [specification-test repository](https://github.com/solid/specification-tests)
 
 ## Processes
 ### Checkout
