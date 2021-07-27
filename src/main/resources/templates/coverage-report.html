@@ -23,7 +23,7 @@
         {#each it.specificationRequirements}
         <div rel="spec:requirement">
         {#include requirement}
-            {#if it.testCases}
+            {#if it.testCases??}
             <table about="{it.subject}">
                 <tr>
                     <th>Title</th>

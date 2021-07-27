@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <body about="{subject}" prefix="{prefixes}">
     {! HEADER !}
-    {#if specifications}
+    {#if specifications??}
     {#include specification-header /}
     {#each specifications}
     <div about="{it.subject}">
@@ -13,19 +13,20 @@
     {/each}
     {/if}
     {! ASSERTOR !}
-    {#if assertor}
+    {#if assertor??}
     {#with assertor}{#include assertor /}{/with}
     {/if}
     {! TEST SUBJECT !}
-    {#if testSubject}
+    {#if testSubject??}
     {#with testSubject}{#include test-subject /}{/with}
     {/if}
     {! SUMMARY !}
-    {#if testSuiteResults}
+    {#if testSuiteResults??}
     {#with testSuiteResults}{#include results-summary /}{/with}
     {/if}
     {! REQUIREMENT - RESULTS !}
-    {#if coverageMode == false}
+    {#if !coverageMode??}
+    {#let specLink='https://example.org'}
     {#each specificationRequirements.orEmpty}
     {#include requirement}
     {#if it.testCases}
@@ -45,9 +46,11 @@
     {/if}
     {/include}
     {/each}
+    {/let}
     {/if}
     {! REQUIREMENT - COVERAGE !}
-    {#if coverageMode == true}
+    {#if coverageMode??}
+    {#let specLink='https://example.org'}
     {#each specificationRequirements.orEmpty}
     {#include requirement}
     {#if it.testCases}
@@ -66,9 +69,10 @@
     {/if}
     {/include}
     {/each}
+    {/let}
     {/if}
     {! TESTCASE !}
-    {#if testCases}
+    {#if testCases??}
     <table>
         <tr>
             <th>Title</th>
@@ -82,7 +86,7 @@
     </table>
     {/if}
     {! SCENARIO !}
-    {#if scenarios}
+    {#if scenarios??}
     <section>
         {#each scenarios}
         {#include scenario /}
@@ -90,7 +94,7 @@
     </section>
     {/if}
     {! STEP !}
-    {#if steps}
+    {#if steps??}
     <table>
         <tr>
             <th>Step</th>

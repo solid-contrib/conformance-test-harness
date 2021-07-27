@@ -16,10 +16,13 @@
 {#with assertor}{#include assertor /}{/with}
 {/if}
 {#with testSubject}{#include test-subject /}{/with}
+{#if resultDate??}
 {#with testSuiteResults}{#include results-summary /}{/with}
+{/if}
 
 <main>
 <article>
+    {#if specifications??}
     <h2>Results by specification requirement</h2>
     {#each specifications.orEmpty}
     <section about="{it.subject}" class="spec">
@@ -53,6 +56,7 @@
         {/if}
     </section>
     {/each}
+    {/if}
 
     {#if testCases}
     <section>
