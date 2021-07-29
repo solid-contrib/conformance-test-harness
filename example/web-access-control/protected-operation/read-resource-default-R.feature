@@ -11,7 +11,7 @@ Feature: Bob can only read an RDF resource to which he is only granted default r
             + createOwnerAuthorization(webIds.alice, resource.getContainer().getUrl())
             + createBobDefaultAuthorization(webIds.bob, resource.getContainer().getUrl(), 'acl:Read')
           karate.log('ACL: ' + acl);
-          resource.getContainer().setAcl(acl);
+          resource.getContainer().setAccessDataset(acl);
         }
         return resource;
       }

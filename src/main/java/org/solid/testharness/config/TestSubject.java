@@ -123,7 +123,7 @@ public class TestSubject {
         if (config.isSetupRootAcl()) {
             logger.debug("Setup root acl");
             try {
-                final URI rootAclUrl = solidClient.getResourceAclLink(config.getServerRoot());
+                final URI rootAclUrl = solidClient.getAclUri(config.getServerRoot());
                 if (rootAclUrl == null) {
                     throw new TestHarnessInitializationException("Failed getting the root ACL link");
                 }
@@ -146,13 +146,13 @@ public class TestSubject {
         try {
             final SolidContainer rootContainer = SolidContainer.create(solidClient, config.getTestContainer());
             logger.debug("Root container content: {}", rootContainer.getContentAsTurtle());
-            logger.debug("Root container access controls: {}", rootContainer.getAccessControls());
+            logger.debug("Root container access controls: {}", rootContainer.getAccessDataset());
 
             // create a root container for all the test cases
             rootTestContainer = SolidContainer.create(solidClient, config.getTestContainer())
                     .generateChildContainer().instantiate();
             logger.debug("Test container content: {}", rootTestContainer.getContentAsTurtle());
-            logger.debug("Test container access controls: {}", rootTestContainer.getAccessControls());
+            logger.debug("Test container access controls: {}", rootTestContainer.getAccessDataset());
         } catch (Exception e) {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException(
                     "Failed to prepare server: %s", e.toString()

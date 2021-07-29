@@ -9,12 +9,6 @@ function() {
         parseWacAllowHeader: (headers) => Java.type('org.solid.testharness.http.HttpUtils').parseWacAllowHeader(headers),
         createTestContainer: () => rootTestContainer.generateChildContainer(),
         createTestContainerImmediate: () => rootTestContainer.generateChildContainer().instantiate(),
-        createOwnerAuthorization: (ownerAgent, targetUri) => `
-<#owner> a acl:Authorization;
-  acl:agent <${ownerAgent}>;
-  acl:accessTo <${targetUri}>;
-  acl:default <${targetUri}>;
-  acl:mode acl:Read, acl:Write, acl:Control.`,
         createAuthorization: (config) => {
             // config: { authUri, agents, groups, publicAccess, authenticatedAccess, accessToTargets, defaultTargets, modes }
             let acl = `\n<${config.authUri}> a acl:Authorization;`
@@ -30,6 +24,7 @@ function() {
                     acl += config.groups.map((group) => `\n  acl:agentGroup <${group}>;`)
                 } else {
                     acl += `\n  acl:agentGroup <${config.groups}>;`
+                    // TODO: WHERE ARE GROUP DEFINITIONS
                 }
             }
             if (config.publicAccess) {
@@ -60,6 +55,13 @@ function() {
             return acl
         },
         aclPrefix: '@prefix acl: <http://www.w3.org/ns/auth/acl#>.\n@prefix foaf: <http://xmlns.com/foaf/0.1/>.',
+        createOwnerAuthorization: (ownerAgent, targetUri) => createAuthorization({
+            authUri: '#owner',
+            agents: ownerAgent,
+            accessToTargets: targetUri,
+            defaultTargets: targetUri,
+            modes: 'acl:Read, acl:Write, acl:Control'
+        }),
         createBobAccessToAuthorization: (webID, resourceUri, modes) => createAuthorization({
             authUri: '#bobAccessTo',
             agents: webID,
