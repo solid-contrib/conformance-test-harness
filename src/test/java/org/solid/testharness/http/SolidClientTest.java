@@ -191,7 +191,7 @@ class SolidClientTest {
     }
 
     @Test
-    void getAclUriFromHeaders() {
+    void getAclUriFromHeadersWAC() {
         final Map<String, List<String>> headerMap = Map.of("Link",
                 List.of("<http://localhost:3000/test.acl>; rel=\"acl\""));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
@@ -199,6 +199,17 @@ class SolidClientTest {
         final SolidClient solidClient = new SolidClient();
         final URI uri = solidClient.getAclUri(headers);
         assertEquals(URI.create("http://localhost:3000/test.acl"), uri);
+    }
+
+    @Test
+    void getAclUriFromHeadersACP() {
+        final Map<String, List<String>> headerMap = Map.of("Link",
+                List.of("<http://localhost:3000/test?ext=acr>; rel=\"http://www.w3.org/ns/solid/acp#accessControl\""));
+        final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
+
+        final SolidClient solidClient = new SolidClient();
+        final URI uri = solidClient.getAclUri(headers);
+        assertEquals(URI.create("http://localhost:3000/test?ext=acr"), uri);
     }
 
     @Test

@@ -7,6 +7,7 @@ function fn() {
     }
 
     const config = bootstrap.getConfig();
+    const testHarness = bootstrap.getTestHarness();
     const testSubject = bootstrap.getTestSubject();
     const target = testSubject.targetServer;
     if (target == null) {
@@ -24,7 +25,7 @@ function fn() {
         target,
         rootTestContainer: testSubject.getRootTestContainer(),
         ...additionalConfig,
-        clients: karate.toMap(testSubject.clients),
+        clients: karate.toMap(testHarness.clients),
         webIds: config.webIds
     };
 }

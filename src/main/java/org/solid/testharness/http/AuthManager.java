@@ -28,7 +28,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.config.Config;
-import org.solid.testharness.config.TargetServer;
 import org.solid.testharness.config.UserCredentials;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
@@ -84,11 +83,10 @@ public class AuthManager {
         }
     }
 
-    public SolidClient authenticate(@NotNull final String user, @NotNull final TargetServer targetServer)
+    public SolidClient authenticate(@NotNull final String user, final boolean authRequired)
             throws Exception {
         requireNonNull(user, "user must not be null");
-        requireNonNull(targetServer, "targetServer must not be null");
-        if (!targetServer.getFeatures().getOrDefault("authentication", false)) {
+        if (!authRequired) {
             return new SolidClient();
         }
         final Client authClient;

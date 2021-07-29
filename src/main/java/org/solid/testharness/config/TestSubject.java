@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.EARL;
 import org.solid.common.vocab.RDF;
-import org.solid.testharness.http.AuthManager;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClient;
 import org.solid.testharness.utils.DataRepository;
@@ -44,8 +43,6 @@ import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 @ApplicationScoped
@@ -53,15 +50,12 @@ public class TestSubject {
     private static final Logger logger = LoggerFactory.getLogger(TestSubject.class);
 
     private TargetServer targetServer;
-    private Map<String, SolidClient> clients;
     private SolidContainer rootTestContainer;
 
     @Inject
     Config config;
     @Inject
     DataRepository dataRepository;
-    @Inject
-    AuthManager authManager;
 
     public void loadTestSubjectConfig()  {
         final IRI configuredTestSubject = config.getTestSubject();
@@ -115,6 +109,11 @@ public class TestSubject {
         }
     }
 
+    /**
+     * Set up the root ACL for Alice (if required).
+     * Confirm access to the root test container & ACL.
+     * Create a sub-container for this run and confirm access to it and its ACL.
+     */
     public void prepareServer() {
         if (targetServer == null) {
             throw new TestHarnessInitializationException("No target server has been configured");
@@ -160,33 +159,6 @@ public class TestSubject {
         }
     }
 
-    public void registerUsers() {
-        try {
-            authManager.registerUser(HttpConstants.ALICE);
-            authManager.registerUser(HttpConstants.BOB);
-        } catch (Exception e) {
-            throw (TestHarnessInitializationException) new TestHarnessInitializationException(
-                    "Failed to register users: %s", e.toString()
-            ).initCause(e);
-        }
-    }
-
-    public void registerClients() {
-        clients = new HashMap<>();
-        if (targetServer == null) {
-            throw new TestHarnessInitializationException("No target server has been configured");
-        }
-        config.getWebIds().keySet().forEach(user -> {
-            try {
-                clients.put(user, authManager.authenticate(user, targetServer));
-            } catch (Exception e) {
-                throw (TestHarnessInitializationException) new TestHarnessInitializationException(
-                        "Failed to register clients: %s", e.toString()
-                ).initCause(e);
-            }
-        });
-    }
-
     public void tearDownServer() {
         try {
             rootTestContainer.delete();
@@ -202,10 +174,6 @@ public class TestSubject {
 
     public void setTargetServer(final TargetServer targetServer) {
         this.targetServer = targetServer;
-    }
-
-    public Map<String, SolidClient> getClients() {
-        return clients;
     }
 
     public SolidContainer getRootTestContainer() {

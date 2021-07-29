@@ -48,6 +48,12 @@ class BootstrapQuarkusTest {
     }
 
     @Test
+    void getTestHarness() {
+        final Bootstrap bootstrap = Bootstrap.getInstance();
+        assertNotNull(bootstrap.getTestHarness());
+    }
+
+    @Test
     void getConfig() {
         final Bootstrap bootstrap = Bootstrap.getInstance();
         assertNotNull(bootstrap.getConfig());

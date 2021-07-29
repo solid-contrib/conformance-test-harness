@@ -25,7 +25,6 @@ package org.solid.testharness;
 
 import com.intuit.karate.Results;
 import com.intuit.karate.Runner;
-import org.apache.commons.lang3.StringUtils;
 import org.solid.testharness.reporting.TestSuiteResults;
 import org.solid.testharness.utils.FeatureResultHandler;
 
@@ -40,7 +39,8 @@ public class TestRunner {
 
     @SuppressWarnings("unchecked")
     // Unavoidable as Runner.builder().path() takes a list or vararg of Strings
-    public TestSuiteResults runTests(final List<String> featurePaths, final int threads) {
+    public TestSuiteResults runTests(final List<String> featurePaths, final int threads,
+                                     final boolean enableReporting) {
         // we can also create Features which may be useful when fetching from remote resource although this may cause
         // problems with loading other features files due to classpath issues - Karate may need a RemoteResource type
         // that knows how to fetch related resources from the same URL the feature came from
@@ -53,23 +53,13 @@ public class TestRunner {
 //                .outputHtmlReport(true)
 //                .parallel(8);
 
-        final Results results = Runner.builder()
+        Runner.Builder builder = Runner.builder()
                 .path(featurePaths)
-                .tags("~@ignore")
-                .outputHtmlReport(true)
-                .suiteReports(featureResultHandler)
-                .parallel(threads);
-        return new TestSuiteResults(results);
-    }
-
-    public TestSuiteResults runTest(final String featurePath) {
-        if (StringUtils.isBlank(featurePath)) {
-            throw new IllegalArgumentException("featurePath is a required parameter");
+                .tags("~@ignore");
+        if (enableReporting) {
+            builder = builder.outputHtmlReport(true).suiteReports(featureResultHandler);
         }
-        final Results results = Runner.builder()
-                .path(featurePath)
-                .tags("~@ignore")
-                .parallel(1);
+        final Results results = builder.parallel(threads);
         return new TestSuiteResults(results);
     }
 }

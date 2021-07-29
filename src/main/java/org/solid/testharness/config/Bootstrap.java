@@ -26,6 +26,7 @@ package org.solid.testharness.config;
 import io.quarkus.runtime.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.testharness.ConformanceTestHarness;
 
 import javax.enterprise.inject.spi.CDI;
 
@@ -63,6 +64,10 @@ public final class Bootstrap {
 
     public TestSubject getTestSubject() {
         return CDI.current().select(TestSubject.class).get();
+    }
+
+    public ConformanceTestHarness getTestHarness() {
+        return CDI.current().select(ConformanceTestHarness.class).get();
     }
 
     public Config getConfig() {
