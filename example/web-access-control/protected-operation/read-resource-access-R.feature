@@ -11,7 +11,7 @@ Feature: Bob can only read an RDF resource to which he is only granted read acce
             + createOwnerAuthorization(webIds.alice, resource.getUrl())
             + createBobAccessToAuthorization(webIds.bob, resource.getUrl(), 'acl:Read')
           karate.log('ACL: ' + acl);
-          resource.setAcl(acl);
+          resource.setAccessDataset(acl);
         }
         return resource;
       }

@@ -38,7 +38,7 @@ public class SolidResource {
     protected SolidClient solidClient;
     protected URI url;
     private URI aclUrl;
-    private Boolean aclAvailable;
+    private Boolean aclLinkAvailable;
     private boolean containerType;
 
     public SolidResource(final SolidClient solidClient, final String url) {
@@ -63,11 +63,11 @@ public class SolidResource {
             try {
                 headers = solidClient.createResource(resourceUri, body, type);
                 if (headers != null && headers.allValues(HttpConstants.HEADER_LINK).size() != 0) {
-                    final URI aclLink = solidClient.getAclLink(headers);
+                    final URI aclLink = solidClient.getAclUri(headers);
                     if (aclLink != null) {
                         logger.debug("ACL LINK {}", aclLink);
                         aclUrl = resourceUri.resolve(aclLink);
-                        aclAvailable = true;
+                        aclLinkAvailable = true;
                     }
                 }
             } catch (Exception e) {
@@ -88,8 +88,8 @@ public class SolidResource {
         return url != null;
     }
 
-    public boolean setAcl(final String acl) throws Exception {
-        if (Boolean.FALSE.equals(aclAvailable)) return false;
+    public boolean setAccessDataset(final String acl) throws Exception {
+        if (Boolean.FALSE.equals(aclLinkAvailable)) return false;
         final String url = getAclUrl();
         if (url == null) return false;
         return solidClient.createAcl(URI.create(url), acl);
@@ -121,12 +121,12 @@ public class SolidResource {
     }
 
     public String getAclUrl() throws Exception {
-        if (aclUrl == null && !Boolean.FALSE.equals(aclAvailable)) {
-            final URI aclLink = solidClient.getResourceAclLink(url);
+        if (aclUrl == null && !Boolean.FALSE.equals(aclLinkAvailable)) {
+            final URI aclLink = solidClient.getAclUri(url);
             if (aclLink != null) {
                 aclUrl = url.resolve(aclLink);
             }
-            aclAvailable = aclLink != null;
+            aclLinkAvailable = aclLink != null;
         }
         return aclUrl != null ? aclUrl.toString() : null;
     }
@@ -135,7 +135,7 @@ public class SolidResource {
         return url != null ? solidClient.getContentAsTurtle(url) : "";
     }
 
-    public String getAccessControls() throws Exception {
+    public String getAccessDataset() throws Exception {
         return getAclUrl() != null ? solidClient.getAcl(aclUrl) : "";
     }
 

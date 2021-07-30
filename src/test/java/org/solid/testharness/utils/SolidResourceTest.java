@@ -93,8 +93,8 @@ class SolidResourceTest {
                 List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
-        when(solidClient.getAclLink(headers)).thenReturn(aclUrl);
-        when(solidClient.getResourceAclLink(testUrl)).thenReturn(aclUrl);
+        when(solidClient.getAclUri(headers)).thenReturn(aclUrl);
+        when(solidClient.getAclUri(testUrl)).thenReturn(aclUrl);
 
         final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
@@ -109,7 +109,7 @@ class SolidResourceTest {
                 List.of("<" + aclUrl + ">; rel=\"noacl\""));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
-        when(solidClient.getResourceAclLink(testUrl)).thenReturn(null);
+        when(solidClient.getAclUri(testUrl)).thenReturn(null);
 
         final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
@@ -135,7 +135,7 @@ class SolidResourceTest {
     void resourceExistsWithAclAfterLookup() throws Exception {
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
         final URI lookedUpAclUrl = URI.create("http://localhost/lookupedUpAcl");
-        when(solidClient.getResourceAclLink(testUrl)).thenReturn(lookedUpAclUrl);
+        when(solidClient.getAclUri(testUrl)).thenReturn(lookedUpAclUrl);
 
         final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
@@ -205,43 +205,43 @@ class SolidResourceTest {
     }
 
     @Test
-    void setAclNoUrl() throws Exception {
+    void setAccessDatasetNoUrl() throws Exception {
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
         final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
-        assertFalse(resource.setAcl("acl"));
+        assertFalse(resource.setAccessDataset("acl"));
     }
 
     @Test
-    void setAclMissing() throws Exception {
+    void setAccessDatasetMissing() throws Exception {
         final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
                 List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
-        when(solidClient.getAclLink(headers)).thenReturn(null);
-        when(solidClient.getResourceAclLink(testUrl)).thenReturn(null);
+        when(solidClient.getAclUri(headers)).thenReturn(null);
+        when(solidClient.getAclUri(testUrl)).thenReturn(null);
 
         final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
-        assertFalse(resource.setAcl("acl"));
+        assertFalse(resource.setAccessDataset("acl"));
         // second attempt short cuts as false
-        assertFalse(resource.setAcl("acl"));
+        assertFalse(resource.setAccessDataset("acl"));
     }
 
     @Test
-    void setAcl() throws Exception {
+    void setAccessDataset() throws Exception {
         final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
                 List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
-        when(solidClient.getAclLink(headers)).thenReturn(aclUrl);
-        when(solidClient.getResourceAclLink(testUrl)).thenReturn(aclUrl);
+        when(solidClient.getAclUri(headers)).thenReturn(aclUrl);
+        when(solidClient.getAclUri(testUrl)).thenReturn(aclUrl);
         when(solidClient.createAcl(aclUrl, "acl")).thenReturn(true);
 
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
         final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
-        assertTrue(resource.setAcl("acl"));
+        assertTrue(resource.setAccessDataset("acl"));
     }
 
     @Test
@@ -270,8 +270,8 @@ class SolidResourceTest {
                 List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
-        when(solidClient.getAclLink(headers)).thenReturn(null);
-        when(solidClient.getResourceAclLink(testUrl)).thenReturn(null);
+        when(solidClient.getAclUri(headers)).thenReturn(null);
+        when(solidClient.getAclUri(testUrl)).thenReturn(null);
 
         final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
@@ -297,18 +297,18 @@ class SolidResourceTest {
     }
 
     @Test
-    void getAccessControls() throws Exception {
-        when(solidClient.getResourceAclLink(testUrl)).thenReturn(aclUrl);
+    void getAccessDataset() throws Exception {
+        when(solidClient.getAclUri(testUrl)).thenReturn(aclUrl);
         when(solidClient.getAcl(aclUrl)).thenReturn("ACL");
         final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
-        assertEquals("ACL", resource.getAccessControls());
+        assertEquals("ACL", resource.getAccessDataset());
     }
 
     @Test
-    void getAccessControlsMissing() throws Exception {
-        when(solidClient.getResourceAclLink(testUrl)).thenReturn(null);
+    void getAccessDatasetMissing() throws Exception {
+        when(solidClient.getAclUri(testUrl)).thenReturn(null);
         final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
-        assertEquals("", resource.getAccessControls());
+        assertEquals("", resource.getAccessDataset());
     }
 
     @Test

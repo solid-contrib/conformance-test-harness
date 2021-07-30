@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.EARL;
 import org.solid.common.vocab.RDF;
-import org.solid.testharness.http.AuthManager;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClient;
 import org.solid.testharness.utils.DataRepository;
@@ -44,8 +43,6 @@ import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 @ApplicationScoped
@@ -53,15 +50,12 @@ public class TestSubject {
     private static final Logger logger = LoggerFactory.getLogger(TestSubject.class);
 
     private TargetServer targetServer;
-    private Map<String, SolidClient> clients;
     private SolidContainer rootTestContainer;
 
     @Inject
     Config config;
     @Inject
     DataRepository dataRepository;
-    @Inject
-    AuthManager authManager;
 
     public void loadTestSubjectConfig()  {
         final IRI configuredTestSubject = config.getTestSubject();
@@ -115,6 +109,11 @@ public class TestSubject {
         }
     }
 
+    /**
+     * Set up the root ACL for Alice (if required).
+     * Confirm access to the root test container & ACL.
+     * Create a sub-container for this run and confirm access to it and its ACL.
+     */
     public void prepareServer() {
         if (targetServer == null) {
             throw new TestHarnessInitializationException("No target server has been configured");
@@ -123,7 +122,7 @@ public class TestSubject {
         if (config.isSetupRootAcl()) {
             logger.debug("Setup root acl");
             try {
-                final URI rootAclUrl = solidClient.getResourceAclLink(config.getServerRoot());
+                final URI rootAclUrl = solidClient.getAclUri(config.getServerRoot());
                 if (rootAclUrl == null) {
                     throw new TestHarnessInitializationException("Failed getting the root ACL link");
                 }
@@ -146,45 +145,18 @@ public class TestSubject {
         try {
             final SolidContainer rootContainer = SolidContainer.create(solidClient, config.getTestContainer());
             logger.debug("Root container content: {}", rootContainer.getContentAsTurtle());
-            logger.debug("Root container access controls: {}", rootContainer.getAccessControls());
+            logger.debug("Root container access controls: {}", rootContainer.getAccessDataset());
 
             // create a root container for all the test cases
             rootTestContainer = SolidContainer.create(solidClient, config.getTestContainer())
                     .generateChildContainer().instantiate();
             logger.debug("Test container content: {}", rootTestContainer.getContentAsTurtle());
-            logger.debug("Test container access controls: {}", rootTestContainer.getAccessControls());
+            logger.debug("Test container access controls: {}", rootTestContainer.getAccessDataset());
         } catch (Exception e) {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException(
                     "Failed to prepare server: %s", e.toString()
             ).initCause(e);
         }
-    }
-
-    public void registerUsers() {
-        try {
-            authManager.registerUser(HttpConstants.ALICE);
-            authManager.registerUser(HttpConstants.BOB);
-        } catch (Exception e) {
-            throw (TestHarnessInitializationException) new TestHarnessInitializationException(
-                    "Failed to register users: %s", e.toString()
-            ).initCause(e);
-        }
-    }
-
-    public void registerClients() {
-        clients = new HashMap<>();
-        if (targetServer == null) {
-            throw new TestHarnessInitializationException("No target server has been configured");
-        }
-        config.getWebIds().keySet().forEach(user -> {
-            try {
-                clients.put(user, authManager.authenticate(user, targetServer));
-            } catch (Exception e) {
-                throw (TestHarnessInitializationException) new TestHarnessInitializationException(
-                        "Failed to register clients: %s", e.toString()
-                ).initCause(e);
-            }
-        });
     }
 
     public void tearDownServer() {
@@ -202,10 +174,6 @@ public class TestSubject {
 
     public void setTargetServer(final TargetServer targetServer) {
         this.targetServer = targetServer;
-    }
-
-    public Map<String, SolidClient> getClients() {
-        return clients;
     }
 
     public SolidContainer getRootTestContainer() {

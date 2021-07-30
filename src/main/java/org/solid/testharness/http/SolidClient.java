@@ -102,14 +102,16 @@ public class SolidClient {
         return response;
     }
 
-    public URI getResourceAclLink(final URI uri) throws IOException, InterruptedException {
+    public URI getAclUri(final URI uri) throws IOException, InterruptedException {
         final HttpResponse<Void> response = client.head(uri);
-        return getAclLink(response.headers());
+        return getAclUri(response.headers());
     }
 
-    public URI getAclLink(final HttpHeaders headers) {
+    public URI getAclUri(final HttpHeaders headers) {
         final List<Link> links = HttpUtils.parseLinkHeaders(headers);
-        final Optional<Link> aclLink = links.stream().filter(link -> link.getRels().contains("acl")).findFirst();
+        final Optional<Link> aclLink = links.stream()
+                .filter(link -> link.getRels().contains("acl") ||
+                        link.getRels().contains("http://www.w3.org/ns/solid/acp#accessControl")).findFirst();
         return aclLink.map(Link::getUri).orElse(null);
     }
 

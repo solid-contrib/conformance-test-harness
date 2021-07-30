@@ -11,7 +11,7 @@ Feature: The WAC-Allow header shows user and public access modes with public rea
             + createOwnerAuthorization(webIds.alice, resource.getUrl())
             + createPublicAccessToAuthorization(resource.getUrl(), 'acl:Read');
           karate.log('ACL: ' + acl);
-          resource.setAcl(acl);
+          resource.setAccessDataset(acl);
         }
         return resource;
       }

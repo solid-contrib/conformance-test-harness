@@ -221,50 +221,6 @@ public class TestSubjectTest {
     }
 
     @Test
-    void registerUsers() throws Exception {
-        testSubject.registerUsers();
-        verify(authManager).registerUser(HttpConstants.ALICE);
-        verify(authManager).registerUser(HttpConstants.BOB);
-    }
-
-    @Test
-    void registerUsersException() throws Exception {
-        doThrow(new Exception("FAIL")).when(authManager).registerUser(any());
-        assertThrows(TestHarnessInitializationException.class, () -> testSubject.registerUsers());
-    }
-
-    @Test
-    void registerWithoutServer() {
-        testSubject.setTargetServer(null);
-        assertThrows(TestHarnessInitializationException.class, () -> testSubject.registerClients());
-    }
-
-    @Test
-    void registerClientsAndGet() throws Exception {
-        final TargetServer targetServer = mock(TargetServer.class);
-        testSubject.setTargetServer(targetServer);
-        when(config.getWebIds())
-                .thenReturn(Map.of(HttpConstants.ALICE, "https://alice.target.example.org/profile/card#me"));
-        final Client mockClient = mock(Client.class);
-        when(authManager.authenticate(anyString(), any(TargetServer.class))).thenReturn(new SolidClient(mockClient));
-        testSubject.registerClients();
-        final Map<String, SolidClient> clients = testSubject.getClients();
-        assertNotNull(clients);
-        assertEquals(1, clients.size());
-    }
-
-    @Test
-    void registerClientsWithAuthException() throws Exception {
-        final TargetServer targetServer = mock(TargetServer.class);
-        testSubject.setTargetServer(targetServer);
-        when(config.getWebIds())
-                .thenReturn(Map.of(HttpConstants.ALICE, "https://alice.target.example.org/profile/card#me"));
-        when(authManager.authenticate(anyString(), any(TargetServer.class)))
-                .thenThrow(new Exception("Failed as expected"));
-        assertThrows(TestHarnessInitializationException.class, () -> testSubject.registerClients());
-    }
-
-    @Test
     void loadTestSubjectConfigTarget1() throws MalformedURLException {
         when(config.getSubjectsUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"));
         when(config.getTestSubject()).thenReturn(iri("https://github.com/solid/conformance-test-harness/testserver"));
@@ -300,11 +256,6 @@ public class TestSubjectTest {
         final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
         assertEquals("https://github.com/solid/conformance-test-harness/default", targetServer.getSubject());
-    }
-
-    @Test
-    void getClientsNull() throws Exception {
-        assertNull(testSubject.getClients());
     }
 
     @Test

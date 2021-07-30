@@ -36,6 +36,9 @@ import org.solid.common.vocab.RDF;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.discovery.TestSuiteDescription;
+import org.solid.testharness.http.AuthManager;
+import org.solid.testharness.http.HttpConstants;
+import org.solid.testharness.http.SolidClient;
 import org.solid.testharness.reporting.ReportGenerator;
 import org.solid.testharness.reporting.TestSuiteResults;
 import org.solid.testharness.utils.DataRepository;
@@ -50,9 +53,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
@@ -62,6 +63,8 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 public class ConformanceTestHarness {
     private static final Logger logger = LoggerFactory.getLogger(ConformanceTestHarness.class);
     private static final Logger resultLogger = LoggerFactory.getLogger("ResultLogger");
+
+    private Map<String, SolidClient> clients;
 
     @Inject
     Config config;
@@ -75,6 +78,8 @@ public class ConformanceTestHarness {
     ReportGenerator reportGenerator;
     @Inject
     DataRepository dataRepository;
+    @Inject
+    AuthManager authManager;
 
     @SuppressWarnings("PMD.UseProperClassLoader") // this is not J2EE and the suggestion fails
     public void initialize() throws IOException {
@@ -134,56 +139,22 @@ public class ConformanceTestHarness {
         }
     }
 
-    public TestSuiteResults runTestSuites() {
-        return this.runTestSuites(null);
-    }
-
     public TestSuiteResults runTestSuites(final List<String> filters) {
-        logger.info("===================== DISCOVER TESTS ========================");
         final List<String> featurePaths;
         try {
             testSubject.loadTestSubjectConfig();
-            // TODO: Consider running some initial tests to discover the features provided by a server
-            final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(
-                    testSubject.getTargetServer().getFeatures().keySet()
-            );
-            logger.info("==== TEST CASES FOUND: {} - {}", testCases.size(), testCases);
-
-            final List<IRI> filteredTestCases = testCases.stream()
-                    .filter(tc -> filters == null || filters.isEmpty() ||
-                            filters.stream().anyMatch(f -> tc.stringValue().contains(f))
-                    )
-                    .collect(Collectors.toList());
-            logger.info("==== FILTERED TEST CASES: {} - {}", filteredTestCases.size(), filteredTestCases);
-
-            featurePaths = testSuiteDescription.locateTestCases(filteredTestCases);
-            if (featurePaths.isEmpty()) {
-                logger.warn("There are no tests available");
+            final Map<String, Boolean> features = testSubject.getTargetServer().getFeatures();
+            featurePaths = discoverTests(filters, features);
+            if (featurePaths == null) {
                 return null;
-            } else {
-                logger.info("==== RUNNING {} TEST CASES: {}", featurePaths.size(), featurePaths);
             }
-
-            logger.info("===================== REGISTER CLIENTS ========================");
-            logger.info("Test subject: {}", config.getServerRoot());
-            if (config.getUserRegistrationEndpoint() != null) {
-                testSubject.registerUsers();
-            }
-            testSubject.registerClients();
-            testSubject.prepareServer();
+            setupTestHarness(features);
         } catch (TestHarnessInitializationException e) {
             logger.error("Cannot run test suites", e);
             return null;
         }
 
-        logger.info("===================== RUN TESTS ========================");
-        final TestSuiteResults results = testRunner.runTests(featurePaths, config.getMaxThreads());
-        reportGenerator.setResults(results);
-
-        if (!config.isSkipTearDown()) {
-            logger.info("===================== DELETING TEST RESOURCES ========================");
-            testSubject.tearDownServer();
-        }
+        final TestSuiteResults results = runTests(featurePaths, true);
 
         logger.info("===================== BUILD REPORTS ========================");
         final File outputDir = config.getOutputDirectory();
@@ -205,7 +176,94 @@ public class ConformanceTestHarness {
             logger.error("Failed to write reports", e);
         }
 
+        return results;
+    }
+
+    public TestSuiteResults runSingleTest(final String uri) {
+        try {
+            testSubject.loadTestSubjectConfig();
+            final Map<String, Boolean> features = testSubject.getTargetServer().getFeatures();
+            setupTestHarness(features);
+        } catch (TestHarnessInitializationException e) {
+            logger.error("Cannot run test", e);
+            return null;
+        }
+
+        return runTests(List.of(uri), false);
+    }
+
+    private List<String> discoverTests(final List<String> filters, final Map<String, Boolean> features) {
+        logger.info("===================== DISCOVER TESTS ========================");
+        // TODO: Consider running some initial tests to discover the features provided by a server
+        final List<String> featurePaths;
+        final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(features.keySet());
+        logger.info("==== TEST CASES FOUND: {} - {}", testCases.size(), testCases);
+
+        final List<IRI> filteredTestCases = testCases.stream()
+                .filter(tc -> filters == null || filters.isEmpty() ||
+                        filters.stream().anyMatch(f -> tc.stringValue().contains(f))
+                )
+                .collect(Collectors.toList());
+        logger.info("==== FILTERED TEST CASES: {} - {}", filteredTestCases.size(), filteredTestCases);
+
+        featurePaths = testSuiteDescription.locateTestCases(filteredTestCases);
+        if (featurePaths.isEmpty()) {
+            logger.warn("There are no tests available");
+            return null;
+        } else {
+            logger.info("==== RUNNING {} TEST CASES: {}", featurePaths.size(), featurePaths);
+        }
+        return featurePaths;
+    }
+
+    private void setupTestHarness(final Map<String, Boolean> features) {
+        logger.info("===================== REGISTER CLIENTS ========================");
+        logger.info("Test subject: {}", config.getServerRoot());
+        if (config.getUserRegistrationEndpoint() != null) {
+            registerUsers();
+        }
+        registerClients(features.getOrDefault("authentication", false));
+        testSubject.prepareServer();
+    }
+
+    private TestSuiteResults runTests(final List<String> featurePaths, final boolean enableReporting) {
+        logger.info("===================== RUN TESTS ========================");
+        final TestSuiteResults results = testRunner.runTests(featurePaths, config.getMaxThreads(), enableReporting);
+        reportGenerator.setResults(results);
+
+        if (!config.isSkipTearDown()) {
+            logger.info("===================== DELETING TEST RESOURCES ========================");
+            testSubject.tearDownServer();
+        }
         logger.info("{}", results);
         return results;
+    }
+
+    private void registerUsers() {
+        try {
+            authManager.registerUser(HttpConstants.ALICE);
+            authManager.registerUser(HttpConstants.BOB);
+        } catch (Exception e) {
+            throw (TestHarnessInitializationException) new TestHarnessInitializationException(
+                    "Failed to register users: %s", e.toString()
+            ).initCause(e);
+        }
+    }
+
+    private void registerClients(final boolean authRequired) {
+        clients = new HashMap<>();
+        config.getWebIds().keySet().forEach(user -> {
+            try {
+                clients.put(user, authManager.authenticate(user, authRequired));
+            } catch (Exception e) {
+                throw (TestHarnessInitializationException) new TestHarnessInitializationException(
+                        "Failed to register clients: %s", e.toString()
+                ).initCause(e);
+            }
+        });
+    }
+
+    public Map<String, SolidClient> getClients() {
+        return clients;
     }
 }

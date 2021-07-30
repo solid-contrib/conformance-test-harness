@@ -169,48 +169,59 @@ class SolidClientTest {
     }
 
     @Test
-    void getResourceAclLink() throws IOException, InterruptedException {
+    void getAclUriFromUri() throws IOException, InterruptedException {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204, Map.of(HttpConstants.HEADER_LINK,
                 List.of("<http://localhost:3000/test.acl>; rel=\"acl\"")));
         when(mockClient.head(any())).thenReturn(mockResponse);
 
         final SolidClient solidClient = new SolidClient(mockClient);
-        final URI uri = solidClient.getResourceAclLink(URI.create("http://localhost:3000/test"));
+        final URI uri = solidClient.getAclUri(URI.create("http://localhost:3000/test"));
         assertEquals(URI.create("http://localhost:3000/test.acl"), uri);
         verify(mockClient).head(URI.create("http://localhost:3000/test"));
     }
 
     @Test
-    void getResourceAclLinkFails() throws IOException, InterruptedException {
+    void getAclUriFails() throws IOException, InterruptedException {
         final Client mockClient = mock(Client.class);
         when(mockClient.head(any())).thenThrow(new IOException("Failed"));
 
         final SolidClient solidClient = new SolidClient(mockClient);
-        assertThrows(IOException.class, () -> solidClient.getResourceAclLink(URI.create("http://localhost:3000/test")));
+        assertThrows(IOException.class, () -> solidClient.getAclUri(URI.create("http://localhost:3000/test")));
     }
 
     @Test
-    void getAclLink() {
+    void getAclUriFromHeadersWAC() {
         final Map<String, List<String>> headerMap = Map.of("Link",
                 List.of("<http://localhost:3000/test.acl>; rel=\"acl\""));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
 
         final SolidClient solidClient = new SolidClient();
-        final URI uri = solidClient.getAclLink(headers);
+        final URI uri = solidClient.getAclUri(headers);
         assertEquals(URI.create("http://localhost:3000/test.acl"), uri);
     }
 
     @Test
-    void getAclLinkMissing() {
-        final HttpHeaders headers = HttpHeaders.of(Collections.emptyMap(), (k, v) -> true);
+    void getAclUriFromHeadersACP() {
+        final Map<String, List<String>> headerMap = Map.of("Link",
+                List.of("<http://localhost:3000/test?ext=acr>; rel=\"http://www.w3.org/ns/solid/acp#accessControl\""));
+        final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
 
         final SolidClient solidClient = new SolidClient();
-        assertNull(solidClient.getAclLink(headers));
+        final URI uri = solidClient.getAclUri(headers);
+        assertEquals(URI.create("http://localhost:3000/test?ext=acr"), uri);
     }
 
     @Test
-    void getAclLinkMultiple() {
+    void getAclUriMissing() {
+        final HttpHeaders headers = HttpHeaders.of(Collections.emptyMap(), (k, v) -> true);
+
+        final SolidClient solidClient = new SolidClient();
+        assertNull(solidClient.getAclUri(headers));
+    }
+
+    @Test
+    void getAclUriMultiple() {
         final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK, List.of(
                 "<http://localhost:3000/test.acl>; rel=\"acl\"",
                 "<http://localhost:3000/test.acl2>; rel=\"acl\""
@@ -218,7 +229,7 @@ class SolidClientTest {
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
 
         final SolidClient solidClient = new SolidClient();
-        final URI uri = solidClient.getAclLink(headers);
+        final URI uri = solidClient.getAclUri(headers);
         assertEquals(URI.create("http://localhost:3000/test.acl"), uri);
     }
 

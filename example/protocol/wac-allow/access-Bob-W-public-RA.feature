@@ -12,7 +12,7 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
             + createBobAccessToAuthorization(webIds.bob, resource.getUrl(), 'acl:Write')
             + createPublicAccessToAuthorization(resource.getUrl(), 'acl:Read, acl:Append')
           karate.log('ACL: ' + acl);
-          resource.setAcl(acl);
+          resource.setAccessDataset(acl);
         }
         return resource;
       }

@@ -25,33 +25,28 @@
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.solid.testharness.TestRunner;
-import org.solid.testharness.config.TestSubject;
+import org.solid.testharness.ConformanceTestHarness;
 import org.solid.testharness.reporting.TestSuiteResults;
 
 import javax.inject.Inject;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Tag("solid")
 @QuarkusTest
 public class TestScenarioRunner {
     @Inject
-    TestSubject testSubject;
-    @Inject
-    TestRunner testRunner;
+    ConformanceTestHarness conformanceTestHarness;
 
     @Test
     void testScenario() {
-        testSubject.loadTestSubjectConfig();
-        testSubject.registerClients();
-        testSubject.prepareServer();
-        final String featurePath = "example/content-negotiation/content-negotiation-turtle.feature";
+//        final String featurePath = "example/protocol/content-negotiation/content-negotiation-turtle.feature";
 //        final String featurePath = "example/writing-resource/containment.feature";
+        final String featurePath = "example/acp.feature";
         final String uri = Path.of(featurePath).toAbsolutePath().normalize().toUri().toString();
-        final TestSuiteResults results = testRunner.runTest(uri);
-        testSubject.tearDownServer();
+        final TestSuiteResults results = conformanceTestHarness.runSingleTest(uri);
         assertNotNull(results);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());
     }
