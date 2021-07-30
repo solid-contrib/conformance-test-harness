@@ -45,7 +45,7 @@ containing descriptions of the following Solid implementations:
 * CSS - [Community Solid Server](https://github.com/solid/community-server)
 * ESS (2 versions) - [Enterprise Solid Server](https://inrupt.com/products/enterprise-solid-server)
   * Access Control Policies (ACP)
-  * Compatibility mode for Web Access Controls (ACL)
+  * Compatibility mode for Web Access Controls (WAC)
 * NSS - [Node Solid Server] (https://github.com/solid/node-solid-server)
 * Other implementations will follow
 
@@ -329,7 +329,7 @@ Note that when you run the server in a container there are some important things
   being tested needs the same capability. For a Node based server this is done by adding `NODE_TLS_REJECT_UNAUTHORIZED=0`
   to the environment before running the server.
 
-### ESS (ACL compatibility mode)
+### ESS (WAC compatibility mode)
 Create a file for environment variables e.g. `ess-compat.env` with the following contents (based on the 
 client_credentials option):
 ```shell
@@ -412,14 +412,16 @@ cat > ./config/css-config.json <<EOF
     "files-scs:config/identity/handler/default.json",
     "files-scs:config/identity/ownership/token.json",
     "files-scs:config/identity/pod/static.json",
+    "files-scs:config/identity/registration/enabled.json",
     "files-scs:config/ldp/authentication/dpop-bearer.json",
     "files-scs:config/ldp/authorization/webacl.json",
     "files-scs:config/ldp/handler/default.json",
     "files-scs:config/ldp/metadata-parser/default.json",
     "files-scs:config/ldp/metadata-writer/default.json",
     "files-scs:config/ldp/permissions/acl.json",
-    "files-scs:config/storage/key-value/memory.json",
-    "files-scs:config/storage/resource-store/file.json",
+    "files-scs:config/storage/backend/memory.json",
+    "files-scs:config/storage/key-value/resource-store.json",
+    "files-scs:config/storage/middleware/default.json",
     "files-scs:config/util/auxiliary/acl.json",
     "files-scs:config/util/identifiers/suffix.json",
     "files-scs:config/util/index/default.json",
