@@ -3,11 +3,18 @@ prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 prefix spec: <http://www.w3.org/ns/spec#>
 
-<https://github.com/solid/web-access-control-spec>
+<https://solid.github.io/web-access-control-spec/>
   a spec:Specification ;
-  spec:requirement <https://github.com/solid/web-access-control-spec#modes-of-access> .
+  spec:requirement <https://solid.github.io/web-access-control-spec/#access-modes> ,
+                     <https://solid.github.io/web-access-control-spec/#access-objects>
+.
 
-<https://github.com/solid/web-access-control-spec#modes-of-access>
+<https://solid.github.io/web-access-control-spec/#access-modes>
+  a spec:NormativeRequirement ;
+  spec:conformanceRole spec:ServerConformanceClass ;
+  spec:normativeConformanceLevel spec:ConformanceMust .
+
+<https://solid.github.io/web-access-control-spec/#access-objects>
   a spec:NormativeRequirement ;
   spec:conformanceRole spec:ServerConformanceClass ;
   spec:normativeConformanceLevel spec:ConformanceMust .
