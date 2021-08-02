@@ -28,6 +28,7 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
+import org.solid.testharness.http.HttpUtils;
 
 import java.io.StringWriter;
 import java.net.MalformedURLException;
@@ -48,11 +49,8 @@ public final class TestUtils {
     }
 
     public static URI getPathUri(final String path) {
-        String uri = Path.of(path).toAbsolutePath().normalize().toUri().toString();
-        if (uri.endsWith("/")) {
-            uri = uri.substring(0, uri.length() - 1);
-        }
-        return URI.create(uri);
+        final String uri = Path.of(path).toAbsolutePath().normalize().toUri().toString();
+        return URI.create(HttpUtils.ensureNoSlashEnd(uri));
     }
 
     public static HttpResponse<Void> mockVoidResponse(final int status) {

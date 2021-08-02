@@ -225,6 +225,24 @@ class HttpUtilsTest {
     }
 
     @Test
+    void ensureSlashEnd() {
+        assertNull(HttpUtils.ensureSlashEnd(null));
+        assertEquals("/", HttpUtils.ensureSlashEnd(""));
+        assertEquals("/", HttpUtils.ensureSlashEnd("/"));
+        assertEquals("abc/", HttpUtils.ensureSlashEnd("abc"));
+        assertEquals("abc/", HttpUtils.ensureSlashEnd("abc/"));
+    }
+
+    @Test
+    void ensureNoSlashEnd() {
+        assertNull(HttpUtils.ensureNoSlashEnd(null));
+        assertEquals("", HttpUtils.ensureNoSlashEnd(""));
+        assertEquals("", HttpUtils.ensureNoSlashEnd("/"));
+        assertEquals("abc", HttpUtils.ensureNoSlashEnd("abc"));
+        assertEquals("abc", HttpUtils.ensureNoSlashEnd("abc/"));
+    }
+
+    @Test
     void encodeValue() {
         assertEquals("a+b", HttpUtils.encodeValue("a b"));
     }

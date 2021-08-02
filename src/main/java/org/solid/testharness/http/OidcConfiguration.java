@@ -38,7 +38,7 @@ public class OidcConfiguration {
     private List<String> grantTypesSupported = Collections.emptyList();
 
     public String getIssuer() {
-        return issuer != null && !issuer.endsWith("/") ? issuer + "/" : issuer;
+        return HttpUtils.ensureSlashEnd(issuer);
     }
 
     @JsonSetter("issuer")

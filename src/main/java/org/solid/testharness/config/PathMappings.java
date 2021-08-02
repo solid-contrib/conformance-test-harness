@@ -107,16 +107,13 @@ public interface PathMappings {
 
         @Override
         public String convert(final String value) {
-            String path;
+            final String path;
             if (value.matches("^(https?|file):/.*")) {
                 path = value;
             } else {
                 path = Path.of(value).toAbsolutePath().normalize().toUri().toString();
             }
-            if (path.endsWith("/")) {
-                path = path.substring(0, path.length() - 1);
-            }
-            return path;
+            return HttpUtils.ensureNoSlashEnd(path);
         }
     }
 
@@ -125,11 +122,7 @@ public interface PathMappings {
 
         @Override
         public String convert(final String value) {
-            if (value.endsWith("/")) {
-                return value.substring(0, value.length() - 1);
-            } else {
-                return value;
-            }
+            return HttpUtils.ensureNoSlashEnd(value);
         }
     }
 }

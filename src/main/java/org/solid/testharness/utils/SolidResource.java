@@ -88,19 +88,16 @@ public class SolidResource {
         return url != null;
     }
 
-    public boolean setAccessDataset(final String acl) throws Exception {
-        if (Boolean.FALSE.equals(aclLinkAvailable)) return false;
-        final String url = getAclUrl();
-        if (url == null) return false;
-        return solidClient.createAcl(URI.create(url), acl);
-    }
-
     public String getUrl() {
         return url != null ? url.toString() : null;
     }
 
     public String getPath() {
         return url != null ? url.getPath() : null;
+    }
+
+    public String getContentAsTurtle() throws Exception {
+        return url != null ? solidClient.getContentAsTurtle(url) : "";
     }
 
     public boolean isContainer() {
@@ -131,12 +128,15 @@ public class SolidResource {
         return aclUrl != null ? aclUrl.toString() : null;
     }
 
-    public String getContentAsTurtle() throws Exception {
-        return url != null ? solidClient.getContentAsTurtle(url) : "";
-    }
-
     public String getAccessDataset() throws Exception {
         return getAclUrl() != null ? solidClient.getAcl(aclUrl) : "";
+    }
+
+    public boolean setAccessDataset(final String acl) throws Exception {
+        if (Boolean.FALSE.equals(aclLinkAvailable)) return false;
+        final String url = getAclUrl();
+        if (url == null) return false;
+        return solidClient.createAcl(URI.create(url), acl);
     }
 
     public void delete() throws Exception {
