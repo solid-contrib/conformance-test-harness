@@ -86,6 +86,186 @@ origin: https://test    # default = https://tester, origin used for OIDC registr
 
 ## 3. Environment Variables
 
+The CTH execution can be controlled through the configuration of environment variables that are stored in a `.env` file.
+
+### Server
+The CTH needs to know the root URL of the server being tested and the path to the container in which test files
+will be created. It can also create a root ACL if the filesystem is initially open:
+```
+# Server Configuration
+RESOURCE_SERVER_ROOT=	# e.g., https://pod.inrupt.com or https://pod-user.inrupt.net
+TEST_CONTAINER=         # e.g., pod-user/test or test
+SETUPROOTACL=           # boolean this tells the server to setup an ACL on the root
+```
+These are used to construct the root location for any files created and destroyed by the tests (e.g., `https://pod.inrupt.com/pod-user/test/` or `https://pod-user.inrupt.net/test`).
+
+There are 2 reasons that the test container is defined in this way:
+1. Different implementations construct the Pod location from the WebID in different ways, as in the 2 examples above.
+2. If tests were run in the Pod owned by the `alice` user, the test container could be created by the CTH but
+   this is not possible if you are using a WebID from a different server's IdP. In this case, you need to grant the test 
+   user full access to a container in which files can be created. 
+
+### Authentication
+There are 4 options for obtaining authentication access tokens when running tests:
+1. Client credentials.
+2. Refresh tokens.
+3. Session-based login.
+4. Register users locally (and login during the authorization code request).
+
+**Note**: For each option, a `SOLID_IDENTITY_PROVIDER` environment variable needs to be configured that provides the URL of the Solid Identity Provider.
+
+#### 1. Client Credentials
+The simplest authentication mechanism is based on the Solid Identity Provider offering the
+client credentials authorization flow and requires the users to be pre-registered.
+
+This mechanism works well in CI environments where the credentials can be passed in as secrets.
+
+For each user, the following configuration information is required:
+* WebID (used as the Client Id).
+* Client Secret.
+
+The required environment variables are:
+```shell
+# Authentication Configuration - Client Credentials
+SOLID_IDENTITY_PROVIDER=	# e.g., https://broker.pod.inrupt.com
+USERS_ALICE_WEBID=
+USERS_ALICE_CLIENTSECRET=
+USERS_BOB_WEBID=
+USERS_BOB_CLIENTSECRET=
+```
+
+**Note**: The access tokens provided cause a 500 error on NSS so session based login is the only
+option for that server.
+
+#### 2. Refresh Tokens
+This relies on getting a refresh token from an IdP (e.g., https://broker.pod.inrupt.com/) and
+exchanging that for an access token in order to run the tests. 
+
+This process requires a user to go the broker's web page, log in, and authorize the application. Also, the
+refresh tokens expire and would need to be recreated regularly which makes it unsuitable for a CI environment.
+
+The refresh token can be created using a
+simple bootstrap process:
+```shell
+npx @inrupt/generate-oidc-token
+```
+
+For each user, the following configuration information is required:
+* WebID.
+* Client Id.
+* Client Secret.
+* Refresh Token.
+
+The required environment variables are:
+```shell
+# Authentication Configuration - Refresh Tokens
+SOLID_IDENTITY_PROVIDER=	# e.g., https://broker.pod.inrupt.com
+USERS_ALICE_WEBID=
+USERS_ALICE_REFRESHTOKEN=
+USERS_ALICE_CLIENTID=
+USERS_ALICE_CLIENTSECRET=
+USERS_BOB_WEBID=
+USERS_BOB_REFRESHTOKEN=
+USERS_BOB_CLIENTID=
+USERS_BOB_CLIENTSECRET=
+```
+
+**Note**: This mechanism will not work for NSS until support for refresh tokens is added:
+See https://github.com/solid/node-solid-server/issues/1533.
+
+#### 3. Session-based Login 
+Some IdPs make it easy to authenticate without a browser by supporting form based login and sessions. The CTH
+has the capability to use this mechanism to login and get access tokens but the users must have some additional data 
+added to their profiles.  
+
+**Notes**: These updates assume the Profile document contains prefixes:
+```
+@prefix solid: <http://www.w3.org/ns/solid/terms#>.
+@prefix acl: <http://www.w3.org/ns/auth/acl#>.
+```
+* Set the Origin as a Trusted App:
+    ```
+    :me acl:trustedApp [
+        acl:mode acl:Read, acl:Write;
+        acl:origin <https://tester>  # or whatever origin is defined in the test harness configuration
+    ];
+    ```
+* Solid Identity Provider: (where the URL is the IdP of this account):
+    ```
+    :me solid:oidcIssuer <https://inrupt.net/>;
+    ```
+    **Note**: By default, NSS does not add this to new profiles.
+
+For each user, the following configuration information is required:
+* WebID.
+* Username.
+* Password.
+
+A URL for the login form is also required. 
+
+The required environment variables are:
+```shell
+# Authentication Configuration - Session-based Login
+SOLID_IDENTITY_PROVIDER=	# e.g., https://inrupt.net
+LOGIN_ENDPOINT=		        # e.g., https://inrupt.net/login/password
+USERS_ALICE_WEBID=
+USERS_ALICE_USERNAME=
+USERS_ALICE_PASSWORD=
+USERS_BOB_WEBID=
+USERS_BOB_USERNAME=
+USERS_BOB_PASSWORD=
+ORIGIN=                     # optional as it defaults to https://tester
+```
+
+This mechanism will work in CI environments where the credentials can be passed in as secrets.
+
+#### 4. Register Users Locally
+If an implementation supports user registration, including creating a Pod, then the harness can use this to create the
+users before running the tests. This can be very useful in a CI environment where the server is created and destroyed
+during the process.
+
+**Note**: There is no standard for this process, so the current implementation only works with CSS. Other
+implementations will be added as required.
+
+For each user, the following configuration information is required:
+* Username.
+* Password.
+
+A URL for the user registration form is also required.
+
+The required environment variables are:
+```shell
+# Authentication Configuration - Register Users Locally
+SOLID_IDENTITY_PROVIDER=	# e.g., https://inrupt.net
+USER_REGISTRATION_ENDPOINT=	# e.g., https://localhost:3000/idp/register
+USERS_ALICE_WEBID=
+USERS_ALICE_USERNAME=
+USERS_ALICE_PASSWORD=
+USERS_BOB_WEBID=
+USERS_BOB_USERNAME=
+USERS_BOB_PASSWORD=
+ORIGIN=                     # optional as it defaults to https://tester
+ ```
+
+This mechanism will work in CI environments where the credentials can be passed in as secrets.
+
+## 4. Command Line Options
+
+The command line options are:
+```
+usage: run
+    --coverage       produce a coverage report
+ -f,--filter <arg>   feature filter(s)
+ -h,--help           print this message
+ -o,--output <arg>   output directory
+    --skip-teardown  skip teardown (when server itself is being stopped)
+ -s,--source <arg>   URL or path to test source(s)
+    --subjects <arg> URL or path to test subject config (Turtle)
+ -t,--target <arg>   target server
+    --tests          produce test and coverage reports
+```
+If neither `--coverage` nor `--tests` is specified then the default action is to run the tests and produce both reports.
+
 ### Logging
 By default, the CTH only provides minimal logging. If you want to see the HTTP request/response exchanges in
 the logs, you can set `DEBUG` level for the categories shown below:
@@ -94,8 +274,9 @@ the logs, you can set `DEBUG` level for the categories shown below:
 * `org.solid.testharness.http.Client` - HTTP interactions during container and resource set up.
 * `org.solid.testharness.http.AuthManager` - HTTP interactions during the authentication flow before testing starts.
 
-In the environment file this looks like this:
+In the environment file, this looks like this:
 ```
+# Logging Levels
 quarkus.log.category."com.intuit.karate".level=DEBUG
 quarkus.log.category."org.solid.testharness.http.Client".level=DEBUG
 quarkus.log.category."org.solid.testharness.http.AuthManager".level=DEBUG
@@ -125,164 +306,9 @@ This results in a log entry such as:
 By default, the CTH will run tests in parallel, defaulting to 8 threads. You can either override this in the 
 YAML config file as mentioned previously, or you can do it with environment variables. For example:
 ```
+# Parallel Testing
 MAXTHREADS=2
 ```
-
-### Server
-The CTH needs to know the root URL of the server being tested and the path to the container in which test files
-will be created. It can also create a root ACL if the filesystem is initially open:
-```
-RESOURCE_SERVER_ROOT=	# e.g., https://pod.inrupt.com or https://pod-user.inrupt.net
-TEST_CONTAINER=         # e.g., pod-user/test or test
-SETUPROOTACL=           # boolean this tells the server to setup an ACL on the root
-```
-These are used to construct the root location for any files created and destroyed by the tests (e.g., `https://pod.inrupt.com/pod-user/test/` or `https://pod-user.inrupt.net/test`).
-
-There are 2 reasons that the test container is defined like this:
-1. Different implementations construct the Pod location from the WebID in different ways, as in the 2 examples above.
-2. If tests were run in the Pod owned by the `alice` user, the test container could be created by the CTH but
-   this is not possible if you are using a WebID from a different server's IdP. In this case, you need to grant the test 
-   user full access to a container in which files can be created. 
-
-### Authentication
-The following are mandatory settings for all authentication mechanisms:
-```shell
-SOLID_IDENTITY_PROVIDER=	# e.g. https://inrupt.net or https://broker.pod.inrupt.com
-USERS_ALICE_WEBID=
-USERS_BOB_WEBID=
-```
-
-There are 4 options for obtaining access tokens when running tests:
-1. Client credentials.
-2. Refresh tokens.
-3. Session-based login.
-4. Register users locally (and login during the authorization code request).
-
-#### 1. Client Credentials
-The simplest authentication mechanism is based on the Solid Identity Provider offering the
-client credentials authorization flow and requires the users to be pre-registered.
-
-The configuration that must be saved for each user is:
-* WebID (used as the Client Id).
-* Client Secret.
-
-The additional environment variables required are:
-```shell
-USERS_ALICE_CLIENTSECRET=
-USERS_BOB_CLIENTSECRET=
-```
-
-This mechanism works well in CI environments where the credentials can be passed in as secrets.
-
-**Note**: The access tokens provided seem to cause a 500 error on NSS so session based login is the only
-option for that server.
-
-#### 2. Refresh Tokens
-This relies on getting a refresh token from an IdP (e.g., https://broker.pod.inrupt.com/) and
-exchanging that for an access token in order to run the tests. The refresh token can be created using a
-simple bootstrap process:
-```shell
-npx @inrupt/generate-oidc-token
-```
-
-The configuration that must be saved for each user is:
-* Client Id.
-* Client Secret.
-* Refresh Token.
-
-The additional environment variables required are:
-```shell
-USERS_ALICE_REFRESHTOKEN=
-USERS_ALICE_CLIENTID=
-USERS_ALICE_CLIENTSECRET=
-USERS_BOB_REFRESHTOKEN=
-USERS_BOB_CLIENTID=
-USERS_BOB_CLIENTSECRET=
-```
-
-Unfortunately, this process requires a user to go the broker's web page, log in, and authorize the application. Also, the
-refresh tokens expire and would need to be recreated regularly which makes it unsuitable for a CI environment.
-
-**Note**: This mechanism will not work for NSS until support for refresh tokens is added:
-See https://github.com/solid/node-solid-server/issues/1533.
-
-#### 3. Session-based Login 
-Some IdPs make it easy to authenticate without a browser by supporting form based login and sessions. The CTH
-has the capability to use this mechanism to login and get access tokens but the users must have some additional data 
-added to their profiles.  
-
-* Trusted app:
-    ```
-    :me acl:trustedApp [
-    acl:mode acl:Read, acl:Write;
-    acl:origin <https://tester>  # or whatever origin is defined in the test harness configuration
-    ];
-    ```
-* Solid Identity Provider: (where the URL is the IdP of this account). NSS does not add this to new profiles by default:
-    ```
-    :me solid:oidcIssuer <https://inrupt.net/>;
-    ```
-
-The configuration that must be saved for each user is:
-* Username.
-* Password.
-
-A URL for the login form is also required. 
-
-The additional environment variables required are:
-```shell
-LOGIN_ENDPOINT=		# e.g. https://inrupt.net/login/password
-USERS_ALICE_USERNAME=
-USERS_ALICE_PASSWORD=
-USERS_BOB_USERNAME=
-USERS_BOB_PASSWORD=
-ORIGIN=             # optional as it defaults to https://tester
-```
-
-This mechanism will work in CI environments where the credentials can be passed in as secrets.
-
-#### 4. Register Users Locally
-If an implementation supports user registration (including creating a Pod) then the harness can use this to create the
-users before running the tests. This can be very useful in a CI environment where the server is created and destroyed
-during the process.
-
-**Note**: There is no standard for this process, so the current implementation only works with CSS. Other
-implementations will be added as required.
-
-The configuration that must be saved for each user is:
-* Username.
-* Password.
-
-A URL for the user registration form is also required.
-
-The additional environment variables required are:
-```shell
-USER_REGISTRATION_ENDPOINT=		# e.g. https://localhost:3000/idp/register
-USERS_ALICE_USERNAME=
-USERS_ALICE_PASSWORD=
-USERS_BOB_USERNAME=
-USERS_BOB_PASSWORD=
-ORIGIN=                         # optional as it defaults to https://tester
- ```
-
-This mechanism will work in CI environments where the credentials can be passed in as secrets.
-
-## 4. Command Line Options
-
-The command line options are:
-```
-usage: run
-    --coverage       produce a coverage report
- -f,--filter <arg>   feature filter(s)
- -h,--help           print this message
- -o,--output <arg>   output directory
-    --skip-teardown  skip teardown (when server itself is being stopped)
- -s,--source <arg>   URL or path to test source(s)
-    --subjects <arg> URL or path to test subject config (Turtle)
- -t,--target <arg>   target server
-    --tests          produce test and coverage reports
-```
-If neither `--coverage` nor `--tests` is specified then the default action is to run the tests and produce both reports.
 
 # Execution
 The CTH can be executed both locally and within a Docker Container.
@@ -335,7 +361,7 @@ The following examples demonstrate how a script can work with the Docker image a
 1. A Solid server running in a Docker container.
 1. A publicly available Solid server with user supplied tests and configuration.
 
-#### Example: Using Publicly Available Solid Server
+#### Example: Using a publicly available Solid Server
 Executes tests against a publicly available server, in this case ESS in WAC compatibility mode (https://pod-compat.inrupt.com).
 
 1. Create a file for environment variables (e.g., `ess-compat.env`) with the following contents (based on the 
@@ -371,7 +397,7 @@ Executes tests against a publicly available server, in this case ESS in WAC comp
 **Note**: To run against the ESS (ACP) version, you would just need to supply a different environment file and set the target as
 `ess`.
 
-#### Example: Using Solid Server in a Docker Container
+#### Example: Using a Solid Server in a Docker Container
 Some Solid servers (e.g., CSS) can be run in a Docker container. 
 
 1. This example assumes you have an image of CSS available. If it has not been published, you can build your own:
@@ -383,7 +409,6 @@ Some Solid servers (e.g., CSS) can be run in a Docker container.
     **Note**: When using a container, you can't use http://localhost:3000 as this will not be accessible to the CTH
     container. Once you switch to a named container, you will also need to switch to `https` and add a self-signed certificate
     due to restrictions with DPoP.`
-
 1. Create a file for environment variables (e.g., `css.env`) with the following contents (based on the local user registration
 option):
     ```shell
@@ -398,8 +423,6 @@ option):
     RESOURCE_SERVER_ROOT=           # e.g. https://server
     TEST_CONTAINER=                 # e.g. /alice/
     ```
-
-    
 1. Create a script based on the following:
     ```shell
     #!/bin/bash
@@ -497,11 +520,10 @@ option):
     docker rm server
     docker network rm testnet
     ```
-
 1. Run this script.
 1. The reports will be created in the specified directory.
 
-#### Example: Using Publicly Available Solid Server Providing your own tests and configuration
+#### Example: Using a publicly available Solid Server providing your own tests and configuration
 To use the Docker image to run a set of local tests:
 1. Create a directory such as `tests`. This directory should contain the tests, manifest files, and a test subject configuration file. For example:
     * `protocol/test.feature`.
@@ -534,7 +556,7 @@ To use the Docker image to run a set of local tests:
         --output=/reports --target=ess-compat
     ```
   
-## Local execution
+## Local Execution
 The CTH is packaged into a single, executable jar which is available as an asset in the release within GitHub:
 https://github.com/solid/conformance-test-harness/releases. The only dependency is on Java 11.
 
