@@ -408,7 +408,8 @@ Some Solid servers (e.g., CSS) can be run in a Docker container.
     ```
     **Note**: When using a container, you can't use http://localhost:3000 as this will not be accessible to the CTH
     container. Once you switch to a named container, you will also need to switch to `https` and add a self-signed certificate
-    due to restrictions with DPoP.`
+    due to restrictions with DPoP. Additionally you will need to add `server` as an alias for `localhost` in your `/etc/hosts`
+    file.
 1. Create a file for environment variables (e.g., `css.env`) with the following contents (based on the local user registration
 option):
     ```shell
@@ -437,10 +438,11 @@ option):
     {
     "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^1.0.0/components/context.jsonld",
     "import": [
-        "files-scs:config/app/app/default.json",
+        "files-scs:config/app/main/default.json",
         "files-scs:config/app/init/default.json",
         "files-scs:config/http/handler/default.json",
         "files-scs:config/http/middleware/websockets.json",
+        "files-scs:config/http/server-factory/websockets.json",
         "files-scs:config/http/static/default.json",
         "files-scs:config/identity/email/default.json",
         "files-scs:config/identity/handler/default.json",
