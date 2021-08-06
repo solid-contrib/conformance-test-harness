@@ -14,11 +14,11 @@ The Conformance Test Harness (CTH) is used to run Solid conformance tests agains
 - [Component Architecture](#component-architecture)
 - [Writing Tests](#writing-tests)
 - [Release Process:](#release-process)
-    - [1. Checkout](#1.-checkout)
-    - [2. Setting up the Environment](#2.-setting-up-the-environment)
-    - [3. Build and Test](#3.-build-and-test)
-    - [4. Docker Image](#4.-docker-image)
-    - [5. Package](#5.-package)
+    - [1. Checkout](#1-checkout)
+    - [2. Setting up the Environment](#2-setting-up-the-environment)
+    - [3. Build and Test](#3-build-and-test)
+    - [4. Docker Image](#4-docker-image)
+    - [5. Package](#5-package)
 
 <!-- /MarkdownTOC -->
 
@@ -92,29 +92,30 @@ git clone git@github.com:solid/conformance-test-harness.git
 
 ### 2. Setting up the Environment
 There are 4 important settings:
-* `target` - The IRI of the target server, used to select the server configuration from the configuration file.
-* `subjects` - The location of the file describing test subjects.
-* `sources` - The locations of annotated Solid specification documents that list the test cases to be run.
-* `mappings` - Maps test cases IRIs to a local file system (there can be multiple mappings). Mappings should be
+1. `target` - The IRI of the target server, used to select the server configuration from the configuration file.
+1. `subjects` - The location of the file describing test subjects.
+1. `sources` - The locations of annotated Solid specification documents that list the test cases to be run.
+1. `mappings` - Maps test cases IRIs to a local file system (there can be multiple mappings). Mappings should be
   ordered so the most specific is first. This allows individual files to be mapped separately from their containing
   directories.
 
-There are 2 ways to set these properties. Firstly, you can provide `config/application.yaml` in the working directory
+To set these properties, you can provide `config/application.yaml` in the working directory
 containing:
 ```yaml
 target: TARGET_SERVER_IRI
 subjects: PATH_TO_SUBJECTS_DOC
 sources:
-	- PATH_TO_SPECIFATION_DOC
-	- PATH_TO_SPECIFATION_DOC
+  - PATH_TO_SPECIFATION_DOC
+  - PATH_TO_SPECIFATION_DOC
 mappings:
-- prefix: https://github.com/solid/conformance-test-harness/example
-  path: example
+  - prefix: https://github.com/solid/conformance-test-harness/example
+    path: example
 ```
-This method works well when running your tests in an IDE as it doesn't require anything adding to the command line.
+This method works well when running your tests in an Integrated Development Environemnt (IDE) as it doesn't require anything adding to the command line.
 
-Alternatively, you can set these as command line options as described later. There is an additional option for use
-during development - you can select a target using:
+Alternatively, you can set these as command line options as described later. 
+
+**Note**: During development, you can select a target using:
 ```
 -Dtarget=TARGET_SERVER_IRI
 ``` 
@@ -132,12 +133,11 @@ To run the test suite with the default target server as defined in `config/appli
 ```
 To run the test suite with a specific target server:
 ```shell
-./mvnw test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/ess-compat
 ./mvnw test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/css
 ./mvnw test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/nss
 ```
 
-Using an Integrated Development Environemnt (IDE), you can also run a specific scenario by editing the TestScenarioRunner and then running it as you would any
+Using an IDE, you can also run a specific scenario by editing the TestScenarioRunner and then running it as you would any
 unit test:
 ```java
 String featurePath = "classpath:writing-resource/containment.feature";
