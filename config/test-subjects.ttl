@@ -10,19 +10,6 @@ prefix earl: <http://www.w3.org/ns/earl#>
 prefix solid: <http://www.w3.org/ns/solid/terms#>
 prefix dcterms: <http://purl.org/dc/terms/>
 
-<ess-compat>
-    a earl:Software, earl:TestSubject ;
-    doap:name "Enterprise Solid Server (Web Access Control version)";
-    doap:release [
-        doap:name "ESS 1.1.2";
-        doap:revision "1.1.2";
-        doap:created "2021-05-24"^^xsd:date
-    ];
-    doap:developer <https://inrupt.com/profile/card/#us>;
-    doap:homepage <https://inrupt.com/products/enterprise-solid-server>;
-    doap:description "A production-grade Solid server produced and supported by Inrupt."@en;
-    doap:programming-language "Java" ;
-    solid-test:features "authentication", "acl", "wac-allow" .
 
 <ess>
     a earl:Software, earl:TestSubject ;
