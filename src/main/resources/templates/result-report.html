@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html prefix="{prefixes}">
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
     <title>Solid Specification - Conformance Test Suite Results</title>
@@ -9,9 +9,16 @@
     {#include js /}
 </head>
 
-<body about="{subject}">
-<h1>Solid Specification - Conformance Test Suite Results</h1>
+<body about="" prefix="{prefixes}">
+<main>
+<article>
+<h1 id="dcterms:title">Solid Specification - Conformance Test Suite Results</h1>
+
+{#include document-identifier /}
+
+<div datatype="rdf:HTML" property="dcterms:description">
 {#include specification-header /}
+
 {#if assertor}
 {#with assertor}{#include assertor /}{/with}
 {/if}
@@ -20,62 +27,68 @@
 {#with testSuiteResults}{#include results-summary /}{/with}
 {/if}
 
-<main>
-<article>
     {#if specifications??}
-    <h2>Results by specification requirement</h2>
+    <section id="results-by-specification-requirement" rel="dcterms:hasPart" resource="#results-by-specification-requirement">
+    <h2 property="dcterms:title">Results by specification requirement</h2>
+    <div datatype="rdf:HTML" property="dcterms:description">
+    <ul>
     {#each specifications.orEmpty}
-    <section about="{it.subject}" class="spec">
+    <li rel="dcterms:hasPart" resource="{it.subject}" class="spec">
         {#if it.specificationRequirements}
         {#let specLink=it.subject}
         {#each it.specificationRequirements}
-        <div rel="spec:requirement">
         {#include requirement}
             {#if it.testCases}
-            <table about="{it.subject}">
+            <table rel="spec:requirement" resource="{it.subject}">
+                <caption>Test cases</caption>
+                <thead>
                 <tr>
                     <th class="title">Title</th>
                     <th class="details">Details</th>
                     <th class="outcome">Outcome</th>
                     <th class="scenarios">Test Scenarios</th>
                 </tr>
+                </thead>
+                <tbody>
                 {#each it.testCases}
                 {#include testcase coverageMode=false /}
                 {/each}
+                </tbody>
             </table>
             {#else}
-            <p>No test cases found</p>
+            <p>No test cases found.</p>
             {/if}
         {/include}
-        </div>
-        <br/>
         {/each}
         {/let}
         {#else}
         <p>No tests were discovered.</p>
         {/if}
-    </section>
+    </li>
     {/each}
+    </ul>
+    </div>
+    </section>
     {/if}
 
     {#if testCases}
-    <section>
-        <h2>Results by test case</h2>
+    <section id="results-by-test-case" rel="dcterms:hasPart" resource="#results-by-test-case">
+        <h2 property="dcterms:title">Results by test case</h2>
+        <div datatype="rdf:HTML" property="dcterms:description">
         {#for testCase in testCases}
         {#if testCase.scenarios}
-        <section about="{testCase.subject}">
+        <section id="---TODO---" about="{testCase.subject}">
             <h3>{testCase.title}</h3>
-            <section rel="dcterms:hasPart">
                 {#each testCase.scenarios}
                 {#include scenario /}
                 {/each}
-            </section>
         </section>
         {/if}
         {/for}
+        </div>
     </section>
     {/if}
-
+</div>
 </article>
 </main>
 </body>

@@ -1,16 +1,16 @@
-<h2>Test subject</h2>
-<section about="{subject}" typeof="{typesList}">
+<section about="{subject}" id="test-subject" typeof="{typesList}">
+    <h2>Test subject</h2>
     <dl><dt>Name</dt><dd property="doap:name">{softwareName}</dd></dl>
     <dl><dt>Description</dt><dd property="doap:description">{description}</dd></dl>
-    <dl><dt>By</dt><dd><a href="{developer}" rel="doap:developer" title="Software developer">{developer}</a></dd></dl>
-    <dl><dt>Homepage</dt><dd><a href="{homepage}" rel="doap:homepage" title="Software homepage">{homepage}</a></dd></dl>
+    <dl><dt>Developer</dt><dd><a href="{developer}" rel="doap:developer">{developer}</a></dd></dl>
+    <dl><dt>Homepage</dt><dd><a href="{homepage}" rel="doap:homepage">{homepage}</a></dd></dl>
     <dl><dt>Programming Language</dt><dd property="doap:programming-language">{programmingLanguage}</dd></dl>
     <dl>
         <dt>Version</dt>
-        <dd property="doap:release" resource="_:rel">
-            <span about="_:rel" property="doap:name">{releaseName}</span>
-            <time about="_:rel" datatype="xsd:date" datetime="{createdDate}" property="doap:created"> ({createdDate})</time>
-            <span about="_:rel" property="doap:revision" content="{revision}"></span>
+        <dd rel="doap:release" resource="#test-subject-release">
+            <span property="doap:name">{releaseName}</span>
+            (<time datatype="xsd:date" datetime="{createdDate}" property="doap:created">{createdDate}</time>)
+            <span content="{revision}" property="doap:revision"></span>
         </dd>
     </dl>
 </section>

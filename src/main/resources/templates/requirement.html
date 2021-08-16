@@ -1,8 +1,7 @@
 {#with it}
-<div class="splitBox" about="{subject}" typeof="{typesList}">
-  <div class="col">
-    <dl><dt>Specification</dt><dd><a href="{specLink}" title="Specification link">{specLink}</a></dd></dl>
-    <dl><dt>Requirement</dt><dd><a href="{subject}" title="Requirement link">{subject}</a></dd></dl>
+<div rel="dcterms:hasPart" resource="{subject}" typeof="{typesList}">
+    <dl><dt>Specification</dt><dd><a href="{specLink}">{specLink}</a></dd></dl>
+    <dl><dt>Requirement</dt><dd><a href="{subject}">{subject}</a></dd></dl>
     <dl>
       <dt>Conformance Role</dt>
       <dd rel="spec:conformanceRole" resource="{conformanceRole}">
@@ -21,13 +20,9 @@
         {/switch}
       </dd>
     </dl>
-  </div>
-  <div class="col">
     {#if excerpt}
     <dl><dt>Excerpt</dt><dd property="spec:excerpt">{excerpt}</dd></dl>
     {/if}
-  </div>
 </div>
 {/with}
 {#insert/}
-

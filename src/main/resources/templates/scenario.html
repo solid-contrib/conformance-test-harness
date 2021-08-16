@@ -1,30 +1,37 @@
 {#with it}
-<div id="scenario-{it.anchor}" about="{subject}" typeof="{typesList}">
-    <dl><dt>Scenario</dt><dd property="dcterms:title">{title}</dd></dl>
+<section id="{it.anchor}" rel="dcterms:hasPart" resource="{subject}" typeof="{typesList}">
+    <h4 property="dcterms:title">{title}</h4>
+    <dl><dt>Scenario</dt><dd>{subject}</dd></dl>
     <dl><dt>Script location</dt><dd rel="prov:used" resource="{used}" title="{used}">{used}</dd></dl>
     <dl><dt>Start</dt><dd><time datatype="xsd:dateTime" datetime="{startTime}" property="prov:startedAtTime">{startTime}</time></dd></dl>
     <dl><dt>End</dt><dd><time datatype="xsd:dateTime" datetime="{endTime}" property="prov:endedAtTime">{endTime}</time></dd></dl>
-    <dl><dt>Outcome</dt><dd rel="prov:generated" resource="{generatedOutput.subject}">
-        <span about="{generatedOutput.subject}" typeof="{generatedOutput.typesList}" rel="prov:value" resource="{generatedOutput.value}"></span>
-        <time about="{generatedOutput.subject}" property="prov:generatedAtTime" datatype="xsd:dateTime" datetime="{generatedOutput.timestamp}"/>
+    <dl><dt>Outcome</dt><dd rel="prov:generated" resource="{generatedOutput.subject}" typeof="{generatedOutput.typesList}">
+        <span rel="prov:value" resource="{generatedOutput.value}">
         {#switch generatedOutput.value}
         {#case 'http://www.w3.org/ns/earl#passed'}✔
         {#case 'http://www.w3.org/ns/earl#failed'}✗
         {#else}o
         {/switch}
+        </span>
+        <span content="{generatedOutput.timestamp}" datatype="xsd:dateTime" property="prov:generatedAtTime"></span>
     </dd></dl>
     {#if steps}
-    <table rel="dcterms:hasPart" inlist="">
+    <table>
+        <caption>Scenario data</caption>
+        <thead>
         <tr>
             <th>Step</th>
             <th>Location</th>
             <th>Outcome</th>
             <th>Info</th>
         </tr>
+        </thead>
+        <tbody>
         {#each steps}
         {#include step /}
         {/each}
+        </tbody>
     </table>
     {/if}
-</div>
+</section>
 {/with}
