@@ -33,7 +33,7 @@
         <jacoco-plugin.version>0.8.7</jacoco-plugin.version>
 
         <!-- dependencies -->
-        <quarkus.version>2.1.1.Final</quarkus.version>
+        <quarkus.version>2.1.3.Final</quarkus.version>
         <karate.version>1.0.1</karate.version>
         <hamcrest.version>2.2</hamcrest.version>
         <rdf4j.version>3.7.2</rdf4j.version>
