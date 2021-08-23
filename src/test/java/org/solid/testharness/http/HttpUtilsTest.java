@@ -49,7 +49,7 @@ class HttpUtilsTest {
 
     @Test
     void newRequestBuilder() {
-        final HttpRequest request = HttpUtils.newRequestBuilder(URI.create("http://example.org")).build();
+        final HttpRequest request = HttpUtils.newRequestBuilder(URI.create("https://example.org")).build();
         assertEquals("AGENT", request.headers().firstValue(HttpConstants.USER_AGENT).get());
     }
 

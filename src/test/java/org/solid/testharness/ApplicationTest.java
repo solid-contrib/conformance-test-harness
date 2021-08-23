@@ -171,8 +171,8 @@ class ApplicationTest {
     void targetIri() throws Exception {
         final TestSuiteResults results = mockResults(0);
         when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
-        assertEquals(0, application.run("--tests", "--target", "http://example.org/test"));
-        verify(config).setTestSubject(iri("http://example.org/test"));
+        assertEquals(0, application.run("--tests", "--target", "https://example.org/test"));
+        verify(config).setTestSubject(iri("https://example.org/test"));
     }
 
     @Test

@@ -26,6 +26,7 @@ package org.solid.testharness.http;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import org.junit.jupiter.api.Test;
+import org.solid.testharness.accesscontrol.AccessDataset;
 import org.solid.testharness.config.ConfigTestNormalProfile;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 import org.solid.testharness.utils.TestUtils;
@@ -213,6 +214,63 @@ class SolidClientTest {
     }
 
     @Test
+    void getAclUriFromHeadersWrongLink() {
+        final Map<String, List<String>> headerMap = Map.of("Link",
+                List.of("<http://localhost:3000/test?ext=acr>; rel=\"https://example.org\""));
+        final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
+
+        final SolidClient solidClient = new SolidClient();
+        assertNull(solidClient.getAclUri(headers));
+    }
+
+    @Test
+    void getAclTypeWAC() throws IOException, InterruptedException {
+        final Client mockClient = mock(Client.class);
+        final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204);
+        when(mockClient.head(any())).thenReturn(mockResponse);
+
+        final SolidClient solidClient = new SolidClient(mockClient);
+        final String mode = solidClient.getAclType(URI.create("http://localhost:3000/test.acl"));
+        assertEquals("WAC", mode);
+    }
+
+    @Test
+    void getAclTypeACP() throws IOException, InterruptedException {
+        final Client mockClient = mock(Client.class);
+        final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204, Map.of(HttpConstants.HEADER_LINK,
+                List.of("<http://www.w3.org/ns/solid/acp#AccessControlResource>; rel=\"type\"")));
+        when(mockClient.head(any())).thenReturn(mockResponse);
+
+        final SolidClient solidClient = new SolidClient(mockClient);
+        final String mode = solidClient.getAclType(URI.create("http://localhost:3000/test.acl"));
+        assertEquals("ACP", mode);
+    }
+
+    @Test
+    void getAclTypeWrongRel() throws IOException, InterruptedException {
+        final Client mockClient = mock(Client.class);
+        final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204, Map.of(HttpConstants.HEADER_LINK,
+                List.of("<http://www.w3.org/ns/solid/acp#AccessControlResource>; rel=\"xxxx\"")));
+        when(mockClient.head(any())).thenReturn(mockResponse);
+
+        final SolidClient solidClient = new SolidClient(mockClient);
+        final String mode = solidClient.getAclType(URI.create("http://localhost:3000/test.acl"));
+        assertEquals("WAC", mode);
+    }
+
+    @Test
+    void getAclTypeWrongUrl() throws IOException, InterruptedException {
+        final Client mockClient = mock(Client.class);
+        final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204, Map.of(HttpConstants.HEADER_LINK,
+                List.of("<https://example.org>; rel=\"type\"")));
+        when(mockClient.head(any())).thenReturn(mockResponse);
+
+        final SolidClient solidClient = new SolidClient(mockClient);
+        final String mode = solidClient.getAclType(URI.create("http://localhost:3000/test.acl"));
+        assertEquals("WAC", mode);
+    }
+
+    @Test
     void getAclUriMissing() {
         final HttpHeaders headers = HttpHeaders.of(Collections.emptyMap(), (k, v) -> true);
 
@@ -234,45 +292,45 @@ class SolidClientTest {
     }
 
     @Test
-    void createAcl() throws IOException, InterruptedException {
-        final URI resourceAcl = URI.create("http://localhost:3000/test.acl");
-        final Client mockClient = mock(Client.class);
-        final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(200);
-        when(mockClient.put(eq(resourceAcl), eq("ACL"), eq(HttpConstants.MEDIA_TYPE_TEXT_TURTLE)))
-                .thenReturn(mockResponse);
-
-        final SolidClient solidClient = new SolidClient(mockClient);
-        final boolean res = solidClient.createAcl(resourceAcl, "ACL");
-        assertTrue(res);
-        verify(mockClient).put(resourceAcl, "ACL", HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
-    }
-
-    @Test
     void getAcl() throws IOException, InterruptedException {
         final URI resourceAcl = URI.create("http://localhost:3000/test.acl");
         final Client mockClient = mock(Client.class);
-        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "ACL CONTENT");
+        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "");
         when(mockClient.getAsTurtle(any())).thenReturn(mockResponse);
 
         final SolidClient solidClient = new SolidClient(mockClient);
-        final String res = solidClient.getAcl(resourceAcl);
-        assertEquals("ACL CONTENT", res);
+        final AccessDataset accessDataset = solidClient.getAcl(resourceAcl);
+        assertNotNull(accessDataset);
+    }
+
+    @Test
+    void getAclFails() throws IOException, InterruptedException {
+        final URI resourceAcl = URI.create("http://localhost:3000/test.acl");
+        final Client mockClient = mock(Client.class);
+        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(404, "");
+        when(mockClient.getAsTurtle(any())).thenReturn(mockResponse);
+
+        final SolidClient solidClient = new SolidClient(mockClient);
+        final AccessDataset accessDataset = solidClient.getAcl(resourceAcl);
+        assertNull(accessDataset);
+    }
+
+    @Test
+    void createAcl() throws IOException, InterruptedException {
+        final AccessDataset accessDataset = mock(AccessDataset.class);
+        when(accessDataset.apply(any(), any())).thenReturn(true);
+        final Client mockClient = mock(Client.class);
+        final SolidClient solidClient = new SolidClient(mockClient);
+        assertTrue(solidClient.createAcl(URI.create("http://localhost:3000/test.acl"), accessDataset));
     }
 
     @Test
     void createAclFails() throws IOException, InterruptedException {
+        final AccessDataset accessDataset = mock(AccessDataset.class);
+        when(accessDataset.apply(any(), any())).thenReturn(false);
         final Client mockClient = mock(Client.class);
-        final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(400);
-        final URI resourceAcl = URI.create("http://localhost:3000/test.acl");
-
-        when(mockClient.head(any())).thenReturn(mockResponse);
-        when(mockClient.put(eq(resourceAcl), eq("ACL"), eq(HttpConstants.MEDIA_TYPE_TEXT_TURTLE)))
-                .thenReturn(mockResponse);
-
         final SolidClient solidClient = new SolidClient(mockClient);
-        final boolean res = solidClient.createAcl(resourceAcl, "ACL");
-        assertFalse(res);
-        verify(mockClient).put(resourceAcl, "ACL", HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
+        assertFalse(solidClient.createAcl(URI.create("http://localhost:3000/test.acl"), accessDataset));
     }
 
     @Test
@@ -307,7 +365,6 @@ class SolidClientTest {
         final String data = PREFIX + "<http://localhost:3000/> ldp:contains <http://localhost:3000/test/>.";
         final SolidClient solidClient = new SolidClient();
         final List<String> members = solidClient.parseMembers(data, URI.create("http://localhost:3000/"));
-        System.out.println(members);
         assertFalse(members.isEmpty());
         assertEquals("http://localhost:3000/test/", members.get(0));
     }

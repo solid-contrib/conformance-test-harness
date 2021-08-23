@@ -23,8 +23,13 @@
  */
 package org.solid.testharness.utils;
 
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.solid.testharness.accesscontrol.AccessControlFactory;
+import org.solid.testharness.accesscontrol.AccessDataset;
+import org.solid.testharness.accesscontrol.AccessDatasetBuilder;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClient;
 
@@ -37,11 +42,15 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@QuarkusTest
 class SolidResourceTest {
     private static final String TEST_URL = "http://localhost/resource";
     URI testUrl = URI.create(TEST_URL);
     URI aclUrl = URI.create(testUrl + ".acl");
     SolidClient solidClient;
+
+    @InjectMock
+    AccessControlFactory accessControlFactory;
 
     @BeforeEach
     void setUp() {
@@ -206,14 +215,16 @@ class SolidResourceTest {
 
     @Test
     void setAccessDatasetNoUrl() throws Exception {
+        final AccessDataset accessDataset = mock(AccessDataset.class);
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
         final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
-        assertFalse(resource.setAccessDataset("acl"));
+        assertFalse(resource.setAccessDataset(accessDataset));
     }
 
     @Test
     void setAccessDatasetMissing() throws Exception {
+        final AccessDataset accessDataset = mock(AccessDataset.class);
         final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
                 List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
@@ -223,25 +234,26 @@ class SolidResourceTest {
 
         final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
-        assertFalse(resource.setAccessDataset("acl"));
+        assertFalse(resource.setAccessDataset(accessDataset));
         // second attempt short cuts as false
-        assertFalse(resource.setAccessDataset("acl"));
+        assertFalse(resource.setAccessDataset(accessDataset));
     }
 
     @Test
     void setAccessDataset() throws Exception {
+        final AccessDataset accessDataset = mock(AccessDataset.class);
         final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
                 List.of("<" + aclUrl.toString() + ">; rel=\"acl\""));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
         when(solidClient.getAclUri(headers)).thenReturn(aclUrl);
         when(solidClient.getAclUri(testUrl)).thenReturn(aclUrl);
-        when(solidClient.createAcl(aclUrl, "acl")).thenReturn(true);
+        when(solidClient.createAcl(aclUrl, accessDataset)).thenReturn(true);
 
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
         final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
-        assertTrue(resource.setAccessDataset("acl"));
+        assertTrue(resource.setAccessDataset(accessDataset));
     }
 
     @Test
@@ -297,18 +309,46 @@ class SolidResourceTest {
     }
 
     @Test
-    void getAccessDataset() throws Exception {
+    void getAccessDatasetBuilder() throws Exception {
         when(solidClient.getAclUri(testUrl)).thenReturn(aclUrl);
-        when(solidClient.getAcl(aclUrl)).thenReturn("ACL");
+        final AccessDatasetBuilder accessDatasetBuilder = mock(AccessDatasetBuilder.class);
+        when(accessControlFactory.getAccessDatasetBuilder(aclUrl.toString())).thenReturn(accessDatasetBuilder);
         final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
-        assertEquals("ACL", resource.getAccessDataset());
+        final AccessDatasetBuilder builder = resource.getAccessDatasetBuilder(
+                "https://alice.target.example.org/profile/card#me");
+        assertNotNull(builder);
+        verify(accessDatasetBuilder, times(1)).setOwnerAccess(any(), any());
+    }
+
+    @Test
+    void getAccessDataset() throws Exception {
+        final AccessDataset accessDataset = mock(AccessDataset.class);
+        when(solidClient.getAclUri(testUrl)).thenReturn(aclUrl);
+        when(solidClient.getAcl(aclUrl)).thenReturn(accessDataset);
+        final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
+        assertEquals(accessDataset, resource.getAccessDataset());
     }
 
     @Test
     void getAccessDatasetMissing() throws Exception {
         when(solidClient.getAclUri(testUrl)).thenReturn(null);
         final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
-        assertEquals("", resource.getAccessDataset());
+        assertEquals(null, resource.getAccessDataset());
+    }
+
+    @Test
+    void getAccessControlMode() throws Exception {
+        when(solidClient.getAclUri(testUrl)).thenReturn(aclUrl);
+        when(solidClient.getAclType(aclUrl)).thenReturn("TEST");
+        final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
+        assertEquals("TEST", resource.getAccessControlMode());
+    }
+
+    @Test
+    void getAccessControlModeMissing() throws Exception {
+        when(solidClient.getAclUri(testUrl)).thenReturn(null);
+        final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
+        assertEquals(null, resource.getAccessControlMode());
     }
 
     @Test
