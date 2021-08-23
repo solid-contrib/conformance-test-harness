@@ -4,27 +4,20 @@ Feature: Bob cannot read an RDF resource to which he is not granted default read
     * def setup =
     """
       function() {
-        const testContainer = createTestContainer();
-        const resource = testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
-        if (resource.exists()) {
-          const acl = aclPrefix
-            + createOwnerAuthorization(webIds.alice, resource.getContainer().getUrl())
-            + createBobDefaultAuthorization(webIds.bob, resource.getContainer().getUrl(), 'acl:Append, acl:Write, acl:Control')
-          karate.log('ACL: ' + acl);
-          resource.getContainer().setAccessDataset(acl);
-        }
-        return resource;
+        const testContainer = createTestContainerImmediate();
+        const access = testContainer.getAccessDatasetBuilder(webIds.alice)
+          .setAgentAccess(testContainer.getUrl(), webIds.bob, ['write'])
+          .setInheritableAgentAccess(testContainer.getUrl(), webIds.bob, ['append', 'write', 'control'])
+          .build();
+        karate.log('ACL:\n' + access.asTurtle());
+        testContainer.setAccessDataset(access);
+        return testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
       }
     """
     * def resource = callonce setup
     * assert resource.exists()
     * def resourceUrl = resource.getUrl()
     * url resourceUrl
-
-  Scenario: Bob can get the resource OPTIONS
-    Given headers clients.bob.getAuthHeaders('OPTIONS', resourceUrl)
-    When method OPTIONS
-    Then status 204
 
   Scenario: Bob cannot read the resource with GET
     Given headers clients.bob.getAuthHeaders('GET', resourceUrl)
@@ -35,3 +28,10 @@ Feature: Bob cannot read an RDF resource to which he is not granted default read
     Given headers clients.bob.getAuthHeaders('HEAD', resourceUrl)
     When method HEAD
     Then status 403
+
+  Scenario: Bob can PUT to the resource but gets nothing back since he cannot read
+    Given request '<> <http://www.w3.org/2000/01/rdf-schema#comment> "Bob replaced it." .'
+    And headers clients.bob.getAuthHeaders('PUT', resourceUrl)
+    And header Content-Type = 'text/turtle'
+    When method PUT
+    Then status 204

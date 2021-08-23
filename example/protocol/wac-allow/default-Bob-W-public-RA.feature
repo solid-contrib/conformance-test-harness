@@ -7,12 +7,12 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
         const testContainer = createTestContainer();
         const resource = testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
         if (resource.exists()) {
-          const acl = aclPrefix
-            + createOwnerAuthorization(webIds.alice, resource.getContainer().getUrl())
-            + createBobDefaultAuthorization(webIds.bob, resource.getContainer().getUrl(), 'acl:Write')
-            + createPublicDefaultAuthorization(resource.getContainer().getUrl(), 'acl:Read, acl:Append')
-          karate.log('ACL: ' + acl);
-          resource.getContainer().setAccessDataset(acl)
+          const access = testContainer.getAccessDatasetBuilder(webIds.alice)
+                .setInheritableAgentAccess(testContainer.getUrl(), webIds.bob, ['write'])
+                .setInheritablePublicAccess(testContainer.getUrl(), ['read', 'append'])
+                .build();
+          karate.log('ACL:\n' + access.asTurtle());
+          resource.getContainer().setAccessDataset(access)
         }
         return resource;
       }
@@ -29,14 +29,14 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     When method HEAD
     Then status 404
 
-  Scenario: There is an acl on the parent containing #bobDefault
+  Scenario: There is an acl on the parent containing Bob's WebID
     Given url resource.getContainer().getAclUrl()
     And headers clients.alice.getAuthHeaders('GET', resource.getContainer().getAclUrl())
     And header Accept = 'text/turtle'
     When method GET
     Then status 200
     And match header Content-Type contains 'text/turtle'
-    And match response contains 'bobDefault'
+    And match response contains webIds.bob
 
   Scenario: Bob calls GET and the header shows RWA access for user, RA for public
     Given headers clients.bob.getAuthHeaders('GET', resourceUrl)

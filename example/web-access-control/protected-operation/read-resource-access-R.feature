@@ -7,11 +7,11 @@ Feature: Bob can only read an RDF resource to which he is only granted read acce
         const testContainer = createTestContainer();
         const resource = testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
         if (resource.exists()) {
-          const acl = aclPrefix
-            + createOwnerAuthorization(webIds.alice, resource.getUrl())
-            + createBobAccessToAuthorization(webIds.bob, resource.getUrl(), 'acl:Read')
-          karate.log('ACL: ' + acl);
-          resource.setAccessDataset(acl);
+          const access = resource.getAccessDatasetBuilder(webIds.alice)
+            .setAgentAccess(resource.getUrl(), webIds.bob, ['read'])
+            .build();
+          karate.log('ACL:\n' + access.asTurtle());
+          resource.setAccessDataset(access);
         }
         return resource;
       }
@@ -30,11 +30,6 @@ Feature: Bob can only read an RDF resource to which he is only granted read acce
     Given headers clients.bob.getAuthHeaders('HEAD', resourceUrl)
     When method HEAD
     Then status 200
-
-  Scenario: Bob can read the resource with OPTIONS
-    Given headers clients.bob.getAuthHeaders('OPTIONS', resourceUrl)
-    When method OPTIONS
-    Then status 204
 
   Scenario: Bob cannot PUT to the resource
     Given request '<> <http://www.w3.org/2000/01/rdf-schema#comment> "Bob replaced it." .'
