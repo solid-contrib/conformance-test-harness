@@ -26,9 +26,13 @@ package org.solid.testharness.utils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.testharness.accesscontrol.AccessControlFactory;
+import org.solid.testharness.accesscontrol.AccessDataset;
+import org.solid.testharness.accesscontrol.AccessDatasetBuilder;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClient;
 
+import javax.enterprise.inject.spi.CDI;
 import java.net.URI;
 import java.net.http.HttpHeaders;
 
@@ -128,15 +132,26 @@ public class SolidResource {
         return aclUrl != null ? aclUrl.toString() : null;
     }
 
-    public String getAccessDataset() throws Exception {
-        return getAclUrl() != null ? solidClient.getAcl(aclUrl) : "";
+    public AccessDatasetBuilder getAccessDatasetBuilder(final String owner) throws Exception {
+        final AccessControlFactory accessControlFactory = CDI.current().select(AccessControlFactory.class).get();
+        final AccessDatasetBuilder builder = accessControlFactory.getAccessDatasetBuilder(getAclUrl());
+        builder.setOwnerAccess(getUrl(), owner);
+        return builder;
     }
 
-    public boolean setAccessDataset(final String acl) throws Exception {
+    public AccessDataset getAccessDataset() throws Exception {
+        return getAclUrl() != null ? solidClient.getAcl(aclUrl) : null;
+    }
+
+    public String getAccessControlMode() throws Exception {
+        return getAclUrl() != null ? solidClient.getAclType(aclUrl) : null;
+    }
+
+    public boolean setAccessDataset(final AccessDataset accessDataset) throws Exception {
         if (Boolean.FALSE.equals(aclLinkAvailable)) return false;
         final String url = getAclUrl();
         if (url == null) return false;
-        return solidClient.createAcl(URI.create(url), acl);
+        return solidClient.createAcl(URI.create(url), accessDataset);
     }
 
     public void delete() throws Exception {
