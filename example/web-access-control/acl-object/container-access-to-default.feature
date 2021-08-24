@@ -1,6 +1,6 @@
-Feature: Bob can read a container and its children if he is granted both default and accessTo read access
+Feature: Bob can read a container and its children if he is granted both direct and inheritable read access
 
-  Background: Create test container with accessTo read-only access for Bob
+  Background: Create test container with direct and inheritable read-only access for Bob
     * def setup =
     """
       function() {

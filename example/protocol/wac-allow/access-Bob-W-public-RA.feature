@@ -31,6 +31,9 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     And match header Content-Type contains 'text/turtle'
     And match response contains 'bobAccessTo'
 
+  # Note this test is not applicable to a server using ACP as the WAC-Allow header is not supported currently.
+  # In ACP mode, the following step would fail as there will be an ACL on the parent - this step needs to change
+  # to ask the test harness to confirm there is no inherited access.
   Scenario: There is no acl on the parent
     Given url resource.getContainer().getAclUrl()
     And headers clients.alice.getAuthHeaders('HEAD', resource.getContainer().getAclUrl())

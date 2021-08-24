@@ -1,6 +1,6 @@
-Feature: Bob can only read child containers/resources of a container to which he is granted default read access
+Feature: Bob can only read child containers/resources of a container to which he is granted inheritable read access
 
-  Background: Create test container with default read-only access for Bob
+  Background: Create test container with inheritable read-only access for Bob
     * def setup =
     """
       function() {

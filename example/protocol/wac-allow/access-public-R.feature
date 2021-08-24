@@ -21,7 +21,7 @@ Feature: The WAC-Allow header shows user and public access modes with public rea
     * def resourceUrl = resource.getUrl()
     * url resourceUrl
 
-  Scenario: There is an acl on the resource containing #publicAccessTo
+  Scenario: There is an acl on the resource granting public access
     Given url resource.getAclUrl()
     And headers clients.alice.getAuthHeaders('GET', resource.getAclUrl())
     And header Accept = 'text/turtle'
@@ -30,7 +30,6 @@ Feature: The WAC-Allow header shows user and public access modes with public rea
     And match header Content-Type contains 'text/turtle'
     # This was a quick check but relies on the representation of the ACL not changing
     # It should really ASK {?s acl:accessTo <target>; acl:agentClass foaf:Agent ; acl:mode acl:Read .}
-#    And match response contains 'publicAccessTo'
     And match response contains 'foaf:Agent'
 
   Scenario: There is no acl on the parent
