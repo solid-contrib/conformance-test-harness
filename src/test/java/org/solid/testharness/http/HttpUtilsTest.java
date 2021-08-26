@@ -49,7 +49,7 @@ class HttpUtilsTest {
 
     @Test
     void newRequestBuilder() {
-        final HttpRequest request = HttpUtils.newRequestBuilder(URI.create("http://example.org")).build();
+        final HttpRequest request = HttpUtils.newRequestBuilder(URI.create("https://example.org")).build();
         assertEquals("AGENT", request.headers().firstValue(HttpConstants.USER_AGENT).get());
     }
 
@@ -222,6 +222,24 @@ class HttpUtilsTest {
     @Test
     void ofFormDataNull() {
         assertThrows(NullPointerException.class, () -> HttpUtils.ofFormData(null));
+    }
+
+    @Test
+    void ensureSlashEnd() {
+        assertNull(HttpUtils.ensureSlashEnd(null));
+        assertEquals("/", HttpUtils.ensureSlashEnd(""));
+        assertEquals("/", HttpUtils.ensureSlashEnd("/"));
+        assertEquals("abc/", HttpUtils.ensureSlashEnd("abc"));
+        assertEquals("abc/", HttpUtils.ensureSlashEnd("abc/"));
+    }
+
+    @Test
+    void ensureNoSlashEnd() {
+        assertNull(HttpUtils.ensureNoSlashEnd(null));
+        assertEquals("", HttpUtils.ensureNoSlashEnd(""));
+        assertEquals("", HttpUtils.ensureNoSlashEnd("/"));
+        assertEquals("abc", HttpUtils.ensureNoSlashEnd("abc"));
+        assertEquals("abc", HttpUtils.ensureNoSlashEnd("abc/"));
     }
 
     @Test

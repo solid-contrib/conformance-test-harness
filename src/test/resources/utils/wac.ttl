@@ -1,0 +1,31 @@
+@prefix acl: <http://www.w3.org/ns/auth/acl#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+
+[] a acl:Authorization;
+    acl:agent <https://example.org/alice#me>;
+    acl:accessTo <https://example.org/test>;
+    acl:mode acl:Read, acl:Write, acl:Control .
+
+[] a acl:Authorization;
+    acl:agent <https://example.org/alice#me>;
+    acl:default <https://example.org/test/>;
+    acl:mode acl:Read, acl:Write, acl:Control .
+
+[] a acl:Authorization;
+    acl:agentGroup [ a vcard:Group;
+                         vcard:hasMember <https://example.org/alice#me>, <https://example.org/bob#me>
+                   ];
+    acl:accessTo <https://example.org/test>;
+    acl:mode acl:Read .
+
+[] a acl:Authorization;
+    acl:agentClass foaf:Agent;
+    acl:accessTo <https://example.org/test>;
+    acl:mode acl:Write .
+
+[] a acl:Authorization;
+    acl:agentClass acl:AuthenticatedAgent;
+    acl:accessTo <https://example.org/test>;
+    acl:mode acl:Append .
+

@@ -7,12 +7,12 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
         const testContainer = createTestContainer();
         const resource = testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
         if (resource.exists()) {
-          const acl = aclPrefix
-            + createOwnerAuthorization(webIds.alice, resource.getUrl())
-            + createBobAccessToAuthorization(webIds.bob, resource.getUrl(), 'acl:Write')
-            + createPublicAccessToAuthorization(resource.getUrl(), 'acl:Read, acl:Append')
-          karate.log('ACL: ' + acl);
-          resource.setAccessDataset(acl);
+          const access = resource.getAccessDatasetBuilder(webIds.alice)
+                .setAgentAccess(resource.getUrl(), webIds.bob, ['write'])
+                .setPublicAccess(resource.getUrl(), ['read', 'append'])
+                .build();
+          karate.log('ACL:\n' + access.asTurtle());
+          resource.setAccessDataset(access);
         }
         return resource;
       }
@@ -22,14 +22,14 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     * def resourceUrl = resource.getUrl()
     * url resourceUrl
 
-  Scenario: There is an acl on the resource containing #bobAccessTo
+  Scenario: There is an acl on the resource containing Bob's WebID
     Given url resource.getAclUrl()
     And headers clients.alice.getAuthHeaders('GET', resource.getAclUrl())
     And header Accept = 'text/turtle'
     When method GET
     Then status 200
     And match header Content-Type contains 'text/turtle'
-    And match response contains 'bobAccessTo'
+    And match response contains webIds.bob
 
   Scenario: There is no acl on the parent
     Given url resource.getContainer().getAclUrl()

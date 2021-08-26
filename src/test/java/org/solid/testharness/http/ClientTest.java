@@ -184,15 +184,22 @@ class ClientTest {
     void getAsTurtleBearer() throws Exception {
         final Client client = new Client.Builder().build();
         client.setAccessToken("ACCESS");
-        final HttpResponse<Void> response = client.put(baseUri.resolve("/put"), "TEXT",
-                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
-        assertEquals(200, response.statusCode());
+        final HttpResponse<String> response = client.getAsTurtle(baseUri.resolve("/get/turtle"));
+        assertEquals("TURTLE-BEARER", response.body());
     }
 
     @Test
     void getAsTurtleNull() {
         final Client client = new Client.Builder().build();
         assertThrows(NullPointerException.class, () -> client.getAsTurtle(null));
+    }
+
+    @Test
+    void patch() throws Exception {
+        final Client client = new Client.Builder().build();
+        final HttpResponse<String> response = client.patch(baseUri.resolve("/patch"), "TEXT",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
+        assertEquals("PATCHED", response.body());
     }
 
     @Test

@@ -6,9 +6,9 @@
     - https://github.com/solid/conformance-test-harness/example/web-access-control/web-access-control-test-manifest.ttl
     - https://github.com/solid/conformance-test-harness/example/protocol/solid-protocol-spec.ttl
     - https://github.com/solid/conformance-test-harness/example/web-access-control/web-access-control-spec.ttl
-  target: https://github.com/solid/conformance-test-harness/ess-compat
-#  target: https://github.com/solid/conformance-test-harness/ess
+  target: https://github.com/solid/conformance-test-harness/ess
 #  target: https://github.com/solid/conformance-test-harness/css
+#  target: https://github.com/solid/conformance-test-harness/ess-compat
 #  target: https://github.com/solid/conformance-test-harness/nss
 #  target: https://github.com/solid/conformance-test-harness/trinpod
 

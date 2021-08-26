@@ -5,8 +5,10 @@ prefix spec: <http://www.w3.org/ns/spec#>
 
 <https://solid.github.io/web-access-control-spec/>
   a spec:Specification ;
-  spec:requirement <https://solid.github.io/web-access-control-spec/#access-modes> ,
-                     <https://solid.github.io/web-access-control-spec/#access-objects>
+  spec:requirement
+        <https://solid.github.io/web-access-control-spec/#access-modes> ,
+        <https://solid.github.io/web-access-control-spec/#access-objects> ,
+        <https://solid.github.io/web-access-control-spec/#authorization-evaluation-context>
 .
 
 <https://solid.github.io/web-access-control-spec/#access-modes>
@@ -15,6 +17,11 @@ prefix spec: <http://www.w3.org/ns/spec#>
   spec:normativeConformanceLevel spec:ConformanceMust .
 
 <https://solid.github.io/web-access-control-spec/#access-objects>
+  a spec:NormativeRequirement ;
+  spec:conformanceRole spec:ServerConformanceClass ;
+  spec:normativeConformanceLevel spec:ConformanceMust .
+
+<https://solid.github.io/web-access-control-spec/#authorization-evaluation-context>
   a spec:NormativeRequirement ;
   spec:conformanceRole spec:ServerConformanceClass ;
   spec:normativeConformanceLevel spec:ConformanceMust .
