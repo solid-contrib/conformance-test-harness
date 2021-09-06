@@ -13,15 +13,16 @@ prefix spec: <http://www.w3.org/ns/spec#>
 
 <https://solid.github.io/web-access-control-spec/#access-modes>
   a spec:NormativeRequirement ;
-  spec:conformanceRole spec:ServerConformanceClass ;
-  spec:normativeConformanceLevel spec:ConformanceMust .
+  spec:requirementSubject spec:Server ;
+  spec:requirementLevel spec:MUST .
 
 <https://solid.github.io/web-access-control-spec/#access-objects>
   a spec:NormativeRequirement ;
-  spec:conformanceRole spec:ServerConformanceClass ;
-  spec:normativeConformanceLevel spec:ConformanceMust .
+  spec:requirementSubject spec:Server ;
+  spec:requirementLevel spec:MUST .
 
 <https://solid.github.io/web-access-control-spec/#authorization-evaluation-context>
   a spec:NormativeRequirement ;
-  spec:conformanceRole spec:ServerConformanceClass ;
-  spec:normativeConformanceLevel spec:ConformanceMust .
+  spec:requirementSubject spec:Server ;
+  spec:requirementLevel spec:MUST .
+

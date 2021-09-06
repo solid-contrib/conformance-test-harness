@@ -17,31 +17,31 @@ prefix spec: <http://www.w3.org/ns/spec#>
 
 <https://solidproject.org/TR/protocol#resource-representations>
     a spec:NormativeRequirement ;
-    spec:conformanceRole spec:ServerConformanceClass ;
-    spec:normativeConformanceLevel spec:ConformanceMust ;
+    spec:requirementSubject spec:Server ;
+    spec:requirementLevel spec:MUST ;
     schema:name "Resource Representations" ;
     schema:description "Full text of the specification section" ;
-    spec:excerpt "the server MUST accept GET requests on this resource when the value of the Accept header requests a representation in text/turtle or application/ld+json"
+    spec:statement "the server MUST accept GET requests on this resource when the value of the Accept header requests a representation in text/turtle or application/ld+json"
 .
 
 <https://solidproject.org/TR/protocol#writing-resources>
     a spec:NormativeRequirement ;
-    spec:conformanceRole spec:ServerConformanceClass ;
-    spec:normativeConformanceLevel spec:ConformanceMust ;
-    spec:excerpt "Servers MUST create intermediate containers and include corresponding containment triples in container representations derived from the URI path component of PUT and PATCH requests"
+    spec:requirementSubject spec:Server ;
+    spec:requirementLevel spec:MUST ;
+    spec:statement "Servers MUST create intermediate containers and include corresponding containment triples in container representations derived from the URI path component of PUT and PATCH requests"
 .
 
 <https://solidproject.org/TR/protocol#web-access-control>
     a spec:NormativeRequirement ;
-    spec:conformanceRole spec:ServerConformanceClass ;
-    spec:normativeConformanceLevel spec:ConformanceMust ;
-    spec:excerpt "Servers exposing client’s access privileges on a resource URL MUST advertise by including the WAC-Allow HTTP header in the response of HTTP HEAD and GET requests"
+    spec:requirementSubject spec:Server ;
+    spec:requirementLevel spec:MUST ;
+    spec:statement "Servers exposing client’s access privileges on a resource URL MUST advertise by including the WAC-Allow HTTP header in the response of HTTP HEAD and GET requests"
 .
 
 #<https://solidproject.org/TR/protocol#test-server-header-put-content-type>
 #  a spec:NormativeRequirement ;
-#  spec:conformanceRole spec:ServerConformanceClass ;
-#  spec:normativeConformanceLevel spec:ConformanceMust ;
+#  spec:requirementSubject spec:Server ;
+#  spec:requirementLevel spec:MUST ;
 #  spec:httpRequest [
 #    http:mthd httpm:PUT
 #  ];

@@ -24,10 +24,13 @@
 package org.solid.testharness.utils;
 
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.util.Models;
+import org.eclipse.rdf4j.repository.util.RepositoryUtil;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
+import org.slf4j.Logger;
 import org.solid.testharness.http.HttpUtils;
 
 import java.io.IOException;
@@ -44,6 +47,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -102,6 +106,28 @@ public final class TestUtils {
                 .set(BasicWriterSettings.INLINE_BLANK_NODES, true);
         Rio.write(model, rdfWriter);
         return sw.toString();
+    }
+
+    public static void showModelDifferences(final Model modelA, final Model modelB, final Logger logger) {
+        if (Models.isomorphic(modelA, modelB)) {
+            logger.debug("Models are isomorphic");
+        } else {
+            logger.debug("Model A = {}, Model B = {}", modelA.size(), modelB.size());
+            if (Models.isSubset(modelA, modelB)) {
+                logger.debug("Model A is a subset of Model B");
+            } else if (Models.isSubset(modelB, modelA)) {
+                logger.debug("Model B is a subset of Model A");
+            }
+            logger.debug("\n== In Model A but not Model B ==\n{}", RepositoryUtil.difference(modelA, modelB)
+                    .stream().map(s -> String.format("%s %s %s", s.getSubject(), s.getPredicate(), s.getObject()))
+                    .collect(Collectors.joining("\n"))
+            );
+
+            logger.debug("\n== In Model B but not Model A ==\n{}", RepositoryUtil.difference(modelB, modelA)
+                    .stream().map(s -> String.format("%s %s %s", s.getSubject(), s.getPredicate(), s.getObject()))
+                    .collect(Collectors.joining("\n"))
+            );
+        }
     }
 
     public static Model loadTurtleFromFile(final String file) throws IOException {

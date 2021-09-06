@@ -1,33 +1,28 @@
 {#with it}
-<div class="splitBox" about="{subject}" typeof="{typesList}">
-  <div class="col">
-    <dl><dt>Specification</dt><dd><a href="{specLink}" title="Specification link">{specLink}</a></dd></dl>
-    <dl><dt>Requirement</dt><dd><a href="{subject}" title="Requirement link">{subject}</a></dd></dl>
+<div rel="dcterms:hasPart" resource="{subject}" typeof="{typesList}">
+    <dl><dt>Specification</dt><dd><a href="{specLink}">{specLink}</a></dd></dl>
+    <dl><dt>Requirement</dt><dd><a href="{subject}">{subject}</a></dd></dl>
     <dl>
-      <dt>Conformance Role</dt>
-      <dd rel="spec:conformanceRole" resource="{conformanceRole}">
-        {#switch conformanceRole}
-        {#case 'http://www.w3.org/ns/spec#ServerConformanceClass'}Server
-        {#case 'http://www.w3.org/ns/spec#ClientConformanceClass'}Client
+      <dt>Requirement subject</dt>
+      <dd rel="spec:requirementSubject" resource="{requirementSubject}">
+        {#switch requirementSubject}
+        {#case 'http://www.w3.org/ns/spec#Server'}Server
+        {#case 'http://www.w3.org/ns/spec#Client'}Client
         {/switch}
       </dd>
     </dl>
     <dl>
-      <dt>Conformance Level</dt>
-      <dd property="spec:normativeConformanceLevel" resource="{conformanceLevel}">
-        {#switch conformanceLevel}
-        {#case 'http://www.w3.org/ns/spec#ConformanceMust'}MUST
-        {#case 'http://www.w3.org/ns/spec#ConformanceMustNot'}MUST NOT
+      <dt>Requirement level</dt>
+      <dd property="spec:requirementLevel" resource="{requirementLevel}">
+        {#switch requirementLevel}
+        {#case 'http://www.w3.org/ns/spec#MUST'}MUST
+        {#case 'http://www.w3.org/ns/spec#MUST-NOT'}MUST NOT
         {/switch}
       </dd>
     </dl>
-  </div>
-  <div class="col">
-    {#if excerpt}
-    <dl><dt>Excerpt</dt><dd property="spec:excerpt">{excerpt}</dd></dl>
+    {#if statement}
+    <dl><dt>Excerpt</dt><dd property="spec:statement">{statement}</dd></dl>
     {/if}
-  </div>
 </div>
 {/with}
 {#insert/}
-

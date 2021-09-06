@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<body about="{subject}" prefix="{prefixes}">
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<body about="" prefix="{prefixes}">
     {! HEADER !}
     {#if specifications??}
     {#include specification-header /}
@@ -96,6 +96,7 @@
     {! STEP !}
     {#if steps??}
     <table>
+        <caption>Scenario data</caption>
         <tr>
             <th>Step</th>
             <th>Location</th>

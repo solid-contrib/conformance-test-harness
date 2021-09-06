@@ -4,7 +4,7 @@ sources:
   - /data/web-access-control/web-access-control-test-manifest.ttl
   - /data/protocol/solid-protocol-spec.ttl
   - /data/web-access-control/web-access-control-spec.ttl
-target: https://github.com/solid/conformance-test-harness/ess
+target: ess
 mappings:
   - prefix: https://github.com/solid/specification-tests/
     path: /data/

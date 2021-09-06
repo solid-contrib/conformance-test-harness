@@ -1,11 +1,12 @@
-<section>
-    <h2>Results summary</h2>
+<section id="results-summary" rel="dcterms:hasPart" resource="#results-summary">
+    <h2 property="dcterms:title">Results summary</h2>
+    <div datatype="rdf:HTML" property="dcterms:description">
     <dl>
         <dt>Test date</dt>
-        <dd><time datatype="xsd:date" datetime="{resultDate}">{resultDate}</time></dd>
+        <dd><time datetime="{resultDate}" datatype="xsd:date" property="dcterms:date">{resultDate}</time></dd>
     </dl>
     <dl>
-        <dt>Time taken</dt>
+        <dt>Duration</dt>
         <dd>{elapsedTime} ms</dd>
     </dl>
     <table>
@@ -32,4 +33,5 @@
         </tr>
         </tbody>
     </table>
+    </div>
 </section>

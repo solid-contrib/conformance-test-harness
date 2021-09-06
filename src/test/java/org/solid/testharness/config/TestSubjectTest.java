@@ -36,6 +36,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpResponse;
 import java.util.List;
@@ -180,22 +181,26 @@ public class TestSubjectTest {
 
     @Test
     void loadTestSubjectConfigTarget1() throws MalformedURLException {
-        when(config.getSubjectsUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"));
-        when(config.getTestSubject()).thenReturn(iri("https://github.com/solid/conformance-test-harness/testserver"));
+        final URL testFileUrl = TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl");
+        final String subject = new URL(testFileUrl, "testserver").toString();
+        when(config.getSubjectsUrl()).thenReturn(testFileUrl);
+        when(config.getTestSubject()).thenReturn(iri(subject));
         testSubject.loadTestSubjectConfig();
         final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
-        assertEquals("https://github.com/solid/conformance-test-harness/testserver", targetServer.getSubject());
+        assertEquals(subject, targetServer.getSubject());
     }
 
     @Test
     void loadTestSubjectConfigTarget2() throws Exception {
-        when(config.getSubjectsUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"));
-        when(config.getTestSubject()).thenReturn(iri("https://github.com/solid/conformance-test-harness/testserver2"));
+        final URL testFileUrl = TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl");
+        final String subject = new URL(testFileUrl, "testserver2").toString();
+        when(config.getSubjectsUrl()).thenReturn(testFileUrl);
+        when(config.getTestSubject()).thenReturn(iri(subject));
         testSubject.loadTestSubjectConfig();
         final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
-        assertEquals("https://github.com/solid/conformance-test-harness/testserver2", targetServer.getSubject());
+        assertEquals(subject, targetServer.getSubject());
     }
 
     @Test
@@ -208,12 +213,12 @@ public class TestSubjectTest {
 
     @Test
     void getTargetServerDefault() throws Exception {
-        when(config.getSubjectsUrl())
-                .thenReturn(TestUtils.getFileUrl("src/test/resources/config/config-sample-single.ttl"));
+        final URL testFileUrl = TestUtils.getFileUrl("src/test/resources/config/config-sample-single.ttl");
+        when(config.getSubjectsUrl()).thenReturn(testFileUrl);
         testSubject.loadTestSubjectConfig();
         final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
-        assertEquals("https://github.com/solid/conformance-test-harness/default", targetServer.getSubject());
+        assertEquals(new URL(testFileUrl, "default").toString(), targetServer.getSubject());
     }
 
     @Test

@@ -45,21 +45,21 @@ class SpecificationRequirementTest extends AbstractDataModelTests {
     }
 
     @Test
-    void getConformanceRole() {
+    void getRequirementSubject() {
         final SpecificationRequirement requirement = new SpecificationRequirement(REQUIREMENT);
-        assertEquals(SPEC.ServerConformanceClass.stringValue(), requirement.getConformanceRole());
+        assertEquals(SPEC.Server.stringValue(), requirement.getRequirementSubject());
     }
 
     @Test
-    void getConformanceLevel() {
+    void getRequirementLevel() {
         final SpecificationRequirement requirement = new SpecificationRequirement(REQUIREMENT);
-        assertEquals(SPEC.ConformanceMust.stringValue(), requirement.getConformanceLevel());
+        assertEquals(SPEC.MUST.stringValue(), requirement.getRequirementLevel());
     }
 
     @Test
-    void getExcerpt() {
+    void getStatement() {
         final SpecificationRequirement requirement = new SpecificationRequirement(REQUIREMENT);
-        assertEquals("excerpt of requirement 1", requirement.getExcerpt());
+        assertEquals("excerpt of requirement 1", requirement.getStatement());
     }
 
     @Test

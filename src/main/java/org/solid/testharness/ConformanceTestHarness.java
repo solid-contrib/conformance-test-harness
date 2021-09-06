@@ -23,10 +23,8 @@
  */
 package org.solid.testharness;
 
-import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
-import org.eclipse.rdf4j.model.util.Values;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +55,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
+import static org.eclipse.rdf4j.model.util.Values.literal;
 
 @ApplicationScoped
 @SuppressWarnings("PMD.MoreThanOneLogger")  // Additional logger provided for JSON output
@@ -92,19 +91,19 @@ public class ConformanceTestHarness {
             dataRepository.setAssertor(assertor);
             try (RepositoryConnection conn = dataRepository.getConnection()) {
                 final ModelBuilder builder = new ModelBuilder();
-                final BNode bnode = Values.bnode();
+                final IRI release = iri(Namespaces.RESULTS_URI, "assertor-release");
                 conn.add(builder.subject(assertor)
                         .add(RDF.type, EARL.Software)
-                        .add(DOAP.name, properties.getProperty("package.name"))
-                        .add(DOAP.description, properties.getProperty("package.description"))
+                        .add(DOAP.name, literal(properties.getProperty("package.name"), "en"))
+                        .add(DOAP.description, literal(properties.getProperty("package.description"), "en"))
                         .add(DOAP.created, Date.from(
                                 Instant.from(DateTimeFormatter.ISO_INSTANT
                                         .parse(properties.getProperty("package.buildTime")))
                         ))
                         .add(DOAP.developer, iri(properties.getProperty("package.organizationUrl")))
                         .add(DOAP.homepage, iri(properties.getProperty("package.url")))
-                        .add(DOAP.release, bnode)
-                        .add(bnode, DOAP.revision, properties.getProperty("package.version"))
+                        .add(DOAP.release, release)
+                        .add(release, DOAP.revision, literal(properties.getProperty("package.version"), "en"))
                         .build());
             }
         }

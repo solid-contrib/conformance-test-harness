@@ -107,7 +107,10 @@ public class Config {
     public IRI getTestSubject() {
         if (testSubject == null && target.isPresent()) {
             logger.debug("Use config to set target: {}", target.get());
-            testSubject = iri(target.get());
+            final String subjectsBaseUri = iri(getSubjectsUrl().toString()).getNamespace();
+            testSubject = target.get().contains(":")
+                    ? iri(target.get())
+                    : iri(subjectsBaseUri, target.get());
         }
         return testSubject;
     }

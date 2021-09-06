@@ -2,27 +2,27 @@
 <tr id="{subject}" about="{subject}" typeof="{typesList}">
     <td>
         <span property="dcterms:title">{title}</span>
-        <span>[<a href="{subject}" title="{subject}">manifest</a>]</span>
+        [<a href="{subject}">manifest</a>]
         {#if isImplemented}
-        <span rel="spec:testScript">[<a href="{testScript}" title="{testScript}">source</a>]</span>
+        [<a href="{testScript}" rel="spec:testScript">source</a>]
         {/if}
-        <span rel="spec:requirementReference" resource="{requirementReference}"></span>
+        [<a href="{requirementReference}" rel="spec:requirementReference">requirement</a>]
     </td>
     <td>
         {#if coverageMode == true}
-        <span rel="td:reviewStatus" resource="{status}">
+        <a href="{status}" rel="td:reviewStatus">
             {#switch status}
             {#case 'http://www.w3.org/2006/03/test-description#unreviewed'}Unreviewed
             {#case 'http://www.w3.org/2006/03/test-description#accepted'}Accepted
             {/switch}
-        </span>
+        </a>
         {#else}
-        <dl><dt>Status</dt><dd rel="td:reviewStatus" resource="{status}">
+        <dl><dt>Status</dt><dd><a href="{status}" rel="td:reviewStatus">
             {#switch status}
             {#case 'http://www.w3.org/2006/03/test-description#unreviewed'}Unreviewed
             {#case 'http://www.w3.org/2006/03/test-description#accepted'}Accepted
             {/switch}
-        </dd></dl>
+        </a></dd></dl>
         {/if}
 
         {#if assertion && coverageMode == false}
@@ -30,7 +30,7 @@
             <div about="{assertion.subject}" typeof="{assertion.typesList}">
                 <span rel="earl:subject" resource="{assertion.testSubject}"></span>
                 <span rel="earl:assertedBy" resource="{assertion.assertedBy}"></span>
-                <dl><dt>Mode</dt><dd rel="earl:mode" resource="{assertion.mode}">
+                <dl><dt>Mode</dt><dd><a href="{assertion.mode}" rel="earl:mode">
                     {#switch assertion.mode}
                     {#case 'http://www.w3.org/ns/earl#automatic'}Automatic
                     {#case 'http://www.w3.org/ns/earl#manual'}Manual
@@ -38,7 +38,7 @@
                     {#case 'http://www.w3.org/ns/earl#undisclosed'}Undisclosed
                     {#case 'http://www.w3.org/ns/earl#unknownMode'}Unknown
                     {/switch}
-                </dd></dl>
+                </a></dd></dl>
             </div>
             <dl><dt>Timestamp</dt><dd>
                 <time about="{assertion.result.subject}" datatype="xsd:dateTime" datetime="{assertion.result.date}" property="dcterms:date">{assertion.result.date}</time>
@@ -50,21 +50,22 @@
     <td>{isImplemented ? '✔' : '✗'}</td>
     {#else if isImplemented && assertion}
     <td about="{assertion.subject}" rel="earl:result" resource="{assertion.result.subject}">
-        <span about="{assertion.result.subject}" typeof="{assertion.result.typesList}" rel="earl:outcome" resource="{assertion.result.outcome}"></span>
+        <span about="{assertion.result.subject}" typeof="{assertion.result.typesList}" rel="earl:outcome" resource="{assertion.result.outcome}">
         {#switch assertion.result.outcome}
         {#case 'http://www.w3.org/ns/earl#passed'}✔
         {#case 'http://www.w3.org/ns/earl#failed'}✗
         {#else}o
         {/switch}
+        </span>
     </td>
     <td>
         {#each scenarios.orEmpty}
-        <ul><li><a href="#scenario-{it.anchor}">{it.title}</a></li></ul>
+        <ul><li><a href="#{it.anchor}">{it.title}</a></li></ul>
         {/each}
     </td>
     {#else}
     <td></td>
-    <td>Test not run</td>
+    <td>Test not run.</td>
     <td></td>
     <td></td>
     {/if}

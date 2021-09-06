@@ -36,9 +36,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.solid.common.vocab.DCTERMS;
-import org.solid.common.vocab.SOLID_TEST;
-import org.solid.common.vocab.SPEC;
+import org.solid.common.vocab.*;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.RDFUtils;
 import org.solid.testharness.utils.TestUtils;
@@ -61,6 +59,7 @@ import static org.mockito.Mockito.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ReportFragmentTest {
     private static final Logger logger = LoggerFactory.getLogger(ReportFragmentTest.class);
+    private static final String BASE_URI = "https://example.org/";
 
     @Inject
     DataRepository dataRepository;
@@ -80,8 +79,8 @@ class ReportFragmentTest {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             conn.clear();
         }
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"));
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"), BASE_URI);
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"), BASE_URI);
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-2.ttl"));
@@ -100,14 +99,20 @@ class ReportFragmentTest {
         final Scenario scenario = testCase.getScenarios().get(0);
         final Step step = scenario.getSteps().get(2);
         step.getModel().remove(iri(step.getScenario()), null, null);
-        logger.debug("Step Model:\n{}", TestUtils.toTurtle(step.getModel()));
 
         final String report = render("steps", List.of(step));
         logger.debug("Report:\n{}", report);
 
-        final Model reportModel = RDFUtils.parseRdfa(report, "https://example.org");
+        logger.debug("Step Model:\n{}", TestUtils.toTurtle(step.getModel()));
+
+        final Model reportModel = RDFUtils.parseRdfa(report, BASE_URI);
+        // remove list from model to just compare the step
+        reportModel.remove(null, DCTERMS.hasPart, null);
+        reportModel.remove(null, RDF.first, null);
+        reportModel.remove(null, RDF.rest, null);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
+        TestUtils.showModelDifferences(reportModel, step.getModel(), logger);
         assertTrue(Models.isomorphic(reportModel, step.getModel()));
     }
 
@@ -122,17 +127,22 @@ class ReportFragmentTest {
         for (Step step: scenario.getSteps()) {
             scenario.getModel().addAll(step.getModel());
         }
-        logger.debug("Scenario Model:\n{}", TestUtils.toTurtle(scenario.getModel()));
-        logger.debug("Scenario Model:\n{}", TestUtils.toTriples(scenario.getModel()));
 
         final String report = render("scenarios", List.of(scenario));
         logger.debug("Report:\n{}", report);
 
-        final Model reportModel = RDFUtils.parseRdfa(report, "https://example.org");
+        logger.debug("Scenario Model:\n{}", TestUtils.toTurtle(scenario.getModel()));
+        logger.debug("Scenario Model:\n{}", TestUtils.toTriples(scenario.getModel()));
+
+        final Model reportModel = RDFUtils.parseRdfa(report, BASE_URI);
+        // remove section hasPart to compare
+        reportModel.remove(iri(BASE_URI), DCTERMS.hasPart, null);
+
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
         logger.debug("Report Model:\n{}", TestUtils.toTriples(reportModel));
 
-        assertTrue(Models.isSubset(reportModel, scenario.getModel()));
+        TestUtils.showModelDifferences(reportModel, scenario.getModel(), logger);
+        assertTrue(Models.isomorphic(scenario.getModel(), reportModel));
     }
 
     @Test
@@ -148,36 +158,42 @@ class ReportFragmentTest {
         for (Scenario scenario: testCase.getScenarios()) {
             testCase.getModel().remove(null, null, iri(scenario.getSubject()));
         }
-        logger.debug("TestCase Model:\n{}", TestUtils.toTurtle(testCase.getModel()));
 
         final String report = render("testCases", List.of(testCase));
         logger.debug("Report:\n{}", report);
 
-        final Model reportModel = RDFUtils.parseRdfa(report, "https://example.org");
+        logger.debug("TestCase Model:\n{}", TestUtils.toTurtle(testCase.getModel()));
+
+        final Model reportModel = RDFUtils.parseRdfa(report, BASE_URI);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
+        TestUtils.showModelDifferences(reportModel, testCase.getModel(), logger);
         assertTrue(Models.isomorphic(reportModel, testCase.getModel()));
     }
 
     @Test
     void requirementReportNoTestCases() throws IOException {
-        final IRI requirementIri = iri("https://example.org/specification1#spec1");
+        final IRI requirementIri = iri(BASE_URI, "specification1#spec1");
         final SpecificationRequirement requirement = new SpecificationRequirement(requirementIri);
         requirement.getModel().remove(null, null, requirementIri);
-        logger.debug("SpecificationRequirement Model:\n{}", TestUtils.toTurtle(requirement.getModel()));
 
         final String report = render("specificationRequirements", List.of(requirement), "coverageMode", false);
         logger.debug("Report:\n{}", report);
 
-        final Model reportModel = RDFUtils.parseRdfa(report, "https://example.org");
+        logger.debug("SpecificationRequirement Model:\n{}", TestUtils.toTurtle(requirement.getModel()));
+
+        final Model reportModel = RDFUtils.parseRdfa(report, BASE_URI);
+        // remove section hasPart to compare
+        reportModel.remove(iri(BASE_URI), DCTERMS.hasPart, null);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
+        TestUtils.showModelDifferences(reportModel, requirement.getModel(), logger);
         assertTrue(Models.isomorphic(reportModel, requirement.getModel()));
     }
 
     @Test
     void requirementReportWithTestCases() throws IOException {
-        final IRI requirementIri = iri("https://example.org/specification1#spec1");
+        final IRI requirementIri = iri(BASE_URI, "specification1#spec1");
         final SpecificationRequirement requirement = new SpecificationRequirement(requirementIri);
         requirement.getModel().remove(null, SPEC.requirement, requirementIri);
         for (TestCase testCase: requirement.getTestCases()) {
@@ -189,50 +205,56 @@ class ReportFragmentTest {
             }
         }
         requirement.getModel().remove(null, DCTERMS.hasPart, null);
-        logger.debug("SpecificationRequirement Model:\n{}", TestUtils.toTurtle(requirement.getModel()));
 
         final String report = render("specificationRequirements", List.of(requirement), "coverageMode", false);
         logger.debug("Report:\n{}", report);
 
-        final Model reportModel = RDFUtils.parseRdfa(report, "https://example.org");
+        logger.debug("SpecificationRequirement Model:\n{}", TestUtils.toTurtle(requirement.getModel()));
+
+        final Model reportModel = RDFUtils.parseRdfa(report, BASE_URI);
+        // remove section hasPart to compare
+        reportModel.remove(iri(BASE_URI), DCTERMS.hasPart, null);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
+        TestUtils.showModelDifferences(reportModel, requirement.getModel(), logger);
         assertTrue(Models.isomorphic(reportModel, requirement.getModel()));
     }
 
     @Test
     void specificationHeader() throws IOException {
-        final IRI specificationIri = iri("https://example.org/specification1");
+        final IRI specificationIri = iri(BASE_URI, "specification1");
         final Specification specification = new Specification(specificationIri);
         logger.debug("Specification Model:\n{}", TestUtils.toTurtle(specification.getModel()));
 
         final String report = render("specifications", List.of(specification));
         logger.debug("Report:\n{}", report);
 
-        final Model reportModel = RDFUtils.parseRdfa(report, "https://example.org");
+        final Model reportModel = RDFUtils.parseRdfa(report, BASE_URI);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
+        TestUtils.showModelDifferences(reportModel, specification.getModel(), logger);
         assertTrue(Models.isomorphic(reportModel, specification.getModel()));
     }
 
     @Test
-    void assertionHeader() throws IOException {
-        final IRI assertorIri = iri("https://github.com/solid/conformance-test-harness/");
+    void assertorHeader() throws IOException {
+        final IRI assertorIri = iri(BASE_URI);
         final Assertor assertor = new Assertor(assertorIri);
         logger.debug("Assertor Model:\n{}", TestUtils.toTurtle(assertor.getModel()));
 
         final String report = render("assertor", assertor);
         logger.debug("Report:\n{}", report);
 
-        final Model reportModel = RDFUtils.parseRdfa(report, "https://example.org");
+        final Model reportModel = RDFUtils.parseRdfa(report, BASE_URI);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
+        TestUtils.showModelDifferences(reportModel, assertor.getModel(), logger);
         assertTrue(Models.isomorphic(reportModel, assertor.getModel()));
     }
 
     @Test
     void testSubject() throws IOException {
-        final IRI testSubjectIri = iri("https://github.com/solid/conformance-test-harness/testserver");
+        final IRI testSubjectIri = iri(BASE_URI, "testserver");
         final TestSubject testSubject = new TestSubject(testSubjectIri);
         testSubject.getModel().remove(null, SOLID_TEST.features, null);
         logger.debug("TestSubject Model:\n{}", TestUtils.toTurtle(testSubject.getModel()));
@@ -240,9 +262,10 @@ class ReportFragmentTest {
         final String report = render("testSubject", testSubject);
         logger.debug("Report:\n{}", report);
 
-        final Model reportModel = RDFUtils.parseRdfa(report, "https://example.org");
+        final Model reportModel = RDFUtils.parseRdfa(report, BASE_URI);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
+        TestUtils.showModelDifferences(reportModel, testSubject.getModel(), logger);
         assertTrue(Models.isomorphic(reportModel, testSubject.getModel()));
     }
 
@@ -269,7 +292,7 @@ class ReportFragmentTest {
 
     @Test
     void requirementCoverageReportWithTestCases() throws IOException {
-        final IRI requirementIri = iri("https://example.org/specification1#spec1");
+        final IRI requirementIri = iri(BASE_URI, "specification1#spec1");
         final SpecificationRequirement requirement = new SpecificationRequirement(requirementIri);
         requirement.getModel().remove(null, SPEC.requirement, requirementIri);
         for (TestCase testCase: requirement.getTestCases()) {
@@ -283,9 +306,12 @@ class ReportFragmentTest {
         final String report = render("specificationRequirements", List.of(requirement), "coverageMode", true);
         logger.debug("Report:\n{}", report);
 
-        final Model reportModel = RDFUtils.parseRdfa(report, "https://example.org");
+        final Model reportModel = RDFUtils.parseRdfa(report, BASE_URI);
+        // remove section hasPart to compare
+        reportModel.remove(iri(BASE_URI), DCTERMS.hasPart, null);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
+        TestUtils.showModelDifferences(reportModel, requirement.getModel(), logger);
         assertTrue(Models.isomorphic(reportModel, requirement.getModel()));
     }
 

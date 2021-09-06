@@ -19,19 +19,20 @@ and how dynamic it is. They are as follows (in order of least dynamic to most).
 This is a Turtle file which describes the test subject and it's capabilities, primarily using
 [EARL](http://www.w3.org/ns/earl#) and [DOAP](http://usefulinc.com/ns/doap#) vocabularies. It takes the following form:
 ```
-<https://github.com/solid/conformance-test-harness/css>
+<css>
     a earl:Software, earl:TestSubject ;
     doap:name "Community Solid Server" ;
-    doap:release [
-                     doap:name "CSS 0.9.0" ;
-                     doap:revision "0.9.0" ;
-                     doap:created "2021-05-04"^^xsd:date
-                 ] ;
+    doap:release <css#test-subject-release> ;
     doap:developer <https://github.com/solid> ;
     doap:homepage <https://github.com/solid/community-server> ;
     doap:description "An open and modular implementation of the Solid specifications."@en ;
     doap:programming-language "TypeScript" ;
     solid-test:features "authentication", "acl", "wac-allow" .
+    
+<css#test-subject-release>
+    doap:name "CSS 0.9.0" ;
+    doap:revision "0.9.0" ;
+    doap:created "2021-05-04"^^xsd:date .
 ```
 **Note**: The test subject identifier is simply an IRI. It is not meant to be resolvable and can be anything as long as
 you specify it on the command line when running tests.
@@ -68,8 +69,8 @@ sources:
   - example/web-access-control/web-access-control-test-manifest.ttl
   - example/protocol/solid-protocol-spec.ttl
   - example/web-access-control/web-access-control-spec.ttl
-# The target is just an IRI and is not expected to resolve to anything - the namespace used below is likely to change
-target: https://github.com/solid/conformance-test-harness/ess-compat
+# The target is just an IRI or local name relative to the test-subjects file and is not expected to resolve to anything
+target: ess
 
 # To map URLs from the manifest to local files:
 mappings:
@@ -364,7 +365,7 @@ The following examples demonstrate how a script can work with the Docker image a
 #### Example: Using a publicly available Solid Server
 Executes tests against a publicly available server, in this case ESS in WAC compatibility mode (https://pod-compat.inrupt.com).
 
-1. Create a file for environment variables (e.g., `ess-compat.env`) with the following contents (based on the 
+1. Create a file for environment variables (e.g., `ess.env`) with the following contents (based on the 
     client_credentials option):
     ```shell
     SOLID_IDENTITY_PROVIDER=
@@ -372,7 +373,7 @@ Executes tests against a publicly available server, in this case ESS in WAC comp
     USERS_ALICE_CLIENTSECRET=
     USERS_BOB_WEBID=
     USERS_BOB_CLIENTSECRET=
-    RESOURCE_SERVER_ROOT=https://pod-compat.inrupt.com
+    RESOURCE_SERVER_ROOT=https://pod.inrupt.com
     TEST_CONTAINER=/pod-owner/shared-test/
     ```
 
@@ -383,15 +384,15 @@ Executes tests against a publicly available server, in this case ESS in WAC comp
     # This uses the test harness docker image with the default tests pulled from a repository.
     # Environment variables are defined in an `env` file in the directory from which you run this script.
 
-    mkdir reports/ess-compat
+    mkdir reports/ess
     docker pull solidconformancetestbeta/conformance-test-harness
     docker run -i --rm \
-    -v "$(pwd)"/reports/ess-compat:/reports \
-    --env-file=ess-compat.env solidconformancetestbeta/conformance-test-harness \
-    --output=/reports --target=ess-compat
+    -v "$(pwd)"/reports/ess:/reports \
+    --env-file=ess.env solidconformancetestbeta/conformance-test-harness \
+    --output=/reports --target=ess
     ```
 
-1. Run `./ess-compat.sh`.
+1. Run `./ess.sh`.
 1. The reports will be created in the specified directory.
 
 **Note**: To run against the ESS (ACP) version, you would just need to supply a different environment file and set the target as
@@ -557,7 +558,7 @@ To use the Docker image to run a set of local tests:
         -v "$(pwd)"/config:/app/config \
         -v "$(pwd)"/reports/local:/reports \
         --env-file=ess.env solidconformancetestbeta/conformance-test-harness \
-        --output=/reports --target=ess-compat
+        --output=/reports --target=ess
     ```
   
 ## Local Execution

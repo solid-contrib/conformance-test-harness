@@ -97,7 +97,7 @@ class TestSuiteDescriptionTest {
     void loadRdfa() throws MalformedURLException {
         testSuiteDescription.load(List.of(new URL("https://example.org/specification-sample-1.html")));
         assertTrue(ask(iri("https://example.org/specification1"), RDF.type, SPEC.Specification));
-        assertTrue(ask(iri("https://example.org/specification1#spec1"), SPEC.excerpt,
+        assertTrue(ask(iri("https://example.org/specification1#spec1"), SPEC.statement,
                 literal("text of requirement 1")));
     }
 

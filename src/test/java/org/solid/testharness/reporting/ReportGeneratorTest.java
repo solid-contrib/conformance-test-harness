@@ -25,30 +25,29 @@ package org.solid.testharness.reporting;
 
 import com.intuit.karate.Results;
 import io.quarkus.test.junit.QuarkusTest;
-import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.util.RepositoryUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.solid.common.vocab.DOAP;
 import org.solid.common.vocab.SOLID_TEST;
 import org.solid.common.vocab.TD;
 import org.solid.testharness.utils.*;
 
 import javax.inject.Inject;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.file.Files;
-import java.util.stream.Collectors;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @QuarkusTest
 class ReportGeneratorTest {
@@ -76,7 +75,8 @@ class ReportGeneratorTest {
 
     @Test
     void buildHtmlResultReport() throws Exception {
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"),
+                Namespaces.TEST_HARNESS_URI);
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
@@ -93,8 +93,9 @@ class ReportGeneratorTest {
         final String report = sw.toString();
         logger.debug("OUTPUT:\n{}", report);
         assertTrue(report.length() > 1);
-        assertTrue(report.contains("about=\"https://github.com/solid/implementation-reports/"));
-        assertTrue(report.contains("about=\"" + Namespaces.TEST_HARNESS_URI + "\" typeof=\"earl:Software\""));
+        assertTrue(report.contains("rel=\"owl:sameAs\">https://github.com/solid/implementation-reports/"));
+        assertTrue(report.contains("about=\"" + Namespaces.TEST_HARNESS_URI +
+                "\" id=\"assertor\" typeof=\"earl:Software\""));
         // TODO: ASSERT:
         /*
         spec & manifest links
@@ -104,8 +105,9 @@ class ReportGeneratorTest {
     }
 
     @Test
-    void resultsIsIsomorphic() throws Exception {
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"));
+    void resultsContainsModel() throws Exception {
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"),
+                Namespaces.TEST_HARNESS_URI);
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
@@ -117,16 +119,12 @@ class ReportGeneratorTest {
         // remove unused parts of test model
         final Model resultModel;
         try (RepositoryConnection conn = dataRepository.getConnection()) {
+            final String namespace = iri(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl").toString())
+                    .getNamespace();
             resultModel = QueryResults.asModel(conn.getStatements(null, null, null));
             resultModel.remove(null, SOLID_TEST.features, null);
-            final Value bnode = resultModel.getStatements(
-                    iri("https://github.com/solid/conformance-test-harness/testserver2"),
-                    DOAP.release, null
-            ).iterator().next().getObject();
-            if (bnode != null && bnode.isBNode()) {
-                resultModel.remove((BNode) bnode, null, null);
-            }
-            resultModel.remove(iri("https://github.com/solid/conformance-test-harness/testserver2"), null, null);
+            resultModel.remove(iri(namespace, "testserver2"), null, null);
+            resultModel.remove(iri(namespace, "testserver2#test-subject-release"), null, null);
             resultModel.remove(null, TD.preCondition, null);
             logger.debug("Results contains {} triples", resultModel.size());
         }
@@ -135,29 +133,18 @@ class ReportGeneratorTest {
         reportGenerator.buildHtmlResultReport(sw);
         final String report = sw.toString();
 //        logger.debug("OUTPUT:\n{}", report);
-        final Model reportModel = RDFUtils.parseRdfa(report, "https://example.org");
+        final Model reportModel = RDFUtils.parseRdfa(report, Namespaces.TEST_HARNESS_URI);
 //        logger.debug("TURTLE:\n{}", TestUtils.toTurtle(reportModel));
         logger.debug("Report contains {} triples", reportModel.size());
-        logger.debug("Report is isomorphic with results: {}", Models.isomorphic(reportModel, resultModel));
 
-        if (!Models.isomorphic(reportModel, resultModel)) {
-            logger.debug("\n== DIFFERENCE EXTRA IN REPORT ==\n{}", RepositoryUtil.difference(reportModel, resultModel)
-                    .stream().map(s -> String.format("%s %s %s", s.getSubject(), s.getPredicate(), s.getObject()))
-                    .collect(Collectors.joining("\n"))
-            );
-
-            logger.debug("\n== DIFFERENCE MISSING IN REPORT ==\n{}", RepositoryUtil.difference(resultModel, reportModel)
-                    .stream().map(s -> String.format("%s %s %s", s.getSubject(), s.getPredicate(), s.getObject()))
-                    .collect(Collectors.joining("\n"))
-            );
-        }
-
-        assertTrue(Models.isomorphic(reportModel, resultModel));
+        TestUtils.showModelDifferences(reportModel, resultModel, logger);
+        assertTrue(Models.isSubset(resultModel, reportModel));
     }
 
     @Test
     void buildHtmlCoverageReport() throws IOException {
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"),
+                Namespaces.TEST_HARNESS_URI);
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-2.ttl"));
@@ -169,7 +156,7 @@ class ReportGeneratorTest {
     }
 
     @Test
-    void coverageIsIsomorphic() throws Exception {
+    void coverageContainsModel() throws Exception {
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-2.ttl"));
@@ -186,31 +173,21 @@ class ReportGeneratorTest {
         reportGenerator.buildHtmlCoverageReport(sw);
         final String report = sw.toString();
 //        logger.debug("OUTPUT:\n{}", report);
-        final Model reportModel = RDFUtils.parseRdfa(report, "https://example.org");
+        final Model reportModel = RDFUtils.parseRdfa(report, Namespaces.TEST_HARNESS_URI);
 //        logger.debug("TURTLE:\n{}", TestUtils.toTurtle(reportModel));
         logger.debug("Report contains {} triples", reportModel.size());
-        logger.debug("Report is isomorphic with results: {}", Models.isomorphic(reportModel, resultModel));
 
-        if (!Models.isomorphic(reportModel, resultModel)) {
-            logger.debug("\n== DIFFERENCE EXTRA IN REPORT ==\n{}", RepositoryUtil.difference(reportModel, resultModel)
-                    .stream().map(s -> String.format("%s %s %s", s.getSubject(), s.getPredicate(), s.getObject()))
-                    .collect(Collectors.joining("\n"))
-            );
-
-            logger.debug("\n== DIFFERENCE MISSING IN REPORT ==\n{}", RepositoryUtil.difference(resultModel, reportModel)
-                    .stream().map(s -> String.format("%s %s %s", s.getSubject(), s.getPredicate(), s.getObject()))
-                    .collect(Collectors.joining("\n"))
-            );
-        }
-
-        assertTrue(Models.isomorphic(reportModel, resultModel));
+        TestUtils.showModelDifferences(reportModel, resultModel, logger);
+        assertTrue(Models.isSubset(resultModel, reportModel));
     }
 
     @Test
     void buildHtmlResultReportFile() throws IOException {
         final File reportFile = new File("target/example-result-report.html");
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"));
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"),
+                Namespaces.TEST_HARNESS_URI);
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"),
+                Namespaces.TEST_HARNESS_URI);
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-2.ttl"));
@@ -226,7 +203,8 @@ class ReportGeneratorTest {
     @Test
     void buildHtmlCoverageReportFile() throws IOException {
         final File reportFile = new File("target/example-coverage-report.html");
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"),
+                Namespaces.TEST_HARNESS_URI);
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-2.ttl"));

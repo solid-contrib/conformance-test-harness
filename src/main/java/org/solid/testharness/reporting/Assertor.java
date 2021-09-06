@@ -23,7 +23,6 @@
  */
 package org.solid.testharness.reporting;
 
-import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.solid.common.vocab.DOAP;
 import org.solid.testharness.utils.DataModelBase;
@@ -56,7 +55,7 @@ public class Assertor extends DataModelBase {
     }
 
     public String getRevision() {
-        final BNode release = getAsBNode(DOAP.release);
+        final IRI release = getAsIri(DOAP.release);
         if (release == null) {
             return null;
         }

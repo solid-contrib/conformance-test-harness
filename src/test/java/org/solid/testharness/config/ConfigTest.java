@@ -46,7 +46,8 @@ public class ConfigTest {
 
     @Test
     void getTestSubjectDefault() {
-        assertEquals(iri("https://github.com/solid/conformance-test-harness/testserver"), config.getTestSubject());
+        assertEquals(iri(iri(config.getSubjectsUrl().toString()).getNamespace(), "testserver"),
+                config.getTestSubject());
     }
 
     @Test
