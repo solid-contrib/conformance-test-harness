@@ -173,7 +173,7 @@ class ApplicationTest {
         final TestSuiteResults results = mockResults(0);
         when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
         when(config.getSubjectsUrl()).thenReturn(new URL("https://example.org/subjects.ttl"));
-        assertEquals(0, application.run("--tests", "--target", "http:s//example.org/test"));
+        assertEquals(0, application.run("--tests", "--target", "https://example.org/test"));
         verify(config).setTestSubject(iri("https://example.org/test"));
     }
 
