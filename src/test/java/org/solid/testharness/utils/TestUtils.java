@@ -126,5 +126,20 @@ public final class TestUtils {
         }
     }
 
+    public static Model loadTurtleFromFile(final String file) throws IOException {
+        final InputStream is = Files.newInputStream(Path.of(file));
+        final Model model = Rio.parse(is, RDFFormat.TURTLE);
+        return model;
+    }
+
+    public static Model loadTurtleFromString(final String data) throws IOException {
+        final Model model = Rio.parse(new StringReader(data), RDFFormat.TURTLE);
+        return model;
+    }
+
+    public static String loadStringFromFile(final String file) throws IOException {
+        return Files.readString(Path.of(file));
+    }
+
     private TestUtils() { }
 }
