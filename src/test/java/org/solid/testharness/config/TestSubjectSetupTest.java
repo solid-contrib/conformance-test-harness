@@ -31,6 +31,7 @@ import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,22 +53,26 @@ public class TestSubjectSetupTest {
 
     @Test
     void setupMissingTargetSingleConfig() throws MalformedURLException {
-        when(config.getSubjectsUrl())
-                .thenReturn(TestUtils.getFileUrl("src/test/resources/config/config-sample-single.ttl"));
+        final URL testFileUrl = TestUtils.getFileUrl("src/test/resources/config/config-sample-single.ttl");
+        when(config.getSubjectsUrl()).thenReturn(testFileUrl);
         testSubject.loadTestSubjectConfig();
         final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
-        assertEquals("https://github.com/solid/conformance-test-harness/default", targetServer.getSubject());
+        assertEquals(new URL(testFileUrl, "default").toString(), targetServer.getSubject());
+        assertEquals(14, targetServer.size());
     }
 
     @Test
     void setupTargetMultipleConfig() throws MalformedURLException {
-        when(config.getSubjectsUrl()).thenReturn(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"));
-        when(config.getTestSubject()).thenReturn(iri("https://github.com/solid/conformance-test-harness/testserver"));
+        final URL testFileUrl = TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl");
+        final String subject = new URL(testFileUrl, "testserver").toString();
+        when(config.getSubjectsUrl()).thenReturn(testFileUrl);
+        when(config.getTestSubject()).thenReturn(iri(subject));
         testSubject.loadTestSubjectConfig();
         final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
-        assertEquals("https://github.com/solid/conformance-test-harness/testserver", targetServer.getSubject());
+        assertEquals(subject, targetServer.getSubject());
+        assertEquals(14, targetServer.size());
     }
 
     @Test

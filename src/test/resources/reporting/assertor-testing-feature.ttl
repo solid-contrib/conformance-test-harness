@@ -3,16 +3,15 @@ prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 prefix doap: <http://usefulinc.com/ns/doap#>
 prefix earl: <http://www.w3.org/ns/earl#>
-prefix ex: <https://example.org/>
 
-ex:tester1 a earl:Software ;
+<tester1> a earl:Software ;
    doap:name "TESTER1"@en ;
    doap:description "DESCRIPTION"@en ;
    doap:created "2021-01-01"^^xsd:date ;
    doap:developer <https://example.org/profile/card/#us>;
    doap:homepage <https://example.org/tester> ;
-   doap:release [
-                    doap:revision "0.0.1-SNAPSHOT"
-                ] .
+   doap:release <tester1#assertor-release> .
 
-ex:tester2 a earl:Software.
+<tester1#assertor-release> doap:revision "0.0.1-SNAPSHOT"@en .
+
+<tester2> a earl:Software.

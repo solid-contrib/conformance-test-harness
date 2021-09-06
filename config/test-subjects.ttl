@@ -1,4 +1,3 @@
-base <https://github.com/solid/conformance-test-harness/>
 prefix test-harness: <https://github.com/solid/conformance-test-harness/>
 prefix solid-test: <https://github.com/solid/conformance-test-harness/vocab#>
 
@@ -10,72 +9,77 @@ prefix earl: <http://www.w3.org/ns/earl#>
 prefix solid: <http://www.w3.org/ns/solid/terms#>
 prefix dcterms: <http://purl.org/dc/terms/>
 
-<ess-compat>
-    a earl:Software, earl:TestSubject ;
-    doap:name "Enterprise Solid Server (Web Access Control version)";
-    doap:release [
-        doap:name "ESS 1.1.2";
-        doap:revision "1.1.2";
-        doap:created "2021-05-24"^^xsd:date
-    ];
-    doap:developer <https://inrupt.com/profile/card/#us>;
-    doap:homepage <https://inrupt.com/products/enterprise-solid-server>;
-    doap:description "A production-grade Solid server produced and supported by Inrupt."@en;
-    doap:programming-language "Java" ;
-    solid-test:features "authentication", "acl", "wac-allow" .
-
 <ess>
     a earl:Software, earl:TestSubject ;
-    doap:name "Enterprise Solid Server (ACP version)";
-    doap:release [
-                     doap:name "ESS 1.1.2";
-                     doap:revision "1.1.2";
-                     doap:created "2021-05-24"^^xsd:date
-                 ];
-    doap:developer <https://inrupt.com/profile/card/#us>;
-    doap:homepage <https://inrupt.com/products/enterprise-solid-server>;
-    doap:description "A production-grade Solid server produced and supported by Inrupt."@en;
-    doap:programming-language "Java" ;
+    doap:name "Enterprise Solid Server (ACP version)"@en ;
+    doap:release <ess#test-subject-release> ;
+    doap:developer <https://inrupt.com/profile/card/#us> ;
+    doap:homepage <https://inrupt.com/products/enterprise-solid-server> ;
+    doap:description "A production-grade Solid server produced and supported by Inrupt."@en ;
+    doap:programming-language "Java"@en ;
     solid-test:features "authentication", "wac-allow" .
+
+<ess#test-subject-release>
+    doap:name "ESS 1.1.2"@en ;
+    doap:revision "1.1.2"@en ;
+    doap:created "2021-05-24"^^xsd:date .
+
+<ess-compat>
+    a earl:Software, earl:TestSubject ;
+    doap:name "Enterprise Solid Server (Web Access Control version)"@en ;
+    doap:release <ess-compat#test-subject-release> ;
+    doap:developer <https://inrupt.com/profile/card/#us> ;
+    doap:homepage <https://inrupt.com/products/enterprise-solid-server> ;
+    doap:description "A production-grade Solid server produced and supported by Inrupt."@en ;
+    doap:programming-language "Java"@en ;
+    solid-test:features "authentication", "acl", "wac-allow" .
+<ess-compat#test-subject-release>
+    doap:name "ESS 1.1.2"@en ;
+    doap:revision "1.1.2"@en ;
+    doap:created "2021-05-24"^^xsd:date .
 
 <css>
     a earl:Software, earl:TestSubject ;
-    doap:name "Community Solid Server" ;
-    doap:release [
-                     doap:name "CSS 0.9.0" ;
-                     doap:revision "0.9.0" ;
-                     doap:created "2021-05-04"^^xsd:date
-                 ] ;
+    doap:name "Community Solid Server"@en ;
+    doap:release <css#test-subject-release> ;
     doap:developer <https://github.com/solid> ;
     doap:homepage <https://github.com/solid/community-server> ;
     doap:description "An open and modular implementation of the Solid specifications."@en ;
-    doap:programming-language "TypeScript" ;
+    doap:programming-language "TypeScript"@en ;
     solid-test:features "authentication", "acl", "wac-allow" .
+
+<css#test-subject-release>
+    doap:name "CSS 0.9.0"@en ;
+    doap:revision "0.9.0"@en ;
+    doap:created "2021-05-04"^^xsd:date .
 
 <nss>
     a earl:Software, earl:TestSubject ;
-    doap:name "Node Solid Server" ;
-    doap:release [
-                     doap:name "NSS 5.6.6" ;
-                     doap:revision "5.6.6" ;
-                     doap:created "2021-03-12"^^xsd:date
-                 ] ;
+    doap:name "Node Solid Server"@en ;
+    doap:release <nss#test-subject-release> ;
     doap:developer <https://github.com/solid> ;
     doap:homepage <https://github.com/solid/node-solid-server> ;
     doap:description "Solid server on top of the file-system in NodeJS."@en ;
-    doap:programming-language "JavaScript" ;
+    doap:programming-language "JavaScript"@en ;
     solid-test:features "authentication", "acl", "wac-allow" .
+
+<nss#test-subject-release>
+    doap:name "NSS 5.6.6"@en ;
+    doap:revision "5.6.6"@en ;
+    doap:created "2021-03-12"^^xsd:date .
 
 <trinpod>
     a earl:Software, earl:TestSubject ;
-    doap:name "TrinPod" ;
-    doap:release [
-                     doap:name "TrinPod-Server" ;
-                     doap:revision "2.2.74" ;
-                     doap:created "2021-07-19"^^xsd:date
-                 ] ;
+    doap:name "TrinPod"@en ;
+    doap:release <trinpod#test-subject-release> ;
     doap:developer <https://graphmetrix.com> ;
     doap:homepage <https://graphmetrix.com/trinpod> ;
-    doap:description "TrinPod™ is an Industrial strength Solid Pod with conceptual computing through Trinity AI Capable of handling a massive amount of data."@en ;
-    doap:programming-language "Common Lisp" ;
+    doap:description
+        "TrinPod™ is an Industrial strength Solid Pod with conceptual computing through Trinity AI Capable of handling a massive amount of data."@en ;
+    doap:programming-language "Common Lisp"@en ;
     solid-test:features "authentication", "acl", "wac-allow" .
+
+<trinpod#test-subject-release>
+    doap:name "TrinPod-Server"@en ;
+    doap:revision "2.2.74"@en ;
+    doap:created "2021-07-19"^^xsd:date .

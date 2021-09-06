@@ -13,14 +13,14 @@
     </dl>
     <dl>
       <dt>Requirement level</dt>
-      <dd property="spec:requirementLevel" resource="{conformanceLevel}">
+      <dd property="spec:requirementLevel" resource="{requirementLevel}">
         {#switch requirementLevel}
         {#case 'http://www.w3.org/ns/spec#MUST'}MUST
         {#case 'http://www.w3.org/ns/spec#MUST-NOT'}MUST NOT
         {/switch}
       </dd>
     </dl>
-    {#if excerpt}
+    {#if statement}
     <dl><dt>Excerpt</dt><dd property="spec:statement">{statement}</dd></dl>
     {/if}
 </div>

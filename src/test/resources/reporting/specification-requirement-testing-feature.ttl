@@ -6,11 +6,11 @@ prefix manifest: <https://example.org/manifests/test-manifest-sample-1.ttl#>
 
 <https://example.org/specification#requirement>
     a spec:NormativeRequirement ;
-    spec:conformanceRole spec:ServerConformanceClass ;
-    spec:normativeConformanceLevel spec:ConformanceMust ;
+    spec:requirementSubject spec:Server ;
+    spec:requirementLevel spec:MUST ;
     schema:name "Requirement 1" ;
     schema:description "Full text of requirement 1" ;
-    spec:excerpt "excerpt of requirement 1" ;
+    spec:statement "excerpt of requirement 1" ;
 .
 
 manifest:group1
@@ -23,9 +23,9 @@ manifest:group1
 
 <https://example.org/specification#requirement2>
     a spec:NormativeRequirement ;
-    spec:conformanceRole spec:ServerConformanceClass ;
-    spec:normativeConformanceLevel spec:ConformanceMust ;
+    spec:requirementSubject spec:Server ;
+    spec:requirementLevel spec:MUST ;
     schema:name "Requirement 2" ;
     schema:description "Full text of requirement 2" ;
-    spec:excerpt "excerpt of requirement 2"
+    spec:statement "excerpt of requirement 2"
 .

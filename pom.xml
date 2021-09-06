@@ -43,7 +43,7 @@
         <commons.text.version>1.9</commons.text.version>
         <commons.cli.version>1.4</commons.cli.version>
         <wiremock.version>2.27.2</wiremock.version>
-        <solid.vocab.version>0.0.8</solid.vocab.version>
+        <solid.vocab.version>0.0.10</solid.vocab.version>
 
         <!-- package info -->
         <package.name>${project.name}</package.name>

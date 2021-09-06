@@ -12,7 +12,7 @@ manifest:group4-feature1
     a td:TestCase ;
     spec:requirementReference <https://example.org/specification2#spec1> ;
     td:reviewStatus td:accepted ;
-    dcterms:title "Group 4 Test case 1" ;
+    dcterms:title "Group 4 Test case 1"@en ;
     td:preCondition "sf1", "sf3" ;
     spec:testScript <https://example.org/test/group4/feature1> .
 
@@ -20,7 +20,7 @@ manifest:group4-feature2
     a td:TestCase ;
     spec:requirementReference <https://example.org/specification2#spec1> ;
     td:reviewStatus td:accepted ;
-    dcterms:title "Group 4 Test case 2" ;
+    dcterms:title "Group 4 Test case 2"@en ;
     td:preCondition "sf1", "sf3" ;
     spec:testScript <https://example.org/test/group4/feature2> .
 
@@ -28,6 +28,6 @@ manifest:group4-feature3
     a td:TestCase ;
     spec:requirementReference <https://example.org/specification2#spec1> ;
     td:reviewStatus td:unreviewed ;
-    dcterms:title "Group 4 Test case 3" ;
+    dcterms:title "Group 4 Test case 3"@en ;
     td:preCondition "sf1", "sf3" ;
     spec:testScript <https://example.org/test/group4/feature3> .

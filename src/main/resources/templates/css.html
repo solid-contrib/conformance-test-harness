@@ -45,17 +45,10 @@
       width: 40%
   }
 
-  /* Split box for requirement headers */
-  .splitBox {
-      display: flex;
-      margin-top: 4px;
+  /* hide marker for spec elements in list as this is a document structure not an actual list */
+  li.spec::marker {
+      content:none;
   }
 
-  .col {
-      width: 50%;
-      border: 1px #eee solid;
-      padding: 4px;
-
-  }
   /*]]>*/
 </style>

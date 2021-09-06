@@ -20,8 +20,8 @@ ex:step2 a earl:Step .
 
 ex:requirement
     a ex:NormativeRequirement ;
-    ex:conformanceRole ex:ServerConformanceClass ;
-    ex:normativeConformanceLevel ex:ConformanceMust
+    ex:requirementSubject ex:Server ;
+    ex:requirementLevel ex:ConformanceMust
 .
 
 ex:group1

@@ -23,7 +23,10 @@
  */
 package org.solid.testharness.config;
 
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
@@ -101,8 +104,8 @@ public class TestSubject {
                 final Model subjectModel = model.filter(subject, null, null);
                 conn.add(subjectModel);
                 for (Value value : subjectModel.objects()) {
-                    if (value.isBNode()) {
-                        conn.add(model.filter((BNode) value, null, null));
+                    if (value.isResource()) {
+                        conn.add(model.filter((Resource) value, null, null));
                     }
                 }
             }

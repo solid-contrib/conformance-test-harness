@@ -16,11 +16,11 @@ prefix spec: <http://www.w3.org/ns/spec#>
 
 <https://example.org/specification1#spec1>
     a spec:NormativeRequirement ;
-    spec:conformanceRole spec:ServerConformanceClass ;
-    spec:normativeConformanceLevel spec:ConformanceMust ;
+    spec:requirementSubject spec:Server ;
+    spec:requirementLevel spec:MUST ;
 #    schema:name "Requirement 1" ;
 #    schema:description "Full text of requirement 1" ;
-    spec:excerpt "excerpt of requirement 1"
+    spec:statement "excerpt of requirement 1"@en
 #    spec:httpRequest [
 #        http:mthd httpm:PUT
 #    ];
@@ -31,18 +31,18 @@ prefix spec: <http://www.w3.org/ns/spec#>
 
 <https://example.org/specification1#spec2>
     a spec:NormativeRequirement ;
-    spec:conformanceRole spec:ServerConformanceClass ;
-    spec:normativeConformanceLevel spec:ConformanceMust ;
+    spec:requirementSubject spec:Server ;
+    spec:requirementLevel spec:MUST ;
 #    schema:name "Requirement 2" ;
 #    schema:description "Full text of requirement 2" ;
-    spec:excerpt "excerpt of requirement 2"
+    spec:statement "excerpt of requirement 2"@en
 .
 
 <https://example.org/specification1#spec3>
     a spec:NormativeRequirement ;
-    spec:conformanceRole spec:ServerConformanceClass ;
-    spec:normativeConformanceLevel spec:ConformanceMust ;
+    spec:requirementSubject spec:Server ;
+    spec:requirementLevel spec:MUST ;
 #    schema:name "Requirement 3" ;
 #    schema:description "Full text of requirement 3" ;
-    spec:excerpt "excerpt of requirement 3"
+    spec:statement "excerpt of requirement 3"@en
 .
