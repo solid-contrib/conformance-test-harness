@@ -144,6 +144,7 @@ public class Client {
         return httpClient.send(request, responseBodyHandler);
     }
 
+    @SuppressWarnings("checkstyle:MultipleStringLiterals")
     public HttpResponse<String> getAsTurtle(@NotNull final URI url) throws IOException, InterruptedException {
         requireNonNull(url, "url is required");
         final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
@@ -163,6 +164,21 @@ public class Client {
         final HttpRequest request = authorize(builder).build();
         HttpUtils.logRequest(logger, request);
         final HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+        HttpUtils.logResponse(logger, response);
+        return response;
+    }
+
+    public HttpResponse<String> patch(@NotNull final URI url, final String data, final String type)
+            throws IOException, InterruptedException {
+        requireNonNull(url, "url is required");
+        requireNonNull(data, "data is required");
+        requireNonNull(type, "type is required");
+        final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
+                .method(HttpConstants.METHOD_PATCH, HttpRequest.BodyPublishers.ofString(data))
+                .header(HttpConstants.HEADER_CONTENT_TYPE, type);
+        final HttpRequest request = authorize(builder).build();
+        HttpUtils.logRequest(logger, request);
+        final HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         HttpUtils.logResponse(logger, response);
         return response;
     }

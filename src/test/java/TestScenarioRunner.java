@@ -42,10 +42,16 @@ public class TestScenarioRunner {
 
     @Test
     void testScenario() {
-//        final String featurePath = "example/protocol/content-negotiation/content-negotiation-turtle.feature";
-//        final String featurePath = "example/writing-resource/containment.feature";
-        final String featurePath = "example/acp.feature";
-        final String uri = Path.of(featurePath).toAbsolutePath().normalize().toUri().toString();
+//        final String featurePath = "protocol/content-negotiation/content-negotiation-turtle.feature";
+//        final String featurePath = "protocol/writing-resource/containment.feature";
+//        final String featurePath = "protocol/wac-allow/access-public-R.feature";
+//        final String featurePath = "web-access-control/acl-object/container-default.feature";
+//        final String featurePath = "web-access-control/protected-operation/read-resource-default-R.feature";
+//        final String featurePath = "web-access-control/protected-operation/acl-propagation.feature";
+        final String featurePath = "web-access-control/protected-operation/not-read-resource-default-AWC.feature";
+//        final String featurePath = "acp.feature";
+
+        final String uri = Path.of("example/" + featurePath).toAbsolutePath().normalize().toUri().toString();
         final TestSuiteResults results = conformanceTestHarness.runSingleTest(uri);
         assertNotNull(results);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());

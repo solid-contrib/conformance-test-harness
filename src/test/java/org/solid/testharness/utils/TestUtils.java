@@ -31,13 +31,18 @@ import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.slf4j.Logger;
+import org.solid.testharness.http.HttpUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
@@ -53,11 +58,8 @@ public final class TestUtils {
     }
 
     public static URI getPathUri(final String path) {
-        String uri = Path.of(path).toAbsolutePath().normalize().toUri().toString();
-        if (uri.endsWith("/")) {
-            uri = uri.substring(0, uri.length() - 1);
-        }
-        return URI.create(uri);
+        final String uri = Path.of(path).toAbsolutePath().normalize().toUri().toString();
+        return URI.create(HttpUtils.ensureNoSlashEnd(uri));
     }
 
     public static HttpResponse<Void> mockVoidResponse(final int status) {
@@ -126,6 +128,20 @@ public final class TestUtils {
                     .collect(Collectors.joining("\n"))
             );
         }
+
+    public static Model loadTurtleFromFile(final String file) throws IOException {
+        final InputStream is = Files.newInputStream(Path.of(file));
+        final Model model = Rio.parse(is, RDFFormat.TURTLE);
+        return model;
+    }
+
+    public static Model loadTurtleFromString(final String data) throws IOException {
+        final Model model = Rio.parse(new StringReader(data), RDFFormat.TURTLE);
+        return model;
+    }
+
+    public static String loadStringFromFile(final String file) throws IOException {
+        return Files.readString(Path.of(file));
     }
 
     private TestUtils() { }

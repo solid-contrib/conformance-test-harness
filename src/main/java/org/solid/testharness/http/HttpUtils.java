@@ -151,7 +151,19 @@ public final class HttpUtils {
         return HttpRequest.BodyPublishers.ofString(builder.toString());
     }
 
-    static String encodeValue(@NotNull final String value) {
+    public static String ensureSlashEnd(final String value) {
+        return value != null && !value.endsWith("/") ? value + "/" : value;
+    }
+
+    public static String ensureNoSlashEnd(final String value) {
+        if (value != null && value.endsWith("/")) {
+            return value.substring(0, value.length() - 1);
+        } else {
+            return value;
+        }
+    }
+
+    public static String encodeValue(@NotNull final String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 

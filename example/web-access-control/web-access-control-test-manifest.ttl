@@ -71,3 +71,10 @@ manifest:acl-object-access-to-default
   spec:testScript
     <https://github.com/solid/conformance-test-harness/example/web-access-control/acl-object/container-access-to-default.feature> .
 
+manifest:protected-operation-acl-propagation
+  a td:TestCase ;
+  spec:requirementReference <https://solid.github.io/web-access-control-spec/#authorization-evaluation-context> ;
+  td:reviewStatus td:unreviewed ;
+  td:preCondition "authentication", "acl" ;
+  spec:testScript
+    <https://github.com/solid/conformance-test-harness/example/web-access-control/protected-operation/acl-propagation.feature> .

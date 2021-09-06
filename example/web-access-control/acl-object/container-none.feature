@@ -5,9 +5,9 @@ Feature: Bob cannot read a container or children if he is not given any access
     """
       function() {
         const testContainer = createTestContainerImmediate();
-        const acl = aclPrefix + createOwnerAuthorization(webIds.alice, testContainer.getUrl())
-        karate.log('ACL: ' + acl);
-        if (testContainer.setAccessDataset(acl)) {
+        const access = testContainer.getAccessDatasetBuilder(webIds.alice).build();
+        karate.log('ACL:\n' + access.asTurtle());
+        if (testContainer.setAccessDataset(access)) {
           const intermediateContainer = testContainer.generateChildContainer();
           const resource = intermediateContainer.createChildResource('.txt', 'hello', 'text/plain')
           return {
@@ -27,12 +27,6 @@ Feature: Bob cannot read a container or children if he is not given any access
     And headers clients.bob.getAuthHeaders('GET', test.containerUrl)
     When method GET
     Then status 403
-
-  Scenario: Bob can get OPTIONS for the container
-    Given url test.containerUrl
-    And headers clients.bob.getAuthHeaders('OPTIONS', test.containerUrl)
-    When method OPTIONS
-    Then status 204
 
   Scenario: Bob cannot read the intermediate container
     Given url test.intermediateContainerUrl

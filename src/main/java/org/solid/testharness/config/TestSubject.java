@@ -34,18 +34,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.EARL;
 import org.solid.common.vocab.RDF;
+import org.solid.testharness.accesscontrol.AccessControlFactory;
+import org.solid.testharness.accesscontrol.AccessDataset;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClient;
-import org.solid.testharness.utils.DataRepository;
-import org.solid.testharness.utils.SolidContainer;
-import org.solid.testharness.utils.TestHarnessInitializationException;
+import org.solid.testharness.utils.*;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
+import java.util.List;
 import java.util.Set;
 
 @ApplicationScoped
@@ -53,12 +53,14 @@ public class TestSubject {
     private static final Logger logger = LoggerFactory.getLogger(TestSubject.class);
 
     private TargetServer targetServer;
-    private SolidContainer rootTestContainer;
+    private SolidContainer testRunContainer;
 
     @Inject
     Config config;
     @Inject
     DataRepository dataRepository;
+    @Inject
+    AccessControlFactory accessControlFactory;
 
     public void loadTestSubjectConfig()  {
         final IRI configuredTestSubject = config.getTestSubject();
@@ -122,39 +124,49 @@ public class TestSubject {
             throw new TestHarnessInitializationException("No target server has been configured");
         }
         final SolidClient solidClient = new SolidClient(HttpConstants.ALICE);
+
+        // Determine the ACL mode the server has implemented
+        final SolidContainer rootTestContainer = new SolidContainer(solidClient, config.getTestContainer());
+        try {
+            config.setAccessControlMode(rootTestContainer.getAccessControlMode());
+        } catch (Exception e) {
+            throw (TestHarnessInitializationException) new TestHarnessInitializationException(
+                    "Failed to determine access control mode: %s", e.toString()
+            ).initCause(e);
+        }
+
         if (config.isSetupRootAcl()) {
             logger.debug("Setup root acl");
+            final boolean success;
             try {
-                final URI rootAclUrl = solidClient.getAclUri(config.getServerRoot());
-                if (rootAclUrl == null) {
-                    throw new TestHarnessInitializationException("Failed getting the root ACL link");
-                }
-                final String acl = String.format("@prefix acl: <http://www.w3.org/ns/auth/acl#>. " +
-                        "<#alice> a acl:Authorization ; " +
-                        "  acl:agent <%s> ;" +
-                        "  acl:accessTo <./>;" +
-                        "  acl:default <./>;" +
-                        "  acl:mode acl:Read, acl:Write, acl:Control .", config.getWebIds().get(HttpConstants.ALICE));
-                if (!solidClient.createAcl(rootAclUrl, acl)) {
-                    throw new TestHarnessInitializationException("Failed to create root ACL");
-                }
-            } catch (IOException | InterruptedException e) {
+                final SolidContainer rootContainer = new SolidContainer(solidClient, config.getServerRoot().toString());
+                final String alice = config.getCredentials(HttpConstants.ALICE).webId();
+                final List<String> modes = List.of(AccessDataset.READ, AccessDataset.WRITE, AccessDataset.CONTROL);
+                final AccessDataset accessDataset = accessControlFactory
+                        .getAccessDatasetBuilder(rootContainer.getAclUrl())
+                        .setAgentAccess(rootContainer.getUrl(), alice, modes)
+                        .setInheritableAgentAccess(rootContainer.getUrl(), alice, modes)
+                        .build();
+                logger.info("ACL doc: {}", accessDataset.toString());
+                success = rootContainer.setAccessDataset(accessDataset);
+            } catch (Exception e) {
                 throw (TestHarnessInitializationException) new TestHarnessInitializationException(
                         "Failed to create root ACL: %s", e.toString()
                 ).initCause(e);
             }
+            if (!success) {
+                throw new TestHarnessInitializationException("Failed to create root ACL");
+            }
         }
         logger.debug("\n========== CHECK TEST SUBJECT ROOT");
         try {
-            final SolidContainer rootContainer = SolidContainer.create(solidClient, config.getTestContainer());
-            logger.debug("Root container content: {}", rootContainer.getContentAsTurtle());
-            logger.debug("Root container access controls: {}", rootContainer.getAccessDataset());
+            logger.debug("Root test container content: {}", rootTestContainer.getContentAsTurtle());
+            logger.debug("Root test container access controls: {}", rootTestContainer.getAccessDataset());
 
-            // create a root container for all the test cases
-            rootTestContainer = SolidContainer.create(solidClient, config.getTestContainer())
-                    .generateChildContainer().instantiate();
-            logger.debug("Test container content: {}", rootTestContainer.getContentAsTurtle());
-            logger.debug("Test container access controls: {}", rootTestContainer.getAccessDataset());
+            // create a root container for all the test cases in this run
+            testRunContainer = rootTestContainer.generateChildContainer().instantiate();
+            logger.debug("Test run container content: {}", testRunContainer.getContentAsTurtle());
+            logger.debug("Test run container access controls: {}", testRunContainer.getAccessDataset());
         } catch (Exception e) {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException(
                     "Failed to prepare server: %s", e.toString()
@@ -164,7 +176,7 @@ public class TestSubject {
 
     public void tearDownServer() {
         try {
-            rootTestContainer.delete();
+            testRunContainer.delete();
         } catch (Exception e) {
             // log failure but continue to report results
             logger.error("Failed to delete the test containers", e);
@@ -179,11 +191,11 @@ public class TestSubject {
         this.targetServer = targetServer;
     }
 
-    public SolidContainer getRootTestContainer() {
-        return rootTestContainer;
+    public SolidContainer getTestRunContainer() {
+        return testRunContainer;
     }
 
-    public void setRootTestContainer(final SolidContainer solidContainer) {
-        rootTestContainer = solidContainer;
+    public void setTestRunContainer(final SolidContainer solidContainer) {
+        testRunContainer = solidContainer;
     }
 }

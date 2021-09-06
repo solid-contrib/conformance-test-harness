@@ -159,4 +159,12 @@ public class ConfigTest {
         assertFalse(config.isSkipTearDown());
         config.setSkipTearDown(true);
         assertTrue(config.isSkipTearDown());
-    }}
+    }
+
+    @Test
+    void setAccessControlMode() {
+        assertNull(config.getAccessControlMode());
+        config.setAccessControlMode("TEST");
+        assertEquals("TEST", config.getAccessControlMode());
+    }
+}
