@@ -17,7 +17,7 @@ prefix dcterms: <http://purl.org/dc/terms/>
     doap:homepage <https://inrupt.com/products/enterprise-solid-server> ;
     doap:description "A production-grade Solid server produced and supported by Inrupt."@en ;
     doap:programming-language "Java"@en ;
-    solid-test:features "authentication", "wac-allow" . # "acp"
+    solid-test:features "authentication", "acl". # "acp"
 
 <ess#test-subject-release>
     doap:name "ESS 1.1.2"@en ;

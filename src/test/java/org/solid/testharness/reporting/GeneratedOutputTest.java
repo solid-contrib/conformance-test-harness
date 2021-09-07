@@ -53,6 +53,12 @@ class GeneratedOutputTest extends AbstractDataModelTests {
     }
 
     @Test
+    void getValueLocalName() {
+        final GeneratedOutput generatedOutput = new GeneratedOutput(iri(NS, "scenario1-output"));
+        assertEquals(EARL.passed.getLocalName(), generatedOutput.getValueLocalName());
+    }
+
+    @Test
     void getDescription() {
         final GeneratedOutput generatedOutput = new GeneratedOutput(iri(NS, "scenario1-output"));
         assertTrue(generatedOutput.getDescription().contains("GET https"));
