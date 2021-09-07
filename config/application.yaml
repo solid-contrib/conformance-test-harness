@@ -7,7 +7,7 @@
     - https://github.com/solid/conformance-test-harness/example/protocol/solid-protocol-spec.ttl
     - https://github.com/solid/conformance-test-harness/example/web-access-control/web-access-control-spec.ttl
   target: ess
-#  target: ess-compat
+#  target: ess-wac
 #  target: css
 #  target: nss
 #  target: trinpod

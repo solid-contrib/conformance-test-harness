@@ -45,7 +45,7 @@ An example of this file is provided in the test repository (https://github.com/s
 containing descriptions of the following Solid implementations:
 * `<css>` - [Community Solid Server](https://github.com/solid/community-server) (CSS).
 * `<ess>` - [Enterprise Solid Server](https://inrupt.com/products/enterprise-solid-server) (ESS) in Access Control Policies (ACP) compatibility mode.
-* `<ess-compat>` - [Enterprise Solid Server](https://inrupt.com/products/enterprise-solid-server) (ESS) in  Web Access Controls (WAC) compatibility mode.
+* `<ess-wac>` - [Enterprise Solid Server](https://inrupt.com/products/enterprise-solid-server) (ESS) in  Web Access Controls (WAC) compatibility mode.
 * `<nss>` - [Node Solid Server](https://github.com/solid/node-solid-server) (NSS).
 * `<trinpod>` - [TrinPod](https://trinpod.us).
 
@@ -363,7 +363,7 @@ The following examples demonstrate how a script can work with the Docker image a
 1. A publicly available Solid server with user supplied tests and configuration.
 
 #### Example: Using a publicly available Solid Server
-Executes tests against a publicly available server, in this case ESS in WAC compatibility mode (https://pod-compat.inrupt.com).
+Executes tests against a publicly available server, in this case ESS (https://pod.inrupt.com).
 
 1. Create a file for environment variables (e.g., `ess.env`) with the following contents (based on the 
     client_credentials option):
