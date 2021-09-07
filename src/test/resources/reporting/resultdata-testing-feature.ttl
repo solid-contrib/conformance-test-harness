@@ -1,16 +1,17 @@
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix spec: <http://www.w3.org/ns/spec#>
 prefix td: <http://www.w3.org/2006/03/test-description#>
+prefix doap: <http://usefulinc.com/ns/doap#>
 prefix ex: <https://example.org/>
 
 ex:specification1
-    a spec:Specification ;
+    a spec:Specification, doap:Specification ;
     spec:requirement <https://example.org/specification1#spec1>,
                      <https://example.org/specification1#spec2>,
                      <https://example.org/specification1#spec3> .
 
 ex:specification2
-    a spec:Specification ;
+    a spec:Specification, doap:Specification ;
     spec:requirement <https://example.org/specification2#spec1> .
 
 ex:test1

@@ -79,7 +79,7 @@ public class NamespacesTest {
     @Test
     void buildAllTurtlePrefixes() {
         final String prefixes = Namespaces.generateAllTurtlePrefixes();
-        assertEquals(13, prefixes.split("\n").length);
+        assertEquals(14, prefixes.split("\n").length);
         assertTrue(prefixes.startsWith("@prefix "));
     }
 

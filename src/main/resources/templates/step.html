@@ -1,31 +1,34 @@
 {#with it}
 <tr class="{background ? 'backgroundStep' : 'scenarioStep'}" resource="{subject}" typeof="{typesList}">
-    <td property="dcterms:title">{title}</td>
-    <td>[<a href="{used}" rel="prov:used">line</a>]</td>
-    <td rel="prov:generated" resource="{generatedOutput.subject}">
-        <span about="{generatedOutput.subject}" typeof="{generatedOutput.typesList}" rel="prov:value" resource="{generatedOutput.value}">
+  <td property="dcterms:title">{title}</td>
+  <td>[<a href="{used}" rel="prov:used">line</a>]</td>
+  <td rel="prov:generated" resource="{generatedOutput.subject}">
+        <span about="{generatedOutput.subject}" typeof="{generatedOutput.typesList}" rel="prov:value"
+              resource="{generatedOutput.value}" class="earl:{generatedOutput.valueLocalName}">
         {#switch generatedOutput.value}
         {#case 'http://www.w3.org/ns/earl#passed'}✔
         {#case 'http://www.w3.org/ns/earl#failed'}✗
         {#else}o
         {/switch}
         </span>
-    </td>
-    <td>
-        {#if generatedOutput.description || scenario}
-        <dl>
-        {/if}
-        {#if generatedOutput.description}
-          <dt>Output</dt>
-          <dd><pre about="{generatedOutput.subject}" property="dcterms:description" datatype="xsd:string">{generatedOutput.description}</pre></dd>
-        {/if}
-        {#if scenario}
-          <dt>Was informed by</dt>
-          <dd><a href="{scenario}" rel="prov:wasInformedBy">scenario</a></dd>
-        {/if}
-        {#if generatedOutput.description || scenario}
-        </dl>
-        {/if}
-    </td>
+  </td>
+  <td>
+    {#if generatedOutput.description || scenario}
+    <dl>
+      {/if}
+      {#if generatedOutput.description}
+      <dt>Output</dt>
+      <dd>
+        <pre about="{generatedOutput.subject}" property="dcterms:description" datatype="xsd:string">{generatedOutput.description}</pre>
+      </dd>
+      {/if}
+      {#if scenario}
+      <dt>Was informed by</dt>
+      <dd><a href="{scenario}" rel="prov:wasInformedBy">scenario</a></dd>
+      {/if}
+      {#if generatedOutput.description || scenario}
+    </dl>
+    {/if}
+  </td>
 </tr>
 {/with}

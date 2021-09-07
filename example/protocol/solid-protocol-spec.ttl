@@ -6,10 +6,11 @@ prefix schema: <http://schema.org/>
 prefix http: <http://www.w3.org/2011/http#>
 prefix httpm: <http://www.w3.org/2011/http-methods#>
 prefix httph: <http://www.w3.org/2011/http-headers#>
+prefix doap: <http://usefulinc.com/ns/doap#>
 prefix spec: <http://www.w3.org/ns/spec#>
 
 <https://solidproject.org/TR/protocol>
-    a spec:Specification ;
+    a spec:Specification, doap:Specification ;
     spec:requirement <https://solidproject.org/TR/protocol#resource-representations>,
                      <https://solidproject.org/TR/protocol#writing-resources>,
                      <https://solidproject.org/TR/protocol#web-access-control>

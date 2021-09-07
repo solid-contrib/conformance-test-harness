@@ -228,7 +228,7 @@ class ReportGeneratorTest {
 
     @Test
     void buildHtmlCoverageReportBadSubject() throws IOException {
-        TestData.insertData(dataRepository, TestData.PREFIXES + "_:b0 a spec:Specification .");
+        TestData.insertData(dataRepository, TestData.PREFIXES + "_:b0 a spec:Specification, doap:Specification .");
         final StringWriter sw = new StringWriter();
         assertThrows(ClassCastException.class, () -> reportGenerator.buildHtmlCoverageReport(sw));
     }

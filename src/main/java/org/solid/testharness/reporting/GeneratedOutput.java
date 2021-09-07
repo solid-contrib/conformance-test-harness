@@ -43,6 +43,10 @@ public class GeneratedOutput extends DataModelBase  {
         return getIriAsString(PROV.value);
     }
 
+    public String getValueLocalName() {
+        return getAsIri(PROV.value).getLocalName();
+    }
+
     public String getDescription() {
         return getLiteralAsString(DCTERMS.description);
     }

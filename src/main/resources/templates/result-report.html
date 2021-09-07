@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="utf-8" />
-    <title>Solid Specification - Conformance Test Suite Results</title>
-    <meta content="width=device-width, initial-scale=1" name="viewport" />
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    {#include css /}
-    {#include js /}
+  <meta charset="utf-8" />
+  <title>Solid Specification - Conformance Test Suite Results</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  {#include css /}
+  {#include js /}
 </head>
 
 <body about="" prefix="{prefixes}">
@@ -27,65 +27,67 @@
 {#with testSuiteResults}{#include results-summary /}{/with}
 {/if}
 
+{#include outcome-values /}
+
 {#if specifications??}
 <section id="results-by-specification-requirement" rel="dcterms:hasPart" resource="#results-by-specification-requirement">
-    <h2 property="dcterms:title">Results by specification requirement</h2>
-    <div datatype="rdf:HTML" property="dcterms:description">
-    <ul>
-    {#each specifications.orEmpty}
-    <li rel="dcterms:hasPart" resource="{it.subject}" class="spec">
-        {#if it.specificationRequirements}
-        {#let specLink=it.subject}
-        {#each it.specificationRequirements}
-        {#include requirement}
-            {#if it.testCases}
-            <table rel="spec:requirement" resource="{it.subject}">
-                <caption>Test cases</caption>
-                <thead>
-                <tr>
-                    <th class="title">Title</th>
-                    <th class="details">Details</th>
-                    <th class="outcome">Outcome</th>
-                    <th class="scenarios">Test Scenarios</th>
-                </tr>
-                </thead>
-                <tbody>
-                {#each it.testCases}
-                {#include testcase coverageMode=false /}
-                {/each}
-                </tbody>
-            </table>
-            {#else}
-            <p>No test cases found.</p>
-            {/if}
-        {/include}
+  <h2 property="dcterms:title">Results by specification requirement</h2>
+  <div datatype="rdf:HTML" property="dcterms:description">
+  <ul>
+  {#each specifications.orEmpty}
+  <li rel="dcterms:hasPart" resource="{it.subject}" class="spec">
+    {#if it.specificationRequirements}
+    {#let specLink=it.subject}
+    {#each it.specificationRequirements}
+    {#include requirement}
+      {#if it.testCases}
+      <table rel="spec:requirement" resource="{it.subject}">
+        <caption>Test cases</caption>
+        <thead>
+        <tr>
+          <th class="title">Title</th>
+          <th class="details">Details</th>
+          <th class="outcome">Outcome</th>
+          <th class="scenarios">Test Scenarios</th>
+        </tr>
+        </thead>
+        <tbody>
+        {#each it.testCases}
+        {#include testcase coverageMode=false /}
         {/each}
-        {/let}
-        {#else}
-        <p>No tests were discovered.</p>
-        {/if}
-    </li>
+        </tbody>
+      </table>
+      {#else}
+      <p>No test cases found.</p>
+      {/if}
+    {/include}
     {/each}
-    </ul>
-    </div>
+    {/let}
+    {#else}
+    <p>No tests were discovered.</p>
+    {/if}
+  </li>
+  {/each}
+  </ul>
+  </div>
 </section>
 {/if}
 
 {#if testCases}
 <section id="results-by-test-case" rel="dcterms:hasPart" resource="#results-by-test-case">
-    <h2 property="dcterms:title">Results by test case</h2>
-    <div datatype="rdf:HTML" property="dcterms:description">
-    {#for testCase in testCases}
-    {#if testCase.scenarios}
-    <section id="{testCase.anchor}" about="{testCase.subject}">
-        <h3>{testCase.title}</h3>
-            {#each testCase.scenarios}
-            {#include scenario /}
-            {/each}
-    </section>
-    {/if}
-    {/for}
-    </div>
+  <h2 property="dcterms:title">Results by test case</h2>
+  <div datatype="rdf:HTML" property="dcterms:description">
+  {#for testCase in testCases}
+  {#if testCase.scenarios}
+  <section id="{testCase.anchor}" about="{testCase.subject}">
+    <h3>{testCase.title}</h3>
+      {#each testCase.scenarios}
+      {#include scenario /}
+      {/each}
+  </section>
+  {/if}
+  {/for}
+  </div>
 </section>
 {/if}
 
@@ -97,18 +99,18 @@
 {!
 <!--
 about
-    a URI or CURIE specifying the resource the metadata is about
+  a URI or CURIE specifying the resource the metadata is about
 rel and rev
-    specifying a relationship and reverse-relationship with another resource, respectively
+  specifying a relationship and reverse-relationship with another resource, respectively
 src, href and resource
-    specifying the partner resource
+  specifying the partner resource
 property
-    specifying a property for the content of an element or the partner resource
+  specifying a property for the content of an element or the partner resource
 content
-    optional attribute that overrides the content of the element when using the property attribute
+  optional attribute that overrides the content of the element when using the property attribute
 datatype
-    optional attribute that specifies the datatype of text specified for use with the property attribute
+  optional attribute that specifies the datatype of text specified for use with the property attribute
 typeof
-    optional attribute that specifies the RDF type(s) of the subject or the partner resource (the resource that the metadata is about).
+  optional attribute that specifies the RDF type(s) of the subject or the partner resource (the resource that the metadata is about).
 -->
 !}

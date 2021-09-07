@@ -1,37 +1,39 @@
 <section id="results-summary" rel="dcterms:hasPart" resource="#results-summary">
-    <h2 property="dcterms:title">Results summary</h2>
-    <div datatype="rdf:HTML" property="dcterms:description">
+  <h2 property="dcterms:title">Results summary</h2>
+  <div datatype="rdf:HTML" property="dcterms:description">
     <dl>
-        <dt>Test date</dt>
-        <dd><time datetime="{resultDate}" datatype="xsd:date" property="dcterms:date">{resultDate}</time></dd>
+      <dt>Test date</dt>
+      <dd>
+        <time datetime="{resultDate}" datatype="xsd:date" property="dcterms:date">{resultDate}</time>
+      </dd>
     </dl>
     <dl>
-        <dt>Duration</dt>
-        <dd>{elapsedTime} ms</dd>
+      <dt>Duration</dt>
+      <dd>{elapsedTime} ms</dd>
     </dl>
     <table>
-        <thead>
-        <tr>
-            <th></th>
-            <th>Passed</th>
-            <th>Failed</th>
-            <th>Total</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>Features (test cases)</td>
-            <td>{featurePassCount}</td>
-            <td>{featureFailCount}</td>
-            <td>{featureTotal}</td>
-        </tr>
-        <tr>
-            <td>Scenarios (tests)</td>
-            <td>{scenarioPassCount}</td>
-            <td>{scenarioFailCount}</td>
-            <td>{scenarioTotal}</td>
-        </tr>
-        </tbody>
+      <thead>
+      <tr>
+        <th></th>
+        <th>Passed</th>
+        <th>Failed</th>
+        <th>Total</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td>Features (test cases)</td>
+        <td>{featurePassCount}</td>
+        <td>{featureFailCount}</td>
+        <td>{featureTotal}</td>
+      </tr>
+      <tr>
+        <td>Scenarios (tests)</td>
+        <td>{scenarioPassCount}</td>
+        <td>{scenarioFailCount}</td>
+        <td>{scenarioTotal}</td>
+      </tr>
+      </tbody>
     </table>
-    </div>
+  </div>
 </section>

@@ -39,6 +39,10 @@ public class TestResult extends DataModelBase  {
         return getIriAsString(EARL.outcome);
     }
 
+    public String getOutcomeLocalName() {
+        return getAsIri(EARL.outcome).getLocalName();
+    }
+
     public ZonedDateTime getDate() {
         return getLiteralAsDateTime(DCTERMS.date);
     }
