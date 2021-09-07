@@ -3,21 +3,21 @@ prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 prefix earl: <http://www.w3.org/ns/earl#>
 prefix doap: <http://usefulinc.com/ns/doap#>
 prefix solid: <http://www.w3.org/ns/solid/terms#>
-prefix ex: <https://example.org/>
 
-ex:testserver
+<testserver>
     a earl:Software, earl:TestSubject ;
-    doap:name "Enterprise Solid Server (Web Access Control version)";
-    doap:release [
-        doap:name "ESS 1.0.9";
-        doap:revision "1.0.9";
-        doap:created "2021-03-05"^^xsd:date
-    ];
+    doap:name "Enterprise Solid Server (Web Access Control version)"@en;
+    doap:release <testserver#test-subject-release> ;
     doap:developer <https://inrupt.com/profile/card/#us>;
     doap:homepage <https://inrupt.com/products/enterprise-solid-server>;
-    doap:description "A production-grade Solid server produced and supported by Inrupt.";
-    doap:programming-language "Java" ;
+    doap:description "A production-grade Solid server produced and supported by Inrupt."@en;
+    doap:programming-language "Java"@en ;
     solid-test:features "feature1" .
 
-ex:bad a earl:Software, earl:TestSubject .
+<testserver#test-subject-release>
+    doap:name "ESS 1.0.9"@en;
+    doap:revision "1.0.9"@en;
+    doap:created "2021-03-05"^^xsd:date .
+
+<bad> a earl:Software, earl:TestSubject .
 

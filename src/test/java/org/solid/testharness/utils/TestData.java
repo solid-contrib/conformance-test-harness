@@ -65,13 +65,13 @@ public final class TestData {
 
     public static void insertData(final DataRepository dataRepository, final Reader reader) throws IOException {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
-            conn.add(reader, RDFFormat.TURTLE);
+            conn.add(reader, SAMPLE_BASE, RDFFormat.TURTLE);
         }
     }
 
     public static void insertData(final DataRepository dataRepository, final URL url) throws IOException {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
-            conn.add(url, RDFFormat.TURTLE);
+            conn.add(url, SAMPLE_BASE, RDFFormat.TURTLE);
         }
     }
 

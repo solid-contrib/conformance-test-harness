@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.reporting.TestSuiteResults;
-import org.solid.testharness.utils.Namespaces;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -120,18 +119,19 @@ public class Application implements QuarkusApplication {
 
                 List<String> filters = null;
                 if (line.hasOption(TESTS) || !line.hasOption(COVERAGE)) {
-                    logger.debug("TARGET SETTING {}", line.getOptionValue(TARGET));
-                    if (line.hasOption(TARGET) && !StringUtils.isBlank(line.getOptionValue(TARGET))) {
-                        final String target = line.getOptionValue(TARGET);
-                        final IRI testSubject = target.contains(":")
-                                ? iri(target)
-                                : iri(Namespaces.TEST_HARNESS_URI, target);
-                        logger.debug("Target: {}", testSubject);
-                        config.setTestSubject(testSubject);
-                    }
                     if (line.hasOption(SUBJECTS)) {
                         config.setSubjectsUrl(line.getOptionValue(SUBJECTS));
                         logger.debug("Subjects = {}", config.getSubjectsUrl());
+                    }
+                    logger.debug("TARGET SETTING {}", line.getOptionValue(TARGET));
+                    if (line.hasOption(TARGET) && !StringUtils.isBlank(line.getOptionValue(TARGET))) {
+                        final String subjectsBaseUri = iri(config.getSubjectsUrl().toString()).getNamespace();
+                        final String target = line.getOptionValue(TARGET);
+                        final IRI testSubject = target.contains(":")
+                                ? iri(target)
+                                : iri(subjectsBaseUri, target);
+                        logger.debug("Target: {}", testSubject);
+                        config.setTestSubject(testSubject);
                     }
                     if (line.hasOption(FILTER)) {
                         filters = Arrays.stream(line.getOptionValues(FILTER))

@@ -7,11 +7,11 @@ Feature: Bob cannot read an RDF resource to which he is not granted read access
         const testContainer = createTestContainer();
         const resource = testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
         if (resource.exists()) {
-          const acl = aclPrefix
-            + createOwnerAuthorization(webIds.alice, resource.getUrl())
-            + createBobAccessToAuthorization(webIds.bob, resource.getUrl(), 'acl:Append, acl:Write, acl:Control')
-          karate.log('ACL: ' + acl);
-          resource.setAccessDataset(acl);
+          const access = resource.getAccessDatasetBuilder(webIds.alice)
+            .setAgentAccess(resource.getUrl(), webIds.bob, ['append', 'write', 'control'])
+            .build();
+          karate.log('ACL:\n' + access.asTurtle());
+          resource.setAccessDataset(access);
         }
         return resource;
       }
@@ -20,11 +20,6 @@ Feature: Bob cannot read an RDF resource to which he is not granted read access
     * assert resource.exists()
     * def resourceUrl = resource.getUrl()
     * url resourceUrl
-
-  Scenario: Bob can get the resource OPTIONS
-    Given headers clients.bob.getAuthHeaders('OPTIONS', resourceUrl)
-    When method OPTIONS
-    Then status 204
 
   Scenario: Bob cannot read the resource with GET
     Given headers clients.bob.getAuthHeaders('GET', resourceUrl)

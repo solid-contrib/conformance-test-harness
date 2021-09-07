@@ -71,6 +71,11 @@ public class ClientResource implements QuarkusTestResourceLifecycleManager {
                         .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_TEXT_TURTLE)
                         .withBody("TURTLE-BEARER")));
 
+        wireMockServer.stubFor(WireMock.patch(WireMock.urlEqualTo("/patch"))
+                .withHeader(HttpConstants.HEADER_CONTENT_TYPE, containing(HttpConstants.MEDIA_TYPE_TEXT_PLAIN))
+                .withRequestBody(containing("TEXT"))
+                .willReturn(WireMock.aResponse().withBody("PATCHED").withStatus(200)));
+
         wireMockServer.stubFor(WireMock.put(WireMock.urlEqualTo("/put"))
                 .withHeader(HttpConstants.HEADER_CONTENT_TYPE, containing(HttpConstants.MEDIA_TYPE_TEXT_PLAIN))
                 .withRequestBody(containing("TEXT"))

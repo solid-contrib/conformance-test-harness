@@ -24,23 +24,33 @@
 package org.solid.testharness.utils;
 
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.util.Models;
+import org.eclipse.rdf4j.repository.util.RepositoryUtil;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
+import org.slf4j.Logger;
+import org.solid.testharness.http.HttpUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public final class TestUtils {
     public static URL getFileUrl(final String file) throws MalformedURLException {
@@ -48,11 +58,8 @@ public final class TestUtils {
     }
 
     public static URI getPathUri(final String path) {
-        String uri = Path.of(path).toAbsolutePath().normalize().toUri().toString();
-        if (uri.endsWith("/")) {
-            uri = uri.substring(0, uri.length() - 1);
-        }
-        return URI.create(uri);
+        final String uri = Path.of(path).toAbsolutePath().normalize().toUri().toString();
+        return URI.create(HttpUtils.ensureNoSlashEnd(uri));
     }
 
     public static HttpResponse<Void> mockVoidResponse(final int status) {
@@ -99,6 +106,43 @@ public final class TestUtils {
                 .set(BasicWriterSettings.INLINE_BLANK_NODES, true);
         Rio.write(model, rdfWriter);
         return sw.toString();
+    }
+
+    public static void showModelDifferences(final Model modelA, final Model modelB, final Logger logger) {
+        if (Models.isomorphic(modelA, modelB)) {
+            logger.debug("Models are isomorphic");
+        } else {
+            logger.debug("Model A = {}, Model B = {}", modelA.size(), modelB.size());
+            if (Models.isSubset(modelA, modelB)) {
+                logger.debug("Model A is a subset of Model B");
+            } else if (Models.isSubset(modelB, modelA)) {
+                logger.debug("Model B is a subset of Model A");
+            }
+            logger.debug("\n== In Model A but not Model B ==\n{}", RepositoryUtil.difference(modelA, modelB)
+                    .stream().map(s -> String.format("%s %s %s", s.getSubject(), s.getPredicate(), s.getObject()))
+                    .collect(Collectors.joining("\n"))
+            );
+
+            logger.debug("\n== In Model B but not Model A ==\n{}", RepositoryUtil.difference(modelB, modelA)
+                    .stream().map(s -> String.format("%s %s %s", s.getSubject(), s.getPredicate(), s.getObject()))
+                    .collect(Collectors.joining("\n"))
+            );
+        }
+    }
+
+    public static Model loadTurtleFromFile(final String file) throws IOException {
+        final InputStream is = Files.newInputStream(Path.of(file));
+        final Model model = Rio.parse(is, RDFFormat.TURTLE);
+        return model;
+    }
+
+    public static Model loadTurtleFromString(final String data) throws IOException {
+        final Model model = Rio.parse(new StringReader(data), RDFFormat.TURTLE);
+        return model;
+    }
+
+    public static String loadStringFromFile(final String file) throws IOException {
+        return Files.readString(Path.of(file));
     }
 
     private TestUtils() { }

@@ -92,7 +92,7 @@ git clone git@github.com:solid/conformance-test-harness.git
 
 ### 2. Setting up the Environment
 There are 4 important settings:
-1. `target` - The IRI of the target server, used to select the server configuration from the configuration file.
+1. `target` - The IRI (or local name) of the target server, used to select the server configuration from the configuration file.
 1. `subjects` - The location of the file describing test subjects.
 1. `sources` - The locations of annotated Solid specification documents that list the test cases to be run.
 1. `mappings` - Maps test cases IRIs to a local file system (there can be multiple mappings). Mappings should be
@@ -102,7 +102,7 @@ There are 4 important settings:
 To set these properties, you can provide `config/application.yaml` in the working directory
 containing:
 ```yaml
-target: TARGET_SERVER_IRI
+target: TARGET_SERVER_IRI or LOCALNAME
 subjects: PATH_TO_SUBJECTS_DOC
 sources:
   - PATH_TO_SPECIFATION_DOC
@@ -133,8 +133,8 @@ To run the test suite with the default target server as defined in `config/appli
 ```
 To run the test suite with a specific target server:
 ```shell
-./mvnw test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/css
-./mvnw test -Psolid -Dtarget=https://github.com/solid/conformance-test-harness/nss
+./mvnw test -Psolid -Dtarget=ess
+./mvnw test -Psolid -Dtarget=css
 ```
 
 Using an IDE, you can also run a specific scenario by editing the TestScenarioRunner and then running it as you would any

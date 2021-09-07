@@ -55,6 +55,8 @@ public class Config {
     private List<URL> testSources;
     private File outputDir;
     private Map<String, Object> webIds;
+    private boolean skipTearDown;
+    private String accessControlMode;
 
     // the settings are taken in the following order of preference:
     //   system property
@@ -102,12 +104,13 @@ public class Config {
     @Inject
     PathMappings pathMappings;
 
-    private boolean skipTearDown;
-
     public IRI getTestSubject() {
         if (testSubject == null && target.isPresent()) {
             logger.debug("Use config to set target: {}", target.get());
-            testSubject = iri(target.get());
+            final String subjectsBaseUri = iri(getSubjectsUrl().toString()).getNamespace();
+            testSubject = target.get().contains(":")
+                    ? iri(target.get())
+                    : iri(subjectsBaseUri, target.get());
         }
         return testSubject;
     }
@@ -233,6 +236,14 @@ public class Config {
 
     public boolean isSkipTearDown() {
         return skipTearDown;
+    }
+
+    public String getAccessControlMode() {
+        return accessControlMode;
+    }
+
+    public void setAccessControlMode(final String accessControlMode) {
+        this.accessControlMode = accessControlMode;
     }
 
     public void logConfigSettings() {

@@ -46,7 +46,8 @@ public class ConfigTest {
 
     @Test
     void getTestSubjectDefault() {
-        assertEquals(iri("https://github.com/solid/conformance-test-harness/testserver"), config.getTestSubject());
+        assertEquals(iri(iri(config.getSubjectsUrl().toString()).getNamespace(), "testserver"),
+                config.getTestSubject());
     }
 
     @Test
@@ -158,4 +159,12 @@ public class ConfigTest {
         assertFalse(config.isSkipTearDown());
         config.setSkipTearDown(true);
         assertTrue(config.isSkipTearDown());
-    }}
+    }
+
+    @Test
+    void setAccessControlMode() {
+        assertNull(config.getAccessControlMode());
+        config.setAccessControlMode("TEST");
+        assertEquals("TEST", config.getAccessControlMode());
+    }
+}

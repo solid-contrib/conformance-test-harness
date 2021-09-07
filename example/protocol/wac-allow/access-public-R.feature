@@ -7,11 +7,11 @@ Feature: The WAC-Allow header shows user and public access modes with public rea
         const testContainer = createTestContainer();
         const resource = testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
         if (resource.exists()) {
-          const acl = aclPrefix
-            + createOwnerAuthorization(webIds.alice, resource.getUrl())
-            + createPublicAccessToAuthorization(resource.getUrl(), 'acl:Read');
-          karate.log('ACL: ' + acl);
-          resource.setAccessDataset(acl);
+          const access = resource.getAccessDatasetBuilder(webIds.alice)
+                .setPublicAccess(resource.getUrl(), ['read'])
+                .build();
+          karate.log('ACL:\n' + access.asTurtle());
+          resource.setAccessDataset(access);
         }
         return resource;
       }

@@ -31,6 +31,8 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.testharness.accesscontrol.AccessDataset;
+import org.solid.testharness.accesscontrol.AccessDatasetWac;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.inject.spi.CDI;
@@ -54,6 +56,8 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 
 public class SolidClient {
     private static final Logger logger = LoggerFactory.getLogger(SolidClient.class);
+    public static final String ACP_MODE = "ACP";
+    public static final String WAC_MODE = "WAC";
 
     private Client client;
 
@@ -111,20 +115,34 @@ public class SolidClient {
         final List<Link> links = HttpUtils.parseLinkHeaders(headers);
         final Optional<Link> aclLink = links.stream()
                 .filter(link -> link.getRels().contains("acl") ||
-                        link.getRels().contains("http://www.w3.org/ns/solid/acp#accessControl")).findFirst();
+                        link.getRels().contains("http://www.w3.org/ns/solid/acp#accessControl"))
+                .findFirst();
         return aclLink.map(Link::getUri).orElse(null);
     }
 
-    public boolean createAcl(final URI url, final String acl) throws IOException, InterruptedException {
-        logger.debug("ACL: {} for {}", acl, url);
-        final HttpResponse<Void> response = client.put(url, acl, HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
-        return HttpUtils.isSuccessful(response.statusCode());
+    public String getAclType(final URI aclUri) throws IOException, InterruptedException {
+        final HttpResponse<Void> response = client.head(aclUri);
+        final List<Link> links = HttpUtils.parseLinkHeaders(response.headers());
+        final Optional<Link> acpLink = links.stream()
+                .filter(link -> link.getRels().contains("type") &&
+                        "http://www.w3.org/ns/solid/acp#AccessControlResource".equals(link.getUri().toString()))
+                .findFirst();
+        return acpLink.isPresent() ? ACP_MODE : WAC_MODE;
     }
 
-    public String getAcl(final URI url) throws IOException, InterruptedException {
+    public boolean createAcl(final URI url, final AccessDataset accessDataset)
+            throws IOException, InterruptedException {
+        logger.debug("ACL: {} for {}", accessDataset.toString(), url);
+        return accessDataset.apply(client, url);
+    }
+
+    public AccessDataset getAcl(final URI url) throws IOException, InterruptedException {
         logger.debug("ACL: for {}", url);
         final HttpResponse<String> response = client.getAsTurtle(url);
-        return response.body();
+        if (!HttpUtils.isSuccessful(response.statusCode())) {
+            return null;
+        }
+        return new AccessDatasetWac(response.body(), url);
     }
 
     public String getContentAsTurtle(final URI url) throws Exception {
@@ -209,6 +227,7 @@ public class SolidClient {
                     logger.debug("FAILED {}", failed);
                 }
             } catch (ExecutionException | InterruptedException e) {
+                // Jacoco reports this as untested - it is hard to force this exception path
                 logger.error("Failed to execute requests", e);
             }
             if (depth != null) {

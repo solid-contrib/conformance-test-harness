@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html prefix="{prefixes}">
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
     <title>Solid Specification - Conformance Test Suite Coverage Report</title>
@@ -9,44 +9,58 @@
     {#include js /}
 </head>
 
-<body about="{subject}">
-<h1>Solid Specification - Conformance Test Suite Coverage Report</h1>
-{#include specification-header /}
-
+<body about="" prefix="{prefixes}">
 <main>
 <article>
-    <h2>Test coverage by specification requirement</h2>
+<h1 property="dcterms:title">Solid Specification - Conformance Test Suite Coverage Report</h1>
+
+{#include document-identifier /}
+
+<div datatype="rdf:HTML" property="dcterms:description">
+{#include specification-header /}
+
+<section id="test-coverage-by-specification-requirement" rel="dcterms:hasPart" resource="#test-coverage-by-specification-requirement">
+    <h2 property="dcterms:title">Test coverage by specification requirement</h2>
+    <div datatype="rdf:HTML" property="dcterms:description">
+    <ul>
     {#each specifications.orEmpty}
-    <section about="{it.subject}" class="spec">
+    <li rel="dcterms:hasPart" resource="{it.subject}" class="spec">
         {#if it.specificationRequirements}
         {#let specLink=it.subject}
         {#each it.specificationRequirements}
-        <div rel="spec:requirement">
         {#include requirement}
             {#if it.testCases??}
-            <table about="{it.subject}">
+            <table rel="spec:requirement" resource="{it.subject}">
+                <caption>Test cases</caption>
+                <thead>
                 <tr>
                     <th>Title</th>
                     <th>Status</th>
                     <th>Implemented</th>
                 </tr>
+                </thead>
+                <tbody>
                 {#each it.testCases}
                 {#include testcase coverageMode=true /}
                 {/each}
+                </tbody>
             </table>
             {#else}
-            <p>No test cases found</p>
+            <p>No test cases found.</p>
             {/if}
         {/include}
-        </div>
-        <br/>
         {/each}
         {/let}
         {#else}
         <p>No tests were discovered.</p>
         {/if}
-    </section>
+    </li>
     {/each}
+    </ul>
+    </div>
+</section>
+
+</div>
 </article>
 </main>
 </body>

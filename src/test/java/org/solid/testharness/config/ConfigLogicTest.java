@@ -34,9 +34,26 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ConfigLogicTest {
+
+    @Test
+    void getTestSubjectsAbsolute() {
+        final Config config = new Config();
+        config.target = Optional.of("https://example.org/testserver");
+        config.setSubjectsUrl("https://example2.org/subjects.ttl");
+        assertEquals(iri("https://example.org/testserver"), config.getTestSubject());
+    }
+
+    @Test
+    void getTestSubjectRelative() {
+        final Config config = new Config();
+        config.target = Optional.of("testserver");
+        config.setSubjectsUrl("https://example.org/subjects.ttl");
+        assertEquals(iri("https://example.org/testserver"), config.getTestSubject());
+    }
 
     @Test
     void getSubjectsUrlNoConfigException() {

@@ -30,10 +30,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.reporting.TestSuiteResults;
-import org.solid.testharness.utils.Namespaces;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -163,16 +163,18 @@ class ApplicationTest {
     void target() throws Exception {
         final TestSuiteResults results = mockResults(0);
         when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
+        when(config.getSubjectsUrl()).thenReturn(new URL("https://example.org/subjects.ttl"));
         assertEquals(0, application.run("--tests", "--target", "test"));
-        verify(config).setTestSubject(iri(Namespaces.TEST_HARNESS_URI, "test"));
+        verify(config).setTestSubject(iri("https://example.org/test"));
     }
 
     @Test
     void targetIri() throws Exception {
         final TestSuiteResults results = mockResults(0);
         when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
-        assertEquals(0, application.run("--tests", "--target", "http://example.org/test"));
-        verify(config).setTestSubject(iri("http://example.org/test"));
+        when(config.getSubjectsUrl()).thenReturn(new URL("https://example.org/subjects.ttl"));
+        assertEquals(0, application.run("--tests", "--target", "https://example.org/test"));
+        verify(config).setTestSubject(iri("https://example.org/test"));
     }
 
     @Test

@@ -34,16 +34,16 @@ public class SpecificationRequirement extends DataModelBase {
         super(subject, ConstructMode.INC_REFS);
     }
 
-    public String getConformanceRole() {
-        return getIriAsString(SPEC.conformanceRole);
+    public String getRequirementSubject() {
+        return getIriAsString(SPEC.requirementSubject);
     }
 
-    public String getConformanceLevel() {
-        return getIriAsString(SPEC.normativeConformanceLevel);
+    public String getRequirementLevel() {
+        return getIriAsString(SPEC.requirementLevel);
     }
 
-    public String getExcerpt() {
-        return getIriAsString(SPEC.excerpt);
+    public String getStatement() {
+        return getIriAsString(SPEC.statement);
     }
 
     public List<TestCase> getTestCases() {
