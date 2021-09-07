@@ -2,10 +2,11 @@ prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 prefix schema: <http://schema.org/>
+prefix doap: <http://usefulinc.com/ns/doap#>
 prefix spec: <http://www.w3.org/ns/spec#>
 
 <https://example.org/specification2>
-    a spec:Specification ;
+    a spec:Specification, doap:Specification ;
     spec:requirement <https://example.org/specification2#spec1> .
 
 <https://example.org/specification2#spec1>
