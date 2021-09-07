@@ -1,90 +1,90 @@
 {#with it}
 <tr id="{subject}" about="{subject}" typeof="{typesList}">
-    <td>
-        <span property="dcterms:title">{title}</span>
-        [<a href="{subject}">manifest</a>]
-        {#if isImplemented}
-        [<a href="{testScript}" rel="spec:testScript">source</a>]
-        {/if}
-        [<a href="{requirementReference}" rel="spec:requirementReference">requirement</a>]
-    </td>
-    <td>
-        <dl>
-            <dt>Status</dt>
-            <dd><a href="{status}" rel="td:reviewStatus">
-                {#switch status}
-                {#case 'http://www.w3.org/2006/03/test-description#unreviewed'}Unreviewed
-                {#case 'http://www.w3.org/2006/03/test-description#accepted'}Accepted
-                {/switch}
-            </a></dd>
-        </dl>
+  <td>
+    <span property="dcterms:title">{title}</span>
+    [<a href="{subject}">manifest</a>]
+    {#if isImplemented}
+    [<a href="{testScript}" rel="spec:testScript">source</a>]
+    {/if}
+    [<a href="{requirementReference}" rel="spec:requirementReference">requirement</a>]
+  </td>
+  <td>
+    <dl>
+      <dt>Status</dt>
+      <dd><a href="{status}" rel="td:reviewStatus">
+        {#switch status}
+        {#case 'http://www.w3.org/2006/03/test-description#unreviewed'}Unreviewed
+        {#case 'http://www.w3.org/2006/03/test-description#accepted'}Accepted
+        {/switch}
+      </a></dd>
+    </dl>
 
-        {#if assertion && coverageMode == false}
-        <div rev="earl:test" resource="{assertion.subject}">
-            <div about="{assertion.subject}" typeof="{assertion.typesList}">
-                <span rel="earl:subject" resource="{assertion.testSubject}"></span>
-                <span rel="earl:assertedBy" resource="{assertion.assertedBy}"></span>
-                <dl>
-                    <dt>Mode</dt>
-                    <dd><a href="{assertion.mode}" rel="earl:mode">
-                        {#switch assertion.mode}
-                        {#case 'http://www.w3.org/ns/earl#automatic'}Automatic
-                        {#case 'http://www.w3.org/ns/earl#manual'}Manual
-                        {#case 'http://www.w3.org/ns/earl#semiAuto'}Semi-Automatic
-                        {#case 'http://www.w3.org/ns/earl#undisclosed'}Undisclosed
-                        {#case 'http://www.w3.org/ns/earl#unknownMode'}Unknown
-                        {/switch}
-                    </a></dd>
-                </dl>
-            </div>
-            <dl>
-                <dt>Timestamp</dt>
-                <dd>
-                    <time about="{assertion.result.subject}" datatype="xsd:dateTime" datetime="{assertion.result.date}"
-                          property="dcterms:date">{assertion.result.date}
-                    </time>
-                </dd>
-            </dl>
-        </div>
-        {/if}
-    </td>
-    {#if coverageMode == true}
-    <td>{isImplemented ? '✔' : '✗'}</td>
-    {#else if isImplemented && assertion}
-    <td about="{assertion.subject}" rel="earl:result" resource="{assertion.result.subject}">
-        <span about="{assertion.result.subject}" typeof="{assertion.result.typesList}" rel="earl:outcome"
-              resource="{assertion.result.outcome}" class="earl:{assertion.result.outcomeLocalName}">
-        {#switch assertion.result.outcome}
-        {#case 'http://www.w3.org/ns/earl#passed'}✔
-        {#case 'http://www.w3.org/ns/earl#failed'}✗
-        {#else}o
+    {#if assertion && coverageMode == false}
+    <div rev="earl:test" resource="{assertion.subject}">
+      <div about="{assertion.subject}" typeof="{assertion.typesList}">
+        <span rel="earl:subject" resource="{assertion.testSubject}"></span>
+        <span rel="earl:assertedBy" resource="{assertion.assertedBy}"></span>
+        <dl>
+          <dt>Mode</dt>
+          <dd><a href="{assertion.mode}" rel="earl:mode">
+            {#switch assertion.mode}
+            {#case 'http://www.w3.org/ns/earl#automatic'}Automatic
+            {#case 'http://www.w3.org/ns/earl#manual'}Manual
+            {#case 'http://www.w3.org/ns/earl#semiAuto'}Semi-Automatic
+            {#case 'http://www.w3.org/ns/earl#undisclosed'}Undisclosed
+            {#case 'http://www.w3.org/ns/earl#unknownMode'}Unknown
+            {/switch}
+          </a></dd>
+        </dl>
+      </div>
+      <dl>
+        <dt>Timestamp</dt>
+        <dd>
+          <time about="{assertion.result.subject}" datatype="xsd:dateTime" datetime="{assertion.result.date}"
+              property="dcterms:date">{assertion.result.date}
+          </time>
+        </dd>
+      </dl>
+    </div>
+    {/if}
+  </td>
+  {#if coverageMode == true}
+  <td>{isImplemented ? '✔' : '✗'}</td>
+  {#else if isImplemented && assertion}
+  <td about="{assertion.subject}" rel="earl:result" resource="{assertion.result.subject}">
+    <span about="{assertion.result.subject}" typeof="{assertion.result.typesList}" rel="earl:outcome"
+        resource="{assertion.result.outcome}" class="earl:{assertion.result.outcomeLocalName}">
+    {#switch assertion.result.outcome}
+    {#case 'http://www.w3.org/ns/earl#passed'}✔
+    {#case 'http://www.w3.org/ns/earl#failed'}✗
+    {#else}o
+    {/switch}
+    </span>
+  </td>
+  <td>
+    <ul>
+      {#each scenarios.orEmpty}
+      <li>
+        <span class="earl:{it.generatedOutput.valueLocalName}">
+        {#switch it.generatedOutput.value}
+        {#case 'http://www.w3.org/ns/earl#passed'}
+          ✔
+        {#case 'http://www.w3.org/ns/earl#failed'}
+          ✗
+        {#else}
+          o
         {/switch}
         </span>
-    </td>
-    <td>
-        <ul>
-            {#each scenarios.orEmpty}
-            <li>
-                <span class="earl:{it.generatedOutput.valueLocalName}">
-                {#switch it.generatedOutput.value}
-                {#case 'http://www.w3.org/ns/earl#passed'}
-                    ✔
-                {#case 'http://www.w3.org/ns/earl#failed'}
-                    ✗
-                {#else}
-                    o
-                {/switch}
-                </span>
-                <a href="#{it.anchor}">{it.title}</a>
-            </li>
-            {/each}
-        </ul>
-    </td>
-    {#else}
-    <td></td>
-    <td>Test not run.</td>
-    <td></td>
-    <td></td>
-    {/if}
+        <a href="#{it.anchor}">{it.title}</a>
+      </li>
+      {/each}
+    </ul>
+  </td>
+  {#else}
+  <td></td>
+  <td>Test not run.</td>
+  <td></td>
+  <td></td>
+  {/if}
 </tr>
 {/with}
