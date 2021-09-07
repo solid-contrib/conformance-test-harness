@@ -56,8 +56,8 @@ public class ResultData {
     }
 
     public String getPrefixes() {
-        return Namespaces.generateRdfaPrefixes(List.of(RDF.PREFIX, RDFS.PREFIX, XSD.PREFIX, DCTERMS.PREFIX, DOAP.PREFIX,
-                SOLID.PREFIX, SOLID_TEST.PREFIX, EARL.PREFIX, TD.PREFIX, PROV.PREFIX, SPEC.PREFIX,
+        return Namespaces.generateRdfaPrefixes(List.of(RDF.PREFIX, RDFS.PREFIX, XSD.PREFIX, OWL.PREFIX, DCTERMS.PREFIX,
+                DOAP.PREFIX, SOLID.PREFIX, SOLID_TEST.PREFIX, EARL.PREFIX, TD.PREFIX, PROV.PREFIX, SPEC.PREFIX,
                 Namespaces.RESULTS_PREFIX));
     }
 

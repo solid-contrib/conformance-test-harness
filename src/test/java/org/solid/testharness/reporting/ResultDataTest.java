@@ -53,6 +53,7 @@ class ResultDataTest extends AbstractDataModelTests {
         assertTrue(prefixes.contains("rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
         assertTrue(prefixes.contains("rdfs: http://www.w3.org/2000/01/rdf-schema#"));
         assertTrue(prefixes.contains("xsd: http://www.w3.org/2001/XMLSchema#"));
+        assertTrue(prefixes.contains("owl: http://www.w3.org/2002/07/owl#"));
         assertTrue(prefixes.contains("dcterms: http://purl.org/dc/terms/"));
         assertTrue(prefixes.contains("doap: http://usefulinc.com/ns/doap#"));
         assertTrue(prefixes.contains("solid: http://www.w3.org/ns/solid/terms#"));

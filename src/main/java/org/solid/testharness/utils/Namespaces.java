@@ -103,6 +103,7 @@ public final class Namespaces {
         namespaceMap.put(PROV.PREFIX, new Namespace(PROV.PREFIX, PROV.NAMESPACE));
         namespaceMap.put(RDF.PREFIX, new Namespace(RDF.PREFIX, RDF.NAMESPACE));
         namespaceMap.put(RDFS.PREFIX, new Namespace(RDFS.PREFIX, RDFS.NAMESPACE));
+        namespaceMap.put(OWL.PREFIX, new Namespace(OWL.PREFIX, OWL.NAMESPACE));
     }
 
     private static class Namespace {
