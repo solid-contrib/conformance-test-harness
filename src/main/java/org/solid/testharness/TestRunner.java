@@ -53,9 +53,7 @@ public class TestRunner {
 //                .outputHtmlReport(true)
 //                .parallel(8);
 
-        Runner.Builder builder = Runner.builder()
-                .path(featurePaths)
-                .tags("~@ignore");
+        Runner.Builder builder = Runner.builder().path(featurePaths);
         if (enableReporting) {
             builder = builder.outputHtmlReport(true).suiteReports(featureResultHandler);
         }
