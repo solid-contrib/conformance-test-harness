@@ -116,7 +116,7 @@ public class TestSubject {
 
     /**
      * Set up the root ACL for Alice (if required).
-     * Confirm access to the root test container & ACL.
+     * Confirm access to the root test container and ACL.
      * Create a sub-container for this run and confirm access to it and its ACL.
      */
     public void prepareServer() {
