@@ -192,9 +192,9 @@ The first time you run this command, it will ask various questions to help setup
 for future releases. This process automatically modifies `pom.xml` to prepare a release version, commits the change, and
 tags the repository, then sets up the project ready for the ongoing development of the next version. 
 
-The final stage is to deploy the package:
+The final step is to perform the release (whilst avoiding deploying to a maven repository or re-running the tests):
 ```shell
-./mvnw release:perform
+./mvnw release:perform -Darguments="-Dmaven.deploy.skip=true -DskipTests"
 ```
 
 You can test this process, and undo the results with:
@@ -203,5 +203,9 @@ You can test this process, and undo the results with:
 ./mvnw release:clean
 ```
 
-Once the release has been completed, you should go to the release tag in GitHub and edit it.
-
+Once this has been completed, you should create the release in Github:
+[Create a new release](https://github.com/solid/conformance-test-harness/releases/new):
+* Choose the tag that was just created.
+* Add a title, e.g. `Release 1.0.0`.
+* Add some content describing notable changes.
+* Publish the release.

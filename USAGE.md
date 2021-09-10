@@ -342,6 +342,11 @@ When you run the server in a container, there are some important things to remem
 * The CTH is setup to detect when you are using https://server, and will allow self-signed certificates. If you see an issue with DPoP verification rejecting self-signed certificates, the server
   being tested will need to be setup to have the same capability. For a Node based server, this is done by adding `NODE_TLS_REJECT_UNAUTHORIZED=0`
   to the environment before running the server.
+
+Some additional notes on using the Docker image:
+* To run a specific version of the Docker image, you need to append a tag to the image name, e.g.
+  `solidconformancetestbeta/conformance-test-harness:1.0.0` 
+* If you do not specify a version then Docker will use the latest image
 * If you want to see the reports, the `/reports` directory must be mapped to a local volume. Alternatively you could use 
 this image in your own image which could send the reports to an external location such as Amazon Web Services (AWS) S3.
 * If you want to run different tests or supply a different config file, you can mount local directories in place of other
@@ -560,15 +565,6 @@ To use the Docker image to run a set of local tests:
         --env-file=ess.env solidconformancetestbeta/conformance-test-harness \
         --output=/reports --target=ess
     ```
-  
-## Local Execution
-The CTH is packaged into a single, executable jar which is available as an asset in the release within GitHub:
-https://github.com/solid/conformance-test-harness/releases. The only dependency is on Java 11.
-
-To run the CTH locally and see its usage, execute:
-```shell
-java -jar solid-conformance-test-harness-runner.jar --help
-```
 
 # Reports
 |Report|Location|
