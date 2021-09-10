@@ -180,14 +180,17 @@ To build a local copy of the Docker image:
 docker build -f src/main/docker/Dockerfile -t testharness .
 ```
 
+The CD workflow in GitHub also builds a Docker image and deploys it to DockerHub:
+https://hub.docker.com/r/solidconformancetestbeta/conformance-test-harness
+
 ### 6. Release
 Update CHANGELOG.md to highlight new features before starting the release:
 ```shell
 ./mvnw release:prepare
 ```
-The first time you run this command, it will ask various questions to help setup `release.properties` which will be used for
-future releases. This process automatically modifies `pom.xml` to prepare a release version, commits the change, and tags
-the repository, then sets up the project ready for the ongoing development of the next version. 
+The first time you run this command, it will ask various questions to help setup `release.properties` which will be used
+for future releases. This process automatically modifies `pom.xml` to prepare a release version, commits the change, and
+tags the repository, then sets up the project ready for the ongoing development of the next version. 
 
 The final stage is to deploy the package:
 ```shell
@@ -200,6 +203,5 @@ You can test this process, and undo the results with:
 ./mvnw release:clean
 ```
 
-Once the release has been completed, you should go to the release tag in GitHub and edit it. You can then upload
-`target/solid-conformance-test-harness-runner.jar` as an asset of the release.
+Once the release has been completed, you should go to the release tag in GitHub and edit it.
 

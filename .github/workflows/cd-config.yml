@@ -37,11 +37,17 @@ jobs:
       # Deploy the docker container
       - name: Publish the Docker container
         run: |
+          VERSION=$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout)
+          LABEL=`[[ $VERSION == *SNAPSHOT* ]] && echo $GITHUB_SHA || echo $VERSION`
+
           # Login to the docker repository
           docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
 
           # Deploy the image
-          mvn package -DskipTests -Dquarkus.container-image.image="docker.io/solidconformancetestbeta/conformance-test-harness" -Dquarkus.docker.dockerfile-jvm-path=src/main/docker/Dockerfile
+          mvn package -DskipTests \
+            -Dquarkus.container-image.image="docker.io/solidconformancetestbeta/conformance-test-harness:$LABEL" \
+            -Dquarkus.docker.dockerfile-jvm-path=src/main/docker/Dockerfile \
+            -Dquarkus.container-image.additional-tags=latest
         env:
           QUARKUS_CONTAINER_IMAGE_BUILD: "true"
           QUARKUS_CONTAINER_IMAGE_PUSH: "true"
