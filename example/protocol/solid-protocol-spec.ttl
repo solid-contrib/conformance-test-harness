@@ -10,7 +10,7 @@ prefix doap: <http://usefulinc.com/ns/doap#>
 prefix spec: <http://www.w3.org/ns/spec#>
 
 <https://solidproject.org/TR/protocol>
-    a spec:Specification, doap:Specification ;
+    a doap:Specification ;
     spec:requirement <https://solidproject.org/TR/protocol#resource-representations>,
                      <https://solidproject.org/TR/protocol#writing-resources>,
                      <https://solidproject.org/TR/protocol#web-access-control>

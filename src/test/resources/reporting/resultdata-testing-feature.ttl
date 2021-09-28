@@ -5,7 +5,7 @@ prefix doap: <http://usefulinc.com/ns/doap#>
 prefix ex: <https://example.org/>
 
 ex:specification1
-    a spec:Specification, doap:Specification ;
+    a doap:Specification ;
     spec:requirement <https://example.org/specification1#spec1>,
                      <https://example.org/specification1#spec2>,
                      <https://example.org/specification1#spec3> .
