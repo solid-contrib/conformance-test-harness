@@ -30,6 +30,7 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.solid.common.vocab.DOAP;
 import org.solid.common.vocab.RDF;
 import org.solid.common.vocab.SPEC;
 import org.solid.testharness.utils.*;
@@ -69,9 +70,10 @@ class TestSuiteDescriptionTest {
                 new URL("https://example.org/test-manifest-sample-1.ttl"),
                 new URL("https://example.org/specification-sample-1.ttl")
         ));
-        assertTrue(ask(iri("https://example.org/specification1"), RDF.type, SPEC.Specification));
+        assertTrue(ask(iri("https://example.org/specification1"), RDF.type, DOAP.Specification));
         assertTrue(ask(iri("https://example.org/test-manifest-sample-1.ttl#group1-feature1"),
                 SPEC.requirementReference, iri("https://example.org/specification1#spec1")));
+        assertFalse(ask(iri("https://example.org/specification2"), RDF.type, DOAP.Specification));
         assertFalse(ask(iri("https://example.org/specification2"), RDF.type, SPEC.Specification));
         assertFalse(ask(iri("https://example.org/test-manifest-sample-2.ttl#group4-feature1"),
                 SPEC.requirementReference, iri("https://example.org/specification2#spec1")));
@@ -85,9 +87,10 @@ class TestSuiteDescriptionTest {
                 new URL("https://example.org/specification-sample-1.ttl"),
                 new URL("https://example.org/specification-sample-2.ttl")
         ));
-        assertTrue(ask(iri("https://example.org/specification1"), RDF.type, SPEC.Specification));
+        assertTrue(ask(iri("https://example.org/specification1"), RDF.type, DOAP.Specification));
         assertTrue(ask(iri("https://example.org/test-manifest-sample-1.ttl#group1-feature1"),
                 SPEC.requirementReference, iri("https://example.org/specification1#spec1")));
+        assertTrue(ask(iri("https://example.org/specification2"), RDF.type, DOAP.Specification));
         assertTrue(ask(iri("https://example.org/specification2"), RDF.type, SPEC.Specification));
         assertTrue(ask(iri("https://example.org/test-manifest-sample-2.ttl#group4-feature1"),
                 SPEC.requirementReference, iri("https://example.org/specification2#spec1")));
@@ -96,7 +99,7 @@ class TestSuiteDescriptionTest {
     @Test
     void loadRdfa() throws MalformedURLException {
         testSuiteDescription.load(List.of(new URL("https://example.org/specification-sample-1.html")));
-        assertTrue(ask(iri("https://example.org/specification1"), RDF.type, SPEC.Specification));
+        assertTrue(ask(iri("https://example.org/specification1"), RDF.type, DOAP.Specification));
         assertTrue(ask(iri("https://example.org/specification1#spec1"), SPEC.statement,
                 literal("text of requirement 1")));
     }
@@ -109,10 +112,10 @@ class TestSuiteDescriptionTest {
                 new URL("https://example.org/specification-sample-1.html"),
                 new URL("https://example.org/specification-sample-2.ttl")
         ));
-        assertTrue(ask(iri("https://example.org/specification1"), RDF.type, SPEC.Specification));
+        assertTrue(ask(iri("https://example.org/specification1"), RDF.type, DOAP.Specification));
         assertTrue(ask(iri("https://example.org/test-manifest-sample-1.ttl#group1-feature1"),
                 SPEC.requirementReference, iri("https://example.org/specification1#spec1")));
-        assertTrue(ask(iri("https://example.org/specification2"), RDF.type, SPEC.Specification));
+        assertTrue(ask(iri("https://example.org/specification2"), RDF.type, DOAP.Specification));
         assertTrue(ask(iri("https://example.org/test-manifest-sample-2.ttl#group4-feature1"),
                 SPEC.requirementReference, iri("https://example.org/specification2#spec1")));
     }

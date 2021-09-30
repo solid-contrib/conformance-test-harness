@@ -30,6 +30,7 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.common.vocab.DOAP;
 import org.solid.common.vocab.RDF;
 import org.solid.common.vocab.SPEC;
 import org.solid.common.vocab.TD;
@@ -42,6 +43,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ApplicationScoped
 public class ReportGenerator {
@@ -81,9 +83,12 @@ public class ReportGenerator {
 
     private List<IRI> getSpecifications() {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
-            return conn.getStatements(null, RDF.type, SPEC.Specification).stream()
-                    .map(Statement::getSubject)
+            return Stream.concat(
+                            conn.getStatements(null, RDF.type, SPEC.Specification).stream(),
+                            conn.getStatements(null, RDF.type, DOAP.Specification).stream()
+                    ).map(Statement::getSubject)
                     .map(IRI.class::cast)
+                    .distinct()
                     .collect(Collectors.toList());
         }
     }
