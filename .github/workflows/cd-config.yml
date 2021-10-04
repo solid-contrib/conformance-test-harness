@@ -46,6 +46,7 @@ jobs:
             -Dquarkus.container-image.image="docker.io/solidconformancetestbeta/conformance-test-harness:$LABEL" \
             -Dquarkus.docker.dockerfile-jvm-path=src/main/docker/Dockerfile \
             -Dquarkus.container-image.additional-tags=latest
+            -Dquarkus.container-image.labels.version="$LABEL"
         env:
           QUARKUS_CONTAINER_IMAGE_BUILD: "true"
           QUARKUS_CONTAINER_IMAGE_PUSH: "true"
