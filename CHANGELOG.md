@@ -1,6 +1,6 @@
 # Solid Specification Conformance Test Harness
 
-## Release 1.0.1
+## Release 1.0.2
 
 ### Minor changes
 * Add a version label to the image file to make it easier to identify.
