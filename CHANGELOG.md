@@ -1,5 +1,12 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.0.1
+
+### Minor changes
+* Add a version label to the image file to make it easier to identify.
+* Fix URLs in reports to point to the specs, manifests and test cases in GitHub (including line-specific links).
+* Allow either doap or spec namespaces on specification documents.
+
 ## Release 1.0.0
 This is the first major release of the Conformance Test Harness. Most people will only need to use the containerized
 version of this package which comes pre-loaded with a test of tests from the

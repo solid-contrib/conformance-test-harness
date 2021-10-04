@@ -184,28 +184,26 @@ The CD workflow in GitHub also builds a Docker image and deploys it to DockerHub
 https://hub.docker.com/r/solidconformancetestbeta/conformance-test-harness
 
 ### 6. Release
-Update CHANGELOG.md to highlight new features before starting the release:
-```shell
-./mvnw release:prepare
-```
-The first time you run this command, it will ask various questions to help setup `release.properties` which will be used
-for future releases. This process automatically modifies `pom.xml` to prepare a release version, commits the change, and
-tags the repository, then sets up the project ready for the ongoing development of the next version. 
+1. Update CHANGELOG.md to highlight new features.
+2. Prepare the release:
+    ```shell
+    ./mvnw release:prepare
+    ```
+    The first time you run this command, it will ask various questions to help setup `release.properties` which will be
+    used for future releases. This process automatically modifies `pom.xml` to prepare a release version, commits the
+    change, and tags the repository, then sets up the project ready for the ongoing development of the next version.
 
-The final step is to perform the release (whilst avoiding deploying to a maven repository or re-running the tests):
-```shell
-./mvnw release:perform -Darguments="-Dmaven.deploy.skip=true -DskipTests"
-```
-
-You can test this process, and undo the results with:
-```shell
-./mvnw release:prepare -DdryRun=true
-./mvnw release:clean
-```
-
-Once this has been completed, you should create the release in Github:
-[Create a new release](https://github.com/solid/conformance-test-harness/releases/new):
-* Choose the tag that was just created.
-* Add a title, e.g. `Release 1.0.0`.
-* Add some content describing notable changes.
-* Publish the release.
+    You can test this process, and undo the results with:
+    ```shell
+    ./mvnw release:prepare -DdryRun=true
+    ./mvnw release:clean
+    ```
+3. Perform the release (whilst avoiding deploying to a maven repository or re-running the tests):
+    ```shell
+    ./mvnw release:perform -Darguments="-Dmaven.deploy.skip=true -DskipTests"
+    ```
+4. Create the release in GitHub - [Create a new release](https://github.com/solid/conformance-test-harness/releases/new):
+   * Choose the tag that was just created.
+   * Add a title, e.g. `Release 1.0.0`.
+   * Add some content describing notable changes.
+   * Publish the release.

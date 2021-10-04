@@ -27,7 +27,6 @@ import com.intuit.karate.Suite;
 import com.intuit.karate.core.FeatureResult;
 import com.intuit.karate.report.Report;
 import com.intuit.karate.report.SuiteReports;
-import org.eclipse.rdf4j.model.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.config.PathMappings;
