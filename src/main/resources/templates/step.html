@@ -23,8 +23,11 @@
       </dd>
       {/if}
       {#if scenario}
+      <span resource="{scenario}" rel="prov:wasInformedBy"></span>
+      <!--
       <dt>Was informed by</dt>
       <dd><a href="{scenario}" rel="prov:wasInformedBy">scenario</a></dd>
+      -->
       {/if}
       {#if generatedOutput.description || scenario}
     </dl>

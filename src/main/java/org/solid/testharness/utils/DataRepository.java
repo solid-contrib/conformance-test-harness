@@ -46,20 +46,22 @@ import org.solid.common.vocab.*;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.eclipse.rdf4j.model.util.Values.bnode;
-import static org.eclipse.rdf4j.model.util.Values.iri;
-import static org.eclipse.rdf4j.model.util.Values.literal;
+import static org.eclipse.rdf4j.model.util.Values.*;
 
 @ApplicationScoped
 public class DataRepository implements Repository {
     private static final Logger logger = LoggerFactory.getLogger(DataRepository.class);
+    private static final String GITHUB_LINE_ANCHOR = "#L";
 
     private Repository repository = new SailRepository(new MemoryStore());
     // TODO: Determine if this should be a separate IRI to the base
@@ -85,7 +87,7 @@ public class DataRepository implements Repository {
     public void load(final URL url, final String baseUri) {
         try (RepositoryConnection conn = getConnection()) {
             try {
-                logger.info("Loading {}", url.toString());
+                logger.info("Loading {} with base {}", url.toString(), baseUri);
                 final ParserConfig parserConfig = new ParserConfig();
                 parserConfig.set(RDFaParserSettings.RDFA_COMPATIBILITY, RDFaVersion.RDFA_1_1);
                 conn.setParserConfig(parserConfig);
@@ -121,7 +123,7 @@ public class DataRepository implements Repository {
             }
             createAssertion(conn, fr, startTime, testCaseIri);
             for (ScenarioResult sr: fr.getScenarioResults()) {
-                createScenarioActivity(conn, sr, testCaseIri);
+                createScenarioActivity(conn, sr, testCaseIri, featureIri);
             }
         } catch (Exception e) {
             logger.error("Failed to load feature result", e);
@@ -157,7 +159,7 @@ public class DataRepository implements Repository {
     }
 
     private void createScenarioActivity(final RepositoryConnection conn, final ScenarioResult sr,
-                                        final IRI testCaseIri) {
+                                        final IRI testCaseIri, final IRI featureIri) {
         final ModelBuilder builder;
         final IRI scenarioIri = createNode();
         final IRI scenarioResultIri = createNode();
@@ -165,7 +167,7 @@ public class DataRepository implements Repository {
         conn.add(builder.subject(scenarioIri)
                 .add(RDF.type, PROV.Activity)
                 .add(DCTERMS.title, sr.getScenario().getName())
-                .add(PROV.used, sr.getScenario().getUriToLineNumber())
+                .add(PROV.used, iri(featureIri.stringValue() + GITHUB_LINE_ANCHOR + sr.getScenario().getLine()))
                 .add(PROV.startedAtTime, new Date(sr.getStartTime()))
                 .add(PROV.endedAtTime, new Date(sr.getEndTime()))
                 .add(PROV.generated, scenarioResultIri)
@@ -177,12 +179,12 @@ public class DataRepository implements Repository {
             conn.add(testCaseIri, DCTERMS.hasPart, scenarioIri);
         }
         if (!sr.getStepResults().isEmpty()) {
-            createStepActivityList(conn, sr, scenarioIri);
+            createStepActivityList(conn, sr, scenarioIri, featureIri);
         }
     }
 
     private void createStepActivityList(final RepositoryConnection conn, final ScenarioResult sr,
-                                        final IRI scenarioIri) {
+                                        final IRI scenarioIri, final IRI featureIri) {
         final List<Resource> steps = sr.getStepResults().stream().map(str -> {
             final IRI stepIri = createNode();
             final IRI stepResultIri = createNode();
@@ -190,7 +192,7 @@ public class DataRepository implements Repository {
             stepBuilder.subject(stepIri)
                     .add(RDF.type, PROV.Activity)
                     .add(DCTERMS.title, str.getStep().getPrefix() + " " + str.getStep().getText())
-                    .add(PROV.used, str.getStep().getDebugInfo())
+                    .add(PROV.used, iri(featureIri.stringValue() + GITHUB_LINE_ANCHOR + str.getStep().getLine()))
                     .add(PROV.generated, stepResultIri)
                     .add(stepResultIri, RDF.type, PROV.Entity)
                     .add(stepResultIri, PROV.value, EARL_RESULT.get(str.getResult().getStatus()));
