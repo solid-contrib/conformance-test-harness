@@ -33,11 +33,13 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.solid.common.vocab.*;
+import org.solid.common.vocab.DCTERMS;
+import org.solid.common.vocab.FOAF;
+import org.solid.common.vocab.RDF;
+import org.solid.common.vocab.SPEC;
 
 import java.io.*;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -73,19 +75,19 @@ class DataRepositoryTest {
         when(feature.getName()).thenReturn("FEATURE NAME");
         final Scenario scenario1 = mock(Scenario.class);
         when(scenario1.getName()).thenReturn("SCENARIO 1");
-        when(scenario1.getUriToLineNumber()).thenReturn(new URI("https://example.org/features#line=1"));
+        when(scenario1.getLine()).thenReturn(1);
         final Scenario scenario2 = mock(Scenario.class);
         when(scenario2.getName()).thenReturn("SCENARIO 2");
-        when(scenario2.getUriToLineNumber()).thenReturn(new URI("https://example.org/features#line=2"));
+        when(scenario2.getLine()).thenReturn(10);
         final Step step1 = mock(Step.class);
         when(step1.getPrefix()).thenReturn("When");
         when(step1.getText()).thenReturn("method GET");
-        when(step1.getDebugInfo()).thenReturn("line");
+        when(step1.getLine()).thenReturn(1);
         when(step1.isBackground()).thenReturn(true);
         final Step step2 = mock(Step.class);
         when(step2.getPrefix()).thenReturn("Then");
         when(step2.getText()).thenReturn("Status 200");
-        when(step2.getDebugInfo()).thenReturn("line");
+        when(step2.getLine()).thenReturn(2);
         final Result res1 = mock(Result.class);
         when(res1.getStatus()).thenReturn("passed");
         final Result res2 = mock(Result.class);
@@ -170,7 +172,7 @@ class DataRepositoryTest {
         when(feature.getName()).thenReturn("FEATURE NAME");
         final Scenario scenario1 = mock(Scenario.class);
         when(scenario1.getName()).thenReturn("SCENARIO 1");
-        when(scenario1.getUriToLineNumber()).thenReturn(new URI("https://example.org/features#line=1"));
+        when(scenario1.getLine()).thenReturn(1);
 
         final FeatureResult fr = mock(FeatureResult.class);
         when(fr.getDisplayName()).thenReturn("DISPLAY_NAME");
@@ -207,6 +209,7 @@ class DataRepositoryTest {
         final FeatureResult fr = mock(FeatureResult.class);
         when(fr.getDisplayName()).thenReturn("");
         when(fr.getFeature()).thenReturn(feature);
+        when(fr.getScenarioResults()).thenThrow(new RuntimeException("FAILED"));
 
         dataRepository.addFeatureResult(suite, fr, featureIri);
         final StringWriter sw = new StringWriter();

@@ -65,10 +65,10 @@ The file can have various formats though the example provided is YAML. It  must 
 # The first 3 can be ignored if using the command line settings: subjects, source and target 
 subjects: test-subjects.ttl
 sources:
-  - example/protocol/solid-protocol-test-manifest.ttl
-  - example/web-access-control/web-access-control-test-manifest.ttl
-  - example/protocol/solid-protocol-spec.ttl
-  - example/web-access-control/web-access-control-spec.ttl
+  - https://github.com/solid/conformance-test-harness/example/protocol/solid-protocol-test-manifest.ttl
+  - https://github.com/solid/conformance-test-harness/example/web-access-control/web-access-control-test-manifest.ttl
+  - https://github.com/solid/conformance-test-harness/example/protocol/solid-protocol-spec.ttl
+  - https://github.com/solid/conformance-test-harness/example/web-access-control/web-access-control-spec.ttl
 # The target is just an IRI or local name relative to the test-subjects file and is not expected to resolve to anything
 target: ess
 
@@ -544,8 +544,8 @@ To use the Docker image to run a set of local tests:
     ```
     subjects: /data/test-subjects.ttl
     sources:
-        - /data/solid-protocol-test-manifest.ttl
-        - /data/solid-protocol-spec.ttl
+        - https://github.com/solid/conformance-test-harness/example/protocol/solid-protocol-test-manifest.ttl
+        - https://github.com/solid/conformance-test-harness/example/protocol/solid-protocol-spec.ttl
     target: https://github.com/solid/conformance-test-harness/ess
     mappings:
         - prefix: https://github.com/solid/conformance-test-harness/example/protocol

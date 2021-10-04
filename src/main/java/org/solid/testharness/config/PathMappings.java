@@ -38,8 +38,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.eclipse.rdf4j.model.util.Values.iri;
-
 @ConfigMapping(prefix = "mappings")
 public interface PathMappings {
     @WithParentName
@@ -49,10 +47,10 @@ public interface PathMappings {
         return mappings().stream().map(PathMapping::stringValue).collect(Collectors.toList()).toString();
     }
 
-    default IRI unmapFeaturePath(final String path) {
+    default String unmapFeaturePath(final String path) {
         URI uri = URI.create(path);
         if (HttpUtils.isHttpProtocol(uri.getScheme())) {
-            return iri(uri.toString());
+            return uri.toString();
         }
         if (!HttpUtils.isFileProtocol(uri.getScheme())) {
             uri = Path.of(path).toAbsolutePath().normalize().toUri();
@@ -60,7 +58,7 @@ public interface PathMappings {
         final String finalPath = uri.toString();
         final PathMapping mapping = mappings().stream()
                 .filter(m -> finalPath.startsWith(m.path())).findFirst().orElse(null);
-        return mapping != null ? iri(finalPath.replace(mapping.path(), mapping.prefix())) : null;
+        return mapping != null ? finalPath.replace(mapping.path(), mapping.prefix()) : null;
     }
 
     default URI mapFeatureIri(final IRI featureIri) {

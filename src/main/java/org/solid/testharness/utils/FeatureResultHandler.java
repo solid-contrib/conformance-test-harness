@@ -35,6 +35,8 @@ import org.solid.testharness.config.PathMappings;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import static org.eclipse.rdf4j.model.util.Values.iri;
+
 @ApplicationScoped
 public class FeatureResultHandler implements SuiteReports {
     private static final Logger logger = LoggerFactory.getLogger(FeatureResultHandler.class);
@@ -47,9 +49,9 @@ public class FeatureResultHandler implements SuiteReports {
     @Override
     public Report featureReport(final Suite suite, final FeatureResult fr) {
         final String featurePath = fr.getDisplayName();
-        final IRI featureIri = pathMappings.unmapFeaturePath(featurePath);
+        final String featureIri = pathMappings.unmapFeaturePath(featurePath);
         if (featureIri != null) {
-            dataRepository.addFeatureResult(suite, fr, featureIri);
+            dataRepository.addFeatureResult(suite, fr, iri(featureIri));
         } else {
             logger.warn("The feature {} could not be mapped back to an IRI", featurePath);
         }

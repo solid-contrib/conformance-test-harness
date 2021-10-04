@@ -2,7 +2,7 @@
 <section id="{it.anchor}" rel="dcterms:hasPart" resource="{subject}" typeof="{typesList}">
   <h4 property="dcterms:title">{title}</h4>
   <dl><dt>Scenario</dt><dd>{subject}</dd></dl>
-  <dl><dt>Script location</dt><dd rel="prov:used" resource="{used}" title="{used}">{used}</dd></dl>
+  <dl><dt>Script location</dt><dd><a rel="prov:used" href="{used}">{used}</a></dd></dl>
   <dl><dt>Start</dt><dd><time datatype="xsd:dateTime" datetime="{startTime}" property="prov:startedAtTime">{startTime}</time></dd></dl>
   <dl><dt>End</dt><dd><time datatype="xsd:dateTime" datetime="{endTime}" property="prov:endedAtTime">{endTime}</time></dd></dl>
   <dl><dt>Outcome</dt><dd rel="prov:generated" resource="{generatedOutput.subject}" typeof="{generatedOutput.typesList}">
