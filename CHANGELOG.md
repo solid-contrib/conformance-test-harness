@@ -1,5 +1,10 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.0.3
+
+### Minor changes
+* Use client_secret_basic authentication to work with client credentials from the Inrupt Application Catalog.
+
 ## Release 1.0.2
 
 ### Minor changes
