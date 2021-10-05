@@ -53,7 +53,7 @@ public interface UserCredentials {
     }
 
     default boolean isUsingClientCredentials() {
-        return clientSecret().isPresent() && !clientId().isPresent();
+        return refreshToken().isEmpty() && clientId().isPresent() && clientSecret().isPresent();
     }
 
     default String stringValue() {
@@ -66,8 +66,8 @@ public interface UserCredentials {
                     mask(refreshToken()), mask(clientId()), mask(clientSecret())
             );
         } else if (isUsingClientCredentials()) {
-            return String.format("UserCredentials: clientSecret=%s",
-                    mask(clientSecret())
+            return String.format("UserCredentials: clientId=%s, clientSecret=%s",
+                    mask(clientId()), mask(clientSecret())
             );
         } else {
             return String.format("UserCredentials: username=%s, password=%s, " +
