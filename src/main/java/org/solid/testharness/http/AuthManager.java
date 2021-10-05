@@ -146,11 +146,11 @@ public class AuthManager {
         }
 
         final Map<Object, Object> data = Map.of(
-                HttpConstants.GRANT_TYPE, HttpConstants.CLIENT_CREDENTIALS,
-                HttpConstants.CLIENT_ID, userConfig.webId(),
-                HttpConstants.CLIENT_SECRET, userConfig.clientSecret().get()
+                HttpConstants.GRANT_TYPE, HttpConstants.CLIENT_CREDENTIALS
         );
-        return requestToken(authClient, oidcConfig, null, data);
+        final String authHeader = HttpConstants.PREFIX_BASIC +
+                base64Encode(userConfig.clientId().get() + ':' + userConfig.clientSecret().get());
+        return requestToken(authClient, oidcConfig, authHeader, data);
     }
 
     private Tokens loginAndGetAccessToken(final Client authClient, final UserCredentials userConfig,

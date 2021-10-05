@@ -117,12 +117,13 @@ There are 4 options for obtaining authentication access tokens when running test
 
 #### 1. Client Credentials
 The simplest authentication mechanism is based on the Solid Identity Provider offering the
-client credentials authorization flow and requires the users to be pre-registered.
+client credentials authorization flow and requires the users pre-register for these credentials.
 
 This mechanism works well in CI environments where the credentials can be passed in as secrets.
 
 For each user, the following configuration information is required:
-* WebID (used as the Client Id).
+* WebID.
+* Client Id.
 * Client Secret.
 
 The required environment variables are:
@@ -130,8 +131,10 @@ The required environment variables are:
 # Authentication Configuration - Client Credentials
 SOLID_IDENTITY_PROVIDER=	# e.g., https://broker.pod.inrupt.com
 USERS_ALICE_WEBID=
+USERS_ALICE_CLIENTID=
 USERS_ALICE_CLIENTSECRET=
 USERS_BOB_WEBID=
+USERS_BOB_CLIENTID=
 USERS_BOB_CLIENTSECRET=
 ```
 

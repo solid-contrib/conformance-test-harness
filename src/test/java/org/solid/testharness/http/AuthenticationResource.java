@@ -37,7 +37,6 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.absent;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 
@@ -60,7 +59,7 @@ public class AuthenticationResource implements QuarkusTestResourceLifecycleManag
     public Map<String, String> start() {
         wireMockServer = new WireMockServer(WireMockConfiguration.options()
                 .dynamicPort());
-// logging the requests helps when debugging tests
+        // logging the requests helps when debugging tests
         wireMockServer.addMockServiceRequestListener(AuthenticationResource::requestReceived);
 
         wireMockServer.start();
@@ -232,17 +231,15 @@ public class AuthenticationResource implements QuarkusTestResourceLifecycleManag
 
         // client credentials token fails with bad secret
         wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/token"))
-                .withHeader(HttpConstants.HEADER_AUTHORIZATION, absent())
+                .withHeader(HttpConstants.HEADER_AUTHORIZATION, equalTo(BAD_BASIC_AUTH))
                 .withRequestBody(containing(HttpConstants.GRANT_TYPE + "=" + HttpConstants.CLIENT_CREDENTIALS))
-                .withRequestBody(containing(HttpConstants.CLIENT_SECRET + "=" + "BADSECRET"))
                 .willReturn(WireMock.aResponse()
                         .withStatus(403)));
 
         // client credentials token succeeds with good secret
         wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/token"))
-                .withHeader(HttpConstants.HEADER_AUTHORIZATION, absent())
+                .withHeader(HttpConstants.HEADER_AUTHORIZATION, equalTo(GOOD_BASIC_AUTH))
                 .withRequestBody(containing(HttpConstants.GRANT_TYPE + "=" + HttpConstants.CLIENT_CREDENTIALS))
-                .withRequestBody(containing(HttpConstants.CLIENT_SECRET + "=" + "CLIENTSECRET"))
                 .willReturn(WireMock.aResponse()
                         .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
                         .withBody(ACCESS_TOKEN)));

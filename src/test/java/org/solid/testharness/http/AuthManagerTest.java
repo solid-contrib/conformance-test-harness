@@ -350,6 +350,7 @@ class AuthManagerTest {
         when(config.getSolidIdentityProvider()).thenReturn(baseUri.resolve("/nogranttypes/"));
         when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
         final TestCredentials credentials = new TestCredentials();
+        credentials.clientId = Optional.of("CLIENTID");
         credentials.clientSecret = Optional.of("BADSECRET");
         when(config.getCredentials("client-nogrant")).thenReturn(credentials);
 
@@ -364,7 +365,7 @@ class AuthManagerTest {
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
         when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
         final TestCredentials credentials = new TestCredentials();
-        credentials.webId = "https://alice.target.example.org/profile/card#me";
+        credentials.clientId = Optional.of("CLIENTID");
         credentials.clientSecret = Optional.of("BADSECRET");
         when(config.getCredentials("test16")).thenReturn(credentials);
 
@@ -379,7 +380,7 @@ class AuthManagerTest {
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
         when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
         final TestCredentials credentials = new TestCredentials();
-        credentials.webId = "https://alice.target.example.org/profile/card#me";
+        credentials.clientId = Optional.of("CLIENTID");
         credentials.clientSecret = Optional.of("CLIENTSECRET");
         when(config.getCredentials("test17")).thenReturn(credentials);
 

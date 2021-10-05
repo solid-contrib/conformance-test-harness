@@ -77,20 +77,32 @@ public class UserCredentialsTest {
         userCredentials.clientId = Optional.empty();
         userCredentials.clientSecret = Optional.of("CLIENT_SECRET");
         assertFalse(userCredentials.isUsingRefreshToken());
-        userCredentials.refreshToken = Optional.empty();
-        userCredentials.clientId = Optional.of("CLIENT_ID");
-        userCredentials.clientSecret = Optional.of("CLIENT_SECRET");
-        assertFalse(userCredentials.isUsingRefreshToken());
     }
 
     @Test
     public void clientCredentials() {
         final TestCredentials userCredentials = new TestCredentials();
+        userCredentials.clientId = Optional.of("CLIENT_ID");
         userCredentials.clientSecret = Optional.of("CLIENT_SECRET");
         assertTrue(userCredentials.isUsingClientCredentials());
         assertFalse(userCredentials.isUsingRefreshToken());
         assertFalse(userCredentials.isUsingUsernamePassword());
-        assertEquals("UserCredentials: clientSecret=***", userCredentials.stringValue());
+        assertEquals("UserCredentials: clientId=***, clientSecret=***", userCredentials.stringValue());
+    }
+
+    @Test
+    public void partialClientCredentials() {
+        final TestCredentials userCredentials = new TestCredentials();
+        userCredentials.clientId = Optional.empty();
+        userCredentials.clientSecret = Optional.of("CLIENT_SECRET");
+        assertFalse(userCredentials.isUsingClientCredentials());
+        assertFalse(userCredentials.isUsingRefreshToken());
+        assertFalse(userCredentials.isUsingUsernamePassword());
+        userCredentials.clientId = Optional.of("CLIENT_ID");
+        userCredentials.clientSecret = Optional.empty();
+        assertFalse(userCredentials.isUsingClientCredentials());
+        assertFalse(userCredentials.isUsingRefreshToken());
+        assertFalse(userCredentials.isUsingUsernamePassword());
     }
 
     @Test
