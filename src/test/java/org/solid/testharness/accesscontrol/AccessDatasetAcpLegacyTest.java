@@ -28,7 +28,6 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.util.Models;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.solid.common.vocab.ACL;
 import org.solid.common.vocab.ACP;
 import org.solid.testharness.http.Client;
 import org.solid.testharness.utils.TestUtils;
@@ -46,7 +45,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class AccessDatasetAcpTest {
+class AccessDatasetAcpLegacyLegacyTest {
     private static final URI RESOURCE_URI = URI.create("https://example.org/test");
     private static final URI CONTAINER_URI = URI.create("https://example.org/test/");
     private static final String AGENT1 = "https://example.org/alice#me";
@@ -56,7 +55,7 @@ class AccessDatasetAcpTest {
 
     @BeforeEach
     void setup() throws IOException {
-        testModel = TestUtils.loadTurtleFromFile("src/test/resources/utils/acp.ttl");
+        testModel = TestUtils.loadTurtleFromFile("src/test/resources/utils/acplegacy.ttl");
     }
 
     @Test
@@ -72,7 +71,7 @@ class AccessDatasetAcpTest {
                 null, List.of("write"), null));
         accessRules.add(new AccessRule(RESOURCE_URI, false, AccessRule.AgentType.AUTHENTICATED_USER,
                 null, List.of("append"), null));
-        final AccessDataset accessDataset = new AccessDatasetAcp(accessRules, ACL_URI.toString());
+        final AccessDataset accessDataset = new AccessDatasetAcpLegacy(accessRules, ACL_URI.toString());
         assertTrue(Models.isomorphic(accessDataset.getModel(), testModel));
     }
 
@@ -81,11 +80,11 @@ class AccessDatasetAcpTest {
         final List<AccessRule> accessRules = new ArrayList<>();
         accessRules.add(new AccessRule(RESOURCE_URI, false, AccessRule.AgentType.AGENT,
                 AGENT1, List.of("controlRead", "control"), null));
-        assertThrows(RuntimeException.class, () -> new AccessDatasetAcp(accessRules, ACL_URI.toString()));
+        assertThrows(RuntimeException.class, () -> new AccessDatasetAcpLegacy(accessRules, ACL_URI.toString()));
         final List<AccessRule> accessRules2 = new ArrayList<>();
         accessRules2.add(new AccessRule(RESOURCE_URI, false, AccessRule.AgentType.AGENT,
                 AGENT1, List.of("controlWrite", "control"), null));
-        assertThrows(RuntimeException.class, () -> new AccessDatasetAcp(accessRules2, ACL_URI.toString()));
+        assertThrows(RuntimeException.class, () -> new AccessDatasetAcpLegacy(accessRules2, ACL_URI.toString()));
     }
 
     @Test
@@ -93,8 +92,8 @@ class AccessDatasetAcpTest {
         final List<AccessRule> accessRules = new ArrayList<>();
         accessRules.add(new AccessRule(RESOURCE_URI, false, AccessRule.AgentType.AGENT,
                 AGENT1, List.of("controlRead"), null));
-        final AccessDataset accessDataset = new AccessDatasetAcp(accessRules, ACL_URI.toString());
-        assertTrue(accessDataset.getModel().contains(null, ACP.allow, ACL.Read));
+        final AccessDataset accessDataset = new AccessDatasetAcpLegacy(accessRules, ACL_URI.toString());
+        assertTrue(accessDataset.getModel().contains(null, ACP.allow, ACP.Read));
         assertTrue(accessDataset.getModel().contains(null, ACP.access, null));
     }
 
@@ -103,8 +102,8 @@ class AccessDatasetAcpTest {
         final List<AccessRule> accessRules = new ArrayList<>();
         accessRules.add(new AccessRule(RESOURCE_URI, false, AccessRule.AgentType.AGENT,
                 AGENT1, List.of("controlWrite"), null));
-        final AccessDataset accessDataset = new AccessDatasetAcp(accessRules, ACL_URI.toString());
-        assertTrue(accessDataset.getModel().contains(null, ACP.allow, ACL.Write));
+        final AccessDataset accessDataset = new AccessDatasetAcpLegacy(accessRules, ACL_URI.toString());
+        assertTrue(accessDataset.getModel().contains(null, ACP.allow, ACP.Write));
         assertTrue(accessDataset.getModel().contains(null, ACP.access, null));
     }
 
@@ -113,13 +112,13 @@ class AccessDatasetAcpTest {
         final List<AccessRule> accessRules = new ArrayList<>();
         accessRules.add(new AccessRule(RESOURCE_URI, false, AccessRule.AgentType.AGENT,
                 AGENT1, List.of("https://example.org/specialMode"), null));
-        final AccessDataset accessDataset = new AccessDatasetAcp(accessRules, ACL_URI.toString());
+        final AccessDataset accessDataset = new AccessDatasetAcpLegacy(accessRules, ACL_URI.toString());
         assertTrue(accessDataset.getModel().contains(null, ACP.allow, iri("https://example.org/specialMode")));
     }
 
     @Test
     void constructFromDoc() throws IOException {
-        final AccessDataset accessDataset = new AccessDatasetAcp(
+        final AccessDataset accessDataset = new AccessDatasetAcpLegacy(
                 TestUtils.loadStringFromFile("src/test/resources/utils/vcard.ttl"),
                 ACL_URI
         );
@@ -131,7 +130,7 @@ class AccessDatasetAcpTest {
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "");
         when(mockClient.patch(any(), any(), any())).thenReturn(mockStringResponse);
-        final AccessDataset accessDataset = new AccessDatasetAcp(
+        final AccessDataset accessDataset = new AccessDatasetAcpLegacy(
                 TestUtils.loadStringFromFile("src/test/resources/utils/vcard.ttl"), ACL_URI
         );
         assertTrue(accessDataset.apply(mockClient, RESOURCE_URI));
@@ -142,7 +141,7 @@ class AccessDatasetAcpTest {
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(403, "");
         when(mockClient.patch(any(), any(), any())).thenReturn(mockStringResponse);
-        final AccessDataset accessDataset = new AccessDatasetAcp(
+        final AccessDataset accessDataset = new AccessDatasetAcpLegacy(
                 TestUtils.loadStringFromFile("src/test/resources/utils/vcard.ttl"), ACL_URI
         );
         assertFalse(accessDataset.apply(mockClient, RESOURCE_URI));
@@ -151,19 +150,19 @@ class AccessDatasetAcpTest {
     @Test
     void applyNull() throws IOException, InterruptedException {
         final Client mockClient = mock(Client.class);
-        final AccessDataset accessDataset = new AccessDatasetAcp(Collections.emptyList(), ACL_URI.toString());
+        final AccessDataset accessDataset = new AccessDatasetAcpLegacy(Collections.emptyList(), ACL_URI.toString());
         assertTrue(accessDataset.apply(mockClient, RESOURCE_URI));
     }
 
     @Test
     void getMode() {
-        final AccessDataset accessDataset = new AccessDatasetAcp(Collections.emptyList(), ACL_URI.toString());
-        assertEquals("ACP", accessDataset.getMode());
+        final AccessDataset accessDataset = new AccessDatasetAcpLegacy(Collections.emptyList(), ACL_URI.toString());
+        assertEquals("ACP_LEGACY", accessDataset.getMode());
     }
 
     @Test
     void getSetModel() {
-        final AccessDataset accessDataset = new AccessDatasetAcp(Collections.emptyList(), ACL_URI.toString());
+        final AccessDataset accessDataset = new AccessDatasetAcpLegacy(Collections.emptyList(), ACL_URI.toString());
         assertNull(accessDataset.getModel());
         accessDataset.setModel(new LinkedHashModel());
         assertNotNull(accessDataset.getModel());

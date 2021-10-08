@@ -24,8 +24,10 @@
 package org.solid.testharness.accesscontrol;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.config.Config;
+import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.http.SolidClient;
 
 import javax.inject.Inject;
@@ -54,6 +56,13 @@ class AccessControlFactoryTest {
         config.setAccessControlMode(SolidClient.ACP_MODE);
         final AccessDatasetBuilder accessDatasetBuilder = accessControlFactory.getAccessDatasetBuilder(BASE);
         assertEquals(SolidClient.ACP_MODE, accessDatasetBuilder.build().getMode());
+    }
+
+    @Test
+    void getAccessDatasetBuilderAcpLegacy() {
+        config.setAccessControlMode(SolidClient.ACP_LEGACY_MODE);
+        final AccessDatasetBuilder accessDatasetBuilder = accessControlFactory.getAccessDatasetBuilder(BASE);
+        assertEquals(SolidClient.ACP_LEGACY_MODE, accessDatasetBuilder.build().getMode());
     }
 
     @Test

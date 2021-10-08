@@ -27,7 +27,6 @@ import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
-import org.solid.common.vocab.ACL;
 import org.solid.common.vocab.ACP;
 import org.solid.common.vocab.RDF;
 import org.solid.common.vocab.VCARD;
@@ -48,31 +47,27 @@ import java.util.stream.Collectors;
 import static org.eclipse.rdf4j.model.util.Values.bnode;
 import static org.eclipse.rdf4j.model.util.Values.iri;
 
-public class AccessDatasetAcp implements AccessDataset {
+public class AccessDatasetAcpLegacy implements AccessDataset {
     static final Map<String, IRI> standardModes = Map.of(
-            READ, ACL.Read,
-            WRITE, ACL.Write,
-            APPEND, ACL.Append
+            READ, ACP.Read,
+            WRITE, ACP.Write,
+            APPEND, ACP.Append
     );
     static final Set<String> controlModes = Set.of(CONTROL, CONTROL_READ, CONTROL_WRITE);
     static final String PREFIX = "acr";
 
     Model model;
 
-    public AccessDatasetAcp(final List<AccessRule> accessRules, final String aclUri) {
+    public AccessDatasetAcpLegacy(final List<AccessRule> accessRules, final String aclUri) {
         final String namespace = aclUri + "#";
-        final IRI accessControlResource = iri(aclUri);
         if (!accessRules.isEmpty()) {
             final ModelBuilder builder = new ModelBuilder();
             // add document namespace and any others needed
             builder.setNamespace(PREFIX, namespace);
             builder.setNamespace(ACP.PREFIX, ACP.NAMESPACE);
-            builder.setNamespace(ACL.PREFIX, ACL.NAMESPACE);
             if (accessRules.stream().anyMatch(rule -> rule.getType() == AccessRule.AgentType.GROUP)) {
                 builder.setNamespace(VCARD.PREFIX, VCARD.NAMESPACE);
             }
-            builder.subject(accessControlResource).add(RDF.type, ACP.AccessControlResource);
-
             final AtomicInteger i = new AtomicInteger();
             accessRules.forEach(rule -> {
                 i.addAndGet(1);
@@ -80,16 +75,13 @@ public class AccessDatasetAcp implements AccessDataset {
                         .filter(mode -> !controlModes.contains(mode))
                         .collect(Collectors.toList());
                 final List<String> controlAccessModes = extractControlModes(rule);
-                final IRI accessControlNode = iri(namespace, "accessControl" + i);
                 final IRI policyNode = iri(namespace, "policy" + i);
                 final IRI ruleNode = iri(namespace, "rule" + i);
-                builder.add(accessControlResource, ACP.accessControl, accessControlNode)
-                        .subject(accessControlNode)
-                        .add(RDF.type, ACP.AccessControl)
+                builder.subject(iri(aclUri))
                         .add(rule.isInheritable() ? ACP.applyMembers : ACP.apply, policyNode)
                         .add(policyNode, RDF.type, ACP.Policy)
                         .add(policyNode, ACP.allOf, ruleNode)
-                        .add(ruleNode, RDF.type, ACP.Matcher);
+                        .add(ruleNode, RDF.type, ACP.Rule);
                 if (!accessModes.isEmpty()) {
                     accessModes.stream()
                             .map(mode -> standardModes.containsKey(mode) ? standardModes.get(mode) : iri(mode))
@@ -98,7 +90,7 @@ public class AccessDatasetAcp implements AccessDataset {
                 }
                 if (!controlAccessModes.isEmpty()) {
                     final IRI accessPolicyNode = iri(namespace, "accessPolicy" + i);
-                    builder.add(accessControlNode, rule.isInheritable() ? ACP.accessMembers : ACP.access, accessPolicyNode)
+                    builder.add(iri(aclUri), rule.isInheritable() ? ACP.accessMembers : ACP.access, accessPolicyNode)
                             .add(accessPolicyNode, RDF.type, ACP.Policy)
                             .add(accessPolicyNode, ACP.allOf, ruleNode);
                     controlAccessModes.stream()
@@ -152,7 +144,7 @@ public class AccessDatasetAcp implements AccessDataset {
         return controlModes;
     }
 
-    public AccessDatasetAcp(final String acl, final URI baseUri) throws IOException {
+    public AccessDatasetAcpLegacy(final String acl, final URI baseUri) throws IOException {
         parseTurtle(acl, baseUri.toString());
     }
 
@@ -166,7 +158,7 @@ public class AccessDatasetAcp implements AccessDataset {
 
     @Override
     public String getMode() {
-        return "ACP";
+        return "ACP_LEGACY";
     }
 
     @Override

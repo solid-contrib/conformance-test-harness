@@ -80,7 +80,7 @@ public class SolidResource {
             }
         }
         this.url = resourceUri;
-        logger.debug("SolidResource: {}", resourceUri);
+        logger.debug("SolidResource proxy for: {}", resourceUri);
     }
 
     public static SolidResource create(final SolidClient solidClient, final String url, final String body,
@@ -141,10 +141,6 @@ public class SolidResource {
 
     public AccessDataset getAccessDataset() throws Exception {
         return getAclUrl() != null ? solidClient.getAcl(aclUrl) : null;
-    }
-
-    public String getAccessControlMode() throws Exception {
-        return getAclUrl() != null ? solidClient.getAclType(aclUrl) : null;
     }
 
     public boolean setAccessDataset(final AccessDataset accessDataset) throws Exception {

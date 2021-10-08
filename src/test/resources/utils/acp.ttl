@@ -1,53 +1,73 @@
 @prefix acp: <http://www.w3.org/ns/solid/acp#> .
 @prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
 @prefix acr: <https://example.org/test.acl#> .
+@prefix acl: <http://www.w3.org/ns/auth/acl#> .
 
 acr:policy1 a acp:Policy;
     acp:allOf acr:rule1 ;
-    acp:allow acp:Read, acp:Write .
+    acp:allow acl:Read, acl:Write .
 
 acr:accessPolicy1 a acp:Policy;
     acp:allOf acr:rule1 ;
-    acp:allow acp:Read, acp:Write .
+    acp:allow acl:Read, acl:Write .
 
 acr:policy2 a acp:Policy;
     acp:allOf acr:rule2 ;
-    acp:allow acp:Read, acp:Write .
+    acp:allow acl:Read, acl:Write .
 
 acr:accessPolicy2 a acp:Policy;
     acp:allOf acr:rule2 ;
-    acp:allow acp:Read, acp:Write .
+    acp:allow acl:Read, acl:Write .
 
 acr:policy3 a acp:Policy;
     acp:allOf acr:rule3 ;
-    acp:allow acp:Read .
+    acp:allow acl:Read .
 
 acr:policy4 a acp:Policy;
     acp:allOf acr:rule4 ;
-    acp:allow acp:Write .
+    acp:allow acl:Write .
 
 acr:policy5 a acp:Policy;
     acp:allOf acr:rule5 ;
-    acp:allow acp:Append .
+    acp:allow acl:Append .
 
-acr:rule1 a acp:Rule;
+acr:rule1 a acp:Matcher;
     acp:agent <https://example.org/alice#me> .
-acr:rule2 a acp:Rule;
+acr:rule2 a acp:Matcher;
     acp:agent <https://example.org/alice#me> .
 
-acr:rule3 a acp:Rule;
+acr:rule3 a acp:Matcher;
         acp:group [
             a vcard:Group;
             vcard:hasMember <https://example.org/alice#me>, <https://example.org/bob#me>
           ] .
-acr:rule4 a acp:Rule;
+acr:rule4 a acp:Matcher;
     acp:agent acp:PublicAgent .
-acr:rule5 a acp:Rule;
+acr:rule5 a acp:Matcher;
     acp:agent acp:AuthenticatedAgent .
 
-<https://example.org/test.acl>
-    acp:apply acr:policy1, acr:policy3, acr:policy4, acr:policy5;
-    acp:access acr:accessPolicy1;
+acr:accessControl1 a acp:AccessControl ;
+    acp:apply acr:policy1;
+    acp:access acr:accessPolicy1
+.
+
+acr:accessControl2 a acp:AccessControl ;
     acp:applyMembers acr:policy2;
     acp:accessMembers acr:accessPolicy2
+.
+
+acr:accessControl3 a acp:AccessControl ;
+    acp:apply acr:policy3
+.
+
+acr:accessControl4 a acp:AccessControl ;
+    acp:apply acr:policy4
+.
+
+acr:accessControl5 a acp:AccessControl ;
+    acp:apply acr:policy5
+.
+
+<https://example.org/test.acl> a acp:AccessControlResource ;
+    acp:accessControl acr:accessControl1, acr:accessControl2, acr:accessControl3, acr:accessControl4, acr:accessControl5
 .

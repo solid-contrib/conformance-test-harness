@@ -38,13 +38,16 @@ import org.solid.testharness.accesscontrol.AccessControlFactory;
 import org.solid.testharness.accesscontrol.AccessDataset;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClient;
-import org.solid.testharness.utils.*;
+import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.SolidContainer;
+import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.List;
 import java.util.Set;
 
@@ -128,7 +131,13 @@ public class TestSubject {
         // Determine the ACL mode the server has implemented
         final SolidContainer rootTestContainer = new SolidContainer(solidClient, config.getTestContainer());
         try {
-            config.setAccessControlMode(rootTestContainer.getAccessControlMode());
+            final String aclUrl = rootTestContainer.getAclUrl();
+            // TODO - if not found
+            String accessControlMode = solidClient.getAclType(URI.create(aclUrl));
+            if (SolidClient.ACP_MODE.equals(accessControlMode) && !targetServer.getFeatures().containsKey("acp1.2")) {
+                accessControlMode = SolidClient.ACP_LEGACY_MODE;
+            }
+            config.setAccessControlMode(accessControlMode);
         } catch (Exception e) {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException(
                     "Failed to determine access control mode: %s", e.toString()

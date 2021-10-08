@@ -225,6 +225,7 @@ public class ConformanceTestHarness {
             registerUsers();
         }
         registerClients(features.getOrDefault("authentication", false));
+        logger.info("===================== PREPARE SERVER ========================");
         testSubject.prepareServer();
     }
 

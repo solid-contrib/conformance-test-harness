@@ -31,8 +31,8 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.testharness.accesscontrol.AccessControlFactory;
 import org.solid.testharness.accesscontrol.AccessDataset;
-import org.solid.testharness.accesscontrol.AccessDatasetWac;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.inject.spi.CDI;
@@ -56,14 +56,17 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 
 public class SolidClient {
     private static final Logger logger = LoggerFactory.getLogger(SolidClient.class);
+    public static final String ACP_LEGACY_MODE = "ACP_LEGACY";
     public static final String ACP_MODE = "ACP";
     public static final String WAC_MODE = "WAC";
 
     private Client client;
+    private AccessControlFactory accessControlFactory;
 
     public SolidClient() {
         final ClientRegistry clientRegistry = CDI.current().select(ClientRegistry.class).get();
         client = clientRegistry.getClient(ClientRegistry.DEFAULT);
+        accessControlFactory = CDI.current().select(AccessControlFactory.class).get();
     }
     public SolidClient(final String user) {
         final ClientRegistry clientRegistry = CDI.current().select(ClientRegistry.class).get();
@@ -71,6 +74,7 @@ public class SolidClient {
         if (client == null) {
             throw new TestHarnessInitializationException("Client '%s' has not been registered yet", user);
         }
+        accessControlFactory = CDI.current().select(AccessControlFactory.class).get();
     }
     public SolidClient(final Client client) {
         this.client = client;
@@ -90,6 +94,7 @@ public class SolidClient {
 
     public HttpHeaders createResource(final URI url, final String data, final String type) throws Exception {
         final HttpResponse<Void> response = client.put(url, data, type);
+        HttpUtils.logResponse(logger, response);
         if (!HttpUtils.isSuccessful(response.statusCode())) {
             throw new Exception("Failed to create resource - status=" + response.statusCode());
         }
@@ -137,12 +142,11 @@ public class SolidClient {
     }
 
     public AccessDataset getAcl(final URI url) throws IOException, InterruptedException {
-        logger.debug("ACL: for {}", url);
         final HttpResponse<String> response = client.getAsTurtle(url);
         if (!HttpUtils.isSuccessful(response.statusCode())) {
             return null;
         }
-        return new AccessDatasetWac(response.body(), url);
+        return accessControlFactory.createAccessDataset(response.body(), url);
     }
 
     public String getContentAsTurtle(final URI url) throws Exception {

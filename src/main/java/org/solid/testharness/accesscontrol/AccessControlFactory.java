@@ -28,6 +28,8 @@ import org.solid.testharness.http.SolidClient;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.io.IOException;
+import java.net.URI;
 
 @ApplicationScoped
 public class AccessControlFactory {
@@ -39,6 +41,20 @@ public class AccessControlFactory {
             return new AccessDatasetWacBuilder().setBaseUri(uri);
         } else if (SolidClient.ACP_MODE.equals(config.getAccessControlMode())) {
             return new AccessDatasetAcpBuilder().setBaseUri(uri);
+        } else if (SolidClient.ACP_LEGACY_MODE.equals(config.getAccessControlMode())) {
+            return new AccessDatasetAcpLegacyBuilder().setBaseUri(uri);
+        } else {
+            return null;
+        }
+    }
+
+    public AccessDataset createAccessDataset(final String acl, final URI baseUri) throws IOException {
+        if (SolidClient.WAC_MODE.equals(config.getAccessControlMode())) {
+            return new AccessDatasetWac(acl, baseUri);
+        } else if (SolidClient.ACP_MODE.equals(config.getAccessControlMode())) {
+            return new AccessDatasetAcp(acl, baseUri);
+        } else if (SolidClient.ACP_LEGACY_MODE.equals(config.getAccessControlMode())) {
+            return new AccessDatasetAcpLegacy(acl, baseUri);
         } else {
             return null;
         }
