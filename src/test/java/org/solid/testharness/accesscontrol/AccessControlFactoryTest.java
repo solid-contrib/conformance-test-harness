@@ -29,6 +29,9 @@ import org.solid.testharness.config.Config;
 
 import javax.inject.Inject;
 
+import java.io.IOException;
+import java.net.URI;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.solid.testharness.config.Config.AccessControlMode.*;
@@ -36,6 +39,7 @@ import static org.solid.testharness.config.Config.AccessControlMode.*;
 @QuarkusTest
 class AccessControlFactoryTest {
     private static final String BASE = "https://example.org";
+    private static final URI BASE_URI = URI.create(BASE);
 
     @Inject
     Config config;
@@ -68,5 +72,32 @@ class AccessControlFactoryTest {
     void getAccessDatasetBuilderNull() {
         config.setAccessControlMode(null);
         assertNull(accessControlFactory.getAccessDatasetBuilder(BASE));
+    }
+
+    @Test
+    void createAccessDatasetWac() throws IOException {
+        config.setAccessControlMode(WAC);
+        final AccessDataset accessDataset = accessControlFactory.createAccessDataset("", BASE_URI);
+        assertEquals(WAC, accessDataset.getMode());
+    }
+
+    @Test
+    void createAccessDatasetAcp() throws IOException {
+        config.setAccessControlMode(ACP);
+        final AccessDataset accessDataset = accessControlFactory.createAccessDataset("", BASE_URI);
+        assertEquals(ACP, accessDataset.getMode());
+    }
+
+    @Test
+    void createAccessDatasetAcpLegacy() throws IOException {
+        config.setAccessControlMode(ACP_LEGACY);
+        final AccessDataset accessDataset = accessControlFactory.createAccessDataset("", BASE_URI);
+        assertEquals(ACP_LEGACY, accessDataset.getMode());
+    }
+
+    @Test
+    void createAccessDatasetNull() throws IOException {
+        config.setAccessControlMode(null);
+        assertNull(accessControlFactory.createAccessDataset("", BASE_URI));
     }
 }
