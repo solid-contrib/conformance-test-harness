@@ -109,7 +109,7 @@ public final class HttpUtils {
 
     private static String formatRequestLog(final HttpRequest request, final String body) {
         final StringBuilder sb = new StringBuilder();
-        sb.append(REQUEST_PREFIX).append(request.method()).append(" ").append(request.uri()).append("\n");
+        sb.append(REQUEST_PREFIX).append(request.method()).append(' ').append(request.uri()).append('\n');
         logHeaders(sb, request.headers().map(), true);
         if (body != null) {
             sb.append(maskBody(body));
@@ -142,7 +142,7 @@ public final class HttpUtils {
 
     private static <T> String formatResponseLog(HttpResponse<T> response) {
         final StringBuilder sb = new StringBuilder();
-        sb.append(RESPONSE_PREFIX).append(response.statusCode()).append("\n");
+        sb.append(RESPONSE_PREFIX).append(response.statusCode()).append('\n');
         logHeaders(sb, response.headers().map(), false);
         final T body = response.body();
         if (body != null) {
@@ -151,10 +151,11 @@ public final class HttpUtils {
         return sb.toString();
     }
 
-    private static void logHeaders(final StringBuilder sb, final Map<String, List<String>> headerMap, final boolean outgoing) {
+    private static void logHeaders(final StringBuilder sb, final Map<String, List<String>> headerMap,
+                                   final boolean outgoing) {
         headerMap.forEach((key, values)
                 -> values.forEach(value -> sb.append(outgoing ? REQUEST_PREFIX : RESPONSE_PREFIX)
-                        .append(key).append(": ").append(maskHeader(key, value)).append("\n"))
+                        .append(key).append(": ").append(maskHeader(key, value)).append('\n'))
         );
     }
 
