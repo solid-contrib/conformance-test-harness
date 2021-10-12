@@ -8,4 +8,3 @@ Feature: Create with immediate read
     And headers clients.alice.getAuthHeaders('GET', testResource.getUrl())
     When method GET
     Then status 200
-    * print response
