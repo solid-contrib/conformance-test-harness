@@ -71,7 +71,6 @@ public class AccessDatasetAcp implements AccessDataset {
             if (accessRules.stream().anyMatch(rule -> rule.getType() == AccessRule.AgentType.GROUP)) {
                 builder.setNamespace(VCARD.PREFIX, VCARD.NAMESPACE);
             }
-            builder.subject(accessControlResource).add(RDF.type, ACP.AccessControlResource);
 
             final AtomicInteger i = new AtomicInteger();
             accessRules.forEach(rule -> {
