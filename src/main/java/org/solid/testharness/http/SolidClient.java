@@ -76,6 +76,7 @@ public class SolidClient {
     }
     public SolidClient(final Client client) {
         this.client = client;
+        accessControlFactory = CDI.current().select(AccessControlFactory.class).get();
     }
 
     public static SolidClient create(final String user) {
@@ -141,6 +142,7 @@ public class SolidClient {
         if (!HttpUtils.isSuccessful(response.statusCode())) {
             return null;
         }
+        System.out.println(1);
         return accessControlFactory.createAccessDataset(response.body(), url);
     }
 
