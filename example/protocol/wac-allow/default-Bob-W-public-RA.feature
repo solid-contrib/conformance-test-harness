@@ -11,7 +11,6 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
                 .setInheritableAgentAccess(testContainer.getUrl(), webIds.bob, ['write'])
                 .setInheritablePublicAccess(testContainer.getUrl(), ['read', 'append'])
                 .build();
-          karate.log('ACL:\n' + access.asTurtle());
           resource.getContainer().setAccessDataset(access)
         }
         return resource;

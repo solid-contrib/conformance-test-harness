@@ -8,7 +8,6 @@ Feature: Bob can only read an RDF resource to which he is only granted default r
         const access = testContainer.getAccessDatasetBuilder(webIds.alice)
               .setInheritableAgentAccess(testContainer.getUrl(), webIds.bob, ['read'])
               .build();
-        karate.log('ACL:\n' + access.asTurtle());
         testContainer.setAccessDataset(access);
         return testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
       }

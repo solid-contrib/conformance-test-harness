@@ -10,7 +10,6 @@ Feature: The WAC-Allow header shows user and public access modes with public rea
           const access = resource.getAccessDatasetBuilder(webIds.alice)
                 .setPublicAccess(resource.getUrl(), ['read'])
                 .build();
-          karate.log('ACL:\n' + access.asTurtle());
           resource.setAccessDataset(access);
         }
         return resource;

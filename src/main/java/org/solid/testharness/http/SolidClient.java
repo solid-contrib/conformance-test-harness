@@ -94,7 +94,6 @@ public class SolidClient {
 
     public HttpHeaders createResource(final URI url, final String data, final String type) throws Exception {
         final HttpResponse<Void> response = client.put(url, data, type);
-        HttpUtils.logResponse(logger, response);
         if (!HttpUtils.isSuccessful(response.statusCode())) {
             throw new Exception("Failed to create resource - status=" + response.statusCode());
         }
@@ -106,9 +105,7 @@ public class SolidClient {
                 .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_TEXT_TURTLE)
                 .header(HttpConstants.HEADER_LINK, HttpConstants.CONTAINER_LINK)
                 .PUT(HttpRequest.BodyPublishers.noBody());
-        final HttpResponse<String> response = client.sendAuthorized(builder, HttpResponse.BodyHandlers.ofString());
-        HttpUtils.logResponse(logger, response);
-        return response;
+        return client.sendAuthorized(builder, HttpResponse.BodyHandlers.ofString());
     }
 
     public URI getAclUri(final URI uri) throws IOException, InterruptedException {

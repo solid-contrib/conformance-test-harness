@@ -8,7 +8,6 @@ Feature: Bob can only read child containers/resources of a container to which he
         const access = testContainer.getAccessDatasetBuilder(webIds.alice)
                 .setInheritableAgentAccess(testContainer.getUrl(), webIds.bob, ['read'])
                 .build();
-        karate.log('ACL:\n' + access.asTurtle());
         if (testContainer.setAccessDataset(access)) {
           const intermediateContainer = testContainer.generateChildContainer();
           const resource = intermediateContainer.createChildResource('.txt', 'hello', 'text/plain')

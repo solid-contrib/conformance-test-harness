@@ -141,7 +141,10 @@ public class Client {
         requireNonNull(requestBuilder, "requestBuilder is required");
         requireNonNull(responseBodyHandler, "responseBodyHandler is required");
         final HttpRequest request = authorize(requestBuilder).build();
-        return httpClient.send(request, responseBodyHandler);
+        HttpUtils.logRequestToKarate(logger, request, null);
+        final HttpResponse<T> response = httpClient.send(request, responseBodyHandler);
+        HttpUtils.logResponseToKarate(logger, response);
+        return response;
     }
 
     @SuppressWarnings("checkstyle:MultipleStringLiterals")
@@ -162,9 +165,9 @@ public class Client {
                 .PUT(HttpRequest.BodyPublishers.ofString(data))
                 .header(HttpConstants.HEADER_CONTENT_TYPE, type);
         final HttpRequest request = authorize(builder).build();
-        HttpUtils.logRequest(logger, request);
+        HttpUtils.logRequestToKarate(logger, request, data);
         final HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
-        HttpUtils.logResponse(logger, response);
+        HttpUtils.logResponseToKarate(logger, response);
         return response;
     }
 
@@ -177,9 +180,9 @@ public class Client {
                 .method(HttpConstants.METHOD_PATCH, HttpRequest.BodyPublishers.ofString(data))
                 .header(HttpConstants.HEADER_CONTENT_TYPE, type);
         final HttpRequest request = authorize(builder).build();
-        HttpUtils.logRequest(logger, request);
+        HttpUtils.logRequestToKarate(logger, request, data);
         final HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        HttpUtils.logResponse(logger, response);
+        HttpUtils.logResponseToKarate(logger, response);
         return response;
     }
 
@@ -188,9 +191,9 @@ public class Client {
         final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
                 .method(HttpConstants.METHOD_HEAD, HttpRequest.BodyPublishers.noBody());
         final HttpRequest request = authorize(builder).build();
-        HttpUtils.logRequest(logger, request);
+        HttpUtils.logRequestToKarate(logger, request, null);
         final HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
-        HttpUtils.logResponse(logger, response);
+        HttpUtils.logResponseToKarate(logger, response);
         return response;
     }
 

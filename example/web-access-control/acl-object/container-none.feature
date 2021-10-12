@@ -6,7 +6,6 @@ Feature: Bob cannot read a container or children if he is not given any access
       function() {
         const testContainer = createTestContainerImmediate();
         const access = testContainer.getAccessDatasetBuilder(webIds.alice).build();
-        karate.log('ACL:\n' + access.asTurtle());
         if (testContainer.setAccessDataset(access)) {
           const intermediateContainer = testContainer.generateChildContainer();
           const resource = intermediateContainer.createChildResource('.txt', 'hello', 'text/plain')

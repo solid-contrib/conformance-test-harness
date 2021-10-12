@@ -9,7 +9,6 @@ Feature: Bob can read a container and its children if he is granted both direct 
                 .setAgentAccess(testContainer.getUrl(), webIds.bob, ['read'])
                 .setInheritableAgentAccess(testContainer.getUrl(), webIds.bob, ['read'])
                 .build();
-        karate.log('ACL:\n' + access.asTurtle());
         if (testContainer.setAccessDataset(access)) {
           const intermediateContainer = testContainer.generateChildContainer();
           const resource = intermediateContainer.createChildResource('.txt', 'hello', 'text/plain')

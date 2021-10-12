@@ -9,7 +9,6 @@ Feature: Bob cannot read an RDF resource to which he is not granted default read
           .setAgentAccess(testContainer.getUrl(), webIds.bob, ['write'])
           .setInheritableAgentAccess(testContainer.getUrl(), webIds.bob, ['append', 'write', 'control'])
           .build();
-        karate.log('ACL:\n' + access.asTurtle());
         testContainer.setAccessDataset(access);
         return testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
       }
