@@ -108,7 +108,7 @@ class HttpUtilsTest {
                 .build();
         HttpUtils.logRequest(logger, request);
         verify(logger).isDebugEnabled();
-        verify(logger, times(2)).debug(anyString(), anyString(), any());
+        verify(logger, times(1)).debug(anyString(), anyString());
         verifyNoMoreInteractions(logger);
     }
 
@@ -134,9 +134,7 @@ class HttpUtilsTest {
         when(response.body()).thenReturn("BODY");
         HttpUtils.logResponse(logger, response);
         verify(logger).isDebugEnabled();
-        verify(logger, times(2)).debug(anyString(), anyString(), any());
-        verify(logger, times(1)).debug(anyString(), eq(400));
-        verify(logger, times(1)).debug(anyString(), eq("BODY"));
+        verify(logger, times(1)).debug(anyString(), anyString());
         verifyNoMoreInteractions(logger);
     }
 
@@ -153,8 +151,7 @@ class HttpUtilsTest {
         when(response.body()).thenReturn(null);
         HttpUtils.logResponse(logger, response);
         verify(logger).isDebugEnabled();
-        verify(logger, times(2)).debug(anyString(), anyString(), any());
-        verify(logger, times(1)).debug(anyString(), eq(400));
+        verify(logger, times(1)).debug(anyString(), anyString());
         verifyNoMoreInteractions(logger);
     }
 

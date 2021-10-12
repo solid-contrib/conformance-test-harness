@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.solid.common.vocab.RDF;
 import org.solid.common.vocab.VCARD;
+import org.solid.testharness.config.Config;
 import org.solid.testharness.http.Client;
 import org.solid.testharness.utils.TestUtils;
 
@@ -39,6 +40,7 @@ import java.net.URI;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.solid.testharness.config.Config.AccessControlMode.WAC;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AccessDatasetTest {
@@ -52,7 +54,7 @@ class AccessDatasetTest {
     @Test
     void getMode() {
         final AccessDataset accessDataset = new TestAccessDataset();
-        assertEquals("TEST", accessDataset.getMode());
+        assertEquals(WAC, accessDataset.getMode());
     }
 
     @Test
@@ -142,8 +144,8 @@ class AccessDatasetTest {
         Model model;
 
         @Override
-        public String getMode() {
-            return "TEST";
+        public Config.AccessControlMode getMode() {
+            return Config.AccessControlMode.WAC;
         }
 
         @Override

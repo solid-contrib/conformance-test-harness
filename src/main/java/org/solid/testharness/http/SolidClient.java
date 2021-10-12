@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.accesscontrol.AccessControlFactory;
 import org.solid.testharness.accesscontrol.AccessDataset;
+import org.solid.testharness.config.Config;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.inject.spi.CDI;
@@ -56,9 +57,6 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 
 public class SolidClient {
     private static final Logger logger = LoggerFactory.getLogger(SolidClient.class);
-    public static final String ACP_LEGACY_MODE = "ACP_LEGACY";
-    public static final String ACP_MODE = "ACP";
-    public static final String WAC_MODE = "WAC";
 
     private Client client;
     private AccessControlFactory accessControlFactory;
@@ -122,14 +120,14 @@ public class SolidClient {
         return aclLink.map(Link::getUri).orElse(null);
     }
 
-    public String getAclType(final URI aclUri) throws IOException, InterruptedException {
+    public Config.AccessControlMode getAclType(final URI aclUri) throws IOException, InterruptedException {
         final HttpResponse<Void> response = client.head(aclUri);
         final List<Link> links = HttpUtils.parseLinkHeaders(response.headers());
         final Optional<Link> acpLink = links.stream()
                 .filter(link -> link.getRels().contains("type") &&
                         "http://www.w3.org/ns/solid/acp#AccessControlResource".equals(link.getUri().toString()))
                 .findFirst();
-        return acpLink.isPresent() ? ACP_MODE : WAC_MODE;
+        return acpLink.isPresent() ? Config.AccessControlMode.ACP : Config.AccessControlMode.WAC;
     }
 
     public boolean createAcl(final URI url, final AccessDataset accessDataset)

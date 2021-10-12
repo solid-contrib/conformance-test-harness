@@ -118,15 +118,8 @@ public final class HttpUtils {
     }
 
     public static <T> void logResponse(final Logger logger, final HttpResponse<T> response) {
-        final StringBuilder sb = new StringBuilder();
         if (logger.isDebugEnabled()) {
-            logger.debug("RESPONSE {} {}", response.request().method(), response.uri());
-            logger.debug("STATUS   {}", response.statusCode());
-            logHeaders(sb, response.headers().map(), false);
-            final T body = response.body();
-            if (body != null) {
-                logger.debug("BODY     {}", maskBody((String)body));
-            }
+            logger.debug("response:\n{}", formatResponseLog(response));
         }
     }
 
@@ -140,7 +133,7 @@ public final class HttpUtils {
         }
     }
 
-    private static <T> String formatResponseLog(HttpResponse<T> response) {
+    private static <T> String formatResponseLog(final HttpResponse<T> response) {
         final StringBuilder sb = new StringBuilder();
         sb.append(RESPONSE_PREFIX).append(response.statusCode()).append('\n');
         logHeaders(sb, response.headers().map(), false);

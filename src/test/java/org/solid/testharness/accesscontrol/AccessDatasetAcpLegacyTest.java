@@ -29,6 +29,7 @@ import org.eclipse.rdf4j.model.util.Models;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.solid.common.vocab.ACP;
+import org.solid.testharness.config.Config;
 import org.solid.testharness.http.Client;
 import org.solid.testharness.utils.TestUtils;
 
@@ -157,7 +158,7 @@ class AccessDatasetAcpLegacyLegacyTest {
     @Test
     void getMode() {
         final AccessDataset accessDataset = new AccessDatasetAcpLegacy(Collections.emptyList(), ACL_URI.toString());
-        assertEquals("ACP_LEGACY", accessDataset.getMode());
+        assertEquals(Config.AccessControlMode.ACP_LEGACY, accessDataset.getMode());
     }
 
     @Test

@@ -31,6 +31,7 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
+import org.solid.testharness.config.Config;
 import org.solid.testharness.http.Client;
 
 import java.io.IOException;
@@ -46,7 +47,7 @@ public interface AccessDataset {
     String CONTROL_READ = "controlRead";
     String CONTROL_WRITE = "controlWrite";
 
-    String getMode();
+    Config.AccessControlMode getMode();
 
     Model getModel();
 

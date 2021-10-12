@@ -68,6 +68,6 @@ acr:accessControl5 a acp:AccessControl ;
     acp:apply acr:policy5
 .
 
-<https://example.org/test.acl> a acp:AccessControlResource ;
+<https://example.org/test.acl>
     acp:accessControl acr:accessControl1, acr:accessControl2, acr:accessControl3, acr:accessControl4, acr:accessControl5
 .

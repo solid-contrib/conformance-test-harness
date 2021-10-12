@@ -51,6 +51,9 @@ import java.net.URI;
 import java.util.List;
 import java.util.Set;
 
+import static org.solid.testharness.config.Config.AccessControlMode.ACP;
+import static org.solid.testharness.config.Config.AccessControlMode.ACP_LEGACY;
+
 @ApplicationScoped
 public class TestSubject {
     private static final Logger logger = LoggerFactory.getLogger(TestSubject.class);
@@ -135,9 +138,9 @@ public class TestSubject {
             if (aclUrl == null) {
                 throw new Exception("Cannot get ACL url for root test container: " + rootTestContainer.getUrl());
             }
-            String accessControlMode = solidClient.getAclType(URI.create(aclUrl));
-            if (SolidClient.ACP_MODE.equals(accessControlMode) && targetServer.getFeatures().containsKey("acp-legacy")) {
-                accessControlMode = SolidClient.ACP_LEGACY_MODE;
+            Config.AccessControlMode accessControlMode = solidClient.getAclType(URI.create(aclUrl));
+            if (accessControlMode == ACP && targetServer.getFeatures().containsKey("acp-legacy")) {
+                accessControlMode = ACP_LEGACY;
             }
             config.setAccessControlMode(accessControlMode);
         } catch (Exception e) {

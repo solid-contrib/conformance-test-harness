@@ -27,7 +27,10 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
-import org.solid.testharness.http.*;
+import org.solid.testharness.http.Client;
+import org.solid.testharness.http.ClientRegistry;
+import org.solid.testharness.http.HttpConstants;
+import org.solid.testharness.http.SolidClient;
 import org.solid.testharness.utils.SolidContainer;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 import org.solid.testharness.utils.TestUtils;
@@ -44,8 +47,10 @@ import java.util.Map;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.solid.testharness.config.Config.AccessControlMode.WAC;
 
 @QuarkusTest
 @TestProfile(ConfigTestNormalProfile.class)
@@ -248,7 +253,7 @@ public class TestSubjectTest {
         when(config.getServerRoot()).thenReturn(URI.create("https://server/"));
         when(config.getReadTimeout()).thenReturn(5000);
         when(config.getAgent()).thenReturn("AGENT");
-        when(config.getAccessControlMode()).thenReturn("WAC");
+        when(config.getAccessControlMode()).thenReturn(WAC);
         final TestCredentials credentials = new TestCredentials();
         credentials.webId = "https://alice.target.example.org/profile/card#me";
         when(config.getCredentials(HttpConstants.ALICE)).thenReturn(credentials);

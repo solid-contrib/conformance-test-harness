@@ -31,6 +31,7 @@ import org.solid.common.vocab.ACL;
 import org.solid.common.vocab.ACP;
 import org.solid.common.vocab.RDF;
 import org.solid.common.vocab.VCARD;
+import org.solid.testharness.config.Config;
 import org.solid.testharness.http.Client;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.HttpUtils;
@@ -97,7 +98,8 @@ public class AccessDatasetAcp implements AccessDataset {
                 }
                 if (!controlAccessModes.isEmpty()) {
                     final IRI accessPolicyNode = iri(namespace, "accessPolicy" + i);
-                    builder.add(accessControlNode, rule.isInheritable() ? ACP.accessMembers : ACP.access, accessPolicyNode)
+                    builder.add(accessControlNode, rule.isInheritable() ? ACP.accessMembers : ACP.access,
+                                    accessPolicyNode)
                             .add(accessPolicyNode, RDF.type, ACP.Policy)
                             .add(accessPolicyNode, ACP.allOf, ruleNode);
                     controlAccessModes.stream()
@@ -164,8 +166,8 @@ public class AccessDatasetAcp implements AccessDataset {
     }
 
     @Override
-    public String getMode() {
-        return "ACP";
+    public Config.AccessControlMode getMode() {
+        return Config.AccessControlMode.ACP;
     }
 
     @Override

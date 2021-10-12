@@ -24,15 +24,14 @@
 package org.solid.testharness.accesscontrol;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.config.Config;
-import org.solid.testharness.config.TestSubject;
-import org.solid.testharness.http.SolidClient;
 
 import javax.inject.Inject;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.solid.testharness.config.Config.AccessControlMode.*;
 
 @QuarkusTest
 class AccessControlFactoryTest {
@@ -46,27 +45,28 @@ class AccessControlFactoryTest {
 
     @Test
     void getAccessDatasetBuilderWac() {
-        config.setAccessControlMode(SolidClient.WAC_MODE);
+        config.setAccessControlMode(WAC);
         final AccessDatasetBuilder accessDatasetBuilder = accessControlFactory.getAccessDatasetBuilder(BASE);
-        assertEquals(SolidClient.WAC_MODE, accessDatasetBuilder.build().getMode());
+        assertEquals(WAC, accessDatasetBuilder.build().getMode());
     }
 
     @Test
     void getAccessDatasetBuilderAcp() {
-        config.setAccessControlMode(SolidClient.ACP_MODE);
+        config.setAccessControlMode(ACP);
         final AccessDatasetBuilder accessDatasetBuilder = accessControlFactory.getAccessDatasetBuilder(BASE);
-        assertEquals(SolidClient.ACP_MODE, accessDatasetBuilder.build().getMode());
+        assertEquals(ACP, accessDatasetBuilder.build().getMode());
     }
 
     @Test
     void getAccessDatasetBuilderAcpLegacy() {
-        config.setAccessControlMode(SolidClient.ACP_LEGACY_MODE);
+        config.setAccessControlMode(ACP_LEGACY);
         final AccessDatasetBuilder accessDatasetBuilder = accessControlFactory.getAccessDatasetBuilder(BASE);
-        assertEquals(SolidClient.ACP_LEGACY_MODE, accessDatasetBuilder.build().getMode());
+        assertEquals(ACP_LEGACY, accessDatasetBuilder.build().getMode());
     }
 
     @Test
     void getAccessDatasetBuilderNull() {
+        config.setAccessControlMode(null);
         assertNull(accessControlFactory.getAccessDatasetBuilder(BASE));
     }
 }
