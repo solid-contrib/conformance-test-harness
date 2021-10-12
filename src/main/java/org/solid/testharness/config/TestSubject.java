@@ -132,9 +132,11 @@ public class TestSubject {
         final SolidContainer rootTestContainer = new SolidContainer(solidClient, config.getTestContainer());
         try {
             final String aclUrl = rootTestContainer.getAclUrl();
-            // TODO - if not found
+            if (aclUrl == null) {
+                throw new Exception("Cannot get ACL url for root test container: " + rootTestContainer.getUrl());
+            }
             String accessControlMode = solidClient.getAclType(URI.create(aclUrl));
-            if (SolidClient.ACP_MODE.equals(accessControlMode) && !targetServer.getFeatures().containsKey("acp1.2")) {
+            if (SolidClient.ACP_MODE.equals(accessControlMode) && targetServer.getFeatures().containsKey("acp-legacy")) {
                 accessControlMode = SolidClient.ACP_LEGACY_MODE;
             }
             config.setAccessControlMode(accessControlMode);
@@ -174,6 +176,9 @@ public class TestSubject {
 
             // create a root container for all the test cases in this run
             testRunContainer = rootTestContainer.generateChildContainer().instantiate();
+            if (testRunContainer == null) {
+                throw new Exception("Cannot create test run container");
+            }
             logger.debug("Test run container content: {}", testRunContainer.getContentAsTurtle());
             logger.debug("Test run container access controls: {}", testRunContainer.getAccessDataset());
         } catch (Exception e) {
