@@ -49,8 +49,8 @@ import static java.util.Objects.requireNonNull;
 public class AuthManager {
     private static final Logger logger = LoggerFactory.getLogger(AuthManager.class);
 
-    private static final Pattern LOGIN_FORM_ACTION = Pattern.compile(".*form.*action\\s*=\\s*['\"]([^'\"]*)['\"].*",
-            Pattern.DOTALL);
+    private static final Pattern LOGIN_FORM_ACTION = Pattern.compile(".*<form\\s.*method\\s*=\\s*\"post\".*",
+            Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     @Inject
     Config config;
@@ -60,6 +60,10 @@ public class AuthManager {
 
     @Inject
     ClientRegistry clientRegistry;
+
+    /*
+     * Track https://github.com/solid/solid-spec/issues/138 to see if any standard develops around account management
+     */
 
     public void registerUser(@NotNull final String user) throws Exception {
         logger.info("Registering user {} at {}", user, config.getUserRegistrationEndpoint());
@@ -284,7 +288,7 @@ public class AuthManager {
                 final Matcher m = LOGIN_FORM_ACTION.matcher(response.body());
                 if (m.matches()) {
                     // login occurs during auth flow
-                    redirectUrl = idpLogin(client, config.getSolidIdentityProvider().resolve(m.group(1)),
+                    redirectUrl = idpLogin(client, config.getSolidIdentityProvider().resolve(response.uri()),
                             userConfig, authorizeEndpoint);
                 }
             }

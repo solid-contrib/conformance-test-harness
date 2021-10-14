@@ -150,16 +150,24 @@ public class AuthenticationResource implements QuarkusTestResourceLifecycleManag
                 .withQueryParam(HttpConstants.REDIRECT_URI, equalTo("https://origin/badform"))
                 .withQueryParam(HttpConstants.CLIENT_ID, equalTo("CLIENTID"))
                 .willReturn(WireMock.aResponse()
-                    .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_TEXT_HTML)
-                    .withBody("BADFORM")));
+                    .withHeader(HttpConstants.HEADER_LOCATION, "/idp/badlogin")
+                    .withStatus(302)));
+        wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/idp/badlogin"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_TEXT_HTML)
+                        .withBody("BADFORM")));
 
         // authorization will get immediate response for login with a good form
         wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/authorization"))
                 .withQueryParam(HttpConstants.REDIRECT_URI, equalTo("https://origin/form"))
                 .withQueryParam(HttpConstants.CLIENT_ID, equalTo("CLIENTID"))
                 .willReturn(WireMock.aResponse()
+                        .withHeader(HttpConstants.HEADER_LOCATION, "/idp/login")
+                        .withStatus(302)));
+        wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/idp/login"))
+                .willReturn(WireMock.aResponse()
                         .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_TEXT_HTML)
-                        .withBody("form action=\"/idp/login\"")));
+                        .withBody("<form method=\"post\"")));
 
         // authorization will get bad auth response after bad login
         wireMockServer.stubFor(WireMock.post(WireMock.urlPathEqualTo("/idp/login"))
