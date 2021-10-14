@@ -1,9 +1,12 @@
 # Solid Specification Conformance Test Harness
 
 ## Release 1.0.3
+### Features
+* Move ACP support towards the draft standard (further changes to follow)
 
 ### Minor changes
 * Use client_secret_basic authentication to work with client credentials from the Inrupt Application Catalog.
+* Change authorization form support to work with changes in CSS 2.0.0 (https://github.com/solid/community-server/issues/992)
 
 ## Release 1.0.2
 
