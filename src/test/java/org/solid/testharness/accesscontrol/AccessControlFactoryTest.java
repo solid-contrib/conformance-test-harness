@@ -26,15 +26,20 @@ package org.solid.testharness.accesscontrol;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.config.Config;
-import org.solid.testharness.http.SolidClient;
 
 import javax.inject.Inject;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.io.IOException;
+import java.net.URI;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.solid.testharness.config.Config.AccessControlMode.*;
 
 @QuarkusTest
 class AccessControlFactoryTest {
     private static final String BASE = "https://example.org";
+    private static final URI BASE_URI = URI.create(BASE);
 
     @Inject
     Config config;
@@ -44,20 +49,55 @@ class AccessControlFactoryTest {
 
     @Test
     void getAccessDatasetBuilderWac() {
-        config.setAccessControlMode(SolidClient.WAC_MODE);
+        config.setAccessControlMode(WAC);
         final AccessDatasetBuilder accessDatasetBuilder = accessControlFactory.getAccessDatasetBuilder(BASE);
-        assertEquals(SolidClient.WAC_MODE, accessDatasetBuilder.build().getMode());
+        assertEquals(WAC, accessDatasetBuilder.build().getMode());
     }
 
     @Test
     void getAccessDatasetBuilderAcp() {
-        config.setAccessControlMode(SolidClient.ACP_MODE);
+        config.setAccessControlMode(ACP);
         final AccessDatasetBuilder accessDatasetBuilder = accessControlFactory.getAccessDatasetBuilder(BASE);
-        assertEquals(SolidClient.ACP_MODE, accessDatasetBuilder.build().getMode());
+        assertEquals(ACP, accessDatasetBuilder.build().getMode());
+    }
+
+    @Test
+    void getAccessDatasetBuilderAcpLegacy() {
+        config.setAccessControlMode(ACP_LEGACY);
+        final AccessDatasetBuilder accessDatasetBuilder = accessControlFactory.getAccessDatasetBuilder(BASE);
+        assertEquals(ACP_LEGACY, accessDatasetBuilder.build().getMode());
     }
 
     @Test
     void getAccessDatasetBuilderNull() {
+        config.setAccessControlMode(null);
         assertNull(accessControlFactory.getAccessDatasetBuilder(BASE));
+    }
+
+    @Test
+    void createAccessDatasetWac() throws IOException {
+        config.setAccessControlMode(WAC);
+        final AccessDataset accessDataset = accessControlFactory.createAccessDataset("", BASE_URI);
+        assertEquals(WAC, accessDataset.getMode());
+    }
+
+    @Test
+    void createAccessDatasetAcp() throws IOException {
+        config.setAccessControlMode(ACP);
+        final AccessDataset accessDataset = accessControlFactory.createAccessDataset("", BASE_URI);
+        assertEquals(ACP, accessDataset.getMode());
+    }
+
+    @Test
+    void createAccessDatasetAcpLegacy() throws IOException {
+        config.setAccessControlMode(ACP_LEGACY);
+        final AccessDataset accessDataset = accessControlFactory.createAccessDataset("", BASE_URI);
+        assertEquals(ACP_LEGACY, accessDataset.getMode());
+    }
+
+    @Test
+    void createAccessDatasetNull() throws IOException {
+        config.setAccessControlMode(null);
+        assertNull(accessControlFactory.createAccessDataset("", BASE_URI));
     }
 }

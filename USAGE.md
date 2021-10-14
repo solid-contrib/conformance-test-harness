@@ -397,7 +397,7 @@ Executes tests against a publicly available server, in this case ESS (https://po
     docker run -i --rm \
     -v "$(pwd)"/reports/ess:/reports \
     --env-file=ess.env solidconformancetestbeta/conformance-test-harness \
-    --output=/reports --target=ess
+    --output=/reports --target=https://github.com/solid/conformance-test-harness/ess
     ```
 
 1. Run `./ess.sh`.
@@ -528,7 +528,7 @@ option):
     docker run -i --rm \
     -v "$(pwd)"/reports/css:/reports \
     --env-file=css.env --network=testnet solidconformancetestbeta/conformance-test-harness \
-    --output=/reports --target=css
+    --output=/reports --target=https://github.com/solid/conformance-test-harness/css
     docker stop server
     docker rm server
     docker network rm testnet
@@ -566,7 +566,7 @@ To use the Docker image to run a set of local tests:
         -v "$(pwd)"/config:/app/config \
         -v "$(pwd)"/reports/local:/reports \
         --env-file=ess.env solidconformancetestbeta/conformance-test-harness \
-        --output=/reports --target=ess
+        --output=/reports --target=https://github.com/solid/conformance-test-harness/ess
     ```
 
 # Reports

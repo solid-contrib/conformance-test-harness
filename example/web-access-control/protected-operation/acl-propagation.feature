@@ -16,7 +16,6 @@ Feature: Inheritable ACL controls child resources
           .setAgentAccess(container.getUrl(), webIds.bob, ['read', 'write'])
           .setInheritableAgentAccess(container.getUrl(), webIds.bob, ['read', 'write'])
           .build();
-        karate.log('ACL:\n' + access.asTurtle());
         container.setAccessDataset(access);
       }
     """
@@ -40,20 +39,17 @@ Feature: Inheritable ACL controls child resources
     And headers clients.bob.getAuthHeaders('PUT', resource2.getUrl())
     And header Content-Type = 'text/plain'
     When method PUT
+    # Only 201 because of https://datatracker.ietf.org/doc/html/rfc7231#section-4.3.4
     Then status 201
 
     # Bob can read the new resource
-    * print resource2.getAccessDataset().asTurtle()
     Given url resource2.getUrl()
     And headers clients.bob.getAuthHeaders('GET', resource2.getUrl())
     When method GET
     Then status 200
 
     # Bob can now read the original resource
-    * print resource.getAccessDataset().asTurtle()
     Given url resourceUrl
     And headers clients.bob.getAuthHeaders('GET', resourceUrl)
     When method GET
     Then status 200
-
-

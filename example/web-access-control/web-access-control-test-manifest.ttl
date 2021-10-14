@@ -78,3 +78,35 @@ manifest:protected-operation-acl-propagation
   td:preCondition "authentication", "acl" ;
   spec:testScript
     <https://github.com/solid/conformance-test-harness/example/web-access-control/protected-operation/acl-propagation.feature> .
+
+manifest:debug-create
+  a td:TestCase ;
+  spec:requirementReference <https://solid.github.io/web-access-control-spec/#authorization-evaluation-context> ;
+  td:reviewStatus td:unreviewed ;
+  td:preCondition "authentication", "acl" ;
+  spec:testScript
+    <https://github.com/solid/conformance-test-harness/example/web-access-control/protected-operation/debug-create.feature> .
+
+manifest:debug-direct-acl
+  a td:TestCase ;
+  spec:requirementReference <https://solid.github.io/web-access-control-spec/#authorization-evaluation-context> ;
+  td:reviewStatus td:unreviewed ;
+  td:preCondition "authentication", "acl" ;
+  spec:testScript
+    <https://github.com/solid/conformance-test-harness/example/web-access-control/protected-operation/debug-direct-acl.feature> .
+
+manifest:debug-indirect-acl
+  a td:TestCase ;
+  spec:requirementReference <https://solid.github.io/web-access-control-spec/#authorization-evaluation-context> ;
+  td:reviewStatus td:unreviewed ;
+  td:preCondition "authentication", "acl" ;
+  spec:testScript
+    <https://github.com/solid/conformance-test-harness/example/web-access-control/protected-operation/debug-indirect-acl.feature> .
+
+manifest:debug-retro-acl
+  a td:TestCase ;
+  spec:requirementReference <https://solid.github.io/web-access-control-spec/#authorization-evaluation-context> ;
+  td:reviewStatus td:unreviewed ;
+  td:preCondition "authentication", "acl" ;
+  spec:testScript
+    <https://github.com/solid/conformance-test-harness/example/web-access-control/protected-operation/debug-retro-acl.feature> .

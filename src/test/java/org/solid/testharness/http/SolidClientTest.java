@@ -25,8 +25,12 @@ package org.solid.testharness.http;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
+import io.quarkus.test.junit.mockito.InjectMock;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.solid.testharness.accesscontrol.AccessDataset;
+import org.solid.testharness.config.Config;
 import org.solid.testharness.config.ConfigTestNormalProfile;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 import org.solid.testharness.utils.TestUtils;
@@ -45,14 +49,24 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.solid.testharness.config.Config.AccessControlMode.WAC;
 
 @QuarkusTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestProfile(ConfigTestNormalProfile.class)
 class SolidClientTest {
     private static final String PREFIX = "@prefix ldp: <http://www.w3.org/ns/ldp#> .";
 
     @Inject
     ClientRegistry clientRegistry;
+    @InjectMock
+    Config config;
+
+    @BeforeAll
+    void setup() {
+        when(config.getReadTimeout()).thenReturn(5000);
+        when(config.getAgent()).thenReturn("AGENT");
+    }
 
     @Test
     void createDefaultClient() {
@@ -230,8 +244,8 @@ class SolidClientTest {
         when(mockClient.head(any())).thenReturn(mockResponse);
 
         final SolidClient solidClient = new SolidClient(mockClient);
-        final String mode = solidClient.getAclType(URI.create("http://localhost:3000/test.acl"));
-        assertEquals("WAC", mode);
+        final Config.AccessControlMode mode = solidClient.getAclType(URI.create("http://localhost:3000/test.acl"));
+        assertEquals(WAC, mode);
     }
 
     @Test
@@ -242,8 +256,8 @@ class SolidClientTest {
         when(mockClient.head(any())).thenReturn(mockResponse);
 
         final SolidClient solidClient = new SolidClient(mockClient);
-        final String mode = solidClient.getAclType(URI.create("http://localhost:3000/test.acl"));
-        assertEquals("ACP", mode);
+        final Config.AccessControlMode mode = solidClient.getAclType(URI.create("http://localhost:3000/test.acl"));
+        assertEquals(Config.AccessControlMode.ACP, mode);
     }
 
     @Test
@@ -254,8 +268,8 @@ class SolidClientTest {
         when(mockClient.head(any())).thenReturn(mockResponse);
 
         final SolidClient solidClient = new SolidClient(mockClient);
-        final String mode = solidClient.getAclType(URI.create("http://localhost:3000/test.acl"));
-        assertEquals("WAC", mode);
+        final Config.AccessControlMode mode = solidClient.getAclType(URI.create("http://localhost:3000/test.acl"));
+        assertEquals(WAC, mode);
     }
 
     @Test
@@ -266,8 +280,8 @@ class SolidClientTest {
         when(mockClient.head(any())).thenReturn(mockResponse);
 
         final SolidClient solidClient = new SolidClient(mockClient);
-        final String mode = solidClient.getAclType(URI.create("http://localhost:3000/test.acl"));
-        assertEquals("WAC", mode);
+        final Config.AccessControlMode mode = solidClient.getAclType(URI.create("http://localhost:3000/test.acl"));
+        assertEquals(WAC, mode);
     }
 
     @Test
@@ -297,6 +311,7 @@ class SolidClientTest {
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "");
         when(mockClient.getAsTurtle(any())).thenReturn(mockResponse);
+        when(config.getAccessControlMode()).thenReturn(WAC);
 
         final SolidClient solidClient = new SolidClient(mockClient);
         final AccessDataset accessDataset = solidClient.getAcl(resourceAcl);

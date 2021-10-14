@@ -23,16 +23,20 @@
  */
 package org.solid.testharness.http;
 
+import com.intuit.karate.core.ScenarioEngine;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectMock;
 import jakarta.ws.rs.core.Link;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.slf4j.Logger;
+import org.solid.testharness.config.Config;
 
 import java.net.URI;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -42,13 +46,31 @@ import static org.mockito.Mockito.*;
 
 @QuarkusTest
 class HttpUtilsTest {
+    @InjectMock
+    Config config;
+
     @Test
     void getAgent() {
+        when(config.getAgent()).thenReturn("AGENT");
         assertEquals("AGENT", HttpUtils.getAgent());
     }
 
     @Test
+    void getConnectTimeout() {
+        when(config.getConnectTimeout()).thenReturn(1111);
+        assertEquals(Duration.ofMillis(1111), HttpUtils.getConnectTimeout());
+    }
+
+    @Test
+    void getDefaultConnectTimeout() {
+        when(config.getConnectTimeout()).thenReturn(0);
+        assertEquals(Duration.ofMillis(Config.DEFAULT_TIMEOUT), HttpUtils.getConnectTimeout());
+    }
+
+    @Test
     void newRequestBuilder() {
+        when(config.getAgent()).thenReturn("AGENT");
+        when(config.getReadTimeout()).thenReturn(1111);
         final HttpRequest request = HttpUtils.newRequestBuilder(URI.create("https://example.org")).build();
         assertEquals("AGENT", request.headers().firstValue(HttpConstants.USER_AGENT).get());
     }
@@ -108,8 +130,46 @@ class HttpUtilsTest {
                 .build();
         HttpUtils.logRequest(logger, request);
         verify(logger).isDebugEnabled();
-        verify(logger, times(2)).debug(anyString(), anyString(), any());
+        verify(logger, times(1)).debug(anyString(), anyString());
         verifyNoMoreInteractions(logger);
+    }
+
+    @Test
+    void logRequestToKarate() {
+        final ScenarioEngine se = ScenarioEngine.forTempUse();
+        ScenarioEngine.set(se);
+        final Logger logger = mock(Logger.class);
+        when(logger.isDebugEnabled()).thenReturn(true);
+        final HttpRequest request = HttpRequest.newBuilder(URI.create("https://example.org/"))
+                .header("key", "value")
+                .build();
+        HttpUtils.logRequestToKarate(logger, request, "body");
+        verify(logger, never()).isDebugEnabled();
+        verify(logger, never()).debug(anyString(), ArgumentMatchers.<Object>any());
+    }
+
+    @Test
+    void logRequestToKarateFallback() {
+        ScenarioEngine.set(null);
+        final Logger logger = mock(Logger.class);
+        when(logger.isDebugEnabled()).thenReturn(true);
+        final HttpRequest request = HttpRequest.newBuilder(URI.create("https://example.org/"))
+                .header("key", "value")
+                .build();
+        HttpUtils.logRequestToKarate(logger, request, "body");
+        verify(logger).isDebugEnabled();
+        verify(logger, times(1)).debug(anyString(), anyString());
+        verifyNoMoreInteractions(logger);
+    }
+
+    @Test
+    void logRequestToKarateFallbackDisabled() {
+        ScenarioEngine.set(null);
+        final Logger logger = mock(Logger.class);
+        final HttpRequest request = mock(HttpRequest.class);
+        when(logger.isDebugEnabled()).thenReturn(false);
+        HttpUtils.logRequestToKarate(logger, request, "body");
+        verify(logger, never()).debug(anyString(), ArgumentMatchers.<Object>any());
     }
 
     @Test
@@ -134,10 +194,55 @@ class HttpUtilsTest {
         when(response.body()).thenReturn("BODY");
         HttpUtils.logResponse(logger, response);
         verify(logger).isDebugEnabled();
-        verify(logger, times(2)).debug(anyString(), anyString(), any());
-        verify(logger, times(1)).debug(anyString(), eq(400));
-        verify(logger, times(1)).debug(anyString(), eq("BODY"));
+        verify(logger, times(1)).debug(anyString(), anyString());
         verifyNoMoreInteractions(logger);
+    }
+
+
+    @Test
+    void logResponseToKarate() {
+        final ScenarioEngine se = ScenarioEngine.forTempUse();
+        ScenarioEngine.set(se);
+        final Logger logger = mock(Logger.class);
+        final HttpRequest request = HttpRequest.newBuilder(URI.create("https://example.org/")).build();
+        final HttpResponse<String> response = mock(HttpResponse.class);
+        when(logger.isDebugEnabled()).thenReturn(true);
+        when(response.request()).thenReturn(request);
+        when(response.uri()).thenReturn(URI.create("https://example.org/"));
+        when(response.statusCode()).thenReturn(400);
+        when(response.headers()).thenReturn(setupHeaders("key", List.of("value")));
+        when(response.body()).thenReturn("BODY");
+        HttpUtils.logResponseToKarate(logger, response);
+        verify(logger, never()).isDebugEnabled();
+        verify(logger, never()).debug(anyString(), ArgumentMatchers.<Object>any());
+    }
+
+    @Test
+    void logResponseToKarateFallback() {
+        ScenarioEngine.set(null);
+        final Logger logger = mock(Logger.class);
+        final HttpRequest request = HttpRequest.newBuilder(URI.create("https://example.org/")).build();
+        final HttpResponse<String> response = mock(HttpResponse.class);
+        when(logger.isDebugEnabled()).thenReturn(true);
+        when(response.request()).thenReturn(request);
+        when(response.uri()).thenReturn(URI.create("https://example.org/"));
+        when(response.statusCode()).thenReturn(400);
+        when(response.headers()).thenReturn(setupHeaders("key", List.of("value")));
+        when(response.body()).thenReturn("BODY");
+        HttpUtils.logResponseToKarate(logger, response);
+        verify(logger).isDebugEnabled();
+        verify(logger, times(1)).debug(anyString(), anyString());
+        verifyNoMoreInteractions(logger);
+    }
+
+    @Test
+    void logResponseToKarateFallbackDisabled() {
+        ScenarioEngine.set(null);
+        final Logger logger = mock(Logger.class);
+        final HttpResponse<String> response = mock(HttpResponse.class);
+        when(logger.isDebugEnabled()).thenReturn(false);
+        HttpUtils.logResponseToKarate(logger, response);
+        verify(logger, never()).debug(anyString(), ArgumentMatchers.<Object>any());
     }
 
     @Test
@@ -153,8 +258,7 @@ class HttpUtilsTest {
         when(response.body()).thenReturn(null);
         HttpUtils.logResponse(logger, response);
         verify(logger).isDebugEnabled();
-        verify(logger, times(2)).debug(anyString(), anyString(), any());
-        verify(logger, times(1)).debug(anyString(), eq(400));
+        verify(logger, times(1)).debug(anyString(), anyString());
         verifyNoMoreInteractions(logger);
     }
 

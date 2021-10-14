@@ -23,6 +23,7 @@
  */
 package org.solid.testharness.http;
 
+import com.intuit.karate.core.ScenarioEngine;
 import jakarta.ws.rs.core.Link;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -46,6 +47,8 @@ import java.util.stream.Collectors;
 
 public final class HttpUtils {
     private static final Logger logger = LoggerFactory.getLogger(HttpUtils.class);
+    private static final String RESPONSE_PREFIX = "  < ";
+    private static final String REQUEST_PREFIX = "  > ";
     private static Config config;
 
     private static Pattern AUTH_HEADER = Pattern.compile("^(\\S+)\\s.*([^\"]{6})$");
@@ -90,26 +93,62 @@ public final class HttpUtils {
 
     public static void logRequest(final Logger logger, final HttpRequest request) {
         if (logger.isDebugEnabled()) {
-            logger.debug("REQUEST  {} {}", request.method(), request.uri());
-            logHeaders(logger, request.headers().map());
+            logger.debug("request:\n{}", formatRequestLog(request, null));
         }
+    }
+
+    public static void logRequestToKarate(final Logger fallbackLogger, final HttpRequest request, final String body) {
+        final com.intuit.karate.Logger logger = Optional.ofNullable(ScenarioEngine.get())
+                .map(se -> se.logger).orElse(null);
+        if (logger != null) {
+            logger.debug("request:\n{}", formatRequestLog(request, body));
+        } else if (fallbackLogger.isDebugEnabled()) {
+            fallbackLogger.debug("request:\n{}", formatRequestLog(request, body));
+        }
+    }
+
+    private static String formatRequestLog(final HttpRequest request, final String body) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(REQUEST_PREFIX).append(request.method()).append(' ').append(request.uri()).append('\n');
+        logHeaders(sb, request.headers().map(), true);
+        if (body != null) {
+            sb.append(maskBody(body));
+        }
+        return sb.toString();
     }
 
     public static <T> void logResponse(final Logger logger, final HttpResponse<T> response) {
         if (logger.isDebugEnabled()) {
-            logger.debug("RESPONSE {} {}", response.request().method(), response.uri());
-            logger.debug("STATUS   {}", response.statusCode());
-            logHeaders(logger, response.headers().map());
-            final T body = response.body();
-            if (body != null) {
-                logger.debug("BODY     {}", maskBody((String)body));
-            }
+            logger.debug("response:\n{}", formatResponseLog(response));
         }
     }
 
-    private static void logHeaders(final Logger logger, final Map<String, List<String>> headerMap) {
+    public static <T> void logResponseToKarate(final Logger fallbackLogger, final HttpResponse<T> response) {
+        final com.intuit.karate.Logger logger = Optional.ofNullable(ScenarioEngine.get())
+                .map(se -> se.logger).orElse(null);
+        if (logger != null) {
+            logger.debug("response:\n{}", formatResponseLog(response));
+        } else if (fallbackLogger.isDebugEnabled()) {
+            fallbackLogger.debug("response:\n{}", formatResponseLog(response));
+        }
+    }
+
+    private static <T> String formatResponseLog(final HttpResponse<T> response) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(RESPONSE_PREFIX).append(response.statusCode()).append('\n');
+        logHeaders(sb, response.headers().map(), false);
+        final T body = response.body();
+        if (body != null) {
+            sb.append(maskBody((String)body));
+        }
+        return sb.toString();
+    }
+
+    private static void logHeaders(final StringBuilder sb, final Map<String, List<String>> headerMap,
+                                   final boolean outgoing) {
         headerMap.forEach((key, values)
-                -> values.forEach(value -> logger.debug("HEADER   {}: {}", key, maskHeader(key, value)))
+                -> values.forEach(value -> sb.append(outgoing ? REQUEST_PREFIX : RESPONSE_PREFIX)
+                        .append(key).append(": ").append(maskHeader(key, value)).append('\n'))
         );
     }
 

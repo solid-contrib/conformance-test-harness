@@ -336,20 +336,20 @@ class SolidResourceTest {
         assertEquals(null, resource.getAccessDataset());
     }
 
-    @Test
-    void getAccessControlMode() throws Exception {
-        when(solidClient.getAclUri(testUrl)).thenReturn(aclUrl);
-        when(solidClient.getAclType(aclUrl)).thenReturn("TEST");
-        final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
-        assertEquals("TEST", resource.getAccessControlMode());
-    }
-
-    @Test
-    void getAccessControlModeMissing() throws Exception {
-        when(solidClient.getAclUri(testUrl)).thenReturn(null);
-        final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
-        assertEquals(null, resource.getAccessControlMode());
-    }
+//    @Test
+//    void getAccessControlMode() throws Exception {
+//        when(solidClient.getAclUri(testUrl)).thenReturn(aclUrl);
+//        when(solidClient.getAclType(aclUrl)).thenReturn("TEST");
+//        final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
+//        assertEquals("TEST", resource.getAccessControlMode());
+//    }
+//
+//    @Test
+//    void getAccessControlModeMissing() throws Exception {
+//        when(solidClient.getAclUri(testUrl)).thenReturn(null);
+//        final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
+//        assertEquals(null, resource.getAccessControlMode());
+//    }
 
     @Test
     void delete() throws Exception {

@@ -56,7 +56,13 @@ public class Config {
     private File outputDir;
     private Map<String, Object> webIds;
     private boolean skipTearDown;
-    private String accessControlMode;
+    private AccessControlMode accessControlMode;
+
+    public enum AccessControlMode {
+        ACP_LEGACY,
+        ACP,
+        WAC
+    }
 
     // the settings are taken in the following order of preference:
     //   system property
@@ -238,11 +244,11 @@ public class Config {
         return skipTearDown;
     }
 
-    public String getAccessControlMode() {
+    public AccessControlMode getAccessControlMode() {
         return accessControlMode;
     }
 
-    public void setAccessControlMode(final String accessControlMode) {
+    public void setAccessControlMode(final AccessControlMode accessControlMode) {
         this.accessControlMode = accessControlMode;
     }
 

@@ -27,7 +27,10 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
-import org.solid.testharness.http.*;
+import org.solid.testharness.http.Client;
+import org.solid.testharness.http.ClientRegistry;
+import org.solid.testharness.http.HttpConstants;
+import org.solid.testharness.http.SolidClient;
 import org.solid.testharness.utils.SolidContainer;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 import org.solid.testharness.utils.TestUtils;
@@ -44,8 +47,10 @@ import java.util.Map;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.solid.testharness.config.Config.AccessControlMode.*;
 
 @QuarkusTest
 @TestProfile(ConfigTestNormalProfile.class)
@@ -66,8 +71,21 @@ public class TestSubjectTest {
     }
 
     @Test
+    void prepareServerAccessControlModeNoAcl() throws Exception {
+        final Client mockClient = setupMockConfig(false, WAC);
+
+        final HttpResponse<Void> mockVoidResponseNoLink = TestUtils.mockVoidResponse(200);
+        when(mockClient.head(eq(URI.create("https://server/test/")))).thenReturn(mockVoidResponseNoLink);
+
+        final Exception exception = assertThrows(TestHarnessInitializationException.class,
+                () -> testSubject.prepareServer());
+        assertEquals("Failed to determine access control mode: java.lang.Exception: Cannot get ACL url for " +
+                "root test container: https://server/test/", exception.getMessage());
+    }
+
+    @Test
     void prepareServerAccessControlModeThrows() throws Exception {
-        final Client mockClient = setupMockConfig(false);
+        final Client mockClient = setupMockConfig(false, WAC);
 
         final HttpResponse<Void> mockVoidResponseLink = TestUtils.mockVoidResponse(200,
                 Map.of(HttpConstants.HEADER_LINK, List.of("<https://server/test/.acl>; rel=\"acl\"")));
@@ -80,8 +98,8 @@ public class TestSubjectTest {
     }
 
     @Test
-    void prepareServerNoRootAcl() throws Exception {
-        final Client mockClient = setupMockConfig(false);
+    void prepareServerNoSetupRootAclWacMode() throws Exception {
+        final Client mockClient = setupMockConfig(false, WAC);
 
         final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "");
         when(mockClient.getAsTurtle(any())).thenReturn(mockStringResponse);
@@ -96,8 +114,44 @@ public class TestSubjectTest {
     }
 
     @Test
-    void prepareServerNoRootAclThrows() throws Exception {
-        final Client mockClient = setupMockConfig(false);
+    void prepareServerNoSetupRootAclAcpMode() throws Exception {
+        final Client mockClient = setupMockConfig(false, ACP);
+
+        final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "");
+        when(mockClient.getAsTurtle(any())).thenReturn(mockStringResponse);
+        doReturn(mockStringResponse).when(mockClient).sendAuthorized(any(), any());
+        final HttpResponse<Void> mockVoidResponse = TestUtils.mockVoidResponse(200, Map.of(HttpConstants.HEADER_LINK,
+                List.of("<https://example.org/.acl>; rel=\"acl\"",
+                        "<http://www.w3.org/ns/solid/acp#AccessControlResource>; rel=\"type\"")));
+        when(mockClient.head(any())).thenReturn(mockVoidResponse);
+
+        assertDoesNotThrow(() -> testSubject.prepareServer());
+        verify(mockClient, never()).put(any(), any(), any());
+        verify(config, times(1)).setAccessControlMode(ACP);
+        assertNotNull(testSubject.getTestRunContainer());
+    }
+
+    @Test
+    void prepareServerNoSetupRootAclAcpLegacyMode() throws Exception {
+        final Client mockClient = setupMockConfig(false, ACP_LEGACY);
+
+        final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "");
+        when(mockClient.getAsTurtle(any())).thenReturn(mockStringResponse);
+        doReturn(mockStringResponse).when(mockClient).sendAuthorized(any(), any());
+        final HttpResponse<Void> mockVoidResponse = TestUtils.mockVoidResponse(200, Map.of(HttpConstants.HEADER_LINK,
+                List.of("<https://example.org/.acl>; rel=\"acl\"",
+                        "<http://www.w3.org/ns/solid/acp#AccessControlResource>; rel=\"type\"")));
+        when(mockClient.head(any())).thenReturn(mockVoidResponse);
+
+        assertDoesNotThrow(() -> testSubject.prepareServer());
+        verify(mockClient, never()).put(any(), any(), any());
+        verify(config, times(1)).setAccessControlMode(ACP_LEGACY);
+        assertNotNull(testSubject.getTestRunContainer());
+    }
+
+    @Test
+    void prepareServerNoSetupRootAclThrows() throws Exception {
+        final Client mockClient = setupMockConfig(false, WAC);
 
         final HttpResponse<Void> mockVoidResponseLink = TestUtils.mockVoidResponse(200,
                 Map.of(HttpConstants.HEADER_LINK, List.of("<https://server/test/.acl>; rel=\"acl\"")));
@@ -112,8 +166,27 @@ public class TestSubjectTest {
     }
 
     @Test
-    void prepareServerWithRootAcl() throws IOException, InterruptedException {
-        final Client mockClient = setupMockConfig(true);
+    void prepareServerNoSetupRootAclContainerFails() throws Exception {
+        final Client mockClient = setupMockConfig(false, WAC);
+
+        final HttpResponse<Void> mockVoidResponseLink = TestUtils.mockVoidResponse(200,
+                Map.of(HttpConstants.HEADER_LINK, List.of("<https://server/test/.acl>; rel=\"acl\"")));
+        when(mockClient.head(eq(URI.create("https://server/test/")))).thenReturn(mockVoidResponseLink);
+        when(mockClient.head(eq(URI.create("https://server/test/.acl")))).thenReturn(mockVoidResponseLink);
+
+        final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "");
+        when(mockClient.getAsTurtle(any())).thenReturn(mockStringResponse);
+        when(mockClient.sendAuthorized(any(), any())).thenThrow(new IOException());
+
+        final Exception exception = assertThrows(TestHarnessInitializationException.class,
+                () -> testSubject.prepareServer());
+        assertEquals("Failed to prepare server: java.lang.Exception: Cannot create test run container",
+                exception.getMessage());
+    }
+
+    @Test
+    void prepareServerWithSetupRootAcl() throws IOException, InterruptedException {
+        final Client mockClient = setupMockConfig(true, WAC);
 
         final HttpResponse<Void> mockVoidResponseLink = TestUtils.mockVoidResponse(200,
                 Map.of(HttpConstants.HEADER_LINK, List.of("<https://target.example.org/.acl>; rel=\"acl\"")));
@@ -142,8 +215,8 @@ public class TestSubjectTest {
     }
 
     @Test
-    void prepareServerWithRootAclThrows() throws IOException, InterruptedException {
-        final Client mockClient = setupMockConfig(true);
+    void prepareServerWithSetupRootAclThrows() throws IOException, InterruptedException {
+        final Client mockClient = setupMockConfig(true, WAC);
 
         final HttpResponse<Void> mockVoidResponseLink = TestUtils.mockVoidResponse(200,
                 Map.of(HttpConstants.HEADER_LINK, List.of("<https://server/test/.acl>; rel=\"acl\"")));
@@ -159,8 +232,8 @@ public class TestSubjectTest {
     }
 
     @Test
-    void prepareServerWithRootAclFails() throws IOException, InterruptedException {
-        final Client mockClient = setupMockConfig(true);
+    void prepareServerWithSetupRootAclFails() throws IOException, InterruptedException {
+        final Client mockClient = setupMockConfig(true, WAC);
 
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
         final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK,
@@ -238,9 +311,12 @@ public class TestSubjectTest {
         verify(mockSolidClient).deleteResourceRecursively(eq(URI.create("https://localhost/container/")));
     }
 
-    private Client setupMockConfig(final boolean setupRootAcl) {
+    private Client setupMockConfig(final boolean setupRootAcl, final Config.AccessControlMode mode) {
         final TargetServer targetServer = mock(TargetServer.class);
         testSubject.setTargetServer(targetServer);
+        if (mode.equals(ACP_LEGACY)) {
+            when(targetServer.getFeatures()).thenReturn(Map.of("acp-legacy", true));
+        }
         when(config.isSetupRootAcl()).thenReturn(setupRootAcl);
         when(config.getWebIds())
                 .thenReturn(Map.of(HttpConstants.ALICE, "https://alice.target.example.org/profile/card#me"));
@@ -248,7 +324,11 @@ public class TestSubjectTest {
         when(config.getServerRoot()).thenReturn(URI.create("https://server/"));
         when(config.getReadTimeout()).thenReturn(5000);
         when(config.getAgent()).thenReturn("AGENT");
-        when(config.getAccessControlMode()).thenReturn("WAC");
+        if (mode.equals(WAC)) {
+            when(config.getAccessControlMode()).thenReturn(WAC);
+        } else {
+            when(config.getAccessControlMode()).thenReturn(ACP);
+        }
         final TestCredentials credentials = new TestCredentials();
         credentials.webId = "https://alice.target.example.org/profile/card#me";
         when(config.getCredentials(HttpConstants.ALICE)).thenReturn(credentials);

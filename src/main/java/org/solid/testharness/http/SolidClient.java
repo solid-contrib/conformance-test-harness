@@ -31,8 +31,9 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.testharness.accesscontrol.AccessControlFactory;
 import org.solid.testharness.accesscontrol.AccessDataset;
-import org.solid.testharness.accesscontrol.AccessDatasetWac;
+import org.solid.testharness.config.Config;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.inject.spi.CDI;
@@ -56,14 +57,14 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 
 public class SolidClient {
     private static final Logger logger = LoggerFactory.getLogger(SolidClient.class);
-    public static final String ACP_MODE = "ACP";
-    public static final String WAC_MODE = "WAC";
 
     private Client client;
+    private AccessControlFactory accessControlFactory;
 
     public SolidClient() {
         final ClientRegistry clientRegistry = CDI.current().select(ClientRegistry.class).get();
         client = clientRegistry.getClient(ClientRegistry.DEFAULT);
+        accessControlFactory = CDI.current().select(AccessControlFactory.class).get();
     }
     public SolidClient(final String user) {
         final ClientRegistry clientRegistry = CDI.current().select(ClientRegistry.class).get();
@@ -71,9 +72,11 @@ public class SolidClient {
         if (client == null) {
             throw new TestHarnessInitializationException("Client '%s' has not been registered yet", user);
         }
+        accessControlFactory = CDI.current().select(AccessControlFactory.class).get();
     }
     public SolidClient(final Client client) {
         this.client = client;
+        accessControlFactory = CDI.current().select(AccessControlFactory.class).get();
     }
 
     public static SolidClient create(final String user) {
@@ -101,9 +104,7 @@ public class SolidClient {
                 .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_TEXT_TURTLE)
                 .header(HttpConstants.HEADER_LINK, HttpConstants.CONTAINER_LINK)
                 .PUT(HttpRequest.BodyPublishers.noBody());
-        final HttpResponse<String> response = client.sendAuthorized(builder, HttpResponse.BodyHandlers.ofString());
-        HttpUtils.logResponse(logger, response);
-        return response;
+        return client.sendAuthorized(builder, HttpResponse.BodyHandlers.ofString());
     }
 
     public URI getAclUri(final URI uri) throws IOException, InterruptedException {
@@ -120,14 +121,14 @@ public class SolidClient {
         return aclLink.map(Link::getUri).orElse(null);
     }
 
-    public String getAclType(final URI aclUri) throws IOException, InterruptedException {
+    public Config.AccessControlMode getAclType(final URI aclUri) throws IOException, InterruptedException {
         final HttpResponse<Void> response = client.head(aclUri);
         final List<Link> links = HttpUtils.parseLinkHeaders(response.headers());
         final Optional<Link> acpLink = links.stream()
                 .filter(link -> link.getRels().contains("type") &&
                         "http://www.w3.org/ns/solid/acp#AccessControlResource".equals(link.getUri().toString()))
                 .findFirst();
-        return acpLink.isPresent() ? ACP_MODE : WAC_MODE;
+        return acpLink.isPresent() ? Config.AccessControlMode.ACP : Config.AccessControlMode.WAC;
     }
 
     public boolean createAcl(final URI url, final AccessDataset accessDataset)
@@ -137,12 +138,12 @@ public class SolidClient {
     }
 
     public AccessDataset getAcl(final URI url) throws IOException, InterruptedException {
-        logger.debug("ACL: for {}", url);
         final HttpResponse<String> response = client.getAsTurtle(url);
         if (!HttpUtils.isSuccessful(response.statusCode())) {
             return null;
         }
-        return new AccessDatasetWac(response.body(), url);
+        System.out.println(1);
+        return accessControlFactory.createAccessDataset(response.body(), url);
     }
 
     public String getContentAsTurtle(final URI url) throws Exception {

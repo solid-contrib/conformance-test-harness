@@ -10,7 +10,6 @@ Feature: Bob can only read an RDF resource to which he is only granted read acce
           const access = resource.getAccessDatasetBuilder(webIds.alice)
             .setAgentAccess(resource.getUrl(), webIds.bob, ['read'])
             .build();
-          karate.log('ACL:\n' + access.asTurtle());
           resource.setAccessDataset(access);
         }
         return resource;

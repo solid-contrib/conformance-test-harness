@@ -164,7 +164,7 @@ public class ConfigTest {
     @Test
     void setAccessControlMode() {
         assertNull(config.getAccessControlMode());
-        config.setAccessControlMode("TEST");
-        assertEquals("TEST", config.getAccessControlMode());
+        config.setAccessControlMode(Config.AccessControlMode.WAC);
+        assertEquals(Config.AccessControlMode.WAC, config.getAccessControlMode());
     }
 }

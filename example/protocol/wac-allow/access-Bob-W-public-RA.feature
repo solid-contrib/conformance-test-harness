@@ -11,7 +11,6 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
                 .setAgentAccess(resource.getUrl(), webIds.bob, ['write'])
                 .setPublicAccess(resource.getUrl(), ['read', 'append'])
                 .build();
-          karate.log('ACL:\n' + access.asTurtle());
           resource.setAccessDataset(access);
         }
         return resource;

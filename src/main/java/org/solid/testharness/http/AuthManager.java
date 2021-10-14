@@ -325,13 +325,11 @@ public class AuthManager {
         logger.debug("\n========== ACCESS TOKEN");
         final HttpRequest.Builder requestBuilder = authClient.signRequest(
                 HttpUtils.newRequestBuilder(URI.create(oidcConfig.getTokenEndpoint()))
+                        .header(HttpConstants.HEADER_AUTHORIZATION, authHeader)
                         .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED)
                         .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
                         .POST(HttpUtils.ofFormData(tokenRequestData))
         );
-        if (authHeader != null) {
-            requestBuilder.header(HttpConstants.HEADER_AUTHORIZATION, authHeader);
-        }
         final HttpRequest request = requestBuilder.build();
         HttpUtils.logRequest(logger, request);
         final HttpResponse<String> response = authClient.send(request, HttpResponse.BodyHandlers.ofString());
