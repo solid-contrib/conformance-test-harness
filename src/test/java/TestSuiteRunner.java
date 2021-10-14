@@ -59,12 +59,8 @@ public class TestSuiteRunner {
     void testSuite() throws IOException {
         conformanceTestHarness.initialize();
         final List<String> filters = null;
-//        final List<String> filters = List.of("containment");
-//        final List<String> filters = List.of("protected");
 //        final List<String> filters = List.of("web-access-control");
-//        final List<String> filters = List.of("container");
 //        final List<String> filters = List.of("debug-direct", "debug-indirect", "retro");
-//        final List<String> filters = List.of("containment", "content", "container", "read-resource-default-R");
         final TestSuiteResults results = conformanceTestHarness.runTestSuites(filters);
         assertNotNull(results);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());
