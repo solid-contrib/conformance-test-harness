@@ -67,10 +67,10 @@ subjects: test-subjects.ttl
 sources:
   - https://github.com/solid/conformance-test-harness/example/protocol/solid-protocol-test-manifest.ttl
   - https://github.com/solid/conformance-test-harness/example/web-access-control/web-access-control-test-manifest.ttl
-  - https://github.com/solid/conformance-test-harness/example/protocol/solid-protocol-spec.ttl
+  - https://solidproject.org/TR/protocol
   - https://github.com/solid/conformance-test-harness/example/web-access-control/web-access-control-spec.ttl
 # The target is just an IRI or local name relative to the test-subjects file and is not expected to resolve to anything
-target: ess
+target: https://github.com/solid/conformance-test-harness/ess
 
 # To map URLs from the manifest to local files:
 mappings:
@@ -548,7 +548,7 @@ To use the Docker image to run a set of local tests:
     subjects: /data/test-subjects.ttl
     sources:
         - https://github.com/solid/conformance-test-harness/example/protocol/solid-protocol-test-manifest.ttl
-        - https://github.com/solid/conformance-test-harness/example/protocol/solid-protocol-spec.ttl
+        - https://solidproject.org/TR/protocol
     target: https://github.com/solid/conformance-test-harness/ess
     mappings:
         - prefix: https://github.com/solid/conformance-test-harness/example/protocol
