@@ -83,10 +83,11 @@ public class AccessDatasetAcp implements AccessDataset {
                 final IRI accessControlNode = iri(namespace, "accessControl" + i);
                 final IRI policyNode = iri(namespace, "policy" + i);
                 final IRI ruleNode = iri(namespace, "rule" + i);
-                builder.add(accessControlResource, ACP.accessControl, accessControlNode)
+                builder.add(accessControlResource, rule.isInheritable() ? ACP.memberAccessControl : ACP.accessControl,
+                                accessControlNode)
                         .subject(accessControlNode)
                         .add(RDF.type, ACP.AccessControl)
-                        .add(rule.isInheritable() ? ACP.applyMembers : ACP.apply, policyNode)
+                        .add(ACP.apply, policyNode)
                         .add(policyNode, RDF.type, ACP.Policy)
                         .add(policyNode, ACP.allOf, ruleNode)
                         .add(ruleNode, RDF.type, ACP.Matcher);
@@ -98,8 +99,7 @@ public class AccessDatasetAcp implements AccessDataset {
                 }
                 if (!controlAccessModes.isEmpty()) {
                     final IRI accessPolicyNode = iri(namespace, "accessPolicy" + i);
-                    builder.add(accessControlNode, rule.isInheritable() ? ACP.accessMembers : ACP.access,
-                                    accessPolicyNode)
+                    builder.add(accessControlNode, ACP.access, accessPolicyNode)
                             .add(accessPolicyNode, RDF.type, ACP.Policy)
                             .add(accessPolicyNode, ACP.allOf, ruleNode);
                     controlAccessModes.stream()

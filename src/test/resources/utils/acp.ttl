@@ -52,8 +52,8 @@ acr:accessControl1 a acp:AccessControl ;
 .
 
 acr:accessControl2 a acp:AccessControl ;
-    acp:applyMembers acr:policy2;
-    acp:accessMembers acr:accessPolicy2
+    acp:apply acr:policy2;
+    acp:access acr:accessPolicy2
 .
 
 acr:accessControl3 a acp:AccessControl ;
@@ -69,5 +69,6 @@ acr:accessControl5 a acp:AccessControl ;
 .
 
 <https://example.org/test.acl>
-    acp:accessControl acr:accessControl1, acr:accessControl2, acr:accessControl3, acr:accessControl4, acr:accessControl5
+    acp:accessControl acr:accessControl1, acr:accessControl3, acr:accessControl4, acr:accessControl5 ;
+    acp:memberAccessControl acr:accessControl2
 .
