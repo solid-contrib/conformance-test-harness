@@ -58,9 +58,10 @@ public class TestSuiteRunner {
     @Test
     void testSuite() throws IOException {
         conformanceTestHarness.initialize();
-        final List<String> filters = null;
-//        final List<String> filters = List.of("web-access-control");
-//        final List<String> filters = List.of("debug-direct", "debug-indirect", "retro");
+        final List<String> filters = List.of(
+//                "web-access-control",
+                "storage"
+        );
         final TestSuiteResults results = conformanceTestHarness.runTestSuites(filters);
         assertNotNull(results);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());

@@ -54,6 +54,8 @@ function fn() {
         SolidContainer: Java.type('org.solid.testharness.utils.SolidContainer'),
         // useful functions
         parseWacAllowHeader: (headers) => Java.type('org.solid.testharness.http.HttpUtils').parseWacAllowHeader(headers),
+        parseLinkHeaders: (headers) => Java.type('org.solid.testharness.http.HttpUtils').parseLinkHeaders(headers),
+        resolveUri: (base, target) => Java.type('org.solid.testharness.http.HttpUtils').resolveUri(base, target),
         createTestContainer: () => rootTestContainer.generateChildContainer(),
         createTestContainerImmediate: () => rootTestContainer.generateChildContainer().instantiate(),
         pause: (pause) => java.lang.Thread.sleep(pause)

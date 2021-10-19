@@ -245,6 +245,27 @@ public final class HttpUtils {
         return links.stream().map(Link::valueOf).collect(Collectors.toList());
     }
 
+    public static List<Map<String, String>> parseLinkHeaders(@NotNull final Map<String, List<String>> headers) {
+        if (headers == null) {
+            return Collections.EMPTY_LIST;
+        }
+        final List<String> links = headers.entrySet()
+                .stream()
+                .filter(entry -> "link".equals(entry.getKey().toLowerCase(Locale.ROOT)))
+                .findFirst()
+                .map(Map.Entry::getValue)
+                .orElse(Collections.EMPTY_LIST);
+        logger.info(links.toString());
+        return links.stream().map(Link::valueOf).map(l -> {
+            final var map = new HashMap<String, String>();
+            if (l.getRel() != null) map.put("rel", l.getRel());
+            if (l.getTitle() != null) map.put("title", l.getTitle());
+            if (l.getType() != null) map.put("type", l.getType());
+            if (l.getUri() != null) map.put("uri", l.getUri().toString());
+            return map;
+        }).collect(Collectors.toList());
+    }
+
     @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     // This method deliberately creates objects in a loop dependent on the structure of the header
     public static Map<String, List<String>> parseWacAllowHeader(@NotNull final Map<String, List<String>> headers) {
@@ -278,6 +299,10 @@ public final class HttpUtils {
         return permissions.entrySet().stream().collect(Collectors.toMap(
                 Map.Entry::getKey,
                 entry -> List.copyOf(entry.getValue())));
+    }
+
+    public static String resolveUri(final String baseUri, final String target) {
+        return URI.create(baseUri).resolve(URI.create(target)).toString();
     }
 
     private static Config getConfig() {

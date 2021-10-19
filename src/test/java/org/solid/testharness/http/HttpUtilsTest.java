@@ -462,7 +462,7 @@ class HttpUtilsTest {
 
     @Test
     void parseLinkHeadersNull() {
-        assertThrows(NullPointerException.class, () -> HttpUtils.parseLinkHeaders(null));
+        assertThrows(NullPointerException.class, () -> HttpUtils.parseLinkHeaders((HttpHeaders) null));
     }
 
     @Test
