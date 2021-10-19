@@ -1,5 +1,10 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.0.5
+
+### Minor changes
+* Add support for acp:memberAccessControl
+
 ## Release 1.0.4
 ### Features
 * Move ACP support towards the draft standard (further changes to follow)

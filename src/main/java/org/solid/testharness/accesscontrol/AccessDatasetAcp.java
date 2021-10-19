@@ -23,14 +23,12 @@
  */
 package org.solid.testharness.accesscontrol;
 
-import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.solid.common.vocab.ACL;
 import org.solid.common.vocab.ACP;
 import org.solid.common.vocab.RDF;
-import org.solid.common.vocab.VCARD;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.http.Client;
 import org.solid.testharness.http.HttpConstants;
@@ -46,7 +44,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static org.eclipse.rdf4j.model.util.Values.bnode;
 import static org.eclipse.rdf4j.model.util.Values.iri;
 
 public class AccessDatasetAcp implements AccessDataset {
@@ -69,9 +66,9 @@ public class AccessDatasetAcp implements AccessDataset {
             builder.setNamespace(PREFIX, namespace);
             builder.setNamespace(ACP.PREFIX, ACP.NAMESPACE);
             builder.setNamespace(ACL.PREFIX, ACL.NAMESPACE);
-            if (accessRules.stream().anyMatch(rule -> rule.getType() == AccessRule.AgentType.GROUP)) {
-                builder.setNamespace(VCARD.PREFIX, VCARD.NAMESPACE);
-            }
+//            if (accessRules.stream().anyMatch(rule -> rule.getType() == AccessRule.AgentType.GROUP)) {
+//                builder.setNamespace(VCARD.PREFIX, VCARD.NAMESPACE);
+//            }
 
             final AtomicInteger i = new AtomicInteger();
             accessRules.forEach(rule -> {
@@ -83,10 +80,11 @@ public class AccessDatasetAcp implements AccessDataset {
                 final IRI accessControlNode = iri(namespace, "accessControl" + i);
                 final IRI policyNode = iri(namespace, "policy" + i);
                 final IRI ruleNode = iri(namespace, "rule" + i);
-                builder.add(accessControlResource, ACP.accessControl, accessControlNode)
+                builder.add(accessControlResource, rule.isInheritable() ? ACP.memberAccessControl : ACP.accessControl,
+                                accessControlNode)
                         .subject(accessControlNode)
                         .add(RDF.type, ACP.AccessControl)
-                        .add(rule.isInheritable() ? ACP.applyMembers : ACP.apply, policyNode)
+                        .add(ACP.apply, policyNode)
                         .add(policyNode, RDF.type, ACP.Policy)
                         .add(policyNode, ACP.allOf, ruleNode)
                         .add(ruleNode, RDF.type, ACP.Matcher);
@@ -98,8 +96,7 @@ public class AccessDatasetAcp implements AccessDataset {
                 }
                 if (!controlAccessModes.isEmpty()) {
                     final IRI accessPolicyNode = iri(namespace, "accessPolicy" + i);
-                    builder.add(accessControlNode, rule.isInheritable() ? ACP.accessMembers : ACP.access,
-                                    accessPolicyNode)
+                    builder.add(accessControlNode, ACP.access, accessPolicyNode)
                             .add(accessPolicyNode, RDF.type, ACP.Policy)
                             .add(accessPolicyNode, ACP.allOf, ruleNode);
                     controlAccessModes.stream()
@@ -117,12 +114,12 @@ public class AccessDatasetAcp implements AccessDataset {
                     case AUTHENTICATED_USER:
                         builder.add(ruleNode, ACP.agent, ACP.AuthenticatedAgent);
                         break;
-                    case GROUP:
-                        final BNode group = bnode();
-                        builder.add(ruleNode, ACP.group, group);
-                        builder.add(group, RDF.type, VCARD.Group);
-                        rule.getMembers().forEach(m -> builder.add(group, VCARD.hasMember, m));
-                        break;
+//                    case GROUP:
+//                        final BNode group = bnode();
+//                        builder.add(ruleNode, ACP.group, group);
+//                        builder.add(group, RDF.type, VCARD.Group);
+//                        rule.getMembers().forEach(m -> builder.add(group, VCARD.hasMember, m));
+//                        break;
                     default:
                         break;
                 }
