@@ -135,14 +135,16 @@ public class SolidResource {
     public SolidResource findStorage() throws Exception {
         URI testUri = url;
         boolean linkFound = false;
-        while (!linkFound && testUri != null) {
+        boolean rootTested = false;
+        while (!linkFound && !rootTested) {
             linkFound = solidClient.hasStorageType(testUri);
             if (!linkFound) {
-                if (!testUri.getPath().equals("/")) {
+                final boolean atRoot = "/".equals(testUri.getPath());
+                if (!atRoot) {
                     // haven't got to the root so keep going
                     testUri = testUri.getPath().endsWith("/") ? testUri.resolve("..") : testUri.resolve(".");
                 } else {
-                    testUri = null;
+                    rootTested = true;
                 }
             }
         }

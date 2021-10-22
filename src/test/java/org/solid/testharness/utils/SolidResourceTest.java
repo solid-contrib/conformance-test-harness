@@ -293,6 +293,33 @@ class SolidResourceTest {
     }
 
     @Test
+    void findStorageFromResource() throws Exception {
+        when(solidClient.hasStorageType(URI.create("http://localhost/container/resource"))).thenReturn(false);
+        when(solidClient.hasStorageType(URI.create("http://localhost/container/"))).thenReturn(false);
+        when(solidClient.hasStorageType(URI.create("http://localhost/"))).thenReturn(true);
+        final SolidResource resource = new SolidResource(solidClient, "http://localhost/container/resource");
+        final SolidResource storageRoot = resource.findStorage();
+        assertEquals("http://localhost/", storageRoot.url.toString());
+    }
+
+    @Test
+    void findStorageFails() throws Exception {
+        when(solidClient.hasStorageType(URI.create("http://localhost/container/resource"))).thenReturn(false);
+        when(solidClient.hasStorageType(URI.create("http://localhost/container/"))).thenReturn(false);
+        when(solidClient.hasStorageType(URI.create("http://localhost/"))).thenReturn(false);
+        final SolidResource resource = new SolidResource(solidClient, "http://localhost/container/resource");
+        final SolidResource storageRoot = resource.findStorage();
+        assertNull(storageRoot);
+    }
+
+    @Test
+    void hasStorageType() throws Exception {
+        when(solidClient.hasStorageType(testUrl)).thenReturn(true);
+        final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
+        assertTrue(resource.hasStorageType());
+    }
+
+    @Test
     void getContentAsTurtle() throws Exception {
         when(solidClient.getContentAsTurtle(testUrl)).thenReturn("CONTENT");
         final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
@@ -335,21 +362,6 @@ class SolidResourceTest {
         final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
         assertEquals(null, resource.getAccessDataset());
     }
-
-//    @Test
-//    void getAccessControlMode() throws Exception {
-//        when(solidClient.getAclUri(testUrl)).thenReturn(aclUrl);
-//        when(solidClient.getAclType(aclUrl)).thenReturn("TEST");
-//        final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
-//        assertEquals("TEST", resource.getAccessControlMode());
-//    }
-//
-//    @Test
-//    void getAccessControlModeMissing() throws Exception {
-//        when(solidClient.getAclUri(testUrl)).thenReturn(null);
-//        final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
-//        assertEquals(null, resource.getAccessControlMode());
-//    }
 
     @Test
     void delete() throws Exception {

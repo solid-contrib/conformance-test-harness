@@ -147,7 +147,7 @@ public class SolidClient {
         return getLinkByType(uri, PIM.Storage) != null;
     }
 
-    public URI getLinkByType(final URI uri, final IRI type) throws IOException, InterruptedException {
+    private URI getLinkByType(final URI uri, final IRI type) throws IOException, InterruptedException {
         final HttpResponse<Void> response = client.head(uri);
         final List<Link> links = HttpUtils.parseLinkHeaders(response.headers());
         return links.stream()

@@ -245,23 +245,26 @@ public final class HttpUtils {
         return links.stream().map(Link::valueOf).collect(Collectors.toList());
     }
 
-    public static List<Map<String, String>> parseLinkHeaders(@NotNull final Map<String, List<String>> headers) {
+    // This version is used in Karate tests which only work with simple classes and collections
+    public static List<Map<String, String>> parseLinkHeaders(final Map<String, List<String>> headers) {
         if (headers == null) {
             return Collections.EMPTY_LIST;
         }
-        final List<String> links = headers.entrySet()
+        List<String> links = headers.entrySet()
                 .stream()
                 .filter(entry -> "link".equals(entry.getKey().toLowerCase(Locale.ROOT)))
                 .findFirst()
                 .map(Map.Entry::getValue)
                 .orElse(Collections.EMPTY_LIST);
-        logger.info(links.toString());
+        if (links.size() == 1 && links.get(0).contains(", ")) {
+            links = Arrays.asList(links.get(0).split(", "));
+        }
         return links.stream().map(Link::valueOf).map(l -> {
             final var map = new HashMap<String, String>();
-            if (l.getRel() != null) map.put("rel", l.getRel());
+            map.put("rel", l.getRel());
+            map.put("uri", l.getUri().toString());
             if (l.getTitle() != null) map.put("title", l.getTitle());
             if (l.getType() != null) map.put("type", l.getType());
-            if (l.getUri() != null) map.put("uri", l.getUri().toString());
             return map;
         }).collect(Collectors.toList());
     }
@@ -301,7 +304,8 @@ public final class HttpUtils {
                 entry -> List.copyOf(entry.getValue())));
     }
 
-    public static String resolveUri(final String baseUri, final String target) {
+    public static String resolveUri(@NotNull final String baseUri, @NotNull final String target) {
+        if (baseUri == null || target == null) return null;
         return URI.create(baseUri).resolve(URI.create(target)).toString();
     }
 

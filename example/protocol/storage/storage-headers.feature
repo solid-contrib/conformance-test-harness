@@ -53,33 +53,3 @@ Feature: Finding the storage for a resource
     # Find storage as Bob fails again since he no longer has access
     * def storageBob = resourceBob.findStorage()
     * assert storageBob == null
-
-    # /storage/shared-test/test/ - bab reads storage
-    #   / 403
-    #   /storage/ link
-    #   /storage/shared-test 403
-    #   /storage/shared-test/test 403
-
-    # /storage/shared-test/test/ - bab reads test
-    #   / 403
-    #   /storage/ 403
-    #   /storage/shared-test 403
-    #   /storage/shared-test/test no link
-
-    # /storage/shared-test/test/test2/ - bab reads test/
-    #   / 403
-    #   /storage/ 403
-    #   /storage/shared-test 403
-    #   /storage/shared-test/test no link
-    #   /storage/shared-test/test/test2 403
-
-    # podspaces
-    # /pod/shared-test/test/ - bob reads test/
-    #   / no link
-    #   /pod/ link
-    #   /storage/shared-test 403
-    #   /storage/shared-test/test no link
-    #   /storage/shared-test/test/test2 403
-
-
-    # /storage/shared-test/test
