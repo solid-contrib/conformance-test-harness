@@ -419,7 +419,7 @@ Some Solid servers (e.g., CSS) can be run in a Docker container.
     container. Once you switch to a named container, you will also need to switch to `https` and add a self-signed certificate
     due to restrictions with DPoP. Additionally you will need to add `server` as an alias for `localhost` in your `/etc/hosts`
     file.
-1. Create a file for environment variables (e.g., `css.env`) with the following contents (based on the local user registration
+2. Create a file for environment variables (e.g., `css.env`) with the following contents (based on the local user registration
 option):
     ```shell
     SOLID_IDENTITY_PROVIDER=        # e.g. https://server/idp
@@ -433,7 +433,8 @@ option):
     RESOURCE_SERVER_ROOT=           # e.g. https://server
     TEST_CONTAINER=                 # e.g. /alice/
     ```
-1. Create a script based on the following:
+3. Create a script based on the following. Note that you will need to update the context and import list in the CSS
+   config section from the latest example at https://github.com/solid/community-server/blob/main/config/default.json.
     ```shell
     #!/bin/bash
 
@@ -442,39 +443,11 @@ option):
 
     mkdir -p reports/css config
 
-    # Create the configuration file needed to run CSS in https mode
+    # Create the configuration file needed to run CSS in https mode.
     cat > ./config/css-config.json <<EOF
     {
-    "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^1.0.0/components/context.jsonld",
-    "import": [
-        "files-scs:config/app/main/default.json",
-        "files-scs:config/app/init/default.json",
-        "files-scs:config/http/handler/default.json",
-        "files-scs:config/http/middleware/websockets.json",
-        "files-scs:config/http/server-factory/websockets.json",
-        "files-scs:config/http/static/default.json",
-        "files-scs:config/identity/email/default.json",
-        "files-scs:config/identity/handler/default.json",
-        "files-scs:config/identity/ownership/token.json",
-        "files-scs:config/identity/pod/static.json",
-        "files-scs:config/identity/registration/enabled.json",
-        "files-scs:config/ldp/authentication/dpop-bearer.json",
-        "files-scs:config/ldp/authorization/webacl.json",
-        "files-scs:config/ldp/handler/default.json",
-        "files-scs:config/ldp/metadata-parser/default.json",
-        "files-scs:config/ldp/metadata-writer/default.json",
-        "files-scs:config/ldp/permissions/acl.json",
-        "files-scs:config/storage/backend/memory.json",
-        "files-scs:config/storage/key-value/resource-store.json",
-        "files-scs:config/storage/middleware/default.json",
-        "files-scs:config/util/auxiliary/acl.json",
-        "files-scs:config/util/identifiers/suffix.json",
-        "files-scs:config/util/index/default.json",
-        "files-scs:config/util/logging/winston.json",
-        "files-scs:config/util/representation-conversion/default.json",
-        "files-scs:config/util/resource-locker/memory.json",
-        "files-scs:config/util/variables/default.json"
-    ],
+    "@context": "",
+    "import": [],
     "@graph": [
         {
         "comment": [
@@ -533,8 +506,8 @@ option):
     docker rm server
     docker network rm testnet
     ```
-1. Run this script.
-1. The reports will be created in the specified directory.
+4. Run this script.
+5. The reports will be created in the specified directory.
 
 #### Example: Using a publicly available Solid Server providing your own tests and configuration
 To use the Docker image to run a set of local tests:
