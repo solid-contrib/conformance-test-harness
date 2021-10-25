@@ -129,6 +129,8 @@ class ReportGeneratorTest {
             logger.debug("Results contains {} triples", resultModel.size());
         }
 
+        final Results results = mock(Results.class);
+        reportGenerator.setResults(new TestSuiteResults(results));
         final StringWriter sw = new StringWriter();
         reportGenerator.buildHtmlResultReport(sw);
         final String report = sw.toString();

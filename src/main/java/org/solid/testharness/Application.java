@@ -148,12 +148,14 @@ public class Application implements QuarkusApplication {
                 conformanceTestHarness.initialize();
 
                 if (line.hasOption(COVERAGE) && !line.hasOption(TESTS)) {
+                    config.logConfigSettings(false);
                     final boolean success = conformanceTestHarness.createCoverageReport();
                     if (!success) {
                         return 1;
                     }
                 }
                 if (line.hasOption(TESTS) || !line.hasOption(COVERAGE)) {
+                    config.logConfigSettings(true);
                     final TestSuiteResults results = conformanceTestHarness.runTestSuites(filters);
                     return results != null && results.getFailCount() == 0 ? 0 : 1;
                 } else {

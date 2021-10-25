@@ -58,6 +58,7 @@ public class TestSuiteRunner {
     @Test
     void testSuite() throws IOException {
         conformanceTestHarness.initialize();
+        config.logConfigSettings(true);
         final List<String> filters = List.of(
 //                "web-access-control",
 //                "storage"
@@ -71,6 +72,7 @@ public class TestSuiteRunner {
     @Disabled
     void testSuiteCoverage() throws Exception {
         conformanceTestHarness.initialize();
+        config.logConfigSettings(false);
         assertTrue(conformanceTestHarness.createCoverageReport());
     }
 }

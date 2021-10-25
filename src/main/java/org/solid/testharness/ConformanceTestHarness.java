@@ -108,8 +108,6 @@ public class ConformanceTestHarness {
                         .build());
             }
         }
-        // log the config of this test run
-        config.logConfigSettings();
         // load the test manifests
         testSuiteDescription.load(config.getTestSources());
     }

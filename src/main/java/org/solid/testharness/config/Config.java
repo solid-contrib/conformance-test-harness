@@ -252,12 +252,14 @@ public class Config {
         this.accessControlMode = accessControlMode;
     }
 
-    public void logConfigSettings() {
+    public void logConfigSettings(final boolean withTests) {
         if (logger.isInfoEnabled()) {
-            logger.info("Subjects URL:   {}", getSubjectsUrl().toString());
             logger.info("Sources:        {}", getTestSources().toString());
             logger.info("Path mappings:  {}", pathMappings.stringValue());
-            logger.info("Target server:  {}", getTestSubject());
+            if (withTests) {
+                logger.info("Subjects URL:   {}", getSubjectsUrl());
+                logger.info("Target server:  {}", getTestSubject());
+            }
         }
     }
 
