@@ -5,7 +5,6 @@ sources:
   - https://solidproject.org/TR/protocol
   - https://github.com/solid/specification-tests/web-access-control/web-access-control-spec.ttl
 #  - https://github.com/solid/specification-tests/protocol/converted.ttl
-target: https://github.com/solid/conformance-test-harness/ess
 mappings:
   - prefix: https://github.com/solid/specification-tests/
     path: /data

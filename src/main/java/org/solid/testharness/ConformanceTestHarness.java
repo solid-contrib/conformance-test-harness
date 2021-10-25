@@ -221,7 +221,7 @@ public class ConformanceTestHarness {
 
     private void setupTestHarness(final Map<String, Boolean> features) {
         logger.info("===================== REGISTER CLIENTS ========================");
-        logger.info("Test subject: {}", config.getServerRoot());
+        logger.info("Test subject root: {}", config.getServerRoot());
         if (config.getUserRegistrationEndpoint() != null) {
             registerUsers();
         }

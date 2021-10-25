@@ -95,7 +95,7 @@ public class TestSubject {
             }
             targetServer = new TargetServer(testSubject);
             dataRepository.setTestSubject(testSubject);
-            logger.debug("TestSubject {}", targetServer.getSubject());
+            logger.info("TestSubject {}", targetServer.getSubject());
         } catch (IOException e) {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException(
                     "Failed to read config file %s: %s",
