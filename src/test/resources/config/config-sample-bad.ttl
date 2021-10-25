@@ -9,4 +9,4 @@ prefix solid: <http://www.w3.org/ns/solid/terms#>
 
 <example>
     a earl:Software, earl:TestSubject ;
-    doap:name "Example server"@en .
+    doap:name "Example server" .
