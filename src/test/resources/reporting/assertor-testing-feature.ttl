@@ -5,13 +5,14 @@ prefix doap: <http://usefulinc.com/ns/doap#>
 prefix earl: <http://www.w3.org/ns/earl#>
 
 <tester1> a earl:Software ;
-   doap:name "TESTER1"@en ;
+   doap:name "TESTER1" ;
    doap:description "DESCRIPTION"@en ;
+   doap:programming-language "Java, Karate" ;
    doap:created "2021-01-01"^^xsd:date ;
    doap:developer <https://example.org/profile/card/#us>;
    doap:homepage <https://example.org/tester> ;
    doap:release <tester1#assertor-release> .
 
-<tester1#assertor-release> doap:revision "0.0.1-SNAPSHOT"@en .
+<tester1#assertor-release> doap:revision "0.0.1-SNAPSHOT" .
 
 <tester2> a earl:Software.
