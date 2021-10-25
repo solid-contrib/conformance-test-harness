@@ -258,7 +258,7 @@ This mechanism will work in CI environments where the credentials can be passed 
 The command line options are:
 ```
 usage: run
-    --coverage       produce a coverage report
+    --coverage       produce a coverage report only
  -f,--filter <arg>   feature filter(s)
  -h,--help           print this message
  -o,--output <arg>   output directory
@@ -266,9 +266,8 @@ usage: run
  -s,--source <arg>   URL or path to test source(s)
     --subjects <arg> URL or path to test subject config (Turtle)
  -t,--target <arg>   target server
-    --tests          produce test and coverage reports
 ```
-If neither `--coverage` nor `--tests` is specified then the default action is to run the tests and produce both reports.
+If `--coverage` is not specified then the default action is to run the tests and produce the results reports.
 
 ### Logging
 By default, the CTH only provides minimal logging. If you want to see the HTTP request/response exchanges in

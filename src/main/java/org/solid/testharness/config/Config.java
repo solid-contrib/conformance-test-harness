@@ -254,7 +254,7 @@ public class Config {
 
     public void logConfigSettings(final boolean withTests) {
         if (logger.isInfoEnabled()) {
-            logger.info("Sources:        {}", getTestSources().toString());
+            logger.info("Sources:        {}", getTestSources());
             logger.info("Path mappings:  {}", pathMappings.stringValue());
             if (withTests) {
                 logger.info("Subjects URL:   {}", getSubjectsUrl());

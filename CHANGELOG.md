@@ -1,17 +1,26 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.0.6 (unreleased)
+### Features
+* Add function to allow a test to locate the `pim:Storage` of a resource by traversing up the hierarchy. 
+
+### Minor changes
+* Fix: Coverage only report failed with missing subject.
+* Update: Simplify command line options. Tests are run unless you specify `--coverage` in which case you get that report
+  instead.
+
 ## Release 1.0.5
 
 ### Minor changes
-* Add support for acp:memberAccessControl
+* Add support for acp:memberAccessControl.
 
 ## Release 1.0.4
 ### Features
-* Move ACP support towards the draft standard (further changes to follow)
+* Move ACP support towards the draft standard (further changes to follow).
 
 ### Minor changes
 * Use client_secret_basic authentication to work with client credentials from the Inrupt Application Catalog.
-* Change authorization form support to work with changes in CSS 2.0.0 (https://github.com/solid/community-server/issues/992)
+* Change authorization form support to work with changes in CSS 2.0.0 (https://github.com/solid/community-server/issues/992).
 
 ## Release 1.0.2
 

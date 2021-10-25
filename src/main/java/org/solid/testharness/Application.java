@@ -55,7 +55,6 @@ public class Application implements QuarkusApplication {
     public static final String OUTPUT = "output";
     public static final String HELP = "help";
     public static final String COVERAGE = "coverage";
-    public static final String TESTS = "tests";
     public static final String FILTER = "filter";
     public static final String SKIP_TEARDOWN = "skip-teardown";
 
@@ -69,8 +68,7 @@ public class Application implements QuarkusApplication {
         logger.debug("Args: {}", Arrays.toString(args));
 
         final Options options = new Options();
-        options.addOption(Option.builder().longOpt(COVERAGE).desc("produce a coverage report").build());
-        options.addOption(Option.builder().longOpt(TESTS).desc("produce test and coverage reports").build());
+        options.addOption(Option.builder().longOpt(COVERAGE).desc("produce a coverage report only").build());
         options.addOption(Option.builder().longOpt(SKIP_TEARDOWN)
                 .desc("skip teardown (when server itself is being stopped)").build());
         options.addOption(
@@ -118,7 +116,7 @@ public class Application implements QuarkusApplication {
                 }
 
                 List<String> filters = null;
-                if (line.hasOption(TESTS) || !line.hasOption(COVERAGE)) {
+                if (!line.hasOption(COVERAGE)) {
                     if (line.hasOption(SUBJECTS)) {
                         config.setSubjectsUrl(line.getOptionValue(SUBJECTS));
                         logger.debug("Subjects = {}", config.getSubjectsUrl());
@@ -147,19 +145,13 @@ public class Application implements QuarkusApplication {
 
                 conformanceTestHarness.initialize();
 
-                if (line.hasOption(COVERAGE) && !line.hasOption(TESTS)) {
+                if (line.hasOption(COVERAGE)) {
                     config.logConfigSettings(false);
-                    final boolean success = conformanceTestHarness.createCoverageReport();
-                    if (!success) {
-                        return 1;
-                    }
-                }
-                if (line.hasOption(TESTS) || !line.hasOption(COVERAGE)) {
+                    return conformanceTestHarness.createCoverageReport() ? 0 : 1;
+                } else {
                     config.logConfigSettings(true);
                     final TestSuiteResults results = conformanceTestHarness.runTestSuites(filters);
                     return results != null && results.getFailCount() == 0 ? 0 : 1;
-                } else {
-                    return 0;
                 }
 
             }

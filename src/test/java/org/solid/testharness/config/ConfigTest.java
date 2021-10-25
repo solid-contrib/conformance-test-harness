@@ -125,6 +125,11 @@ public class ConfigTest {
     }
 
     @Test
+    void logConfigSettingsNoTests() {
+        assertDoesNotThrow(() -> config.logConfigSettings(false));
+    }
+
+    @Test
     void getAgent() {
         assertEquals("AGENT", config.getAgent());
     }
