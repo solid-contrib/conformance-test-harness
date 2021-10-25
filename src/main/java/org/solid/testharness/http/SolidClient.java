@@ -24,6 +24,7 @@
 package org.solid.testharness.http;
 
 import jakarta.ws.rs.core.Link;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
@@ -31,6 +32,8 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.common.vocab.ACP;
+import org.solid.common.vocab.PIM;
 import org.solid.testharness.accesscontrol.AccessControlFactory;
 import org.solid.testharness.accesscontrol.AccessDataset;
 import org.solid.testharness.config.Config;
@@ -116,19 +119,14 @@ public class SolidClient {
         final List<Link> links = HttpUtils.parseLinkHeaders(headers);
         final Optional<Link> aclLink = links.stream()
                 .filter(link -> link.getRels().contains("acl") ||
-                        link.getRels().contains("http://www.w3.org/ns/solid/acp#accessControl"))
+                        link.getRels().contains(ACP.accessControl.toString()))
                 .findFirst();
         return aclLink.map(Link::getUri).orElse(null);
     }
 
     public Config.AccessControlMode getAclType(final URI aclUri) throws IOException, InterruptedException {
-        final HttpResponse<Void> response = client.head(aclUri);
-        final List<Link> links = HttpUtils.parseLinkHeaders(response.headers());
-        final Optional<Link> acpLink = links.stream()
-                .filter(link -> link.getRels().contains("type") &&
-                        "http://www.w3.org/ns/solid/acp#AccessControlResource".equals(link.getUri().toString()))
-                .findFirst();
-        return acpLink.isPresent() ? Config.AccessControlMode.ACP : Config.AccessControlMode.WAC;
+        final URI acpLink = getLinkByType(aclUri, ACP.AccessControlResource);
+        return acpLink != null ? Config.AccessControlMode.ACP : Config.AccessControlMode.WAC;
     }
 
     public boolean createAcl(final URI url, final AccessDataset accessDataset)
@@ -143,6 +141,20 @@ public class SolidClient {
             return null;
         }
         return accessControlFactory.createAccessDataset(response.body(), url);
+    }
+
+    public boolean hasStorageType(final URI uri) throws IOException, InterruptedException {
+        return getLinkByType(uri, PIM.Storage) != null;
+    }
+
+    private URI getLinkByType(final URI uri, final IRI type) throws IOException, InterruptedException {
+        final HttpResponse<Void> response = client.head(uri);
+        final List<Link> links = HttpUtils.parseLinkHeaders(response.headers());
+        return links.stream()
+                .filter(link -> link.getRels().contains("type") &&
+                        type.toString().equals(link.getUri().toString()))
+                .findFirst()
+                .map(Link::getUri).orElse(null);
     }
 
     public String getContentAsTurtle(final URI url) throws Exception {

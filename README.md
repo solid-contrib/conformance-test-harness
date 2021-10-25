@@ -92,7 +92,7 @@ git clone git@github.com:solid/conformance-test-harness.git
 
 ### 2. Setting up the Environment
 There are 4 important settings:
-1. `target` - The IRI (or local name) of the target server, used to select the server configuration from the configuration file.
+1. `target` - The IRI of the target server, used to select the server configuration from the configuration file.
 1. `subjects` - The location of the file describing test subjects.
 1. `sources` - The locations of annotated Solid specification documents that list the test cases to be run.
 1. `mappings` - Maps test cases IRIs to a local file system (there can be multiple mappings). Mappings should be
@@ -102,7 +102,7 @@ There are 4 important settings:
 To set these properties, you can provide `config/application.yaml` in the working directory
 containing:
 ```yaml
-target: TARGET_SERVER_IRI or LOCALNAME
+target: TARGET_SERVER_IRI
 subjects: PATH_TO_SUBJECTS_DOC
 sources:
   - PATH_TO_SPECIFATION_DOC
@@ -184,8 +184,9 @@ The CD workflow in GitHub also builds a Docker image and deploys it to DockerHub
 https://hub.docker.com/r/solidconformancetestbeta/conformance-test-harness
 
 ### 6. Release
-1. Update CHANGELOG.md to highlight new features.
-2. Prepare the release:
+1. Check config files, scripts and examples here and in the specification-tests repo for any changes.
+2. Update CHANGELOG.md to highlight new features.
+3. Prepare the release:
     ```shell
     ./mvnw release:prepare
     ```
@@ -198,11 +199,11 @@ https://hub.docker.com/r/solidconformancetestbeta/conformance-test-harness
     ./mvnw release:prepare -DdryRun=true
     ./mvnw release:clean
     ```
-3. Perform the release (whilst avoiding deploying to a maven repository or re-running the tests):
+4. Perform the release (whilst avoiding deploying to a maven repository or re-running the tests):
     ```shell
     ./mvnw release:perform -Darguments="-Dmaven.deploy.skip=true -DskipTests"
     ```
-4. Create the release in GitHub - [Create a new release](https://github.com/solid/conformance-test-harness/releases/new):
+5. Create the release in GitHub - [Create a new release](https://github.com/solid/conformance-test-harness/releases/new):
    * Choose the tag that was just created.
    * Add a title, e.g. `Release 1.0.0`.
    * Add some content describing notable changes.

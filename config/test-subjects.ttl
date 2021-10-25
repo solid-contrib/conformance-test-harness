@@ -20,9 +20,9 @@ prefix dcterms: <http://purl.org/dc/terms/>
     solid-test:features "authentication", "acl". #, "wac-allow"
 
 <ess#test-subject-release>
-    doap:name "ESS 1.1.2"@en ;
-    doap:revision "1.1.2"@en ;
-    doap:created "2021-05-24"^^xsd:date .
+    doap:name "ESS 1.1.6"@en;
+    doap:revision "1.1.6"@en;
+    doap:created "2021-09-11"^^xsd:date .
 
 <ess-wac>
     a earl:Software, earl:TestSubject ;
@@ -33,10 +33,11 @@ prefix dcterms: <http://purl.org/dc/terms/>
     doap:description "A production-grade Solid server produced and supported by Inrupt."@en ;
     doap:programming-language "Java"@en ;
     solid-test:features "authentication", "acl", "wac-allow".
+
 <ess-wac#test-subject-release>
-    doap:name "ESS 1.1.2"@en ;
-    doap:revision "1.1.2"@en ;
-    doap:created "2021-05-24"^^xsd:date .
+    doap:name "ESS 1.1.6"@en;
+    doap:revision "1.1.6"@en;
+    doap:created "2021-09-11"^^xsd:date .
 
 <css>
     a earl:Software, earl:TestSubject ;
@@ -46,12 +47,12 @@ prefix dcterms: <http://purl.org/dc/terms/>
     doap:homepage <https://github.com/solid/community-server> ;
     doap:description "An open and modular implementation of the Solid specifications."@en ;
     doap:programming-language "TypeScript"@en ;
-    solid-test:features "authentication", "acl", "wac-allow", "wac".
+    solid-test:features "authentication", "acl", "wac-allow", "wac" .
 
 <css#test-subject-release>
-    doap:name "CSS 0.9.0"@en ;
-    doap:revision "0.9.0"@en ;
-    doap:created "2021-05-04"^^xsd:date .
+    doap:name "CSS 1.1.0"@en ;
+    doap:revision "1.1.0"@en ;
+    doap:created "2021-09-03"^^xsd:date .
 
 <nss>
     a earl:Software, earl:TestSubject ;
@@ -61,12 +62,12 @@ prefix dcterms: <http://purl.org/dc/terms/>
     doap:homepage <https://github.com/solid/node-solid-server> ;
     doap:description "Solid server on top of the file-system in NodeJS."@en ;
     doap:programming-language "JavaScript"@en ;
-    solid-test:features "authentication", "acl", "wac-allow", "wac".
+    solid-test:features "authentication", "acl", "wac-allow", "wac" .
 
 <nss#test-subject-release>
-    doap:name "NSS 5.6.6"@en ;
-    doap:revision "5.6.6"@en ;
-    doap:created "2021-03-12"^^xsd:date .
+    doap:name "NSS 5.6.8"@en ;
+    doap:revision "5.6.8"@en ;
+    doap:created "2021-07-22"^^xsd:date .
 
 <trinpod>
     a earl:Software, earl:TestSubject ;
@@ -77,9 +78,9 @@ prefix dcterms: <http://purl.org/dc/terms/>
     doap:description
         "TrinPod™ is an Industrial strength Solid Pod with conceptual computing through Trinity AI Capable of handling a massive amount of data."@en ;
     doap:programming-language "Common Lisp"@en ;
-    solid-test:features "authentication", "acl", "wac-allow", "wac".
+    solid-test:features "authentication", "acl", "wac-allow", "wac" .
 
 <trinpod#test-subject-release>
     doap:name "TrinPod-Server"@en ;
-    doap:revision "2.2.74"@en ;
-    doap:created "2021-07-19"^^xsd:date .
+    doap:revision "2.3.3"@en ;
+    doap:created "2021-10-14"^^xsd:date .

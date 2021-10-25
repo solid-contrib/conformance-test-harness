@@ -132,6 +132,29 @@ public class SolidResource {
         return aclUrl != null ? aclUrl.toString() : null;
     }
 
+    public SolidResource findStorage() throws Exception {
+        URI testUri = url;
+        boolean linkFound = false;
+        boolean rootTested = false;
+        while (!linkFound && !rootTested) {
+            linkFound = solidClient.hasStorageType(testUri);
+            if (!linkFound) {
+                final boolean atRoot = "/".equals(testUri.getPath());
+                if (!atRoot) {
+                    // haven't got to the root so keep going
+                    testUri = testUri.getPath().endsWith("/") ? testUri.resolve("..") : testUri.resolve(".");
+                } else {
+                    rootTested = true;
+                }
+            }
+        }
+        return linkFound ? new SolidResource(solidClient, testUri.toString()) : null;
+    }
+
+    public boolean hasStorageType() throws Exception {
+        return solidClient.hasStorageType(url);
+    }
+
     public AccessDatasetBuilder getAccessDatasetBuilder(final String owner) throws Exception {
         final AccessControlFactory accessControlFactory = CDI.current().select(AccessControlFactory.class).get();
         final AccessDatasetBuilder builder = accessControlFactory.getAccessDatasetBuilder(getAclUrl());

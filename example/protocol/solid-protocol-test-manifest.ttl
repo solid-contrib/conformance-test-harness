@@ -55,3 +55,11 @@ manifest:wac-allow-access-public-R
   td:preCondition "authentication", "acl", "wac-allow" ;
   spec:testScript
     <https://github.com/solid/conformance-test-harness/example/protocol/wac-allow/access-public-R.feature> .
+
+manifest:storage-headers
+  a td:TestCase ;
+  spec:requirementReference <https://solidproject.org/TR/protocol#server-link-storage> ;
+  td:reviewStatus td:unreviewed ;
+  td:preCondition "authentication", "acl" ;
+  spec:testScript
+    <https://github.com/solid/conformance-test-harness/example/protocol/storage/storage-headers.feature> .

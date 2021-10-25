@@ -29,6 +29,8 @@ import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.solid.common.vocab.ACP;
+import org.solid.common.vocab.PIM;
 import org.solid.testharness.accesscontrol.AccessDataset;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.config.ConfigTestNormalProfile;
@@ -252,7 +254,7 @@ class SolidClientTest {
     void getAclTypeACP() throws IOException, InterruptedException {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204, Map.of(HttpConstants.HEADER_LINK,
-                List.of("<http://www.w3.org/ns/solid/acp#AccessControlResource>; rel=\"type\"")));
+                List.of("<" + ACP.AccessControlResource.toString() + ">; rel=\"type\"")));
         when(mockClient.head(any())).thenReturn(mockResponse);
 
         final SolidClient solidClient = new SolidClient(mockClient);
@@ -264,7 +266,7 @@ class SolidClientTest {
     void getAclTypeWrongRel() throws IOException, InterruptedException {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204, Map.of(HttpConstants.HEADER_LINK,
-                List.of("<http://www.w3.org/ns/solid/acp#AccessControlResource>; rel=\"xxxx\"")));
+                List.of("<" + ACP.AccessControlResource.toString() + ">; rel=\"xxxx\"")));
         when(mockClient.head(any())).thenReturn(mockResponse);
 
         final SolidClient solidClient = new SolidClient(mockClient);
@@ -329,6 +331,28 @@ class SolidClientTest {
         final AccessDataset accessDataset = solidClient.getAcl(resourceAcl);
         assertNull(accessDataset);
     }
+
+    @Test
+    void hasStorageTypeFalse() throws IOException, InterruptedException {
+        final Client mockClient = mock(Client.class);
+        final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204);
+        when(mockClient.head(any())).thenReturn(mockResponse);
+
+        final SolidClient solidClient = new SolidClient(mockClient);
+        assertFalse(solidClient.hasStorageType(URI.create("http://localhost:3000/")));
+    }
+
+    @Test
+    void hasStorageTypeTrue() throws IOException, InterruptedException {
+        final Client mockClient = mock(Client.class);
+        final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204, Map.of(HttpConstants.HEADER_LINK,
+                List.of("<" + PIM.Storage.toString() + ">; rel=\"type\"")));
+        when(mockClient.head(any())).thenReturn(mockResponse);
+
+        final SolidClient solidClient = new SolidClient(mockClient);
+        assertTrue(solidClient.hasStorageType(URI.create("http://localhost:3000/")));
+    }
+
 
     @Test
     void createAcl() throws IOException, InterruptedException {
