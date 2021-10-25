@@ -111,14 +111,11 @@ mappings:
   - prefix: https://github.com/solid/conformance-test-harness/example
     path: example
 ```
-This method works well when running your tests in an Integrated Development Environemnt (IDE) as it doesn't require anything adding to the command line.
+This method works well when running your tests in an Integrated Development Environemnt (IDE) as it doesn't require
+anything adding to the command line. If there is only one test subject defined in the `test-subjects.ttl` file, then the
+target property can be omitted as this will be selected by default.
 
 Alternatively, you can set these as command line options as described later. 
-
-**Note**: During development, you can select a target using:
-```
--Dtarget=TARGET_SERVER_IRI
-``` 
 
 ### 3. Build and Test
 To run the unit tests on the Test Harness itself:
@@ -127,14 +124,9 @@ To run the unit tests on the Test Harness itself:
 ```
 The test coverage report is available here:`target/site/jacoco/index.html`
 
-To run the test suite with the default target server as defined in `config/application.yaml`:
+To run the test suite against whichever server is configured in your `.env` file:
 ```shell
 ./mvnw test -Psolid
-```
-To run the test suite with a specific target server:
-```shell
-./mvnw test -Psolid -Dtarget=ess
-./mvnw test -Psolid -Dtarget=css
 ```
 
 Using an IDE, you can also run a specific scenario by editing the TestScenarioRunner and then running it as you would any
