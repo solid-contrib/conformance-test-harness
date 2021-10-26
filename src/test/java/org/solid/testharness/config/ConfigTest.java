@@ -121,7 +121,12 @@ public class ConfigTest {
 
     @Test
     void logConfigSettings() {
-        assertDoesNotThrow(() -> config.logConfigSettings());
+        assertDoesNotThrow(() -> config.logConfigSettings(true));
+    }
+
+    @Test
+    void logConfigSettingsNoTests() {
+        assertDoesNotThrow(() -> config.logConfigSettings(false));
     }
 
     @Test

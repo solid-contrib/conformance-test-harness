@@ -108,8 +108,6 @@ public class ConformanceTestHarness {
                         .build());
             }
         }
-        // log the config of this test run
-        config.logConfigSettings();
         // load the test manifests
         testSuiteDescription.load(config.getTestSources());
     }
@@ -171,10 +169,6 @@ public class ConformanceTestHarness {
             final File reportHtmlFile = new File(outputDir, "report.html");
             logger.info("Report HTML/RDFa file: {}", reportHtmlFile.getPath());
             reportGenerator.buildHtmlResultReport(Files.newBufferedWriter(reportHtmlFile.toPath()));
-
-            final File coverageHtmlFile = new File(outputDir, "coverage.html");
-            logger.info("Coverage report HTML/RDFa file: {}", coverageHtmlFile.getPath());
-            reportGenerator.buildHtmlCoverageReport(Files.newBufferedWriter(coverageHtmlFile.toPath()));
         } catch (Exception e) {
             logger.error("Failed to write reports", e);
         }

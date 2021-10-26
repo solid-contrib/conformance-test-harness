@@ -45,10 +45,13 @@ public class ResultData {
     public ResultData(final List<IRI> specifications, final List<IRI> testCases, final TestSuiteResults results) {
         assertor = new Assertor(iri(Namespaces.TEST_HARNESS_URI));
         final Config config = CDI.current().select(Config.class).get();
-        testSubject = new TestSubject(config.getTestSubject());
+        if (results != null) {
+            // there is a test subject when there are results, but not for coverage reports
+            testSubject = new TestSubject(config.getTestSubject());
+            this.testSuiteResults = results;
+        }
         this.specifications = specifications.stream().map(Specification::new).collect(Collectors.toList());
         this.testCases = testCases.stream().map(TestCase::new).collect(Collectors.toList());
-        this.testSuiteResults = results;
     }
 
     public String getSubject() {
