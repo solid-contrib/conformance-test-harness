@@ -51,7 +51,8 @@ class TestSuiteDescriptionNoRepositoryTest {
     void locateTestCasesException() {
         when(dataRepository.getConnection()).thenThrow(new RepositoryException("BAD REPOSITORY"));
         final List<IRI> testCases = List.of(iri("https://example.org/test/group3/feature1"));
-        assertThrows(TestHarnessInitializationException.class, () -> testSuiteDescription.locateTestCases(testCases));
+        assertThrows(TestHarnessInitializationException.class,
+                () -> testSuiteDescription.locateTestCases(testCases,false));
     }
 
     @Test

@@ -6,6 +6,7 @@
 
 ### Minor changes
 * Fix: Coverage only report failed with missing subject.
+* Fix: Fetch test case titles from Feature files for coverage report.
 * Update: Simplify command line options. Tests are run unless you specify `--coverage` in which case you get that report
   instead.
 

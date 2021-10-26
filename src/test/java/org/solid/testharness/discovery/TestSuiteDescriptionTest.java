@@ -30,10 +30,14 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.solid.common.vocab.DCTERMS;
 import org.solid.common.vocab.DOAP;
 import org.solid.common.vocab.RDF;
 import org.solid.common.vocab.SPEC;
-import org.solid.testharness.utils.*;
+import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.Namespaces;
+import org.solid.testharness.utils.TestHarnessInitializationException;
+import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
 import java.net.MalformedURLException;
@@ -236,19 +240,20 @@ class TestSuiteDescriptionTest {
     @Test
     void mapEmptyList() {
         final List<IRI> testCases = Collections.emptyList();
-        assertTrue(testSuiteDescription.locateTestCases(testCases).isEmpty());
+        assertTrue(testSuiteDescription.locateTestCases(testCases, false).isEmpty());
     }
 
     @Test
     void mapRemoteFeaturePaths() {
         final List<IRI> testCases = List.of(iri("https://example.org/test/group3/feature1"));
-        assertThrows(TestHarnessInitializationException.class, () -> testSuiteDescription.locateTestCases(testCases));
+        assertThrows(TestHarnessInitializationException.class,
+                () -> testSuiteDescription.locateTestCases(testCases, false));
     }
 
     @Test
     void mapFeaturePaths() {
         final List<IRI> testCases = List.of(iri("https://example.org/features/test.feature"));
-        final List<String> paths = testSuiteDescription.locateTestCases(testCases);
+        final List<String> paths = testSuiteDescription.locateTestCases(testCases, false);
         final String[] expected = new String[]{TestUtils.getPathUri("src/test/resources/test.feature").toString()};
         assertThat("Locations match", paths, containsInAnyOrder(expected));
     }
@@ -259,17 +264,30 @@ class TestSuiteDescriptionTest {
                 iri("https://example.org/test/group1/feature1"), iri("https://example.org/test/group1/feature2"),
                 iri("https://example.org/test/group1/feature3"), iri("https://example.org/test/group2/feature1")
         );
-        final List<String> paths = testSuiteDescription.locateTestCases(testCases);
+        final List<String> paths = testSuiteDescription.locateTestCases(testCases, false);
         final String[] expected = new String[]{TestUtils.getPathUri("src/test/resources/test-features/group1/feature1")
                 .toString(),
                 TestUtils.getPathUri("src/test/resources/test-features/group1/feature2").toString(),
                 TestUtils.getPathUri("src/test/resources/test-features/otherExample/feature1").toString()
         };
         assertThat("Locations match", paths, containsInAnyOrder(expected));
-        // TODO: Test for titles being inserted once this is implemented
-//        try (RepositoryConnection conn = repository.getConnection()) {
-//            assertTrue(conn.hasStatement(null, EARL.mode, EARL.untested, false));
-//        }
+    }
+
+    @Test
+    void fetchFeatureTitles() {
+        try (RepositoryConnection conn = repository.getConnection()) {
+            conn.add(iri("https://example.org/group1-feature1"), SPEC.testScript,
+                    iri("https://example.org/test/group1/feature1"));
+        }
+        final List<IRI> testCases = List.of(
+                iri("https://example.org/test/group1/feature1"), iri("https://example.org/test/group1/feature2"),
+                iri("https://example.org/test/group1/feature3"), iri("https://example.org/test/group2/feature1"),
+                iri("https://example.org/test/group2/")
+        );
+        final List<String> paths = testSuiteDescription.locateTestCases(testCases, true);
+        // this finds 2 titles but can only attach one to the testcase in the repository
+        assertTrue(ask(iri("https://example.org/group1-feature1"), DCTERMS.title, literal("Feature 1 title")));
+        assertFalse(ask(iri("https://example.org/group1-feature2"), DCTERMS.title, literal("Feature 2 title")));
     }
 
     private IRI[] createIriList(final String... testCases) {
