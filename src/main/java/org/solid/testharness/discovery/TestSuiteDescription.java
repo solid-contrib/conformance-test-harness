@@ -23,6 +23,7 @@
  */
 package org.solid.testharness.discovery;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.RDF4JException;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -30,7 +31,10 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.solid.common.vocab.*;
+import org.solid.common.vocab.DCTERMS;
+import org.solid.common.vocab.RDF;
+import org.solid.common.vocab.SPEC;
+import org.solid.common.vocab.TD;
 import org.solid.testharness.config.PathMappings;
 import org.solid.testharness.http.HttpUtils;
 import org.solid.testharness.utils.DataRepository;
@@ -38,11 +42,20 @@ import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.io.BufferedReader;
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
-import java.util.*;
+import java.nio.file.Files;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static org.eclipse.rdf4j.model.util.Values.literal;
 
 /**
  * Representation of a test suite description document parsed from RDF.
@@ -50,6 +63,8 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class TestSuiteDescription {
     private static final Logger logger = LoggerFactory.getLogger(TestSuiteDescription.class);
+    private static final Pattern FEATURE_TITLE = Pattern.compile("^\\s*Feature\\s*:\\s*(\\S[^#]+)\\s*",
+            Pattern.CASE_INSENSITIVE);
 
     @Inject
     DataRepository dataRepository;
@@ -80,14 +95,14 @@ public class TestSuiteDescription {
         return getFilteredTestCases(null, false);
     }
 
-    public List<String> locateTestCases(final List<IRI> testCases) {
+    public List<String> locateTestCases(final List<IRI> testCases, final boolean readTitles) {
         if (testCases.isEmpty()) {
             return Collections.EMPTY_LIST;
         }
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             // keep this connection for when we read the Feature file titles and add to the TestCase
-            return testCases.stream().map(t -> {
-                final URI mappedLocation = pathMappings.mapFeatureIri(t);
+            return testCases.stream().map(testCaseIri -> {
+                final URI mappedLocation = pathMappings.mapFeatureIri(testCaseIri);
                 if (HttpUtils.isHttpProtocol(mappedLocation.getScheme())) {
                     throw new TestHarnessInitializationException("Remote test cases are not yet supported - use " +
                             "mappings to point to local copies");
@@ -98,6 +113,19 @@ public class TestSuiteDescription {
                     logger.warn("FEATURE NOT FOUND: {}", mappedLocation);
                     return null;
                 } else {
+                    if (readTitles) {
+                        final String title = getFeatureTitle(file);
+                        if (title != null) {
+                            final IRI subject = conn.getStatements(null, SPEC.testScript, testCaseIri).stream()
+                                    .map(Statement::getSubject)
+                                    .filter(Value::isIRI)
+                                    .map(IRI.class::cast)
+                                    .findFirst().orElse(null);
+                            if (subject != null) {
+                                conn.add(subject, DCTERMS.title, literal(title));
+                            }
+                        }
+                    }
                     return mappedLocation.toString();
                 }
             }).filter(Objects::nonNull).collect(Collectors.toList());
@@ -105,6 +133,25 @@ public class TestSuiteDescription {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException(e.toString())
                     .initCause(e);
         }
+    }
+
+    @SuppressWarnings("PMD.AssignmentInOperand") // this is a common pattern and changing it makes less readable code
+    private String getFeatureTitle(final File file) {
+        try (final BufferedReader br = Files.newBufferedReader(file.toPath())) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (StringUtils.isBlank(line)) continue;
+                if (line.strip().startsWith("#")) continue;
+                final Matcher matcher = FEATURE_TITLE.matcher(line);
+                if (matcher.matches()) {
+                    return matcher.group(1).strip();
+                }
+            }
+            logger.warn("FILE DOES NOT START WITH 'Feature:' {}", file.toPath());
+        } catch (Exception e) { // jacoco will not show full coverage for this try-with-resources line
+            logger.warn("FEATURE NOT READABLE: {} - {}", file.toPath(), e.getMessage());
+        }
+        return null;
     }
 
     private List<IRI> getFilteredTestCases(final Set<String> serverFeatures, final boolean applyFilters) {

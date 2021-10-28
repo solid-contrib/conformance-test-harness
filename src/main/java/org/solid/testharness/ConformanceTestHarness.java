@@ -116,7 +116,7 @@ public class ConformanceTestHarness {
         logger.info("===================== DISCOVER TESTS ========================");
         try {
             final List<IRI> testCases = testSuiteDescription.getAllTestCases();
-            final List<String> featurePaths = testSuiteDescription.locateTestCases(testCases);
+            final List<String> featurePaths = testSuiteDescription.locateTestCases(testCases, true);
             if (featurePaths.isEmpty()) {
                 logger.warn("There are no tests available");
                 return true;
@@ -203,7 +203,7 @@ public class ConformanceTestHarness {
                 .collect(Collectors.toList());
         logger.info("==== FILTERED TEST CASES: {} - {}", filteredTestCases.size(), filteredTestCases);
 
-        featurePaths = testSuiteDescription.locateTestCases(filteredTestCases);
+        featurePaths = testSuiteDescription.locateTestCases(filteredTestCases, false);
         if (featurePaths.isEmpty()) {
             logger.warn("There are no tests available");
             return null;

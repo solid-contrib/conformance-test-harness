@@ -101,14 +101,14 @@ class ConformanceTestHarnessTest {
 
     @Test
     void createCoverageReportNoTests() {
-        when(testSuiteDescription.locateTestCases(any())).thenReturn(Collections.emptyList());
+        when(testSuiteDescription.locateTestCases(any(), eq(true))).thenReturn(Collections.emptyList());
         assertTrue(conformanceTestHarness.createCoverageReport());
         assertTrue(Files.notExists(tmp.resolve("coverage.html")));
     }
 
     @Test
     void createCoverageReportInitError() {
-        when(testSuiteDescription.locateTestCases(any())).thenThrow(TestHarnessInitializationException.class);
+        when(testSuiteDescription.locateTestCases(any(), eq(true))).thenThrow(TestHarnessInitializationException.class);
         assertFalse(conformanceTestHarness.createCoverageReport());
         assertTrue(Files.notExists(tmp.resolve("coverage.html")));
     }
@@ -116,14 +116,14 @@ class ConformanceTestHarnessTest {
     @Test
     void createCoverageReportWriteFail() {
         tmp.toFile().setWritable(false);
-        when(testSuiteDescription.locateTestCases(any())).thenReturn(List.of("feature"));
+        when(testSuiteDescription.locateTestCases(any(), eq(true))).thenReturn(List.of("feature"));
         assertFalse(conformanceTestHarness.createCoverageReport());
         assertTrue(Files.notExists(tmp.resolve("coverage.html")));
     }
 
     @Test
     void createCoverageReportPass() {
-        when(testSuiteDescription.locateTestCases(any())).thenReturn(List.of("feature"));
+        when(testSuiteDescription.locateTestCases(any(), eq(true))).thenReturn(List.of("feature"));
         assertTrue(conformanceTestHarness.createCoverageReport());
         assertTrue(Files.exists(tmp.resolve("coverage.html")));
     }
@@ -137,7 +137,7 @@ class ConformanceTestHarnessTest {
     void runTestSuiteNoTests() {
         mockTargetServer();
         when(testSuiteDescription.getSupportedTestCases(any())).thenReturn(Collections.emptyList());
-        when(testSuiteDescription.locateTestCases(any())).thenReturn(Collections.emptyList());
+        when(testSuiteDescription.locateTestCases(any(), eq(false))).thenReturn(Collections.emptyList());
         assertNull(conformanceTestHarness.runTestSuites(null));
         assertTrue(Files.notExists(tmp.resolve("report.html")));
     }
@@ -146,7 +146,7 @@ class ConformanceTestHarnessTest {
     void runTestSuiteNoTestsNullFilter() {
         mockTargetServer();
         when(testSuiteDescription.getSupportedTestCases(any())).thenReturn(List.of(iri("file:/group1/tests")));
-        when(testSuiteDescription.locateTestCases(any())).thenReturn(Collections.emptyList());
+        when(testSuiteDescription.locateTestCases(any(), eq(false))).thenReturn(Collections.emptyList());
         assertNull(conformanceTestHarness.runTestSuites(null));
         assertTrue(Files.notExists(tmp.resolve("report.html")));
     }
@@ -155,7 +155,7 @@ class ConformanceTestHarnessTest {
     void runTestSuiteNoTestsEmptyFilter() {
         mockTargetServer();
         when(testSuiteDescription.getSupportedTestCases(any())).thenReturn(List.of(iri("file:/group1/tests")));
-        when(testSuiteDescription.locateTestCases(any())).thenReturn(Collections.emptyList());
+        when(testSuiteDescription.locateTestCases(any(), eq(false))).thenReturn(Collections.emptyList());
         assertNull(conformanceTestHarness.runTestSuites(Collections.emptyList()));
         assertTrue(Files.notExists(tmp.resolve("report.html")));
     }
@@ -165,7 +165,7 @@ class ConformanceTestHarnessTest {
         mockTargetServer();
         when(config.getUserRegistrationEndpoint()).thenReturn(URI.create("https://example.org/register"));
         when(testSuiteDescription.getSupportedTestCases(any())).thenReturn(Collections.emptyList());
-        when(testSuiteDescription.locateTestCases(any())).thenReturn(List.of("test"));
+        when(testSuiteDescription.locateTestCases(any(), eq(false))).thenReturn(List.of("test"));
 
         final TestSuiteResults results = mockResults(1);
         when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
@@ -187,7 +187,7 @@ class ConformanceTestHarnessTest {
     void runTestSuitePass() {
         mockTargetServer();
         when(testSuiteDescription.getSupportedTestCases(any())).thenReturn(Collections.emptyList());
-        when(testSuiteDescription.locateTestCases(any())).thenReturn(List.of("test"));
+        when(testSuiteDescription.locateTestCases(any(), eq(false))).thenReturn(List.of("test"));
         final TestSuiteResults results = mockResults(1);
         when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
         assertEquals(1, conformanceTestHarness.runTestSuites(null).getFailCount());
@@ -200,7 +200,7 @@ class ConformanceTestHarnessTest {
         mockTargetServer();
         when(config.isSkipTearDown()).thenReturn(true);
         when(testSuiteDescription.getSupportedTestCases(any())).thenReturn(Collections.emptyList());
-        when(testSuiteDescription.locateTestCases(any())).thenReturn(List.of("test"));
+        when(testSuiteDescription.locateTestCases(any(), eq(false))).thenReturn(List.of("test"));
         final TestSuiteResults results = mockResults(1);
         when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
         assertEquals(1, conformanceTestHarness.runTestSuites(null).getFailCount());
@@ -213,13 +213,13 @@ class ConformanceTestHarnessTest {
         mockTargetServer();
         when(testSuiteDescription.getSupportedTestCases(any()))
                 .thenReturn(List.of(iri("file:/group1/tests"), iri("file:/group2/tests")));
-        when(testSuiteDescription.locateTestCases(any())).thenReturn(List.of("test"));
+        when(testSuiteDescription.locateTestCases(any(), eq(false))).thenReturn(List.of("test"));
         final TestSuiteResults results = mockResults(1);
         when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
 
         assertEquals(1, conformanceTestHarness.runTestSuites(List.of("group1")).getFailCount());
         final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
-        verify(testSuiteDescription).locateTestCases(captor.capture());
+        verify(testSuiteDescription).locateTestCases(captor.capture(), eq(false));
         assertEquals(1, captor.getValue().size());
         assertEquals(iri("file:/group1/tests"), captor.getValue().get(0));
         assertTrue(Files.exists(tmp.resolve("report.html")));
@@ -230,13 +230,13 @@ class ConformanceTestHarnessTest {
         mockTargetServer();
         when(testSuiteDescription.getSupportedTestCases(any()))
                 .thenReturn(List.of(iri("file:/group1/tests"), iri("file:/group2/tests"), iri("file:/example/group3")));
-        when(testSuiteDescription.locateTestCases(any())).thenReturn(List.of("test"));
+        when(testSuiteDescription.locateTestCases(any(), eq(false))).thenReturn(List.of("test"));
         final TestSuiteResults results = mockResults(1);
         when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
 
         assertEquals(1, conformanceTestHarness.runTestSuites(List.of("group1", "group2")).getFailCount());
         final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
-        verify(testSuiteDescription).locateTestCases(captor.capture());
+        verify(testSuiteDescription).locateTestCases(captor.capture(), eq(false));
         assertEquals(2, captor.getValue().size());
         assertEquals(iri("file:/group1/tests"), captor.getValue().get(0));
         assertEquals(iri("file:/group2/tests"), captor.getValue().get(1));
@@ -248,13 +248,13 @@ class ConformanceTestHarnessTest {
         mockTargetServer();
         when(testSuiteDescription.getSupportedTestCases(any()))
                 .thenReturn(List.of(iri("file:/group1/tests"), iri("file:/group2/tests")));
-        when(testSuiteDescription.locateTestCases(any())).thenReturn(List.of("test"));
+        when(testSuiteDescription.locateTestCases(any(), eq(false))).thenReturn(List.of("test"));
         final TestSuiteResults results = mockResults(1);
         when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
 
         assertEquals(1, conformanceTestHarness.runTestSuites(List.of("missing")).getFailCount());
         final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
-        verify(testSuiteDescription).locateTestCases(captor.capture());
+        verify(testSuiteDescription).locateTestCases(captor.capture(), eq(false));
         assertTrue(captor.getValue().isEmpty());
         assertTrue(Files.exists(tmp.resolve("report.html")));
     }
@@ -264,7 +264,7 @@ class ConformanceTestHarnessTest {
         tmp.toFile().setWritable(false);
         mockTargetServer();
         when(testSuiteDescription.getSupportedTestCases(any())).thenReturn(Collections.emptyList());
-        when(testSuiteDescription.locateTestCases(any())).thenReturn(List.of("test"));
+        when(testSuiteDescription.locateTestCases(any(), eq(false))).thenReturn(List.of("test"));
         final TestSuiteResults results = mockResults(1);
         when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
         assertEquals(1, conformanceTestHarness.runTestSuites(null).getFailCount());
