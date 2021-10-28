@@ -1,6 +1,6 @@
 # Solid Specification Conformance Test Harness
 
-## Release 1.0.6 (unreleased)
+## Release 1.0.6
 ### Features
 * Add function to allow a test to locate the `pim:Storage` of a resource by traversing up the hierarchy. 
 
