@@ -42,7 +42,7 @@
         <jakarta.version>3.0.0</jakarta.version>
         <jose4j.version>0.7.9</jose4j.version>
         <commons.text.version>1.9</commons.text.version>
-        <commons.cli.version>1.4</commons.cli.version>
+        <commons.cli.version>1.5.0</commons.cli.version>
         <wiremock.version>2.27.2</wiremock.version>
         <solid.vocab.version>0.0.12</solid.vocab.version>
 
