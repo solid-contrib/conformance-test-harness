@@ -21,12 +21,15 @@
 
 <section id="test-coverage-by-specification-requirement" rel="dcterms:hasPart" resource="#test-coverage-by-specification-requirement">
   <h2 property="dcterms:title">Test coverage by specification requirement</h2>
+  {#include buttons coverageMode=true /}
   <div datatype="rdf:HTML" property="dcterms:description">
   <ul>
   {#each specifications.orEmpty}
   <li rel="dcterms:hasPart" resource="{it.subject}" class="spec">
     <details id="{it.anchor}">
-      <summary><b>Specification:</b> {it.subject} <a href="{it.subject}" class="ext"></a><span class="count">{it.countRequirements}</span></summary>
+      <summary><b>Specification:</b> {it.subject} <a href="{it.subject}" class="ext"></a>
+        <span class="count">{it.countRequirements}</span>
+      </summary>
       {#if it.specificationRequirements}
       {#each it.specificationRequirements}
       {#include requirement}

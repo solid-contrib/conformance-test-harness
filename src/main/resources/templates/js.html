@@ -1,12 +1,12 @@
 <script>
   //<![CDATA[
   document.addEventListener("DOMContentLoaded", function (event) {
-    const anchors = document.getElementsByTagName("a");
-    for (let i = 0; i < anchors.length; i++) {
-      anchors[i].href = anchors[i].href
+    const anchors = document.querySelectorAll("a");
+    anchors.forEach(anchor => {
+      anchor.href = anchor.href
               .replace('github.com/solid/specification-tests/', 'github.com/solid/specification-tests/blob/main/')
               .replace('github.com/solid/conformance-test-harness/', 'github.com/solid/conformance-test-harness/blob/main/')
-    }
+    })
 
     function openTarget() {
       const hash = location.hash.substring(1);
@@ -26,6 +26,24 @@
     openTarget();
   });
 
+  function openAll(elem) {
+    elem.parentElement.querySelectorAll('details').forEach(d => d.open = true);
+  }
+
+  function openFailed(elem) {
+    elem.parentElement.querySelectorAll('details').forEach(d => d.open = false);
+    elem.parentElement.querySelectorAll('details.failed').forEach(d => {
+      d.open = true;
+      const parentDetails = d.parentElement.closest('details')
+      if (parentDetails) {
+        parentDetails.open = true;
+      }
+    });
+  }
+
+  function closeAll(elem) {
+    elem.parentElement.querySelectorAll('details').forEach(d => d.open = false);
+  }
 
   //]]>
 </script>

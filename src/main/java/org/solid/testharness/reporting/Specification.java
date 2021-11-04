@@ -47,4 +47,16 @@ public class Specification extends DataModelBase {
     public int countRequirements() {
         return getSpecificationRequirements() != null ?  getSpecificationRequirements().size() : 0;
     }
+
+    public long countFailed() {
+        return getSpecificationRequirements() != null
+                ? getSpecificationRequirements().stream().filter(sr -> sr.countFailed() > 0).count()
+                : 0;
+    }
+
+    public long countPassed() {
+        return getSpecificationRequirements() != null
+                ? getSpecificationRequirements().stream().filter(sr -> sr.countPassed() == sr.countTestCases()).count()
+                : 0;
+    }
 }

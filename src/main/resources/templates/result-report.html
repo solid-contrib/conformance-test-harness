@@ -32,13 +32,14 @@
 {#if specifications??}
 <section id="results-by-specification-requirement" rel="dcterms:hasPart" resource="#results-by-specification-requirement">
   <h2 property="dcterms:title">Results by specification requirement</h2>
+  {#include buttons coverageMode=false /}
   <div datatype="rdf:HTML" property="dcterms:description">
   <ul>
   {#each specifications.orEmpty}
   <li rel="dcterms:hasPart" resource="{it.subject}" class="spec">
-    <details id="{it.anchor}">
+    <details id="{it.anchor}" {#if it.countFailed > 0}open class="failed"{/if}>
       <summary><b>Specification:</b> {it.subject} <a href="{it.subject}" class="ext"></a>
-        <span class="count">{it.countRequirements}</span>
+        <span class="count">{it.countPassed}/{it.countRequirements}</span>
       </summary>
     {#if it.specificationRequirements}
     {#each it.specificationRequirements}
@@ -79,19 +80,24 @@
 {#if testCases}
 <section id="results-by-test-case" rel="dcterms:hasPart" resource="#results-by-test-case">
   <h2 property="dcterms:title">Results by test case</h2>
+  {#include buttons coverageMode=false /}
   <div datatype="rdf:HTML" property="dcterms:description">
+    <ul>
   {#for testCase in testCases}
   {#if testCase.scenarios}
-  <details id="{testCase.anchor}" about="{testCase.subject}" {#if testCase.failed()}open{/if}>
-    <summary><b>Feature:</b> {testCase.title} <a href="#{testCase.requirementAnchor}" class="opening" data-id="{testCase.requirementAnchor}">&uarr;</a>
-      <span class="count">{testCase.countPassed}/{testCase.countScenarios}</span>
-    </summary>
-    {#each testCase.scenarios}
-    {#include scenario /}
-    {/each}
-  </details>
+    <li about="{testCase.subject}" class="spec">
+    <details id="{testCase.anchor}" {#if testCase.failed()}open class="failed"{/if}>
+      <summary><b>Feature:</b> {testCase.title} <a href="#{testCase.requirementAnchor}" class="opening" data-id="{testCase.requirementAnchor}">&uarr;</a>
+        <span class="count">{testCase.countPassed}/{testCase.countScenarios}</span>
+      </summary>
+      {#each testCase.scenarios}
+      {#include scenario /}
+      {/each}
+    </details>
+    </li>
   {/if}
   {/for}
+    </ul>
   </div>
 </section>
 {/if}
