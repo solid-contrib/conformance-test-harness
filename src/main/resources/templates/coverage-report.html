@@ -25,35 +25,36 @@
   <ul>
   {#each specifications.orEmpty}
   <li rel="dcterms:hasPart" resource="{it.subject}" class="spec">
-    {#if it.specificationRequirements}
-    {#let specLink=it.subject}
-    {#each it.specificationRequirements}
-    {#include requirement}
-      {#if it.testCases??}
-      <table rel="spec:requirement" resource="{it.subject}">
-        <caption>Test cases</caption>
-        <thead>
-        <tr>
-          <th>Title</th>
-          <th>Details</th>
-          <th>Implemented</th>
-        </tr>
-        </thead>
-        <tbody>
-        {#each it.testCases}
-        {#include testcase coverageMode=true /}
-        {/each}
-        </tbody>
-      </table>
+    <details id="{it.anchor}">
+      <summary><b>Specification:</b> {it.subject} <a href="{it.subject}" class="ext"></a><span class="count">{it.countRequirements}</span></summary>
+      {#if it.specificationRequirements}
+      {#each it.specificationRequirements}
+      {#include requirement}
+        {#if it.testCases??}
+        <table rel="spec:requirement" resource="{it.subject}">
+          <caption>Test cases</caption>
+          <thead>
+          <tr>
+            <th>Title</th>
+            <th>Details</th>
+            <th>Implemented</th>
+          </tr>
+          </thead>
+          <tbody>
+          {#each it.testCases}
+          {#include testcase coverageMode=true /}
+          {/each}
+          </tbody>
+        </table>
+        {#else}
+        <p>No test cases found.</p>
+        {/if}
+      {/include}
+      {/each}
       {#else}
-      <p>No test cases found.</p>
+      <p>No tests were discovered.</p>
       {/if}
-    {/include}
-    {/each}
-    {/let}
-    {#else}
-    <p>No tests were discovered.</p>
-    {/if}
+    </details>
   </li>
   {/each}
   </ul>

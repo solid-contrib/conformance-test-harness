@@ -1,6 +1,6 @@
 {#with it}
-<section id="{it.anchor}" rel="dcterms:hasPart" resource="{subject}" typeof="{typesList}">
-  <h4 property="dcterms:title">{title}</h4>
+<details id="{anchor}" rel="dcterms:hasPart" resource="{subject}" typeof="{typesList}" {#if !generatedOutput.passed}open{/if}>
+  <summary><b>Scenario:</b> <span property="dcterms:title">{title}</span></summary>
   <dl><dt>Scenario</dt><dd>{subject}</dd></dl>
   <dl><dt>Script location</dt><dd><a rel="prov:used" href="{used}">{used}</a></dd></dl>
   <dl><dt>Start</dt><dd><time datatype="xsd:dateTime" datetime="{startTime}" property="prov:startedAtTime">{startTime}</time></dd></dl>
@@ -33,5 +33,5 @@
     </tbody>
   </table>
   {/if}
-</section>
+</details>
 {/with}

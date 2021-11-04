@@ -28,13 +28,23 @@ import org.solid.common.vocab.SPEC;
 import org.solid.testharness.utils.DataModelBase;
 
 import java.util.List;
+import java.util.Optional;
 
 public class Specification extends DataModelBase {
+    private Optional<List<SpecificationRequirement>> requirements;
+
     public Specification(final IRI subject) {
         super(subject);
     }
 
     public List<SpecificationRequirement> getSpecificationRequirements() {
-        return getModelList(SPEC.requirement, SpecificationRequirement.class);
+        if (requirements == null) {
+            requirements = Optional.ofNullable(getModelList(SPEC.requirement, SpecificationRequirement.class));
+        }
+        return requirements.orElse(null);
+    }
+
+    public int countRequirements() {
+        return getSpecificationRequirements() != null ?  getSpecificationRequirements().size() : 0;
     }
 }

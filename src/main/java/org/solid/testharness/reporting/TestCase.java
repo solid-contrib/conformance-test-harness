@@ -28,8 +28,11 @@ import org.solid.common.vocab.*;
 import org.solid.testharness.utils.DataModelBase;
 
 import java.util.List;
+import java.util.Optional;
 
 public class TestCase extends DataModelBase {
+    private Optional<List<Scenario>> scenarios;
+
     public TestCase(final IRI subject) {
         super(subject, ConstructMode.INC_REFS);
     }
@@ -50,6 +53,11 @@ public class TestCase extends DataModelBase {
         return getIriAsString(SPEC.requirementReference);
     }
 
+    public String getRequirementAnchor() {
+        final IRI requirement = getAsIri(SPEC.requirementReference);
+        return requirement != null ? requirement.getLocalName() : null;
+    }
+
     public boolean isImplemented() {
         return getIriAsString(SPEC.testScript) != null;
     }
@@ -64,6 +72,33 @@ public class TestCase extends DataModelBase {
     }
 
     public List<Scenario> getScenarios() {
-        return getModelList(DCTERMS.hasPart, Scenario.class);
+        if (scenarios == null) {
+            scenarios = Optional.ofNullable(getModelList(DCTERMS.hasPart, Scenario.class));
+        }
+        return scenarios.orElse(null);
+    }
+
+    public int countScenarios() {
+        return getScenarios() != null ?  getScenarios().size() : 0;
+    }
+
+    public long countFailed() {
+        return getScenarios() != null
+                ? getScenarios().stream().filter(s -> !s.getGeneratedOutput().isPassed()).count()
+                : 0;
+    }
+
+    public long countPassed() {
+        return getScenarios() != null
+                ? getScenarios().stream().filter(s -> s.getGeneratedOutput().isPassed()).count()
+                : 0;
+    }
+
+    public boolean failed() {
+        return getScenarios() != null && getScenarios().stream().anyMatch(s -> !s.getGeneratedOutput().isPassed());
+    }
+
+    public boolean passed() {
+        return getScenarios() != null && getScenarios().stream().allMatch(s -> s.getGeneratedOutput().isPassed());
     }
 }

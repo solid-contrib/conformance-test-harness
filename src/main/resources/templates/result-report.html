@@ -36,8 +36,11 @@
   <ul>
   {#each specifications.orEmpty}
   <li rel="dcterms:hasPart" resource="{it.subject}" class="spec">
+    <details id="{it.anchor}">
+      <summary><b>Specification:</b> {it.subject} <a href="{it.subject}" class="ext"></a>
+        <span class="count">{it.countRequirements}</span>
+      </summary>
     {#if it.specificationRequirements}
-    {#let specLink=it.subject}
     {#each it.specificationRequirements}
     {#include requirement}
       {#if it.testCases}
@@ -62,10 +65,10 @@
       {/if}
     {/include}
     {/each}
-    {/let}
     {#else}
     <p>No tests were discovered.</p>
     {/if}
+    </details>
   </li>
   {/each}
   </ul>
@@ -79,12 +82,14 @@
   <div datatype="rdf:HTML" property="dcterms:description">
   {#for testCase in testCases}
   {#if testCase.scenarios}
-  <section id="{testCase.anchor}" about="{testCase.subject}">
-    <h3>{testCase.title}</h3>
-      {#each testCase.scenarios}
-      {#include scenario /}
-      {/each}
-  </section>
+  <details id="{testCase.anchor}" about="{testCase.subject}" {#if testCase.failed()}open{/if}>
+    <summary><b>Feature:</b> {testCase.title} <a href="#{testCase.requirementAnchor}" class="opening" data-id="{testCase.requirementAnchor}">&uarr;</a>
+      <span class="count">{testCase.countPassed}/{testCase.countScenarios}</span>
+    </summary>
+    {#each testCase.scenarios}
+    {#include scenario /}
+    {/each}
+  </details>
   {/if}
   {/for}
   </div>

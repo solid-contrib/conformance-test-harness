@@ -103,4 +103,10 @@ class TestCaseTest extends AbstractDataModelTests  {
         final TestCase testCase = new TestCase(iri(NS, "test2"));
         assertNull(testCase.getScenarios());
     }
+
+    @Test
+    void getResultTrue() {
+        final TestCase testCase = new TestCase(iri(NS, "test1"));
+        assertFalse(testCase.failed());
+    }
 }

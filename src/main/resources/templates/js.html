@@ -7,6 +7,25 @@
               .replace('github.com/solid/specification-tests/', 'github.com/solid/specification-tests/blob/main/')
               .replace('github.com/solid/conformance-test-harness/', 'github.com/solid/conformance-test-harness/blob/main/')
     }
+
+    function openTarget() {
+      const hash = location.hash.substring(1);
+      if (hash) {
+        const details = document.getElementById(hash);
+        if (details && details.tagName.toLowerCase() === 'details') {
+          details.open = true;
+          const parentDetails = details.parentElement.closest('details')
+          if (parentDetails) {
+            parentDetails.open = true;
+          }
+          details.scrollIntoView();
+        }
+      }
+    }
+    window.addEventListener('hashchange', openTarget);
+    openTarget();
   });
+
+
   //]]>
 </script>

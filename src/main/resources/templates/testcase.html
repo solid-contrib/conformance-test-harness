@@ -79,7 +79,7 @@
           o
         {/switch}
         </span>
-        <a href="#{it.anchor}">{it.title}</a>
+        <a href="#{it.anchor}" class="opening" data-id="{it.anchor}">{it.title}</a>
       </li>
       {/each}
     </ul>
@@ -87,8 +87,6 @@
   {#else}
   <td></td>
   <td>Test not run.</td>
-  <td></td>
-  <td></td>
   {/if}
 </tr>
 {/with}

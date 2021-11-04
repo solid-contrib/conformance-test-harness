@@ -26,7 +26,6 @@
     {/if}
     {! REQUIREMENT - RESULTS !}
     {#if !coverageMode??}
-    {#let specLink='https://example.org'}
     {#each specificationRequirements.orEmpty}
     {#include requirement}
     {#if it.testCases}
@@ -46,11 +45,9 @@
     {/if}
     {/include}
     {/each}
-    {/let}
     {/if}
     {! REQUIREMENT - COVERAGE !}
     {#if coverageMode??}
-    {#let specLink='https://example.org'}
     {#each specificationRequirements.orEmpty}
     {#include requirement}
     {#if it.testCases}
@@ -69,7 +66,6 @@
     {/if}
     {/include}
     {/each}
-    {/let}
     {/if}
     {! TESTCASE !}
     {#if testCases??}
