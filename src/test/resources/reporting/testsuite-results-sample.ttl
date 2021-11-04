@@ -8,7 +8,7 @@ prefix td: <http://www.w3.org/2006/03/test-description#>
 prefix prov: <http://www.w3.org/ns/prov#>
 prefix test-harness: <https://github.com/solid/conformance-test-harness/>
 
-prefix results: <https://github.com/solid/implementation-reports/uuid#>
+prefix results: <https://github.com/solid/specification-tests/uuid#>
 prefix manifest: <#>
 
 manifest:group1-feature1

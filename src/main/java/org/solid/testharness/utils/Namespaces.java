@@ -36,8 +36,8 @@ import java.util.stream.Collectors;
 public final class Namespaces {
     private static Map<String, Namespace> namespaceMap;
 
-    public static final String RESULTS_URI = "https://github.com/solid/implementation-reports/" +
-            UUID.randomUUID() + "#";
+    public static final String RESULTS_BASE_URI = "https://github.com/solid/specification-tests/" + UUID.randomUUID();
+    public static final String RESULTS_URI = RESULTS_BASE_URI + "#";
     public static final String RESULTS_PREFIX = "results";
     public static final String TEST_HARNESS_URI = "https://github.com/solid/conformance-test-harness/";
     public static final String TEST_HARNESS_PREFIX = "test-harness";

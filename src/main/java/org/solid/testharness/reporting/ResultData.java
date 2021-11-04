@@ -55,7 +55,7 @@ public class ResultData {
     }
 
     public String getSubject() {
-        return Namespaces.RESULTS_URI;
+        return Namespaces.RESULTS_BASE_URI;
     }
 
     public String getPrefixes() {
