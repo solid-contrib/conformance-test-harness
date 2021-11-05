@@ -86,4 +86,24 @@ class ScenarioTest extends AbstractDataModelTests {
         final Scenario scenario = new Scenario(iri(NS, "scenario2"));
         assertNull(scenario.getSteps());
     }
+
+    @Test
+    void getNoPassFail() {
+        final Scenario scenario = new Scenario(iri(NS, "scenario1"));
+        assertFalse(scenario.isFailed());
+        assertFalse(scenario.isPassed());
+    }
+
+    @Test
+    void isFailed() {
+        final Scenario scenario = new Scenario(iri(NS, "scenarioFail"));
+        assertTrue(scenario.isFailed());
+    }
+
+    @Test
+    void isPassed() {
+        final Scenario scenario = new Scenario(iri(NS, "scenarioPass"));
+        assertTrue(scenario.isPassed());
+    }
+
 }

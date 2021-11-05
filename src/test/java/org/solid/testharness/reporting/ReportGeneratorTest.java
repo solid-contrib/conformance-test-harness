@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.file.Files;
+import java.time.Instant;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
@@ -93,7 +94,7 @@ class ReportGeneratorTest {
         final String report = sw.toString();
         logger.debug("OUTPUT:\n{}", report);
         assertTrue(report.length() > 1);
-        assertTrue(report.contains("rel=\"owl:sameAs\">https://github.com/solid/implementation-reports/"));
+        assertTrue(report.contains("rel=\"owl:sameAs\">https://github.com/solid/specification-tests/"));
         assertTrue(report.contains("about=\"" + Namespaces.TEST_HARNESS_URI +
                 "\" id=\"assertor\" typeof=\"earl:Software\""));
         // TODO: ASSERT:
@@ -196,6 +197,16 @@ class ReportGeneratorTest {
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-2.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/reporting/testsuite-results-sample.ttl"),
                 TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl").toString());
+        final Results results = mock(Results.class);
+        when(results.getFeaturesPassed()).thenReturn(0);
+        when(results.getFeaturesFailed()).thenReturn(1);
+        when(results.getFeaturesTotal()).thenReturn(1);
+        when(results.getScenariosPassed()).thenReturn(1);
+        when(results.getScenariosFailed()).thenReturn(1);
+        when(results.getScenariosTotal()).thenReturn(2);
+        when(results.getEndTime()).thenReturn(Instant.now().toEpochMilli());
+        reportGenerator.setStartTime(System.currentTimeMillis() - 1000);
+        reportGenerator.setResults(new TestSuiteResults(results));
         final Writer wr = Files.newBufferedWriter(reportFile.toPath());
         reportGenerator.buildHtmlResultReport(wr);
         wr.close();

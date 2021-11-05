@@ -53,6 +53,18 @@ class GeneratedOutputTest extends AbstractDataModelTests {
     }
 
     @Test
+    void isFailed() {
+        final GeneratedOutput generatedOutput = new GeneratedOutput(iri(NS, "scenario1-output2"));
+        assertTrue(generatedOutput.isFailed());
+    }
+
+    @Test
+    void isPassed() {
+        final GeneratedOutput generatedOutput = new GeneratedOutput(iri(NS, "scenario1-output"));
+        assertTrue(generatedOutput.isPassed());
+    }
+
+    @Test
     void getValueLocalName() {
         final GeneratedOutput generatedOutput = new GeneratedOutput(iri(NS, "scenario1-output"));
         assertEquals(EARL.passed.getLocalName(), generatedOutput.getValueLocalName());

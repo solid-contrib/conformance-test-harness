@@ -30,11 +30,30 @@ import org.solid.testharness.utils.DataModelBase;
 import java.util.List;
 
 public class Specification extends DataModelBase {
+    private List<SpecificationRequirement> requirements;
+
     public Specification(final IRI subject) {
         super(subject);
+        requirements = getModelList(SPEC.requirement, SpecificationRequirement.class);
     }
 
     public List<SpecificationRequirement> getSpecificationRequirements() {
-        return getModelList(SPEC.requirement, SpecificationRequirement.class);
+        return requirements;
+    }
+
+    public int countRequirements() {
+        return requirements != null ?  requirements.size() : 0;
+    }
+
+    public long countFailed() {
+        return requirements != null
+                ? requirements.stream().filter(SpecificationRequirement::isFailed).count()
+                : 0;
+    }
+
+    public long countPassed() {
+        return requirements != null
+                ? requirements.stream().filter(SpecificationRequirement::isPassed).count()
+                : 0;
     }
 }

@@ -53,7 +53,19 @@ class TestCaseTest extends AbstractDataModelTests  {
     @Test
     void getRequirementReference() {
         final TestCase testCase = new TestCase(iri(NS, "test1"));
-        assertEquals("https://example.org/specification1#requriement1", testCase.getRequirementReference());
+        assertEquals("https://example.org/specification1#requirement1", testCase.getRequirementReference());
+    }
+
+    @Test
+    void getRequirementAnchor() {
+        final TestCase testCase = new TestCase(iri(NS, "test1"));
+        assertEquals("requirement1", testCase.getRequirementAnchor());
+    }
+
+    @Test
+    void getRequirementAnchorNull() {
+        final TestCase testCase = new TestCase(iri(NS, "test2"));
+        assertNull(testCase.getRequirementAnchor());
     }
 
     @Test
@@ -102,5 +114,52 @@ class TestCaseTest extends AbstractDataModelTests  {
     void getScenariosEmpty() {
         final TestCase testCase = new TestCase(iri(NS, "test2"));
         assertNull(testCase.getScenarios());
+        assertEquals(0, testCase.countScenarios());
+        assertEquals(0, testCase.countPassed());
+        assertEquals(0, testCase.countFailed());
+        assertFalse(testCase.isPassed());
+        assertFalse(testCase.isFailed());
+    }
+
+    @Test
+    void countScenarios() {
+        final TestCase testCase = new TestCase(iri(NS, "test1"));
+        assertEquals(2, testCase.countScenarios());
+    }
+
+    @Test
+    void countFailed() {
+        final TestCase testCase = new TestCase(iri(NS, "test1"));
+        assertEquals(1, testCase.countFailed());
+    }
+
+    @Test
+    void countPassed() {
+        final TestCase testCase = new TestCase(iri(NS, "test1"));
+        assertEquals(1, testCase.countPassed());
+    }
+
+    @Test
+    void failedFalse() {
+        final TestCase testCase = new TestCase(iri(NS, "testPass"));
+        assertFalse(testCase.isFailed());
+    }
+
+    @Test
+    void failedTrue() {
+        final TestCase testCase = new TestCase(iri(NS, "testFail"));
+        assertTrue(testCase.isFailed());
+    }
+
+    @Test
+    void passedFalse() {
+        final TestCase testCase = new TestCase(iri(NS, "testFail"));
+        assertFalse(testCase.isPassed());
+    }
+
+    @Test
+    void passedTrue() {
+        final TestCase testCase = new TestCase(iri(NS, "testPass"));
+        assertTrue(testCase.isPassed());
     }
 }

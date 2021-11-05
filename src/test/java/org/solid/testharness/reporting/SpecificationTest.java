@@ -46,4 +46,43 @@ class SpecificationTest extends AbstractDataModelTests {
         assertEquals(3, specificationRequirements.size());
         assertEquals("https://example.org/specification1#spec1", specificationRequirements.get(0).getSubject());
     }
+
+    @Test
+    void getSpecificationRequirementsNull() {
+        final Specification specification = new Specification(iri(NS, "specification2"));
+        assertNull(specification.getSpecificationRequirements());
+        assertEquals(0, specification.countRequirements());
+        assertEquals(0, specification.countPassed());
+        assertEquals(0, specification.countFailed());
+    }
+
+    @Test
+    void countRequirements() {
+        final Specification specification = new Specification(iri(NS, "specification1"));
+        assertEquals(3, specification.countRequirements());
+    }
+
+    @Test
+    void countFailed0() {
+        final Specification specification = new Specification(iri(NS, "specificationPass"));
+        assertEquals(0, specification.countFailed());
+    }
+
+    @Test
+    void countFailed() {
+        final Specification specification = new Specification(iri(NS, "specificationFail"));
+        assertEquals(1, specification.countFailed());
+    }
+
+    @Test
+    void countPassed0() {
+        final Specification specification = new Specification(iri(NS, "specificationFail"));
+        assertEquals(0, specification.countPassed());
+    }
+
+    @Test
+    void countPassed() {
+        final Specification specification = new Specification(iri(NS, "specificationPass"));
+        assertEquals(1, specification.countPassed());
+    }
 }

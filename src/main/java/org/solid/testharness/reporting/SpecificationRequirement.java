@@ -30,8 +30,11 @@ import org.solid.testharness.utils.DataModelBase;
 import java.util.List;
 
 public class SpecificationRequirement extends DataModelBase {
+    private List<TestCase> testCases;
+
     public SpecificationRequirement(final IRI subject) {
         super(subject, ConstructMode.INC_REFS);
+        testCases = getModelListByObject(SPEC.requirementReference, TestCase.class);
     }
 
     public String getRequirementSubject() {
@@ -47,7 +50,30 @@ public class SpecificationRequirement extends DataModelBase {
     }
 
     public List<TestCase> getTestCases() {
-        return getModelListByObject(SPEC.requirementReference, TestCase.class);
+        return testCases;
+    }
+
+    public int countTestCases() {
+        return getTestCases() != null ?  getTestCases().size() : 0;
+    }
+
+    public long countFailed() {
+        return testCases != null
+                ? testCases.stream().filter(TestCase::isFailed).count()
+                : 0;
+    }
+
+    public long countPassed() {
+        return testCases != null
+                ? testCases.stream().filter(TestCase::isPassed).count()
+                : 0;
+    }
+
+    public boolean isFailed() {
+        return testCases != null && testCases.stream().anyMatch(TestCase::isFailed);
+    }
+
+    public boolean isPassed() {
+        return testCases != null && testCases.stream().allMatch(TestCase::isPassed);
     }
 }
-

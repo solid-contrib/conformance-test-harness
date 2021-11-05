@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <title>Solid Specification - Conformance Test Suite Coverage Report</title>
   <meta content="width=device-width, initial-scale=1" name="viewport" />
-  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   {#include css /}
   {#include js /}
 </head>
@@ -21,39 +20,47 @@
 
 <section id="test-coverage-by-specification-requirement" rel="dcterms:hasPart" resource="#test-coverage-by-specification-requirement">
   <h2 property="dcterms:title">Test coverage by specification requirement</h2>
+  {#include buttons coverageMode=true /}
   <div datatype="rdf:HTML" property="dcterms:description">
   <ul>
   {#each specifications.orEmpty}
   <li rel="dcterms:hasPart" resource="{it.subject}" class="spec">
-    {#if it.specificationRequirements}
-    {#let specLink=it.subject}
-    {#each it.specificationRequirements}
-    {#include requirement}
-      {#if it.testCases??}
-      <table rel="spec:requirement" resource="{it.subject}">
-        <caption>Test cases</caption>
-        <thead>
-        <tr>
-          <th>Title</th>
-          <th>Details</th>
-          <th>Implemented</th>
-        </tr>
-        </thead>
-        <tbody>
-        {#each it.testCases}
-        {#include testcase coverageMode=true /}
-        {/each}
-        </tbody>
-      </table>
+    <details id="{it.anchor}">
+      <summary><b>Specification:</b> {it.subject} <a href="{it.subject}" class="ext"></a>
+        <span class="count">{it.countRequirements}</span>
+      </summary>
+      {#if it.specificationRequirements}
+      <ul>
+      {#each it.specificationRequirements}
+        <li rel="spec:requirement" resource="{it.subject}" class="spec">
+          {#include requirement coverageMode=true}
+          {#if it.testCases??}
+          <table>
+            <caption>Test cases</caption>
+            <thead>
+            <tr>
+              <th>Title</th>
+              <th>Details</th>
+              <th>Implemented</th>
+            </tr>
+            </thead>
+            <tbody>
+            {#each it.testCases}
+            {#include testcase coverageMode=true /}
+            {/each}
+            </tbody>
+          </table>
+          {#else}
+          <p>No test cases found.</p>
+          {/if}
+          {/include}
+        </li>
+      {/each}
+      </ul>
       {#else}
-      <p>No test cases found.</p>
+      <p>No tests were discovered.</p>
       {/if}
-    {/include}
-    {/each}
-    {/let}
-    {#else}
-    <p>No tests were discovered.</p>
-    {/if}
+    </details>
   </li>
   {/each}
   </ul>

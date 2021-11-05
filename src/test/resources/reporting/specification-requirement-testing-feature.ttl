@@ -2,9 +2,15 @@ prefix td: <http://www.w3.org/2006/03/test-description#>
 prefix dcterms: <http://purl.org/dc/terms/>
 prefix schema: <http://schema.org/>
 prefix spec: <http://www.w3.org/ns/spec#>
+prefix earl: <http://www.w3.org/ns/earl#>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix td: <http://www.w3.org/2006/03/test-description#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix ex: <https://example.org/>
 prefix manifest: <https://example.org/manifests/test-manifest-sample-1.ttl#>
+prefix req: <https://example.org/specification#>
 
-<https://example.org/specification#requirement>
+req:requirement
     a spec:NormativeRequirement ;
     spec:requirementSubject spec:Server ;
     spec:requirementLevel spec:MUST ;
@@ -15,13 +21,14 @@ prefix manifest: <https://example.org/manifests/test-manifest-sample-1.ttl#>
 
 manifest:group1
     a td:TestCase ;
-    spec:requirementReference <https://example.org/specification#requirement> ;
+    spec:requirementReference req:requirement ;
     td:reviewStatus td:accepted ;
     dcterms:title "Group 1"@en ;
-    spec:testScript <https://example.org/test/group1/feature1>
+    spec:testScript <https://example.org/test/group1/feature1> ;
+    dcterms:hasPart ex:scenario1
 .
 
-<https://example.org/specification#requirement2>
+req:requirement2
     a spec:NormativeRequirement ;
     spec:requirementSubject spec:Server ;
     spec:requirementLevel spec:MUST ;
@@ -29,3 +36,39 @@ manifest:group1
     schema:description "Full text of requirement 2" ;
     spec:statement "excerpt of requirement 2"
 .
+
+ex:scenario1
+    a prov:Activity;
+    prov:generated ex:result1 .
+
+ex:result1
+    a prov:Entity ;
+    prov:value earl:failed .
+
+req:requirementPass
+    a spec:NormativeRequirement .
+
+manifest:testPass
+    a td:TestCase ;
+    spec:requirementReference req:requirementPass .
+
+ex:assertionPass a earl:Assertion ;
+    earl:test manifest:testPass ;
+    earl:result ex:resultPass .
+
+ex:resultPass a earl:TestResult ;
+    earl:outcome earl:passed .
+
+req:requirementFail
+    a spec:NormativeRequirement .
+
+manifest:testFail
+    a td:TestCase ;
+    spec:requirementReference req:requirementFail .
+
+ex:assertionFail a earl:Assertion ;
+    earl:test manifest:testFail ;
+    earl:result ex:resultFail.
+
+ex:resultFail a earl:TestResult ;
+    earl:outcome earl:failed .

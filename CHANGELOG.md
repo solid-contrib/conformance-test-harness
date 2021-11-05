@@ -1,5 +1,9 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.0.7
+### Features
+* Improve report navigation and interpretation with collapsing sections and counts of tests passed.
+
 ## Release 1.0.6
 ### Features
 * Add function to allow a test to locate the `pim:Storage` of a resource by traversing up the hierarchy. 

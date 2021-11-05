@@ -24,3 +24,15 @@ ex:step2 a prov:Activity;
     dcterms:title "STEP2" .
 
 ex:scenario2 a prov:Activity.
+
+ex:scenarioPass a prov:Activity;
+    prov:generated ex:outputPass .
+
+ex:outputPass a prov:Entity ;
+    prov:value earl:passed .
+
+ex:scenarioFail a prov:Activity;
+    prov:generated ex:outputFail .
+
+ex:outputFail a prov:Entity ;
+    prov:value earl:failed .

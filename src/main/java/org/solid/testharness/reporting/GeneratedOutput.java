@@ -25,6 +25,7 @@ package org.solid.testharness.reporting;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.solid.common.vocab.DCTERMS;
+import org.solid.common.vocab.EARL;
 import org.solid.common.vocab.PROV;
 import org.solid.testharness.utils.DataModelBase;
 
@@ -41,6 +42,14 @@ public class GeneratedOutput extends DataModelBase  {
 
     public String getValue() {
         return getIriAsString(PROV.value);
+    }
+
+    public boolean isFailed() {
+        return EARL.failed.equals(getAsIri(PROV.value));
+    }
+
+    public boolean isPassed() {
+        return EARL.passed.equals(getAsIri(PROV.value));
     }
 
     public String getValueLocalName() {

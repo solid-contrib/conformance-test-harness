@@ -47,6 +47,18 @@ class TestResultTest extends AbstractDataModelTests {
     }
 
     @Test
+    void isPassed() {
+        final TestResult testResult = new TestResult(iri(NS, "result1"));
+        assertTrue(testResult.isPassed());
+    }
+
+    @Test
+    void isFailed() {
+        final TestResult testResult = new TestResult(iri(NS, "result2"));
+        assertTrue(testResult.isFailed());
+    }
+
+    @Test
     void getOutcomeLocalName() {
         final TestResult testResult = new TestResult(iri(NS, "result1"));
         assertEquals(EARL.passed.getLocalName(), testResult.getOutcomeLocalName());

@@ -39,6 +39,14 @@ public class TestResult extends DataModelBase  {
         return getIriAsString(EARL.outcome);
     }
 
+    public boolean isPassed() {
+        return EARL.passed.equals(getAsIri(EARL.outcome));
+    }
+
+    public boolean isFailed() {
+        return EARL.failed.equals(getAsIri(EARL.outcome));
+    }
+
     public String getOutcomeLocalName() {
         return getAsIri(EARL.outcome).getLocalName();
     }

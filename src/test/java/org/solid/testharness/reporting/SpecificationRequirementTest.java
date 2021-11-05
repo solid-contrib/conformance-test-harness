@@ -24,7 +24,6 @@
 package org.solid.testharness.reporting;
 
 import io.quarkus.test.junit.QuarkusTest;
-import org.eclipse.rdf4j.model.IRI;
 import org.junit.jupiter.api.Test;
 import org.solid.common.vocab.SPEC;
 import org.solid.testharness.utils.AbstractDataModelTests;
@@ -36,8 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 class SpecificationRequirementTest extends AbstractDataModelTests {
-    private static final IRI REQUIREMENT = iri(NS, "specification#requirement");
-    private static final IRI REQUIREMENT2 = iri(NS, "specification#requirement2");
+    private static final String SPEC_NS = NS + "specification#";
 
     @Override
     public String getTestFile() {
@@ -46,25 +44,25 @@ class SpecificationRequirementTest extends AbstractDataModelTests {
 
     @Test
     void getRequirementSubject() {
-        final SpecificationRequirement requirement = new SpecificationRequirement(REQUIREMENT);
+        final SpecificationRequirement requirement = new SpecificationRequirement(iri(SPEC_NS, "requirement"));
         assertEquals(SPEC.Server.stringValue(), requirement.getRequirementSubject());
     }
 
     @Test
     void getRequirementLevel() {
-        final SpecificationRequirement requirement = new SpecificationRequirement(REQUIREMENT);
+        final SpecificationRequirement requirement = new SpecificationRequirement(iri(SPEC_NS, "requirement"));
         assertEquals(SPEC.MUST.stringValue(), requirement.getRequirementLevel());
     }
 
     @Test
     void getStatement() {
-        final SpecificationRequirement requirement = new SpecificationRequirement(REQUIREMENT);
+        final SpecificationRequirement requirement = new SpecificationRequirement(iri(SPEC_NS, "requirement"));
         assertEquals("excerpt of requirement 1", requirement.getStatement());
     }
 
     @Test
     void getTestCase() {
-        final SpecificationRequirement requirement = new SpecificationRequirement(REQUIREMENT);
+        final SpecificationRequirement requirement = new SpecificationRequirement(iri(SPEC_NS, "requirement"));
         final List<TestCase> testCases = requirement.getTestCases();
         assertNotNull(testCases);
         assertEquals(1, testCases.size());
@@ -73,8 +71,43 @@ class SpecificationRequirementTest extends AbstractDataModelTests {
 
     @Test
     void getTestCaseMissing() {
-        final SpecificationRequirement requirement = new SpecificationRequirement(REQUIREMENT2);
+        final SpecificationRequirement requirement = new SpecificationRequirement(iri(SPEC_NS, "requirement2"));
         final List<TestCase> testCases = requirement.getTestCases();
         assertNull(testCases);
+        assertEquals(0, requirement.countTestCases());
+        assertEquals(0, requirement.countPassed());
+        assertEquals(0, requirement.countFailed());
+        assertFalse(requirement.isFailed());
+        assertFalse(requirement.isPassed());
+    }
+
+    @Test
+    void countTestCases() {
+        final SpecificationRequirement requirement = new SpecificationRequirement(iri(SPEC_NS, "requirement"));
+        assertEquals(1, requirement.countTestCases());
+    }
+
+    @Test
+    void countFailed() {
+        final SpecificationRequirement requirement = new SpecificationRequirement(iri(SPEC_NS, "requirementFail"));
+        assertEquals(1, requirement.countFailed());
+    }
+
+    @Test
+    void countPassed() {
+        final SpecificationRequirement requirement = new SpecificationRequirement(iri(SPEC_NS, "requirementPass"));
+        assertEquals(1, requirement.countPassed());
+    }
+
+    @Test
+    void isFailed() {
+        final SpecificationRequirement requirement = new SpecificationRequirement(iri(SPEC_NS, "requirementFail"));
+        assertTrue(requirement.isFailed());
+    }
+
+    @Test
+    void isPassed() {
+        final SpecificationRequirement requirement = new SpecificationRequirement(iri(SPEC_NS, "requirementPass"));
+        assertTrue(requirement.isPassed());
     }
 }

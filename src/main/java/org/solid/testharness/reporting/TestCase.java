@@ -24,14 +24,25 @@
 package org.solid.testharness.reporting;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.solid.common.vocab.*;
+import org.solid.common.vocab.DCTERMS;
+import org.solid.common.vocab.EARL;
+import org.solid.common.vocab.SPEC;
+import org.solid.common.vocab.TD;
 import org.solid.testharness.utils.DataModelBase;
 
 import java.util.List;
 
 public class TestCase extends DataModelBase {
+    private List<Scenario> scenarios;
+    private Assertion assertion;
+
     public TestCase(final IRI subject) {
         super(subject, ConstructMode.INC_REFS);
+        scenarios = getModelList(DCTERMS.hasPart, Scenario.class);
+        final List<Assertion> assertions = getModelListByObject(EARL.test, Assertion.class);
+        if (assertions != null) {
+            assertion = assertions.get(0);
+        }
     }
 
     public String getTitle() {
@@ -50,20 +61,40 @@ public class TestCase extends DataModelBase {
         return getIriAsString(SPEC.requirementReference);
     }
 
+    public String getRequirementAnchor() {
+        final IRI requirement = getAsIri(SPEC.requirementReference);
+        return requirement != null ? requirement.getLocalName() : null;
+    }
+
     public boolean isImplemented() {
         return getIriAsString(SPEC.testScript) != null;
     }
 
     public Assertion getAssertion() {
-        final List<Assertion> assertions = getModelListByObject(EARL.test, Assertion.class);
-        if (assertions != null) {
-            return assertions.get(0);
-        } else {
-            return null;
-        }
+        return assertion;
     }
 
     public List<Scenario> getScenarios() {
-        return getModelList(DCTERMS.hasPart, Scenario.class);
+        return scenarios;
+    }
+
+    public int countScenarios() {
+        return scenarios != null ?  scenarios.size() : 0;
+    }
+
+    public long countFailed() {
+        return scenarios != null ? scenarios.stream().filter(Scenario::isFailed).count() : 0;
+    }
+
+    public long countPassed() {
+        return scenarios != null ? scenarios.stream().filter(Scenario::isPassed).count() : 0;
+    }
+
+    public boolean isFailed() {
+        return assertion != null && assertion.isFailed();
+    }
+
+    public boolean isPassed() {
+        return assertion != null && assertion.isPassed();
     }
 }
