@@ -44,3 +44,7 @@ ex:scenario1-step1-output
     a prov:Entity ;
     prov:generatedAtTime "2021-04-06T17:41:20.889001Z"^^xsd:dateTime ;
     prov:value earl:passed .
+
+ex:scenario1-output2
+a prov:Entity ;
+prov:value earl:failed .

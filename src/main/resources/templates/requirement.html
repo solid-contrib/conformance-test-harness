@@ -1,4 +1,4 @@
-<details id="{it.anchor}" rel="dcterms:hasPart" resource="{it.subject}" typeof="{it.typesList}" {#if it.countFailed > 0}open class="failed"{/if}>
+<details id="{it.anchor}" rel="dcterms:hasPart" resource="{it.subject}" typeof="{it.typesList}" {#if it.failed}open="open" class="failed"{/if}>
   {#with it}
   <summary><b>Requirement:</b> {subject} <a href="{subject}" class="ext"></a>
     <span class="count">{countPassed}/{countTestCases}</span>

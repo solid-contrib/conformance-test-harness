@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <title>Solid Specification - Conformance Test Suite Coverage Report</title>
   <meta content="width=device-width, initial-scale=1" name="viewport" />
-  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   {#include css /}
   {#include js /}
 </head>
@@ -31,29 +30,33 @@
         <span class="count">{it.countRequirements}</span>
       </summary>
       {#if it.specificationRequirements}
+      <ul>
       {#each it.specificationRequirements}
-      {#include requirement}
-        {#if it.testCases??}
-        <table rel="spec:requirement" resource="{it.subject}">
-          <caption>Test cases</caption>
-          <thead>
-          <tr>
-            <th>Title</th>
-            <th>Details</th>
-            <th>Implemented</th>
-          </tr>
-          </thead>
-          <tbody>
-          {#each it.testCases}
-          {#include testcase coverageMode=true /}
-          {/each}
-          </tbody>
-        </table>
-        {#else}
-        <p>No test cases found.</p>
-        {/if}
-      {/include}
+        <li rel="spec:requirement" resource="{it.subject}" class="spec">
+          {#include requirement}
+          {#if it.testCases??}
+          <table>
+            <caption>Test cases</caption>
+            <thead>
+            <tr>
+              <th>Title</th>
+              <th>Details</th>
+              <th>Implemented</th>
+            </tr>
+            </thead>
+            <tbody>
+            {#each it.testCases}
+            {#include testcase coverageMode=true /}
+            {/each}
+            </tbody>
+          </table>
+          {#else}
+          <p>No test cases found.</p>
+          {/if}
+          {/include}
+        </li>
       {/each}
+      </ul>
       {#else}
       <p>No tests were discovered.</p>
       {/if}

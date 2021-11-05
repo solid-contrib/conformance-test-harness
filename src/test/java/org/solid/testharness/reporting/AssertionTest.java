@@ -71,8 +71,29 @@ class AssertionTest extends AbstractDataModelTests {
     }
 
     @Test
+    void getNoPassFail() {
+        final Assertion assertion = new Assertion(iri(NS, "assertion1"));
+        assertFalse(assertion.isFailed());
+        assertFalse(assertion.isPassed());
+    }
+
+    @Test
     void getNoResult() {
         final Assertion assertion = new Assertion(iri(NS, "assertion2"));
         assertNull(assertion.getResult());
     }
+
+    @Test
+    void isFailed() {
+        final Assertion assertion = new Assertion(iri(NS, "assertionFail"));
+        assertTrue(assertion.isFailed());
+    }
+
+    @Test
+    void isPassed() {
+        final Assertion assertion = new Assertion(iri(NS, "assertionPass"));
+        assertTrue(assertion.isPassed());
+    }
+
+
 }

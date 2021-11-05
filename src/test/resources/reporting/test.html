@@ -12,18 +12,22 @@
     </div>
     {/each}
     {/if}
+
     {! ASSERTOR !}
     {#if assertor??}
     {#with assertor}{#include assertor /}{/with}
     {/if}
+
     {! TEST SUBJECT !}
     {#if testSubject??}
     {#with testSubject}{#include test-subject /}{/with}
     {/if}
+
     {! SUMMARY !}
     {#if testSuiteResults??}
     {#with testSuiteResults}{#include results-summary /}{/with}
     {/if}
+
     {! REQUIREMENT - RESULTS !}
     {#if !coverageMode??}
     {#each specificationRequirements.orEmpty}
@@ -46,11 +50,12 @@
     {/include}
     {/each}
     {/if}
+
     {! REQUIREMENT - COVERAGE !}
     {#if coverageMode??}
     {#each specificationRequirements.orEmpty}
     {#include requirement}
-    {#if it.testCases}
+    {#if it.testCases??}
     <table>
         <tr>
             <th>Title</th>
@@ -67,6 +72,7 @@
     {/include}
     {/each}
     {/if}
+
     {! TESTCASE !}
     {#if testCases??}
     <table>
@@ -81,6 +87,7 @@
         {/each}
     </table>
     {/if}
+
     {! SCENARIO !}
     {#if scenarios??}
     <section>
@@ -89,6 +96,7 @@
         {/each}
     </section>
     {/if}
+
     {! STEP !}
     {#if steps??}
     <table>

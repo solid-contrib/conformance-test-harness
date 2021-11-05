@@ -31,6 +31,8 @@ import io.quarkus.test.junit.QuarkusTest;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.*;
@@ -56,7 +58,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ReportFragmentTest {
     private static final Logger logger = LoggerFactory.getLogger(ReportFragmentTest.class);
     private static final String BASE_URI = "https://example.org/";
@@ -73,7 +74,7 @@ class ReportFragmentTest {
         engineBuilder.addLocator(new TestTemplateLocator());
     }
 
-    @BeforeAll
+    @BeforeEach
     void setup() throws MalformedURLException {
         testTemplate = engine.getTemplate("src/test/resources/reporting/test.html");
         try (RepositoryConnection conn = dataRepository.getConnection()) {
@@ -91,14 +92,8 @@ class ReportFragmentTest {
 
     @Test
     void stepReport() throws IOException {
-        final IRI testCaseIri = iri(
-                TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl").toString(),
-                "#group1-feature1"
-        );
-        final TestCase testCase = new TestCase(testCaseIri);
-        final Scenario scenario = testCase.getScenarios().get(0);
-        final Step step = scenario.getSteps().get(2);
-        step.getModel().remove(iri(step.getScenario()), null, null);
+        remove(iri("https://github.com/solid/specification-tests/uuid#node1f273av6vx13"), null, null);
+        final Step step = new Step(iri("https://github.com/solid/specification-tests/uuid#node1f273av6vx18"));
 
         final String report = render("steps", List.of(step));
         logger.debug("Report:\n{}", report);
@@ -118,12 +113,8 @@ class ReportFragmentTest {
 
     @Test
     void scenarioReport() throws IOException {
-        final IRI testCaseIri = iri(
-                TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl").toString(),
-                "#group1-feature1"
-        );
-        final TestCase testCase = new TestCase(testCaseIri);
-        final Scenario scenario = testCase.getScenarios().get(0);
+        final Scenario scenario = new Scenario(
+                iri("https://github.com/solid/specification-tests/uuid#node1f273av6vx13"));
         for (Step step: scenario.getSteps()) {
             scenario.getModel().addAll(step.getModel());
         }
@@ -151,13 +142,11 @@ class ReportFragmentTest {
                 TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl").toString(),
                 "#group1-feature1"
         );
+        remove(iri("https://github.com/solid/conformance-test-harness/testserver"), null, null);
+        remove(null, null, iri("https://github.com/solid/specification-tests/uuid#node1f273av6vx13"));
+        remove(null, null, iri("https://github.com/solid/specification-tests/uuid#node1f273av6vx42"));
         final TestCase testCase = new TestCase(testCaseIri);
         testCase.getModel().addAll(testCase.getAssertion().getModel());
-        testCase.getModel().remove(iri(testCase.getAssertion().getTestSubject()), null, null);
-        testCase.getModel().remove(iri(testCase.getAssertion().getAssertedBy()), null, null);
-        for (Scenario scenario: testCase.getScenarios()) {
-            testCase.getModel().remove(null, null, iri(scenario.getSubject()));
-        }
 
         final String report = render("testCases", List.of(testCase));
         logger.debug("Report:\n{}", report);
@@ -174,8 +163,8 @@ class ReportFragmentTest {
     @Test
     void requirementReportNoTestCases() throws IOException {
         final IRI requirementIri = iri(BASE_URI, "specification1#spec1");
+        remove(null, null, requirementIri);
         final SpecificationRequirement requirement = new SpecificationRequirement(requirementIri);
-        requirement.getModel().remove(null, null, requirementIri);
 
         final String report = render("specificationRequirements", List.of(requirement), "coverageMode", false);
         logger.debug("Report:\n{}", report);
@@ -194,14 +183,13 @@ class ReportFragmentTest {
     @Test
     void requirementReportWithTestCases() throws IOException {
         final IRI requirementIri = iri(BASE_URI, "specification1#spec1");
+        remove(null, SPEC.requirement, requirementIri);
+        remove(iri("https://github.com/solid/conformance-test-harness/testserver"), null, null);
         final SpecificationRequirement requirement = new SpecificationRequirement(requirementIri);
-        requirement.getModel().remove(null, SPEC.requirement, requirementIri);
         for (TestCase testCase: requirement.getTestCases()) {
             requirement.getModel().addAll(testCase.getModel());
             if (testCase.getAssertion() != null) {
                 requirement.getModel().addAll(testCase.getAssertion().getModel());
-                requirement.getModel().remove(iri(testCase.getAssertion().getTestSubject()), null, null);
-                requirement.getModel().remove(iri(testCase.getAssertion().getAssertedBy()), null, null);
             }
         }
         requirement.getModel().remove(null, DCTERMS.hasPart, null);
@@ -293,12 +281,16 @@ class ReportFragmentTest {
     @Test
     void requirementCoverageReportWithTestCases() throws IOException {
         final IRI requirementIri = iri(BASE_URI, "specification1#spec1");
+        remove(null, SPEC.requirement, requirementIri);
+        remove(iri("https://github.com/solid/conformance-test-harness/testserver"), null, null);
+        final String manifest = TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl") + "#";
+        remove(null, null, iri(manifest, "group1-feature1"));
+        remove(null, null, iri(manifest, "group1-feature2"));
+        remove(null, null, iri(manifest, "group1-feature3"));
+
         final SpecificationRequirement requirement = new SpecificationRequirement(requirementIri);
-        requirement.getModel().remove(null, SPEC.requirement, requirementIri);
         for (TestCase testCase: requirement.getTestCases()) {
             requirement.getModel().addAll(testCase.getModel());
-            requirement.getModel().remove(null, null, testCase.getSubjectIri());
-
         }
         requirement.getModel().remove(null, DCTERMS.hasPart, null);
         logger.debug("SpecificationRequirement Model:\n{}", TestUtils.toTurtle(requirement.getModel()));
@@ -313,6 +305,12 @@ class ReportFragmentTest {
 
         TestUtils.showModelDifferences(reportModel, requirement.getModel(), logger);
         assertTrue(Models.isomorphic(reportModel, requirement.getModel()));
+    }
+
+    private void remove(final Resource subject, final IRI predicate, final Value object) {
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            conn.remove(subject, predicate, object);
+        }
     }
 
     private String render(final String key, final Object object) {

@@ -7,20 +7,52 @@ prefix ex: <https://example.org/>
 
 ex:test1
     a td:TestCase ;
-    spec:requirementReference <https://example.org/specification1#requriement1> ;
+    spec:requirementReference <https://example.org/specification1#requirement1> ;
     dcterms:title "Title" ;
     td:reviewStatus td:unreviewed ;
     spec:testScript <https://example.org/test3.feature> ;
-    dcterms:hasPart ex:scenario1 .
+    dcterms:hasPart ex:scenario1, ex:scenario2 .
 
 ex:assertion
     a earl:Assertion ;
     earl:test ex:test1.
 
 ex:scenario1
-    a prov:Activity .
+    a prov:Activity;
+    prov:generated ex:result1 .
+
+ex:result1
+    a prov:Entity ;
+    prov:value earl:failed .
+
+ex:scenario2
+    a prov:Activity;
+    prov:generated ex:result2 .
+
+ex:result2
+    a prov:Entity ;
+    prov:value earl:passed .
 
 ex:test2
     a td:TestCase ;
     td:reviewStatus td:accepted .
 
+ex:testFail
+    a td:TestCase .
+
+ex:testPass
+    a td:TestCase .
+
+ex:assertionPass a earl:Assertion ;
+    earl:test ex:testPass ;
+    earl:result ex:resultPass .
+
+ex:resultPass a earl:TestResult ;
+    earl:outcome earl:passed .
+
+ex:assertionFail a earl:Assertion ;
+    earl:test ex:testFail ;
+    earl:result ex:resultFail.
+
+ex:resultFail a earl:TestResult ;
+    earl:outcome earl:failed .

@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <title>Solid Specification - Conformance Test Suite Results</title>
   <meta content="width=device-width, initial-scale=1" name="viewport" />
-  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   {#include css /}
   {#include js /}
 </head>
@@ -37,38 +36,42 @@
   <ul>
   {#each specifications.orEmpty}
   <li rel="dcterms:hasPart" resource="{it.subject}" class="spec">
-    <details id="{it.anchor}" {#if it.countFailed > 0}open class="failed"{/if}>
+    <details id="{it.anchor}" {#if it.countFailed > 0}open="open" class="failed"{/if}>
       <summary><b>Specification:</b> {it.subject} <a href="{it.subject}" class="ext"></a>
         <span class="count">{it.countPassed}/{it.countRequirements}</span>
       </summary>
-    {#if it.specificationRequirements}
-    {#each it.specificationRequirements}
-    {#include requirement}
-      {#if it.testCases}
-      <table rel="spec:requirement" resource="{it.subject}">
-        <caption>Test cases</caption>
-        <thead>
-        <tr>
-          <th class="title">Title</th>
-          <th class="details">Details</th>
-          <th class="outcome">Outcome</th>
-          <th class="scenarios">Test Scenarios</th>
-        </tr>
-        </thead>
-        <tbody>
-        {#each it.testCases}
-        {#include testcase coverageMode=false /}
-        {/each}
-        </tbody>
-      </table>
+      {#if it.specificationRequirements}
+      <ul>
+      {#each it.specificationRequirements}
+        <li rel="spec:requirement" resource="{it.subject}" class="spec">
+          {#include requirement}
+          {#if it.testCases}
+          <table rel="spec:requirement" resource="{it.subject}">
+            <caption>Test cases</caption>
+            <thead>
+            <tr>
+              <th class="title">Title</th>
+              <th class="details">Details</th>
+              <th class="outcome">Outcome</th>
+              <th class="scenarios">Test Scenarios</th>
+            </tr>
+            </thead>
+            <tbody>
+            {#each it.testCases}
+            {#include testcase coverageMode=false /}
+            {/each}
+            </tbody>
+          </table>
+          {#else}
+          <p>No test cases found.</p>
+          {/if}
+          {/include}
+        </li>
+      {/each}
+      </ul>
       {#else}
-      <p>No test cases found.</p>
+      <p>No tests were discovered.</p>
       {/if}
-    {/include}
-    {/each}
-    {#else}
-    <p>No tests were discovered.</p>
-    {/if}
     </details>
   </li>
   {/each}
@@ -86,8 +89,8 @@
   {#for testCase in testCases}
   {#if testCase.scenarios}
     <li about="{testCase.subject}" class="spec">
-    <details id="{testCase.anchor}" {#if testCase.failed()}open class="failed"{/if}>
-      <summary><b>Feature:</b> {testCase.title} <a href="#{testCase.requirementAnchor}" class="opening" data-id="{testCase.requirementAnchor}">&uarr;</a>
+    <details id="{testCase.anchor}" {#if testCase.failed}open="open" class="failed"{/if}>
+      <summary><b>Feature:</b> {testCase.title} <a href="#{testCase.requirementAnchor}" class="opening" data-id="{testCase.requirementAnchor}">&#8593;</a>
         <span class="count">{testCase.countPassed}/{testCase.countScenarios}</span>
       </summary>
       {#each testCase.scenarios}

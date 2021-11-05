@@ -9,5 +9,27 @@ ex:assertion1 a earl:Assertion ;
     earl:subject test-harness:testserver;
     earl:mode earl:automatic;
     earl:result ex:result1 .
+
 ex:result1 a earl:TestResult.
+
 ex:assertion2 a earl:Assertion.
+
+ex:assertionPass a earl:Assertion ;
+    earl:assertedBy test-harness: ;
+    earl:test ex:test;
+    earl:subject test-harness:testserver;
+    earl:mode earl:automatic;
+    earl:result ex:resultPass .
+
+ex:resultPass a earl:TestResult ;
+    earl:outcome earl:passed .
+
+ex:assertionFail a earl:Assertion ;
+    earl:assertedBy test-harness: ;
+    earl:test ex:test;
+    earl:subject test-harness:testserver;
+    earl:mode earl:automatic;
+    earl:result ex:resultFail.
+
+ex:resultFail a earl:TestResult ;
+    earl:outcome earl:failed .

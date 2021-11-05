@@ -1,6 +1,10 @@
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix doap: <http://usefulinc.com/ns/doap#>
 prefix spec: <http://www.w3.org/ns/spec#>
+prefix earl: <http://www.w3.org/ns/earl#>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix td: <http://www.w3.org/2006/03/test-description#>
+prefix prov: <http://www.w3.org/ns/prov#>
 prefix ex: <https://example.org/>
 
 ex:specification1
@@ -8,3 +12,63 @@ ex:specification1
     spec:requirement <https://example.org/specification1#spec1>,
                      <https://example.org/specification1#spec2>,
                      <https://example.org/specification1#spec3>.
+
+ex:specification2 a doap:Specification .
+
+ex:feature1
+    a td:TestCase ;
+    spec:requirementReference <https://example.org/specification3#spec1> ;
+    dcterms:hasPart ex:scenario1 .
+
+ex:assertion1
+    a earl:Assertion;
+    earl:test ex:feature1;
+    earl:result ex:testResult .
+
+ex:testResult
+    a earl:TestResult;
+    earl:outcome earl:passed.
+
+ex:scenario1
+    a prov:Activity;
+    prov:generated ex:result1 .
+
+ex:result1
+    a prov:Entity ;
+    prov:value earl:failed .
+
+ex:specificationPass
+    a doap:Specification ;
+    spec:requirement <https://example.org/specificationPass#req> .
+
+<https://example.org/specificationPass#req>
+    a spec:NormativeRequirement .
+
+ex:testPass
+    a td:TestCase ;
+    spec:requirementReference <https://example.org/specificationPass#req> .
+
+ex:assertionPass a earl:Assertion ;
+    earl:test ex:testPass ;
+    earl:result ex:resultPass .
+
+ex:resultPass a earl:TestResult ;
+    earl:outcome earl:passed .
+
+ex:specificationFail
+    a doap:Specification ;
+    spec:requirement <https://example.org/specificationFail#req> .
+
+<https://example.org/specificationFail#req>
+    a spec:NormativeRequirement .
+
+ex:testFail
+    a td:TestCase ;
+    spec:requirementReference <https://example.org/specificationFail#req> .
+
+ex:assertionFail a earl:Assertion ;
+    earl:test ex:testFail ;
+    earl:result ex:resultFail.
+
+ex:resultFail a earl:TestResult ;
+    earl:outcome earl:failed .
