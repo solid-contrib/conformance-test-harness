@@ -33,7 +33,7 @@
       <ul>
       {#each it.specificationRequirements}
         <li rel="spec:requirement" resource="{it.subject}" class="spec">
-          {#include requirement}
+          {#include requirement coverageMode=true}
           {#if it.testCases??}
           <table>
             <caption>Test cases</caption>
