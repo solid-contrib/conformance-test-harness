@@ -28,13 +28,13 @@ import org.solid.common.vocab.SPEC;
 import org.solid.testharness.utils.DataModelBase;
 
 import java.util.List;
-import java.util.Optional;
 
 public class SpecificationRequirement extends DataModelBase {
-    private Optional<List<TestCase>> testCases;
+    private List<TestCase> testCases;
 
     public SpecificationRequirement(final IRI subject) {
         super(subject, ConstructMode.INC_REFS);
+        testCases = getModelListByObject(SPEC.requirementReference, TestCase.class);
     }
 
     public String getRequirementSubject() {
@@ -50,10 +50,7 @@ public class SpecificationRequirement extends DataModelBase {
     }
 
     public List<TestCase> getTestCases() {
-        if (testCases == null) {
-            testCases = Optional.ofNullable(getModelListByObject(SPEC.requirementReference, TestCase.class));
-        }
-        return testCases.orElse(null);
+        return testCases;
     }
 
     public int countTestCases() {
@@ -61,14 +58,22 @@ public class SpecificationRequirement extends DataModelBase {
     }
 
     public long countFailed() {
-        return getTestCases() != null
-                ? getTestCases().stream().filter(tc -> tc.failed()).count()
+        return testCases != null
+                ? testCases.stream().filter(TestCase::isFailed).count()
                 : 0;
     }
 
     public long countPassed() {
-        return getTestCases() != null
-                ? getTestCases().stream().filter(tc -> tc.passed()).count()
+        return testCases != null
+                ? testCases.stream().filter(TestCase::isPassed).count()
                 : 0;
+    }
+
+    public boolean isFailed() {
+        return testCases != null && testCases.stream().anyMatch(TestCase::isFailed);
+    }
+
+    public boolean isPassed() {
+        return testCases != null && testCases.stream().allMatch(TestCase::isPassed);
     }
 }

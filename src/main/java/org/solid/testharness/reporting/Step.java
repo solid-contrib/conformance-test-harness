@@ -31,8 +31,14 @@ import org.solid.testharness.utils.DataModelBase;
 import java.util.List;
 
 public class Step extends DataModelBase {
+    private GeneratedOutput generatedOutput;
+
     public Step(final IRI subject) {
         super(subject, ConstructMode.DEEP);
+        final List<GeneratedOutput> generatedOutputs = getModelList(PROV.generated, GeneratedOutput.class);
+        if (generatedOutputs != null) {
+            generatedOutput = generatedOutputs.get(0);
+        }
     }
 
     public String getTitle() {
@@ -52,11 +58,6 @@ public class Step extends DataModelBase {
     }
 
     public GeneratedOutput getGeneratedOutput() {
-        final List<GeneratedOutput> generatedOutputs = getModelList(PROV.generated, GeneratedOutput.class);
-        if (generatedOutputs != null) {
-            return generatedOutputs.get(0);
-        } else {
-            return null;
-        }
+        return generatedOutput;
     }
 }

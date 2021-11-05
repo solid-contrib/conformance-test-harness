@@ -28,35 +28,32 @@ import org.solid.common.vocab.SPEC;
 import org.solid.testharness.utils.DataModelBase;
 
 import java.util.List;
-import java.util.Optional;
 
 public class Specification extends DataModelBase {
-    private Optional<List<SpecificationRequirement>> requirements;
+    private List<SpecificationRequirement> requirements;
 
     public Specification(final IRI subject) {
         super(subject);
+        requirements = getModelList(SPEC.requirement, SpecificationRequirement.class);
     }
 
     public List<SpecificationRequirement> getSpecificationRequirements() {
-        if (requirements == null) {
-            requirements = Optional.ofNullable(getModelList(SPEC.requirement, SpecificationRequirement.class));
-        }
-        return requirements.orElse(null);
+        return requirements;
     }
 
     public int countRequirements() {
-        return getSpecificationRequirements() != null ?  getSpecificationRequirements().size() : 0;
+        return requirements != null ?  requirements.size() : 0;
     }
 
     public long countFailed() {
-        return getSpecificationRequirements() != null
-                ? getSpecificationRequirements().stream().filter(sr -> sr.countFailed() > 0).count()
+        return requirements != null
+                ? requirements.stream().filter(SpecificationRequirement::isFailed).count()
                 : 0;
     }
 
     public long countPassed() {
-        return getSpecificationRequirements() != null
-                ? getSpecificationRequirements().stream().filter(sr -> sr.countPassed() == sr.countTestCases()).count()
+        return requirements != null
+                ? requirements.stream().filter(SpecificationRequirement::isPassed).count()
                 : 0;
     }
 }

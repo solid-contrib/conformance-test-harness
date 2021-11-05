@@ -32,8 +32,14 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 public class Scenario extends DataModelBase {
+    private GeneratedOutput generatedOutput;
+
     public Scenario(final IRI subject) {
         super(subject, ConstructMode.DEEP_WITH_LISTS);
+        final List<GeneratedOutput> generatedOutputs = getModelList(PROV.generated, GeneratedOutput.class);
+        if (generatedOutputs != null) {
+            generatedOutput = generatedOutputs.get(0);
+        }
     }
 
     public String getTitle() {
@@ -52,15 +58,18 @@ public class Scenario extends DataModelBase {
     }
 
     public GeneratedOutput getGeneratedOutput() {
-        final List<GeneratedOutput> generatedOutputs = getModelList(PROV.generated, GeneratedOutput.class);
-        if (generatedOutputs != null) {
-            return generatedOutputs.get(0);
-        } else {
-            return null;
-        }
+        return generatedOutput;
     }
 
     public List<Step> getSteps() {
         return getModelCollectionList(DCTERMS.hasPart, Step.class);
+    }
+
+    public boolean isFailed() {
+        return generatedOutput.isFailed();
+    }
+
+    public boolean isPassed() {
+        return generatedOutput.isPassed();
     }
 }

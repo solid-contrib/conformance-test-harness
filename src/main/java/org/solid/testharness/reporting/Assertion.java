@@ -30,8 +30,14 @@ import org.solid.testharness.utils.DataModelBase;
 import java.util.List;
 
 public class Assertion extends DataModelBase {
+    private TestResult testResult;
+
     public Assertion(final IRI subject) {
         super(subject, ConstructMode.DEEP);
+        final List<TestResult> results = getModelList(EARL.result, TestResult.class);
+        if (results != null) {
+            testResult = results.get(0);
+        }
     }
 
     public String getAssertedBy() {
@@ -51,11 +57,14 @@ public class Assertion extends DataModelBase {
     }
 
     public TestResult getResult() {
-        final List<TestResult> results = getModelList(EARL.result, TestResult.class);
-        if (results != null) {
-            return results.get(0);
-        } else {
-            return null;
-        }
+        return testResult;
+    }
+
+    public boolean isFailed() {
+        return testResult.isFailed();
+    }
+
+    public boolean isPassed() {
+        return testResult.isPassed();
     }
 }

@@ -32,8 +32,6 @@ import org.solid.testharness.utils.DataModelBase;
 import java.time.ZonedDateTime;
 
 public class GeneratedOutput extends DataModelBase  {
-    private static String PASSED = EARL.passed.toString();
-
     public GeneratedOutput(final IRI subject) {
         super(subject);
     }
@@ -46,8 +44,12 @@ public class GeneratedOutput extends DataModelBase  {
         return getIriAsString(PROV.value);
     }
 
+    public boolean isFailed() {
+        return EARL.failed.equals(getAsIri(PROV.value));
+    }
+
     public boolean isPassed() {
-        return PASSED.equals(getIriAsString(PROV.value));
+        return EARL.passed.equals(getAsIri(PROV.value));
     }
 
     public String getValueLocalName() {
