@@ -55,20 +55,25 @@ You can either use this file and choose which server you are targeting when you 
 provide your own version of the file.
 
 ## 2. CTH Configuration
-This file  can be used in place of 
-command line settings if desired but is only required if you want to override default settings or
-map URLs or source files to a local file system. It can also control the level of logging but this
-is better controlled via environment variables.
+This file can be used in place of command line settings if desired but is only required if you want to override default
+settings or map URLs or source files to a local file system. It can also control the level of logging but this is better
+controlled via environment variables.
 
-The file can have various formats though the example provided is YAML. It  must be in a specific location, `config/application.yaml`, in your current working directory.
+The file can have various formats though the example provided is YAML. It  must be in a specific location,
+`config/application.yaml`, in your current working directory. The default version of this file, used in the docker image
+of the CTH, is maintained at https://github.com/solid/specification-tests/blob/main/application.yaml.
 ```yaml
 # The first 3 can be ignored if using the command line settings: subjects, source and target 
 subjects: test-subjects.ttl
 sources:
-  - https://github.com/solid/conformance-test-harness/example/protocol/solid-protocol-test-manifest.ttl
-  - https://github.com/solid/conformance-test-harness/example/web-access-control/web-access-control-test-manifest.ttl
+  # Protocol spec & manifest
   - https://solidproject.org/TR/protocol
-  - https://github.com/solid/conformance-test-harness/example/web-access-control/web-access-control-spec.ttl
+  - https://github.com/solid/specification-tests/protocol/solid-protocol-test-manifest.ttl
+
+  # WAC spec & manifest
+  - https://solid.github.io/web-access-control-spec
+  - https://github.com/solid/specification-tests/web-access-control/web-access-control-test-manifest.ttl
+
 # The target is just an IRI or local name relative to the test-subjects file and is not expected to resolve to anything
 target: https://github.com/solid/conformance-test-harness/ess
 
@@ -325,7 +330,7 @@ https://github.com/solid/specification-tests.
 
 The Docker image works with the following internal structure:
 * `/app/harness` - contains the executable jar file.
-* `/app/config` - contains the default application.yaml file.
+* `/app/config` - contains the default application.yaml file from https://github.com/solid/specification-tests.
 * `/data` - contains the contents of the https://github.com/solid/specification-tests test repository.
 * `/reports` - the directory into which reports are written.
 

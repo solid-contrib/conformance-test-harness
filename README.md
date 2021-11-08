@@ -4,7 +4,7 @@ The Conformance Test Harness (CTH) is used to run Solid conformance tests agains
 
 <!-- MarkdownTOC -->
 
-- [Repository Structure](#repo-structure)
+- [Repository Structure](#repository-structure)
 - [Architecture:](#architecture)
 	- [Test Harness](#test-harness)
 	- [Test Executor](#test-executor)
@@ -13,17 +13,18 @@ The Conformance Test Harness (CTH) is used to run Solid conformance tests agains
 	- [Conformance Report](#conformance-report)
 - [Component Architecture](#component-architecture)
 - [Writing Tests](#writing-tests)
-- [Release Process:](#release-process)
+- [Processes:](#processes)
     - [1. Checkout](#1-checkout)
     - [2. Setting up the Environment](#2-setting-up-the-environment)
     - [3. Build and Test](#3-build-and-test)
-    - [4. Docker Image](#4-docker-image)
-    - [5. Package](#5-package)
+    - [4. Package](#4-package)
+    - [5. Docker Image](#5-docker-image)
+    - [6. Release](#6-release)
 
 <!-- /MarkdownTOC -->
 
 
-## Repoository Structure
+## Repository Structure
 * architecture - Architectural diagrams.
 * config - Configuration files used to run the example test cases.
 * example - Proof of Concept (PoC) test cases demonstrating use of the CTH.
@@ -178,7 +179,8 @@ https://hub.docker.com/r/solidconformancetestbeta/conformance-test-harness
 ### 6. Release
 1. Check config files, scripts and examples here and in the specification-tests repo for any changes.
 2. Update CHANGELOG.md to highlight new features.
-3. Prepare the release:
+3. Commit changes and merge as part of a PR.
+4. Prepare the release:
     ```shell
     ./mvnw release:prepare
     ```
@@ -191,12 +193,13 @@ https://hub.docker.com/r/solidconformancetestbeta/conformance-test-harness
     ./mvnw release:prepare -DdryRun=true
     ./mvnw release:clean
     ```
-4. Perform the release (whilst avoiding deploying to a maven repository or re-running the tests):
+5. Perform the release (whilst avoiding deploying to a maven repository or re-running the tests):
     ```shell
     ./mvnw release:perform -Darguments="-Dmaven.deploy.skip=true -DskipTests"
     ```
-5. Create the release in GitHub - [Create a new release](https://github.com/solid/conformance-test-harness/releases/new):
+6. Create the release in GitHub - [Create a new release](https://github.com/solid/conformance-test-harness/releases/new):
    * Choose the tag that was just created.
    * Add a title, e.g. `Release 1.0.0`.
    * Add some content describing notable changes.
    * Publish the release.
+7. Inform any teams using their own scripts of changes such as configuration or spec/manifest sources.

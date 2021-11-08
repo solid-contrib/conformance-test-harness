@@ -1,8 +1,11 @@
 # Solid Specification Conformance Test Harness
 
-## Release 1.0.8
+## Release 1.0.9
 ### Features
 * Improve report navigation and interpretation with collapsing sections and counts of tests passed.
+
+### Minor changes
+* Fix: Use the config file in the specification-tests repo to ensure consistency.
 
 ## Release 1.0.6
 ### Features

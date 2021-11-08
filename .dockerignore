@@ -1,4 +1,3 @@
 *
 !target/*-runner.jar
 !config/test-subjects.ttl
-!src/main/docker/application.yaml
