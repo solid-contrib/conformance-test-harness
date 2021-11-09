@@ -98,23 +98,15 @@ class ConformanceTestHarnessTest {
     }
 
     @Test
-    void createCoverageReportInitError() {
-        doThrow(new TestHarnessInitializationException("FAIL")).when(testSuiteDescription).prepareTestCases(true);
-        assertFalse(conformanceTestHarness.createCoverageReport());
-        assertTrue(Files.notExists(tmp.resolve("coverage.html")));
+    void prepareCoverageReport() {
+        assertDoesNotThrow(() -> conformanceTestHarness.prepareCoverageReport());
     }
 
     @Test
-    void createCoverageReportWriteFail() {
-        tmp.toFile().setWritable(false);
-        assertFalse(conformanceTestHarness.createCoverageReport());
-        assertTrue(Files.notExists(tmp.resolve("coverage.html")));
-    }
-
-    @Test
-    void createCoverageReportPass() {
-        assertTrue(conformanceTestHarness.createCoverageReport());
-        assertTrue(Files.exists(tmp.resolve("coverage.html")));
+    void prepareCoverageReportInitError() {
+        doThrow(new TestHarnessInitializationException("FAIL"))
+                .when(testSuiteDescription).prepareTestCases(Config.RunMode.COVERAGE);
+        assertThrows(TestHarnessInitializationException.class, () -> conformanceTestHarness.prepareCoverageReport());
     }
 
     @Test
@@ -122,7 +114,6 @@ class ConformanceTestHarnessTest {
         mockTargetServer();
         when(testSuiteDescription.getFeaturePaths()).thenReturn(null);
         assertNull(conformanceTestHarness.runTestSuites(null));
-        assertTrue(Files.notExists(tmp.resolve("report.html")));
     }
 
     @Test
@@ -130,7 +121,6 @@ class ConformanceTestHarnessTest {
         mockTargetServer();
         when(testSuiteDescription.getFeaturePaths()).thenReturn(Collections.emptyList());
         assertNull(conformanceTestHarness.runTestSuites(null));
-        assertTrue(Files.notExists(tmp.resolve("report.html")));
     }
 
     @Test
@@ -138,7 +128,6 @@ class ConformanceTestHarnessTest {
         mockTargetServer();
         when(testSuiteDescription.getFeaturePaths()).thenReturn(Collections.emptyList());
         assertNull(conformanceTestHarness.runTestSuites(Collections.emptyList()));
-        assertTrue(Files.notExists(tmp.resolve("report.html")));
     }
 
     @Test
@@ -150,7 +139,6 @@ class ConformanceTestHarnessTest {
         final TestSuiteResults results = mockResults(1);
         when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
         assertEquals(1, conformanceTestHarness.runTestSuites(null).getFailCount());
-        assertTrue(Files.exists(tmp.resolve("report.html")));
         verify(authManager).registerUser(HttpConstants.ALICE);
         verify(authManager).registerUser(HttpConstants.BOB);
     }
@@ -161,7 +149,6 @@ class ConformanceTestHarnessTest {
         doThrow(new TestHarnessInitializationException("FAIL"))
                 .when(testSuiteDescription).setNonRunningTestAssertions(any(), any());
         assertNull(conformanceTestHarness.runTestSuites(null));
-        assertTrue(Files.notExists(tmp.resolve("report.html")));
     }
 
     @Test
@@ -171,31 +158,28 @@ class ConformanceTestHarnessTest {
         final TestSuiteResults results = mockResults(1);
         when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
         assertEquals(1, conformanceTestHarness.runTestSuites(null).getFailCount());
-        assertTrue(Files.exists(tmp.resolve("report.html")));
-        verify(testSubject).tearDownServer();
     }
 
     @Test
-    void runTestSuiteNoTearDown() {
-        mockTargetServer();
-        when(config.isSkipTearDown()).thenReturn(true);
-        when(testSuiteDescription.getFeaturePaths()).thenReturn(List.of("feature"));
-        final TestSuiteResults results = mockResults(1);
-        when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
-        assertEquals(1, conformanceTestHarness.runTestSuites(null).getFailCount());
-        assertTrue(Files.exists(tmp.resolve("report.html")));
-        verify(testSubject, never()).tearDownServer();
-    }
-
-    @Test
-    void runTestSuiteWriteFail() {
+    void buildReportsWriteFail() {
         tmp.toFile().setWritable(false);
-        mockTargetServer();
-        when(testSuiteDescription.getFeaturePaths()).thenReturn(List.of("feature"));
-        final TestSuiteResults results = mockResults(1);
-        when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
-        assertEquals(1, conformanceTestHarness.runTestSuites(null).getFailCount());
+        conformanceTestHarness.buildReports(Config.RunMode.COVERAGE);
+        assertTrue(Files.notExists(tmp.resolve("coverage.html")));
         assertTrue(Files.notExists(tmp.resolve("report.html")));
+        assertTrue(Files.notExists(tmp.resolve("report.ttl")));
+    }
+
+    @Test
+    void buildReportsCoverageReportPass() {
+        conformanceTestHarness.buildReports(Config.RunMode.COVERAGE);
+        assertTrue(Files.exists(tmp.resolve("coverage.html")));
+    }
+
+    @Test
+    void buildReportsResultsReportPass() {
+        conformanceTestHarness.buildReports(Config.RunMode.TEST);
+        assertTrue(Files.exists(tmp.resolve("report.html")));
+        assertTrue(Files.exists(tmp.resolve("report.ttl")));
     }
 
     @Test
@@ -203,7 +187,6 @@ class ConformanceTestHarnessTest {
         mockTargetServer();
         doThrow(new TestHarnessInitializationException("FAIL")).when(testSubject).prepareServer();
         assertNull(conformanceTestHarness.runSingleTest(null));
-        assertTrue(Files.notExists(tmp.resolve("report.html")));
     }
 
     @Test
@@ -214,8 +197,6 @@ class ConformanceTestHarnessTest {
         final TestSuiteResults results = mockResults(1);
         when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
         assertEquals(1, conformanceTestHarness.runSingleTest("test").getFailCount());
-        assertFalse(Files.exists(tmp.resolve("report.html")));
-        verify(testSubject).tearDownServer();
         assertNotNull(conformanceTestHarness.getClients());
         assertEquals(1, conformanceTestHarness.getClients().size());
     }
@@ -245,6 +226,12 @@ class ConformanceTestHarnessTest {
                 .thenReturn(Map.of(HttpConstants.ALICE, "https://alice.target.example.org/profile/card#me"));
         when(authManager.authenticate(any(), anyBoolean())).thenThrow(TestHarnessInitializationException.class);
         assertNull(conformanceTestHarness.runSingleTest("test"));
+    }
+
+    @Test
+    void cleanUp() {
+        conformanceTestHarness.cleanUp();
+        verify(testSubject).tearDownServer();
     }
 
     private void mockTargetServer() {

@@ -55,13 +55,17 @@ public class Config {
     private List<URL> testSources;
     private File outputDir;
     private Map<String, Object> webIds;
-    private boolean skipTearDown;
     private AccessControlMode accessControlMode;
 
     public enum AccessControlMode {
         ACP_LEGACY,
         ACP,
         WAC
+    }
+
+    public enum RunMode {
+        COVERAGE,
+        TEST
     }
 
     // the settings are taken in the following order of preference:
@@ -127,7 +131,7 @@ public class Config {
 
     public URL getSubjectsUrl() {
         if (subjectsUrl == null) {
-            if (!subjectsFile.isPresent()) {
+            if (subjectsFile.isEmpty()) {
                 throw new TestHarnessInitializationException("config option or subjects config is required");
             }
             this.subjectsUrl = createUrl(subjectsFile.get(), "subjects");
@@ -141,7 +145,7 @@ public class Config {
 
     public List<URL> getTestSources()  {
         if (testSources == null) {
-            if (!sourceList.isPresent()) {
+            if (sourceList.isEmpty()) {
                 throw new TestHarnessInitializationException("source option or sources config is required");
             }
             this.testSources = sourceList.get().stream()
@@ -236,14 +240,6 @@ public class Config {
         return setupRootAcl;
     }
 
-    public void setSkipTearDown(final boolean skipTearDown) {
-        this.skipTearDown = skipTearDown;
-    }
-
-    public boolean isSkipTearDown() {
-        return skipTearDown;
-    }
-
     public AccessControlMode getAccessControlMode() {
         return accessControlMode;
     }
@@ -252,11 +248,11 @@ public class Config {
         this.accessControlMode = accessControlMode;
     }
 
-    public void logConfigSettings(final boolean withTests) {
+    public void logConfigSettings(final RunMode mode) {
         if (logger.isInfoEnabled()) {
             logger.info("Sources:        {}", getTestSources());
             logger.info("Path mappings:  {}", pathMappings.stringValue());
-            if (withTests) {
+            if (mode == RunMode.TEST) {
                 logger.info("Subjects URL:   {}", getSubjectsUrl());
                 logger.info("Target server:  {}", getTestSubject());
             }

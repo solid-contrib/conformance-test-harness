@@ -57,6 +57,7 @@ public class Application implements QuarkusApplication {
     public static final String COVERAGE = "coverage";
     public static final String FILTER = "filter";
     public static final String SKIP_TEARDOWN = "skip-teardown";
+    public static final String SKIP_REPORTS = "skip-reports";
 
     @Inject
     Config config;
@@ -71,6 +72,8 @@ public class Application implements QuarkusApplication {
         options.addOption(Option.builder().longOpt(COVERAGE).desc("produce a coverage report only").build());
         options.addOption(Option.builder().longOpt(SKIP_TEARDOWN)
                 .desc("skip teardown (when server itself is being stopped)").build());
+        options.addOption(Option.builder().longOpt(SKIP_REPORTS)
+                .desc("skip report generation").build());
         options.addOption(
                 Option.builder().longOpt(SUBJECTS).hasArg().desc("URL or path to test subject config (Turtle)").build()
         );
@@ -93,20 +96,25 @@ public class Application implements QuarkusApplication {
                 formatter.printHelp( "run", options );
                 return 0;
             } else {
-                final File outputDir;
-                if (line.hasOption(OUTPUT) && !StringUtils.isBlank(line.getOptionValue(OUTPUT))) {
-                    outputDir = Path.of(line.getOptionValue(OUTPUT)).toAbsolutePath().normalize().toFile();
-                    logger.debug("Output = {}", outputDir.getPath());
-                } else {
-                    outputDir = Path.of("").toAbsolutePath().toFile();
+                if (line.hasOption(SKIP_REPORTS) && line.hasOption(COVERAGE)) {
+                    throw new Exception("The skip-reports option cannot apply when the coverage option is used");
                 }
-                try (final Formatter formatter = new Formatter()) {
-                    if (!validateOutputDir(outputDir.toPath(), formatter)) {
-                        logger.error("{}", formatter);
-                        return 1;
+                if (!line.hasOption(SKIP_REPORTS)) {
+                    final File outputDir;
+                    if (line.hasOption(OUTPUT) && !StringUtils.isBlank(line.getOptionValue(OUTPUT))) {
+                        outputDir = Path.of(line.getOptionValue(OUTPUT)).toAbsolutePath().normalize().toFile();
+                        logger.debug("Output = {}", outputDir.getPath());
+                    } else {
+                        outputDir = Path.of("").toAbsolutePath().toFile();
                     }
+                    try (final Formatter formatter = new Formatter()) {
+                        if (!validateOutputDir(outputDir.toPath(), formatter)) {
+                            logger.error("{}", formatter);
+                            return 1;
+                        }
+                    }
+                    config.setOutputDirectory(outputDir);
                 }
-                config.setOutputDirectory(outputDir);
 
                 if (line.hasOption(SOURCE)) {
                     config.setTestSources(Arrays.stream(line.getOptionValues(SOURCE))
@@ -137,25 +145,28 @@ public class Application implements QuarkusApplication {
                                 .collect(Collectors.toList());
                         logger.debug("Filters = {}", filters);
                     }
-                    if (line.hasOption(SKIP_TEARDOWN)) {
-                        config.setSkipTearDown(true);
-                        logger.debug("Skip teardown = true");
-                    }
                 }
-                config.logConfigSettings(!line.hasOption(COVERAGE));
+                config.logConfigSettings(line.hasOption(COVERAGE) ? Config.RunMode.COVERAGE : Config.RunMode.TEST);
 
                 conformanceTestHarness.initialize();
 
                 if (line.hasOption(COVERAGE)) {
-                    return conformanceTestHarness.createCoverageReport() ? 0 : 1;
+                    conformanceTestHarness.prepareCoverageReport();
+                    conformanceTestHarness.buildReports(Config.RunMode.COVERAGE);
+                    return 0;
                 } else {
                     final TestSuiteResults results = conformanceTestHarness.runTestSuites(filters);
+                    if (!line.hasOption(SKIP_REPORTS)) {
+                        conformanceTestHarness.buildReports(Config.RunMode.TEST);
+                    }
+                    if (!line.hasOption(SKIP_TEARDOWN)) {
+                        conformanceTestHarness.cleanUp();
+                    }
                     return results != null && results.getFailCount() == 0 ? 0 : 1;
                 }
-
             }
         } catch (Exception e) {
-            logger.error("Application initialization failed.  Reason: {}", e.toString());
+            logger.error("Application failed.  Reason: {}", e.toString());
         }
         return 1;
     }

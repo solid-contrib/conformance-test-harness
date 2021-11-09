@@ -66,7 +66,7 @@ public class ConfigMissingTest {
 
     @Test
     void logConfigSettings() {
-        assertDoesNotThrow(() -> config.logConfigSettings(true));
+        assertDoesNotThrow(() -> config.logConfigSettings(Config.RunMode.TEST));
     }
 
     @Test

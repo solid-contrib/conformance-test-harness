@@ -58,12 +58,13 @@ public class TestSuiteRunner {
     @Test
     void testSuite() throws IOException {
         conformanceTestHarness.initialize();
-        config.logConfigSettings(true);
+        config.logConfigSettings(Config.RunMode.TEST);
         final List<String> filters = List.of(
 //                "web-access-control",
 //                "storage"
         );
         final TestSuiteResults results = conformanceTestHarness.runTestSuites(filters);
+        conformanceTestHarness.cleanUp();
         assertNotNull(results);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());
     }
@@ -72,7 +73,8 @@ public class TestSuiteRunner {
     @Disabled
     void testSuiteCoverage() throws Exception {
         conformanceTestHarness.initialize();
-        config.logConfigSettings(false);
-        assertTrue(conformanceTestHarness.createCoverageReport());
+        config.logConfigSettings(Config.RunMode.COVERAGE);
+        conformanceTestHarness.prepareCoverageReport();
+        conformanceTestHarness.buildReports(Config.RunMode.COVERAGE);
     }
 }

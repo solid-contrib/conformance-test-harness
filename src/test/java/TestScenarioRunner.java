@@ -53,6 +53,7 @@ public class TestScenarioRunner {
 
         final String uri = Path.of("example/" + featurePath).toAbsolutePath().normalize().toUri().toString();
         final TestSuiteResults results = conformanceTestHarness.runSingleTest(uri);
+        conformanceTestHarness.cleanUp();
         assertNotNull(results);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());
     }

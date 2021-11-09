@@ -2,7 +2,8 @@
 
 ## Release 1.0.10
 ### Features
-* TBD
+* The new command line option, `--skip-reports`, stops the results reports being generated. The result counts are still 
+  logged in JSON format.
 
 ### Minor changes
 * Fix: Fetch missing titles from tests that are not run to include in the result report.
