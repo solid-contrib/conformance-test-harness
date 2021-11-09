@@ -23,7 +23,6 @@
  */
 package org.solid.testharness.reporting;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.karate.Results;
 
@@ -85,19 +84,23 @@ public class TestSuiteResults {
         return new Date(this.results.getEndTime());
     }
 
-    public String toJson() throws JsonProcessingException {
-        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a", Locale.getDefault());
-        final ObjectMapper objectMapper = CDI.current().select(ObjectMapper.class).get();
-        return objectMapper.writeValueAsString(Map.of(
-        "featuresPassed", this.results.getFeaturesPassed(),
-        "featuresFailed", this.results.getFeaturesFailed(),
-        "featuresSkipped", (int) this.results.toKarateJson().get("featuresSkipped"),
-        "scenariosPassed", this.results.getScenariosPassed(),
-        "scenariosFailed", this.results.getScenariosFailed(),
-        "elapsedTime", this.results.getElapsedTime(),
-        "totalTime", this.results.getTimeTakenMillis(),
-        "resultDate", sdf.format(getResultDate())
-        ));
+    public String toJson() {
+        try {
+            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a", Locale.getDefault());
+            final ObjectMapper objectMapper = CDI.current().select(ObjectMapper.class).get();
+            return objectMapper.writeValueAsString(Map.of(
+                    "featuresPassed", this.results.getFeaturesPassed(),
+                    "featuresFailed", this.results.getFeaturesFailed(),
+                    "featuresSkipped", (int) this.results.toKarateJson().get("featuresSkipped"),
+                    "scenariosPassed", this.results.getScenariosPassed(),
+                    "scenariosFailed", this.results.getScenariosFailed(),
+                    "elapsedTime", this.results.getElapsedTime(),
+                    "totalTime", this.results.getTimeTakenMillis(),
+                    "resultDate", sdf.format(getResultDate())
+            ));
+        } catch (Exception e) {
+            return "{}";
+        }
     }
 
     @Override

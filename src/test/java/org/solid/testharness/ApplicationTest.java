@@ -63,6 +63,12 @@ class ApplicationTest {
     }
 
     @Test
+    void reportCLash() throws Exception {
+        assertEquals(1, application.run("--skip-reports", "--coverage"));
+        verify(conformanceTestHarness, never()).prepareCoverageReport();
+    }
+
+    @Test
     void outputBad() throws Exception {
         assertEquals(1, application.run("--output", "./missing"));
         assertNull(config.getOutputDirectory());
@@ -96,16 +102,23 @@ class ApplicationTest {
 
     @Test
     void outputMissing() throws Exception {
-        when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
         assertEquals(0, application.run("--output", "", "--coverage"));
         final File cwd = Path.of("").toAbsolutePath().toFile();
         verify(config).setOutputDirectory(cwd);
     }
 
     @Test
+    void outputSkipped() throws Exception {
+        final TestSuiteResults results = mockResults(0);
+        when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
+        assertEquals(0, application.run("--skip-reports"));
+        verify(config, never()).setOutputDirectory(any());
+        verify(conformanceTestHarness, never()).buildReports(any());
+    }
+
+    @Test
     void sourceOnce() throws Exception {
         final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
-        when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
         assertEquals(0, application.run("--source", "source1", "--coverage"));
         verify(config).setTestSources(captor.capture());
         assertEquals(1, captor.getValue().size());
@@ -115,7 +128,6 @@ class ApplicationTest {
     @Test
     void sourceDouble() throws Exception {
         final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
-        when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
         assertEquals(0, application.run("--source", "source1,source2", "--coverage"));
         verify(config).setTestSources(captor.capture());
         assertEquals(2, captor.getValue().size());
@@ -126,7 +138,6 @@ class ApplicationTest {
     @Test
     void sourceMultiple() throws Exception {
         final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
-        when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
         assertEquals(0, application.run("--source", "source1", "--source", "source2", "--coverage"));
         verify(config).setTestSources(captor.capture());
         assertEquals(2, captor.getValue().size());
@@ -137,23 +148,20 @@ class ApplicationTest {
     @Test
     void sourceBlank() throws Exception {
         final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
-        when(conformanceTestHarness.createCoverageReport()).thenReturn(false);
-        assertEquals(1, application.run("--source", "", "--coverage"));
+        assertEquals(0, application.run("--source", "", "--coverage"));
         verify(config).setTestSources(captor.capture());
         assertEquals(0, captor.getValue().size());
     }
 
     @Test
     void sourceNotSet() throws Exception {
-        when(conformanceTestHarness.createCoverageReport()).thenReturn(false);
-        assertEquals(1, application.run("--coverage"));
+        assertEquals(0, application.run("--coverage"));
         verify(config, never()).setTestSources(any());
     }
 
     @Test
     void targetBlank() throws Exception {
         final TestSuiteResults results = mockResults(0);
-        when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
         when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
         assertEquals(0, application.run("--target", ""));
         verify(config, never()).setTestSubject(any());
@@ -185,8 +193,7 @@ class ApplicationTest {
 
     @Test
     void subjectsNotSet() throws Exception {
-        when(conformanceTestHarness.createCoverageReport()).thenReturn(false);
-        assertEquals(1, application.run("--coverage"));
+        assertEquals(0, application.run("--coverage"));
         verify(config, never()).setSubjectsUrl(any());
     }
 
@@ -239,14 +246,14 @@ class ApplicationTest {
     void runTestSuitesNoResults() throws Exception {
         when(conformanceTestHarness.runTestSuites(any())).thenReturn(null);
         assertEquals(1, application.run());
-        verify(config, never()).setSkipTearDown(true);
+        verify(conformanceTestHarness).cleanUp();
     }
 
     @Test
     void runTestSuitesNoTearDown() throws Exception {
         when(conformanceTestHarness.runTestSuites(any())).thenReturn(null);
         assertEquals(1, application.run("--skip-teardown"));
-        verify(config).setSkipTearDown(true);
+        verify(conformanceTestHarness, never()).cleanUp();
     }
 
     @Test
@@ -258,25 +265,17 @@ class ApplicationTest {
 
     @Test
     void coverageReportOnly() throws Exception {
-        when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
         assertEquals(0, application.run("--coverage"));
-        verify(conformanceTestHarness).createCoverageReport();
+        verify(conformanceTestHarness).prepareCoverageReport();
     }
 
     @Test
     void runWithNoOptions() throws Exception {
-        when(conformanceTestHarness.createCoverageReport()).thenReturn(true);
         final TestSuiteResults results = mockResults(0);
         when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
         assertEquals(0, application.run());
-        verify(conformanceTestHarness, never()).createCoverageReport();
+        verify(conformanceTestHarness, never()).prepareCoverageReport();
         verify(conformanceTestHarness).runTestSuites(any());
-    }
-
-    @Test
-    void coverageReportBadData() throws Exception {
-        when(conformanceTestHarness.createCoverageReport()).thenReturn(false);
-        assertEquals(1, application.run("--coverage"));
     }
 
     private TestSuiteResults mockResults(final int failures) {

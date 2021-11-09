@@ -121,12 +121,12 @@ public class ConfigTest {
 
     @Test
     void logConfigSettings() {
-        assertDoesNotThrow(() -> config.logConfigSettings(true));
+        assertDoesNotThrow(() -> config.logConfigSettings(Config.RunMode.TEST));
     }
 
     @Test
     void logConfigSettingsNoTests() {
-        assertDoesNotThrow(() -> config.logConfigSettings(false));
+        assertDoesNotThrow(() -> config.logConfigSettings(Config.RunMode.COVERAGE));
     }
 
     @Test
@@ -157,13 +157,6 @@ public class ConfigTest {
     @Test
     public void isSetupRootAcl() {
         assertTrue(config.isSetupRootAcl());
-    }
-
-    @Test
-    void setSkipTearDown() {
-        assertFalse(config.isSkipTearDown());
-        config.setSkipTearDown(true);
-        assertTrue(config.isSkipTearDown());
     }
 
     @Test

@@ -27,6 +27,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.junit.jupiter.api.Test;
+import org.solid.testharness.config.Config;
 import org.solid.testharness.discovery.TestSuiteDescription;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestHarnessInitializationException;
@@ -55,7 +56,8 @@ class TestSuiteDescriptionNoRepositoryTest {
     @Test
     void prepareTestCasesException() {
         when(dataRepository.getConnection()).thenThrow(new RepositoryException("BAD REPOSITORY"));
-        assertThrows(TestHarnessInitializationException.class, () -> testSuiteDescription.prepareTestCases(false));
+        assertThrows(TestHarnessInitializationException.class,
+                () -> testSuiteDescription.prepareTestCases(Config.RunMode.TEST));
     }
 }
 

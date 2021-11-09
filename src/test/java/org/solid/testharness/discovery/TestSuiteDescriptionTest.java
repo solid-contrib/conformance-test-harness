@@ -31,6 +31,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.solid.common.vocab.*;
+import org.solid.testharness.config.Config;
 import org.solid.testharness.utils.*;
 
 import javax.inject.Inject;
@@ -217,7 +218,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void mapEmptyList() {
-        assertDoesNotThrow(() -> testSuiteDescription.prepareTestCases(false));
+        assertDoesNotThrow(() -> testSuiteDescription.prepareTestCases(Config.RunMode.TEST));
     }
 
     @Test
@@ -225,14 +226,14 @@ class TestSuiteDescriptionTest {
         add(iri(TestData.SAMPLE_NS, "testcase"), RDF.type, TD.TestCase);
         add(iri(TestData.SAMPLE_NS, "testcase"), SPEC.testScript, iri("https://remote.org/remote-test"));
         assertThrows(TestHarnessInitializationException.class,
-                () -> testSuiteDescription.prepareTestCases(false));
+                () -> testSuiteDescription.prepareTestCases(Config.RunMode.TEST));
     }
 
     @Test
     void mapMissingFeaturePaths() {
         add(iri(TestData.SAMPLE_NS, "testcase"), RDF.type, TD.TestCase);
         add(iri(TestData.SAMPLE_NS, "testcase"), SPEC.testScript, iri("https://example.org/features/unknown.feature"));
-        testSuiteDescription.prepareTestCases(false);
+        testSuiteDescription.prepareTestCases(Config.RunMode.TEST);
         assertTrue(testSuiteDescription.getFeaturePaths().isEmpty());
     }
 
@@ -240,7 +241,7 @@ class TestSuiteDescriptionTest {
     void prepareTestCases() {
         add(iri(TestData.SAMPLE_NS, "testcase"), RDF.type, TD.TestCase);
         add(iri(TestData.SAMPLE_NS, "testcase"), SPEC.testScript, iri("https://example.org/features/test.feature"));
-        testSuiteDescription.prepareTestCases(false);
+        testSuiteDescription.prepareTestCases(Config.RunMode.TEST);
         final List<String> paths = testSuiteDescription.getFeaturePaths();
         final String[] expected = new String[]{TestUtils.getPathUri("src/test/resources/test.feature").toString()};
         assertThat("Locations match", paths, containsInAnyOrder(expected));
@@ -252,7 +253,7 @@ class TestSuiteDescriptionTest {
         add(iri(TestData.SAMPLE_NS, "testcase"), SPEC.testScript, iri("https://example.org/features/test.feature"));
         add(iri(TestData.SAMPLE_NS, "assertion"), RDF.type, EARL.Assertion);
         add(iri(TestData.SAMPLE_NS, "assertion"), EARL.test, iri(TestData.SAMPLE_NS, "testcase"));
-        testSuiteDescription.prepareTestCases(false);
+        testSuiteDescription.prepareTestCases(Config.RunMode.TEST);
         assertTrue(testSuiteDescription.getFeaturePaths().isEmpty());
     }
 
@@ -263,7 +264,7 @@ class TestSuiteDescriptionTest {
                 iri("https://example.org/features/test.feature"));
         add(iri(TestData.SAMPLE_NS, "assertion"), RDF.type, EARL.Assertion);
         add(iri(TestData.SAMPLE_NS, "assertion"), EARL.test, iri(TestData.SAMPLE_NS, "testcase"));
-        testSuiteDescription.prepareTestCases(true);
+        testSuiteDescription.prepareTestCases(Config.RunMode.COVERAGE);
         assertTrue(testSuiteDescription.getFeaturePaths().isEmpty());
 //        final List<String> paths = testSuiteDescription.getFeaturePaths();
 //        final String[] expected = new String[]{TestUtils.getPathUri("src/test/resources/test.feature").toString()};
@@ -274,12 +275,12 @@ class TestSuiteDescriptionTest {
     void prepareTestCasesNotImplemented() {
         add(iri(TestData.SAMPLE_NS, "testcase"), RDF.type, TD.TestCase);
         add(iri(TestData.SAMPLE_NS, "testcase"), SPEC.testScript, literal("test.feature"));
-        testSuiteDescription.prepareTestCases(true);
+        testSuiteDescription.prepareTestCases(Config.RunMode.COVERAGE);
         assertTrue(testSuiteDescription.getFeaturePaths().isEmpty());
     }
 
     @Test
-    void prepareTestCasesTitle() throws Exception {
+    void prepareTestCasesTitle() {
         add(iri("https://example.org/group1-feature1"), RDF.type, TD.TestCase);
         add(iri("https://example.org/group1-feature1"), SPEC.testScript,
                 iri("https://example.org/test/group1/feature1"));
@@ -292,7 +293,7 @@ class TestSuiteDescriptionTest {
         add(iri("https://example.org/group2-feature2"), RDF.type, TD.TestCase);
         add(iri("https://example.org/group2-feature2"), SPEC.testScript,
                 iri("https://example.org/test/group2/"));
-        testSuiteDescription.prepareTestCases(true);
+        testSuiteDescription.prepareTestCases(Config.RunMode.COVERAGE);
         assertTrue(ask(iri("https://example.org/group1-feature1"), DCTERMS.title, literal("Feature 1 title")));
         assertTrue(ask(iri("https://example.org/group1-feature2"), DCTERMS.title, literal("Feature 2 title")));
         assertEquals(0, count(iri("https://example.org/group2-feature1"), DCTERMS.title, null));

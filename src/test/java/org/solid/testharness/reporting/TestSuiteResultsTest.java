@@ -23,7 +23,6 @@
  */
 package org.solid.testharness.reporting;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.intuit.karate.Results;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
@@ -31,8 +30,10 @@ import org.junit.jupiter.api.Test;
 import java.util.Date;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @QuarkusTest
 class TestSuiteResultsTest {
@@ -114,11 +115,11 @@ class TestSuiteResultsTest {
         final Date now = new Date();
         when(results.getEndTime()).thenReturn(now.getTime());
         final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
-        assertTrue(testSuiteResults.getResultDate().equals(now));
+        assertEquals(testSuiteResults.getResultDate(), now);
     }
 
     @Test
-    void toJson() throws JsonProcessingException {
+    void toJson() {
         final Results results = mock(Results.class);
         when(results.getFeaturesPassed()).thenReturn(10);
         when(results.getFeaturesFailed()).thenReturn(0);
@@ -129,6 +130,14 @@ class TestSuiteResultsTest {
         when(results.getTimeTakenMillis()).thenReturn(1000d);
         final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
         assertTrue(testSuiteResults.toJson().contains("\"featuresPassed\":10"));
+    }
+
+    @Test
+    void toJsonFails() {
+        final Results results = mock(Results.class);
+        when(results.getFeaturesPassed()).thenThrow(new RuntimeException("FAIL"));
+        final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
+        assertEquals("{}", testSuiteResults.toJson());
     }
 
     @Test

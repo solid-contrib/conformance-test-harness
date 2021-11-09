@@ -33,6 +33,7 @@ import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.*;
+import org.solid.testharness.config.Config;
 import org.solid.testharness.config.PathMappings;
 import org.solid.testharness.http.HttpUtils;
 import org.solid.testharness.utils.DataRepository;
@@ -139,13 +140,13 @@ public class TestSuiteDescription {
         }
     }
 
-    public void prepareTestCases(final boolean coverageMode) {
+    public void prepareTestCases(final Config.RunMode runMode) {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             featurePaths = conn.getStatements(null, RDF.type, TD.TestCase).stream()
                     .map(Statement::getSubject)
                     .filter(Value::isIRI)
                     .map(IRI.class::cast)
-                    .map(tc -> new Feature(conn, tc, coverageMode))
+                    .map(tc -> new Feature(conn, tc, runMode))
                     .peek(Feature::findFeatureIri)
                     .filter(Feature::isImplemented)
                     .peek(Feature::locateFeature)
@@ -168,11 +169,11 @@ public class TestSuiteDescription {
         private String location;
         private boolean runnable;
 
-        public Feature(final RepositoryConnection conn, final IRI testCaseIri, final boolean coverageMode) {
+        public Feature(final RepositoryConnection conn, final IRI testCaseIri, final Config.RunMode runMode) {
             this.conn = conn;
             this.testCaseIri = testCaseIri;
             // test is runnable when not in coverage mode and it doesn't have an assertion already
-            runnable = !coverageMode && !conn.hasStatement(null, EARL.test, testCaseIri, false);
+            runnable = runMode == Config.RunMode.TEST && !conn.hasStatement(null, EARL.test, testCaseIri, false);
         }
 
         public void findFeatureIri() {

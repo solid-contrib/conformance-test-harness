@@ -268,6 +268,7 @@ usage: run
  -h,--help           print this message
  -o,--output <arg>   output directory
     --skip-teardown  skip teardown (when server itself is being stopped)
+    --skip-reports   skip report generation
  -s,--source <arg>   URL or path to test source(s)
     --subjects <arg> URL or path to test subject config (Turtle)
  -t,--target <arg>   target server
@@ -356,6 +357,7 @@ Some additional notes on using the Docker image:
 * If you do not specify a version then Docker will use the latest image
 * If you want to see the reports, the `/reports` directory must be mapped to a local volume. Alternatively you could use 
 this image in your own image which could send the reports to an external location such as Amazon Web Services (AWS) S3.
+* If you use the `--skip-reports` option you do not need to map the `/reports` directory.
 * If you want to run different tests or supply a different config file, you can mount local directories in place of other
 internal ones. For example:
     ```

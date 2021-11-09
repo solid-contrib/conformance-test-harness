@@ -115,26 +115,8 @@ public class ConformanceTestHarness {
                 testSuiteDescription.getTestCases(false));
     }
 
-    public boolean createCoverageReport() {
-        try {
-            testSuiteDescription.prepareTestCases(true);
-        } catch (TestHarnessInitializationException e) {
-            logger.error("Cannot build report", e);
-            return false;
-        }
-
-        logger.info("===================== BUILD REPORT ========================");
-        final File outputDir = config.getOutputDirectory();
-        logger.info("Reports location: {}", outputDir.getPath());
-        try {
-            final File coverageHtmlFile = new File(outputDir, "coverage.html");
-            logger.info("Coverage report HTML/RDFa file: {}", coverageHtmlFile.getPath());
-            reportGenerator.buildHtmlCoverageReport(Files.newBufferedWriter(coverageHtmlFile.toPath()));
-            return true;
-        } catch (IOException e) {
-            logger.error("Failed to write coverage report", e);
-            return false;
-        }
+    public void prepareCoverageReport() {
+        testSuiteDescription.prepareTestCases(Config.RunMode.COVERAGE);
     }
 
     public TestSuiteResults runTestSuites(final List<String> filters) {
@@ -149,7 +131,7 @@ public class ConformanceTestHarness {
                     testSuiteDescription.getTestCases(true).size(),
                     testSuiteDescription.getTestCases(true));
 
-            testSuiteDescription.prepareTestCases(false);
+            testSuiteDescription.prepareTestCases(Config.RunMode.TEST);
             featurePaths = testSuiteDescription.getFeaturePaths();
             if (featurePaths == null || featurePaths.isEmpty()) {
                 logger.warn("There are no tests available");
@@ -164,25 +146,31 @@ public class ConformanceTestHarness {
         }
 
         final TestSuiteResults results = runTests(featurePaths, true);
+        resultLogger.info(results.toJson());
+        return results;
+    }
 
-        logger.info("===================== BUILD REPORT ========================");
+    public void buildReports(final Config.RunMode mode) {
+        logger.info("===================== BUILD REPORTS ========================");
         final File outputDir = config.getOutputDirectory();
         logger.info("Reports location: {}", outputDir.getPath());
         try {
-            resultLogger.info(results.toJson());
-            final File reportTurtleFile = new File(outputDir, "report.ttl");
-            logger.info("Report Turtle file: {}", reportTurtleFile.getPath());
-            reportGenerator.buildTurtleReport(Files.newBufferedWriter(reportTurtleFile.toPath()));
+            if (mode == Config.RunMode.COVERAGE) {
+                final File coverageHtmlFile = new File(outputDir, "coverage.html");
+                logger.info("Coverage report HTML/RDFa file: {}", coverageHtmlFile.getPath());
+                reportGenerator.buildHtmlCoverageReport(Files.newBufferedWriter(coverageHtmlFile.toPath()));
+            } else {
+                final File reportTurtleFile = new File(outputDir, "report.ttl");
+                logger.info("Report Turtle file: {}", reportTurtleFile.getPath());
+                reportGenerator.buildTurtleReport(Files.newBufferedWriter(reportTurtleFile.toPath()));
 
-            final File reportHtmlFile = new File(outputDir, "report.html");
-            logger.info("Report HTML/RDFa file: {}", reportHtmlFile.getPath());
-            reportGenerator.buildHtmlResultReport(Files.newBufferedWriter(reportHtmlFile.toPath()));
+                final File reportHtmlFile = new File(outputDir, "report.html");
+                logger.info("Report HTML/RDFa file: {}", reportHtmlFile.getPath());
+                reportGenerator.buildHtmlResultReport(Files.newBufferedWriter(reportHtmlFile.toPath()));
+            }
         } catch (Exception e) {
-            logger.error("Failed to write result reports", e);
+            logger.error("Failed to write reports", e);
         }
-
-        cleanUp();
-        return results;
     }
 
     public TestSuiteResults runSingleTest(final String uri) {
@@ -194,10 +182,7 @@ public class ConformanceTestHarness {
             logger.error("Cannot run test", e);
             return null;
         }
-
-        final TestSuiteResults results = runTests(List.of(uri), false);
-        cleanUp();
-        return results;
+        return runTests(List.of(uri), false);
     }
 
     private void setupTestHarness(final Map<String, Boolean> features) {
@@ -219,11 +204,9 @@ public class ConformanceTestHarness {
         return results;
     }
 
-    private void cleanUp() {
-        if (!config.isSkipTearDown()) {
-            logger.info("===================== DELETING TEST RESOURCES ========================");
-            testSubject.tearDownServer();
-        }
+    public void cleanUp() {
+        logger.info("===================== DELETING TEST RESOURCES ========================");
+        testSubject.tearDownServer();
     }
 
     private void registerUsers() {
