@@ -5,11 +5,7 @@
   <td rel="prov:generated" resource="{generatedOutput.subject}">
         <span about="{generatedOutput.subject}" typeof="{generatedOutput.typesList}" rel="prov:value"
               resource="{generatedOutput.value}" class="earl:{generatedOutput.valueLocalName}">
-        {#switch generatedOutput.value}
-        {#case 'http://www.w3.org/ns/earl#passed'}✔
-        {#case 'http://www.w3.org/ns/earl#failed'}✗
-        {#else}o
-        {/switch}
+          {#include outcome value=generatedOutput.value /}
         </span>
   </td>
   <td>

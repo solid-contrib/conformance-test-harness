@@ -1,5 +1,13 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.0.10
+### Features
+* TBD
+
+### Minor changes
+* Fix: Fetch missing titles from tests that are not run to include in the result report.
+* Update: Add assertions for tests that are not run or are inapplicable to the test subject.
+
 ## Release 1.0.9
 ### Features
 * Improve report navigation and interpretation with collapsing sections and counts of tests passed.

@@ -142,14 +142,13 @@ public class Application implements QuarkusApplication {
                         logger.debug("Skip teardown = true");
                     }
                 }
+                config.logConfigSettings(!line.hasOption(COVERAGE));
 
                 conformanceTestHarness.initialize();
 
                 if (line.hasOption(COVERAGE)) {
-                    config.logConfigSettings(false);
                     return conformanceTestHarness.createCoverageReport() ? 0 : 1;
                 } else {
-                    config.logConfigSettings(true);
                     final TestSuiteResults results = conformanceTestHarness.runTestSuites(filters);
                     return results != null && results.getFailCount() == 0 ? 0 : 1;
                 }

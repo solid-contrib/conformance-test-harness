@@ -7,11 +7,7 @@
   <dl><dt>End</dt><dd><time datatype="xsd:dateTime" datetime="{endTime}" property="prov:endedAtTime">{endTime}</time></dd></dl>
   <dl><dt>Outcome</dt><dd rel="prov:generated" resource="{generatedOutput.subject}" typeof="{generatedOutput.typesList}">
     <span rel="prov:value" resource="{generatedOutput.value}" class="earl:{generatedOutput.valueLocalName}">
-    {#switch generatedOutput.value}
-    {#case 'http://www.w3.org/ns/earl#passed'}✔
-    {#case 'http://www.w3.org/ns/earl#failed'}✗
-    {#else}o
-    {/switch}
+      {#include outcome value=generatedOutput.value /}
     </span>
     <span content="{generatedOutput.timestamp}" datatype="xsd:dateTime" property="prov:generatedAtTime"></span>
   </dd></dl>

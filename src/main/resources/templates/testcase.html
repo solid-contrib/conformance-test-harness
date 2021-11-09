@@ -58,11 +58,7 @@
   <td about="{assertion.subject}" rel="earl:result" resource="{assertion.result.subject}">
     <span about="{assertion.result.subject}" typeof="{assertion.result.typesList}" rel="earl:outcome"
         resource="{assertion.result.outcome}" class="earl:{assertion.result.outcomeLocalName}">
-    {#switch assertion.result.outcome}
-    {#case 'http://www.w3.org/ns/earl#passed'}✔
-    {#case 'http://www.w3.org/ns/earl#failed'}✗
-    {#else}o
-    {/switch}
+      {#include outcome value=assertion.result.outcome /}
     </span>
   </td>
   <td>
@@ -70,14 +66,7 @@
       {#each scenarios.orEmpty}
       <li>
         <span class="earl:{it.generatedOutput.valueLocalName}">
-        {#switch it.generatedOutput.value}
-        {#case 'http://www.w3.org/ns/earl#passed'}
-          ✔
-        {#case 'http://www.w3.org/ns/earl#failed'}
-          ✗
-        {#else}
-          o
-        {/switch}
+          {#include outcome value=it.generatedOutput.value /}
         </span>
         <a href="#{it.anchor}" class="opening" data-id="{it.anchor}">{it.title}</a>
       </li>

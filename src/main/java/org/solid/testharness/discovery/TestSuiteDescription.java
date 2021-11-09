@@ -29,12 +29,10 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.solid.common.vocab.DCTERMS;
-import org.solid.common.vocab.RDF;
-import org.solid.common.vocab.SPEC;
-import org.solid.common.vocab.TD;
+import org.solid.common.vocab.*;
 import org.solid.testharness.config.PathMappings;
 import org.solid.testharness.http.HttpUtils;
 import org.solid.testharness.utils.DataRepository;
@@ -47,9 +45,8 @@ import java.io.File;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Collections;
+import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,11 +63,28 @@ public class TestSuiteDescription {
     private static final Pattern FEATURE_TITLE = Pattern.compile("^\\s*Feature\\s*:\\s*(\\S[^#]+)\\s*",
             Pattern.CASE_INSENSITIVE);
 
+    private List<String> featurePaths;
+
     @Inject
     DataRepository dataRepository;
 
     @Inject
     PathMappings pathMappings;
+
+    public List<String> getFeaturePaths() {
+        return featurePaths;
+    }
+
+    public List<IRI> getTestCases(final boolean filtered) {
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            return conn.getStatements(null, RDF.type, TD.TestCase).stream()
+                    .map(Statement::getSubject)
+                    .filter(tc -> !filtered || !conn.hasStatement(null, EARL.test, tc, false))
+                    .filter(Value::isIRI)
+                    .map(IRI.class::cast)
+                    .collect(Collectors.toList());
+        }
+    }
 
     /**
      * Load data from the list of URLs.
@@ -82,104 +96,147 @@ public class TestSuiteDescription {
         }
     }
 
-    /**
-     * This searches the whole dataRepository for supported test cases based on the server capabilities.
-     * @param serverFeatures set of supported features
-     * @return List of features
-     */
-    public List<IRI> getSupportedTestCases(final Set<String> serverFeatures) {
-        return getFilteredTestCases(serverFeatures, true);
-    }
-
-    public List<IRI> getAllTestCases() {
-        return getFilteredTestCases(null, false);
-    }
-
-    public List<String> locateTestCases(final List<IRI> testCases, final boolean readTitles) {
-        if (testCases.isEmpty()) {
-            return Collections.EMPTY_LIST;
-        }
+    public void setNonRunningTestAssertions(final Set<String> features, final List<String> filters) {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
-            // keep this connection for when we read the Feature file titles and add to the TestCase
-            return testCases.stream().map(testCaseIri -> {
-                final URI mappedLocation = pathMappings.mapFeatureIri(testCaseIri);
-                if (HttpUtils.isHttpProtocol(mappedLocation.getScheme())) {
-                    throw new TestHarnessInitializationException("Remote test cases are not yet supported - use " +
-                            "mappings to point to local copies");
-                }
-                final File file = new File(mappedLocation.getPath());
-                if (!file.exists()) {
-                    // TODO: if starter feature files are auto-generated, read for @ignore as well
-                    logger.warn("FEATURE NOT FOUND: {}", mappedLocation);
-                    return null;
-                } else {
-                    if (readTitles) {
-                        final String title = getFeatureTitle(file);
-                        if (title != null) {
-                            final IRI subject = conn.getStatements(null, SPEC.testScript, testCaseIri).stream()
-                                    .map(Statement::getSubject)
-                                    .filter(Value::isIRI)
-                                    .map(IRI.class::cast)
-                                    .findFirst().orElse(null);
-                            if (subject != null) {
-                                conn.add(subject, DCTERMS.title, literal(title));
-                            }
+            // check test cases are applicable to the target and are not filtered out
+            conn.getStatements(null, RDF.type, TD.TestCase).stream()
+                    .map(Statement::getSubject)
+                    .filter(Value::isIRI)
+                    .map(IRI.class::cast)
+                    .forEach(tc -> {
+                        if (checkApplicability(conn, tc, features) && filters != null && !filters.isEmpty()) {
+                            checkFilters(conn, tc, filters);
                         }
-                    }
-                    return mappedLocation.toString();
-                }
-            }).filter(Objects::nonNull).collect(Collectors.toList());
+                    });
         } catch (RDF4JException e) {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException(e.toString())
                     .initCause(e);
         }
     }
 
-    @SuppressWarnings("PMD.AssignmentInOperand") // this is a common pattern and changing it makes less readable code
-    private String getFeatureTitle(final File file) {
-        try (final BufferedReader br = Files.newBufferedReader(file.toPath())) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (StringUtils.isBlank(line)) continue;
-                if (line.strip().startsWith("#")) continue;
-                final Matcher matcher = FEATURE_TITLE.matcher(line);
-                if (matcher.matches()) {
-                    return matcher.group(1).strip();
-                }
-            }
-            logger.warn("FILE DOES NOT START WITH 'Feature:' {}", file.toPath());
-        } catch (Exception e) { // jacoco will not show full coverage for this try-with-resources line
-            logger.warn("FEATURE NOT READABLE: {} - {}", file.toPath(), e.getMessage());
+    @SuppressWarnings("PMD.CloseResource") // the connection is closed by the caller
+    private boolean checkApplicability(final RepositoryConnection conn, final IRI testCase,
+                                       final Set<String> serverFeatures) {
+        final RepositoryResult<Statement> preConditions = conn.getStatements(testCase, TD.preCondition, null);
+        if (preConditions.hasNext() && !preConditions.stream()
+                .map(Statement::getObject)
+                .filter(Value::isLiteral)
+                .map(Value::stringValue)
+                .allMatch(serverFeature ->
+                        serverFeatures != null && serverFeatures.contains(serverFeature)
+                )) {
+            // the test case has pre-conditions and they don't all match the set of server features
+            dataRepository.createAssertion(conn, EARL.inapplicable, new Date(), testCase);
+            return false;
         }
-        return null;
+        return true;
     }
 
-    private List<IRI> getFilteredTestCases(final Set<String> serverFeatures, final boolean applyFilters) {
+    private void checkFilters(final RepositoryConnection conn, final IRI testCase, final List<String> filters) {
+        if (filters.stream().noneMatch(f -> testCase.stringValue().contains(f))) {
+            // the test case doesn't match the filter so will not be tested
+            dataRepository.createAssertion(conn, EARL.untested, new Date(), testCase);
+        }
+    }
+
+    public void prepareTestCases(final boolean coverageMode) {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
-            // get test cases
-            return conn.getStatements(null, RDF.type, TD.TestCase).stream()
+            featurePaths = conn.getStatements(null, RDF.type, TD.TestCase).stream()
                     .map(Statement::getSubject)
-                    // filter test cases based on preConditions
-                    // - either no preCondition exists or the preconditions are all in serverFeatures
-                    .filter(tc -> !applyFilters ||
-                            !conn.getStatements(tc, TD.preCondition, null).hasNext() ||
-                            conn.getStatements(tc, TD.preCondition, null).stream()
-                                    .map(Statement::getObject)
-                                    .filter(Value::isLiteral)
-                                    .map(Value::stringValue)
-                                    .allMatch(serverFeature ->
-                                            serverFeatures != null && serverFeatures.contains(serverFeature)
-                                    )
-                    )
-                    // get features in each group
-                    .flatMap(tc -> conn.getStatements(tc, SPEC.testScript, null).stream())
-                    .map(Statement::getObject)
                     .filter(Value::isIRI)
                     .map(IRI.class::cast)
+                    .map(tc -> new Feature(conn, tc, coverageMode))
+                    .peek(Feature::findFeatureIri)
+                    .filter(Feature::isImplemented)
+                    .peek(Feature::locateFeature)
+                    .filter(Feature::isFound)
+                    .peek(Feature::extractTitleIfNeeded)
+                    .filter(Feature::isRunnable)
+                    .map(Feature::getLocation)
                     .collect(Collectors.toList());
         } catch (RDF4JException e) {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException(e.toString())
                     .initCause(e);
+        }
+    }
+
+    private class Feature {
+        private RepositoryConnection conn;
+        private IRI testCaseIri;
+        private IRI featureIri;
+        private File featureFile;
+        private String location;
+        private boolean runnable;
+
+        public Feature(final RepositoryConnection conn, final IRI testCaseIri, final boolean coverageMode) {
+            this.conn = conn;
+            this.testCaseIri = testCaseIri;
+            // test is runnable when not in coverage mode and it doesn't have an assertion already
+            runnable = !coverageMode && !conn.hasStatement(null, EARL.test, testCaseIri, false);
+        }
+
+        public void findFeatureIri() {
+            final Value obj = conn.getStatements(testCaseIri, SPEC.testScript, null).next().getObject();
+            if (obj.isIRI()) {
+                this.featureIri = (IRI) obj;
+            }
+        }
+        public boolean isImplemented() {
+            return featureIri != null;
+        }
+
+        public void locateFeature() {
+            // map feature IRI to file
+            final URI mappedLocation = pathMappings.mapFeatureIri(featureIri);
+            if (HttpUtils.isHttpProtocol(mappedLocation.getScheme())) {
+                throw new TestHarnessInitializationException("Remote test cases are not yet supported - " +
+                        "use mappings to point to local copies");
+            }
+            final File file = new File(mappedLocation.getPath());
+            if (!file.exists()) {
+                // TODO: if starter feature files are auto-generated, read for @ignore as well
+                logger.warn("FEATURE NOT FOUND: {}", mappedLocation);
+            } else {
+                featureFile = file;
+                location = mappedLocation.toString();
+            }
+        }
+        public boolean isFound() {
+            return featureFile != null;
+        }
+        public void extractTitleIfNeeded() {
+            if (!runnable) {
+                final String title = getFeatureTitle(featureFile);
+                if (title != null) {
+                    conn.add(testCaseIri, DCTERMS.title, literal(title));
+                }
+            }
+        }
+        public String getLocation() {
+            return location;
+        }
+        public boolean isRunnable() {
+            return runnable;
+        }
+
+        @SuppressWarnings("PMD.AssignmentInOperand") // this is a common pattern and changing it makes it less readable
+        private String getFeatureTitle(final File file) {
+            try (final BufferedReader br = Files.newBufferedReader(file.toPath())) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    if (StringUtils.isBlank(line)) continue;
+                    if (line.strip().startsWith("#")) continue; // ignore comments
+                    if (line.strip().startsWith("@")) continue; // ignore tags
+                    final Matcher matcher = FEATURE_TITLE.matcher(line);
+                    if (matcher.matches()) {
+                        return matcher.group(1).strip();
+                    }
+                }
+                logger.warn("FILE DOES NOT START WITH 'Feature:' {}", file.toPath());
+            } catch (Exception e) { // jacoco will not show full coverage for this try-with-resources line
+                logger.warn("FEATURE NOT READABLE: {} - {}", file.toPath(), e.getMessage());
+            }
+            return null;
         }
     }
 }

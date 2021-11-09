@@ -121,7 +121,8 @@ public class DataRepository implements Repository {
             if (testCaseIri != null) {
                 conn.add(testCaseIri, DCTERMS.title, literal(fr.getFeature().getName()));
             }
-            createAssertion(conn, fr, startTime, testCaseIri);
+            createAssertion(conn, fr.isFailed() ? EARL.failed : EARL.passed,
+                    new Date((long) (startTime + fr.getDurationMillis())), testCaseIri);
             for (ScenarioResult sr: fr.getScenarioResults()) {
                 createScenarioActivity(conn, sr, testCaseIri, featureIri);
             }
@@ -138,7 +139,7 @@ public class DataRepository implements Repository {
                 .findFirst().orElse(null);
     }
 
-    private void createAssertion(final RepositoryConnection conn, final FeatureResult fr, final long startTime,
+    public void createAssertion(final RepositoryConnection conn, final Value outcome, final Date date,
                                  final IRI testCaseIri) {
         final IRI featureAssertion = createNode();
         final ModelBuilder builder = new ModelBuilder();
@@ -150,8 +151,8 @@ public class DataRepository implements Repository {
                 .add(EARL.mode, EARL.automatic)
                 .add(EARL.result, featureResult)
                 .add(featureResult, RDF.type, EARL.TestResult)
-                .add(featureResult, EARL.outcome, fr.isFailed() ? EARL.failed : EARL.passed)
-                .add(featureResult, DCTERMS.date, new Date((long) (startTime + fr.getDurationMillis())))
+                .add(featureResult, EARL.outcome, outcome)
+                .add(featureResult, DCTERMS.date, date)
                 .build());
         if (testCaseIri != null) {
             conn.add(featureAssertion, EARL.test, testCaseIri);
