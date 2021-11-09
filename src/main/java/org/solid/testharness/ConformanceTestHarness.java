@@ -52,7 +52,6 @@ import java.nio.file.Files;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.eclipse.rdf4j.model.util.Values.literal;
@@ -109,18 +108,16 @@ public class ConformanceTestHarness {
             }
         }
         // load the test manifests
+        logger.info("===================== DISCOVER TESTS ========================");
         testSuiteDescription.load(config.getTestSources());
+        logger.info("==== TEST CASES FOUND: {} - {}",
+                testSuiteDescription.getTestCases(false).size(),
+                testSuiteDescription.getTestCases(false));
     }
 
     public boolean createCoverageReport() {
-        logger.info("===================== DISCOVER TESTS ========================");
         try {
-            final List<IRI> testCases = testSuiteDescription.getAllTestCases();
-            final List<String> featurePaths = testSuiteDescription.locateTestCases(testCases, true);
-            if (featurePaths.isEmpty()) {
-                logger.warn("There are no tests available");
-                return true;
-            }
+            testSuiteDescription.prepareTestCases(true);
         } catch (TestHarnessInitializationException e) {
             logger.error("Cannot build report", e);
             return false;
@@ -143,12 +140,23 @@ public class ConformanceTestHarness {
     public TestSuiteResults runTestSuites(final List<String> filters) {
         final List<String> featurePaths;
         try {
+            // TODO: Consider running some initial tests to discover the features provided by a server
             testSubject.loadTestSubjectConfig();
             final Map<String, Boolean> features = testSubject.getTargetServer().getFeatures();
-            featurePaths = discoverTests(filters, features);
-            if (featurePaths == null) {
+
+            testSuiteDescription.setNonRunningTestAssertions(features.keySet(), filters);
+            logger.info("==== FILTERED TEST CASES ({}): {}",
+                    testSuiteDescription.getTestCases(true).size(),
+                    testSuiteDescription.getTestCases(true));
+
+            testSuiteDescription.prepareTestCases(false);
+            featurePaths = testSuiteDescription.getFeaturePaths();
+            if (featurePaths == null || featurePaths.isEmpty()) {
+                logger.warn("There are no tests available");
                 return null;
             }
+            logger.info("==== RUNNING TEST CASES ({}): {}", featurePaths.size(), featurePaths);
+
             setupTestHarness(features);
         } catch (TestHarnessInitializationException e) {
             logger.error("Cannot run test suites", e);
@@ -157,7 +165,7 @@ public class ConformanceTestHarness {
 
         final TestSuiteResults results = runTests(featurePaths, true);
 
-        logger.info("===================== BUILD REPORTS ========================");
+        logger.info("===================== BUILD REPORT ========================");
         final File outputDir = config.getOutputDirectory();
         logger.info("Reports location: {}", outputDir.getPath());
         try {
@@ -170,9 +178,10 @@ public class ConformanceTestHarness {
             logger.info("Report HTML/RDFa file: {}", reportHtmlFile.getPath());
             reportGenerator.buildHtmlResultReport(Files.newBufferedWriter(reportHtmlFile.toPath()));
         } catch (Exception e) {
-            logger.error("Failed to write reports", e);
+            logger.error("Failed to write result reports", e);
         }
 
+        cleanUp();
         return results;
     }
 
@@ -186,31 +195,9 @@ public class ConformanceTestHarness {
             return null;
         }
 
-        return runTests(List.of(uri), false);
-    }
-
-    private List<String> discoverTests(final List<String> filters, final Map<String, Boolean> features) {
-        logger.info("===================== DISCOVER TESTS ========================");
-        // TODO: Consider running some initial tests to discover the features provided by a server
-        final List<String> featurePaths;
-        final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(features.keySet());
-        logger.info("==== TEST CASES FOUND: {} - {}", testCases.size(), testCases);
-
-        final List<IRI> filteredTestCases = testCases.stream()
-                .filter(tc -> filters == null || filters.isEmpty() ||
-                        filters.stream().anyMatch(f -> tc.stringValue().contains(f))
-                )
-                .collect(Collectors.toList());
-        logger.info("==== FILTERED TEST CASES: {} - {}", filteredTestCases.size(), filteredTestCases);
-
-        featurePaths = testSuiteDescription.locateTestCases(filteredTestCases, false);
-        if (featurePaths.isEmpty()) {
-            logger.warn("There are no tests available");
-            return null;
-        } else {
-            logger.info("==== RUNNING {} TEST CASES: {}", featurePaths.size(), featurePaths);
-        }
-        return featurePaths;
+        final TestSuiteResults results = runTests(List.of(uri), false);
+        cleanUp();
+        return results;
     }
 
     private void setupTestHarness(final Map<String, Boolean> features) {
@@ -228,13 +215,15 @@ public class ConformanceTestHarness {
         logger.info("===================== RUN TESTS ========================");
         final TestSuiteResults results = testRunner.runTests(featurePaths, config.getMaxThreads(), enableReporting);
         reportGenerator.setResults(results);
+        logger.info("{}", results);
+        return results;
+    }
 
+    private void cleanUp() {
         if (!config.isSkipTearDown()) {
             logger.info("===================== DELETING TEST RESOURCES ========================");
             testSubject.tearDownServer();
         }
-        logger.info("{}", results);
-        return results;
     }
 
     private void registerUsers() {

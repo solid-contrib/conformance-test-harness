@@ -30,22 +30,14 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.solid.common.vocab.DCTERMS;
-import org.solid.common.vocab.DOAP;
-import org.solid.common.vocab.RDF;
-import org.solid.common.vocab.SPEC;
-import org.solid.testharness.utils.DataRepository;
-import org.solid.testharness.utils.Namespaces;
-import org.solid.testharness.utils.TestHarnessInitializationException;
-import org.solid.testharness.utils.TestUtils;
+import org.solid.common.vocab.*;
+import org.solid.testharness.utils.*;
 
 import javax.inject.Inject;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.eclipse.rdf4j.model.util.Values.literal;
@@ -66,10 +58,12 @@ class TestSuiteDescriptionTest {
             Namespaces.addToRepository(repository);
             conn.clear();
         }
+        repository.setAssertor(iri(TestData.SAMPLE_NS, "testharness"));
+        repository.setTestSubject(iri(TestData.SAMPLE_NS, "test"));
     }
 
     @Test
-    void loadOneManifest() throws Exception {
+    void loadOneManifest() throws MalformedURLException {
         testSuiteDescription.load(List.of(
                 new URL("https://example.org/test-manifest-sample-1.ttl"),
                 new URL("https://example.org/specification-sample-1.ttl")
@@ -125,178 +119,233 @@ class TestSuiteDescriptionTest {
     }
 
     @Test
-    void getSupportedTestCasesNullFeatures() throws MalformedURLException {
-        testSuiteDescription.load(List.of(
-                new URL("https://example.org/test-manifest-sample-1.ttl"),
-                new URL("https://example.org/test-manifest-sample-2.ttl"),
-                new URL("https://example.org/specification-sample-1.ttl"),
-                new URL("https://example.org/specification-sample-2.ttl")
-        ));
-        final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(null);
-        final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3");
-        assertThat("Group 1 matches", testCases, containsInAnyOrder(expected));
+    void setNonRunningTestAssertionsNull() throws MalformedURLException {
+        testSuiteDescription.load(List.of( new URL("https://example.org/test-manifest-sample-1.ttl")));
+        testSuiteDescription.setNonRunningTestAssertions(null, null);
+        assertEquals(6, count(null, RDF.type, TD.TestCase));
+        assertEquals(3, count(null, RDF.type, EARL.Assertion));
+        assertEquals(3, count(null, EARL.outcome, EARL.inapplicable));
+        assertFalse(ask(null, EARL.test, createTestIri("group1/feature1")));
+        assertFalse(ask(null, EARL.test, createTestIri("group1/feature2")));
+        assertFalse(ask(null, EARL.test, createTestIri("group1/feature3")));
     }
 
     @Test
-    void getSupportedTestCasesEmptyFeatures() throws MalformedURLException {
-        testSuiteDescription.load(List.of(
-                new URL("https://example.org/test-manifest-sample-1.ttl"),
-                new URL("https://example.org/test-manifest-sample-2.ttl"),
-                new URL("https://example.org/specification-sample-1.ttl"),
-                new URL("https://example.org/specification-sample-2.ttl")
-        ));
-        final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of());
-        final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3");
-        assertThat("Groups 1 matches", testCases, containsInAnyOrder(expected));
+    void setNonRunningTestAssertionsEmptyFeatures() throws MalformedURLException {
+        testSuiteDescription.load(List.of( new URL("https://example.org/test-manifest-sample-1.ttl")));
+        testSuiteDescription.setNonRunningTestAssertions(Set.of(), null);
+        assertEquals(6, count(null, RDF.type, TD.TestCase));
+        assertEquals(3, count(null, RDF.type, EARL.Assertion));
+        assertEquals(3, count(null, EARL.outcome, EARL.inapplicable));
+        assertFalse(ask(null, EARL.test, createTestIri("group1/feature1")));
+        assertFalse(ask(null, EARL.test, createTestIri("group1/feature2")));
+        assertFalse(ask(null, EARL.test, createTestIri("group1/feature3")));
     }
 
     @Test
-    void getSupportedTestCasesOneFeature() throws MalformedURLException {
-        testSuiteDescription.load(List.of(
-                new URL("https://example.org/test-manifest-sample-1.ttl"),
-                new URL("https://example.org/test-manifest-sample-2.ttl"),
-                new URL("https://example.org/specification-sample-1.ttl"),
-                new URL("https://example.org/specification-sample-2.ttl")
-        ));
-        final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf1"));
-        final IRI[] expected = createIriList(
-                "group1/feature1", "group1/feature2", "group1/feature3", "group2/feature1"
-        );
-        assertThat("Groups 1, 2 match", testCases, containsInAnyOrder(expected));
+    void setNonRunningTestAssertionsEmptyFilters() throws MalformedURLException {
+        testSuiteDescription.load(List.of( new URL("https://example.org/test-manifest-sample-1.ttl")));
+        testSuiteDescription.setNonRunningTestAssertions(null, List.of());
+        assertEquals(6, count(null, RDF.type, TD.TestCase));
+        assertEquals(3, count(null, RDF.type, EARL.Assertion));
+        assertEquals(3, count(null, EARL.outcome, EARL.inapplicable));
+        assertFalse(ask(null, EARL.test, createTestIri("group1/feature1")));
+        assertFalse(ask(null, EARL.test, createTestIri("group1/feature2")));
+        assertFalse(ask(null, EARL.test, createTestIri("group1/feature3")));
     }
 
     @Test
-    void getSupportedTestCasesFeature1And2() throws MalformedURLException {
-        testSuiteDescription.load(List.of(
-                new URL("https://example.org/test-manifest-sample-1.ttl"),
-                new URL("https://example.org/test-manifest-sample-2.ttl"),
-                new URL("https://example.org/specification-sample-1.ttl"),
-                new URL("https://example.org/specification-sample-2.ttl")
-        ));
-        final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf1", "sf2"));
-        final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
-                "group2/feature1", "group3/feature1", "group3/feature2");
-        assertThat("Groups 1, 2, 3 match", testCases, containsInAnyOrder(expected));
+    void setNonRunningTestAssertionsOneFeature() throws MalformedURLException {
+        testSuiteDescription.load(List.of( new URL("https://example.org/test-manifest-sample-1.ttl")));
+        testSuiteDescription.setNonRunningTestAssertions(Set.of("sf1"), null);
+        assertEquals(6, count(null, RDF.type, TD.TestCase));
+        assertEquals(2, count(null, RDF.type, EARL.Assertion));
+        assertEquals(2, count(null, EARL.outcome, EARL.inapplicable));
+        assertFalse(ask(null, EARL.test, createTestIri("group1/feature1")));
+        assertFalse(ask(null, EARL.test, createTestIri("group1/feature2")));
+        assertFalse(ask(null, EARL.test, createTestIri("group1/feature3")));
+        assertFalse(ask(null, EARL.test, createTestIri("group2/feature1")));
     }
 
     @Test
-    void getSupportedTestCasesFeature1And3() throws MalformedURLException {
-        testSuiteDescription.load(List.of(
-                new URL("https://example.org/test-manifest-sample-1.ttl"),
-                new URL("https://example.org/test-manifest-sample-2.ttl"),
-                new URL("https://example.org/specification-sample-1.ttl"),
-                new URL("https://example.org/specification-sample-2.ttl")
-        ));
-        final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf1", "sf3"));
-        final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
-                "group2/feature1", "group4/feature1", "group4/feature2", "group4/feature3");
-        assertThat("Groups 1, 2, 4 match", testCases, containsInAnyOrder(expected));
+    void setNonRunningTestAssertionsFeature1And2() throws MalformedURLException {
+        testSuiteDescription.load(List.of( new URL("https://example.org/test-manifest-sample-1.ttl")));
+        testSuiteDescription.setNonRunningTestAssertions(Set.of("sf1",  "sf2"), null);
+        assertEquals(6, count(null, RDF.type, TD.TestCase));
+        assertEquals(0, count(null, RDF.type, EARL.Assertion));
+        assertEquals(0, count(null, EARL.outcome, EARL.inapplicable));
     }
 
     @Test
-    void getSupportedTestCasesAllFeatures() throws MalformedURLException {
-        testSuiteDescription.load(List.of(
-                new URL("https://example.org/test-manifest-sample-1.ttl"),
-                new URL("https://example.org/test-manifest-sample-2.ttl"),
-                new URL("https://example.org/specification-sample-1.ttl"),
-                new URL("https://example.org/specification-sample-2.ttl")
-        ));
-        final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf1", "sf2", "sf3"));
-        final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
-                "group2/feature1", "group3/feature1", "group3/feature2",
-                "group4/feature1", "group4/feature2", "group4/feature3"
-        );
-        assertThat("All groups match", testCases, containsInAnyOrder(expected));
+    void setNonRunningTestAssertionsFeature1And3() throws MalformedURLException {
+        testSuiteDescription.load(List.of( new URL("https://example.org/test-manifest-sample-1.ttl")));
+        testSuiteDescription.setNonRunningTestAssertions(Set.of("sf1",  "sf3"), null);
+        assertEquals(6, count(null, RDF.type, TD.TestCase));
+        assertEquals(2, count(null, RDF.type, EARL.Assertion));
+        assertEquals(2, count(null, EARL.outcome, EARL.inapplicable));
+        assertFalse(ask(null, EARL.test, createTestIri("group1/feature1")));
+        assertFalse(ask(null, EARL.test, createTestIri("group1/feature2")));
+        assertFalse(ask(null, EARL.test, createTestIri("group1/feature3")));
+        assertFalse(ask(null, EARL.test, createTestIri("group2/feature1")));
     }
 
     @Test
-    void getSupportedTestCasesFeature3() throws MalformedURLException {
-        testSuiteDescription.load(List.of(
-                new URL("https://example.org/test-manifest-sample-1.ttl"),
-                new URL("https://example.org/test-manifest-sample-2.ttl"),
-                new URL("https://example.org/specification-sample-1.ttl"),
-                new URL("https://example.org/specification-sample-2.ttl")
-        ));
-        final List<IRI> testCases = testSuiteDescription.getSupportedTestCases(Set.of("sf3"));
-        final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3");
-        assertThat("Group 1 matches", testCases, containsInAnyOrder(expected));
+    void setNonRunningTestAssertionsNoFeaturesFilterGroup1() throws MalformedURLException {
+        testSuiteDescription.load(List.of( new URL("https://example.org/test-manifest-sample-1.ttl")));
+        testSuiteDescription.setNonRunningTestAssertions(null, List.of("group1"));
+        assertEquals(6, count(null, RDF.type, TD.TestCase));
+        assertEquals(3, count(null, RDF.type, EARL.Assertion));
+        assertEquals(0, count(null, EARL.outcome, EARL.untested));
+        assertEquals(3, count(null, EARL.outcome, EARL.inapplicable));
+        assertFalse(ask(null, EARL.test, createTestIri("group2/feature1")));
+        assertFalse(ask(null, EARL.test, createTestIri("group3/feature1")));
+        assertFalse(ask(null, EARL.test, createTestIri("group3/feature2")));
     }
 
     @Test
-    void getAllTestCases() throws MalformedURLException {
-        testSuiteDescription.load(List.of(
-                new URL("https://example.org/test-manifest-sample-1.ttl"),
-                new URL("https://example.org/test-manifest-sample-2.ttl"),
-                new URL("https://example.org/specification-sample-1.ttl"),
-                new URL("https://example.org/specification-sample-2.ttl")
-        ));
-        final List<IRI> testCases = testSuiteDescription.getAllTestCases();
-        final IRI[] expected = createIriList("group1/feature1", "group1/feature2", "group1/feature3",
-                "group2/feature1", "group3/feature1", "group3/feature2",
-                "group4/feature1", "group4/feature2", "group4/feature3");
-        assertThat("Group 1 matches", testCases, containsInAnyOrder(expected));
+    void setNonRunningTestAssertionsFilterGroup1() throws MalformedURLException {
+        testSuiteDescription.load(List.of( new URL("https://example.org/test-manifest-sample-1.ttl")));
+        testSuiteDescription.setNonRunningTestAssertions(Set.of("sf1", "sf2"), List.of("group1"));
+        assertEquals(6, count(null, RDF.type, TD.TestCase));
+        assertEquals(3, count(null, RDF.type, EARL.Assertion));
+        assertEquals(3, count(null, EARL.outcome, EARL.untested));
+        assertEquals(0, count(null, EARL.outcome, EARL.inapplicable));
+        assertFalse(ask(null, EARL.test, createTestIri("group2/feature1")));
+        assertFalse(ask(null, EARL.test, createTestIri("group3/feature1")));
+        assertFalse(ask(null, EARL.test, createTestIri("group3/feature2")));
     }
 
     @Test
     void mapEmptyList() {
-        final List<IRI> testCases = Collections.emptyList();
-        assertTrue(testSuiteDescription.locateTestCases(testCases, false).isEmpty());
+        assertDoesNotThrow(() -> testSuiteDescription.prepareTestCases(false));
     }
 
     @Test
     void mapRemoteFeaturePaths() {
-        final List<IRI> testCases = List.of(iri("https://example.org/test/group3/feature1"));
+        add(iri(TestData.SAMPLE_NS, "testcase"), RDF.type, TD.TestCase);
+        add(iri(TestData.SAMPLE_NS, "testcase"), SPEC.testScript, iri("https://remote.org/remote-test"));
         assertThrows(TestHarnessInitializationException.class,
-                () -> testSuiteDescription.locateTestCases(testCases, false));
+                () -> testSuiteDescription.prepareTestCases(false));
     }
 
     @Test
-    void mapFeaturePaths() {
-        final List<IRI> testCases = List.of(iri("https://example.org/features/test.feature"));
-        final List<String> paths = testSuiteDescription.locateTestCases(testCases, false);
+    void mapMissingFeaturePaths() {
+        add(iri(TestData.SAMPLE_NS, "testcase"), RDF.type, TD.TestCase);
+        add(iri(TestData.SAMPLE_NS, "testcase"), SPEC.testScript, iri("https://example.org/features/unknown.feature"));
+        testSuiteDescription.prepareTestCases(false);
+        assertTrue(testSuiteDescription.getFeaturePaths().isEmpty());
+    }
+
+    @Test
+    void prepareTestCases() {
+        add(iri(TestData.SAMPLE_NS, "testcase"), RDF.type, TD.TestCase);
+        add(iri(TestData.SAMPLE_NS, "testcase"), SPEC.testScript, iri("https://example.org/features/test.feature"));
+        testSuiteDescription.prepareTestCases(false);
+        final List<String> paths = testSuiteDescription.getFeaturePaths();
         final String[] expected = new String[]{TestUtils.getPathUri("src/test/resources/test.feature").toString()};
         assertThat("Locations match", paths, containsInAnyOrder(expected));
     }
 
     @Test
-    void mapMissingFeaturePaths() {
-        final List<IRI> testCases = List.of(
-                iri("https://example.org/test/group1/feature1"), iri("https://example.org/test/group1/feature2"),
-                iri("https://example.org/test/group1/feature3"), iri("https://example.org/test/group2/feature1")
-        );
-        final List<String> paths = testSuiteDescription.locateTestCases(testCases, false);
-        final String[] expected = new String[]{TestUtils.getPathUri("src/test/resources/test-features/group1/feature1")
-                .toString(),
-                TestUtils.getPathUri("src/test/resources/test-features/group1/feature2").toString(),
-                TestUtils.getPathUri("src/test/resources/test-features/otherExample/feature1").toString()
-        };
-        assertThat("Locations match", paths, containsInAnyOrder(expected));
+    void prepareTestCasesWithAssertionInTestMode() {
+        add(iri(TestData.SAMPLE_NS, "testcase"), RDF.type, TD.TestCase);
+        add(iri(TestData.SAMPLE_NS, "testcase"), SPEC.testScript, iri("https://example.org/features/test.feature"));
+        add(iri(TestData.SAMPLE_NS, "assertion"), RDF.type, EARL.Assertion);
+        add(iri(TestData.SAMPLE_NS, "assertion"), EARL.test, iri(TestData.SAMPLE_NS, "testcase"));
+        testSuiteDescription.prepareTestCases(false);
+        assertTrue(testSuiteDescription.getFeaturePaths().isEmpty());
     }
 
     @Test
-    void fetchFeatureTitles() {
-        try (RepositoryConnection conn = repository.getConnection()) {
-            conn.add(iri("https://example.org/group1-feature1"), SPEC.testScript,
-                    iri("https://example.org/test/group1/feature1"));
-        }
-        final List<IRI> testCases = List.of(
-                iri("https://example.org/test/group1/feature1"), iri("https://example.org/test/group1/feature2"),
-                iri("https://example.org/test/group1/feature3"), iri("https://example.org/test/group2/feature1"),
-                iri("https://example.org/test/group2/")
-        );
-        final List<String> paths = testSuiteDescription.locateTestCases(testCases, true);
-        // this finds 2 titles but can only attach one to the testcase in the repository
-        assertTrue(ask(iri("https://example.org/group1-feature1"), DCTERMS.title, literal("Feature 1 title")));
-        assertFalse(ask(iri("https://example.org/group1-feature2"), DCTERMS.title, literal("Feature 2 title")));
+    void prepareTestCasesWithAssertionInCoverageMode() {
+        add(iri(TestData.SAMPLE_NS, "testcase"), RDF.type, TD.TestCase);
+        add(iri(TestData.SAMPLE_NS, "testcase"), SPEC.testScript,
+                iri("https://example.org/features/test.feature"));
+        add(iri(TestData.SAMPLE_NS, "assertion"), RDF.type, EARL.Assertion);
+        add(iri(TestData.SAMPLE_NS, "assertion"), EARL.test, iri(TestData.SAMPLE_NS, "testcase"));
+        testSuiteDescription.prepareTestCases(true);
+        assertTrue(testSuiteDescription.getFeaturePaths().isEmpty());
+//        final List<String> paths = testSuiteDescription.getFeaturePaths();
+//        final String[] expected = new String[]{TestUtils.getPathUri("src/test/resources/test.feature").toString()};
+//        assertThat("Locations match", paths, containsInAnyOrder(expected));
     }
 
-    private IRI[] createIriList(final String... testCases) {
-        return Stream.of(testCases).map(s -> iri("https://example.org/test/" + s)).toArray(IRI[]::new);
+    @Test
+    void prepareTestCasesNotImplemented() {
+        add(iri(TestData.SAMPLE_NS, "testcase"), RDF.type, TD.TestCase);
+        add(iri(TestData.SAMPLE_NS, "testcase"), SPEC.testScript, literal("test.feature"));
+        testSuiteDescription.prepareTestCases(true);
+        assertTrue(testSuiteDescription.getFeaturePaths().isEmpty());
+    }
+
+    @Test
+    void prepareTestCasesTitle() throws Exception {
+        add(iri("https://example.org/group1-feature1"), RDF.type, TD.TestCase);
+        add(iri("https://example.org/group1-feature1"), SPEC.testScript,
+                iri("https://example.org/test/group1/feature1"));
+        add(iri("https://example.org/group1-feature2"), RDF.type, TD.TestCase);
+        add(iri("https://example.org/group1-feature2"), SPEC.testScript,
+                iri("https://example.org/test/group1/feature2"));
+        add(iri("https://example.org/group2-feature1"), RDF.type, TD.TestCase);
+        add(iri("https://example.org/group2-feature1"), SPEC.testScript,
+                iri("https://example.org/test/group2/feature1"));
+        add(iri("https://example.org/group2-feature2"), RDF.type, TD.TestCase);
+        add(iri("https://example.org/group2-feature2"), SPEC.testScript,
+                iri("https://example.org/test/group2/"));
+        testSuiteDescription.prepareTestCases(true);
+        assertTrue(ask(iri("https://example.org/group1-feature1"), DCTERMS.title, literal("Feature 1 title")));
+        assertTrue(ask(iri("https://example.org/group1-feature2"), DCTERMS.title, literal("Feature 2 title")));
+        assertEquals(0, count(iri("https://example.org/group2-feature1"), DCTERMS.title, null));
+    }
+
+    @Test
+    void getTestCases() {
+        add(iri(TestData.SAMPLE_NS, "testcase"), RDF.type, TD.TestCase);
+        add(iri(TestData.SAMPLE_NS, "testcase"), SPEC.testScript, iri("https://example.org/features/test.feature"));
+        add(iri(TestData.SAMPLE_NS, "assertion"), RDF.type, EARL.Assertion);
+        add(iri(TestData.SAMPLE_NS, "assertion"), EARL.test, iri(TestData.SAMPLE_NS, "testcase"));
+        final List<IRI> testCases = testSuiteDescription.getTestCases(false);
+        final IRI[] expected = new IRI[]{iri(TestData.SAMPLE_NS, "testcase")};
+        assertThat("TestCases match", testCases, containsInAnyOrder(expected));
+    }
+
+    @Test
+    void getTestCasesFiltered() {
+        add(iri(TestData.SAMPLE_NS, "testcase"), RDF.type, TD.TestCase);
+        add(iri(TestData.SAMPLE_NS, "testcase"), SPEC.testScript, iri("https://example.org/features/test.feature"));
+        add(iri(TestData.SAMPLE_NS, "assertion"), RDF.type, EARL.Assertion);
+        add(iri(TestData.SAMPLE_NS, "assertion"), EARL.test, iri(TestData.SAMPLE_NS, "testcase"));
+        assertTrue(testSuiteDescription.getTestCases(true).isEmpty());
+    }
+
+    @Test
+    void getTestCasesFiltered2() {
+        add(iri(TestData.SAMPLE_NS, "testcase"), RDF.type, TD.TestCase);
+        add(iri(TestData.SAMPLE_NS, "testcase"), SPEC.testScript, iri("https://example.org/features/test.feature"));
+        final List<IRI> testCases = testSuiteDescription.getTestCases(true);
+        final IRI[] expected = new IRI[]{iri(TestData.SAMPLE_NS, "testcase")};
+        assertThat("TestCases match", testCases, containsInAnyOrder(expected));
+    }
+
+    private IRI createTestIri(final String testCase) {
+        return iri("https://example.org/test/" + testCase);
+    }
+
+    private void add(final Resource subject, final IRI predicate, final Value object) {
+        try (RepositoryConnection conn = repository.getConnection()) {
+            conn.add(subject, predicate, object);
+        }
     }
 
     private boolean ask(final Resource subject, final IRI predicate, final Value object) {
         try (RepositoryConnection conn = repository.getConnection()) {
             return conn.hasStatement(subject, predicate, object, false);
+        }
+    }
+
+    private long count(final Resource subject, final IRI predicate, final Value object) {
+        try (RepositoryConnection conn = repository.getConnection()) {
+            return conn.getStatements(subject, predicate, object, false).stream().count();
         }
     }
 }

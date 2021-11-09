@@ -25,7 +25,6 @@ package org.solid.testharness.reporting;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
-import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.discovery.TestSuiteDescription;
@@ -33,11 +32,9 @@ import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.inject.Inject;
-import java.util.List;
 
-import static org.eclipse.rdf4j.model.util.Values.iri;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 @QuarkusTest
 class TestSuiteDescriptionNoRepositoryTest {
@@ -48,18 +45,17 @@ class TestSuiteDescriptionNoRepositoryTest {
     TestSuiteDescription testSuiteDescription;
 
     @Test
-    void locateTestCasesException() {
+    void setNonRunningTestAssertionsException() {
         when(dataRepository.getConnection()).thenThrow(new RepositoryException("BAD REPOSITORY"));
-        final List<IRI> testCases = List.of(iri("https://example.org/test/group3/feature1"));
         assertThrows(TestHarnessInitializationException.class,
-                () -> testSuiteDescription.locateTestCases(testCases,false));
+                () -> testSuiteDescription.setNonRunningTestAssertions(null, null));
     }
 
+
     @Test
-    void getAllTestCasesException() {
+    void prepareTestCasesException() {
         when(dataRepository.getConnection()).thenThrow(new RepositoryException("BAD REPOSITORY"));
-        final List<IRI> testCases = List.of(iri("https://example.org/test/group3/feature1"));
-        assertThrows(TestHarnessInitializationException.class, () -> testSuiteDescription.getAllTestCases());
+        assertThrows(TestHarnessInitializationException.class, () -> testSuiteDescription.prepareTestCases(false));
     }
 }
 
