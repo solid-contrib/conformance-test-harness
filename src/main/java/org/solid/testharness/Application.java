@@ -56,6 +56,7 @@ public class Application implements QuarkusApplication {
     public static final String HELP = "help";
     public static final String COVERAGE = "coverage";
     public static final String FILTER = "filter";
+    public static final String IGNORE_FAILURES = "ignore-failures";
     public static final String SKIP_TEARDOWN = "skip-teardown";
     public static final String SKIP_REPORTS = "skip-reports";
 
@@ -74,6 +75,8 @@ public class Application implements QuarkusApplication {
                 .desc("skip teardown (when server itself is being stopped)").build());
         options.addOption(Option.builder().longOpt(SKIP_REPORTS)
                 .desc("skip report generation").build());
+        options.addOption(Option.builder().longOpt(IGNORE_FAILURES)
+                .desc("return success even if there are failures").build());
         options.addOption(
                 Option.builder().longOpt(SUBJECTS).hasArg().desc("URL or path to test subject config (Turtle)").build()
         );
@@ -86,6 +89,7 @@ public class Application implements QuarkusApplication {
         options.addOption(
                 Option.builder("f").longOpt(FILTER).desc("feature filter(s)").hasArgs().valueSeparator(',').build()
         );
+
         options.addOption("h", HELP, false, "print this message");
 
         final CommandLineParser parser = new DefaultParser();
@@ -162,7 +166,7 @@ public class Application implements QuarkusApplication {
                     if (!line.hasOption(SKIP_TEARDOWN)) {
                         conformanceTestHarness.cleanUp();
                     }
-                    return results != null && results.getFailCount() == 0 ? 0 : 1;
+                    return (results != null && results.getFailCount() == 0) || line.hasOption(IGNORE_FAILURES) ? 0 : 1;
                 }
             }
         } catch (Exception e) {

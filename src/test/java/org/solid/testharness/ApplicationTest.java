@@ -264,6 +264,13 @@ class ApplicationTest {
     }
 
     @Test
+    void runTestSuitesFailuresIgnoring() throws Exception {
+        final TestSuiteResults results = mockResults(1);
+        when(conformanceTestHarness.runTestSuites(any())).thenReturn(results);
+        assertEquals(0, application.run("--ignore-failures"));
+    }
+
+    @Test
     void coverageReportOnly() throws Exception {
         assertEquals(0, application.run("--coverage"));
         verify(conformanceTestHarness).prepareCoverageReport();
