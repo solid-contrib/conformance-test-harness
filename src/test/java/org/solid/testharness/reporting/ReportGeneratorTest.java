@@ -229,11 +229,6 @@ class ReportGeneratorTest {
     }
 
     @Test
-    void printReportToConsole() {
-        assertDoesNotThrow(() -> reportGenerator.printReportToConsole());
-    }
-
-    @Test
     void buildHtmlCoverageReportEmpty() {
         final StringWriter sw = new StringWriter();
         assertDoesNotThrow(() -> reportGenerator.buildHtmlCoverageReport(sw));

@@ -48,7 +48,6 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Writer;
 import java.net.URL;
 import java.util.Date;
@@ -219,14 +218,7 @@ public class DataRepository implements Repository {
     }
 
     public void export(final Writer wr) throws Exception {
-        export(Rio.createWriter(RDFFormat.TURTLE, wr));
-    }
-
-    public void export(final OutputStream os) throws Exception {
-        export(Rio.createWriter(RDFFormat.TURTLE, os));
-    }
-
-    private void export(final RDFWriter rdfWriter) throws Exception {
+        final RDFWriter rdfWriter = Rio.createWriter(RDFFormat.TURTLE, wr);
         try (RepositoryConnection conn = getConnection()) {
             rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true)
                     .set(BasicWriterSettings.INLINE_BLANK_NODES, true);

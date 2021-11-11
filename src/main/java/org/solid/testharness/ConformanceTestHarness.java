@@ -119,33 +119,30 @@ public class ConformanceTestHarness {
         testSuiteDescription.prepareTestCases(Config.RunMode.COVERAGE);
     }
 
-    public TestSuiteResults runTestSuites(final List<String> filters) {
+    public TestSuiteResults runTestSuites(final List<String> filters, final List<String> statuses) {
         final List<String> featurePaths;
-        try {
-            // TODO: Consider running some initial tests to discover the features provided by a server
-            testSubject.loadTestSubjectConfig();
-            final Map<String, Boolean> features = testSubject.getTargetServer().getFeatures();
+        final TestSuiteResults results;
 
-            testSuiteDescription.setNonRunningTestAssertions(features.keySet(), filters);
-            logger.info("==== FILTERED TEST CASES ({}): {}",
-                    testSuiteDescription.getTestCases(true).size(),
-                    testSuiteDescription.getTestCases(true));
+        // TODO: Consider running some initial tests to discover the features provided by a server
+        testSubject.loadTestSubjectConfig();
+        final Map<String, Boolean> features = testSubject.getTargetServer().getFeatures();
 
-            testSuiteDescription.prepareTestCases(Config.RunMode.TEST);
-            featurePaths = testSuiteDescription.getFeaturePaths();
-            if (featurePaths == null || featurePaths.isEmpty()) {
-                logger.warn("There are no tests available");
-                return null;
-            }
+        testSuiteDescription.setNonRunningTestAssertions(features.keySet(), filters, statuses);
+        logger.info("==== FILTERED TEST CASES ({}): {}",
+                testSuiteDescription.getTestCases(true).size(),
+                testSuiteDescription.getTestCases(true));
+
+        testSuiteDescription.prepareTestCases(Config.RunMode.TEST);
+        featurePaths = testSuiteDescription.getFeaturePaths();
+        if (featurePaths == null || featurePaths.isEmpty()) {
+            logger.warn("There are no tests available");
+            results = TestSuiteResults.emptyResults();
+        } else {
             logger.info("==== RUNNING TEST CASES ({}): {}", featurePaths.size(), featurePaths);
-
             setupTestHarness(features);
-        } catch (TestHarnessInitializationException e) {
-            logger.error("Cannot run test suites", e);
-            return null;
+            results = runTests(featurePaths, true);
         }
 
-        final TestSuiteResults results = runTests(featurePaths, true);
         resultLogger.info(results.toJson());
         return results;
     }

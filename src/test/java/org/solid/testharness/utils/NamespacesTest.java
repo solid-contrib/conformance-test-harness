@@ -31,7 +31,7 @@ import org.solid.common.vocab.DOAP;
 import org.solid.common.vocab.EARL;
 
 import java.io.StringReader;
-import java.io.StringWriter;
+import java.util.Collections;
 import java.util.List;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
@@ -48,9 +48,7 @@ public class NamespacesTest {
                 "<https://github.com/solid/conformance-test-harness/> a <http://www.w3.org/ns/earl#Software> ."
         );
         TestData.insertData(dataRepository, reader);
-        final StringWriter sw = new StringWriter();
-        dataRepository.export(sw);
-        assertTrue(sw.toString().contains("earl:Software"));
+        assertTrue(TestUtils.repositoryToString(dataRepository).contains("earl:Software"));
     }
 
     @Test
@@ -87,7 +85,7 @@ public class NamespacesTest {
     void buildTurtlePrefixesNullOrEmpty() {
         final List<String> empty = null;
         assertEquals("", Namespaces.generateTurtlePrefixes(empty));
-        assertEquals("", Namespaces.generateTurtlePrefixes(List.of()));
+        assertEquals("", Namespaces.generateTurtlePrefixes(Collections.emptyList()));
     }
 
     @Test
@@ -108,7 +106,7 @@ public class NamespacesTest {
     void buildHtmlPrefixesNullOrEmpty() {
         final List<String> empty = null;
         assertEquals("", Namespaces.generateRdfaPrefixes(empty));
-        assertEquals("", Namespaces.generateRdfaPrefixes(List.of()));
+        assertEquals("", Namespaces.generateRdfaPrefixes(Collections.emptyList()));
     }
 
     @Test

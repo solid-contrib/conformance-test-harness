@@ -38,10 +38,10 @@ import org.solid.testharness.reporting.ReportGenerator;
 import org.solid.testharness.reporting.TestSuiteResults;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestHarnessInitializationException;
+import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -85,9 +85,7 @@ class ConformanceTestHarnessTest {
     @Test
     void initialize() throws Exception {
         conformanceTestHarness.initialize();
-        final StringWriter sw = new StringWriter();
-        dataRepository.export(sw);
-        final String result = sw.toString();
+        final String result = TestUtils.repositoryToString(dataRepository);
         assertTrue(result.contains("a earl:Software"));
         assertTrue(result.contains("doap:name"));
         assertTrue(result.contains("doap:description"));
@@ -113,21 +111,27 @@ class ConformanceTestHarnessTest {
     void runTestSuiteNoTestsNullFeaturePaths() {
         mockTargetServer();
         when(testSuiteDescription.getFeaturePaths()).thenReturn(null);
-        assertNull(conformanceTestHarness.runTestSuites(null));
+        final TestSuiteResults results = conformanceTestHarness.runTestSuites(null, null);
+        assertNotNull(results);
+        assertEquals(0, results.getFeatureTotal());
     }
 
     @Test
     void runTestSuiteNoTestsNullFilters() {
         mockTargetServer();
         when(testSuiteDescription.getFeaturePaths()).thenReturn(Collections.emptyList());
-        assertNull(conformanceTestHarness.runTestSuites(null));
+        final TestSuiteResults results = conformanceTestHarness.runTestSuites(null, null);
+        assertNotNull(results);
+        assertEquals(0, results.getFeatureTotal());
     }
 
     @Test
     void runTestSuiteNoTestsEmptyFilter() {
         mockTargetServer();
         when(testSuiteDescription.getFeaturePaths()).thenReturn(Collections.emptyList());
-        assertNull(conformanceTestHarness.runTestSuites(Collections.emptyList()));
+        final TestSuiteResults results = conformanceTestHarness.runTestSuites(Collections.emptyList(), null);
+        assertNotNull(results);
+        assertEquals(0, results.getFeatureTotal());
     }
 
     @Test
@@ -138,7 +142,7 @@ class ConformanceTestHarnessTest {
 
         final TestSuiteResults results = mockResults(1);
         when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
-        assertEquals(1, conformanceTestHarness.runTestSuites(null).getFailCount());
+        assertEquals(1, conformanceTestHarness.runTestSuites(null, null).getFailCount());
         verify(authManager).registerUser(HttpConstants.ALICE);
         verify(authManager).registerUser(HttpConstants.BOB);
     }
@@ -147,8 +151,8 @@ class ConformanceTestHarnessTest {
     void runTestSuiteInitError() {
         mockTargetServer();
         doThrow(new TestHarnessInitializationException("FAIL"))
-                .when(testSuiteDescription).setNonRunningTestAssertions(any(), any());
-        assertNull(conformanceTestHarness.runTestSuites(null));
+                .when(testSuiteDescription).setNonRunningTestAssertions(any(), any(), any());
+        assertThrows(TestHarnessInitializationException.class, () -> conformanceTestHarness.runTestSuites(null, null));
     }
 
     @Test
@@ -157,7 +161,7 @@ class ConformanceTestHarnessTest {
         when(testSuiteDescription.getFeaturePaths()).thenReturn(List.of("feature"));
         final TestSuiteResults results = mockResults(1);
         when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
-        assertEquals(1, conformanceTestHarness.runTestSuites(null).getFailCount());
+        assertEquals(1, conformanceTestHarness.runTestSuites(null, null).getFailCount());
     }
 
     @Test

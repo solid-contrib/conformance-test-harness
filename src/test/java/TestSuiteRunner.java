@@ -24,7 +24,10 @@
 
 import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.solid.testharness.ConformanceTestHarness;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.reporting.TestSuiteResults;
@@ -35,7 +38,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Tag("solid")
 @QuarkusTest
@@ -63,9 +67,11 @@ public class TestSuiteRunner {
 //                "web-access-control",
 //                "storage"
         );
-        final TestSuiteResults results = conformanceTestHarness.runTestSuites(filters);
-        conformanceTestHarness.cleanUp();
+        final TestSuiteResults results = conformanceTestHarness.runTestSuites(filters, null);
         assertNotNull(results);
+        if (results.getFeatureTotal() > 0) {
+            conformanceTestHarness.cleanUp();
+        }
         assertEquals(0, results.getFailCount(), results.getErrorMessages());
     }
 

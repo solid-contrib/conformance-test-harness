@@ -28,8 +28,6 @@ import io.quarkus.qute.Template;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.DOAP;
 import org.solid.common.vocab.RDF;
 import org.solid.common.vocab.SPEC;
@@ -39,7 +37,6 @@ import org.solid.testharness.utils.DataRepository;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,8 +44,6 @@ import java.util.stream.Stream;
 
 @ApplicationScoped
 public class ReportGenerator {
-    private static final Logger logger = LoggerFactory.getLogger(ReportGenerator.class);
-
     @Inject
     DataRepository dataRepository;
 
@@ -62,12 +57,6 @@ public class ReportGenerator {
 
     public void buildTurtleReport(final Writer writer) throws Exception {
         dataRepository.export(writer);
-    }
-
-    public void printReportToConsole() throws Exception {
-        final StringWriter sw = new StringWriter();
-        dataRepository.export(sw);
-        logger.info("REPORT\n{}", sw);
     }
 
     public void buildHtmlCoverageReport(final Writer writer) throws IOException {

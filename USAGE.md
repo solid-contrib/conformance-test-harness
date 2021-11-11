@@ -263,15 +263,17 @@ This mechanism will work in CI environments where the credentials can be passed 
 The command line options are:
 ```
 usage: run
-    --coverage       produce a coverage report only
- -f,--filter <arg>   feature filter(s)
- -h,--help           print this message
- -o,--output <arg>   output directory
-    --skip-teardown  skip teardown (when server itself is being stopped)
-    --skip-reports   skip report generation
- -s,--source <arg>   URL or path to test source(s)
-    --subjects <arg> URL or path to test subject config (Turtle)
- -t,--target <arg>   target server
+    --coverage        produce a coverage report only
+ -f,--filter <arg>    feature filter(s)
+    --ignore-failures return success even if there are failures 
+ -h,--help            print this message
+ -o,--output <arg>    output directory
+    --skip-reports    skip report generation
+    --skip-teardown   skip teardown (when server itself is being stopped)
+ -s,--source <arg>    URL or path to test source(s)
+    --status <arg>    status(es) of tests to run
+    --subjects <arg>  URL or path to test subject config (Turtle)
+ -t,--target <arg>    target server
 ```
 If `--coverage` is not specified then the default action is to run the tests and produce the results reports.
 

@@ -53,6 +53,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.eclipse.rdf4j.model.util.Values.literal;
 
 /**
@@ -97,7 +98,12 @@ public class TestSuiteDescription {
         }
     }
 
-    public void setNonRunningTestAssertions(final Set<String> features, final List<String> filters) {
+    public void setNonRunningTestAssertions(final Set<String> features, final List<String> filters,
+                                            final List<String> statuses) {
+        final List<String> filterList = filters != null && !filters.isEmpty() ? filters : null;
+        final List<IRI> statusList = statuses != null && !statuses.isEmpty()
+                ? statuses.stream().map(s -> iri(TD.NAMESPACE, s)).collect(Collectors.toList())
+                : null;
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             // check test cases are applicable to the target and are not filtered out
             conn.getStatements(null, RDF.type, TD.TestCase).stream()
@@ -105,8 +111,10 @@ public class TestSuiteDescription {
                     .filter(Value::isIRI)
                     .map(IRI.class::cast)
                     .forEach(tc -> {
-                        if (checkApplicability(conn, tc, features) && filters != null && !filters.isEmpty()) {
-                            checkFilters(conn, tc, filters);
+                        if (checkApplicability(conn, tc, features)) {
+                            if (checkFilters(conn, tc, filterList)) {
+                                checkStatuses(conn, tc, statusList);
+                            }
                         }
                     });
         } catch (RDF4JException e) {
@@ -133,9 +141,19 @@ public class TestSuiteDescription {
         return true;
     }
 
-    private void checkFilters(final RepositoryConnection conn, final IRI testCase, final List<String> filters) {
-        if (filters.stream().noneMatch(f -> testCase.stringValue().contains(f))) {
+    private boolean checkFilters(final RepositoryConnection conn, final IRI testCase, final List<String> filters) {
+        if (filters != null && filters.stream().noneMatch(f -> testCase.stringValue().contains(f))) {
             // the test case doesn't match the filter so will not be tested
+            dataRepository.createAssertion(conn, EARL.untested, new Date(), testCase);
+            return false;
+        }
+        return true;
+    }
+
+    private void checkStatuses(final RepositoryConnection conn, final IRI testCase, final List<IRI> statuses) {
+        if (statuses != null &&
+                statuses.stream().noneMatch(s -> conn.hasStatement(testCase, TD.reviewStatus, s, false))) {
+            // the test case review status doesn't match the status list so will not be tested
             dataRepository.createAssertion(conn, EARL.untested, new Date(), testCase);
         }
     }
