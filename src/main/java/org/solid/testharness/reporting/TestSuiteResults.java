@@ -36,40 +36,48 @@ public class TestSuiteResults {
     Results results;
     long startTime;
 
+    public static TestSuiteResults emptyResults() {
+        return new TestSuiteResults(null);
+    }
+
     public TestSuiteResults(final Results results) {
         this.results = results;
     }
 
     public String getErrorMessages() {
-        return this.results.getErrorMessages();
+        return results != null ? results.getErrorMessages() : "";
     }
 
     public int getFailCount() {
-        return this.results.getFailCount();
+        return results != null ? results.getFailCount() : 0;
     }
 
     public int getFeatureFailCount() {
-        return this.results.getFeaturesFailed();
+        return results != null ? results.getFeaturesFailed() : 0;
     }
 
     public int getFeaturePassCount() {
-        return this.results.getFeaturesPassed();
+        return results != null ? results.getFeaturesPassed() : 0;
+    }
+
+    public int getFeatureSkipCount() {
+        return results != null ? (int) results.toKarateJson().get("featuresSkipped") : 0;
     }
 
     public int getFeatureTotal() {
-        return this.results.getFeaturesTotal();
+        return results != null ? results.getFeaturesTotal() : 0;
     }
 
     public int getScenarioFailCount() {
-        return this.results.getScenariosFailed();
+        return results != null ? results.getScenariosFailed() : 0;
     }
 
     public int getScenarioPassCount() {
-        return this.results.getScenariosPassed();
+        return results != null ? results.getScenariosPassed() : 0;
     }
 
     public int getScenarioTotal() {
-        return this.results.getScenariosTotal();
+        return results != null ? results.getScenariosTotal() : 0;
     }
 
     public void setStartTime(final long startTime) {
@@ -80,8 +88,12 @@ public class TestSuiteResults {
         return System.currentTimeMillis() - startTime;
     }
 
+    public double getTimeTakenMillis() {
+        return results != null ? results.getTimeTakenMillis() : 0;
+    }
+
     public Date getResultDate() {
-        return new Date(this.results.getEndTime());
+        return results != null ? new Date(results.getEndTime()) : new Date();
     }
 
     public String toJson() {
@@ -89,13 +101,13 @@ public class TestSuiteResults {
             final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a", Locale.getDefault());
             final ObjectMapper objectMapper = CDI.current().select(ObjectMapper.class).get();
             return objectMapper.writeValueAsString(Map.of(
-                    "featuresPassed", this.results.getFeaturesPassed(),
-                    "featuresFailed", this.results.getFeaturesFailed(),
-                    "featuresSkipped", (int) this.results.toKarateJson().get("featuresSkipped"),
-                    "scenariosPassed", this.results.getScenariosPassed(),
-                    "scenariosFailed", this.results.getScenariosFailed(),
-                    "elapsedTime", this.results.getElapsedTime(),
-                    "totalTime", this.results.getTimeTakenMillis(),
+                    "featuresPassed", this.getFeaturePassCount(),
+                    "featuresFailed", this.getFeatureFailCount(),
+                    "featuresSkipped", this.getFeatureSkipCount(),
+                    "scenariosPassed", this.getScenarioPassCount(),
+                    "scenariosFailed", this.getScenarioFailCount(),
+                    "elapsedTime", this.getElapsedTime(),
+                    "totalTime", this.getTimeTakenMillis(),
                     "resultDate", sdf.format(getResultDate())
             ));
         } catch (Exception e) {
@@ -105,9 +117,13 @@ public class TestSuiteResults {
 
     @Override
     public String toString() {
-        return String.format("Results:\n  Features  passed: %d, failed: %d, total: %d\n" +
-                        "  Scenarios passed: %d, failed: %d, total: %d",
-                results.getFeaturesPassed(), results.getFeaturesFailed(), results.getFeaturesTotal(),
-                results.getScenariosPassed(), results.getScenariosFailed(), results.getScenariosTotal());
+        if (getFeatureTotal() > 0) {
+            return String.format("Results:\n  Features  passed: %d, failed: %d, total: %d\n" +
+                            "  Scenarios passed: %d, failed: %d, total: %d",
+                    results.getFeaturesPassed(), results.getFeaturesFailed(), results.getFeaturesTotal(),
+                    results.getScenariosPassed(), results.getScenariosFailed(), results.getScenariosTotal());
+        } else {
+            return "Results: No features were run";
+        }
     }
 }

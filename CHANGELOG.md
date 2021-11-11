@@ -4,8 +4,9 @@
 ### Features
 * New command line options:
   * `--skip-reports` stops the results reports being generated. The result counts are still logged in JSON format.
-  * `--ignore-failures` can be used in a CI workflow to ensure the harness always returns a success code even if tests
-    fail.
+  * `--ignore-failures` can be used in a CI workflow to ensure the harness always returns a success exit code even if
+    tests fail.
+  * `--status` list of review statuses (local names e.g. approved, unreviewed) of tests you want to run.
 
 ### Minor changes
 * Fix: Fetch missing titles from tests that are not run to include in the result report.

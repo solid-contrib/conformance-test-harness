@@ -56,19 +56,133 @@ public class Application implements QuarkusApplication {
     public static final String HELP = "help";
     public static final String COVERAGE = "coverage";
     public static final String FILTER = "filter";
+    public static final String STATUS = "status";
     public static final String IGNORE_FAILURES = "ignore-failures";
     public static final String SKIP_TEARDOWN = "skip-teardown";
     public static final String SKIP_REPORTS = "skip-reports";
+
+    private List<String> filters;
+    private List<String> statuses;
+
+    private Config.RunMode runMode;
+    private boolean skipReports;
+    private boolean skipTearDown;
+    private boolean ignoreFailures;
 
     @Inject
     Config config;
     @Inject
     ConformanceTestHarness conformanceTestHarness;
 
+    public static void main(final String... args) {
+        Quarkus.run(Application.class, args);
+    }
+
     @Override
     public int run(final String... args) throws Exception {
-        logger.debug("Args: {}", Arrays.toString(args));
+        try {
+            final int result = processCommandLine(args);
+            if (result >= 0) return result;
 
+            conformanceTestHarness.initialize();
+
+            if (runMode == Config.RunMode.COVERAGE) {
+                conformanceTestHarness.prepareCoverageReport();
+                conformanceTestHarness.buildReports(Config.RunMode.COVERAGE);
+                return 0;
+            } else {
+                final TestSuiteResults results = conformanceTestHarness.runTestSuites(filters, statuses);
+                if (results.getFeatureTotal() > 0) {
+                    if (!skipReports) {
+                        conformanceTestHarness.buildReports(Config.RunMode.TEST);
+                    }
+                    if (!skipTearDown) {
+                        conformanceTestHarness.cleanUp();
+                    }
+                }
+                return results.getFailCount() == 0 || ignoreFailures ? 0 : 1;
+            }
+        } catch (Exception e) {
+            logger.error("Application failed. Reason: {}", e.toString());
+        }
+        return 1;
+    }
+
+    private int processCommandLine(final String... args) throws ParseException {
+        logger.debug("Args: {}", Arrays.toString(args));
+        final Options options = setupOptions();
+        final CommandLineParser parser = new DefaultParser();
+        final CommandLine cmd = parser.parse(options, args);
+        if (cmd.hasOption(HELP)) {
+            final HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp( "run", options );
+            return 0;
+        }
+        if (cmd.hasOption(SKIP_REPORTS) && cmd.hasOption(COVERAGE)) {
+            logger.error("The skip-reports option cannot apply when the coverage option is used");
+            return 1;
+        }
+        if (!cmd.hasOption(SKIP_REPORTS)) {
+            final File outputDir;
+            if (cmd.hasOption(OUTPUT) && !StringUtils.isBlank(cmd.getOptionValue(OUTPUT))) {
+                outputDir = Path.of(cmd.getOptionValue(OUTPUT)).toAbsolutePath().normalize().toFile();
+                logger.debug("Output = {}", outputDir.getPath());
+            } else {
+                outputDir = Path.of("").toAbsolutePath().toFile();
+            }
+            try (final Formatter formatter = new Formatter()) {
+                if (!validateOutputDir(outputDir.toPath(), formatter)) {
+                    logger.error("{}", formatter);
+                    return 1;
+                }
+            }
+            config.setOutputDirectory(outputDir);
+        }
+
+        if (cmd.hasOption(SOURCE)) {
+            config.setTestSources(Arrays.stream(cmd.getOptionValues(SOURCE))
+                    .filter(s -> !StringUtils.isBlank(s))
+                    .collect(Collectors.toList()));
+            logger.debug("Suite = {}", config.getTestSources().toString());
+        }
+
+        if (!cmd.hasOption(COVERAGE)) {
+            if (cmd.hasOption(SUBJECTS)) {
+                config.setSubjectsUrl(cmd.getOptionValue(SUBJECTS));
+                logger.debug("Subjects = {}", config.getSubjectsUrl());
+            }
+            logger.debug("TARGET SETTING {}", cmd.getOptionValue(TARGET));
+            if (cmd.hasOption(TARGET) && !StringUtils.isBlank(cmd.getOptionValue(TARGET))) {
+                final String subjectsBaseUri = iri(config.getSubjectsUrl().toString()).getNamespace();
+                final String target = cmd.getOptionValue(TARGET);
+                final IRI testSubject = target.contains(":")
+                        ? iri(target)
+                        : iri(subjectsBaseUri, target);
+                logger.debug("Target: {}", testSubject);
+                config.setTestSubject(testSubject);
+            }
+            if (cmd.hasOption(FILTER)) {
+                filters = Arrays.stream(cmd.getOptionValues(FILTER))
+                        .filter(s -> !StringUtils.isBlank(s))
+                        .collect(Collectors.toList());
+                logger.debug("Filters = {}", filters);
+            }
+            if (cmd.hasOption(STATUS)) {
+                statuses = Arrays.stream(cmd.getOptionValues(STATUS))
+                        .filter(s -> !StringUtils.isBlank(s))
+                        .collect(Collectors.toList());
+                logger.debug("Statuses = {}", statuses);
+            }
+        }
+        runMode = cmd.hasOption(COVERAGE) ? Config.RunMode.COVERAGE : Config.RunMode.TEST;
+        skipReports = cmd.hasOption(SKIP_REPORTS);
+        skipTearDown = cmd.hasOption(SKIP_TEARDOWN);
+        ignoreFailures = cmd.hasOption(IGNORE_FAILURES);
+        config.logConfigSettings(runMode);
+        return -1;
+    }
+
+    private Options setupOptions() {
         final Options options = new Options();
         options.addOption(Option.builder().longOpt(COVERAGE).desc("produce a coverage report only").build());
         options.addOption(Option.builder().longOpt(SKIP_TEARDOWN)
@@ -85,98 +199,17 @@ public class Application implements QuarkusApplication {
                 Option.builder("s").longOpt(SOURCE).desc("URL or path to test source(s)")
                         .hasArgs().valueSeparator(',').build()
         );
+        options.addOption(
+                Option.builder().longOpt(STATUS).desc("status(es) of tests to run")
+                        .hasArgs().valueSeparator(',').build()
+        );
         options.addOption("o", OUTPUT, true, "output directory");
         options.addOption(
                 Option.builder("f").longOpt(FILTER).desc("feature filter(s)").hasArgs().valueSeparator(',').build()
         );
 
         options.addOption("h", HELP, false, "print this message");
-
-        final CommandLineParser parser = new DefaultParser();
-        try {
-            final CommandLine line = parser.parse(options, args);
-            if (line.hasOption(HELP)) {
-                final HelpFormatter formatter = new HelpFormatter();
-                formatter.printHelp( "run", options );
-                return 0;
-            } else {
-                if (line.hasOption(SKIP_REPORTS) && line.hasOption(COVERAGE)) {
-                    throw new Exception("The skip-reports option cannot apply when the coverage option is used");
-                }
-                if (!line.hasOption(SKIP_REPORTS)) {
-                    final File outputDir;
-                    if (line.hasOption(OUTPUT) && !StringUtils.isBlank(line.getOptionValue(OUTPUT))) {
-                        outputDir = Path.of(line.getOptionValue(OUTPUT)).toAbsolutePath().normalize().toFile();
-                        logger.debug("Output = {}", outputDir.getPath());
-                    } else {
-                        outputDir = Path.of("").toAbsolutePath().toFile();
-                    }
-                    try (final Formatter formatter = new Formatter()) {
-                        if (!validateOutputDir(outputDir.toPath(), formatter)) {
-                            logger.error("{}", formatter);
-                            return 1;
-                        }
-                    }
-                    config.setOutputDirectory(outputDir);
-                }
-
-                if (line.hasOption(SOURCE)) {
-                    config.setTestSources(Arrays.stream(line.getOptionValues(SOURCE))
-                            .filter(s -> !StringUtils.isBlank(s))
-                            .collect(Collectors.toList()));
-                    logger.debug("Suite = {}", config.getTestSources().toString());
-                }
-
-                List<String> filters = null;
-                if (!line.hasOption(COVERAGE)) {
-                    if (line.hasOption(SUBJECTS)) {
-                        config.setSubjectsUrl(line.getOptionValue(SUBJECTS));
-                        logger.debug("Subjects = {}", config.getSubjectsUrl());
-                    }
-                    logger.debug("TARGET SETTING {}", line.getOptionValue(TARGET));
-                    if (line.hasOption(TARGET) && !StringUtils.isBlank(line.getOptionValue(TARGET))) {
-                        final String subjectsBaseUri = iri(config.getSubjectsUrl().toString()).getNamespace();
-                        final String target = line.getOptionValue(TARGET);
-                        final IRI testSubject = target.contains(":")
-                                ? iri(target)
-                                : iri(subjectsBaseUri, target);
-                        logger.debug("Target: {}", testSubject);
-                        config.setTestSubject(testSubject);
-                    }
-                    if (line.hasOption(FILTER)) {
-                        filters = Arrays.stream(line.getOptionValues(FILTER))
-                                .filter(s -> !StringUtils.isBlank(s))
-                                .collect(Collectors.toList());
-                        logger.debug("Filters = {}", filters);
-                    }
-                }
-                config.logConfigSettings(line.hasOption(COVERAGE) ? Config.RunMode.COVERAGE : Config.RunMode.TEST);
-
-                conformanceTestHarness.initialize();
-
-                if (line.hasOption(COVERAGE)) {
-                    conformanceTestHarness.prepareCoverageReport();
-                    conformanceTestHarness.buildReports(Config.RunMode.COVERAGE);
-                    return 0;
-                } else {
-                    final TestSuiteResults results = conformanceTestHarness.runTestSuites(filters);
-                    if (!line.hasOption(SKIP_REPORTS)) {
-                        conformanceTestHarness.buildReports(Config.RunMode.TEST);
-                    }
-                    if (!line.hasOption(SKIP_TEARDOWN)) {
-                        conformanceTestHarness.cleanUp();
-                    }
-                    return (results != null && results.getFailCount() == 0) || line.hasOption(IGNORE_FAILURES) ? 0 : 1;
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Application failed.  Reason: {}", e.toString());
-        }
-        return 1;
-    }
-
-    public static void main(final String... args) {
-        Quarkus.run(Application.class, args);
+        return options;
     }
 
     private boolean validateOutputDir(final Path dir, final Formatter error) {

@@ -30,13 +30,29 @@ import org.junit.jupiter.api.Test;
 import java.util.Date;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
 class TestSuiteResultsTest {
+    @Test
+    void emptyResults() {
+        final TestSuiteResults testSuiteResults = TestSuiteResults.emptyResults();
+        assertEquals("", testSuiteResults.getErrorMessages());
+        assertEquals(0, testSuiteResults.getFailCount());
+        assertEquals(0, testSuiteResults.getFeatureFailCount());
+        assertEquals(0, testSuiteResults.getFeaturePassCount());
+        assertEquals(0, testSuiteResults.getFeatureSkipCount());
+        assertEquals(0, testSuiteResults.getFeatureTotal());
+        assertEquals(0, testSuiteResults.getScenarioFailCount());
+        assertEquals(0, testSuiteResults.getScenarioPassCount());
+        assertEquals(0, testSuiteResults.getScenarioTotal());
+        assertEquals(0, testSuiteResults.getTimeTakenMillis());
+        assertEquals(0, testSuiteResults.getFailCount());
+        assertNotNull(testSuiteResults.getResultDate());
+    }
+
     @Test
     void getErrorMessages() {
         final Results results = mock(Results.class);
@@ -133,6 +149,13 @@ class TestSuiteResultsTest {
     }
 
     @Test
+    void toJsonEmpty() {
+        final TestSuiteResults testSuiteResults = TestSuiteResults.emptyResults();
+        assertTrue(testSuiteResults.toJson().contains("\"featuresPassed\":0"));
+        assertTrue(testSuiteResults.toJson().contains("\"featuresFailed\":0"));
+    }
+
+    @Test
     void toJsonFails() {
         final Results results = mock(Results.class);
         when(results.getFeaturesPassed()).thenThrow(new RuntimeException("FAIL"));
@@ -152,5 +175,11 @@ class TestSuiteResultsTest {
         final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
         assertEquals("Results:\n  Features  passed: 1, failed: 2, total: 3\n" +
                 "  Scenarios passed: 10, failed: 20, total: 30", testSuiteResults.toString());
+    }
+
+    @Test
+    void testToStringEmpty() {
+        final TestSuiteResults testSuiteResults = TestSuiteResults.emptyResults();
+        assertEquals("Results: No features were run", testSuiteResults.toString());
     }
 }

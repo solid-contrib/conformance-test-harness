@@ -271,6 +271,7 @@ usage: run
     --skip-reports    skip report generation
     --skip-teardown   skip teardown (when server itself is being stopped)
  -s,--source <arg>    URL or path to test source(s)
+    --status <arg>    status(es) of tests to run
     --subjects <arg>  URL or path to test subject config (Turtle)
  -t,--target <arg>    target server
 ```
