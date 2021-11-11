@@ -31,14 +31,15 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.util.Values;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.DCTERMS;
 import org.solid.common.vocab.FOAF;
 import org.solid.common.vocab.RDF;
 import org.solid.common.vocab.SPEC;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -53,15 +54,13 @@ import static org.mockito.Mockito.when;
 
 @QuarkusTest
 class DataRepositoryTest {
-    private static final Logger logger = LoggerFactory.getLogger(DataRepositoryTest.class);
-
     private static final IRI assertor = iri(TestData.SAMPLE_NS, "testharness");
     private static final IRI testSubject = iri(TestData.SAMPLE_NS, "test");
     private static final IRI featureIri = iri(TestData.SAMPLE_NS, "feature");
     private static final IRI testCaseIri = iri(TestData.SAMPLE_NS, "testCase");
 
     @Test
-    void addFeatureResult() throws Exception {
+    void addFeatureResult() {
         final DataRepository dataRepository = new DataRepository();
         dataRepository.postConstruct();
         dataRepository.setAssertor(assertor);
@@ -102,15 +101,15 @@ class DataRepositoryTest {
         final ScenarioResult sr1 = mock(ScenarioResult.class);
         when(sr1.getScenario()).thenReturn(scenario1);
         when(sr1.isFailed()).thenReturn(true);
-        when(sr1.getStartTime()).thenReturn(123456789l);
-        when(sr1.getEndTime()).thenReturn(123456789l);
+        when(sr1.getStartTime()).thenReturn(123456789L);
+        when(sr1.getEndTime()).thenReturn(123456789L);
         when(sr1.getDurationMillis()).thenReturn(2000.0);
 
         final ScenarioResult sr2 = mock(ScenarioResult.class);
         when(sr2.getScenario()).thenReturn(scenario2);
         when(sr2.isFailed()).thenReturn(false);
-        when(sr1.getStartTime()).thenReturn(123456789l);
-        when(sr1.getEndTime()).thenReturn(123456789l);
+        when(sr1.getStartTime()).thenReturn(123456789L);
+        when(sr1.getEndTime()).thenReturn(123456789L);
         when(sr2.getDurationMillis()).thenReturn(3000.0);
 
         when(fr.getScenarioResults()).thenReturn(List.of(sr1, sr2));
@@ -126,15 +125,14 @@ class DataRepositoryTest {
         when(sr1.getStepResults()).thenReturn(List.of(str1, str2));
 
         dataRepository.addFeatureResult(suite, fr, featureIri);
-        final StringWriter sw = new StringWriter();
-        dataRepository.export(sw);
-        assertTrue(sw.toString().contains("dcterms:title \"FEATURE NAME\""));
-        assertTrue(sw.toString().contains("earl:outcome earl:failed"));
-        assertTrue(sw.toString().contains("prov:value earl:passed"));
+        final String result = TestUtils.repositoryToString(dataRepository);
+        assertTrue(result.contains("dcterms:title \"FEATURE NAME\""));
+        assertTrue(result.contains("earl:outcome earl:failed"));
+        assertTrue(result.contains("prov:value earl:passed"));
     }
 
     @Test
-    void addFeatureResultTestFailed() throws Exception {
+    void addFeatureResultTestFailed() {
         final DataRepository dataRepository = new DataRepository();
         dataRepository.postConstruct();
         dataRepository.setAssertor(assertor);
@@ -154,14 +152,13 @@ class DataRepositoryTest {
         when(fr.getScenarioResults()).thenReturn(Collections.emptyList());
 
         dataRepository.addFeatureResult(suite, fr, featureIri);
-        final StringWriter sw = new StringWriter();
-        dataRepository.export(sw);
-        assertTrue(sw.toString().contains("dcterms:title \"FEATURE NAME\""));
-        assertTrue(sw.toString().contains("earl:outcome earl:failed"));
+        final String result = TestUtils.repositoryToString(dataRepository);
+        assertTrue(result.contains("dcterms:title \"FEATURE NAME\""));
+        assertTrue(result.contains("earl:outcome earl:failed"));
     }
 
     @Test
-    void addFeatureResultNoTestCase() throws Exception {
+    void addFeatureResultNoTestCase() {
         final DataRepository dataRepository = new DataRepository();
         dataRepository.postConstruct();
         dataRepository.setAssertor(assertor);
@@ -183,22 +180,21 @@ class DataRepositoryTest {
         final ScenarioResult sr1 = mock(ScenarioResult.class);
         when(sr1.getScenario()).thenReturn(scenario1);
         when(sr1.isFailed()).thenReturn(true);
-        when(sr1.getStartTime()).thenReturn(123456789l);
-        when(sr1.getEndTime()).thenReturn(123456789l);
+        when(sr1.getStartTime()).thenReturn(123456789L);
+        when(sr1.getEndTime()).thenReturn(123456789L);
         when(sr1.getDurationMillis()).thenReturn(2000.0);
 
         when(fr.getScenarioResults()).thenReturn(List.of(sr1));
         when(sr1.getStepResults()).thenReturn(Collections.emptyList());
 
         dataRepository.addFeatureResult(suite, fr, featureIri);
-        final StringWriter sw = new StringWriter();
-        dataRepository.export(sw);
-        assertFalse(sw.toString().contains("dcterms:title \"FEATURE NAME\""));
-        assertTrue(sw.toString().contains("earl:outcome earl:failed"));
+        final String result = TestUtils.repositoryToString(dataRepository);
+        assertFalse(result.contains("dcterms:title \"FEATURE NAME\""));
+        assertTrue(result.contains("earl:outcome earl:failed"));
     }
 
     @Test
-    void addFeatureResultBadRdf() throws Exception {
+    void addFeatureResultBadRdf() {
         final DataRepository dataRepository = new DataRepository();
         dataRepository.postConstruct();
         dataRepository.setAssertor(assertor);
@@ -212,9 +208,8 @@ class DataRepositoryTest {
         when(fr.getScenarioResults()).thenThrow(new RuntimeException("FAILED"));
 
         dataRepository.addFeatureResult(suite, fr, featureIri);
-        final StringWriter sw = new StringWriter();
-        dataRepository.export(sw);
-        assertFalse(sw.toString().contains(featureIri.stringValue()));
+        final String result = TestUtils.repositoryToString(dataRepository);
+        assertFalse(result.contains(featureIri.stringValue()));
     }
 
     @Test
@@ -233,24 +228,6 @@ class DataRepositoryTest {
         final Writer wr = Files.newBufferedWriter(tempFile.toPath());
         wr.close();
         assertThrows(Exception.class, () -> dataRepository.export(wr));
-    }
-
-    @Test
-    void exportStream() throws Exception {
-        final DataRepository dataRepository = setupRepository();
-        final ByteArrayOutputStream os = new ByteArrayOutputStream();
-        dataRepository.export(os);
-        assertTrue(os.toString().contains(TestData.SAMPLE_TURTLE));
-    }
-
-    @Test
-    void exportStreamFailing() throws IOException {
-        final DataRepository dataRepository = setupRepository();
-        final File tempFile = File.createTempFile("TestHarness-", ".tmp");
-        tempFile.deleteOnExit();
-        final OutputStream os = Files.newOutputStream(tempFile.toPath());
-        os.close();
-        assertThrows(Exception.class, () -> dataRepository.export(os));
     }
 
     @Test

@@ -23,8 +23,10 @@
  */
 package org.solid.testharness.utils;
 
+import org.eclipse.rdf4j.RDF4JException;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.util.Models;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.util.RepositoryUtil;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFWriter;
@@ -131,18 +133,38 @@ public final class TestUtils {
     }
 
     public static Model loadTurtleFromFile(final String file) throws IOException {
-        final InputStream is = Files.newInputStream(Path.of(file));
-        final Model model = Rio.parse(is, RDFFormat.TURTLE);
-        return model;
+        try (InputStream is = Files.newInputStream(Path.of(file))) {
+            return Rio.parse(is, RDFFormat.TURTLE);
+        }
     }
 
     public static Model loadTurtleFromString(final String data) throws IOException {
-        final Model model = Rio.parse(new StringReader(data), RDFFormat.TURTLE);
-        return model;
+        return Rio.parse(new StringReader(data), RDFFormat.TURTLE);
     }
 
     public static String loadStringFromFile(final String file) throws IOException {
         return Files.readString(Path.of(file));
+    }
+
+    public static String repositoryToString(final DataRepository repository) {
+        final StringWriter sw = new StringWriter();
+        try {
+            repository.export(sw);
+        } catch (Exception e) {
+            return "";
+        }
+        return sw.toString();
+    }
+
+    public static void dumpRepository(final DataRepository repository) {
+        final RDFWriter rdfWriter = Rio.createWriter(RDFFormat.TURTLE, System.out);
+        try (RepositoryConnection conn = repository.getConnection()) {
+            rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true)
+                    .set(BasicWriterSettings.INLINE_BLANK_NODES, true);
+            conn.export(rdfWriter);
+        } catch (RDF4JException e) {
+            System.out.println("Failed to write repository: " + e);
+        }
     }
 
     private TestUtils() { }
