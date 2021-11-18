@@ -1,0 +1,15 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+
+<#tests> a doap:Project ;
+   doap:name "Solid Specification Conformance Tests" ;
+   doap:description "A suite of tests related to Solid specifications that will run by the Solid Conformance Test Harness."@en ;
+   doap:programming-language "KarateDSL" ;
+   doap:created "2021-11-16T00:00:00.001Z"^^xsd:dateTime ;
+   doap:developer <https://solidproject.org>;
+   doap:homepage <https://github.com/solid/specification-tests> ;
+   doap:release <#tests-release> .
+
+<#tests-release> doap:revision "0.0.1" .

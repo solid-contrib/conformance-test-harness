@@ -1,30 +1,32 @@
 <script>
   //<![CDATA[
-  document.addEventListener("DOMContentLoaded", function (event) {
-    const anchors = document.querySelectorAll("a");
-    anchors.forEach(anchor => {
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll("a").forEach(anchor => {
       anchor.href = anchor.href
               .replace('github.com/solid/specification-tests/', 'github.com/solid/specification-tests/blob/main/')
               .replace('github.com/solid/conformance-test-harness/', 'github.com/solid/conformance-test-harness/blob/main/')
-    })
+    });
 
-    function openTarget() {
-      const hash = location.hash.substring(1);
-      if (hash) {
-        const details = document.getElementById(hash);
-        if (details && details.tagName.toLowerCase() === 'details') {
-          details.open = true;
-          const parentDetails = details.parentElement.closest('details')
-          if (parentDetails) {
-            parentDetails.open = true;
-          }
-          details.scrollIntoView();
-        }
-      }
-    }
+    fetchLatestTestsVersion();
+
     window.addEventListener('hashchange', openTarget);
     openTarget();
   });
+
+  function openTarget() {
+    const hash = location.hash.substring(1);
+    if (hash) {
+      const details = document.getElementById(hash);
+      if (details && details.tagName.toLowerCase() === 'details') {
+        details.open = true;
+        const parentDetails = details.parentElement.closest('details')
+        if (parentDetails) {
+          parentDetails.open = true;
+        }
+        details.scrollIntoView();
+      }
+    }
+  }
 
   function openAll(elem) {
     elem.parentElement.querySelectorAll('details').forEach(d => d.open = true);
@@ -45,5 +47,22 @@
     elem.parentElement.querySelectorAll('details').forEach(d => d.open = false);
   }
 
+  function fetchLatestTestsVersion() {
+    const warning = document.querySelector('#version-warning');
+    if (!warning) return;
+    fetch('https://api.github.com/repos/solid/specification-tests/tags').then((response) => {
+      return response.json();
+    }).then((data) => {
+      if (data && data.length && data[0].name) {
+        const latestVersion = data[0].name.replace('v', '');
+        if (warning.dataset.revision !== latestVersion) {
+          warning.style.display = 'inline';
+          document.querySelector('#latest-version').innerHTML = latestVersion;
+        }
+      }
+    }).catch((err) => {
+      console.warn('Failed to get release versions from https://github.com/solid/specification-tests.', err);
+    });
+  }
   //]]>
 </script>

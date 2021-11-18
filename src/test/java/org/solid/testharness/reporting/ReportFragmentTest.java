@@ -82,6 +82,7 @@ class ReportFragmentTest {
         }
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/harness-sample.ttl"), BASE_URI);
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"), BASE_URI);
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/config/tests-sample.ttl"), BASE_URI);
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-2.ttl"));
@@ -238,6 +239,22 @@ class ReportFragmentTest {
 
         TestUtils.showModelDifferences(reportModel, assertor.getModel(), logger);
         assertTrue(Models.isomorphic(reportModel, assertor.getModel()));
+    }
+
+    @Test
+    void specificationTestsHeader() throws IOException {
+        final IRI specificationTestsIri = iri(BASE_URI + "#tests");
+        final SpecificationTests specificationTests = new SpecificationTests(specificationTestsIri);
+        logger.debug("SpecificationTests Model:\n{}", TestUtils.toTurtle(specificationTests.getModel()));
+
+        final String report = render("specificationTests", specificationTests);
+        logger.debug("Report:\n{}", report);
+
+        final Model reportModel = RDFUtils.parseRdfa(report, BASE_URI + "#tests");
+        logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
+
+        TestUtils.showModelDifferences(reportModel, specificationTests.getModel(), logger);
+        assertTrue(Models.isomorphic(reportModel, specificationTests.getModel()));
     }
 
     @Test

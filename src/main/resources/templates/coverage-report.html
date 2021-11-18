@@ -18,6 +18,10 @@
 <div datatype="rdf:HTML" property="dcterms:description">
 {#include specification-header /}
 
+{#if specificationTests}
+{#with specificationTests}{#include specification-tests /}{/with}
+{/if}
+
 <section id="test-coverage-by-specification-requirement" rel="dcterms:hasPart" resource="#test-coverage-by-specification-requirement">
   <h2 property="dcterms:title">Test coverage by specification requirement</h2>
   {#include buttons coverageMode=true /}

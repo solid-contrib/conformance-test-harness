@@ -89,6 +89,12 @@ class ResultDataTest extends AbstractDataModelTests {
     }
 
     @Test
+    void getSpecificationTests() {
+        final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList(), null);
+        assertNotNull(resultData.getSpecificationTests());
+    }
+
+    @Test
     void getTestSubject() {
         final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList(),
                 new TestSuiteResults(null));

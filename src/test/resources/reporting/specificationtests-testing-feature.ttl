@@ -1,0 +1,18 @@
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix doap: <http://usefulinc.com/ns/doap#>
+prefix earl: <http://www.w3.org/ns/earl#>
+
+<tests> a earl:Software ;
+   doap:name "TESTS" ;
+   doap:description "DESCRIPTION"@en ;
+   doap:programming-language "KarateDSL" ;
+   doap:created "2021-01-01T00:00:00.000Z"^^xsd:dateTime ;
+   doap:developer <https://example.org/profile/card/#us>;
+   doap:homepage <https://example.org/tests> ;
+   doap:release <tests#release> .
+
+<tests#release> doap:revision "0.0.1" .
+
+<tester2> a earl:Software.

@@ -21,6 +21,9 @@
 {#if assertor}
 {#with assertor}{#include assertor /}{/with}
 {/if}
+{#if specificationTests}
+{#with specificationTests}{#include specification-tests /}{/with}
+{/if}
 {#with testSubject}{#include test-subject /}{/with}
 {#if testSuiteResults??}
 {#with testSuiteResults}{#include results-summary /}{/with}
