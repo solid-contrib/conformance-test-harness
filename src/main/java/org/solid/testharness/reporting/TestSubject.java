@@ -24,58 +24,9 @@
 package org.solid.testharness.reporting;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.solid.common.vocab.DOAP;
-import org.solid.testharness.utils.DataModelBase;
 
-import java.time.LocalDate;
-
-public class TestSubject extends DataModelBase  {
+public class TestSubject extends Software  {
     public TestSubject(final IRI subject) {
-        super(subject, ConstructMode.DEEP);
+        super(subject);
     }
-
-    public String getSoftwareName() {
-        return getLiteralAsString(DOAP.name);
-    }
-
-    public String getDescription() {
-        return getLiteralAsString(DOAP.description);
-    }
-
-    public String getProgrammingLanguage() {
-        return getLiteralAsString(DOAP.programming_language);
-    }
-
-    public String getDeveloper() {
-        return getIriAsString(DOAP.developer);
-    }
-
-    public String getHomepage() {
-        return getIriAsString(DOAP.homepage);
-    }
-
-    public String getReleaseName() {
-        final IRI release = getAsIri(DOAP.release);
-        if (release == null) {
-            return null;
-        }
-        return getLiteralAsString(release, DOAP.name);
-    }
-
-    public String getRevision() {
-        final IRI release = getAsIri(DOAP.release);
-        if (release == null) {
-            return null;
-        }
-        return getLiteralAsString(release, DOAP.revision);
-    }
-
-    public LocalDate getCreatedDate() {
-        final IRI release = getAsIri(DOAP.release);
-        if (release == null) {
-            return null;
-        }
-        return getLiteralAsDate(release, DOAP.created);
-    }
-
 }
