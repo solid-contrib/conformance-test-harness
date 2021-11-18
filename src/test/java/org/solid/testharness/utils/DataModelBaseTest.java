@@ -25,14 +25,13 @@ package org.solid.testharness.utils;
 
 import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.datatypes.XMLDateTime;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.solid.testharness.reporting.Step;
 import org.solid.testharness.reporting.TestCase;
 
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -63,7 +62,7 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void getSubjectIri() {
-        assertTrue(iri(NS, "test").equals(dataModelBase.getSubjectIri()));
+        assertEquals(iri(NS, "test"), dataModelBase.getSubjectIri());
     }
 
     @Test
@@ -167,7 +166,7 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void getAsIri() {
-        assertTrue(iri(NS, "iri").equals(dataModelBase.getAsIri(iri(NS, "hasIri"))));
+        assertEquals(iri(NS, "iri"), dataModelBase.getAsIri(iri(NS, "hasIri")));
     }
 
     @Test
@@ -187,7 +186,7 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void getMissingLiteralAsString() {
-        assertEquals(null, dataModelBase.getLiteralAsString(iri(NS, "hasMissingString")));
+        assertNull(dataModelBase.getLiteralAsString(iri(NS, "hasMissingString")));
     }
 
     @Test
@@ -240,18 +239,18 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void getLiteralAsBoolean() {
-        assertEquals(true, dataModelBase.getLiteralAsBoolean(iri(NS, "hasBool")));
+        assertTrue(dataModelBase.getLiteralAsBoolean(iri(NS, "hasBool")));
     }
 
     @Test
     void getMissingLiteralAsBoolean() {
-        assertEquals(false, dataModelBase.getLiteralAsBoolean(iri(NS, "hasMissingBool")));
+        assertFalse(dataModelBase.getLiteralAsBoolean(iri(NS, "hasMissingBool")));
     }
 
     @Test
     void getLiteralAsDate() {
-        final LocalDate date = dataModelBase.getLiteralAsDate(iri(NS, "hasDate"));
-        assertThat("Date matches", date.isEqual(LocalDate.parse("2021-04-08")));
+        final XMLDateTime dateTime = dataModelBase.getLiteralAsDateTime(iri(NS, "hasDate"));
+        assertThat("Date matches", dateTime.compareTo(new XMLDateTime("2021-04-08T00:00:00.000Z")) == 0);
     }
 
     @Test
@@ -259,19 +258,14 @@ class DataModelBaseTest extends AbstractDataModelTests {
         final DataModelBase deepModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.DEEP);
         final BNode node = deepModel.getAsBNode(iri(NS, "hasBNode"));
         assertNotNull(node);
-        final LocalDate date = deepModel.getLiteralAsDate(node, iri(NS, "hasDate"));
-        assertThat("Date matches", date.isEqual(LocalDate.parse("2021-07-09")));
-    }
-
-    @Test
-    void getMissingLiteralAsDate() {
-        assertNull(dataModelBase.getLiteralAsDate(iri(NS, "hasMissingDate")));
+        final XMLDateTime dateTime = deepModel.getLiteralAsDateTime(node, iri(NS, "hasDateTime"));
+        assertThat("Date matches", dateTime.compareTo(new XMLDateTime("2021-07-09T00:00:00.000Z")) == 0);
     }
 
     @Test
     void getLiteralAsDateTime() {
-        final ZonedDateTime dateTime = dataModelBase.getLiteralAsDateTime(iri(NS, "hasDateTime"));
-        assertThat("DateTime matches", dateTime.isEqual(ZonedDateTime.parse("2021-04-08T12:30:00.000Z")));
+        final XMLDateTime dateTime = dataModelBase.getLiteralAsDateTime(iri(NS, "hasDateTime"));
+        assertThat("DateTime matches", dateTime.compareTo(new XMLDateTime("2021-04-08T12:30:00.000Z")) == 0);
     }
 
     @Test

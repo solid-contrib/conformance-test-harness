@@ -58,7 +58,7 @@ class PathMappingsMissingTest {
     }
 
     @Test
-    void mapFeatureIri() {
-        assertEquals(URI.create("file:/path"), pathMappings.mapFeatureIri(iri("file:/path")));
+    void mapIri() {
+        assertEquals(URI.create("file:/path"), pathMappings.mapIri(iri("file:/path")));
     }
 }

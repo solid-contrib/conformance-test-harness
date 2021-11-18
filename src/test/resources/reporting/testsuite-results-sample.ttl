@@ -27,21 +27,21 @@ results:node1f273av6vx11
 results:node1f273av6vx12
     a earl:TestResult;
     earl:outcome earl:passed;
-    dcterms:date "2021-04-01T17:13:01.628001Z"^^xsd:dateTime .
+    dcterms:date "2021-04-01T17:13:01.628Z"^^xsd:dateTime .
 
 # Scenario 1
 results:node1f273av6vx13
     a prov:Activity;
     dcterms:title "Group 1 Test case 1 Scenario 1"@en;
     prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=10,15> ;
-    prov:startedAtTime "2021-04-15T13:00:01-04:00"^^xsd:dateTime ;
-    prov:endedAtTime   "2021-04-15T13:01:01-04:00"^^xsd:dateTime ;
+    prov:startedAtTime "2021-04-15T13:00:01.000-04:00"^^xsd:dateTime ;
+    prov:endedAtTime   "2021-04-15T13:01:01.000-04:00"^^xsd:dateTime ;
     prov:generated results:node1f273av6vx14 ;
     dcterms:hasPart (results:node1f273av6vx16 results:node1f273av6vx17 results:node1f273av6vx18).
 
 results:node1f273av6vx14
     a prov:Entity ;
-    prov:generatedAtTime "2021-04-01T17:12:59.933001Z"^^xsd:dateTime ;
+    prov:generatedAtTime "2021-04-01T17:12:59.933Z"^^xsd:dateTime ;
     prov:value earl:passed .
 
 # Step list
@@ -107,14 +107,14 @@ results:node1f273av6vx42
     a prov:Activity;
     dcterms:title "Group 1 Test case 1 Scenario 2"@en;
     prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=25,35> ;
-    prov:startedAtTime "2021-04-15T13:02:01-04:00"^^xsd:dateTime ;
-    prov:endedAtTime   "2021-04-15T13:04:01-04:00"^^xsd:dateTime ;
+    prov:startedAtTime "2021-04-15T13:02:01.000-04:00"^^xsd:dateTime ;
+    prov:endedAtTime   "2021-04-15T13:04:01.000-04:00"^^xsd:dateTime ;
     prov:generated results:node1f273av6vx43 ;
     dcterms:hasPart (results:node1f273av6vx45 results:node1f273av6vx53 results:node1f273av6vx54 results:node1f273av6vx55) .
 
 results:node1f273av6vx43
     a prov:Entity ;
-    prov:generatedAtTime "2021-04-01T17:12:59.933001Z"^^xsd:dateTime ;
+    prov:generatedAtTime "2021-04-01T17:12:59.933Z"^^xsd:dateTime ;
     prov:value earl:failed .
 
 results:node1f273av6vx45

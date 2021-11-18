@@ -37,6 +37,7 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 
 public class ResultData {
     private Assertor assertor;
+    private SpecificationTests specificationTests;
     private TestSubject testSubject;
     private List<Specification> specifications;
     private List<TestCase> testCases;
@@ -44,6 +45,7 @@ public class ResultData {
 
     public ResultData(final List<IRI> specifications, final List<IRI> testCases, final TestSuiteResults results) {
         assertor = new Assertor(iri(Namespaces.TEST_HARNESS_URI));
+        this.specificationTests = new SpecificationTests(iri(Namespaces.SPECIFICATION_TESTS_IRI));
         final Config config = CDI.current().select(Config.class).get();
         if (results != null) {
             // there is a test subject when there are results, but not for coverage reports
@@ -74,6 +76,10 @@ public class ResultData {
 
     public Assertor getAssertor() {
         return assertor;
+    }
+
+    public SpecificationTests getSpecificationTests() {
+        return specificationTests;
     }
 
     public TestSubject getTestSubject() {

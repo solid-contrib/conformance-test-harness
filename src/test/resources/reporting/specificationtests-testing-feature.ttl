@@ -4,15 +4,15 @@ prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 prefix doap: <http://usefulinc.com/ns/doap#>
 prefix earl: <http://www.w3.org/ns/earl#>
 
-<tester1> a earl:Software ;
-   doap:name "TESTER1" ;
+<tests> a earl:Software ;
+   doap:name "TESTS" ;
    doap:description "DESCRIPTION"@en ;
-   doap:programming-language "Java, KarateDSL" ;
+   doap:programming-language "KarateDSL" ;
    doap:created "2021-01-01T00:00:00.000Z"^^xsd:dateTime ;
    doap:developer <https://example.org/profile/card/#us>;
-   doap:homepage <https://example.org/tester> ;
-   doap:release <tester1#assertor-release> .
+   doap:homepage <https://example.org/tests> ;
+   doap:release <tests#release> .
 
-<tester1#assertor-release> doap:revision "0.0.1-SNAPSHOT" .
+<tests#release> doap:revision "0.0.1" .
 
 <tester2> a earl:Software.

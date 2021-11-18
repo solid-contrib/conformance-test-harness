@@ -24,49 +24,22 @@
 package org.solid.testharness.reporting;
 
 import io.quarkus.test.junit.QuarkusTest;
-import org.eclipse.rdf4j.model.datatypes.XMLDateTime;
 import org.junit.jupiter.api.Test;
-import org.solid.common.vocab.EARL;
 import org.solid.testharness.utils.AbstractDataModelTests;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
-class TestResultTest extends AbstractDataModelTests {
+class SpecificationTestsTest extends AbstractDataModelTests {
     @Override
     public String getTestFile() {
-        return "src/test/resources/reporting/testresult-testing-feature.ttl";
+        return "src/test/resources/reporting/specificationtests-testing-feature.ttl";
     }
 
     @Test
-    void getOutcome() {
-        final TestResult testResult = new TestResult(iri(NS, "result1"));
-        assertEquals(EARL.passed.stringValue(), testResult.getOutcome());
-    }
-
-    @Test
-    void isPassed() {
-        final TestResult testResult = new TestResult(iri(NS, "result1"));
-        assertTrue(testResult.isPassed());
-    }
-
-    @Test
-    void isFailed() {
-        final TestResult testResult = new TestResult(iri(NS, "result2"));
-        assertTrue(testResult.isFailed());
-    }
-
-    @Test
-    void getOutcomeLocalName() {
-        final TestResult testResult = new TestResult(iri(NS, "result1"));
-        assertEquals(EARL.passed.getLocalName(), testResult.getOutcomeLocalName());
-    }
-
-    @Test
-    void getDate() {
-        final TestResult testResult = new TestResult(iri(NS, "result1"));
-        assertEquals(0, testResult.getDate().compareTo(new XMLDateTime("2021-04-06T17:41:20.889Z")));
+    void constructed() {
+        final SpecificationTests specificationTests = new SpecificationTests(iri(NS, "tests"));
+        assertEquals("TESTS", specificationTests.getSoftwareName());
     }
 }

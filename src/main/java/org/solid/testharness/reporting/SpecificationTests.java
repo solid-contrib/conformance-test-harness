@@ -25,8 +25,8 @@ package org.solid.testharness.reporting;
 
 import org.eclipse.rdf4j.model.IRI;
 
-public class TestSubject extends Software  {
-    public TestSubject(final IRI subject) {
+public class SpecificationTests extends Software {
+    public SpecificationTests(final IRI subject) {
         super(subject);
     }
 }

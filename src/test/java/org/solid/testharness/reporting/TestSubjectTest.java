@@ -27,10 +27,8 @@ import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.utils.AbstractDataModelTests;
 
-import java.time.LocalDate;
-
 import static org.eclipse.rdf4j.model.util.Values.iri;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
 class TestSubjectTest extends AbstractDataModelTests {
@@ -40,68 +38,9 @@ class TestSubjectTest extends AbstractDataModelTests {
     }
 
     @Test
-    void getSoftwareName() {
+    void constructed() {
         final TestSubject testSubject = new TestSubject(iri(NS, "testSubject1"));
         assertEquals("TESTER1", testSubject.getSoftwareName());
-    }
-
-    @Test
-    void getDescription() {
-        final TestSubject testSubject = new TestSubject(iri(NS, "testSubject1"));
-        assertEquals("DESCRIPTION", testSubject.getDescription());
-    }
-
-    @Test
-    void getCreatedDate() {
-        final TestSubject testSubject = new TestSubject(iri(NS, "testSubject1"));
-        assertEquals(LocalDate.parse("2021-03-05"), testSubject.getCreatedDate());
-    }
-
-    @Test
-    void getProgrammingLanguage() {
-        final TestSubject testSubject = new TestSubject(iri(NS, "testSubject1"));
-        assertEquals("LANG", testSubject.getProgrammingLanguage());
-    }
-
-    @Test
-    void getDeveloper() {
-        final TestSubject testSubject = new TestSubject(iri(NS, "testSubject1"));
-        assertEquals("https://example.org/profile/card/#us", testSubject.getDeveloper());
-    }
-
-    @Test
-    void getHomepage() {
-        final TestSubject testSubject = new TestSubject(iri(NS, "testSubject1"));
-        assertEquals("https://example.org/testSubject1", testSubject.getHomepage());
-    }
-
-    @Test
-    void getRevision() {
-        final TestSubject testSubject = new TestSubject(iri(NS, "testSubject1"));
-        assertEquals("0.0.1-SNAPSHOT", testSubject.getRevision());
-    }
-
-    @Test
-    void getReleaseName() {
-        final TestSubject testSubject = new TestSubject(iri(NS, "testSubject1"));
-        assertEquals("RELEASE_NAME", testSubject.getReleaseName());
-    }
-
-    @Test
-    void getCreatedDateNull() {
-        final TestSubject testSubject = new TestSubject(iri(NS, "testSubject2"));
-        assertNull(testSubject.getCreatedDate());
-    }
-
-    @Test
-    void getReleaseNameNull() {
-        final TestSubject testSubject = new TestSubject(iri(NS, "testSubject2"));
-        assertNull(testSubject.getReleaseName());
-    }
-
-    @Test
-    void getRevisionNull() {
-        final TestSubject testSubject = new TestSubject(iri(NS, "testSubject2"));
-        assertNull(testSubject.getRevision());
+        assertEquals("2021-03-05T00:00:00.000Z", testSubject.getReleaseDate().toString());
     }
 }

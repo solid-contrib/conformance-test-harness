@@ -6,9 +6,9 @@ prefix ex: <https://example.org/>
 ex:result1
     a earl:TestResult ;
     earl:outcome earl:passed;
-    dcterms:date "2021-04-06T17:41:20.889001Z"^^xsd:dateTime .
+    dcterms:date "2021-04-06T17:41:20.889Z"^^xsd:dateTime .
 
 ex:result2
     a earl:TestResult ;
     earl:outcome earl:failed;
-    dcterms:date "2021-04-06T17:41:20.889001Z"^^xsd:dateTime .
+    dcterms:date "2021-04-06T17:41:20.889Z"^^xsd:dateTime .

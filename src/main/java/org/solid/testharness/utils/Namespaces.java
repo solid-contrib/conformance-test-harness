@@ -36,11 +36,13 @@ import java.util.stream.Collectors;
 public final class Namespaces {
     private static Map<String, Namespace> namespaceMap;
 
-    public static final String RESULTS_BASE_URI = "https://github.com/solid/specification-tests/" + UUID.randomUUID();
+    public static final String TESTS_REPO_URI = "https://github.com/solid/specification-tests/";
+    public static final String RESULTS_BASE_URI = TESTS_REPO_URI + UUID.randomUUID();
     public static final String RESULTS_URI = RESULTS_BASE_URI + "#";
     public static final String RESULTS_PREFIX = "results";
     public static final String TEST_HARNESS_URI = "https://github.com/solid/conformance-test-harness/";
     public static final String TEST_HARNESS_PREFIX = "test-harness";
+    public static final String SPECIFICATION_TESTS_IRI = Namespaces.RESULTS_URI + "tests";
     public static final String TURTLE_PREFIX_FORMAT = "@prefix %s: <%s> .\n";
     public static final String RDFA_PREFIX_FORMAT = "%s: %s";
 

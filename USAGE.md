@@ -32,7 +32,7 @@ This is a Turtle file which describes the test subject and it's capabilities, pr
 <css#test-subject-release>
     doap:name "CSS 0.9.0" ;
     doap:revision "0.9.0" ;
-    doap:created "2021-05-04"^^xsd:date .
+    doap:created "2021-05-04T00:00:00.000Z"^^xsd:dateTime .
 ```
 **Note**: The test subject identifier is simply an IRI. It is not meant to be resolvable and can be anything as long as
 you specify it on the command line when running tests.
@@ -326,10 +326,10 @@ The CTH can be executed both locally and within a Docker Container.
 
 ## Running in a Docker Container
 The simplest way to run the CTH is via the [Docker](https://www.docker.com/) image published to
-https://hub.docker.com/repository/docker/solidconformancetestbeta/conformance-test-harness.
+https://hub.docker.com/r/solidconformancetestbeta/conformance-test-harness.
 
-For ease of use, the Docker image includes the tests, manifest files, and test subject configuration files from 
-https://github.com/solid/specification-tests.
+For ease of use, the Docker image includes the latest release of the tests, manifest files, and test subject
+configuration files from https://github.com/solid/specification-tests.
 
 The Docker image works with the following internal structure:
 * `/app/harness` - contains the executable jar file.
@@ -343,14 +343,15 @@ To use this image, you just need to provide:
 1. The test subject using the `target` option on the command line.
 
 When you run the server in a container, there are some important things to remember:
-* You cannot use localhost so you need to name your instance and use that name to access it from the test container. The
-  CTH is set up to allow the name `server` so the URL will be https://server.
+* You cannot use localhost, so you need to name your instance and use that name to access it from the test container.
+  The CTH is set up to allow the name `server` so the URL will be https://server.
 * When using a domain name, you may hit the problem that DPoP verification requires https unless you are using
   localhost hence using `https` in the above URL.
 * As the image uses `https`, you need to provide a SSL certificate to the server which can be generated
   as a self-signed certificate (as seen in the CSS example below).
-* The CTH is setup to detect when you are using https://server, and will allow self-signed certificates. If you see an issue with DPoP verification rejecting self-signed certificates, the server
-  being tested will need to be setup to have the same capability. For a Node based server, this is done by adding `NODE_TLS_REJECT_UNAUTHORIZED=0`
+* The CTH is set up to detect when you are using https://server, and will allow self-signed certificates. If you see an
+  issue with DPoP verification rejecting self-signed certificates, the server being tested will need to be set up to
+  have the same capability. For a Node based server, this is done by adding `NODE_TLS_REJECT_UNAUTHORIZED=0`
   to the environment before running the server.
 
 Some additional notes on using the Docker image:
@@ -371,6 +372,14 @@ internal ones. For example:
     --output=/reports \
     --target=...
     ```
+* If you want to run a specific release of the tests then you will need to clone the repository, checkout the specific
+  version and then treat them as local tests, as shown above.
+    ```shell
+    git clone https://github.com/solid/specification-tests /data
+    cd /data
+    git checkout v1.0.0
+    ```  
+
 ### Examples
 
 The following examples demonstrate how a script can work with the Docker image and run tests against:
@@ -523,8 +532,8 @@ To use the Docker image to run a set of local tests:
     * `protocol/test.feature`.
     * `solid-protocol-test-manifest.ttl`.
     * `test-subjects.ttl`.
-1. Create a directory called `config`.
-2. Create the file `config/application.yaml`. For example:
+2. Create a directory called `config`.
+3. Create the file `config/application.yaml`. For example:
     ```
     subjects: /data/test-subjects.ttl
     sources:
@@ -540,7 +549,7 @@ To use the Docker image to run a set of local tests:
     * You can set the default target here rather than on the command line - this has to be a URI from the `test-subjects.ttl`
     file.
     * The mapping prefix is whatever you have used within the test manifest file.
-1. The command line needs to map the local directories into the Docker image to replace the internal directories:
+4. The command line needs to map the local directories into the Docker image to replace the internal directories:
     ```
     docker run -i --rm \
         -v "$(pwd)"/tests:/data 

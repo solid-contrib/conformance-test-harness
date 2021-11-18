@@ -27,6 +27,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -370,8 +371,7 @@ class TestSuiteDescriptionTest {
     @Test
     void prepareTestCasesWithAssertionInCoverageMode() {
         add(iri(NS, "testcase"), RDF.type, TD.TestCase);
-        add(iri(NS, "testcase"), SPEC.testScript,
-                iri(NS, "features/test.feature"));
+        add(iri(NS, "testcase"), SPEC.testScript, iri(NS, "features/test.feature"));
         add(iri(NS, "assertion"), RDF.type, EARL.Assertion);
         add(iri(NS, "assertion"), EARL.test, iri(NS, "testcase"));
         testSuiteDescription.prepareTestCases(Config.RunMode.COVERAGE);
@@ -435,23 +435,42 @@ class TestSuiteDescriptionTest {
         assertThat("TestCases match", testCases, containsInAnyOrder(expected));
     }
 
-//    @Test
-//    void getTestCasesStatuses() {
-//        add(iri(NS, "testcase"), RDF.type, TD.TestCase);
-//        add(iri(NS, "testcase"), TD.reviewStatus, TD.accepted);
-//        add(iri(NS, "assertion"), RDF.type, EARL.Assertion);
-//        add(iri(NS, "assertion"), EARL.test, iri(NS, "testcase"));
-//        assertTrue(testSuiteDescription.getTestCases(true).isEmpty());
-//    }
-//
-//    @Test
-//    void getTestCasesStatuses2() {
-//        add(iri(NS, "testcase"), RDF.type, TD.TestCase);
-//        add(iri(NS, "testcase"), SPEC.testScript, iri(NS, "features/test.feature"));
-//        final List<IRI> testCases = testSuiteDescription.getTestCases(true);
-//        final IRI[] expected = new IRI[]{iri(NS, "testcase")};
-//        assertThat("TestCases match", testCases, containsInAnyOrder(expected));
-//    }
+    @Test
+    void getTestsVersion() {
+        TestSuiteDescription.TEST_VERSION = iri(NS, "features/discovery/test-version.txt");
+        testSuiteDescription.getTestsVersion();
+        assertTrue(ask(iri(Namespaces.SPECIFICATION_TESTS_IRI), RDF.type, DOAP.Project));
+        assertTrue(ask(iri(Namespaces.SPECIFICATION_TESTS_IRI), DOAP.created,
+                literal("2021-11-15T00:00:00Z", XSD.DATETIME)));
+        assertTrue(ask(iri(Namespaces.RESULTS_URI, "tests-release"), DOAP.revision, literal("1.0.0")));
+    }
+
+    @Test
+    void getTestsVersionPartial() {
+        TestSuiteDescription.TEST_VERSION = iri(NS, "features/discovery/test-version-partial.txt");
+        testSuiteDescription.getTestsVersion();
+        assertTrue(ask(iri(Namespaces.SPECIFICATION_TESTS_IRI), RDF.type, DOAP.Project));
+        assertFalse(ask(iri(Namespaces.SPECIFICATION_TESTS_IRI), DOAP.created, null));
+        assertTrue(ask(iri(Namespaces.RESULTS_URI, "tests-release"), DOAP.revision, literal("1.0.1")));
+    }
+
+    @Test
+    void getTestsVersionNoVersion() {
+        TestSuiteDescription.TEST_VERSION = iri(NS, "features/discovery/test-version-empty.txt");
+        testSuiteDescription.getTestsVersion();
+        assertTrue(ask(iri(Namespaces.SPECIFICATION_TESTS_IRI), RDF.type, DOAP.Project));
+        assertFalse(ask(iri(Namespaces.SPECIFICATION_TESTS_IRI), DOAP.created, null));
+        assertTrue(ask(iri(Namespaces.RESULTS_URI, "tests-release"), DOAP.revision, literal("unknown")));
+    }
+
+    @Test
+    void getTestsVersionMissing() {
+        TestSuiteDescription.TEST_VERSION = iri(NS, "features/discovery/test-version-missing.txt");
+        testSuiteDescription.getTestsVersion();
+        assertTrue(ask(iri(Namespaces.SPECIFICATION_TESTS_IRI), RDF.type, DOAP.Project));
+        assertFalse(ask(iri(Namespaces.SPECIFICATION_TESTS_IRI), DOAP.created, null));
+        assertTrue(ask(iri(Namespaces.RESULTS_URI, "tests-release"), DOAP.revision, literal("unknown")));
+    }
 
     private void add(final Resource subject, final IRI predicate, final Value object) {
         try (RepositoryConnection conn = repository.getConnection()) {

@@ -20,4 +20,4 @@ prefix solid: <http://www.w3.org/ns/solid/terms#>
 <default#test-subject-release>
     doap:name "ESS 1.0.9";
     doap:revision "1.0.9";
-    doap:created "2021-03-05"^^xsd:date .
+    doap:created "2021-03-05T00:00:00.001Z"^^xsd:dateTime .

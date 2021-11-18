@@ -18,6 +18,11 @@
     {#with assertor}{#include assertor /}{/with}
     {/if}
 
+    {! SPECIFICATION-TESTS !}
+    {#if specificationTests??}
+    {#with specificationTests}{#include specification-tests /}{/with}
+    {/if}
+
     {! TEST SUBJECT !}
     {#if testSubject??}
     {#with testSubject}{#include test-subject /}{/with}

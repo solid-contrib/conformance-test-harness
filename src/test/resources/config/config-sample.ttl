@@ -20,7 +20,7 @@
 <testserver#test-subject-release>
     doap:name "ESS 1.0.9" ;
     doap:revision "1.0.9" ;
-    doap:created "2021-03-05"^^xsd:date .
+    doap:created "2021-03-05T00:00:00.001Z"^^xsd:dateTime .
 
 <testserver2>
     a earl:Software, earl:TestSubject ;
@@ -35,4 +35,4 @@
 <testserver2#test-subject-release>
     doap:name "CSS 0.8.0" ;
     doap:revision "0.8.0" ;
-    doap:created "2021-03-04"^^xsd:date .
+    doap:created "2021-03-04T00:00:00.001Z"^^xsd:dateTime .

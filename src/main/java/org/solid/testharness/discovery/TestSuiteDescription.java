@@ -28,6 +28,9 @@ import org.eclipse.rdf4j.RDF4JException;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.datatypes.XMLDateTime;
+import org.eclipse.rdf4j.model.util.ModelBuilder;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.slf4j.Logger;
@@ -37,15 +40,18 @@ import org.solid.testharness.config.Config;
 import org.solid.testharness.config.PathMappings;
 import org.solid.testharness.http.HttpUtils;
 import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.Namespaces;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -64,8 +70,13 @@ public class TestSuiteDescription {
     private static final Logger logger = LoggerFactory.getLogger(TestSuiteDescription.class);
     private static final Pattern FEATURE_TITLE = Pattern.compile("^\\s*Feature\\s*:\\s*(\\S[^#]+)\\s*",
             Pattern.CASE_INSENSITIVE);
+    private static final Pattern VERSION_INFO = Pattern.compile("^v?(\\d+\\.\\d+\\.\\d+)(?: (\\d{4}-\\d{2}-\\d{2}))?$");
+    private static final String START_OF_DAY = "T00:00:00Z";
+    protected static IRI TEST_VERSION = iri(Namespaces.TESTS_REPO_URI, "version.txt");
 
     private List<String> featurePaths;
+    private String currentVersion;
+    private String releaseDate;
 
     @Inject
     DataRepository dataRepository;
@@ -95,6 +106,45 @@ public class TestSuiteDescription {
     public void load(final List<URL> urlList) {
         for (final URL url: urlList) {
             dataRepository.load(pathMappings.mapUrl(url), url.toString());
+        }
+    }
+
+    public void getTestsVersion() {
+        getCurrentVersionInfo();
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            final ModelBuilder builder = new ModelBuilder();
+            final IRI release = iri(Namespaces.RESULTS_URI, "tests-release");
+            builder.subject(Namespaces.SPECIFICATION_TESTS_IRI)
+                    .add(RDF.type, DOAP.Project)
+                    .add(DOAP.name, "Specification Tests")
+                    .add(DOAP.description, literal("Solid Specification Conformance Tests", "en"))
+                    .add(DOAP.developer, iri("https://solidproject.org"))
+                    .add(DOAP.homepage, iri(Namespaces.TESTS_REPO_URI))
+                    .add(DOAP.programming_language, "KarateDSL")
+                    .add(DOAP.release, release)
+                    .add(release, DOAP.revision, currentVersion != null ? currentVersion : "unknown");
+            if (releaseDate != null) {
+                builder.add(DOAP.created,
+                        literal(new XMLDateTime(releaseDate + START_OF_DAY).toString(),XSD.DATETIME));
+            }
+            conn.add(builder.build());
+        }
+    }
+
+    @SuppressWarnings({"PMD.AvoidLiteralsInIfCondition", "PMD.NullAssignment"})
+    private void getCurrentVersionInfo() {
+        currentVersion = null;
+        releaseDate = null;
+        try {
+            final String str = new String(Files.readAllBytes(Paths.get(pathMappings.mapIri(TEST_VERSION))));
+            final Matcher matcher = VERSION_INFO.matcher(str.trim());
+            if (matcher.matches()) {
+                currentVersion = matcher.group(1);
+                releaseDate = matcher.group(2);
+                logger.info("Test suite version: {} {}", currentVersion, releaseDate);
+            }
+        } catch (IOException e) {
+            logger.warn("Failed to read the version of the tests: {}", e.getMessage());
         }
     }
 
@@ -206,7 +256,7 @@ public class TestSuiteDescription {
 
         public void locateFeature() {
             // map feature IRI to file
-            final URI mappedLocation = pathMappings.mapFeatureIri(featureIri);
+            final URI mappedLocation = pathMappings.mapIri(featureIri);
             if (HttpUtils.isHttpProtocol(mappedLocation.getScheme())) {
                 throw new TestHarnessInitializationException("Remote test cases are not yet supported - " +
                         "use mappings to point to local copies");
