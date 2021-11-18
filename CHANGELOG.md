@@ -7,10 +7,12 @@
   * `--ignore-failures` can be used in a CI workflow to ensure the harness always returns a success exit code even if
     tests fail.
   * `--status` list of review statuses (local names e.g. approved, unreviewed) of tests you want to run.
+* Added a block to reports with details about the test suite e.g. release date and version information.
 
 ### Minor changes
 * Fix: Fetch missing titles from tests that are not run to include in the result report.
 * Update: Add assertions for tests that are not run or are inapplicable to the test subject.
+* Update: Made all dates in report use `xsd:dateTime` although someonly display as a date.
 
 ## Release 1.0.9
 ### Features
