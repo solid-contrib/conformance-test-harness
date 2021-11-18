@@ -81,12 +81,13 @@ public class ConformanceTestHarness {
 
     @SuppressWarnings("PMD.UseProperClassLoader") // this is not J2EE and the suggestion fails
     public void initialize() throws IOException {
+        final IRI assertor;
         // set up the report run and create the assertor information in the data repository
         reportGenerator.setStartTime(System.currentTimeMillis());
         try (final InputStream is = getClass().getClassLoader().getResourceAsStream("assertor.properties")) {
             final Properties properties = new Properties();
             properties.load(is);
-            final IRI assertor = iri(Namespaces.TEST_HARNESS_URI);
+            assertor = iri(Namespaces.TEST_HARNESS_URI);
             dataRepository.setAssertor(assertor);
             try (RepositoryConnection conn = dataRepository.getConnection()) {
                 final ModelBuilder builder = new ModelBuilder();
@@ -110,6 +111,7 @@ public class ConformanceTestHarness {
         // load the test manifests
         logger.info("===================== DISCOVER TESTS ========================");
         testSuiteDescription.load(config.getTestSources());
+        testSuiteDescription.getTestsVersion();
         logger.info("==== TEST CASES FOUND: {} - {}",
                 testSuiteDescription.getTestCases(false).size(),
                 testSuiteDescription.getTestCases(false));

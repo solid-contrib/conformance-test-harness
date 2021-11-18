@@ -61,31 +61,23 @@ public interface PathMappings {
         return mapping != null ? finalPath.replace(mapping.path(), mapping.prefix()) : null;
     }
 
-    default URI mapFeatureIri(final IRI featureIri) {
-        final String location = featureIri.stringValue();
-        final PathMapping mapping = mappings().stream()
-                .filter(m -> location.startsWith(m.prefix())).findFirst().orElse(null);
-        return URI.create(mapping != null ? location.replace(mapping.prefix(), mapping.path()) : location);
-    }
-
-    default URL mapIri(final IRI iri) {
-        return toUrl(iri.stringValue());
+    default URI mapIri(final IRI iri) {
+        return mapLocation(iri.stringValue());
     }
 
     default URL mapUrl(final URL url) {
-        return toUrl(url.toString());
-    }
-
-    default URL toUrl(final String location) {
-        final PathMapping mapping = mappings().stream()
-                .filter(m -> location.startsWith(m.prefix())).findFirst().orElse(null);
         try {
-            return new URL(
-                    mapping != null ? location.replace(mapping.prefix(), mapping.path()) : location);
+            return mapLocation(url.toString()).toURL();
         } catch (MalformedURLException e) {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException("Bad URL mapping: %s",
                     e.toString()).initCause(e);
         }
+    }
+
+    private URI mapLocation(final String location) {
+        final PathMapping mapping = mappings().stream()
+                .filter(m -> location.startsWith(m.prefix())).findFirst().orElse(null);
+        return URI.create(mapping != null ? location.replace(mapping.prefix(), mapping.path()) : location);
     }
 
     interface PathMapping {
