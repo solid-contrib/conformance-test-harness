@@ -32,7 +32,7 @@ This is a Turtle file which describes the test subject and it's capabilities, pr
 <css#test-subject-release>
     doap:name "CSS 0.9.0" ;
     doap:revision "0.9.0" ;
-    doap:created "2021-05-04"^^xsd:date .
+    doap:created "2021-05-04T00:00:00.000Z"^^xsd:dateTime .
 ```
 **Note**: The test subject identifier is simply an IRI. It is not meant to be resolvable and can be anything as long as
 you specify it on the command line when running tests.

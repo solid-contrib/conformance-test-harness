@@ -24,11 +24,11 @@
 package org.solid.testharness.reporting;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.datatypes.XMLDateTime;
 import org.solid.common.vocab.DCTERMS;
 import org.solid.common.vocab.PROV;
 import org.solid.testharness.utils.DataModelBase;
 
-import java.time.ZonedDateTime;
 import java.util.List;
 
 public class Scenario extends DataModelBase {
@@ -50,10 +50,10 @@ public class Scenario extends DataModelBase {
         return getIriAsString(PROV.used);
     }
 
-    public ZonedDateTime getStartTime() {
+    public XMLDateTime getStartTime() {
         return getLiteralAsDateTime(PROV.startedAtTime);
     }
-    public ZonedDateTime getEndTime() {
+    public XMLDateTime getEndTime() {
         return getLiteralAsDateTime(PROV.endedAtTime);
     }
 

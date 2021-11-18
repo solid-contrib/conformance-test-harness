@@ -24,11 +24,10 @@
 package org.solid.testharness.reporting;
 
 import io.quarkus.test.junit.QuarkusTest;
+import org.eclipse.rdf4j.model.datatypes.XMLDateTime;
 import org.junit.jupiter.api.Test;
 import org.solid.common.vocab.EARL;
 import org.solid.testharness.utils.AbstractDataModelTests;
-
-import java.time.ZonedDateTime;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
@@ -43,7 +42,7 @@ class GeneratedOutputTest extends AbstractDataModelTests {
     @Test
     void getTimestamp() {
         final GeneratedOutput generatedOutput = new GeneratedOutput(iri(NS, "scenario1-output"));
-        assertTrue(generatedOutput.getTimestamp().isEqual(ZonedDateTime.parse("2021-04-06T17:41:20.889001Z")));
+        assertEquals(0, generatedOutput.getTimestamp().compareTo(new XMLDateTime("2021-04-06T17:41:20.889Z")));
     }
 
     @Test

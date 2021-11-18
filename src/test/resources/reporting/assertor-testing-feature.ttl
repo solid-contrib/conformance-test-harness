@@ -8,7 +8,7 @@ prefix earl: <http://www.w3.org/ns/earl#>
    doap:name "TESTER1" ;
    doap:description "DESCRIPTION"@en ;
    doap:programming-language "Java, KarateDSL" ;
-   doap:created "2021-01-01"^^xsd:date ;
+   doap:created "2021-01-01T00:00:00.000Z"^^xsd:dateTime ;
    doap:developer <https://example.org/profile/card/#us>;
    doap:homepage <https://example.org/tester> ;
    doap:release <tester1#assertor-release> .

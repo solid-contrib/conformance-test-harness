@@ -2,10 +2,10 @@
   <h2>Assertor</h2>
   <dl><dt>Name</dt><dd property="doap:name" lang="" xml:lang="">{softwareName}</dd></dl>
   <dl><dt>Description</dt><dd property="doap:description">{description}</dd></dl>
-  <dl><dt>Created</dt><dd><time datatype="xsd:date" datetime="{createdDate}" property="doap:created">{createdDate}</time></dd></dl>
+  <dl><dt>Created</dt><dd><time datatype="xsd:dateTime" datetime="{createdDate}" content="{createdDate}" property="doap:created">{createdDateAsDate}</time></dd></dl>
   <dl><dt>Developer</dt><dd><a href="{developer}" rel="doap:developer">{developer}</a></dd></dl>
   <dl><dt>Homepage</dt><dd><a href="{homepage}" rel="doap:homepage">{homepage}</a></dd></dl>
-  <dl><dt>Programming Language</dt><dd property="doap:programming-language" lang="" xml:lang="">Java, KarateDSL</dd></dl>
+  <dl><dt>Programming Language</dt><dd property="doap:programming-language" lang="" xml:lang="">{programmingLanguage}</dd></dl>
   <dl>
     <dt>Version</dt>
     <dd rel="doap:release" resource="#assertor-release">

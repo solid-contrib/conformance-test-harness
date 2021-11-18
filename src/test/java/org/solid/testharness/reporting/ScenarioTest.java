@@ -24,10 +24,9 @@
 package org.solid.testharness.reporting;
 
 import io.quarkus.test.junit.QuarkusTest;
+import org.eclipse.rdf4j.model.datatypes.XMLDateTime;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.utils.AbstractDataModelTests;
-
-import java.time.ZonedDateTime;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
@@ -54,13 +53,13 @@ class ScenarioTest extends AbstractDataModelTests {
     @Test
     void getStartTime() {
         final Scenario scenario = new Scenario(iri(NS, "scenario1"));
-        assertTrue(scenario.getStartTime().isEqual(ZonedDateTime.parse("2021-04-15T13:00:00-04:00")));
+        assertEquals(0, scenario.getStartTime().compareTo(new XMLDateTime(("2021-04-15T13:00:00-04:00"))));
     }
 
     @Test
     void getEndTime() {
         final Scenario scenario = new Scenario(iri(NS, "scenario1"));
-        assertTrue(scenario.getEndTime().isEqual(ZonedDateTime.parse("2021-04-15T13:01:00-04:00")));
+        assertEquals(0, scenario.getEndTime().compareTo(new XMLDateTime(("2021-04-15T13:01:00-04:00"))));
     }
 
     @Test

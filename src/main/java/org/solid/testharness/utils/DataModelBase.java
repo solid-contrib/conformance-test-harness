@@ -25,9 +25,11 @@ package org.solid.testharness.utils;
 
 import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.datatypes.XMLDateTime;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.util.RDFCollections;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryResult;
@@ -40,7 +42,9 @@ import javax.enterprise.inject.spi.CDI;
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -48,6 +52,7 @@ import static java.util.Objects.requireNonNull;
 
 public class DataModelBase {
     private static final Logger logger = LoggerFactory.getLogger(DataModelBase.class);
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
     @NotNull
     protected Model model;
@@ -58,7 +63,7 @@ public class DataModelBase {
         SHALLOW,
         INC_REFS,
         DEEP,
-        DEEP_WITH_LISTS;
+        DEEP_WITH_LISTS
     }
 
     protected DataModelBase(final IRI subject) {
@@ -211,20 +216,19 @@ public class DataModelBase {
         return value.map(Literal::booleanValue).orElse(false);
     }
 
-    protected LocalDate getLiteralAsDate(final Resource subject, final IRI predicate) {
-        final Optional<Literal> value = Models.getPropertyLiteral(model, subject, predicate);
-        return value.map(Literal::calendarValue).map(v -> LocalDate.of(
-                v.getYear(),
-                v.getMonth(),
-                v.getDay())).orElse(null);
+    protected XMLDateTime getLiteralAsDateTime(final IRI predicate) {
+        return getLiteralAsDateTime(subject, predicate);
     }
 
-    protected LocalDate getLiteralAsDate(final IRI predicate) {
-        return getLiteralAsDate(subject, predicate);
-    }
-
-    protected ZonedDateTime getLiteralAsDateTime(final IRI predicate) {
+    protected XMLDateTime getLiteralAsDateTime(final Resource subject, final IRI predicate) {
         final Optional<Literal> value = Models.getPropertyLiteral(model, subject, predicate);
-        return value.map(Literal::stringValue).map(v -> ZonedDateTime.parse(v)).orElse(null);
+        if (value.isEmpty()) return null;
+        final ZonedDateTime dateTime;
+        if (value.get().getDatatype().equals(XSD.DATE)) {
+            dateTime = LocalDate.from(value.get().temporalAccessorValue()).atStartOfDay(ZoneId.of("Z"));
+        } else {
+            dateTime = ZonedDateTime.from(value.get().temporalAccessorValue());
+        }
+        return new XMLDateTime(dateTime.format(formatter));
     }
 }
