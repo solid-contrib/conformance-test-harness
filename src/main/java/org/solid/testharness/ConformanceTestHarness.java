@@ -130,6 +130,9 @@ public class ConformanceTestHarness {
         final Map<String, Boolean> features = testSubject.getTargetServer().getFeatures();
 
         testSuiteDescription.setNonRunningTestAssertions(features.keySet(), filters, statuses);
+        logger.info("==== APPLY FEATURE FILTERS: {}", features.keySet());
+        logger.info("==== APPLY NAME FILTERS:    {}", filters);
+        logger.info("==== APPLY STATUS FILTERS:  {}", statuses);
         logger.info("==== FILTERED TEST CASES ({}): {}",
                 testSuiteDescription.getTestCases(true).size(),
                 testSuiteDescription.getTestCases(true));

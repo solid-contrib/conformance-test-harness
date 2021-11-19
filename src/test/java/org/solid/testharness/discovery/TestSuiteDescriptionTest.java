@@ -349,6 +349,13 @@ class TestSuiteDescriptionTest {
     }
 
     @Test
+    void mapMissingFeature() {
+        add(iri(NS, "testcase"), RDF.type, TD.TestCase);
+        testSuiteDescription.prepareTestCases(Config.RunMode.TEST);
+        assertTrue(testSuiteDescription.getFeaturePaths().isEmpty());
+    }
+
+    @Test
     void prepareTestCases() {
         add(iri(NS, "testcase"), RDF.type, TD.TestCase);
         add(iri(NS, "testcase"), SPEC.testScript, iri(NS, "features/test.feature"));

@@ -18,13 +18,15 @@
 <div datatype="rdf:HTML" property="dcterms:description">
 {#include specification-header /}
 
-{#if assertor}
+{#if assertor??}
 {#with assertor}{#include assertor /}{/with}
 {/if}
-{#if specificationTests}
+{#if specificationTests??}
 {#with specificationTests}{#include specification-tests /}{/with}
 {/if}
+{#if testSubject??}
 {#with testSubject}{#include test-subject /}{/with}
+{/if}
 {#if testSuiteResults??}
 {#with testSuiteResults}{#include results-summary /}{/with}
 {/if}
