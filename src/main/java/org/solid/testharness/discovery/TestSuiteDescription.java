@@ -143,7 +143,7 @@ public class TestSuiteDescription {
                 releaseDate = matcher.group(2);
                 logger.info("Test suite version: {} {}", currentVersion, releaseDate);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.warn("Failed to read the version of the tests: {}", e.getMessage());
         }
     }
@@ -245,10 +245,12 @@ public class TestSuiteDescription {
         }
 
         public void findFeatureIri() {
-            final Value obj = conn.getStatements(testCaseIri, SPEC.testScript, null).next().getObject();
-            if (obj.isIRI()) {
-                this.featureIri = (IRI) obj;
-            }
+            conn.getStatements(testCaseIri, SPEC.testScript, null).stream()
+                    .map(Statement::getObject)
+                    .filter(Value::isIRI)
+                    .map(IRI.class::cast)
+                    .findFirst()
+                    .map(obj -> this.featureIri = obj);
         }
         public boolean isImplemented() {
             return featureIri != null;
