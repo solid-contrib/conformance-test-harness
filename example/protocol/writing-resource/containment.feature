@@ -1,12 +1,12 @@
 Feature: Creating a resource using PUT and PATCH must create intermediate containers
 
   Background: Set up clients and paths
-    * def testContainer = createTestContainer()
-    * def intermediateContainer = testContainer.generateChildContainer()
-    * def resource = intermediateContainer.generateChildResource('.txt')
+    * def testContainer = rootTestContainer.reserveContainer()
+    * def intermediateContainer = testContainer.reserveContainer()
+    * def resource = intermediateContainer.reserveResource('.txt')
 
   Scenario: PUT creates a grandchild resource and intermediate containers
-    * def resourceUrl = resource.getUrl()
+    * def resourceUrl = resource.url
     Given url resourceUrl
     And headers clients.alice.getAuthHeaders('PUT', resourceUrl)
     And header Content-Type = 'text/plain'
@@ -14,25 +14,25 @@ Feature: Creating a resource using PUT and PATCH must create intermediate contai
     When method PUT
     Then assert responseStatus >= 200 && responseStatus < 300
 
-    * def parentUrl = intermediateContainer.getUrl()
+    * def parentUrl = intermediateContainer.url
     Given url parentUrl
     And headers clients.alice.getAuthHeaders('GET', parentUrl)
     And header Accept = 'text/turtle'
     When method GET
     Then status 200
-    And match intermediateContainer.parseMembers(response) contains resource.getUrl()
+    And match intermediateContainer.parseMembers(response) contains resource.url
 
-    * def grandParentUrl = testContainer.getUrl()
+    * def grandParentUrl = testContainer.url
     Given url grandParentUrl
     And headers clients.alice.getAuthHeaders('GET', grandParentUrl)
     And header Accept = 'text/turtle'
     When method GET
     Then status 200
     * print 'GRANDPARENT CONTAINMENT TRIPLES' + response
-    And match testContainer.parseMembers(response) contains intermediateContainer.getUrl()
+    And match testContainer.parseMembers(response) contains intermediateContainer.url
 
   Scenario: PATCH creates a grandchild resource and intermediate containers
-    * def resourceUrl = resource.getUrl()
+    * def resourceUrl = resource.url
     Given url resourceUrl
     And headers clients.alice.getAuthHeaders('PATCH', resourceUrl)
     And header Content-Type = "application/sparql-update"
@@ -40,19 +40,19 @@ Feature: Creating a resource using PUT and PATCH must create intermediate contai
     When method PATCH
     Then assert responseStatus >= 200 && responseStatus < 300
 
-    * def parentUrl = intermediateContainer.getUrl()
+    * def parentUrl = intermediateContainer.url
     Given url parentUrl
     And headers clients.alice.getAuthHeaders('GET', parentUrl)
     And header Accept = 'text/turtle'
     When method GET
     Then status 200
-    And match intermediateContainer.parseMembers(response) contains resource.getUrl()
+    And match intermediateContainer.parseMembers(response) contains resource.url
 
-    * def grandParentUrl = testContainer.getUrl()
+    * def grandParentUrl = testContainer.url
     Given url grandParentUrl
     And headers clients.alice.getAuthHeaders('GET', grandParentUrl)
     And header Accept = 'text/turtle'
     When method GET
     Then status 200
     * print 'GRANDPARENT CONTAINMENT TRIPLES' + response
-    And match testContainer.parseMembers(response) contains intermediateContainer.getUrl()
+    And match testContainer.parseMembers(response) contains intermediateContainer.url

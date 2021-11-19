@@ -69,6 +69,7 @@ public class TestSuiteRunner {
         );
         final TestSuiteResults results = conformanceTestHarness.runTestSuites(filters, null);
         assertNotNull(results);
+        conformanceTestHarness.buildReports(Config.RunMode.TEST);
         if (results.getFeatureTotal() > 0) {
             conformanceTestHarness.cleanUp();
         }

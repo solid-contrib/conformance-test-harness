@@ -4,17 +4,17 @@ Feature: Bob can only read an RDF resource to which he is only granted default r
     * def setup =
     """
       function() {
-        const testContainer = createTestContainerImmediate();
+        const testContainer = rootTestContainer.createContainer();
         const access = testContainer.getAccessDatasetBuilder(webIds.alice)
-              .setInheritableAgentAccess(testContainer.getUrl(), webIds.bob, ['read'])
+              .setInheritableAgentAccess(testContainer.url, webIds.bob, ['read'])
               .build();
         testContainer.setAccessDataset(access);
-        return testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
+        return testContainer.createResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
       }
     """
     * def resource = callonce setup
     * assert resource.exists()
-    * def resourceUrl = resource.getUrl()
+    * def resourceUrl = resource.url
     * url resourceUrl
 
   Scenario: Bob can read the resource with GET

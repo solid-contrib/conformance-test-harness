@@ -33,15 +33,15 @@ import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.UUID;
 
-public class SolidContainer extends SolidResource {
-    private static final Logger logger = LoggerFactory.getLogger(SolidContainer.class);
+public class SolidContainerProvider extends SolidResourceProvider {
+    private static final Logger logger = LoggerFactory.getLogger(SolidContainerProvider.class);
 
-    public SolidContainer(final SolidClient solidClient, final String url) throws IllegalArgumentException {
+    public SolidContainerProvider(final SolidClient solidClient, final String url) throws IllegalArgumentException {
         super(solidClient, validateUrl(url), null, null);
     }
 
-    public static SolidContainer create(final SolidClient solidClient, final String url) {
-        return new SolidContainer(solidClient, url);
+    public static SolidContainerProvider create(final SolidClient solidClient, final String url) {
+        return new SolidContainerProvider(solidClient, url);
     }
 
     public List<String> listMembers() throws Exception {
@@ -59,7 +59,7 @@ public class SolidContainer extends SolidResource {
         return url;
     }
 
-    public SolidContainer instantiate() {
+    public SolidContainerProvider instantiate() {
         try {
             final HttpResponse<String> response = solidClient.createContainer(this.url);
             if (HttpUtils.isSuccessful(response.statusCode())) {
@@ -75,21 +75,26 @@ public class SolidContainer extends SolidResource {
         }
     }
 
-    public SolidContainer generateChildContainer() {
-        return new SolidContainer(super.solidClient, url.resolve(UUID.randomUUID() + "/").toString());
+    public SolidContainerProvider createContainer() {
+        return new SolidContainerProvider(super.solidClient, url.resolve(UUID.randomUUID() + "/").toString())
+                .instantiate();
     }
 
-    public SolidResource generateChildResource(final String suffix) {
-        return new SolidResource(super.solidClient, url.resolve(UUID.randomUUID() + suffix).toString());
+    public SolidContainerProvider reserveContainer() {
+        return new SolidContainerProvider(super.solidClient, url.resolve(UUID.randomUUID() + "/").toString());
     }
 
-    public SolidResource createChildResource(final String suffix, final String body, final String type) {
+    public SolidResourceProvider reserveResource(final String suffix) {
+        return new SolidResourceProvider(super.solidClient, url.resolve(UUID.randomUUID() + suffix).toString());
+    }
+
+    public SolidResourceProvider createResource(final String suffix, final String body, final String type) {
         try {
             final URI childUrl = url.resolve(UUID.randomUUID() + suffix);
             logger.info("Create child in {}: {}", url, childUrl);
-            return new SolidResource(super.solidClient, childUrl.toString(), body, type);
+            return new SolidResourceProvider(super.solidClient, childUrl.toString(), body, type);
         } catch (Exception e) {
-            logger.error("createChildResource in " + url.toString() + " failed", e);
+            logger.error("createResource in " + url.toString() + " failed", e);
         }
         return null;
     }

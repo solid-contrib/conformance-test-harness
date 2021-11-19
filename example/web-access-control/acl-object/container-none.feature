@@ -4,15 +4,15 @@ Feature: Bob cannot read a container or children if he is not given any access
     * def setup =
     """
       function() {
-        const testContainer = createTestContainerImmediate();
+        const testContainer = rootTestContainer.createContainer();
         const access = testContainer.getAccessDatasetBuilder(webIds.alice).build();
         if (testContainer.setAccessDataset(access)) {
-          const intermediateContainer = testContainer.generateChildContainer();
-          const resource = intermediateContainer.createChildResource('.txt', 'hello', 'text/plain')
+          const intermediateContainer = testContainer.reserveContainer();
+          const resource = intermediateContainer.createResource('.txt', 'hello', 'text/plain')
           return {
-            containerUrl: testContainer.getUrl(),
-            intermediateContainerUrl: intermediateContainer.getUrl(),
-            resourceUrl: resource.getUrl()
+            containerUrl: testContainer.url,
+            intermediateContainerUrl: intermediateContainer.url,
+            resourceUrl: resource.url
           }
         }
         return null;

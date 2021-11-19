@@ -1,13 +1,13 @@
 Feature: Requests support content negotiation for Turtle resource
 
   Background: Create a turtle resource
-    * def testContainer = createTestContainer()
+    * def testContainer = rootTestContainer.reserveContainer()
     * def exampleTurtle = karate.readAsString('../fixtures/example.ttl')
-    * def resource = testContainer.createChildResource('.ttl', exampleTurtle, 'text/turtle');
-    * assert resource.exists()
-    * def expected = RDFUtils.turtleToTripleArray(exampleTurtle, resource.getUrl())
+    * def resource = testContainer.createResource('.ttl', exampleTurtle, 'text/turtle');
+#    * assert resource.exists()
+    * def expected = RDFUtils.turtleToTripleArray(exampleTurtle, 'http://example.org/')
     * headers clients.alice.getAuthHeaders('GET', resource.getUrl())
-    * url resource.getUrl()
+    * url resource.url
 
   Scenario: Alice can read the TTL example as JSON-LD
     Given header Accept = 'application/ld+json'

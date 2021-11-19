@@ -39,7 +39,7 @@ import org.solid.testharness.accesscontrol.AccessDataset;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClient;
 import org.solid.testharness.utils.DataRepository;
-import org.solid.testharness.utils.SolidContainer;
+import org.solid.testharness.utils.SolidContainerProvider;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -59,7 +59,7 @@ public class TestSubject {
     private static final Logger logger = LoggerFactory.getLogger(TestSubject.class);
 
     private TargetServer targetServer;
-    private SolidContainer testRunContainer;
+    private SolidContainerProvider testRunContainer;
 
     @Inject
     Config config;
@@ -132,7 +132,8 @@ public class TestSubject {
         final SolidClient solidClient = new SolidClient(HttpConstants.ALICE);
 
         // Determine the ACL mode the server has implemented
-        final SolidContainer rootTestContainer = new SolidContainer(solidClient, config.getTestContainer());
+        final SolidContainerProvider rootTestContainer = new SolidContainerProvider(solidClient,
+                config.getTestContainer());
         try {
             final String aclUrl = rootTestContainer.getAclUrl();
             if (aclUrl == null) {
@@ -153,7 +154,8 @@ public class TestSubject {
             logger.debug("Setup root acl");
             final boolean success;
             try {
-                final SolidContainer rootContainer = new SolidContainer(solidClient, config.getServerRoot().toString());
+                final SolidContainerProvider rootContainer = new SolidContainerProvider(solidClient,
+                        config.getServerRoot().toString());
                 final String alice = config.getCredentials(HttpConstants.ALICE).webId();
                 final List<String> modes = List.of(AccessDataset.READ, AccessDataset.WRITE, AccessDataset.CONTROL);
                 final AccessDataset accessDataset = accessControlFactory
@@ -178,7 +180,7 @@ public class TestSubject {
             logger.debug("Root test container access controls: {}", rootTestContainer.getAccessDataset());
 
             // create a root container for all the test cases in this run
-            testRunContainer = rootTestContainer.generateChildContainer().instantiate();
+            testRunContainer = rootTestContainer.createContainer();
             if (testRunContainer == null) {
                 throw new Exception("Cannot create test run container");
             }
@@ -208,11 +210,11 @@ public class TestSubject {
         this.targetServer = targetServer;
     }
 
-    public SolidContainer getTestRunContainer() {
+    public SolidContainerProvider getTestRunContainer() {
         return testRunContainer;
     }
 
-    public void setTestRunContainer(final SolidContainer solidContainer) {
-        testRunContainer = solidContainer;
+    public void setTestRunContainer(final SolidContainerProvider solidContainerProvider) {
+        testRunContainer = solidContainerProvider;
     }
 }

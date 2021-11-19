@@ -1,13 +1,13 @@
 Feature: Requests support content negotiation for JSON-LD resource
 
   Background: Create a JSON-LD resource
-    * def testContainer = createTestContainer()
+    * def testContainer = rootTestContainer.reserveContainer()
     * def exampleJson = karate.readAsString('../fixtures/example.json')
-    * def resource = testContainer.createChildResource('.json', exampleJson, 'application/ld+json');
+    * def resource = testContainer.createResource('.json', exampleJson, 'application/ld+json');
     * assert resource.exists()
     * def expected = RDFUtils.jsonLdToTripleArray(exampleJson, resource.getUrl())
     * headers clients.alice.getAuthHeaders('GET', resource.getUrl())
-    * url resource.getUrl()
+    * url resource.url
 
   Scenario: Alice can read the JSON-LD example as JSON-LD
     Given header Accept = 'application/ld+json'

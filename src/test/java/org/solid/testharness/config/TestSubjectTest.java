@@ -31,7 +31,7 @@ import org.solid.testharness.http.Client;
 import org.solid.testharness.http.ClientRegistry;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClient;
-import org.solid.testharness.utils.SolidContainer;
+import org.solid.testharness.utils.SolidContainerProvider;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 import org.solid.testharness.utils.TestUtils;
 
@@ -297,7 +297,7 @@ public class TestSubjectTest {
     @Test
     void tearDownServer() throws Exception {
         final SolidClient mockSolidClient = mock(SolidClient.class);
-        testSubject.setTestRunContainer(SolidContainer.create(mockSolidClient, "https://localhost/container/"));
+        testSubject.setTestRunContainer(SolidContainerProvider.create(mockSolidClient, "https://localhost/container/"));
         assertDoesNotThrow(() -> testSubject.tearDownServer());
         verify(mockSolidClient).deleteResourceRecursively(eq(URI.create("https://localhost/container/")));
     }
@@ -305,7 +305,7 @@ public class TestSubjectTest {
     @Test
     void tearDownServerFails() throws Exception {
         final SolidClient mockSolidClient = mock(SolidClient.class);
-        testSubject.setTestRunContainer(SolidContainer.create(mockSolidClient, "https://localhost/container/"));
+        testSubject.setTestRunContainer(SolidContainerProvider.create(mockSolidClient, "https://localhost/container/"));
         doThrow(new Exception("FAIL")).when(mockSolidClient).deleteResourceRecursively(any());
         assertDoesNotThrow(() -> testSubject.tearDownServer());
         verify(mockSolidClient).deleteResourceRecursively(eq(URI.create("https://localhost/container/")));

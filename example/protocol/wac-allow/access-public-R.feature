@@ -4,11 +4,11 @@ Feature: The WAC-Allow header shows user and public access modes with public rea
     * def setup =
     """
       function() {
-        const testContainer = createTestContainer();
-        const resource = testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
+        const testContainer = rootTestContainer.reserveContainer();
+        const resource = testContainer.createResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
         if (resource.exists()) {
           const access = resource.getAccessDatasetBuilder(webIds.alice)
-                .setPublicAccess(resource.getUrl(), ['read'])
+                .setPublicAccess(resource.url, ['read'])
                 .build();
           resource.setAccessDataset(access);
         }
@@ -17,11 +17,11 @@ Feature: The WAC-Allow header shows user and public access modes with public rea
     """
     * def resource = callonce setup
     * assert resource.exists()
-    * def resourceUrl = resource.getUrl()
+    * def resourceUrl = resource.url
     * url resourceUrl
 
   Scenario: There is an acl on the resource granting public access
-    Given url resource.getAclUrl()
+    Given url resource.aclUrl
     And headers clients.alice.getAuthHeaders('GET', resource.getAclUrl())
     And header Accept = 'text/turtle'
     When method GET
@@ -32,8 +32,8 @@ Feature: The WAC-Allow header shows user and public access modes with public rea
     And match response contains 'foaf:Agent'
 
   Scenario: There is no acl on the parent
-    Given url resource.getContainer().getAclUrl()
-    And headers clients.alice.getAuthHeaders('HEAD', resource.getContainer().getAclUrl())
+    Given url resource.container.aclUrl
+    And headers clients.alice.getAuthHeaders('HEAD', resource.container.getAclUrl())
     And header Accept = 'text/turtle'
     When method HEAD
     Then status 404

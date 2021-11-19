@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest
-class SolidResourceTest {
+class SolidResourceProviderTest {
     private static final String TEST_URL = "http://localhost/resource";
     URI testUrl = URI.create(TEST_URL);
     URI aclUrl = URI.create(testUrl + ".acl");
@@ -60,38 +60,38 @@ class SolidResourceTest {
     @Test
     void testConstructorExceptions() {
         Exception exception = assertThrows(IllegalArgumentException.class, () ->
-                new SolidResource(null, null, null, null)
+                new SolidResourceProvider(null, null, null, null)
         );
         assertEquals("Parameter solidClient is required", exception.getMessage());
         exception = assertThrows(IllegalArgumentException.class, () ->
-                new SolidResource(solidClient, null, null, null)
+                new SolidResourceProvider(solidClient, null, null, null)
         );
         assertEquals("Parameter url is required", exception.getMessage());
         exception = assertThrows(IllegalArgumentException.class, () ->
-                new SolidResource(solidClient, "", null, null)
+                new SolidResourceProvider(solidClient, "", null, null)
         );
         assertEquals("Parameter url is required", exception.getMessage());
 
         exception = assertThrows(IllegalArgumentException.class, () ->
-                new SolidResource(solidClient, "test", null, null)
+                new SolidResourceProvider(solidClient, "test", null, null)
         );
         assertEquals("The url must be absolute", exception.getMessage());
 
         exception = assertThrows(IllegalArgumentException.class, () ->
-                new SolidResource(solidClient, TEST_URL, "", null)
+                new SolidResourceProvider(solidClient, TEST_URL, "", null)
         );
         assertEquals("Parameter type is required", exception.getMessage());
     }
 
     @Test
     void testConstructorNoBody() {
-        final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, testUrl.toString());
         assertTrue(resource.exists());
     }
 
     @Test
     void testCreate() {
-        final SolidResource resource = SolidResource.create(solidClient, testUrl.toString(), "hello",
+        final SolidResourceProvider resource = SolidResourceProvider.create(solidClient, testUrl.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertTrue(resource.exists());
     }
@@ -105,7 +105,7 @@ class SolidResourceTest {
         when(solidClient.getAclUri(headers)).thenReturn(aclUrl);
         when(solidClient.getAclUri(testUrl)).thenReturn(aclUrl);
 
-        final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, testUrl.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
 
         assertTrue(resource.exists());
@@ -120,7 +120,7 @@ class SolidResourceTest {
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
         when(solidClient.getAclUri(testUrl)).thenReturn(null);
 
-        final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, testUrl.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
 
         assertTrue(resource.exists());
@@ -133,7 +133,7 @@ class SolidResourceTest {
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
 
-        final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, testUrl.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
 
         assertTrue(resource.exists());
@@ -146,7 +146,7 @@ class SolidResourceTest {
         final URI lookedUpAclUrl = URI.create("http://localhost/lookupedUpAcl");
         when(solidClient.getAclUri(testUrl)).thenReturn(lookedUpAclUrl);
 
-        final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, testUrl.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
 
         assertTrue(resource.exists());
@@ -158,7 +158,7 @@ class SolidResourceTest {
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN))
                 .thenThrow(new Exception());
 
-        final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, testUrl.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
 
         assertFalse(resource.exists());
@@ -168,9 +168,9 @@ class SolidResourceTest {
     void getContainer() throws Exception {
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
 
-        final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, TEST_URL, "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
-        final SolidContainer container = resource.getContainer();
+        final SolidContainerProvider container = resource.getContainer();
 
         assertTrue(resource.exists());
         assertFalse(resource.isContainer());
@@ -183,10 +183,10 @@ class SolidResourceTest {
     void getParent() throws Exception {
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
 
-        final SolidResource resource = new SolidResource(solidClient, "http://localhost/container/resource",
-                "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
-        final SolidContainer container = resource.getContainer();
-        final SolidContainer nextContainer = container.getContainer();
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient,
+                "http://localhost/container/resource", "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
+        final SolidContainerProvider container = resource.getContainer();
+        final SolidContainerProvider nextContainer = container.getContainer();
 
         assertTrue(resource.exists());
         assertTrue(container.exists());
@@ -201,10 +201,10 @@ class SolidResourceTest {
     void getTopLevelContainer() throws Exception {
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
 
-        final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, TEST_URL, "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
-        final SolidContainer container = resource.getContainer();
-        final SolidContainer nextContainer = container.getContainer();
+        final SolidContainerProvider container = resource.getContainer();
+        final SolidContainerProvider nextContainer = container.getContainer();
 
         assertTrue(resource.exists());
         assertTrue(container.exists());
@@ -217,7 +217,7 @@ class SolidResourceTest {
     void setAccessDatasetNoUrl() throws Exception {
         final AccessDataset accessDataset = mock(AccessDataset.class);
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
-        final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, TEST_URL, "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertFalse(resource.setAccessDataset(accessDataset));
     }
@@ -232,7 +232,7 @@ class SolidResourceTest {
         when(solidClient.getAclUri(headers)).thenReturn(null);
         when(solidClient.getAclUri(testUrl)).thenReturn(null);
 
-        final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, testUrl.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertFalse(resource.setAccessDataset(accessDataset));
         // second attempt short cuts as false
@@ -251,7 +251,7 @@ class SolidResourceTest {
         when(solidClient.createAcl(aclUrl, accessDataset)).thenReturn(true);
 
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(headers);
-        final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, TEST_URL, "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertTrue(resource.setAccessDataset(accessDataset));
     }
@@ -259,7 +259,7 @@ class SolidResourceTest {
     @Test
     void getUrl() throws Exception {
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
-        final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, TEST_URL, "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertEquals(TEST_URL, resource.getUrl());
         assertEquals("/resource", resource.getPath());
@@ -269,7 +269,7 @@ class SolidResourceTest {
     void getUrlNull() throws Exception {
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN))
                 .thenThrow(new Exception("Failed as expected"));
-        final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, TEST_URL, "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertFalse(resource.exists());
         assertNull(resource.getUrl());
@@ -285,7 +285,7 @@ class SolidResourceTest {
         when(solidClient.getAclUri(headers)).thenReturn(null);
         when(solidClient.getAclUri(testUrl)).thenReturn(null);
 
-        final SolidResource resource = new SolidResource(solidClient, testUrl.toString(), "hello",
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, testUrl.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertNull(resource.getAclUrl());
         // second attempt short cuts
@@ -297,8 +297,9 @@ class SolidResourceTest {
         when(solidClient.hasStorageType(URI.create("http://localhost/container/resource"))).thenReturn(false);
         when(solidClient.hasStorageType(URI.create("http://localhost/container/"))).thenReturn(false);
         when(solidClient.hasStorageType(URI.create("http://localhost/"))).thenReturn(true);
-        final SolidResource resource = new SolidResource(solidClient, "http://localhost/container/resource");
-        final SolidResource storageRoot = resource.findStorage();
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient,
+                "http://localhost/container/resource");
+        final SolidResourceProvider storageRoot = resource.findStorage();
         assertEquals("http://localhost/", storageRoot.url.toString());
     }
 
@@ -307,22 +308,23 @@ class SolidResourceTest {
         when(solidClient.hasStorageType(URI.create("http://localhost/container/resource"))).thenReturn(false);
         when(solidClient.hasStorageType(URI.create("http://localhost/container/"))).thenReturn(false);
         when(solidClient.hasStorageType(URI.create("http://localhost/"))).thenReturn(false);
-        final SolidResource resource = new SolidResource(solidClient, "http://localhost/container/resource");
-        final SolidResource storageRoot = resource.findStorage();
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient,
+                "http://localhost/container/resource");
+        final SolidResourceProvider storageRoot = resource.findStorage();
         assertNull(storageRoot);
     }
 
     @Test
     void hasStorageType() throws Exception {
         when(solidClient.hasStorageType(testUrl)).thenReturn(true);
-        final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, testUrl.toString());
         assertTrue(resource.hasStorageType());
     }
 
     @Test
     void getContentAsTurtle() throws Exception {
         when(solidClient.getContentAsTurtle(testUrl)).thenReturn("CONTENT");
-        final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, testUrl.toString());
         assertEquals("CONTENT", resource.getContentAsTurtle());
     }
 
@@ -330,7 +332,7 @@ class SolidResourceTest {
     void getContentAsTurtleEmpty() throws Exception {
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN))
                 .thenThrow(new Exception("FAIL"));
-        final SolidResource resource = new SolidResource(solidClient, testUrl.toString(),"hello",
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, testUrl.toString(),"hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertEquals("", resource.getContentAsTurtle());
     }
@@ -340,7 +342,7 @@ class SolidResourceTest {
         when(solidClient.getAclUri(testUrl)).thenReturn(aclUrl);
         final AccessDatasetBuilder accessDatasetBuilder = mock(AccessDatasetBuilder.class);
         when(accessControlFactory.getAccessDatasetBuilder(aclUrl.toString())).thenReturn(accessDatasetBuilder);
-        final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, testUrl.toString());
         final AccessDatasetBuilder builder = resource.getAccessDatasetBuilder(
                 "https://alice.target.example.org/profile/card#me");
         assertNotNull(builder);
@@ -352,56 +354,57 @@ class SolidResourceTest {
         final AccessDataset accessDataset = mock(AccessDataset.class);
         when(solidClient.getAclUri(testUrl)).thenReturn(aclUrl);
         when(solidClient.getAcl(aclUrl)).thenReturn(accessDataset);
-        final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, testUrl.toString());
         assertEquals(accessDataset, resource.getAccessDataset());
     }
 
     @Test
     void getAccessDatasetMissing() throws Exception {
         when(solidClient.getAclUri(testUrl)).thenReturn(null);
-        final SolidResource resource = new SolidResource(solidClient, testUrl.toString());
-        assertEquals(null, resource.getAccessDataset());
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, testUrl.toString());
+        assertNull(resource.getAccessDataset());
     }
 
     @Test
     void delete() throws Exception {
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
-        final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, TEST_URL, "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
-        assertDoesNotThrow(() -> resource.delete());
+        assertDoesNotThrow(resource::delete);
     }
 
     @Test
     void deleteException() throws Exception {
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
-        final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, TEST_URL, "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         doThrow(new Exception("Failed as expected")).when(solidClient).deleteResourceRecursively(testUrl);
-        assertThrows(Exception.class, () -> resource.delete());
+        assertThrows(Exception.class, resource::delete);
     }
 
     @Test
     void resourceToString() throws Exception {
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(null);
-        final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, TEST_URL, "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
-        assertEquals("SolidResource: " + TEST_URL, resource.toString());
+        assertEquals("SolidResourceProvider: " + TEST_URL, resource.toString());
     }
 
     @Test
     void emptyResourceToString() throws Exception {
         when(solidClient.createResource(testUrl, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN))
                 .thenThrow(new Exception("Failed as expected"));
-        final SolidResource resource = new SolidResource(solidClient, TEST_URL, "hello",
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, TEST_URL, "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
-        assertEquals("SolidResource: null", resource.toString());
+        assertEquals("SolidResourceProvider: null", resource.toString());
     }
 
     @Test
     void containerToString() throws Exception {
         when(solidClient.createResource(new URI("http://localhost/container/"), null, null))
                 .thenReturn(null);
-        final SolidResource resource = new SolidResource(solidClient, "http://localhost/container/", null, null);
-        assertEquals("SolidContainer: http://localhost/container/", resource.toString());
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClient, "http://localhost/container/",
+                null, null);
+        assertEquals("SolidContainerProvider: http://localhost/container/", resource.toString());
     }
 }
