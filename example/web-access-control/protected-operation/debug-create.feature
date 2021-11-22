@@ -1,10 +1,10 @@
 Feature: Create with immediate read
 
   Scenario: Create test
-    * def testContainer = createTestContainer()
-    * def testResource = testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
+    * def testContainer = rootTestContainer.reserveContainer()
+    * def testResource = testContainer.createResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
 
-    Given url testResource.getUrl()
+    Given url testResource.url
     And headers clients.alice.getAuthHeaders('GET', testResource.getUrl())
     When method GET
     Then status 200

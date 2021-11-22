@@ -36,8 +36,8 @@ import javax.enterprise.inject.spi.CDI;
 import java.net.URI;
 import java.net.http.HttpHeaders;
 
-public class SolidResource {
-    private static final Logger logger = LoggerFactory.getLogger(SolidResource.class);
+public class SolidResourceProvider {
+    private static final Logger logger = LoggerFactory.getLogger(SolidResourceProvider.class);
 
     protected SolidClient solidClient;
     protected URI url;
@@ -45,11 +45,12 @@ public class SolidResource {
     private Boolean aclLinkAvailable;
     private boolean containerType;
 
-    public SolidResource(final SolidClient solidClient, final String url) {
+    public SolidResourceProvider(final SolidClient solidClient, final String url) {
         this(solidClient, url, null, null);
     }
 
-    public SolidResource(final SolidClient solidClient, final String url, final String body, final String type) {
+    public SolidResourceProvider(final SolidClient solidClient, final String url, final String body,
+                                 final String type) {
         if (solidClient == null) throw new IllegalArgumentException("Parameter solidClient is required");
         if (StringUtils.isEmpty(url)) throw new IllegalArgumentException("Parameter url is required");
         if (body != null && StringUtils.isEmpty(type)) {
@@ -80,12 +81,12 @@ public class SolidResource {
             }
         }
         this.url = resourceUri;
-        logger.debug("SolidResource proxy for: {}", resourceUri);
+        logger.debug("SolidResourceProvider proxy for: {}", resourceUri);
     }
 
-    public static SolidResource create(final SolidClient solidClient, final String url, final String body,
-                                       final String type) {
-        return new SolidResource(solidClient, url, body, type);
+    public static SolidResourceProvider create(final SolidClient solidClient, final String url, final String body,
+                                               final String type) {
+        return new SolidResourceProvider(solidClient, url, body, type);
     }
 
     public boolean exists() {
@@ -108,16 +109,16 @@ public class SolidResource {
         return containerType;
     }
 
-    public SolidContainer getContainer() {
+    public SolidContainerProvider getContainer() {
         if (containerType) {
             if ("/".equals(url.getPath())) {
                 // already at root
                 return null;
             } else {
-                return new SolidContainer(solidClient, this.url.resolve("..").toString());
+                return new SolidContainerProvider(solidClient, this.url.resolve("..").toString());
             }
         } else {
-            return new SolidContainer(solidClient, this.url.resolve(".").toString());
+            return new SolidContainerProvider(solidClient, this.url.resolve(".").toString());
         }
     }
 
@@ -132,7 +133,7 @@ public class SolidResource {
         return aclUrl != null ? aclUrl.toString() : null;
     }
 
-    public SolidResource findStorage() throws Exception {
+    public SolidResourceProvider findStorage() throws Exception {
         URI testUri = url;
         boolean linkFound = false;
         boolean rootTested = false;
@@ -148,7 +149,7 @@ public class SolidResource {
                 }
             }
         }
-        return linkFound ? new SolidResource(solidClient, testUri.toString()) : null;
+        return linkFound ? new SolidResourceProvider(solidClient, testUri.toString()) : null;
     }
 
     public boolean hasStorageType() throws Exception {
@@ -180,9 +181,9 @@ public class SolidResource {
     @Override
     public String toString() {
         if (containerType) {
-            return "SolidContainer: " + url.toString();
+            return "SolidContainerProvider: " + url.toString();
         } else {
-            return "SolidResource: " + (url != null ? url.toString() : "null");
+            return "SolidResourceProvider: " + (url != null ? url.toString() : "null");
         }
     }
 }

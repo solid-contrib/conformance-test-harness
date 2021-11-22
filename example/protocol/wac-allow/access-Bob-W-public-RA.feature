@@ -4,12 +4,12 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     * def setup =
     """
       function() {
-        const testContainer = createTestContainer();
-        const resource = testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
+        const testContainer = rootTestContainer.reserveContainer();
+        const resource = testContainer.createResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
         if (resource.exists()) {
           const access = resource.getAccessDatasetBuilder(webIds.alice)
-                .setAgentAccess(resource.getUrl(), webIds.bob, ['write'])
-                .setPublicAccess(resource.getUrl(), ['read', 'append'])
+                .setAgentAccess(resource.url, webIds.bob, ['write'])
+                .setPublicAccess(resource.url, ['read', 'append'])
                 .build();
           resource.setAccessDataset(access);
         }
@@ -18,11 +18,11 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     """
     * def resource = callonce setup
     * assert resource.exists()
-    * def resourceUrl = resource.getUrl()
+    * def resourceUrl = resource.url
     * url resourceUrl
 
   Scenario: There is an acl on the resource containing Bob's WebID
-    Given url resource.getAclUrl()
+    Given url resource.aclUrl
     And headers clients.alice.getAuthHeaders('GET', resource.getAclUrl())
     And header Accept = 'text/turtle'
     When method GET
@@ -34,8 +34,8 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
   # In ACP mode, the following step would fail as there will be an ACL on the parent - this step needs to change
   # to ask the test harness to confirm there is no inherited access.
   Scenario: There is no acl on the parent
-    Given url resource.getContainer().getAclUrl()
-    And headers clients.alice.getAuthHeaders('HEAD', resource.getContainer().getAclUrl())
+    Given url resource.container.aclUrl
+    And headers clients.alice.getAuthHeaders('HEAD', resource.container.getAclUrl())
     And header Accept = 'text/turtle'
     When method HEAD
     Then status 404

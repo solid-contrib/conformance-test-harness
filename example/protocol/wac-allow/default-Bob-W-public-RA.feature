@@ -4,33 +4,33 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     * def setup =
     """
       function() {
-        const testContainer = createTestContainer();
-        const resource = testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
+        const testContainer = rootTestContainer.reserveContainer();
+        const resource = testContainer.createResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
         if (resource.exists()) {
           const access = testContainer.getAccessDatasetBuilder(webIds.alice)
-                .setInheritableAgentAccess(testContainer.getUrl(), webIds.bob, ['write'])
-                .setInheritablePublicAccess(testContainer.getUrl(), ['read', 'append'])
+                .setInheritableAgentAccess(testContainer.url, webIds.bob, ['write'])
+                .setInheritablePublicAccess(testContainer.url, ['read', 'append'])
                 .build();
-          resource.getContainer().setAccessDataset(access)
+          resource.container.setAccessDataset(access)
         }
         return resource;
       }
     """
     * def resource = callonce setup
     * assert resource.exists()
-    * def resourceUrl = resource.getUrl()
+    * def resourceUrl = resource.url
     * url resourceUrl
 
   Scenario: There is no acl on the resource
-    Given url resource.getAclUrl()
+    Given url resource.aclUrl
     And headers clients.alice.getAuthHeaders('HEAD', resource.getAclUrl())
     And header Accept = 'text/turtle'
     When method HEAD
     Then status 404
 
   Scenario: There is an acl on the parent containing Bob's WebID
-    Given url resource.getContainer().getAclUrl()
-    And headers clients.alice.getAuthHeaders('GET', resource.getContainer().getAclUrl())
+    Given url resource.container.aclUrl
+    And headers clients.alice.getAuthHeaders('GET', resource.container.getAclUrl())
     And header Accept = 'text/turtle'
     When method GET
     Then status 200

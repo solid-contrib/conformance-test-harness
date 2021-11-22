@@ -1,8 +1,8 @@
 Feature: Finding the storage for a resource
 
   Background: Set test file
-    * def testContainer = createTestContainer()
-    * def resource = testContainer.createChildResource('.txt', 'hello', 'text/plain')
+    * def testContainer = rootTestContainer.reserveContainer()
+    * def resource = testContainer.createResource('.txt', 'hello', 'text/plain')
 
   Scenario: Test Storage finding
     # Confirm resource is not a Storage
@@ -29,7 +29,7 @@ Feature: Finding the storage for a resource
     * assert storageBob == null
 
     # Grant Bob read access to the storage root
-    * def acl = storage.getAccessDatasetBuilder(webIds.alice).setAgentAccess(storage.getUrl(), webIds.bob, ['read']).build()
+    * def acl = storage.getAccessDatasetBuilder(webIds.alice).setAgentAccess(storage.url, webIds.bob, ['read']).build()
     * storage.setAccessDataset(acl)
 
     # Find storage as Bob now succeeds since he has access

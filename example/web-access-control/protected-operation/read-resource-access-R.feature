@@ -4,11 +4,11 @@ Feature: Bob can only read an RDF resource to which he is only granted read acce
     * def setup =
     """
       function() {
-        const testContainer = createTestContainer();
-        const resource = testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
+        const testContainer = rootTestContainer.reserveContainer();
+        const resource = testContainer.createResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
         if (resource.exists()) {
           const access = resource.getAccessDatasetBuilder(webIds.alice)
-            .setAgentAccess(resource.getUrl(), webIds.bob, ['read'])
+            .setAgentAccess(resource.url, webIds.bob, ['read'])
             .build();
           resource.setAccessDataset(access);
         }
@@ -17,7 +17,7 @@ Feature: Bob can only read an RDF resource to which he is only granted read acce
     """
     * def resource = callonce setup
     * assert resource.exists()
-    * def resourceUrl = resource.getUrl()
+    * def resourceUrl = resource.url
     * url resourceUrl
 
   Scenario: Bob can read the resource with GET

@@ -4,8 +4,8 @@ Feature: Inheritable ACL controls child resources
     * def setup =
     """
       function() {
-        const testContainer = createTestContainer();
-        const resource = testContainer.createChildResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
+        const testContainer = rootTestContainer.reserveContainer();
+        const resource = testContainer.createResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
         return resource;
       }
     """
@@ -13,15 +13,15 @@ Feature: Inheritable ACL controls child resources
     """
       function(container) {
         const access = container.getAccessDatasetBuilder(webIds.alice)
-          .setAgentAccess(container.getUrl(), webIds.bob, ['read', 'write'])
-          .setInheritableAgentAccess(container.getUrl(), webIds.bob, ['read', 'write'])
+          .setAgentAccess(container.url, webIds.bob, ['read', 'write'])
+          .setInheritableAgentAccess(container.url, webIds.bob, ['read', 'write'])
           .build();
         container.setAccessDataset(access);
       }
     """
     * def resource = callonce setup
     * assert resource.exists()
-    * def resourceUrl = resource.getUrl()
+    * def resourceUrl = resource.url
 
     # Bob cannot access the resource
     Given url resourceUrl
@@ -33,8 +33,8 @@ Feature: Inheritable ACL controls child resources
     * addAcl(resource.getContainer())
 
     # Bob can put a new resource
-    * def resource2 = resource.getContainer().generateChildResource('.txt')
-    Given url resource2.getUrl()
+    * def resource2 = resource.container.reserveResource('.txt')
+    Given url resource2.url
     And request 'New resource'
     And headers clients.bob.getAuthHeaders('PUT', resource2.getUrl())
     And header Content-Type = 'text/plain'
@@ -43,7 +43,7 @@ Feature: Inheritable ACL controls child resources
     Then status 201
 
     # Bob can read the new resource
-    Given url resource2.getUrl()
+    Given url resource2.url
     And headers clients.bob.getAuthHeaders('GET', resource2.getUrl())
     When method GET
     Then status 200
