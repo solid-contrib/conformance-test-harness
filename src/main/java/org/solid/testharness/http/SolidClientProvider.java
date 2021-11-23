@@ -44,25 +44,24 @@ import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-public class SolidClient {
-    private static final Logger logger = LoggerFactory.getLogger(SolidClient.class);
+public class SolidClientProvider {
+    private static final Logger logger = LoggerFactory.getLogger(SolidClientProvider.class);
 
     private Client client;
     private AccessControlFactory accessControlFactory;
 
-    public SolidClient() {
+    public SolidClientProvider() {
         final ClientRegistry clientRegistry = CDI.current().select(ClientRegistry.class).get();
         client = clientRegistry.getClient(ClientRegistry.DEFAULT);
         accessControlFactory = CDI.current().select(AccessControlFactory.class).get();
     }
-    public SolidClient(final String user) {
+    public SolidClientProvider(final String user) {
         final ClientRegistry clientRegistry = CDI.current().select(ClientRegistry.class).get();
         client = clientRegistry.getClient(user);
         if (client == null) {
@@ -70,21 +69,17 @@ public class SolidClient {
         }
         accessControlFactory = CDI.current().select(AccessControlFactory.class).get();
     }
-    public SolidClient(final Client client) {
+    public SolidClientProvider(final Client client) {
         this.client = client;
         accessControlFactory = CDI.current().select(AccessControlFactory.class).get();
     }
 
-    public static SolidClient create(final String user) {
-        return new SolidClient(user);
+    public static SolidClientProvider create(final String user) {
+        return new SolidClientProvider(user);
     }
 
     public Client getClient() {
         return client;
-    }
-
-    public Map<String, String> getAuthHeaders(final String method, final String uri) {
-        return client.getAuthHeaders(method, uri);
     }
 
     public HttpHeaders createResource(final URI url, final String data, final String type) throws Exception {
@@ -246,6 +241,6 @@ public class SolidClient {
 
     @Override
     public String toString() {
-        return "SolidClient: user=" + client.getUser() + ", accessToken=" + client.getAccessToken();
+        return "SolidClientProvider: user=" + client.getUser() + ", accessToken=" + client.getAccessToken();
     }
 }

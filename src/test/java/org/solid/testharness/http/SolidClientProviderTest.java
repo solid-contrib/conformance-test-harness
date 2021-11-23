@@ -34,7 +34,6 @@ import org.solid.common.vocab.PIM;
 import org.solid.testharness.accesscontrol.AccessDataset;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.config.ConfigTestNormalProfile;
-import org.solid.testharness.utils.Namespaces;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 import org.solid.testharness.utils.TestUtils;
 
@@ -43,10 +42,12 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpResponse;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,8 +57,10 @@ import static org.solid.testharness.config.Config.AccessControlMode.WAC;
 
 @QuarkusTest
 @TestProfile(ConfigTestNormalProfile.class)
-class SolidClientTest {
-    private static final String PREFIX = Namespaces.generateTurtlePrefixes(List.of(LDP.PREFIX));
+class SolidClientProviderTest {
+    private static final URI BASE_URL = URI.create("https://example.org/");
+    private static final URI TEST_URL = BASE_URL.resolve("/test");
+    private static final String ENTRY = "<%s> <" + LDP.CONTAINS + "> <%s>.";
 
     @Inject
     ClientRegistry clientRegistry;
@@ -72,8 +75,8 @@ class SolidClientTest {
 
     @Test
     void createDefaultClient() {
-        final SolidClient solidClient = new SolidClient();
-        final Client client = solidClient.getClient();
+        final SolidClientProvider solidClientProvider = new SolidClientProvider();
+        final Client client = solidClientProvider.getClient();
         assertNotNull(client.getHttpClient());
         assertEquals("", client.getUser());
         assertNull(client.getAccessToken());
@@ -81,14 +84,14 @@ class SolidClientTest {
 
     @Test
     void createMissingNamedClient() {
-        assertThrows(TestHarnessInitializationException.class, () -> new SolidClient("nobody"));
+        assertThrows(TestHarnessInitializationException.class, () -> new SolidClientProvider("nobody"));
     }
 
     @Test
     void createWithExistingClient() {
         final Client newClient = new Client.Builder("newuser").build();
-        final SolidClient solidClient = new SolidClient(newClient);
-        final Client client = solidClient.getClient();
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(newClient);
+        final Client client = solidClientProvider.getClient();
         assertNotNull(client.getHttpClient());
         assertEquals("newuser", client.getUser());
         assertNull(client.getAccessToken());
@@ -97,8 +100,8 @@ class SolidClientTest {
     @Test
     void createNamedClient() {
         clientRegistry.register("user1", new Client.Builder("user1").build());
-        final SolidClient solidClient = new SolidClient("user1");
-        final Client client = solidClient.getClient();
+        final SolidClientProvider solidClientProvider = new SolidClientProvider("user1");
+        final Client client = solidClientProvider.getClient();
         assertNotNull(client.getHttpClient());
         assertEquals("user1", client.getUser());
         assertNull(client.getAccessToken());
@@ -107,49 +110,39 @@ class SolidClientTest {
     @Test
     void createStatically() {
         clientRegistry.register("user2", new Client.Builder("user2").build());
-        final SolidClient solidClient = SolidClient.create("user2");
-        final Client client = solidClient.getClient();
+        final SolidClientProvider solidClientProvider = SolidClientProvider.create("user2");
+        final Client client = solidClientProvider.getClient();
         assertNotNull(client.getHttpClient());
         assertEquals("user2", client.getUser());
         assertNull(client.getAccessToken());
     }
 
     @Test
-    void getAuthHeaders() {
-        final Client mockClient = mock(Client.class);
-        when(mockClient.getAuthHeaders("GET", "http://localhost:3000")).thenReturn(Collections.emptyMap());
-
-        final SolidClient solidClient = new SolidClient(mockClient);
-        final var headers = solidClient.getAuthHeaders("GET", "http://localhost:3000");
-        assertTrue((headers.isEmpty()));
-    }
-
-    @Test
     void createResource() throws Exception {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(200);
-        when(mockClient.put(eq(URI.create("http://localhost:3000/test")), eq("DATA"),
+        when(mockClient.put(eq(TEST_URL), eq("DATA"),
                 eq(HttpConstants.MEDIA_TYPE_TEXT_PLAIN)))
                 .thenReturn(mockResponse);
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        final HttpHeaders headers = solidClient.createResource(URI.create("http://localhost:3000/test"),
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        final HttpHeaders headers = solidClientProvider.createResource(TEST_URL,
                 "DATA", HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertTrue(headers.map().isEmpty());
-        verify(mockClient).put(URI.create("http://localhost:3000/test"), "DATA", HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
+        verify(mockClient).put(TEST_URL, "DATA", HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
     }
 
     @Test
     void createResourceFails() throws Exception {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(412);
-        when(mockClient.put(eq(URI.create("http://localhost:3000/test")), eq("DATA"),
+        when(mockClient.put(eq(TEST_URL), eq("DATA"),
                 eq(HttpConstants.MEDIA_TYPE_TEXT_PLAIN)))
                 .thenReturn(mockResponse);
 
-        final SolidClient solidClient = new SolidClient(mockClient);
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
         final Exception exception = assertThrows(Exception.class,
-                () -> solidClient.createResource(URI.create("http://localhost:3000/test"), "DATA",
+                () -> solidClientProvider.createResource(TEST_URL, "DATA",
                         HttpConstants.MEDIA_TYPE_TEXT_PLAIN)
         );
         assertEquals("Failed to create resource - status=412", exception.getMessage());
@@ -161,8 +154,8 @@ class SolidClientTest {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(201, "");
         doReturn(mockResponse).when(mockClient).sendAuthorized(any(), any());
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        final HttpResponse<String> response = solidClient.createContainer(URI.create("http://localhost:3000/test/"));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        final HttpResponse<String> response = solidClientProvider.createContainer(BASE_URL.resolve("/test/"));
         assertEquals(201, response.statusCode());
     }
 
@@ -173,13 +166,13 @@ class SolidClientTest {
         final HttpHeaders mockHeaders = HttpHeaders.of(Collections.emptyMap(), (k, v) -> true);
         when(mockResponse.headers()).thenReturn(mockHeaders);
         when(mockResponse.statusCode()).thenReturn(412);
-        when(mockClient.put(eq(URI.create("http://localhost:3000/test")), eq("DATA"),
+        when(mockClient.put(eq(TEST_URL), eq("DATA"),
                 eq(HttpConstants.MEDIA_TYPE_TEXT_PLAIN)))
                 .thenReturn(mockResponse);
 
-        final SolidClient solidClient = new SolidClient(mockClient);
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
         final Exception exception = assertThrows(Exception.class,
-                () -> solidClient.createResource(URI.create("http://localhost:3000/test"), "DATA",
+                () -> solidClientProvider.createResource(TEST_URL, "DATA",
                         HttpConstants.MEDIA_TYPE_TEXT_PLAIN)
         );
         assertEquals("Failed to create resource - status=412", exception.getMessage());
@@ -189,13 +182,13 @@ class SolidClientTest {
     void getAclUriFromUri() throws IOException, InterruptedException {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204, Map.of(HttpConstants.HEADER_LINK,
-                List.of("<http://localhost:3000/test.acl>; rel=\"acl\"")));
+                List.of("<" + BASE_URL.resolve("test.acl") + ">; rel=\"acl\"")));
         when(mockClient.head(any())).thenReturn(mockResponse);
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        final URI uri = solidClient.getAclUri(URI.create("http://localhost:3000/test"));
-        assertEquals(URI.create("http://localhost:3000/test.acl"), uri);
-        verify(mockClient).head(URI.create("http://localhost:3000/test"));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        final URI uri = solidClientProvider.getAclUri(TEST_URL);
+        assertEquals(BASE_URL.resolve("/test.acl"), uri);
+        verify(mockClient).head(TEST_URL);
     }
 
     @Test
@@ -203,40 +196,41 @@ class SolidClientTest {
         final Client mockClient = mock(Client.class);
         when(mockClient.head(any())).thenThrow(new IOException("Failed"));
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        assertThrows(IOException.class, () -> solidClient.getAclUri(URI.create("http://localhost:3000/test")));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        assertThrows(IOException.class, () -> solidClientProvider.getAclUri(TEST_URL));
     }
 
     @Test
     void getAclUriFromHeadersWAC() {
         final Map<String, List<String>> headerMap = Map.of("Link",
-                List.of("<http://localhost:3000/test.acl>; rel=\"acl\""));
+                List.of("<" + BASE_URL.resolve("test.acl") + ">; rel=\"acl\""));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
 
-        final SolidClient solidClient = new SolidClient();
-        final URI uri = solidClient.getAclUri(headers);
-        assertEquals(URI.create("http://localhost:3000/test.acl"), uri);
+        final SolidClientProvider solidClientProvider = new SolidClientProvider();
+        final URI uri = solidClientProvider.getAclUri(headers);
+        assertEquals(BASE_URL.resolve("/test.acl"), uri);
     }
 
     @Test
     void getAclUriFromHeadersACP() {
         final Map<String, List<String>> headerMap = Map.of("Link",
-                List.of("<http://localhost:3000/test?ext=acr>; rel=\"http://www.w3.org/ns/solid/acp#accessControl\""));
+                List.of("<" + BASE_URL.resolve("test?ext=acr") +
+                        ">; rel=\"http://www.w3.org/ns/solid/acp#accessControl\""));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
 
-        final SolidClient solidClient = new SolidClient();
-        final URI uri = solidClient.getAclUri(headers);
-        assertEquals(URI.create("http://localhost:3000/test?ext=acr"), uri);
+        final SolidClientProvider solidClientProvider = new SolidClientProvider();
+        final URI uri = solidClientProvider.getAclUri(headers);
+        assertEquals(BASE_URL.resolve("/test?ext=acr"), uri);
     }
 
     @Test
     void getAclUriFromHeadersWrongLink() {
         final Map<String, List<String>> headerMap = Map.of("Link",
-                List.of("<http://localhost:3000/test?ext=acr>; rel=\"https://example.org\""));
+                List.of("<" + BASE_URL.resolve("test?ext=acr") + ">; rel=\"https://example.org\""));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
 
-        final SolidClient solidClient = new SolidClient();
-        assertNull(solidClient.getAclUri(headers));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider();
+        assertNull(solidClientProvider.getAclUri(headers));
     }
 
     @Test
@@ -245,8 +239,8 @@ class SolidClientTest {
         final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204);
         when(mockClient.head(any())).thenReturn(mockResponse);
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        final Config.AccessControlMode mode = solidClient.getAclType(URI.create("http://localhost:3000/test.acl"));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        final Config.AccessControlMode mode = solidClientProvider.getAclType(BASE_URL.resolve("/test.acl"));
         assertEquals(WAC, mode);
     }
 
@@ -257,8 +251,8 @@ class SolidClientTest {
                 List.of("<" + ACP.AccessControlResource.toString() + ">; rel=\"type\"")));
         when(mockClient.head(any())).thenReturn(mockResponse);
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        final Config.AccessControlMode mode = solidClient.getAclType(URI.create("http://localhost:3000/test.acl"));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        final Config.AccessControlMode mode = solidClientProvider.getAclType(BASE_URL.resolve("/test.acl"));
         assertEquals(Config.AccessControlMode.ACP, mode);
     }
 
@@ -269,8 +263,8 @@ class SolidClientTest {
                 List.of("<" + ACP.AccessControlResource.toString() + ">; rel=\"xxxx\"")));
         when(mockClient.head(any())).thenReturn(mockResponse);
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        final Config.AccessControlMode mode = solidClient.getAclType(URI.create("http://localhost:3000/test.acl"));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        final Config.AccessControlMode mode = solidClientProvider.getAclType(BASE_URL.resolve("/test.acl"));
         assertEquals(WAC, mode);
     }
 
@@ -281,8 +275,8 @@ class SolidClientTest {
                 List.of("<https://example.org>; rel=\"type\"")));
         when(mockClient.head(any())).thenReturn(mockResponse);
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        final Config.AccessControlMode mode = solidClient.getAclType(URI.create("http://localhost:3000/test.acl"));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        final Config.AccessControlMode mode = solidClientProvider.getAclType(BASE_URL.resolve("/test.acl"));
         assertEquals(WAC, mode);
     }
 
@@ -290,54 +284,54 @@ class SolidClientTest {
     void getAclUriMissing() {
         final HttpHeaders headers = HttpHeaders.of(Collections.emptyMap(), (k, v) -> true);
 
-        final SolidClient solidClient = new SolidClient();
-        assertNull(solidClient.getAclUri(headers));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider();
+        assertNull(solidClientProvider.getAclUri(headers));
     }
 
     @Test
     void getAclUriMultiple() {
         final Map<String, List<String>> headerMap = Map.of(HttpConstants.HEADER_LINK, List.of(
-                "<http://localhost:3000/test.acl>; rel=\"acl\"",
-                "<http://localhost:3000/test.acl2>; rel=\"acl\""
+                "<" + BASE_URL.resolve("test.acl") + ">; rel=\"acl\"",
+                "<" + BASE_URL.resolve("test.acl2") + ">; rel=\"acl\""
                 ));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
 
-        final SolidClient solidClient = new SolidClient();
-        final URI uri = solidClient.getAclUri(headers);
-        assertEquals(URI.create("http://localhost:3000/test.acl"), uri);
+        final SolidClientProvider solidClientProvider = new SolidClientProvider();
+        final URI uri = solidClientProvider.getAclUri(headers);
+        assertEquals(BASE_URL.resolve("/test.acl"), uri);
     }
 
     @Test
     void getAcl() throws IOException, InterruptedException {
-        final URI resourceAcl = URI.create("http://localhost:3000/test.acl");
+        final URI resourceAcl = BASE_URL.resolve("/test.acl");
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "");
         when(mockClient.getAsTurtle(any())).thenReturn(mockResponse);
         when(config.getAccessControlMode()).thenReturn(WAC);
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        final AccessDataset accessDataset = solidClient.getAcl(resourceAcl);
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        final AccessDataset accessDataset = solidClientProvider.getAcl(resourceAcl);
         assertNotNull(accessDataset);
     }
 
     @Test
     void getAclFails() throws IOException, InterruptedException {
-        final URI resourceAcl = URI.create("http://localhost:3000/test.acl");
+        final URI resourceAcl = BASE_URL.resolve("/test.acl");
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(404, "");
         when(mockClient.getAsTurtle(any())).thenReturn(mockResponse);
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        final AccessDataset accessDataset = solidClient.getAcl(resourceAcl);
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        final AccessDataset accessDataset = solidClientProvider.getAcl(resourceAcl);
         assertNull(accessDataset);
     }
 
     @Test
     void getAccessDatasetBuilder() {
         final Client mockClient = mock(Client.class);
-        final SolidClient solidClient = new SolidClient(mockClient);
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
         when(config.getAccessControlMode()).thenReturn(WAC);
-        assertNotNull(solidClient.getAccessDatasetBuilder(URI.create("http://localhost:3000/test.acl")));
+        assertNotNull(solidClientProvider.getAccessDatasetBuilder(BASE_URL.resolve("/test.acl")));
     }
 
     @Test
@@ -346,8 +340,8 @@ class SolidClientTest {
         final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204);
         when(mockClient.head(any())).thenReturn(mockResponse);
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        assertFalse(solidClient.hasStorageType(URI.create("http://localhost:3000/")));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        assertFalse(solidClientProvider.hasStorageType(BASE_URL));
     }
 
     @Test
@@ -357,8 +351,8 @@ class SolidClientTest {
                 List.of("<" + PIM.Storage.toString() + ">; rel=\"type\"")));
         when(mockClient.head(any())).thenReturn(mockResponse);
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        assertTrue(solidClient.hasStorageType(URI.create("http://localhost:3000/")));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        assertTrue(solidClientProvider.hasStorageType(BASE_URL));
     }
 
 
@@ -367,8 +361,8 @@ class SolidClientTest {
         final AccessDataset accessDataset = mock(AccessDataset.class);
         when(accessDataset.apply(any(), any())).thenReturn(true);
         final Client mockClient = mock(Client.class);
-        final SolidClient solidClient = new SolidClient(mockClient);
-        assertTrue(solidClient.createAcl(URI.create("http://localhost:3000/test.acl"), accessDataset));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        assertTrue(solidClientProvider.createAcl(BASE_URL.resolve("/test.acl"), accessDataset));
     }
 
     @Test
@@ -376,102 +370,96 @@ class SolidClientTest {
         final AccessDataset accessDataset = mock(AccessDataset.class);
         when(accessDataset.apply(any(), any())).thenReturn(false);
         final Client mockClient = mock(Client.class);
-        final SolidClient solidClient = new SolidClient(mockClient);
-        assertFalse(solidClient.createAcl(URI.create("http://localhost:3000/test.acl"), accessDataset));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        assertFalse(solidClientProvider.createAcl(BASE_URL.resolve("/test.acl"), accessDataset));
     }
 
     @Test
     void getContainmentData() throws Exception {
         final Client mockClient = mock(Client.class);
-        final URI resourceAcl = URI.create("http://localhost:3000/test");
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "TEST");
 
-        when(mockClient.getAsTurtle(eq(resourceAcl))).thenReturn(mockResponse);
+        when(mockClient.getAsTurtle(eq(TEST_URL))).thenReturn(mockResponse);
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        assertEquals("TEST", solidClient.getContentAsTurtle(resourceAcl));
-        verify(mockClient).getAsTurtle(resourceAcl);
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        assertEquals("TEST", solidClientProvider.getContentAsTurtle(TEST_URL));
+        verify(mockClient).getAsTurtle(TEST_URL);
     }
 
     @Test
     void getContainmentDataFails() throws IOException, InterruptedException {
         final Client mockClient = mock(Client.class);
-        final URI resourceAcl = URI.create("http://localhost:3000/test");
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(400, null);
 
-        when(mockClient.getAsTurtle(eq(resourceAcl))).thenReturn(mockResponse);
+        when(mockClient.getAsTurtle(eq(TEST_URL))).thenReturn(mockResponse);
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        final Exception exception = assertThrows(Exception.class, () -> solidClient.getContentAsTurtle(resourceAcl));
-        assertEquals("Error response=400 trying to get content for http://localhost:3000/test",
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        final Exception exception = assertThrows(Exception.class,
+                () -> solidClientProvider.getContentAsTurtle(TEST_URL));
+        assertEquals("Error response=400 trying to get content for " + TEST_URL,
                 exception.getMessage());
     }
 
     @Test
     void deleteResource() {
-        final String data = PREFIX + "<http://localhost:3000/> ldp:contains <http://localhost:3000/test>.";
         final Client mockClient = mock(Client.class);
-        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, data);
         final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(204);
 
-        when(mockClient.deleteAsync(URI.create("http://localhost:3000/test")))
+        when(mockClient.deleteAsync(TEST_URL))
                 .thenReturn(CompletableFuture.supplyAsync(() -> mockResponseOk));
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        assertDoesNotThrow(() -> solidClient.deleteResourceRecursively(URI.create("http://localhost:3000/test")));
-        verify(mockClient).deleteAsync(URI.create("http://localhost:3000/test"));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        assertDoesNotThrow(() -> solidClientProvider.deleteResourceRecursively(TEST_URL));
+        verify(mockClient).deleteAsync(TEST_URL);
         verifyNoMoreInteractions(mockClient);
     }
 
     @Test
     void deleteContents() throws IOException, InterruptedException {
-        final String data = PREFIX + "<http://localhost:3000/> ldp:contains " +
-                "<http://localhost:3000/test>, <http://localhost:3000/test2>.";
+        final String data = turtleList(BASE_URL, BASE_URL.resolve("test"), BASE_URL.resolve("test2"));
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, data);
         final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(204);
 
-        when(mockClient.getAsTurtle(eq(URI.create("http://localhost:3000/")))).thenReturn(mockResponse);
-        when(mockClient.deleteAsync(URI.create("http://localhost:3000/test")))
+        when(mockClient.getAsTurtle(eq(BASE_URL))).thenReturn(mockResponse);
+        when(mockClient.deleteAsync(BASE_URL.resolve("/test")))
                 .thenReturn(CompletableFuture.supplyAsync(() -> mockResponseOk));
-        when(mockClient.deleteAsync(URI.create("http://localhost:3000/test2")))
+        when(mockClient.deleteAsync(BASE_URL.resolve("/test2")))
                 .thenReturn(CompletableFuture.supplyAsync(() -> mockResponseOk));
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        assertDoesNotThrow(() -> solidClient.deleteContentsRecursively(URI.create("http://localhost:3000/")));
-        verify(mockClient).getAsTurtle(URI.create("http://localhost:3000/"));
-        verify(mockClient).deleteAsync(URI.create("http://localhost:3000/test"));
-        verify(mockClient).deleteAsync(URI.create("http://localhost:3000/test2"));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        assertDoesNotThrow(() -> solidClientProvider.deleteContentsRecursively(BASE_URL));
+        verify(mockClient).getAsTurtle(BASE_URL);
+        verify(mockClient).deleteAsync(BASE_URL.resolve("/test"));
+        verify(mockClient).deleteAsync(BASE_URL.resolve("/test2"));
         verifyNoMoreInteractions(mockClient);
     }
 
     @Test
     void deleteContentsOneFails() throws IOException, InterruptedException {
-        final String data = PREFIX + "<http://localhost:3000/> ldp:contains " +
-                "<http://localhost:3000/test>, <http://localhost:3000/test2>.";
+        final String data = turtleList(BASE_URL, BASE_URL.resolve("test"), BASE_URL.resolve("test2"));
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, data);
         final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(204);
         final HttpResponse<Void> mockResponseFail = TestUtils.mockVoidResponse(400);
 
-        when(mockClient.getAsTurtle(eq(URI.create("http://localhost:3000/")))).thenReturn(mockResponse);
-        when(mockClient.deleteAsync(URI.create("http://localhost:3000/test")))
+        when(mockClient.getAsTurtle(eq(BASE_URL))).thenReturn(mockResponse);
+        when(mockClient.deleteAsync(BASE_URL.resolve("/test")))
                 .thenReturn(CompletableFuture.supplyAsync(() -> mockResponseOk));
-        when(mockClient.deleteAsync(URI.create("http://localhost:3000/test2")))
+        when(mockClient.deleteAsync(BASE_URL.resolve("/test2")))
                 .thenReturn(CompletableFuture.supplyAsync(() -> mockResponseFail));
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        assertDoesNotThrow(() -> solidClient.deleteContentsRecursively(URI.create("http://localhost:3000/")));
-        verify(mockClient).getAsTurtle(URI.create("http://localhost:3000/"));
-        verify(mockClient).deleteAsync(URI.create("http://localhost:3000/test"));
-        verify(mockClient).deleteAsync(URI.create("http://localhost:3000/test2"));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        assertDoesNotThrow(() -> solidClientProvider.deleteContentsRecursively(BASE_URL));
+        verify(mockClient).getAsTurtle(BASE_URL);
+        verify(mockClient).deleteAsync(BASE_URL.resolve("/test"));
+        verify(mockClient).deleteAsync(BASE_URL.resolve("/test2"));
         verifyNoMoreInteractions(mockClient);
     }
 
     @Test
     void deleteContainerOneException() throws IOException, InterruptedException {
-        final String data = PREFIX + "<http://localhost:3000/> ldp:contains " +
-                "<http://localhost:3000/test>, <http://localhost:3000/test2>.";
+        final String data = turtleList(BASE_URL, BASE_URL.resolve("test"), BASE_URL.resolve("test2"));
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, data);
         final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(204);
@@ -480,115 +468,117 @@ class SolidClientTest {
         // resources which may fail. Better handling needed.
         when(mockResponseException.statusCode()).thenThrow(new RuntimeException("FAIL"));
 
-        when(mockClient.getAsTurtle(eq(URI.create("http://localhost:3000/")))).thenReturn(mockResponse);
-        when(mockClient.deleteAsync(URI.create("http://localhost:3000/test")))
+        when(mockClient.getAsTurtle(eq(BASE_URL))).thenReturn(mockResponse);
+        when(mockClient.deleteAsync(BASE_URL.resolve("/test")))
                 .thenReturn(CompletableFuture.supplyAsync(() -> mockResponseOk));
-        when(mockClient.deleteAsync(URI.create("http://localhost:3000/test2")))
+        when(mockClient.deleteAsync(BASE_URL.resolve("/test2")))
                 .thenReturn(CompletableFuture.supplyAsync(() -> mockResponseException));
-        when(mockClient.deleteAsync(URI.create("http://localhost:3000/")))
+        when(mockClient.deleteAsync(BASE_URL))
                 .thenReturn(CompletableFuture.supplyAsync(() -> mockResponseOk));
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        assertDoesNotThrow(() -> solidClient.deleteResourceRecursively(URI.create("http://localhost:3000/")));
-        verify(mockClient).getAsTurtle(URI.create("http://localhost:3000/"));
-        verify(mockClient).deleteAsync(URI.create("http://localhost:3000/test"));
-        verify(mockClient).deleteAsync(URI.create("http://localhost:3000/test2"));
-        verify(mockClient).deleteAsync(URI.create("http://localhost:3000/"));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        assertDoesNotThrow(() -> solidClientProvider.deleteResourceRecursively(BASE_URL));
+        verify(mockClient).getAsTurtle(BASE_URL);
+        verify(mockClient).deleteAsync(BASE_URL.resolve("/test"));
+        verify(mockClient).deleteAsync(BASE_URL.resolve("/test2"));
+        verify(mockClient).deleteAsync(BASE_URL);
         verifyNoMoreInteractions(mockClient);
     }
 
     @Test
     void deleteContainerListFails() throws IOException, InterruptedException {
-        final String data = PREFIX + "<http://localhost:3000/> ldp:contains <http://localhost:3000/test>.";
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(400, null);
 
-        when(mockClient.getAsTurtle(eq(URI.create("http://localhost:3000/")))).thenReturn(mockResponse);
+        when(mockClient.getAsTurtle(eq(BASE_URL))).thenReturn(mockResponse);
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        assertDoesNotThrow(() -> solidClient.deleteResourceRecursively(URI.create("http://localhost:3000/")));
-        verify(mockClient).getAsTurtle(URI.create("http://localhost:3000/"));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        assertDoesNotThrow(() -> solidClientProvider.deleteResourceRecursively(BASE_URL));
+        verify(mockClient).getAsTurtle(BASE_URL);
         verifyNoMoreInteractions(mockClient);
     }
 
     @Test
     void deleteContainer() throws IOException, InterruptedException {
-        final String data = PREFIX + "<http://localhost:3000/> ldp:contains " +
-                "<http://localhost:3000/test>, <http://localhost:3000/test2>.";
+        final String data = turtleList(BASE_URL, BASE_URL.resolve("test"), BASE_URL.resolve("test2"));
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, data);
         final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(204);
 
-        when(mockClient.getAsTurtle(eq(URI.create("http://localhost:3000/")))).thenReturn(mockResponse);
-        when(mockClient.deleteAsync(URI.create("http://localhost:3000/test")))
+        when(mockClient.getAsTurtle(eq(BASE_URL))).thenReturn(mockResponse);
+        when(mockClient.deleteAsync(BASE_URL.resolve("/test")))
                 .thenReturn(CompletableFuture.supplyAsync(() -> mockResponseOk));
-        when(mockClient.deleteAsync(URI.create("http://localhost:3000/test2")))
+        when(mockClient.deleteAsync(BASE_URL.resolve("/test2")))
                 .thenReturn(CompletableFuture.supplyAsync(() -> mockResponseOk));
-        when(mockClient.deleteAsync(URI.create("http://localhost:3000/")))
+        when(mockClient.deleteAsync(BASE_URL))
                 .thenReturn(CompletableFuture.supplyAsync(() -> mockResponseOk));
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        assertDoesNotThrow(() -> solidClient.deleteResourceRecursively(URI.create("http://localhost:3000/")));
-        verify(mockClient).getAsTurtle(URI.create("http://localhost:3000/"));
-        verify(mockClient).deleteAsync(URI.create("http://localhost:3000/test"));
-        verify(mockClient).deleteAsync(URI.create("http://localhost:3000/test2"));
-        verify(mockClient).deleteAsync(URI.create("http://localhost:3000/"));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        assertDoesNotThrow(() -> solidClientProvider.deleteResourceRecursively(BASE_URL));
+        verify(mockClient).getAsTurtle(BASE_URL);
+        verify(mockClient).deleteAsync(BASE_URL.resolve("/test"));
+        verify(mockClient).deleteAsync(BASE_URL.resolve("/test2"));
+        verify(mockClient).deleteAsync(BASE_URL);
         verifyNoMoreInteractions(mockClient);
     }
 
     @Test
     void deleteContainerDeep() throws IOException, InterruptedException {
-        final String data = PREFIX + "<http://localhost:3000/> ldp:contains " +
-                "<http://localhost:3000/test>, <http://localhost:3000/child/>.";
-        final String data2 = PREFIX + "<http://localhost:3000/child/> ldp:contains " +
-                "<http://localhost:3000/test2>, <http://localhost:3000/test3>.";
+        final String data = turtleList(BASE_URL, BASE_URL.resolve("test"), BASE_URL.resolve("child/"));
+        final String data2 = turtleList(BASE_URL.resolve("child/"),
+                BASE_URL.resolve("test2"), BASE_URL.resolve("test3"));
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, data);
         final HttpResponse<String> mockResponseChild = TestUtils.mockStringResponse(200, data2);
         final HttpResponse<Void> mockResponseOk = TestUtils.mockVoidResponse(204);
 
-        when(mockClient.getAsTurtle(eq(URI.create("http://localhost:3000/")))).thenReturn(mockResponse);
-        when(mockClient.getAsTurtle(eq(URI.create("http://localhost:3000/child/")))).thenReturn(mockResponseChild);
-        when(mockClient.deleteAsync(URI.create("http://localhost:3000/test")))
+        when(mockClient.getAsTurtle(eq(BASE_URL))).thenReturn(mockResponse);
+        when(mockClient.getAsTurtle(eq(BASE_URL.resolve("/child/")))).thenReturn(mockResponseChild);
+        when(mockClient.deleteAsync(BASE_URL.resolve("/test")))
                 .thenReturn(CompletableFuture.supplyAsync(() -> mockResponseOk));
-        when(mockClient.deleteAsync(URI.create("http://localhost:3000/test2")))
+        when(mockClient.deleteAsync(BASE_URL.resolve("/test2")))
                 .thenReturn(CompletableFuture.supplyAsync(() -> mockResponseOk));
-        when(mockClient.deleteAsync(URI.create("http://localhost:3000/test3"))).
+        when(mockClient.deleteAsync(BASE_URL.resolve("/test3"))).
                 thenReturn(CompletableFuture.supplyAsync(() -> mockResponseOk));
-        when(mockClient.deleteAsync(URI.create("http://localhost:3000/child/")))
+        when(mockClient.deleteAsync(BASE_URL.resolve("/child/")))
                 .thenReturn(CompletableFuture.supplyAsync(() -> mockResponseOk));
-        when(mockClient.deleteAsync(URI.create("http://localhost:3000/")))
+        when(mockClient.deleteAsync(BASE_URL))
                 .thenReturn(CompletableFuture.supplyAsync(() -> mockResponseOk));
 
-        final SolidClient solidClient = new SolidClient(mockClient);
-        assertDoesNotThrow(() -> solidClient.deleteResourceRecursively(URI.create("http://localhost:3000/")));
-        verify(mockClient).getAsTurtle(URI.create("http://localhost:3000/"));
-        verify(mockClient).getAsTurtle(URI.create("http://localhost:3000/child/"));
-        verify(mockClient).deleteAsync(URI.create("http://localhost:3000/test"));
-        verify(mockClient).deleteAsync(URI.create("http://localhost:3000/test2"));
-        verify(mockClient).deleteAsync(URI.create("http://localhost:3000/test3"));
-        verify(mockClient).deleteAsync(URI.create("http://localhost:3000/child/"));
-        verify(mockClient).deleteAsync(URI.create("http://localhost:3000/"));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        assertDoesNotThrow(() -> solidClientProvider.deleteResourceRecursively(BASE_URL));
+        verify(mockClient).getAsTurtle(BASE_URL);
+        verify(mockClient).getAsTurtle(BASE_URL.resolve("/child/"));
+        verify(mockClient).deleteAsync(BASE_URL.resolve("/test"));
+        verify(mockClient).deleteAsync(BASE_URL.resolve("/test2"));
+        verify(mockClient).deleteAsync(BASE_URL.resolve("/test3"));
+        verify(mockClient).deleteAsync(BASE_URL.resolve("/child/"));
+        verify(mockClient).deleteAsync(BASE_URL);
         verifyNoMoreInteractions(mockClient);
     }
 
     @Test
     void deleteNull() {
-        final SolidClient solidClient = new SolidClient();
-        assertThrows(IllegalArgumentException.class, () -> solidClient.deleteResourceRecursively(null));
+        final SolidClientProvider solidClientProvider = new SolidClientProvider();
+        assertThrows(IllegalArgumentException.class, () -> solidClientProvider.deleteResourceRecursively(null));
     }
 
     @Test
     void testToString() {
-        final SolidClient solidClient = new SolidClient();
-        assertEquals("SolidClient: user=, accessToken=null", solidClient.toString());
+        final SolidClientProvider solidClientProvider = new SolidClientProvider();
+        assertEquals("SolidClientProvider: user=, accessToken=null", solidClientProvider.toString());
     }
 
     @Test
     void testToStringNamed() {
         clientRegistry.register("toStringUser", new Client.Builder("toStringUser").build());
-        final SolidClient solidClient = new SolidClient("toStringUser");
-        solidClient.getClient().setAccessToken("ACCESS");
-        assertEquals("SolidClient: user=toStringUser, accessToken=ACCESS", solidClient.toString());
+        final SolidClientProvider solidClientProvider = new SolidClientProvider("toStringUser");
+        solidClientProvider.getClient().setAccessToken("ACCESS");
+        assertEquals("SolidClientProvider: user=toStringUser, accessToken=ACCESS", solidClientProvider.toString());
+    }
+
+    String turtleList(final URI container, final URI... args) {
+        return String.format(ENTRY, container,
+                Arrays.stream(args).map(URI::toString).collect(Collectors.joining(">, <")));
     }
 }

@@ -37,11 +37,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 class RDFUtilsTest {
     private static final Logger logger = LoggerFactory.getLogger(RDFUtilsTest.class);
-    private static final String PREFIX = Namespaces.generateTurtlePrefixes(List.of(LDP.PREFIX));
     private static final String TEST_URL = "https://example.org/";
     private static final String CHLID = "https://example.org/test/";
-    private static final String NO_MEMBERS = PREFIX + "<" + TEST_URL + "> a " + LDP.CONTAINER + ".";
-    private static final String MEMBERS = PREFIX + "<" + TEST_URL + "> " + LDP.CONTAINS + " <" + CHLID + ">.";
+    private static final String NO_MEMBERS = String.format("<%s> a <%s>.", TEST_URL, LDP.CONTAINER);
+    private static final String MEMBERS = String.format("<%s> <%s> <%s>.", TEST_URL, LDP.CONTAINS, CHLID);
 
     @Test
     void turtleToTripleArray() throws Exception {

@@ -23,7 +23,6 @@
  */
 package org.solid.testharness.api;
 
-import org.solid.testharness.http.SolidClient;
 import org.solid.testharness.utils.RDFUtils;
 import org.solid.testharness.utils.SolidContainerProvider;
 
@@ -36,24 +35,15 @@ import java.util.UUID;
  * It is an adapter designed to be used from tests written in Karate and the methods only use basic the types of String,
  * List, Map as these are automatically translated into the Javascript environment that runs the tests. The exceptions
  * to this rule are classes passed within the test safely such as <code>SolidResource</code>,
- * <code>SolidContainer</code>, <code>SolidClient</code>, and <code>AccessDataset</code>. Internally it maps calls
- * through to a <a href="#SolidContainerProvider">SolidContainerProvider</a> object.
+ * <code>SolidContainer</code>, <code>SolidClient</code>, and <code>AccessDataset</code>. Internally it maps
+ * calls through to a <a href="#SolidContainerProvider">SolidContainerProvider</a> object.
  */
 public final class SolidContainer extends SolidResource {
     private SolidContainerProvider solidContainerProvider;
 
-    SolidContainer(final SolidContainerProvider solidContainerProvider) {
+    public SolidContainer(final SolidContainerProvider solidContainerProvider) {
         super(solidContainerProvider);
         this.solidContainerProvider = solidContainerProvider;
-    }
-
-    /**
-     * Create a <code>SolidContainer</code> from a <code>SolidContainerProvider</code>.
-     * @param solidContainerProvider the <code>SolidContainerProvider</code> being adapted
-     * @return the container
-     */
-    public static SolidContainer from(final SolidContainerProvider solidContainerProvider) {
-        return new SolidContainer(solidContainerProvider);
     }
 
     /**
@@ -63,7 +53,9 @@ public final class SolidContainer extends SolidResource {
      * @return the container
      */
     public static SolidContainer create(final SolidClient solidClient, final String url) {
-        return new SolidContainer(new SolidContainerProvider(solidClient, URI.create(url)));
+        return new SolidContainer(
+                new SolidContainerProvider(solidClient.solidClientProvider, URI.create(url))
+        );
     }
 
     /**
@@ -80,7 +72,7 @@ public final class SolidContainer extends SolidResource {
      * @return the new container
      */
     public SolidContainer reserveContainer() {
-        return SolidContainer.from(solidContainerProvider.reserveContainer(UUID.randomUUID().toString()));
+        return new SolidContainer(solidContainerProvider.reserveContainer(UUID.randomUUID().toString()));
     }
 
     /**
@@ -88,7 +80,7 @@ public final class SolidContainer extends SolidResource {
      * @return the new container
      */
     public SolidContainer createContainer() {
-        return SolidContainer.from(solidContainerProvider.reserveContainer(UUID.randomUUID().toString()).instantiate());
+        return new SolidContainer(solidContainerProvider.reserveContainer(UUID.randomUUID().toString()).instantiate());
     }
 
     /**
@@ -97,7 +89,7 @@ public final class SolidContainer extends SolidResource {
      * @return the new resource
      */
     public SolidResource reserveResource(final String suffix) {
-        return SolidResource.from(solidContainerProvider.reserveResource(UUID.randomUUID() + suffix));
+        return new SolidResource(solidContainerProvider.reserveResource(UUID.randomUUID() + suffix));
     }
 
     /**
@@ -109,7 +101,7 @@ public final class SolidContainer extends SolidResource {
      * @return the new resource
      */
     public SolidResource createResource(final String suffix, final String body, final String type) {
-        return SolidResource.from(solidContainerProvider.createResource(UUID.randomUUID() + suffix, body, type));
+        return new SolidResource(solidContainerProvider.createResource(UUID.randomUUID() + suffix, body, type));
     }
 
     /**

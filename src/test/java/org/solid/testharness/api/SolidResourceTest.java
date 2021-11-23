@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.solid.testharness.accesscontrol.AccessDataset;
 import org.solid.testharness.accesscontrol.AccessDatasetBuilder;
 import org.solid.testharness.http.HttpConstants;
-import org.solid.testharness.http.SolidClient;
+import org.solid.testharness.http.SolidClientProvider;
 import org.solid.testharness.utils.SolidContainerProvider;
 import org.solid.testharness.utils.SolidResourceProvider;
 
@@ -43,15 +43,9 @@ class SolidResourceTest {
     private static final URI TEST_URL = URI.create("https://example.org/resource");
 
     @Test
-    void from() {
-        final SolidClient solidClient = mock(SolidClient.class);
-        final SolidResourceProvider solidResourceProvider = new SolidResourceProvider(solidClient, TEST_URL);
-        assertEquals(TEST_URL.toString(), SolidResource.from(solidResourceProvider).getUrl());
-    }
-
-    @Test
     void testCreate() {
-        final SolidClient solidClient = mock(SolidClient.class);
+        final SolidClientProvider solidClientProvider = mock(SolidClientProvider.class);
+        final SolidClient solidClient = new SolidClient(solidClientProvider);
         final SolidResource solidResource = SolidResource.create(solidClient, TEST_URL.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertTrue(solidResource.exists());
@@ -145,7 +139,7 @@ class SolidResourceTest {
     void isStorageType() throws Exception {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
         when(solidResourceProvider.isStorageType()).thenReturn(true);
-        final SolidResource resource = SolidResource.from(solidResourceProvider);
+        final SolidResource resource = new SolidResource(solidResourceProvider);
         assertTrue(resource.isStorageType());
     }
 
@@ -154,7 +148,7 @@ class SolidResourceTest {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
         final AccessDatasetBuilder accessDatasetBuilder = mock(AccessDatasetBuilder.class);
         when(solidResourceProvider.getAccessDatasetBuilder()).thenReturn(accessDatasetBuilder);
-        final SolidResource resource = SolidResource.from(solidResourceProvider);
+        final SolidResource resource = new SolidResource(solidResourceProvider);
         assertEquals(accessDatasetBuilder, resource.getAccessDatasetBuilder("owner"));
     }
 
@@ -163,7 +157,7 @@ class SolidResourceTest {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
         final AccessDatasetBuilder accessDatasetBuilder = mock(AccessDatasetBuilder.class);
         when(solidResourceProvider.getAccessDatasetBuilder()).thenReturn(accessDatasetBuilder);
-        final SolidResource resource = SolidResource.from(solidResourceProvider);
+        final SolidResource resource = new SolidResource(solidResourceProvider);
         assertEquals(accessDatasetBuilder, resource.getAccessDatasetBuilder());
     }
 
@@ -172,7 +166,7 @@ class SolidResourceTest {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
         final AccessDataset accessDataset = mock(AccessDataset.class);
         when(solidResourceProvider.getAccessDataset()).thenReturn(accessDataset);
-        final SolidResource resource = SolidResource.from(solidResourceProvider);
+        final SolidResource resource = new SolidResource(solidResourceProvider);
         assertEquals(accessDataset, resource.getAccessDataset());
     }
 
@@ -180,14 +174,14 @@ class SolidResourceTest {
     void setAccessDatasetNoUrl() throws Exception {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
         when(solidResourceProvider.setAccessDataset(any())).thenReturn(true);
-        final SolidResource resource = SolidResource.from(solidResourceProvider);
+        final SolidResource resource = new SolidResource(solidResourceProvider);
         assertTrue(resource.setAccessDataset(null));
     }
 
     @Test
     void delete() throws Exception {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
-        final SolidResource resource = SolidResource.from(solidResourceProvider);
+        final SolidResource resource = new SolidResource(solidResourceProvider);
         assertDoesNotThrow(resource::delete);
         verify(solidResourceProvider).delete();
     }
@@ -197,7 +191,7 @@ class SolidResourceTest {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
         when(solidResourceProvider.isContainer()).thenReturn(false);
         when(solidResourceProvider.getUrl()).thenReturn(TEST_URL);
-        final SolidResource resource = SolidResource.from(solidResourceProvider);
+        final SolidResource resource = new SolidResource(solidResourceProvider);
         assertEquals("SolidResource: " + TEST_URL, resource.toString());
     }
 
@@ -206,7 +200,7 @@ class SolidResourceTest {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
         when(solidResourceProvider.isContainer()).thenReturn(true);
         when(solidResourceProvider.getUrl()).thenReturn(TEST_URL);
-        final SolidResource resource = SolidResource.from(solidResourceProvider);
+        final SolidResource resource = new SolidResource(solidResourceProvider);
         assertEquals("SolidContainer: " + TEST_URL, resource.toString());
     }
 }

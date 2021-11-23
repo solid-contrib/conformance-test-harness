@@ -26,8 +26,7 @@ package org.solid.testharness.api;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.http.HttpConstants;
-import org.solid.testharness.http.SolidClient;
-import org.solid.testharness.utils.Namespaces;
+import org.solid.testharness.http.SolidClientProvider;
 import org.solid.testharness.utils.SolidContainerProvider;
 import org.solid.testharness.utils.SolidResourceProvider;
 
@@ -39,20 +38,13 @@ import static org.mockito.Mockito.*;
 
 class SolidContainerTest {
     private static final URI TEST_URL = URI.create("https://example.org/");
-    private static final String PREFIX = Namespaces.generateTurtlePrefixes(List.of(LDP.PREFIX));
     private static final String CHLID = "https://example.org/test/";
-    private static final String MEMBERS = PREFIX + "<" + TEST_URL + "> " + LDP.CONTAINS + " <" + CHLID + ">.";
-
-    @Test
-    void from() {
-        final SolidClient solidClient = mock(SolidClient.class);
-        final SolidContainerProvider solidContainerProvider = new SolidContainerProvider(solidClient, TEST_URL);
-        assertEquals(TEST_URL.toString(), SolidContainer.from(solidContainerProvider).getUrl());
-    }
+    private static final String MEMBERS = String.format("<%s> <%s> <%s>.", TEST_URL, LDP.CONTAINS, CHLID);
 
     @Test
     void testCreate() {
-        final SolidClient solidClient = mock(SolidClient.class);
+        final SolidClientProvider solidClientProvider = mock(SolidClientProvider.class);
+        final SolidClient solidClient = new SolidClient(solidClientProvider);
         final SolidContainer solidContainer = SolidContainer.create(solidClient, TEST_URL.toString());
         assertTrue(solidContainer.exists());
     }
@@ -131,7 +123,7 @@ class SolidContainerTest {
     @Test
     void deleteContents() throws Exception {
         final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
-        final SolidContainer solidContainer = SolidContainer.from(solidContainerProvider);
+        final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
         assertDoesNotThrow(solidContainer::deleteContents);
         verify(solidContainerProvider).deleteContents();
     }

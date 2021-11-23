@@ -44,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 @QuarkusTestResource(ClientResource.class)
 class ClientTest {
+    private static final URI TEST_URL = URI.create(TestData.SAMPLE_BASE);
     private URI baseUri;
 
     @BeforeEach
@@ -291,14 +292,14 @@ class ClientTest {
     @Test
     void getAuthHeadersNoAccessToken() {
         final Client client = new Client.Builder().build();
-        assertTrue(client.getAuthHeaders("GET", TestData.SAMPLE_BASE).isEmpty());
+        assertTrue(client.getAuthHeaders("GET", TEST_URL).isEmpty());
     }
 
     @Test
     void getAuthHeadersNoDpop() {
         final Client client = new Client.Builder().build();
         client.setAccessToken("ACCESS");
-        final Map<String, String> headers = client.getAuthHeaders("GET", TestData.SAMPLE_BASE);
+        final Map<String, String> headers = client.getAuthHeaders("GET", TEST_URL);
         assertTrue(headers.containsKey(HttpConstants.HEADER_AUTHORIZATION));
         assertTrue(headers.get(HttpConstants.HEADER_AUTHORIZATION).startsWith(HttpConstants.PREFIX_BEARER));
         assertTrue(headers.containsKey(HttpConstants.USER_AGENT));
@@ -308,7 +309,7 @@ class ClientTest {
     void getAuthHeadersDpop() throws JoseException {
         final Client client = new Client.Builder().withDpopSupport().build();
         client.setAccessToken("ACCESS");
-        final Map<String, String> headers = client.getAuthHeaders("GET", TestData.SAMPLE_BASE);
+        final Map<String, String> headers = client.getAuthHeaders("GET", TEST_URL);
         assertTrue(headers.containsKey(HttpConstants.HEADER_AUTHORIZATION));
         assertTrue(headers.get(HttpConstants.HEADER_AUTHORIZATION).startsWith(HttpConstants.PREFIX_DPOP));
         assertTrue(headers.containsKey(HttpConstants.HEADER_DPOP));
@@ -318,7 +319,7 @@ class ClientTest {
     @Test
     void getAuthHeadersNullMethod() {
         final Client client = new Client.Builder().build();
-        assertThrows(NullPointerException.class, () -> client.getAuthHeaders(null, ""));
+        assertThrows(NullPointerException.class, () -> client.getAuthHeaders(null, TEST_URL));
     }
 
     @Test

@@ -37,7 +37,7 @@ import org.solid.common.vocab.RDF;
 import org.solid.testharness.accesscontrol.AccessControlFactory;
 import org.solid.testharness.accesscontrol.AccessDataset;
 import org.solid.testharness.http.HttpConstants;
-import org.solid.testharness.http.SolidClient;
+import org.solid.testharness.http.SolidClientProvider;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.SolidContainerProvider;
 import org.solid.testharness.utils.TestHarnessInitializationException;
@@ -130,17 +130,17 @@ public class TestSubject {
         if (targetServer == null) {
             throw new TestHarnessInitializationException("No target server has been configured");
         }
-        final SolidClient solidClient = new SolidClient(HttpConstants.ALICE);
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(HttpConstants.ALICE);
 
         // Determine the ACL mode the server has implemented
-        final SolidContainerProvider rootTestContainer = new SolidContainerProvider(solidClient,
+        final SolidContainerProvider rootTestContainer = new SolidContainerProvider(solidClientProvider,
                 URI.create(config.getTestContainer()));
         try {
             final URI aclUrl = rootTestContainer.getAclUrl();
             if (aclUrl == null) {
                 throw new Exception("Cannot get ACL url for root test container: " + rootTestContainer.getUrl());
             }
-            Config.AccessControlMode accessControlMode = solidClient.getAclType(aclUrl);
+            Config.AccessControlMode accessControlMode = solidClientProvider.getAclType(aclUrl);
             if (accessControlMode == ACP && targetServer.getFeatures().containsKey("acp-legacy")) {
                 accessControlMode = ACP_LEGACY;
             }
@@ -155,7 +155,7 @@ public class TestSubject {
             logger.debug("Setup root acl");
             final boolean success;
             try {
-                final SolidContainerProvider rootContainer = new SolidContainerProvider(solidClient,
+                final SolidContainerProvider rootContainer = new SolidContainerProvider(solidClientProvider,
                         config.getServerRoot());
                 final String alice = config.getCredentials(HttpConstants.ALICE).webId();
                 final List<String> modes = List.of(AccessDataset.READ, AccessDataset.WRITE, AccessDataset.CONTROL);
@@ -215,7 +215,7 @@ public class TestSubject {
         return testRunContainer;
     }
 
-    public void setTestRunContainer(final SolidContainerProvider solidContainerProvider) {
+    protected void setTestRunContainer(final SolidContainerProvider solidContainerProvider) {
         testRunContainer = solidContainerProvider;
     }
 }

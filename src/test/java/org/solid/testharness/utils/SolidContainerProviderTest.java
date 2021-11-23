@@ -26,7 +26,7 @@ package org.solid.testharness.utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.http.HttpConstants;
-import org.solid.testharness.http.SolidClient;
+import org.solid.testharness.http.SolidClientProvider;
 
 import java.net.URI;
 import java.net.http.HttpResponse;
@@ -37,32 +37,32 @@ import static org.mockito.Mockito.*;
 class SolidContainerProviderTest {
     private static final URI ROOT_URL = URI.create("https://example.org/");
     private static final URI TEST_URL = ROOT_URL.resolve("/container/");
-    SolidClient solidClient;
+    SolidClientProvider solidClientProvider;
 
     @BeforeEach
     void setUp() {
-        solidClient = mock(SolidClient.class);
+        solidClientProvider = mock(SolidClientProvider.class);
     }
 
     @Test
     void testConstructorExceptions() {
         Exception exception = assertThrows(IllegalArgumentException.class, () ->
-                new SolidContainerProvider(solidClient, null)
+                new SolidContainerProvider(solidClientProvider, null)
         );
         assertEquals("A container url must end with /", exception.getMessage());
         exception = assertThrows(IllegalArgumentException.class, () ->
-                new SolidContainerProvider(solidClient, ROOT_URL.resolve("/not-container"))
+                new SolidContainerProvider(solidClientProvider, ROOT_URL.resolve("/not-container"))
         );
         assertEquals("A container url must end with /", exception.getMessage());
         exception = assertThrows(IllegalArgumentException.class, () ->
                 new SolidContainerProvider(null, TEST_URL)
         );
-        assertEquals("Parameter solidClient is required", exception.getMessage());
+        assertEquals("Parameter solidClientProvider is required", exception.getMessage());
     }
 
     @Test
     void testCreate() {
-        final SolidContainerProvider container = new SolidContainerProvider(solidClient, TEST_URL);
+        final SolidContainerProvider container = new SolidContainerProvider(solidClientProvider, TEST_URL);
         assertTrue(container.isContainer());
         assertTrue(container.exists());
     }
@@ -70,30 +70,30 @@ class SolidContainerProviderTest {
     @Test
     void instantiate() throws Exception {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "");
-        when(solidClient.createContainer(any())).thenReturn(mockResponse);
-        final SolidContainerProvider container = new SolidContainerProvider(solidClient, TEST_URL);
+        when(solidClientProvider.createContainer(any())).thenReturn(mockResponse);
+        final SolidContainerProvider container = new SolidContainerProvider(solidClientProvider, TEST_URL);
         assertNotNull(container.instantiate());
     }
 
     @Test
     void instantiateBadResponse() throws Exception {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(400, "BAD RESPONSE");
-        when(solidClient.createContainer(any())).thenReturn(mockResponse);
-        final SolidContainerProvider container = new SolidContainerProvider(solidClient, TEST_URL);
+        when(solidClientProvider.createContainer(any())).thenReturn(mockResponse);
+        final SolidContainerProvider container = new SolidContainerProvider(solidClientProvider, TEST_URL);
         assertNull(container.instantiate());
     }
 
     @Test
     void instantiateException() throws Exception {
-        when(solidClient.createContainer(any())).thenThrow(new Exception("FAIL"));
-        final SolidContainerProvider container = new SolidContainerProvider(solidClient, TEST_URL);
+        when(solidClientProvider.createContainer(any())).thenThrow(new Exception("FAIL"));
+        final SolidContainerProvider container = new SolidContainerProvider(solidClientProvider, TEST_URL);
         assertNull(container.instantiate());
     }
 
     @Test
     void reserveContainer() throws Exception {
-        final SolidContainerProvider container = new SolidContainerProvider(solidClient, TEST_URL);
-        when(solidClient.createResource(any(), any(), any())).thenReturn(null);
+        final SolidContainerProvider container = new SolidContainerProvider(solidClientProvider, TEST_URL);
+        when(solidClientProvider.createResource(any(), any(), any())).thenReturn(null);
         final SolidResourceProvider childResource = container.reserveContainer("container");
         assertTrue(childResource.isContainer());
         assertEquals(TEST_URL.resolve("container/"), childResource.getUrl());
@@ -101,8 +101,8 @@ class SolidContainerProviderTest {
 
     @Test
     void reserveResource() throws Exception {
-        final SolidContainerProvider container = new SolidContainerProvider(solidClient, TEST_URL);
-        when(solidClient.createResource(any(), any(), any())).thenReturn(null);
+        final SolidContainerProvider container = new SolidContainerProvider(solidClientProvider, TEST_URL);
+        when(solidClientProvider.createResource(any(), any(), any())).thenReturn(null);
         final SolidResourceProvider childResource = container.reserveResource("resource.suffix");
         assertFalse(childResource.isContainer());
         assertEquals(TEST_URL.resolve("resource.suffix"), childResource.getUrl());
@@ -110,8 +110,8 @@ class SolidContainerProviderTest {
 
     @Test
     void createResource() throws Exception {
-        final SolidContainerProvider container = new SolidContainerProvider(solidClient, TEST_URL);
-        when(solidClient.createResource(any(), any(), any())).thenReturn(null);
+        final SolidContainerProvider container = new SolidContainerProvider(solidClientProvider, TEST_URL);
+        when(solidClientProvider.createResource(any(), any(), any())).thenReturn(null);
         final SolidResourceProvider childResource = container.createResource(
                 ".suffix", "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN
         );
@@ -122,14 +122,14 @@ class SolidContainerProviderTest {
 
     @Test
     void createResourcException() {
-        final SolidContainerProvider container = new SolidContainerProvider(solidClient, TEST_URL);
+        final SolidContainerProvider container = new SolidContainerProvider(solidClientProvider, TEST_URL);
         assertNull(container.createResource(".suffix", "hello", null));
     }
 
     @Test
     void deleteContents() throws Exception {
-        final SolidContainerProvider container = new SolidContainerProvider(solidClient, TEST_URL);
+        final SolidContainerProvider container = new SolidContainerProvider(solidClientProvider, TEST_URL);
         assertDoesNotThrow(container::deleteContents);
-        verify(solidClient).deleteContentsRecursively(TEST_URL);
+        verify(solidClientProvider).deleteContentsRecursively(TEST_URL);
     }
 }

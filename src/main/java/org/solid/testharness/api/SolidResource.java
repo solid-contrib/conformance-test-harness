@@ -25,7 +25,6 @@ package org.solid.testharness.api;
 
 import org.solid.testharness.accesscontrol.AccessDataset;
 import org.solid.testharness.accesscontrol.AccessDatasetBuilder;
-import org.solid.testharness.http.SolidClient;
 import org.solid.testharness.utils.SolidContainerProvider;
 import org.solid.testharness.utils.SolidResourceProvider;
 
@@ -36,23 +35,14 @@ import java.net.URI;
  * It is an adapter designed to be used from tests written in Karate and the methods only use basic the types of String,
  * List, Map as these are automatically translated into the Javascript environment that runs the tests. The exceptions
  * to this rule are classes passed within the test safely such as <code>SolidResource</code>,
- * <code>SolidContainer</code>, <code>SolidClient</code>, and <code>AccessDataset</code>. Internally it maps calls
- * through to a <a href="#SolidResourceProvider">SolidResourceProvider</a> object.
+ * <code>SolidContainer</code>, <code>SolidClient</code>, and <code>AccessDataset</code>. Internally it maps
+ * calls through to a <a href="#SolidResourceProvider">SolidResourceProvider</a> object.
  */
 public class SolidResource {
     protected SolidResourceProvider solidResourceProvider;
 
     protected SolidResource(final SolidResourceProvider solidResourceProvider) {
         this.solidResourceProvider = solidResourceProvider;
-    }
-
-    /**
-     * Create a <code>SolidResource</code> from a <code>SolidResourceProvider</code>.
-     * @param solidResourceProvider the <code>SolidResourceProvider</code> being adapted
-     * @return the resource
-     */
-    protected static SolidResource from(final SolidResourceProvider solidResourceProvider) {
-        return new SolidResource(solidResourceProvider);
     }
 
     /**
@@ -66,7 +56,9 @@ public class SolidResource {
      */
     public static SolidResource create(final SolidClient solidClient, final String url,
                                        final String body, final String type) {
-        return new SolidResource(new SolidResourceProvider(solidClient, URI.create(url), body, type));
+        return new SolidResource(
+                new SolidResourceProvider(solidClient.solidClientProvider, URI.create(url),body, type)
+        );
     }
 
     /**
@@ -92,7 +84,7 @@ public class SolidResource {
      */
     public SolidContainer getContainer() {
         final SolidContainerProvider solidContainerProvider = solidResourceProvider.getContainer();
-        return solidContainerProvider != null ? SolidContainer.from(solidContainerProvider) : null;
+        return solidContainerProvider != null ? new SolidContainer(solidContainerProvider) : null;
     }
 
     /**
@@ -112,7 +104,7 @@ public class SolidResource {
      */
     public SolidResource findStorage() throws Exception {
         final SolidResourceProvider storage = solidResourceProvider.findStorage();
-        return storage != null ? SolidResource.from(storage) : null;
+        return storage != null ? new SolidResource(storage) : null;
     }
 
     /**
