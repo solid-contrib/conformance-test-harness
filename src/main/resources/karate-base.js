@@ -44,13 +44,13 @@ function fn() {
     karate.configure('ssl', true);
 
     return {
-        rootTestContainer: testSubject.getTestRunContainer(),
+        rootTestContainer: Java.type('org.solid.testharness.api.SolidContainer').from(testSubject.getTestRunContainer()),
         clients: karate.toMap(testHarness.clients),
         webIds: config.webIds,
         // utility classes
         RDFUtils: Java.type('org.solid.testharness.utils.RDFUtils'),
-        SolidResource: Java.type('org.solid.testharness.utils.SolidResourceProvider'),
-        SolidContainer: Java.type('org.solid.testharness.utils.SolidContainerProvider'),
+        SolidResource: Java.type('org.solid.testharness.api.SolidResource'),
+        SolidContainer: Java.type('org.solid.testharness.api.SolidContainer'),
         // useful functions
         parseWacAllowHeader: (headers) => Java.type('org.solid.testharness.http.HttpUtils').parseWacAllowHeader(headers),
         parseLinkHeaders: (headers) => Java.type('org.solid.testharness.http.HttpUtils').parseLinkHeaders(headers),

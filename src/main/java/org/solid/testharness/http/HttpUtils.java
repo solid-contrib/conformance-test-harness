@@ -191,15 +191,11 @@ public final class HttpUtils {
     }
 
     public static String ensureSlashEnd(final String value) {
-        return value != null && !value.endsWith("/") ? value + "/" : value;
+        return value != null ? value.replaceAll("/*$", "") + "/" : null;
     }
 
     public static String ensureNoSlashEnd(final String value) {
-        if (value != null && value.endsWith("/")) {
-            return value.substring(0, value.length() - 1);
-        } else {
-            return value;
-        }
+        return value != null ? value.replaceAll("/*$", "") : null;
     }
 
     public static String encodeValue(@NotNull final String value) {

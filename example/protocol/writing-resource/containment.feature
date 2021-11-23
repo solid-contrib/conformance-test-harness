@@ -20,7 +20,7 @@ Feature: Creating a resource using PUT and PATCH must create intermediate contai
     And header Accept = 'text/turtle'
     When method GET
     Then status 200
-    And match intermediateContainer.parseMembers(response) contains resource.url
+    And match RDFUtils.parseContainerContents(response, parentUrl) contains resource.url
 
     * def grandParentUrl = testContainer.url
     Given url grandParentUrl
@@ -29,7 +29,7 @@ Feature: Creating a resource using PUT and PATCH must create intermediate contai
     When method GET
     Then status 200
     * print 'GRANDPARENT CONTAINMENT TRIPLES' + response
-    And match testContainer.parseMembers(response) contains intermediateContainer.url
+    And match RDFUtils.parseContainerContents(response, grandParentUrl) contains intermediateContainer.url
 
   Scenario: PATCH creates a grandchild resource and intermediate containers
     * def resourceUrl = resource.url
@@ -46,7 +46,7 @@ Feature: Creating a resource using PUT and PATCH must create intermediate contai
     And header Accept = 'text/turtle'
     When method GET
     Then status 200
-    And match intermediateContainer.parseMembers(response) contains resource.url
+    And match RDFUtils.parseContainerContents(response, parentUrl) contains resource.url
 
     * def grandParentUrl = testContainer.url
     Given url grandParentUrl
@@ -55,4 +55,4 @@ Feature: Creating a resource using PUT and PATCH must create intermediate contai
     When method GET
     Then status 200
     * print 'GRANDPARENT CONTAINMENT TRIPLES' + response
-    And match testContainer.parseMembers(response) contains intermediateContainer.url
+    And match RDFUtils.parseContainerContents(response, grandParentUrl) contains intermediateContainer.url

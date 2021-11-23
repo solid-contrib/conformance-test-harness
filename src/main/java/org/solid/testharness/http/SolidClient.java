@@ -25,24 +25,20 @@ package org.solid.testharness.http;
 
 import jakarta.ws.rs.core.Link;
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.vocabulary.LDP;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.Rio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.ACP;
 import org.solid.common.vocab.PIM;
 import org.solid.testharness.accesscontrol.AccessControlFactory;
 import org.solid.testharness.accesscontrol.AccessDataset;
+import org.solid.testharness.accesscontrol.AccessDatasetBuilder;
 import org.solid.testharness.config.Config;
+import org.solid.testharness.utils.RDFUtils;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.inject.spi.CDI;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.URI;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
@@ -50,13 +46,10 @@ import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import static org.eclipse.rdf4j.model.util.Values.iri;
 
 public class SolidClient {
     private static final Logger logger = LoggerFactory.getLogger(SolidClient.class);
@@ -143,6 +136,10 @@ public class SolidClient {
         return accessControlFactory.createAccessDataset(response.body(), url);
     }
 
+    public AccessDatasetBuilder getAccessDatasetBuilder(final URI aclUrl) {
+        return accessControlFactory.getAccessDatasetBuilder(aclUrl.toString());
+    }
+
     public boolean hasStorageType(final URI uri) throws IOException, InterruptedException {
         return getLinkByType(uri, PIM.Storage) != null;
     }
@@ -166,18 +163,6 @@ public class SolidClient {
         return response.body();
     }
 
-    public List<String> parseMembers(final String data, final URI url) throws Exception {
-        final Model model;
-        try {
-            model = Rio.parse(new StringReader(data), url.toString(), RDFFormat.TURTLE);
-        } catch (Exception e) {
-            logger.error("RDF Parse Error: {} in {}", e, data);
-            throw (Exception) new Exception("Bad container listing").initCause(e);
-        }
-        final Set<Value> resources = model.filter(iri(url.toString()), LDP.CONTAINS, null).objects();
-        return resources.stream().map(Object::toString).collect(Collectors.toList());
-    }
-
     public void deleteResourceRecursively(final URI url) throws Exception {
         deleteRecursive(url, null).get();
     }
@@ -198,7 +183,7 @@ public class SolidClient {
             // get all members
             final List<URI> members;
             try {
-                members = parseMembers(getContentAsTurtle(url), url).stream()
+                members = RDFUtils.parseContainerContents(getContentAsTurtle(url), url.toString()).stream()
                         .map(URI::create)
                         .collect(Collectors.toList());
             } catch (Exception e) {

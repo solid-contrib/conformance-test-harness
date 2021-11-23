@@ -50,6 +50,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.solid.testharness.config.Config.AccessControlMode.ACP;
 import static org.solid.testharness.config.Config.AccessControlMode.ACP_LEGACY;
@@ -133,13 +134,13 @@ public class TestSubject {
 
         // Determine the ACL mode the server has implemented
         final SolidContainerProvider rootTestContainer = new SolidContainerProvider(solidClient,
-                config.getTestContainer());
+                URI.create(config.getTestContainer()));
         try {
-            final String aclUrl = rootTestContainer.getAclUrl();
+            final URI aclUrl = rootTestContainer.getAclUrl();
             if (aclUrl == null) {
                 throw new Exception("Cannot get ACL url for root test container: " + rootTestContainer.getUrl());
             }
-            Config.AccessControlMode accessControlMode = solidClient.getAclType(URI.create(aclUrl));
+            Config.AccessControlMode accessControlMode = solidClient.getAclType(aclUrl);
             if (accessControlMode == ACP && targetServer.getFeatures().containsKey("acp-legacy")) {
                 accessControlMode = ACP_LEGACY;
             }
@@ -155,13 +156,13 @@ public class TestSubject {
             final boolean success;
             try {
                 final SolidContainerProvider rootContainer = new SolidContainerProvider(solidClient,
-                        config.getServerRoot().toString());
+                        config.getServerRoot());
                 final String alice = config.getCredentials(HttpConstants.ALICE).webId();
                 final List<String> modes = List.of(AccessDataset.READ, AccessDataset.WRITE, AccessDataset.CONTROL);
                 final AccessDataset accessDataset = accessControlFactory
-                        .getAccessDatasetBuilder(rootContainer.getAclUrl())
-                        .setAgentAccess(rootContainer.getUrl(), alice, modes)
-                        .setInheritableAgentAccess(rootContainer.getUrl(), alice, modes)
+                        .getAccessDatasetBuilder(rootContainer.getAclUrl().toString())
+                        .setAgentAccess(rootContainer.getUrl().toString(), alice, modes)
+                        .setInheritableAgentAccess(rootContainer.getUrl().toString(), alice, modes)
                         .build();
                 logger.info("ACL doc: {}", accessDataset.toString());
                 success = rootContainer.setAccessDataset(accessDataset);
@@ -180,7 +181,7 @@ public class TestSubject {
             logger.debug("Root test container access controls: {}", rootTestContainer.getAccessDataset());
 
             // create a root container for all the test cases in this run
-            testRunContainer = rootTestContainer.createContainer();
+            testRunContainer = rootTestContainer.reserveContainer(UUID.randomUUID().toString()).instantiate();
             if (testRunContainer == null) {
                 throw new Exception("Cannot create test run container");
             }

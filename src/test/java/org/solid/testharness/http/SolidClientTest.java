@@ -26,14 +26,15 @@ package org.solid.testharness.http;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.mockito.InjectMock;
-import org.junit.jupiter.api.BeforeAll;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.solid.common.vocab.ACP;
 import org.solid.common.vocab.PIM;
 import org.solid.testharness.accesscontrol.AccessDataset;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.config.ConfigTestNormalProfile;
+import org.solid.testharness.utils.Namespaces;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 import org.solid.testharness.utils.TestUtils;
 
@@ -54,17 +55,16 @@ import static org.mockito.Mockito.*;
 import static org.solid.testharness.config.Config.AccessControlMode.WAC;
 
 @QuarkusTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestProfile(ConfigTestNormalProfile.class)
 class SolidClientTest {
-    private static final String PREFIX = "@prefix ldp: <http://www.w3.org/ns/ldp#> .";
+    private static final String PREFIX = Namespaces.generateTurtlePrefixes(List.of(LDP.PREFIX));
 
     @Inject
     ClientRegistry clientRegistry;
     @InjectMock
     Config config;
 
-    @BeforeAll
+    @BeforeEach
     void setup() {
         when(config.getReadTimeout()).thenReturn(5000);
         when(config.getAgent()).thenReturn("AGENT");
@@ -333,6 +333,14 @@ class SolidClientTest {
     }
 
     @Test
+    void getAccessDatasetBuilder() {
+        final Client mockClient = mock(Client.class);
+        final SolidClient solidClient = new SolidClient(mockClient);
+        when(config.getAccessControlMode()).thenReturn(WAC);
+        assertNotNull(solidClient.getAccessDatasetBuilder(URI.create("http://localhost:3000/test.acl")));
+    }
+
+    @Test
     void hasStorageTypeFalse() throws IOException, InterruptedException {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204);
@@ -397,32 +405,6 @@ class SolidClientTest {
         final Exception exception = assertThrows(Exception.class, () -> solidClient.getContentAsTurtle(resourceAcl));
         assertEquals("Error response=400 trying to get content for http://localhost:3000/test",
                 exception.getMessage());
-    }
-
-    @Test
-    void parseMembers() throws Exception {
-        final String data = PREFIX + "<http://localhost:3000/> ldp:contains <http://localhost:3000/test/>.";
-        final SolidClient solidClient = new SolidClient();
-        final List<String> members = solidClient.parseMembers(data, URI.create("http://localhost:3000/"));
-        assertFalse(members.isEmpty());
-        assertEquals("http://localhost:3000/test/", members.get(0));
-    }
-
-    @Test
-    void parseMembersEmpty() throws Exception {
-        final String data = PREFIX + "<http://localhost:3000/> a ldp:Container.";
-        final SolidClient solidClient = new SolidClient();
-        final List<String> members = solidClient.parseMembers(data, URI.create("http://localhost:3000/"));
-        assertTrue(members.isEmpty());
-    }
-
-    @Test
-    void parseMembersFails() {
-        final SolidClient solidClient = new SolidClient();
-        final Exception exception = assertThrows(Exception.class,
-                () -> solidClient.parseMembers("BAD", URI.create("http://localhost:3000/"))
-        );
-        assertEquals("Bad container listing", exception.getMessage());
     }
 
     @Test

@@ -29,6 +29,7 @@ import org.eclipse.rdf4j.model.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.http.HttpConstants;
+import org.solid.testharness.http.HttpUtils;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -54,7 +55,7 @@ public class Config {
     private URL subjectsUrl;
     private List<URL> testSources;
     private File outputDir;
-    private Map<String, Object> webIds;
+    private Map<String, String> webIds;
     private AccessControlMode accessControlMode;
 
     public enum AccessControlMode {
@@ -188,10 +189,7 @@ public class Config {
     }
 
     public String getTestContainer() {
-        if (!testContainer.endsWith(SLASH)) {
-            testContainer += SLASH;
-        }
-        return getServerRoot().resolve(testContainer).toString();
+        return getServerRoot().resolve(HttpUtils.ensureSlashEnd(testContainer)).toString();
     }
 
     public UserCredentials getCredentials(final String user) {
@@ -206,7 +204,7 @@ public class Config {
     }
 
     // used to provide the test features with the web IDs
-    public Map<String, Object> getWebIds() {
+    public Map<String, String> getWebIds() {
         if (webIds == null) {
             webIds = Map.of(
                     HttpConstants.ALICE, users.alice().webId(),

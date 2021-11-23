@@ -6,7 +6,7 @@ Feature: Finding the storage for a resource
 
   Scenario: Test Storage finding
     # Confirm resource is not a Storage
-    * assert !resource.hasStorageType()
+    * assert !resource.storageType
 
     # Find storage as Alice
     * def storage = resource.findStorage()
@@ -16,7 +16,7 @@ Feature: Finding the storage for a resource
     And header Accept = 'text/turtle'
     When method GET
     Then status 200
-    And assert storage.hasStorageType()
+    And assert storage.storageType
 
     # Use a local function to check the link headers
     * def hasStorageType = (ls) => ls.findIndex(l => l.rel == 'type' && l.uri == 'http://www.w3.org/ns/pim/space#Storage') != -1
@@ -40,7 +40,7 @@ Feature: Finding the storage for a resource
     And header Accept = 'text/turtle'
     When method GET
     Then status 200
-    And assert storageBob.hasStorageType()
+    And assert storageBob.storageType
 
     # Remove Bob's access
     Given url storage.url

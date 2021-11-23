@@ -55,6 +55,8 @@ import static org.solid.testharness.config.Config.AccessControlMode.*;
 @QuarkusTest
 @TestProfile(ConfigTestNormalProfile.class)
 public class TestSubjectTest {
+    private static final URI TEST_URL = URI.create("https://localhost/container/");
+
     @InjectMock
     Config config;
 
@@ -297,18 +299,18 @@ public class TestSubjectTest {
     @Test
     void tearDownServer() throws Exception {
         final SolidClient mockSolidClient = mock(SolidClient.class);
-        testSubject.setTestRunContainer(SolidContainerProvider.create(mockSolidClient, "https://localhost/container/"));
+        testSubject.setTestRunContainer(new SolidContainerProvider(mockSolidClient, TEST_URL));
         assertDoesNotThrow(() -> testSubject.tearDownServer());
-        verify(mockSolidClient).deleteResourceRecursively(eq(URI.create("https://localhost/container/")));
+        verify(mockSolidClient).deleteResourceRecursively(eq(TEST_URL));
     }
 
     @Test
     void tearDownServerFails() throws Exception {
         final SolidClient mockSolidClient = mock(SolidClient.class);
-        testSubject.setTestRunContainer(SolidContainerProvider.create(mockSolidClient, "https://localhost/container/"));
+        testSubject.setTestRunContainer(new SolidContainerProvider(mockSolidClient, TEST_URL));
         doThrow(new Exception("FAIL")).when(mockSolidClient).deleteResourceRecursively(any());
         assertDoesNotThrow(() -> testSubject.tearDownServer());
-        verify(mockSolidClient).deleteResourceRecursively(eq(URI.create("https://localhost/container/")));
+        verify(mockSolidClient).deleteResourceRecursively(eq(TEST_URL));
     }
 
     private Client setupMockConfig(final boolean setupRootAcl, final Config.AccessControlMode mode) {

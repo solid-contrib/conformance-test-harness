@@ -24,21 +24,31 @@
 package org.solid.testharness.utils;
 
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.rio.ParserConfig;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.ParseErrorLogger;
 import org.eclipse.rdf4j.rio.helpers.RDFaParserSettings;
 import org.eclipse.rdf4j.rio.helpers.RDFaVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.eclipse.rdf4j.model.util.Values.iri;
 
 public final class RDFUtils {
+    private static final Logger logger = LoggerFactory.getLogger(RDFUtils.class);
+
     public static List<String> turtleToTripleArray(final String data, final String baseUri) throws Exception {
         final Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.TURTLE);
         final StringWriter sw = new StringWriter();
@@ -65,6 +75,18 @@ public final class RDFUtils {
         parserConfig.set(RDFaParserSettings.RDFA_COMPATIBILITY, RDFaVersion.RDFA_1_1);
         return Rio.parse(new StringReader(data), baseUri, RDFFormat.RDFA,
                 parserConfig, SimpleValueFactory.getInstance(), new ParseErrorLogger());
+    }
+
+    public static List<String> parseContainerContents(final String data, final String url) throws Exception {
+        final Model model;
+        try {
+            model = Rio.parse(new StringReader(data), url, RDFFormat.TURTLE);
+        } catch (Exception e) {
+            logger.error("RDF Parse Error: {} in {}", e, data);
+            throw (Exception) new Exception("Bad container listing").initCause(e);
+        }
+        final Set<Value> resources = model.filter(iri(url), LDP.CONTAINS, null).objects();
+        return resources.stream().map(Object::toString).collect(Collectors.toList());
     }
 
     private RDFUtils() { }
