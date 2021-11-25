@@ -43,7 +43,7 @@ function fn() {
     karate.configure('readTimeout', config.readTimeout);
     karate.configure('ssl', true);
 
-    const Utils = Java.type('org.solid.testharness.utils.HttpUtils');
+    const Utils = Java.type('org.solid.testharness.api.Utils');
     const SolidContainer = Java.type('org.solid.testharness.api.SolidContainer');
     const SolidResource = Java.type('org.solid.testharness.api.SolidResource');
     const RDFUtils = Java.type('org.solid.testharness.utils.RDFUtils');
