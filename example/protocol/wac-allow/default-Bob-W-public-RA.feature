@@ -7,7 +7,7 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
         const testContainer = rootTestContainer.reserveContainer();
         const resource = testContainer.createResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
         if (resource.exists()) {
-          const access = testContainer.getAccessDatasetBuilder(webIds.alice)
+          const access = testContainer.accessDatasetBuilder
                 .setInheritableAgentAccess(testContainer.url, webIds.bob, ['write'])
                 .setInheritablePublicAccess(testContainer.url, ['read', 'append'])
                 .build();
@@ -23,14 +23,14 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
 
   Scenario: There is no acl on the resource
     Given url resource.aclUrl
-    And headers clients.alice.getAuthHeaders('HEAD', resource.getAclUrl())
+    And headers clients.alice.getAuthHeaders('HEAD', resource.aclUrl)
     And header Accept = 'text/turtle'
     When method HEAD
     Then status 404
 
   Scenario: There is an acl on the parent containing Bob's WebID
     Given url resource.container.aclUrl
-    And headers clients.alice.getAuthHeaders('GET', resource.container.getAclUrl())
+    And headers clients.alice.getAuthHeaders('GET', resource.container.aclUrl)
     And header Accept = 'text/turtle'
     When method GET
     Then status 200

@@ -7,7 +7,7 @@ Feature: Bob can only read an RDF resource to which he is only granted read acce
         const testContainer = rootTestContainer.reserveContainer();
         const resource = testContainer.createResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
         if (resource.exists()) {
-          const access = resource.getAccessDatasetBuilder(webIds.alice)
+          const access = resource.accessDatasetBuilder
             .setAgentAccess(resource.url, webIds.bob, ['read'])
             .build();
           resource.setAccessDataset(access);

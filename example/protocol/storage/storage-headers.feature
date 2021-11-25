@@ -29,7 +29,7 @@ Feature: Finding the storage for a resource
     * assert storageBob == null
 
     # Grant Bob read access to the storage root
-    * def acl = storage.getAccessDatasetBuilder(webIds.alice).setAgentAccess(storage.url, webIds.bob, ['read']).build()
+    * def acl = storage.accessDatasetBuilder.setAgentAccess(storage.url, webIds.bob, ['read']).build()
     * storage.setAccessDataset(acl)
 
     # Find storage as Bob now succeeds since he has access
