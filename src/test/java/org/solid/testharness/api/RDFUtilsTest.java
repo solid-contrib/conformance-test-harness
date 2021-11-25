@@ -21,13 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.solid.testharness.utils;
+package org.solid.testharness.api;
 
 import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.testharness.utils.TestData;
 
 import java.util.Arrays;
 import java.util.List;

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.solid.testharness.utils;
+package org.solid.testharness.api;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Value;
@@ -70,7 +70,7 @@ public final class RDFUtils {
         return Arrays.asList(sw.toString().split("\n"));
     }
 
-    public static Model parseRdfa(final String data, final String baseUri) throws IOException {
+    private static Model parseRdfa(final String data, final String baseUri) throws IOException {
         final ParserConfig parserConfig = new ParserConfig();
         parserConfig.set(RDFaParserSettings.RDFA_COMPATIBILITY, RDFaVersion.RDFA_1_1);
         return Rio.parse(new StringReader(data), baseUri, RDFFormat.RDFA,

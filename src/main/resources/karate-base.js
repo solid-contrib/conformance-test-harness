@@ -46,7 +46,7 @@ function fn() {
     const Utils = Java.type('org.solid.testharness.api.Utils');
     const SolidContainer = Java.type('org.solid.testharness.api.SolidContainer');
     const SolidResource = Java.type('org.solid.testharness.api.SolidResource');
-    const RDFUtils = Java.type('org.solid.testharness.utils.RDFUtils');
+    const RDFUtils = Java.type('org.solid.testharness.api.RDFUtils');
 
     return {
         // global variables

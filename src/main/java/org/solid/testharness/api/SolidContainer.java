@@ -23,7 +23,6 @@
  */
 package org.solid.testharness.api;
 
-import org.solid.testharness.utils.RDFUtils;
 import org.solid.testharness.utils.SolidContainerProvider;
 
 import java.net.URI;

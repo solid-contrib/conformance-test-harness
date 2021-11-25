@@ -25,6 +25,10 @@ package org.solid.testharness.http;
 
 import jakarta.ws.rs.core.Link;
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.Rio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.ACP;
@@ -33,12 +37,12 @@ import org.solid.testharness.accesscontrol.AccessControlFactory;
 import org.solid.testharness.accesscontrol.AccessDataset;
 import org.solid.testharness.accesscontrol.AccessDatasetBuilder;
 import org.solid.testharness.config.Config;
-import org.solid.testharness.utils.RDFUtils;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.inject.spi.CDI;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.URI;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
@@ -49,6 +53,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import static org.eclipse.rdf4j.model.util.Values.iri;
 
 public class SolidClientProvider {
     private static final Logger logger = LoggerFactory.getLogger(SolidClientProvider.class);
@@ -178,9 +184,7 @@ public class SolidClientProvider {
             // get all members
             final List<URI> members;
             try {
-                members = RDFUtils.parseContainerContents(getContentAsTurtle(url), url.toString()).stream()
-                        .map(URI::create)
-                        .collect(Collectors.toList());
+                members = parseContainerContents(getContentAsTurtle(url), url);
             } catch (Exception e) {
                 logger.error("Failed to get container members: {}", e.toString());
                 return CompletableFuture.completedFuture(null);
@@ -237,6 +241,20 @@ public class SolidClientProvider {
 
     private boolean isContainer(@NotNull final URI url) {
         return url.getPath().endsWith("/");
+    }
+
+    private static List<URI> parseContainerContents(final String data, final URI url) throws Exception {
+        final Model model;
+        try {
+            model = Rio.parse(new StringReader(data), url.toString(), RDFFormat.TURTLE);
+        } catch (Exception e) {
+            logger.error("RDF Parse Error: {} in {}", e, data);
+            throw (Exception) new Exception("Bad container listing").initCause(e);
+        }
+        return model.filter(iri(url.toString()), LDP.CONTAINS, null).objects().stream()
+                .map(Object::toString)
+                .map(URI::create)
+                .collect(Collectors.toList());
     }
 
     @Override
