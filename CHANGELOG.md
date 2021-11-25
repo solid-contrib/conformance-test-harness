@@ -2,6 +2,9 @@
 
 ## Release 1.0.11
 
+### Features
+* Extract Karate-facing API from internals of CTH.
+
 ### Minor changes
 * Improve error handling & reporting when running tests locally.
 

@@ -87,11 +87,11 @@ public class AuthManager {
         }
     }
 
-    public SolidClient authenticate(@NotNull final String user, final boolean authRequired)
+    public SolidClientProvider authenticate(@NotNull final String user, final boolean authRequired)
             throws Exception {
         requireNonNull(user, "user must not be null");
         if (!authRequired) {
-            return new SolidClient();
+            return new SolidClientProvider();
         }
         final Client authClient;
         if (clientRegistry.hasClient(user)) {
@@ -122,7 +122,7 @@ public class AuthManager {
             }
             authClient.setAccessToken(tokens.getAccessToken());
         }
-        return new SolidClient(authClient);
+        return new SolidClientProvider(authClient);
     }
 
     private Tokens exchangeRefreshToken(final Client authClient, final UserCredentials userConfig,

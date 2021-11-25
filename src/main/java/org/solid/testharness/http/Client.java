@@ -225,14 +225,14 @@ public class Client {
      * @param uri URI of request
      * @return Map of authentication and agent headers
      */
-    public Map<String, String> getAuthHeaders(@NotNull final String method, @NotNull final String uri) {
+    public Map<String, String> getAuthHeaders(@NotNull final String method, @NotNull final URI uri) {
         requireNonNull(method, "method is required");
         requireNonNull(uri, "uri is required");
         final Map<String, String> headers = new HashMap<>();
         if (accessToken == null) return headers;
         if (dpopSupported) {
             headers.put(HttpConstants.HEADER_AUTHORIZATION, HttpConstants.PREFIX_DPOP + accessToken);
-            final String dpopToken = generateDpopToken(method, uri);
+            final String dpopToken = generateDpopToken(method, uri.toString());
             headers.put(HttpConstants.HEADER_DPOP, dpopToken);
         } else {
             headers.put(HttpConstants.HEADER_AUTHORIZATION, HttpConstants.PREFIX_BEARER + accessToken);

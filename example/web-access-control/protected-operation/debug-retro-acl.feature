@@ -8,25 +8,25 @@ Feature: Test ACL in applyMembers mode retrospectively applied
     # get the initial ACR for that resource
     Given url testResource.aclUrl
     And header Accept = 'text/turtle'
-    And headers clients.alice.getAuthHeaders('GET', testResource.getAclUrl())
+    And headers clients.alice.getAuthHeaders('GET', testResource.aclUrl)
     When method GET
     Then status 200
     * print "INITIAL ACR: " + response
 
     # confirm Bob has no read access
     Given url testResource.url
-    And headers clients.bob.getAuthHeaders('GET', testResource.getUrl())
+    And headers clients.bob.getAuthHeaders('GET', testResource.url)
     When method GET
     Then status 403
 
     # grant Bob read access to member resources
-    * def access = testContainer.getAccessDatasetBuilder(webIds.alice).setInheritableAgentAccess(testContainer.url, webIds.bob, ['read']).build()
+    * def access = testContainer.accessDatasetBuilder.setInheritableAgentAccess(testContainer.url, webIds.bob, ['read']).build()
     * assert testContainer.setAccessDataset(access)
 
     # get the container ACR to confirm it changed
     Given url testContainer.aclUrl
     And header Accept = 'text/turtle'
-    And headers clients.alice.getAuthHeaders('GET', testContainer.getAclUrl())
+    And headers clients.alice.getAuthHeaders('GET', testContainer.aclUrl)
     When method GET
     Then status 200
     * print "NEW CONTAINER ACR: " + response
@@ -35,7 +35,7 @@ Feature: Test ACL in applyMembers mode retrospectively applied
     # get the resource ACR to confirm it changed and references the container ACR
     Given url testResource.aclUrl
     And header Accept = 'text/turtle'
-    And headers clients.alice.getAuthHeaders('GET', testResource.getAclUrl())
+    And headers clients.alice.getAuthHeaders('GET', testResource.aclUrl)
     When method GET
     Then status 200
     * print "NEW RESOURCE ACR: " + response
@@ -43,6 +43,6 @@ Feature: Test ACL in applyMembers mode retrospectively applied
 
     # can Bob read the resource
     Given url testResource.url
-    And headers clients.bob.getAuthHeaders('GET', testResource.getUrl())
+    And headers clients.bob.getAuthHeaders('GET', testResource.url)
     When method GET
     Then status 200

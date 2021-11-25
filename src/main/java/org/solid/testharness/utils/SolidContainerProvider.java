@@ -26,34 +26,21 @@ package org.solid.testharness.utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.http.HttpUtils;
-import org.solid.testharness.http.SolidClient;
+import org.solid.testharness.http.SolidClientProvider;
 
 import java.net.URI;
 import java.net.http.HttpResponse;
-import java.util.List;
-import java.util.UUID;
 
 public class SolidContainerProvider extends SolidResourceProvider {
     private static final Logger logger = LoggerFactory.getLogger(SolidContainerProvider.class);
 
-    public SolidContainerProvider(final SolidClient solidClient, final String url) throws IllegalArgumentException {
-        super(solidClient, validateUrl(url), null, null);
+    public SolidContainerProvider(final SolidClientProvider solidClientProvider, final URI url)
+            throws IllegalArgumentException {
+        super(solidClientProvider, validateUrl(url), null, null);
     }
 
-    public static SolidContainerProvider create(final SolidClient solidClient, final String url) {
-        return new SolidContainerProvider(solidClient, url);
-    }
-
-    public List<String> listMembers() throws Exception {
-        return parseMembers(solidClient.getContentAsTurtle(url));
-    }
-
-    public List<String> parseMembers(final String data) throws Exception {
-        return solidClient.parseMembers(data, url);
-    }
-
-    private static String validateUrl(final String url) {
-        if (url == null || !url.endsWith("/")) {
+    private static URI validateUrl(final URI url) {
+        if (url == null || !url.toString().endsWith("/")) {
             throw new IllegalArgumentException("A container url must end with /");
         }
         return url;
@@ -61,7 +48,7 @@ public class SolidContainerProvider extends SolidResourceProvider {
 
     public SolidContainerProvider instantiate() {
         try {
-            final HttpResponse<String> response = solidClient.createContainer(this.url);
+            final HttpResponse<String> response = solidClientProvider.createContainer(this.url);
             if (HttpUtils.isSuccessful(response.statusCode())) {
                 return this;
             } else {
@@ -75,24 +62,19 @@ public class SolidContainerProvider extends SolidResourceProvider {
         }
     }
 
-    public SolidContainerProvider createContainer() {
-        return new SolidContainerProvider(super.solidClient, url.resolve(UUID.randomUUID() + "/").toString())
-                .instantiate();
+    public SolidContainerProvider reserveContainer(final String name) {
+        return new SolidContainerProvider(super.solidClientProvider, url.resolve(HttpUtils.ensureSlashEnd(name)));
     }
 
-    public SolidContainerProvider reserveContainer() {
-        return new SolidContainerProvider(super.solidClient, url.resolve(UUID.randomUUID() + "/").toString());
+    public SolidResourceProvider reserveResource(final String name) {
+        return new SolidResourceProvider(super.solidClientProvider, url.resolve(HttpUtils.ensureNoSlashEnd(name)));
     }
 
-    public SolidResourceProvider reserveResource(final String suffix) {
-        return new SolidResourceProvider(super.solidClient, url.resolve(UUID.randomUUID() + suffix).toString());
-    }
-
-    public SolidResourceProvider createResource(final String suffix, final String body, final String type) {
+    public SolidResourceProvider createResource(final String name, final String body, final String type) {
         try {
-            final URI childUrl = url.resolve(UUID.randomUUID() + suffix);
+            final URI childUrl = url.resolve(HttpUtils.ensureNoSlashEnd(name));
             logger.info("Create child in {}: {}", url, childUrl);
-            return new SolidResourceProvider(super.solidClient, childUrl.toString(), body, type);
+            return new SolidResourceProvider(super.solidClientProvider, childUrl, body, type);
         } catch (Exception e) {
             logger.error("createResource in " + url.toString() + " failed", e);
         }
@@ -100,6 +82,6 @@ public class SolidContainerProvider extends SolidResourceProvider {
     }
 
     public void deleteContents() throws Exception {
-        solidClient.deleteContentsRecursively(url);
+        solidClientProvider.deleteContentsRecursively(url);
     }
 }

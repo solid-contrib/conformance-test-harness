@@ -27,7 +27,6 @@ import com.intuit.karate.core.ScenarioEngine;
 import jakarta.ws.rs.core.Link;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.solid.testharness.config.Config;
 
 import javax.enterprise.inject.spi.CDI;
@@ -46,7 +45,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public final class HttpUtils {
-    private static final Logger logger = LoggerFactory.getLogger(HttpUtils.class);
     private static final String RESPONSE_PREFIX = "  < ";
     private static final String REQUEST_PREFIX = "  > ";
     private static Config config;
@@ -191,15 +189,11 @@ public final class HttpUtils {
     }
 
     public static String ensureSlashEnd(final String value) {
-        return value != null && !value.endsWith("/") ? value + "/" : value;
+        return value != null ? value.replaceAll("/*$", "") + "/" : null;
     }
 
     public static String ensureNoSlashEnd(final String value) {
-        if (value != null && value.endsWith("/")) {
-            return value.substring(0, value.length() - 1);
-        } else {
-            return value;
-        }
+        return value != null ? value.replaceAll("/*$", "") : null;
     }
 
     public static String encodeValue(@NotNull final String value) {
@@ -239,75 +233,12 @@ public final class HttpUtils {
         Objects.requireNonNull(headers, "headers is required");
         List<String> links = headers.allValues(HttpConstants.HEADER_LINK);
         // TODO: the following must be applied to all link headers, then the whole list flattened
-        if (links.size() == 1 && links.get(0).contains(", ")) {
-            links = Arrays.asList(links.get(0).split(", "));
+        if (links.size() == 1 && links.get(0).contains(",")) {
+            links = Arrays.asList(links.get(0).split("\\s*,\\s*"));
         }
         return links.stream().map(Link::valueOf).collect(Collectors.toList());
     }
 
-    // This version is used in Karate tests which only work with simple classes and collections
-    public static List<Map<String, String>> parseLinkHeaders(final Map<String, List<String>> headers) {
-        if (headers == null) {
-            return Collections.EMPTY_LIST;
-        }
-        List<String> links = headers.entrySet()
-                .stream()
-                .filter(entry -> "link".equals(entry.getKey().toLowerCase(Locale.ROOT)))
-                .findFirst()
-                .map(Map.Entry::getValue)
-                .orElse(Collections.EMPTY_LIST);
-        if (links.size() == 1 && links.get(0).contains(", ")) {
-            links = Arrays.asList(links.get(0).split(", "));
-        }
-        return links.stream().map(Link::valueOf).map(l -> {
-            final var map = new HashMap<String, String>();
-            map.put("rel", l.getRel());
-            map.put("uri", l.getUri().toString());
-            if (l.getTitle() != null) map.put("title", l.getTitle());
-            if (l.getType() != null) map.put("type", l.getType());
-            return map;
-        }).collect(Collectors.toList());
-    }
-
-    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
-    // This method deliberately creates objects in a loop dependent on the structure of the header
-    public static Map<String, List<String>> parseWacAllowHeader(@NotNull final Map<String, List<String>> headers) {
-        Objects.requireNonNull(headers, "headers is required");
-        logger.debug("WAC-Allow: {}", headers);
-        final Map<String, Set<String>> permissions = new HashMap<>();
-        permissions.put("user", new HashSet<>());
-        permissions.put("public", new HashSet<>());
-        final Optional<Map.Entry<String, List<String>>> header = headers.entrySet()
-                .stream()
-                .filter(entry -> HttpConstants.HEADER_WAC_ALLOW.equalsIgnoreCase(entry.getKey()))
-                .findFirst();
-        if (header.isPresent()) {
-            final String wacAllowHeader = header.get().getValue().get(0);
-            // note this does not support imbalanced quotes
-            final Pattern p = Pattern.compile("(\\w+)\\s*=\\s*\"?\\s*((?:\\s*[^\",\\s]+)*)\\s*\"?");
-            final Matcher m = p.matcher(wacAllowHeader);
-            while (m.find()) {
-                if (!permissions.containsKey(m.group(1))) {
-                    permissions.put(m.group(1), new HashSet<>());
-                }
-                if (!m.group(2).isEmpty()) {
-                    permissions.get(m.group(1)).addAll(
-                            Arrays.asList(m.group(2).toLowerCase(Locale.ROOT).split("\\s+"))
-                    );
-                }
-            }
-        } else {
-            logger.error("WAC-Allow header missing");
-        }
-        return permissions.entrySet().stream().collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> List.copyOf(entry.getValue())));
-    }
-
-    public static String resolveUri(@NotNull final String baseUri, @NotNull final String target) {
-        if (baseUri == null || target == null) return null;
-        return URI.create(baseUri).resolve(URI.create(target)).toString();
-    }
 
     private static Config getConfig() {
         synchronized (HttpUtils.class) {

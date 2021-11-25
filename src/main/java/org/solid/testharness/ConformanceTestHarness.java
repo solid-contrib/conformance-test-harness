@@ -31,12 +31,12 @@ import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.DOAP;
 import org.solid.common.vocab.EARL;
 import org.solid.common.vocab.RDF;
+import org.solid.testharness.api.SolidClient;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.discovery.TestSuiteDescription;
 import org.solid.testharness.http.AuthManager;
 import org.solid.testharness.http.HttpConstants;
-import org.solid.testharness.http.SolidClient;
 import org.solid.testharness.reporting.ReportGenerator;
 import org.solid.testharness.reporting.TestSuiteResults;
 import org.solid.testharness.utils.DataRepository;
@@ -226,7 +226,7 @@ public class ConformanceTestHarness {
         clients = new HashMap<>();
         config.getWebIds().keySet().forEach(user -> {
             try {
-                clients.put(user, authManager.authenticate(user, authRequired));
+                clients.put(user, new SolidClient(authManager.authenticate(user, authRequired)));
             } catch (Exception e) {
                 throw (TestHarnessInitializationException) new TestHarnessInitializationException(
                         "Failed to register clients: %s", e.toString()
@@ -235,6 +235,10 @@ public class ConformanceTestHarness {
         });
     }
 
+    /**
+     * Return a map of the <code>SolidClient</code> instances available to the Karate tests.
+     * @return the map of clients
+     */
     public Map<String, SolidClient> getClients() {
         return clients;
     }

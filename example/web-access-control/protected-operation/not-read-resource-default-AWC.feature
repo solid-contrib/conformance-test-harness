@@ -5,7 +5,7 @@ Feature: Bob cannot read an RDF resource to which he is not granted default read
     """
       function() {
         const testContainer = rootTestContainer.createContainer();
-        const access = testContainer.getAccessDatasetBuilder(webIds.alice)
+        const access = testContainer.accessDatasetBuilder
           .setAgentAccess(testContainer.url, webIds.bob, ['write'])
           .setInheritableAgentAccess(testContainer.url, webIds.bob, ['append', 'write', 'control'])
           .build();

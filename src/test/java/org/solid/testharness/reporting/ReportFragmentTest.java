@@ -40,7 +40,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.*;
 import org.solid.testharness.utils.DataRepository;
-import org.solid.testharness.utils.RDFUtils;
 import org.solid.testharness.utils.TestUtils;
 
 import javax.enterprise.event.Observes;
@@ -101,7 +100,7 @@ class ReportFragmentTest {
 
         logger.debug("Step Model:\n{}", TestUtils.toTurtle(step.getModel()));
 
-        final Model reportModel = RDFUtils.parseRdfa(report, BASE_URI);
+        final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
         // remove list from model to just compare the step
         reportModel.remove(null, DCTERMS.hasPart, null);
         reportModel.remove(null, RDF.first, null);
@@ -126,7 +125,7 @@ class ReportFragmentTest {
         logger.debug("Scenario Model:\n{}", TestUtils.toTurtle(scenario.getModel()));
         logger.debug("Scenario Model:\n{}", TestUtils.toTriples(scenario.getModel()));
 
-        final Model reportModel = RDFUtils.parseRdfa(report, BASE_URI);
+        final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
         // remove section hasPart to compare
         reportModel.remove(iri(BASE_URI), DCTERMS.hasPart, null);
 
@@ -154,7 +153,7 @@ class ReportFragmentTest {
 
         logger.debug("TestCase Model:\n{}", TestUtils.toTurtle(testCase.getModel()));
 
-        final Model reportModel = RDFUtils.parseRdfa(report, BASE_URI);
+        final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         TestUtils.showModelDifferences(reportModel, testCase.getModel(), logger);
@@ -172,7 +171,7 @@ class ReportFragmentTest {
 
         logger.debug("SpecificationRequirement Model:\n{}", TestUtils.toTurtle(requirement.getModel()));
 
-        final Model reportModel = RDFUtils.parseRdfa(report, BASE_URI);
+        final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
         // remove section hasPart to compare
         reportModel.remove(iri(BASE_URI), DCTERMS.hasPart, null);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
@@ -200,7 +199,7 @@ class ReportFragmentTest {
 
         logger.debug("SpecificationRequirement Model:\n{}", TestUtils.toTurtle(requirement.getModel()));
 
-        final Model reportModel = RDFUtils.parseRdfa(report, BASE_URI);
+        final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
         // remove section hasPart to compare
         reportModel.remove(iri(BASE_URI), DCTERMS.hasPart, null);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
@@ -218,7 +217,7 @@ class ReportFragmentTest {
         final String report = render("specifications", List.of(specification));
         logger.debug("Report:\n{}", report);
 
-        final Model reportModel = RDFUtils.parseRdfa(report, BASE_URI);
+        final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         TestUtils.showModelDifferences(reportModel, specification.getModel(), logger);
@@ -234,7 +233,7 @@ class ReportFragmentTest {
         final String report = render("assertor", assertor);
         logger.debug("Report:\n{}", report);
 
-        final Model reportModel = RDFUtils.parseRdfa(report, BASE_URI);
+        final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         TestUtils.showModelDifferences(reportModel, assertor.getModel(), logger);
@@ -250,7 +249,7 @@ class ReportFragmentTest {
         final String report = render("specificationTests", specificationTests);
         logger.debug("Report:\n{}", report);
 
-        final Model reportModel = RDFUtils.parseRdfa(report, BASE_URI + "#tests");
+        final Model reportModel = TestUtils.parseRdfa(report, BASE_URI + "#tests");
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         TestUtils.showModelDifferences(reportModel, specificationTests.getModel(), logger);
@@ -267,7 +266,7 @@ class ReportFragmentTest {
         final String report = render("testSubject", testSubject);
         logger.debug("Report:\n{}", report);
 
-        final Model reportModel = RDFUtils.parseRdfa(report, BASE_URI);
+        final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         TestUtils.showModelDifferences(reportModel, testSubject.getModel(), logger);
@@ -315,7 +314,7 @@ class ReportFragmentTest {
         final String report = render("specificationRequirements", List.of(requirement), "coverageMode", true);
         logger.debug("Report:\n{}", report);
 
-        final Model reportModel = RDFUtils.parseRdfa(report, BASE_URI);
+        final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
         // remove section hasPart to compare
         reportModel.remove(iri(BASE_URI), DCTERMS.hasPart, null);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));

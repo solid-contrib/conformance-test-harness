@@ -5,7 +5,7 @@ Feature: Bob cannot read a container or children if he is not given any access
     """
       function() {
         const testContainer = rootTestContainer.createContainer();
-        const access = testContainer.getAccessDatasetBuilder(webIds.alice).build();
+        const access = testContainer.accessDatasetBuilder.build();
         if (testContainer.setAccessDataset(access)) {
           const intermediateContainer = testContainer.reserveContainer();
           const resource = intermediateContainer.createResource('.txt', 'hello', 'text/plain')

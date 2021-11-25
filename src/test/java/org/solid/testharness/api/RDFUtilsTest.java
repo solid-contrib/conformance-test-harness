@@ -21,12 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.solid.testharness.utils;
+package org.solid.testharness.api;
 
 import io.quarkus.test.junit.QuarkusTest;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.testharness.utils.TestData;
 
 import java.util.Arrays;
 import java.util.List;
@@ -36,6 +38,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 class RDFUtilsTest {
     private static final Logger logger = LoggerFactory.getLogger(RDFUtilsTest.class);
+    private static final String TEST_URL = "https://example.org/";
+    private static final String CHLID = "https://example.org/test/";
+    private static final String NO_MEMBERS = String.format("<%s> a <%s>.", TEST_URL, LDP.CONTAINER);
+    private static final String MEMBERS = String.format("<%s> <%s> <%s>.", TEST_URL, LDP.CONTAINS, CHLID);
 
     @Test
     void turtleToTripleArray() throws Exception {
@@ -75,5 +81,26 @@ class RDFUtilsTest {
     @Test
     void rdfaToTripleArrayFails() {
         assertThrows(Exception.class, () -> RDFUtils.rdfaToTripleArray("Not RDFa", TestData.SAMPLE_BASE));
+    }
+
+    @Test
+    void parseMembers() throws Exception {
+        final List<String> members = RDFUtils.parseContainerContents(MEMBERS, TEST_URL);
+        assertFalse(members.isEmpty());
+        assertEquals(CHLID, members.get(0));
+    }
+
+    @Test
+    void parseMembersEmpty() throws Exception {
+        final List<String> members = RDFUtils.parseContainerContents(NO_MEMBERS, TEST_URL);
+        assertTrue(members.isEmpty());
+    }
+
+    @Test
+    void parseMembersFails() {
+        final Exception exception = assertThrows(Exception.class,
+                () -> RDFUtils.parseContainerContents("BAD", TEST_URL)
+        );
+        assertEquals("Bad container listing", exception.getMessage());
     }
 }

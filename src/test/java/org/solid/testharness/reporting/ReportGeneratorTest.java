@@ -136,7 +136,7 @@ class ReportGeneratorTest {
         reportGenerator.buildHtmlResultReport(sw);
         final String report = sw.toString();
 //        logger.debug("OUTPUT:\n{}", report);
-        final Model reportModel = RDFUtils.parseRdfa(report, Namespaces.TEST_HARNESS_URI);
+        final Model reportModel = TestUtils.parseRdfa(report, Namespaces.TEST_HARNESS_URI);
 //        logger.debug("TURTLE:\n{}", TestUtils.toTurtle(reportModel));
         logger.debug("Report contains {} triples", reportModel.size());
 
@@ -176,7 +176,7 @@ class ReportGeneratorTest {
         reportGenerator.buildHtmlCoverageReport(sw);
         final String report = sw.toString();
 //        logger.debug("OUTPUT:\n{}", report);
-        final Model reportModel = RDFUtils.parseRdfa(report, Namespaces.TEST_HARNESS_URI);
+        final Model reportModel = TestUtils.parseRdfa(report, Namespaces.TEST_HARNESS_URI);
 //        logger.debug("TURTLE:\n{}", TestUtils.toTurtle(reportModel));
         logger.debug("Report contains {} triples", reportModel.size());
 

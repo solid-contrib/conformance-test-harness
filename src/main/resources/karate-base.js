@@ -43,22 +43,31 @@ function fn() {
     karate.configure('readTimeout', config.readTimeout);
     karate.configure('ssl', true);
 
+    const Utils = Java.type('org.solid.testharness.api.Utils');
+    const SolidContainer = Java.type('org.solid.testharness.api.SolidContainer');
+    const SolidResource = Java.type('org.solid.testharness.api.SolidResource');
+    const RDFUtils = Java.type('org.solid.testharness.api.RDFUtils');
+
     return {
-        rootTestContainer: testSubject.getTestRunContainer(),
+        // global variables
+        rootTestContainer: new SolidContainer(testSubject.getTestRunContainer()),
         clients: karate.toMap(testHarness.clients),
         webIds: config.webIds,
-        // utility classes
-        RDFUtils: Java.type('org.solid.testharness.utils.RDFUtils'),
-        SolidResource: Java.type('org.solid.testharness.utils.SolidResourceProvider'),
-        SolidContainer: Java.type('org.solid.testharness.utils.SolidContainerProvider'),
+
+        // utility libraries
+        RDFUtils,
+        SolidResource,
+        SolidContainer,
+
         // useful functions
-        parseWacAllowHeader: (headers) => Java.type('org.solid.testharness.http.HttpUtils').parseWacAllowHeader(headers),
-        parseLinkHeaders: (headers) => Java.type('org.solid.testharness.http.HttpUtils').parseLinkHeaders(headers),
-        resolveUri: (base, target) => Java.type('org.solid.testharness.http.HttpUtils').resolveUri(base, target),
+        parseWacAllowHeader: (headers) => Utils.parseWacAllowHeader(headers),
+        parseLinkHeaders: (headers) => Utils.parseLinkHeaders(headers),
+        resolveUri: (base, target) => Utils.resolveUri(base, target),
+        pause: (pause) => java.lang.Thread.sleep(pause),
+
         // @deprecated - use rootTestContainer.reserveContainer()
         createTestContainer: () => rootTestContainer.reserveContainer(),
         // @deprecated - use rootTestContainer.createContainer()
-        createTestContainerImmediate: () => rootTestContainer.createContainer(),
-        pause: (pause) => java.lang.Thread.sleep(pause)
+        createTestContainerImmediate: () => rootTestContainer.createContainer()
     };
 }

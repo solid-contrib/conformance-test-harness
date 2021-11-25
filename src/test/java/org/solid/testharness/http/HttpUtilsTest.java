@@ -333,8 +333,10 @@ class HttpUtilsTest {
         assertNull(HttpUtils.ensureSlashEnd(null));
         assertEquals("/", HttpUtils.ensureSlashEnd(""));
         assertEquals("/", HttpUtils.ensureSlashEnd("/"));
+        assertEquals("/", HttpUtils.ensureSlashEnd("//"));
         assertEquals("abc/", HttpUtils.ensureSlashEnd("abc"));
         assertEquals("abc/", HttpUtils.ensureSlashEnd("abc/"));
+        assertEquals("abc/", HttpUtils.ensureSlashEnd("abc//"));
     }
 
     @Test
@@ -342,8 +344,10 @@ class HttpUtilsTest {
         assertNull(HttpUtils.ensureNoSlashEnd(null));
         assertEquals("", HttpUtils.ensureNoSlashEnd(""));
         assertEquals("", HttpUtils.ensureNoSlashEnd("/"));
+        assertEquals("", HttpUtils.ensureNoSlashEnd("//"));
         assertEquals("abc", HttpUtils.ensureNoSlashEnd("abc"));
         assertEquals("abc", HttpUtils.ensureNoSlashEnd("abc/"));
+        assertEquals("abc", HttpUtils.ensureNoSlashEnd("abc//"));
     }
 
     @Test
@@ -462,111 +466,7 @@ class HttpUtilsTest {
 
     @Test
     void parseLinkHeadersNull() {
-        assertThrows(NullPointerException.class, () -> HttpUtils.parseLinkHeaders((HttpHeaders) null));
-    }
-
-    @Test
-    void parseLinkHeaders2() {
-        final List<Map<String, String>> links = HttpUtils.parseLinkHeaders(setupHeaders(HttpConstants.HEADER_LINK,
-                List.of("<https://example.org/next>; rel=\"next\"; title=\"title\"; type=\"type\"")).map());
-        assertEquals(1, links.size());
-        assertEquals("https://example.org/next", links.get(0).get("uri"));
-        assertEquals("title", links.get(0).get("title"));
-        assertEquals("type", links.get(0).get("type"));
-        assertEquals("next", links.get(0).get("rel"));
-    }
-
-    @Test
-    void parseLinkHeaders2TwoInOne() {
-        final List<Map<String, String>> links = HttpUtils.parseLinkHeaders(setupHeaders(HttpConstants.HEADER_LINK,
-                List.of("<https://example.org/next>; rel=\"next\", <https://example.org/last>; rel=\"last\"")).map());
-        assertEquals(2, links.size());
-        assertEquals("https://example.org/next", links.get(0).get("uri"));
-        assertEquals("next", links.get(0).get("rel"));
-        assertEquals("https://example.org/last", links.get(1).get("uri"));
-        assertEquals("last", links.get(1).get("rel"));
-    }
-
-    @Test
-    void parseLinkHeaders2Two() {
-        final List<Map<String, String>> links = HttpUtils.parseLinkHeaders(setupHeaders(HttpConstants.HEADER_LINK,
-                List.of("<https://example.org/type1>; rel=\"type\"",
-                        "<https://example.org/next>; rel=\"next\"; type=\"text/plain\"")).map());
-        assertEquals("https://example.org/type1", links.get(0).get("uri"));
-        assertEquals("type", links.get(0).get("rel"));
-        assertEquals("https://example.org/next", links.get(1).get("uri"));
-        assertEquals("next", links.get(1).get("rel"));
-        assertEquals("text/plain", links.get(1).get("type"));
-    }
-
-    @Test
-    void parseLinkHeaders2NoLink() {
-        assertTrue(HttpUtils.parseLinkHeaders(setupHeaders("NotLink", List.of("something")).map()).isEmpty());
-    }
-
-    @Test
-    void parseLinkHeaders2Null() {
-        assertTrue(HttpUtils.parseLinkHeaders((Map<String, List<String>>) null).isEmpty());
-    }
-
-    @Test
-    void parseWacAllowHeader() {
-        final Map<String, List<String>> header = HttpUtils.parseWacAllowHeader(
-                Map.of(HttpConstants.HEADER_WAC_ALLOW, List.of("user=\"read write\", public=\"read\""))
-        );
-        assertEquals(2, header.get("user").size());
-        assertEquals("read", header.get("user").get(0));
-        assertEquals("write", header.get("user").get(1));
-        assertEquals(1, header.get("public").size());
-        assertEquals("read", header.get("public").get(0));
-    }
-
-    @Test
-    void parseWacAllowHeaderEmptyGroup() {
-        final Map<String, List<String>> header = HttpUtils.parseWacAllowHeader(
-                Map.of(HttpConstants.HEADER_WAC_ALLOW, List.of("user=\"read\", public="))
-        );
-        assertEquals(1, header.get("user").size());
-        assertEquals("read", header.get("user").get(0));
-        assertTrue(header.get("public").isEmpty());
-    }
-
-    @Test
-    void parseWacAllowHeaderNewGroup() {
-        final Map<String, List<String>> header = HttpUtils.parseWacAllowHeader(
-                Map.of(HttpConstants.HEADER_WAC_ALLOW, List.of("user=\"read\", internal=\"append\""))
-        );
-        assertEquals(1, header.get("user").size());
-        assertEquals("read", header.get("user").get(0));
-        assertTrue(header.get("public").isEmpty());
-        assertEquals(1, header.get("internal").size());
-        assertEquals("append", header.get("internal").get(0));
-    }
-
-    @Test
-    void parseWacAllowHeaderMissing() {
-        final Map<String, List<String>> header = HttpUtils.parseWacAllowHeader(
-                Map.of("NotWacAllow", List.of("something"))
-        );
-        assertTrue(header.get("user").isEmpty());
-        assertTrue(header.get("public").isEmpty());
-    }
-
-    @Test
-    void parseWacAllowHeaderNull() {
-        assertThrows(NullPointerException.class, () -> HttpUtils.parseWacAllowHeader(null));
-    }
-
-    @Test
-    void resolveUriNulls() {
-        assertNull(HttpUtils.resolveUri(null, ""));
-        assertNull(HttpUtils.resolveUri("", null));
-    }
-
-    @Test
-    void resolveUri() {
-        assertEquals("https://example.org/new/", HttpUtils.resolveUri("https://example.org/path/old/", "/new/"));
-        assertEquals("https://example.org/path/new", HttpUtils.resolveUri("https://example.org/path/old", "new"));
+        assertThrows(NullPointerException.class, () -> HttpUtils.parseLinkHeaders(null));
     }
 
     private HttpHeaders setupHeaders(final String name, final List<String> values) {

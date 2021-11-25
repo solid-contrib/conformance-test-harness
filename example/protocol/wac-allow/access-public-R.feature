@@ -7,7 +7,7 @@ Feature: The WAC-Allow header shows user and public access modes with public rea
         const testContainer = rootTestContainer.reserveContainer();
         const resource = testContainer.createResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
         if (resource.exists()) {
-          const access = resource.getAccessDatasetBuilder(webIds.alice)
+          const access = resource.accessDatasetBuilder
                 .setPublicAccess(resource.url, ['read'])
                 .build();
           resource.setAccessDataset(access);
@@ -22,7 +22,7 @@ Feature: The WAC-Allow header shows user and public access modes with public rea
 
   Scenario: There is an acl on the resource granting public access
     Given url resource.aclUrl
-    And headers clients.alice.getAuthHeaders('GET', resource.getAclUrl())
+    And headers clients.alice.getAuthHeaders('GET', resource.aclUrl)
     And header Accept = 'text/turtle'
     When method GET
     Then status 200
@@ -33,7 +33,7 @@ Feature: The WAC-Allow header shows user and public access modes with public rea
 
   Scenario: There is no acl on the parent
     Given url resource.container.aclUrl
-    And headers clients.alice.getAuthHeaders('HEAD', resource.container.getAclUrl())
+    And headers clients.alice.getAuthHeaders('HEAD', resource.container.aclUrl)
     And header Accept = 'text/turtle'
     When method HEAD
     Then status 404

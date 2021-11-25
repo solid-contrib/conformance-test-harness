@@ -88,8 +88,8 @@ class AuthManagerTest {
     @Test
     void authenticateNonAuthenticating() throws Exception {
         when(clientRegistry.getClient(ClientRegistry.DEFAULT)).thenReturn(client);
-        final SolidClient solidClient = authManager.authenticate("ignored", false);
-        assertTrue(solidClient.getClient().getUser().isEmpty());
+        final SolidClientProvider solidClientProvider = authManager.authenticate("ignored", false);
+        assertTrue(solidClientProvider.getClient().getUser().isEmpty());
     }
 
     @Test
@@ -97,8 +97,8 @@ class AuthManagerTest {
         final Client client = new Client.Builder("existing").build();
         when(clientRegistry.hasClient("existing")).thenReturn(true);
         when(clientRegistry.getClient("existing")).thenReturn(client);
-        final SolidClient solidClient = authManager.authenticate("existing", true);
-        assertEquals("existing", solidClient.getClient().getUser());
+        final SolidClientProvider solidClientProvider = authManager.authenticate("existing", true);
+        assertEquals("existing", solidClientProvider.getClient().getUser());
         verify(config, never()).getCredentials("existing");
     }
 
@@ -193,8 +193,8 @@ class AuthManagerTest {
         credentials.clientSecret = Optional.of("CLIENTSECRET");
         when(config.getCredentials("test6")).thenReturn(credentials);
 
-        final SolidClient solidClient = authManager.authenticate("test6", true);
-        assertEquals("ACCESS_TOKEN", solidClient.getClient().getAccessToken());
+        final SolidClientProvider solidClientProvider = authManager.authenticate("test6", true);
+        assertEquals("ACCESS_TOKEN", solidClientProvider.getClient().getAccessToken());
     }
 
     @Test
@@ -341,8 +341,8 @@ class AuthManagerTest {
         when(config.getOrigin()).thenReturn("https://origin/goodcode");
         setupLogin(baseUri, "test15", "PASSWORD", "/login/password", null);
 
-        final SolidClient solidClient = authManager.authenticate("test15", true);
-        assertEquals("ACCESS_TOKEN", solidClient.getClient().getAccessToken());
+        final SolidClientProvider solidClientProvider = authManager.authenticate("test15", true);
+        assertEquals("ACCESS_TOKEN", solidClientProvider.getClient().getAccessToken());
     }
 
     @Test
@@ -384,8 +384,8 @@ class AuthManagerTest {
         credentials.clientSecret = Optional.of("CLIENTSECRET");
         when(config.getCredentials("test17")).thenReturn(credentials);
 
-        final SolidClient solidClient = authManager.authenticate("test17", true);
-        assertEquals("ACCESS_TOKEN", solidClient.getClient().getAccessToken());
+        final SolidClientProvider solidClientProvider = authManager.authenticate("test17", true);
+        assertEquals("ACCESS_TOKEN", solidClientProvider.getClient().getAccessToken());
     }
 
     public void setBaseUri(final URI baseUri) {

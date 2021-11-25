@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.solid.testharness.http.Client;
 import org.solid.testharness.http.ClientRegistry;
 import org.solid.testharness.http.HttpConstants;
-import org.solid.testharness.http.SolidClient;
+import org.solid.testharness.http.SolidClientProvider;
 import org.solid.testharness.utils.SolidContainerProvider;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 import org.solid.testharness.utils.TestUtils;
@@ -55,6 +55,8 @@ import static org.solid.testharness.config.Config.AccessControlMode.*;
 @QuarkusTest
 @TestProfile(ConfigTestNormalProfile.class)
 public class TestSubjectTest {
+    private static final URI TEST_URL = URI.create("https://localhost/container/");
+
     @InjectMock
     Config config;
 
@@ -296,19 +298,19 @@ public class TestSubjectTest {
 
     @Test
     void tearDownServer() throws Exception {
-        final SolidClient mockSolidClient = mock(SolidClient.class);
-        testSubject.setTestRunContainer(SolidContainerProvider.create(mockSolidClient, "https://localhost/container/"));
+        final SolidClientProvider mockSolidClientProvider = mock(SolidClientProvider.class);
+        testSubject.setTestRunContainer(new SolidContainerProvider(mockSolidClientProvider, TEST_URL));
         assertDoesNotThrow(() -> testSubject.tearDownServer());
-        verify(mockSolidClient).deleteResourceRecursively(eq(URI.create("https://localhost/container/")));
+        verify(mockSolidClientProvider).deleteResourceRecursively(eq(TEST_URL));
     }
 
     @Test
     void tearDownServerFails() throws Exception {
-        final SolidClient mockSolidClient = mock(SolidClient.class);
-        testSubject.setTestRunContainer(SolidContainerProvider.create(mockSolidClient, "https://localhost/container/"));
-        doThrow(new Exception("FAIL")).when(mockSolidClient).deleteResourceRecursively(any());
+        final SolidClientProvider mockSolidClientProvider = mock(SolidClientProvider.class);
+        testSubject.setTestRunContainer(new SolidContainerProvider(mockSolidClientProvider, TEST_URL));
+        doThrow(new Exception("FAIL")).when(mockSolidClientProvider).deleteResourceRecursively(any());
         assertDoesNotThrow(() -> testSubject.tearDownServer());
-        verify(mockSolidClient).deleteResourceRecursively(eq(URI.create("https://localhost/container/")));
+        verify(mockSolidClientProvider).deleteResourceRecursively(eq(TEST_URL));
     }
 
     private Client setupMockConfig(final boolean setupRootAcl, final Config.AccessControlMode mode) {

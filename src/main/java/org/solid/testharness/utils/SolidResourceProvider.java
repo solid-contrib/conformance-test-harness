@@ -26,11 +26,11 @@ package org.solid.testharness.utils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.solid.testharness.accesscontrol.AccessControlFactory;
 import org.solid.testharness.accesscontrol.AccessDataset;
 import org.solid.testharness.accesscontrol.AccessDatasetBuilder;
+import org.solid.testharness.config.Config;
 import org.solid.testharness.http.HttpConstants;
-import org.solid.testharness.http.SolidClient;
+import org.solid.testharness.http.SolidClientProvider;
 
 import javax.enterprise.inject.spi.CDI;
 import java.net.URI;
@@ -39,39 +39,38 @@ import java.net.http.HttpHeaders;
 public class SolidResourceProvider {
     private static final Logger logger = LoggerFactory.getLogger(SolidResourceProvider.class);
 
-    protected SolidClient solidClient;
+    protected SolidClientProvider solidClientProvider;
     protected URI url;
     private URI aclUrl;
     private Boolean aclLinkAvailable;
     private boolean containerType;
 
-    public SolidResourceProvider(final SolidClient solidClient, final String url) {
-        this(solidClient, url, null, null);
+    public SolidResourceProvider(final SolidClientProvider solidClientProvider, final URI url) {
+        this(solidClientProvider, url, null, null);
     }
 
-    public SolidResourceProvider(final SolidClient solidClient, final String url, final String body,
+    public SolidResourceProvider(final SolidClientProvider solidClientProvider, final URI url, final String body,
                                  final String type) {
-        if (solidClient == null) throw new IllegalArgumentException("Parameter solidClient is required");
-        if (StringUtils.isEmpty(url)) throw new IllegalArgumentException("Parameter url is required");
+        if (solidClientProvider == null)
+            throw new IllegalArgumentException("Parameter solidClientProvider is required");
+        if (url == null) throw new IllegalArgumentException("Parameter url is required");
+        if (!url.isAbsolute()) throw new IllegalArgumentException("The url must be absolute");
         if (body != null && StringUtils.isEmpty(type)) {
             throw new IllegalArgumentException("Parameter type is required");
         }
-        this.solidClient = solidClient;
+        this.solidClientProvider = solidClientProvider;
 
-        final URI resourceUri = URI.create(url);
-        if (!resourceUri.isAbsolute()) throw new IllegalArgumentException("The url must be absolute");
-
-        containerType = url.endsWith("/");
+        containerType = url.toString().endsWith("/");
 
         if (body != null) {
             final HttpHeaders headers;
             try {
-                headers = solidClient.createResource(resourceUri, body, type);
+                headers = solidClientProvider.createResource(url, body, type);
                 if (headers != null && headers.allValues(HttpConstants.HEADER_LINK).size() != 0) {
-                    final URI aclLink = solidClient.getAclUri(headers);
+                    final URI aclLink = solidClientProvider.getAclUri(headers);
                     if (aclLink != null) {
                         logger.debug("ACL LINK {}", aclLink);
-                        aclUrl = resourceUri.resolve(aclLink);
+                        aclUrl = url.resolve(aclLink);
                         aclLinkAvailable = true;
                     }
                 }
@@ -80,29 +79,20 @@ public class SolidResourceProvider {
                 return;
             }
         }
-        this.url = resourceUri;
-        logger.debug("SolidResourceProvider proxy for: {}", resourceUri);
-    }
-
-    public static SolidResourceProvider create(final SolidClient solidClient, final String url, final String body,
-                                               final String type) {
-        return new SolidResourceProvider(solidClient, url, body, type);
+        this.url = url;
+        logger.debug("SolidResourceProvider proxy for: {}", url);
     }
 
     public boolean exists() {
         return url != null;
     }
 
-    public String getUrl() {
-        return url != null ? url.toString() : null;
-    }
-
-    public String getPath() {
-        return url != null ? url.getPath() : null;
+    public URI getUrl() {
+        return url;
     }
 
     public String getContentAsTurtle() throws Exception {
-        return url != null ? solidClient.getContentAsTurtle(url) : "";
+        return url != null ? solidClientProvider.getContentAsTurtle(url) : "";
     }
 
     public boolean isContainer() {
@@ -115,30 +105,49 @@ public class SolidResourceProvider {
                 // already at root
                 return null;
             } else {
-                return new SolidContainerProvider(solidClient, this.url.resolve("..").toString());
+                return new SolidContainerProvider(solidClientProvider, this.url.resolve(".."));
             }
         } else {
-            return new SolidContainerProvider(solidClient, this.url.resolve(".").toString());
+            return new SolidContainerProvider(solidClientProvider, this.url.resolve("."));
         }
     }
 
-    public String getAclUrl() throws Exception {
+    public URI getAclUrl() throws Exception {
         if (aclUrl == null && !Boolean.FALSE.equals(aclLinkAvailable)) {
-            final URI aclLink = solidClient.getAclUri(url);
+            final URI aclLink = solidClientProvider.getAclUri(url);
             if (aclLink != null) {
                 aclUrl = url.resolve(aclLink);
             }
             aclLinkAvailable = aclLink != null;
         }
-        return aclUrl != null ? aclUrl.toString() : null;
+        return aclUrl;
     }
 
-    public SolidResourceProvider findStorage() throws Exception {
+    public AccessDatasetBuilder getAccessDatasetBuilder() throws Exception {
+        final AccessDatasetBuilder builder = solidClientProvider.getAccessDatasetBuilder(getAclUrl());
+        final Config config = CDI.current().select(Config.class).get();
+        final String owner = config.getWebIds().get(solidClientProvider.getClient().getUser());
+        builder.setOwnerAccess(url.toString(), owner);
+        return builder;
+    }
+
+    public AccessDataset getAccessDataset() throws Exception {
+        return getAclUrl() != null ? solidClientProvider.getAcl(aclUrl) : null;
+    }
+
+    public boolean setAccessDataset(final AccessDataset accessDataset) throws Exception {
+        if (Boolean.FALSE.equals(aclLinkAvailable)) return false;
+        final URI aclUrl = getAclUrl();
+        if (aclUrl == null) return false;
+        return solidClientProvider.createAcl(aclUrl, accessDataset);
+    }
+
+    public SolidContainerProvider findStorage() throws Exception {
         URI testUri = url;
         boolean linkFound = false;
         boolean rootTested = false;
         while (!linkFound && !rootTested) {
-            linkFound = solidClient.hasStorageType(testUri);
+            linkFound = solidClientProvider.hasStorageType(testUri);
             if (!linkFound) {
                 final boolean atRoot = "/".equals(testUri.getPath());
                 if (!atRoot) {
@@ -149,33 +158,15 @@ public class SolidResourceProvider {
                 }
             }
         }
-        return linkFound ? new SolidResourceProvider(solidClient, testUri.toString()) : null;
+        return linkFound ? new SolidContainerProvider(solidClientProvider, testUri) : null;
     }
 
-    public boolean hasStorageType() throws Exception {
-        return solidClient.hasStorageType(url);
-    }
-
-    public AccessDatasetBuilder getAccessDatasetBuilder(final String owner) throws Exception {
-        final AccessControlFactory accessControlFactory = CDI.current().select(AccessControlFactory.class).get();
-        final AccessDatasetBuilder builder = accessControlFactory.getAccessDatasetBuilder(getAclUrl());
-        builder.setOwnerAccess(getUrl(), owner);
-        return builder;
-    }
-
-    public AccessDataset getAccessDataset() throws Exception {
-        return getAclUrl() != null ? solidClient.getAcl(aclUrl) : null;
-    }
-
-    public boolean setAccessDataset(final AccessDataset accessDataset) throws Exception {
-        if (Boolean.FALSE.equals(aclLinkAvailable)) return false;
-        final String url = getAclUrl();
-        if (url == null) return false;
-        return solidClient.createAcl(URI.create(url), accessDataset);
+    public boolean isStorageType() throws Exception {
+        return solidClientProvider.hasStorageType(url);
     }
 
     public void delete() throws Exception {
-        solidClient.deleteResourceRecursively(url);
+        solidClientProvider.deleteResourceRecursively(url);
     }
 
     @Override

@@ -25,13 +25,18 @@ package org.solid.testharness.utils;
 
 import org.eclipse.rdf4j.RDF4JException;
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.util.RepositoryUtil;
+import org.eclipse.rdf4j.rio.ParserConfig;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
+import org.eclipse.rdf4j.rio.helpers.ParseErrorLogger;
+import org.eclipse.rdf4j.rio.helpers.RDFaParserSettings;
+import org.eclipse.rdf4j.rio.helpers.RDFaVersion;
 import org.slf4j.Logger;
 import org.solid.testharness.http.HttpUtils;
 
@@ -154,6 +159,13 @@ public final class TestUtils {
             return "";
         }
         return sw.toString();
+    }
+
+    public static Model parseRdfa(final String data, final String baseUri) throws IOException {
+        final ParserConfig parserConfig = new ParserConfig();
+        parserConfig.set(RDFaParserSettings.RDFA_COMPATIBILITY, RDFaVersion.RDFA_1_1);
+        return Rio.parse(new StringReader(data), baseUri, RDFFormat.RDFA,
+                parserConfig, SimpleValueFactory.getInstance(), new ParseErrorLogger());
     }
 
     public static void dumpRepository(final DataRepository repository) {

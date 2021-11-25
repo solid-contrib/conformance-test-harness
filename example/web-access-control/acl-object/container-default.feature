@@ -5,7 +5,7 @@ Feature: Bob can only read child containers/resources of a container to which he
     """
       function() {
         const testContainer = rootTestContainer.createContainer();
-        const access = testContainer.getAccessDatasetBuilder(webIds.alice)
+        const access = testContainer.accessDatasetBuilder
                 .setInheritableAgentAccess(testContainer.url, webIds.bob, ['read'])
                 .build();
         if (testContainer.setAccessDataset(access)) {

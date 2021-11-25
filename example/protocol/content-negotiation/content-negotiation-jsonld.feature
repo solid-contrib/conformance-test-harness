@@ -5,8 +5,8 @@ Feature: Requests support content negotiation for JSON-LD resource
     * def exampleJson = karate.readAsString('../fixtures/example.json')
     * def resource = testContainer.createResource('.json', exampleJson, 'application/ld+json');
     * assert resource.exists()
-    * def expected = RDFUtils.jsonLdToTripleArray(exampleJson, resource.getUrl())
-    * headers clients.alice.getAuthHeaders('GET', resource.getUrl())
+    * def expected = RDFUtils.jsonLdToTripleArray(exampleJson, resource.url)
+    * headers clients.alice.getAuthHeaders('GET', resource.url)
     * url resource.url
 
   Scenario: Alice can read the JSON-LD example as JSON-LD
@@ -14,11 +14,11 @@ Feature: Requests support content negotiation for JSON-LD resource
     When method GET
     Then status 200
     And match header Content-Type contains 'application/ld+json'
-    And match RDFUtils.jsonLdToTripleArray(JSON.stringify(response), resource.getUrl()) contains expected
+    And match RDFUtils.jsonLdToTripleArray(JSON.stringify(response), resource.url) contains expected
 
   Scenario: Alice can read the JSON-LD example as TTL
     Given header Accept = 'text/turtle'
     When method GET
     Then status 200
     And match header Content-Type contains 'text/turtle'
-    And match RDFUtils.turtleToTripleArray(response, resource.getUrl()) contains expected
+    And match RDFUtils.turtleToTripleArray(response, resource.url) contains expected

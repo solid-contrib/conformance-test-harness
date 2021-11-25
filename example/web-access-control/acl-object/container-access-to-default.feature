@@ -5,7 +5,7 @@ Feature: Bob can read a container and its children if he is granted both direct 
     """
       function() {
         const testContainer = rootTestContainer.createContainer();
-        const access = testContainer.getAccessDatasetBuilder(webIds.alice)
+        const access = testContainer.accessDatasetBuilder
                 .setAgentAccess(testContainer.url, webIds.bob, ['read'])
                 .setInheritableAgentAccess(testContainer.url, webIds.bob, ['read'])
                 .build();
