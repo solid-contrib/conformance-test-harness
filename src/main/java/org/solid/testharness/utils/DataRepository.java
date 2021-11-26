@@ -53,6 +53,7 @@ import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.eclipse.rdf4j.model.util.Values.*;
@@ -61,6 +62,13 @@ import static org.eclipse.rdf4j.model.util.Values.*;
 public class DataRepository implements Repository {
     private static final Logger logger = LoggerFactory.getLogger(DataRepository.class);
     private static final String GITHUB_LINE_ANCHOR = "#L";
+    private static final Pattern JS_ERROR = Pattern.compile(
+            "\\Rjs failed:\\R>>>>.*<<<<\\Rorg.graalvm.polyglot.PolyglotException: " +
+                    "([^\\r\\n]+)\\R" +             // exception message
+                    "(?:(Caused[^\\r\\n]+)\\R)?" +  // optional cause
+                    "(?:([^\\r\\n]+).*)?" +         // first line of stack trace
+                    "(- <js>[^\\r\\n]+).*",         // last line of stack
+            Pattern.DOTALL);
 
     private Repository repository = new SailRepository(new MemoryStore());
     // TODO: Determine if this should be a separate IRI to the base
@@ -197,7 +205,7 @@ public class DataRepository implements Repository {
                     .add(stepResultIri, RDF.type, PROV.Entity)
                     .add(stepResultIri, PROV.value, EARL_RESULT.get(str.getResult().getStatus()));
             if (!str.getStepLog().isEmpty()) {
-                stepBuilder.add(stepResultIri, DCTERMS.description, str.getStepLog());
+                stepBuilder.add(stepResultIri, DCTERMS.description, simplify(str.getStepLog()));
             }
             if (!str.getStep().isBackground()) {
                 stepBuilder.add(stepIri, PROV.wasInformedBy, scenarioIri);
@@ -215,6 +223,11 @@ public class DataRepository implements Repository {
 
     private IRI createNode() {
         return iri(Namespaces.RESULTS_URI, bnode().getID());
+    }
+
+    private String simplify(final String data) {
+        // strip out unnecessary logging and remove blank lines
+        return JS_ERROR.matcher(data).replaceFirst("\n$1\n$2\n$3\n$4").replaceAll("\\R+", "\n");
     }
 
     public void export(final Writer wr) throws Exception {

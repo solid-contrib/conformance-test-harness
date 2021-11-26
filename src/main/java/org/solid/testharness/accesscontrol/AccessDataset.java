@@ -63,7 +63,7 @@ public interface AccessDataset {
                 .set(BasicWriterSettings.INLINE_BLANK_NODES, true);
         Rio.write(getModel(), rdfWriter);
         return sw.toString();
-    };
+    }
 
     default String asSparqlInsert() {
         if (getModel() == null) {
@@ -85,7 +85,7 @@ public interface AccessDataset {
         sw.append("}");
         // modify the prefixes to be SPARQL format
         return sw.toString().replaceAll("@prefix ([^:]+): <([^>]+)> .", "PREFIX $1: <$2>");
-    };
+    }
 
     default void parseTurtle(String data, String baseUri) throws IOException {
         final Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.TURTLE);
@@ -99,5 +99,5 @@ public interface AccessDataset {
         return Models.isSubset(getModel(), otherAccessDataset.getModel());
     }
 
-    boolean apply(Client client, URI uri) throws IOException, InterruptedException;
+    void apply(Client client, URI uri) throws Exception;
 }

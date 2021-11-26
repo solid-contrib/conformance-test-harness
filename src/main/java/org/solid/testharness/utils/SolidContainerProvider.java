@@ -23,19 +23,13 @@
  */
 package org.solid.testharness.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.solid.testharness.http.HttpUtils;
 import org.solid.testharness.http.SolidClientProvider;
 
 import java.net.URI;
-import java.net.http.HttpResponse;
 
 public class SolidContainerProvider extends SolidResourceProvider {
-    private static final Logger logger = LoggerFactory.getLogger(SolidContainerProvider.class);
-
-    public SolidContainerProvider(final SolidClientProvider solidClientProvider, final URI url)
-            throws IllegalArgumentException {
+    public SolidContainerProvider(final SolidClientProvider solidClientProvider, final URI url) {
         super(solidClientProvider, validateUrl(url), null, null);
     }
 
@@ -46,20 +40,9 @@ public class SolidContainerProvider extends SolidResourceProvider {
         return url;
     }
 
-    public SolidContainerProvider instantiate() {
-        try {
-            final HttpResponse<String> response = solidClientProvider.createContainer(this.url);
-            if (HttpUtils.isSuccessful(response.statusCode())) {
-                return this;
-            } else {
-                logger.error("Failed to create " + url.toString() + ", response = " + response.statusCode());
-                logger.error("Response: " + response.body());
-                return null;
-            }
-        } catch (Exception e) {
-            logger.error("createContainer: " + url.toString() + " failed", e);
-            return null;
-        }
+    public SolidContainerProvider instantiate() throws Exception {
+        solidClientProvider.createContainer(this.url);
+        return this;
     }
 
     public SolidContainerProvider reserveContainer(final String name) {
@@ -71,14 +54,8 @@ public class SolidContainerProvider extends SolidResourceProvider {
     }
 
     public SolidResourceProvider createResource(final String name, final String body, final String type) {
-        try {
-            final URI childUrl = url.resolve(HttpUtils.ensureNoSlashEnd(name));
-            logger.info("Create child in {}: {}", url, childUrl);
-            return new SolidResourceProvider(super.solidClientProvider, childUrl, body, type);
-        } catch (Exception e) {
-            logger.error("createResource in " + url.toString() + " failed", e);
-        }
-        return null;
+        final URI childUrl = url.resolve(HttpUtils.ensureNoSlashEnd(name));
+        return new SolidResourceProvider(super.solidClientProvider, childUrl, body, type);
     }
 
     public void deleteContents() throws Exception {

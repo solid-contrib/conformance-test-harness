@@ -103,7 +103,7 @@ public class AccessDatasetAcp implements AccessDataset {
                             .add(accessPolicyNode, RDF.type, ACP.Policy)
                             .add(accessPolicyNode, ACP.allOf, ruleNode);
                     controlAccessModes.stream()
-                            .map(mode -> standardModes.get(mode))
+                            .map(standardModes::get)
                             .forEach(mode -> builder.add(accessPolicyNode, ACP.allow, mode));
                 }
                 // Jacoco does not report switch coverage correctly
@@ -158,11 +158,14 @@ public class AccessDatasetAcp implements AccessDataset {
     }
 
     @Override
-    public boolean apply(final Client client, final URI uri) throws IOException, InterruptedException {
-        if (model == null) return true;
-        final HttpResponse<String> response = client.patch(uri, asSparqlInsert(),
-                HttpConstants.MEDIA_TYPE_APPLICATION_SPARQL_UPDATE);
-        return HttpUtils.isSuccessful(response.statusCode());
+    public void apply(final Client client, final URI uri) throws Exception {
+        if (model != null) {
+            final HttpResponse<String> response = client.patch(uri, asSparqlInsert(),
+                    HttpConstants.MEDIA_TYPE_APPLICATION_SPARQL_UPDATE);
+            if (!HttpUtils.isSuccessful(response.statusCode())) {
+                throw new Exception("Error response=" + response.statusCode() + " trying to apply ACL");
+            }
+        }
     }
 
     @Override

@@ -56,9 +56,13 @@ public class SolidResource {
      */
     public static SolidResource create(final SolidClient solidClient, final String url,
                                        final String body, final String type) {
-        return new SolidResource(
-                new SolidResourceProvider(solidClient.solidClientProvider, URI.create(url),body, type)
-        );
+        try {
+            return new SolidResource(
+                    new SolidResourceProvider(solidClient.solidClientProvider, URI.create(url),body, type)
+            );
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to construct resource", e);
+        }
     }
 
     /**
@@ -75,7 +79,8 @@ public class SolidResource {
      * @return the url
      */
     public String getUrl() {
-        return solidResourceProvider.getUrl() != null ? solidResourceProvider.getUrl().toString() : null;
+        final URI url = solidResourceProvider.getUrl();
+        return url != null ? url.toString() : null;
     }
 
     /**
@@ -90,30 +95,39 @@ public class SolidResource {
     /**
      * Return the URL of the ACL related to this resource.
      * @return ACL url
-     * @throws Exception
      */
-    public String getAclUrl() throws Exception {
-        final URI aclUrl = solidResourceProvider.getAclUrl();
-        return aclUrl != null ? aclUrl.toString() : null;
+    public String getAclUrl() {
+        try {
+            final URI aclUrl = solidResourceProvider.getAclUrl();
+            return aclUrl != null ? aclUrl.toString() : null;
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to get ACL url", e);
+        }
     }
 
     /**
      * Search up the path hierarchy to attempt to find the container which is marked as the storage for this resource.
      * @return the SolidResource representing the storage container for this resource, if found.
-     * @throws Exception
      */
-    public SolidResource findStorage() throws Exception {
-        final SolidResourceProvider storage = solidResourceProvider.findStorage();
-        return storage != null ? new SolidResource(storage) : null;
+    public SolidResource findStorage() {
+        try {
+            final SolidResourceProvider storage = solidResourceProvider.findStorage();
+            return storage != null ? new SolidResource(storage) : null;
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to find storage for this resource", e);
+        }
     }
 
     /**
      * Returns a boolean indicating if the resource is a storage root.
      * @return <code>true</code> if the resource has a <code>pim:Storage</code> link; <code>false</code> otherwise.
-     * @throws Exception
      */
-    public boolean isStorageType() throws Exception {
-        return solidResourceProvider.isStorageType();
+    public boolean isStorageType() {
+        try {
+            return solidResourceProvider.isStorageType();
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to find storage link header", e);
+        }
     }
 
     /**
@@ -121,47 +135,57 @@ public class SolidResource {
      * @deprecated Use <code>getAccessDatasetBuilder()</code> as the owner is the client who created the resource.
      * @param owner a WebId
      * @return an access dataset builder
-     * @throws Exception
      */
     @Deprecated
-    public AccessDatasetBuilder getAccessDatasetBuilder(final String owner) throws Exception {
+    public AccessDatasetBuilder getAccessDatasetBuilder(final String owner) {
         return getAccessDatasetBuilder();
     }
 
     /**
      * Return an <code>AccessDatasetBuilder</code>.
      * @return an access dataset builder
-     * @throws Exception
      */
-    public AccessDatasetBuilder getAccessDatasetBuilder() throws Exception {
-        return solidResourceProvider.getAccessDatasetBuilder();
+    public AccessDatasetBuilder getAccessDatasetBuilder() {
+        try {
+            return solidResourceProvider.getAccessDatasetBuilder();
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to create AccessDatasetBuilder", e);
+        }
     }
 
     /**
      * Return the <code>AccessDataset</code> associated with this resource.
      * @return an access dataset
-     * @throws Exception
      */
-    public AccessDataset getAccessDataset() throws Exception {
-        return solidResourceProvider.getAccessDataset();
+    public AccessDataset getAccessDataset() {
+        try {
+            return solidResourceProvider.getAccessDataset();
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to get the access dataset", e);
+        }
     }
 
     /**
      * Apply an <code>AccessDataset</code> to the resource.
      * @param accessDataset the <code>AccessDataset</code> to be applied to the resource
-     * @return <code>true</code> if this succeeds
-     * @throws Exception
      */
-    public boolean setAccessDataset(final AccessDataset accessDataset) throws Exception {
-        return solidResourceProvider.setAccessDataset(accessDataset);
+    public void setAccessDataset(final AccessDataset accessDataset) {
+        try {
+            solidResourceProvider.setAccessDataset(accessDataset);
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to apply the ACL", e);
+        }
     }
 
     /**
      * Delete this resource (and any contents if it is a container).
-     * @throws Exception
      */
-    public void delete() throws Exception {
-        solidResourceProvider.delete();
+    public void delete() {
+        try {
+            solidResourceProvider.delete();
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to delete the resource", e);
+        }
     }
 
     @Override

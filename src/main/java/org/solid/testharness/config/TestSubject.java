@@ -153,7 +153,6 @@ public class TestSubject {
 
         if (config.isSetupRootAcl()) {
             logger.debug("Setup root acl");
-            final boolean success;
             try {
                 final SolidContainerProvider rootContainer = new SolidContainerProvider(solidClientProvider,
                         config.getServerRoot());
@@ -165,14 +164,11 @@ public class TestSubject {
                         .setInheritableAgentAccess(rootContainer.getUrl().toString(), alice, modes)
                         .build();
                 logger.info("ACL doc: {}", accessDataset.toString());
-                success = rootContainer.setAccessDataset(accessDataset);
+                rootContainer.setAccessDataset(accessDataset);
             } catch (Exception e) {
                 throw (TestHarnessInitializationException) new TestHarnessInitializationException(
                         "Failed to create root ACL: %s", e.toString()
                 ).initCause(e);
-            }
-            if (!success) {
-                throw new TestHarnessInitializationException("Failed to create root ACL");
             }
         }
         logger.debug("\n========== CHECK TEST SUBJECT ROOT");
@@ -182,9 +178,6 @@ public class TestSubject {
 
             // create a root container for all the test cases in this run
             testRunContainer = rootTestContainer.reserveContainer(UUID.randomUUID().toString()).instantiate();
-            if (testRunContainer == null) {
-                throw new Exception("Cannot create test run container");
-            }
             logger.debug("Test run container content: {}", testRunContainer.getContentAsTurtle());
             logger.debug("Test run container access controls: {}", testRunContainer.getAccessDataset());
         } catch (Exception e) {

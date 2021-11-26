@@ -21,18 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.solid.testharness.utils;
+package org.solid.testharness.api;
 
-import java.util.Formatter;
+public class TestHarnessException extends RuntimeException {
+    private static final long serialVersionUID = -3676037765799217562L;
+    private String message;
 
-public class TestHarnessInitializationException extends RuntimeException {
-    private static final long serialVersionUID = -3676037765799217561L;
-
-    public TestHarnessInitializationException(final String message, final Throwable cause) {
+    public TestHarnessException(final String message, final Throwable cause) {
         super(message, cause);
+        this.message = message;
     }
 
-    public TestHarnessInitializationException(final String message, final String... args) {
-        super(args.length > 0 ? new Formatter().format(message, args).toString() : message);
+    @Override
+    public String getMessage() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getName()).append(": ");
+        if (message != null) {
+            sb.append(message);
+        }
+        if (getCause() != null) {
+            sb.append("\nCaused by: ").append(getCause());
+        }
+        return sb.toString();
     }
 }
