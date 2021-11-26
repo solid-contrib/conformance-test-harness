@@ -21,44 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.solid.testharness.utils;
+package org.solid.testharness.api;
 
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TestHarnessInitializationExceptionTest {
-    @Test
-    void simpleConstructor() {
-        final TestHarnessInitializationException exception = new TestHarnessInitializationException("message",
-                new Exception("FAIL"));
-        assertEquals("message", exception.getMessage());
-    }
-
+class TestHarnessExceptionTest {
     @Test
     void simpleMessage() {
-        final TestHarnessInitializationException exception = new TestHarnessInitializationException("message");
-        assertEquals("message", exception.getMessage());
+        final TestHarnessException exception = new TestHarnessException("message", new Exception("FAIL"));
+        assertEquals("org.solid.testharness.api.TestHarnessException: message\n" +
+                "Caused by: java.lang.Exception: FAIL", exception.getMessage());
     }
 
     @Test
-    void simpleMessageNullArgs() {
-        final TestHarnessInitializationException exception = new TestHarnessInitializationException("message",
-                (String) null);
-        assertEquals("message", exception.getMessage());
+    void noMessage() {
+        final TestHarnessException exception = new TestHarnessException(null, new Exception("FAIL"));
+        assertEquals("org.solid.testharness.api.TestHarnessException: \n" +
+                "Caused by: java.lang.Exception: FAIL", exception.getMessage());
     }
 
     @Test
-    void simpleMessageArgs1() {
-        final TestHarnessInitializationException exception = new TestHarnessInitializationException("message %s",
-                "arg1");
-        assertEquals("message arg1", exception.getMessage());
-    }
-
-    @Test
-    void simpleMessageArgs2() {
-        final TestHarnessInitializationException exception = new TestHarnessInitializationException("message %s %s",
-                "arg1", "arg2");
-        assertEquals("message arg1 arg2", exception.getMessage());
+    void noCause() {
+        final TestHarnessException exception = new TestHarnessException("message", null);
+        assertEquals("org.solid.testharness.api.TestHarnessException: message", exception.getMessage());
     }
 }

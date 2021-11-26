@@ -135,7 +135,7 @@ class AccessDatasetAcpTest {
         final AccessDataset accessDataset = new AccessDatasetAcp(
                 TestUtils.loadStringFromFile("src/test/resources/utils/vcard.ttl"), ACL_URI
         );
-        assertTrue(accessDataset.apply(mockClient, RESOURCE_URI));
+        assertDoesNotThrow(() -> accessDataset.apply(mockClient, RESOURCE_URI));
     }
 
     @Test
@@ -146,14 +146,14 @@ class AccessDatasetAcpTest {
         final AccessDataset accessDataset = new AccessDatasetAcp(
                 TestUtils.loadStringFromFile("src/test/resources/utils/vcard.ttl"), ACL_URI
         );
-        assertFalse(accessDataset.apply(mockClient, RESOURCE_URI));
+        assertThrows(Exception.class, () -> accessDataset.apply(mockClient, RESOURCE_URI));
     }
 
     @Test
-    void applyNull() throws IOException, InterruptedException {
+    void applyNull() {
         final Client mockClient = mock(Client.class);
         final AccessDataset accessDataset = new AccessDatasetAcp(Collections.emptyList(), ACL_URI.toString());
-        assertTrue(accessDataset.apply(mockClient, RESOURCE_URI));
+        assertDoesNotThrow(() -> accessDataset.apply(mockClient, RESOURCE_URI));
     }
 
     @Test

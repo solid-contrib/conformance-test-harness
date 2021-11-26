@@ -145,7 +145,7 @@ class SolidClientProviderTest {
                 () -> solidClientProvider.createResource(TEST_URL, "DATA",
                         HttpConstants.MEDIA_TYPE_TEXT_PLAIN)
         );
-        assertEquals("Failed to create resource - status=412", exception.getMessage());
+        assertEquals("Failed to create " + TEST_URL + ", response=412", exception.getMessage());
     }
 
     @Test
@@ -155,27 +155,22 @@ class SolidClientProviderTest {
         doReturn(mockResponse).when(mockClient).sendAuthorized(any(), any());
 
         final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
-        final HttpResponse<String> response = solidClientProvider.createContainer(BASE_URL.resolve("/test/"));
-        assertEquals(201, response.statusCode());
+        final HttpHeaders headers = solidClientProvider.createContainer(BASE_URL.resolve("/test/"));
+        assertTrue(headers.map().isEmpty());
     }
 
     @Test
     void createContainerFails() throws Exception {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
-        final HttpHeaders mockHeaders = HttpHeaders.of(Collections.emptyMap(), (k, v) -> true);
-        when(mockResponse.headers()).thenReturn(mockHeaders);
         when(mockResponse.statusCode()).thenReturn(412);
-        when(mockClient.put(eq(TEST_URL), eq("DATA"),
-                eq(HttpConstants.MEDIA_TYPE_TEXT_PLAIN)))
-                .thenReturn(mockResponse);
+        doReturn(mockResponse).when(mockClient).sendAuthorized(any(), any());
 
         final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
         final Exception exception = assertThrows(Exception.class,
-                () -> solidClientProvider.createResource(TEST_URL, "DATA",
-                        HttpConstants.MEDIA_TYPE_TEXT_PLAIN)
+                () -> solidClientProvider.createContainer(BASE_URL.resolve("/test/"))
         );
-        assertEquals("Failed to create resource - status=412", exception.getMessage());
+        assertEquals("Failed to create " + BASE_URL.resolve("/test/") + ", response=412", exception.getMessage());
     }
 
     @Test
@@ -357,21 +352,21 @@ class SolidClientProviderTest {
 
 
     @Test
-    void createAcl() throws IOException, InterruptedException {
+    void createAcl() {
         final AccessDataset accessDataset = mock(AccessDataset.class);
-        when(accessDataset.apply(any(), any())).thenReturn(true);
         final Client mockClient = mock(Client.class);
         final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
-        assertTrue(solidClientProvider.createAcl(BASE_URL.resolve("/test.acl"), accessDataset));
+        assertDoesNotThrow(() -> solidClientProvider.createAcl(BASE_URL.resolve("/test.acl"), accessDataset));
     }
 
     @Test
-    void createAclFails() throws IOException, InterruptedException {
+    void createAclFails() throws Exception {
         final AccessDataset accessDataset = mock(AccessDataset.class);
-        when(accessDataset.apply(any(), any())).thenReturn(false);
+        doThrow(new Exception("FAIL")).when(accessDataset).apply(any(), any());
         final Client mockClient = mock(Client.class);
         final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
-        assertFalse(solidClientProvider.createAcl(BASE_URL.resolve("/test.acl"), accessDataset));
+        assertThrows(Exception.class,
+                () -> solidClientProvider.createAcl(BASE_URL.resolve("/test.acl"), accessDataset));
     }
 
     @Test
@@ -496,6 +491,19 @@ class SolidClientProviderTest {
         assertDoesNotThrow(() -> solidClientProvider.deleteResourceRecursively(BASE_URL));
         verify(mockClient).getAsTurtle(BASE_URL);
         verifyNoMoreInteractions(mockClient);
+    }
+
+    @Test
+    void deleteContainerListParseException() throws IOException, InterruptedException {
+        final Client mockClient = mock(Client.class);
+        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "NOT RDF");
+
+        when(mockClient.getAsTurtle(eq(BASE_URL))).thenReturn(mockResponse);
+
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        assertDoesNotThrow(() -> solidClientProvider.deleteResourceRecursively(BASE_URL));
+        verify(mockClient).getAsTurtle(BASE_URL);
+        verify(mockClient, never()).deleteAsync(any());
     }
 
     @Test

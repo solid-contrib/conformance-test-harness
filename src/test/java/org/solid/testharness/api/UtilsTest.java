@@ -122,13 +122,18 @@ public class UtilsTest {
 
     @Test
     void parseWacAllowHeaderNull() {
-        assertThrows(NullPointerException.class, () -> Utils.parseWacAllowHeader(null));
+        assertThrows(TestHarnessException.class, () -> Utils.parseWacAllowHeader(null));
     }
 
     @Test
     void resolveUriNulls() {
         assertNull(Utils.resolveUri(null, ""));
         assertNull(Utils.resolveUri("", null));
+    }
+
+    @Test
+    void resolveUriException() {
+        assertThrows(TestHarnessException.class, () -> Utils.resolveUri("~://?", ""));
     }
 
     @Test

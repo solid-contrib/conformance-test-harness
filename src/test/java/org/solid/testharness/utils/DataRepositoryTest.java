@@ -117,7 +117,10 @@ class DataRepositoryTest {
         final StepResult str1 = mock(StepResult.class);
         when(str1.getStep()).thenReturn(step1);
         when(str1.getResult()).thenReturn(res1);
-        when(str1.getStepLog()).thenReturn("STEP1 LOG");
+        when(str1.getStepLog()).thenReturn("STEP1 LOG\n" +
+                "js failed:\n>>>>?<<<<\n" +
+                "org.graalvm.polyglot.PolyglotException: EXCEPTION\n" +
+                "Caused by EXCEPTION2\nSTACK1\nSTACK2\n- <js>LAST\nother stuff");
         final StepResult str2 = mock(StepResult.class);
         when(str2.getStep()).thenReturn(step2);
         when(str2.getResult()).thenReturn(res2);
@@ -129,6 +132,8 @@ class DataRepositoryTest {
         assertTrue(result.contains("dcterms:title \"FEATURE NAME\""));
         assertTrue(result.contains("earl:outcome earl:failed"));
         assertTrue(result.contains("prov:value earl:passed"));
+        assertTrue(result.contains("dcterms:description \"\"\"STEP1 LOG\n" +
+                "EXCEPTION\nCaused by EXCEPTION2\nSTACK1\n- <js>LAST"));
     }
 
     @Test

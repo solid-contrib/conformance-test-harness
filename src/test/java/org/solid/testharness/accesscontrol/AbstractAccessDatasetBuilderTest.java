@@ -194,9 +194,7 @@ class AbstractAccessDatasetBuilderTest {
         }
 
         @Override
-        public boolean apply(final Client client, final URI uri) {
-            return false;
-        }
+        public void apply(final Client client, final URI uri) { }
     }
 
     class TestAccessDatasetBuilder extends AbstractAccessDatasetBuilder {
