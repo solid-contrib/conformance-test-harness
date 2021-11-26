@@ -14,7 +14,7 @@ Feature: Test ACL in applyMembers mode
 
     # grant Bob read access to member resources
     * def access = testContainer.accessDatasetBuilder.setInheritableAgentAccess(testContainer.url, webIds.bob, ['read']).build()
-    * assert testContainer.setAccessDataset(access)
+    * testContainer.accessDataset = access
 
     # get the ACR to confirm it changed
     Given url testContainer.aclUrl
@@ -27,7 +27,6 @@ Feature: Test ACL in applyMembers mode
 
     # create a new resource in the container which should inherit access from the container
     * def testResource = testContainer.createResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
-    * assert testResource.exists()
 
     # get the resource ACR to confirm it has inherited read permission for Bob
     Given url testResource.aclUrl

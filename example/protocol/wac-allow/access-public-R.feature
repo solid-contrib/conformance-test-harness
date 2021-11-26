@@ -6,19 +6,15 @@ Feature: The WAC-Allow header shows user and public access modes with public rea
       function() {
         const testContainer = rootTestContainer.reserveContainer();
         const resource = testContainer.createResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
-        if (resource.exists()) {
-          const access = resource.accessDatasetBuilder
-                .setPublicAccess(resource.url, ['read'])
-                .build();
-          resource.setAccessDataset(access);
-        }
+        const access = resource.accessDatasetBuilder
+              .setPublicAccess(resource.url, ['read'])
+              .build();
+        resource.accessDataset = access;
         return resource;
       }
     """
     * def resource = callonce setup
-    * assert resource.exists()
-    * def resourceUrl = resource.url
-    * url resourceUrl
+    * url resource.url
 
   Scenario: There is an acl on the resource granting public access
     Given url resource.aclUrl
@@ -39,7 +35,7 @@ Feature: The WAC-Allow header shows user and public access modes with public rea
     Then status 404
 
   Scenario: Bob calls GET and the header shows R access for user, R for public
-    Given headers clients.bob.getAuthHeaders('GET', resourceUrl)
+    Given headers clients.bob.getAuthHeaders('GET', resource.url)
     When method GET
     Then status 200
     And match header WAC-Allow != null
@@ -48,7 +44,7 @@ Feature: The WAC-Allow header shows user and public access modes with public rea
     And match result.public contains only ['read']
 
   Scenario: Bob calls HEAD and the header shows R access for user, R for public
-    Given headers clients.bob.getAuthHeaders('HEAD', resourceUrl)
+    Given headers clients.bob.getAuthHeaders('HEAD', resource.url)
     When method HEAD
     Then status 200
     And match header WAC-Allow != null

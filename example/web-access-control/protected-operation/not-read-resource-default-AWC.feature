@@ -9,28 +9,26 @@ Feature: Bob cannot read an RDF resource to which he is not granted default read
           .setAgentAccess(testContainer.url, webIds.bob, ['write'])
           .setInheritableAgentAccess(testContainer.url, webIds.bob, ['append', 'write', 'control'])
           .build();
-        testContainer.setAccessDataset(access);
+        testContainer.accessDataset = access;
         return testContainer.createResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
       }
     """
     * def resource = callonce setup
-    * assert resource.exists()
-    * def resourceUrl = resource.url
-    * url resourceUrl
+    * url resource.url
 
   Scenario: Bob cannot read the resource with GET
-    Given headers clients.bob.getAuthHeaders('GET', resourceUrl)
+    Given headers clients.bob.getAuthHeaders('GET', resource.url)
     When method GET
     Then status 403
 
   Scenario: Bob cannot read the resource with HEAD
-    Given headers clients.bob.getAuthHeaders('HEAD', resourceUrl)
+    Given headers clients.bob.getAuthHeaders('HEAD', resource.url)
     When method HEAD
     Then status 403
 
   Scenario: Bob can PUT to the resource but gets nothing back since he cannot read
     Given request '<> <http://www.w3.org/2000/01/rdf-schema#comment> "Bob replaced it." .'
-    And headers clients.bob.getAuthHeaders('PUT', resourceUrl)
+    And headers clients.bob.getAuthHeaders('PUT', resource.url)
     And header Content-Type = 'text/turtle'
     When method PUT
     Then status 204
