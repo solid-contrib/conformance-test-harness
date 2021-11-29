@@ -4,7 +4,7 @@
 
 ### Features
 * Extract Karate-facing API from internals of CTH.
-* Improve exception handling for reporting better errors in tests and simplifing tests.
+* Improve exception handling for reporting better errors in tests and simplifying tests.
 
 ### Minor changes
 * Improve error handling & reporting when running tests locally.
