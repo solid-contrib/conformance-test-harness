@@ -44,7 +44,7 @@ class RDFUtilsTest {
     private static final String MEMBERS = String.format("<%s> <%s> <%s>.", TEST_URL, LDP.CONTAINS, CHLID);
 
     @Test
-    void turtleToTripleArray() throws Exception {
+    void turtleToTripleArray() {
         final List<String> triples = RDFUtils.turtleToTripleArray(TestData.SAMPLE_TURTLE, TestData.SAMPLE_BASE);
         assertNotNull(triples);
         assertEquals(1, triples.size());
@@ -57,7 +57,7 @@ class RDFUtilsTest {
     }
 
     @Test
-    void jsonLdToTripleArray() throws Exception {
+    void jsonLdToTripleArray() {
         final List<String> triples = RDFUtils.jsonLdToTripleArray(TestData.SAMPLE_JSONLD, TestData.SAMPLE_BASE);
         assertNotNull(triples);
         assertEquals(1, triples.size());
@@ -70,7 +70,7 @@ class RDFUtilsTest {
     }
 
     @Test
-    void rdfaToTripleArray() throws Exception {
+    void rdfaToTripleArray() {
         final List<String> triples = RDFUtils.rdfaToTripleArray(TestData.SAMPLE_HTML, TestData.SAMPLE_BASE);
         logger.error(Arrays.toString(triples.toArray()));
         assertNotNull(triples);
@@ -84,14 +84,14 @@ class RDFUtilsTest {
     }
 
     @Test
-    void parseMembers() throws Exception {
+    void parseMembers() {
         final List<String> members = RDFUtils.parseContainerContents(MEMBERS, TEST_URL);
         assertFalse(members.isEmpty());
         assertEquals(CHLID, members.get(0));
     }
 
     @Test
-    void parseMembersEmpty() throws Exception {
+    void parseMembersEmpty() {
         final List<String> members = RDFUtils.parseContainerContents(NO_MEMBERS, TEST_URL);
         assertTrue(members.isEmpty());
     }
@@ -101,6 +101,7 @@ class RDFUtilsTest {
         final Exception exception = assertThrows(Exception.class,
                 () -> RDFUtils.parseContainerContents("BAD", TEST_URL)
         );
-        assertEquals("Bad container listing", exception.getMessage());
+        assertTrue(exception.getMessage().contains("TestHarnessException: Bad container listing"));
+        assertTrue(exception.getMessage().contains("RDFParseException: Unexpected end of file"));
     }
 }

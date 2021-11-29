@@ -83,10 +83,6 @@ public class SolidResourceProvider {
         logger.debug("SolidResourceProvider proxy for: {}", url);
     }
 
-    public boolean exists() {
-        return url != null;
-    }
-
     public URI getUrl() {
         return url;
     }
@@ -135,11 +131,10 @@ public class SolidResourceProvider {
         return getAclUrl() != null ? solidClientProvider.getAcl(aclUrl) : null;
     }
 
-    public boolean setAccessDataset(final AccessDataset accessDataset) throws Exception {
-        if (Boolean.FALSE.equals(aclLinkAvailable)) return false;
+    public void setAccessDataset(final AccessDataset accessDataset) throws Exception {
         final URI aclUrl = getAclUrl();
-        if (aclUrl == null) return false;
-        return solidClientProvider.createAcl(aclUrl, accessDataset);
+        if (aclUrl == null) throw new Exception("Failed to find ACL Link for this resource");
+        solidClientProvider.createAcl(aclUrl, accessDataset);
     }
 
     public SolidContainerProvider findStorage() throws Exception {

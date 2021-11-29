@@ -3,7 +3,6 @@ Feature: Inheritable ACL controls child resources
   Background: Create test resource and prepare ACL
     * def testContainer = rootTestContainer.reserveContainer()
     * def resource = testContainer.createResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
-    * assert resource.exists()
 
   Scenario: Check Bob's access before and after setting access via the parent ACL
     # Bob cannot access the resource

@@ -53,7 +53,7 @@ public final class Utils {
         if (headers == null) {
             return Collections.EMPTY_LIST;
         }
-        // Link can be multi-valued (comma separated) or multi-instance so this builds a list from either form (or both)
+        // Link can be multi-valued (comma separated) or multi-instance so this builds a list from both forms
         // TODO: This is temporary as a link can contain a comma so this is not safe - a parser is required
         // See https://blog.stevenlevithan.com/archives/match-quoted-string
         // See https://gist.github.com/pimbrouwers/8f78e318ccfefff18f518a483997be29
@@ -84,36 +84,40 @@ public final class Utils {
      * @return the map of permissions groups and permissions
      */
     public static Map<String, List<String>> parseWacAllowHeader(@NotNull final Map<String, List<String>> headers) {
-        Objects.requireNonNull(headers, "headers is required");
-        logger.debug("WAC-Allow: {}", headers);
-        final Map<String, Set<String>> permissions = new HashMap<>();
-        permissions.put("user", new HashSet<>());
-        permissions.put("public", new HashSet<>());
-        final Optional<Map.Entry<String, List<String>>> header = headers.entrySet()
-                .stream()
-                .filter(entry -> HttpConstants.HEADER_WAC_ALLOW.equalsIgnoreCase(entry.getKey()))
-                .findFirst();
-        if (header.isPresent()) {
-            final String wacAllowHeader = header.get().getValue().get(0);
-            // note this does not support imbalanced quotes
-            final Pattern p = Pattern.compile("(\\w+)\\s*=\\s*\"?\\s*((?:\\s*[^\",\\s]+)*)\\s*\"?");
-            final Matcher m = p.matcher(wacAllowHeader);
-            while (m.find()) {
-                if (!permissions.containsKey(m.group(1))) {
-                    permissions.put(m.group(1), new HashSet<>());
+        try {
+            Objects.requireNonNull(headers, "headers is required");
+            logger.debug("WAC-Allow: {}", headers);
+            final Map<String, Set<String>> permissions = new HashMap<>();
+            permissions.put("user", new HashSet<>());
+            permissions.put("public", new HashSet<>());
+            final Optional<Map.Entry<String, List<String>>> header = headers.entrySet()
+                    .stream()
+                    .filter(entry -> HttpConstants.HEADER_WAC_ALLOW.equalsIgnoreCase(entry.getKey()))
+                    .findFirst();
+            if (header.isPresent()) {
+                final String wacAllowHeader = header.get().getValue().get(0);
+                // note this does not support imbalanced quotes
+                final Pattern p = Pattern.compile("(\\w+)\\s*=\\s*\"?\\s*((?:\\s*[^\",\\s]+)*)\\s*\"?");
+                final Matcher m = p.matcher(wacAllowHeader);
+                while (m.find()) {
+                    if (!permissions.containsKey(m.group(1))) {
+                        permissions.put(m.group(1), new HashSet<>());
+                    }
+                    if (!m.group(2).isEmpty()) {
+                        permissions.get(m.group(1)).addAll(
+                                Arrays.asList(m.group(2).toLowerCase(Locale.ROOT).split("\\s+"))
+                        );
+                    }
                 }
-                if (!m.group(2).isEmpty()) {
-                    permissions.get(m.group(1)).addAll(
-                            Arrays.asList(m.group(2).toLowerCase(Locale.ROOT).split("\\s+"))
-                    );
-                }
+            } else {
+                logger.error("WAC-Allow header missing");
             }
-        } else {
-            logger.error("WAC-Allow header missing");
+            return permissions.entrySet().stream().collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    entry -> List.copyOf(entry.getValue())));
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to parse WAC-Allow header", e);
         }
-        return permissions.entrySet().stream().collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> List.copyOf(entry.getValue())));
     }
 
     /**
@@ -123,8 +127,12 @@ public final class Utils {
      * @return the resolved URI
      */
     public static String resolveUri(@NotNull final String baseUri, @NotNull final String target) {
-        if (baseUri == null || target == null) return null;
-        return URI.create(baseUri).resolve(URI.create(target)).toString();
+        try {
+            if (baseUri == null || target == null) return null;
+            return URI.create(baseUri).resolve(URI.create(target)).toString();
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to resolve URI", e);
+        }
     }
 
     private Utils() { }

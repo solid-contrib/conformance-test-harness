@@ -113,11 +113,14 @@ public class AccessDatasetWac implements AccessDataset {
     }
 
     @Override
-    public boolean apply(final Client client, final URI uri) throws IOException, InterruptedException {
-        if (model == null) return true;
-        final HttpResponse<Void> response = client.put(uri, asTurtle(),
-                HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
-        return HttpUtils.isSuccessful(response.statusCode());
+    public void apply(final Client client, final URI uri) throws Exception {
+        if (model != null) {
+            final HttpResponse<Void> response = client.put(uri, asTurtle(),
+                    HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
+            if (!HttpUtils.isSuccessful(response.statusCode())) {
+                throw new Exception("Error response=" + response.statusCode() + " trying to apply ACL");
+            }
+        }
     }
 
     @Override

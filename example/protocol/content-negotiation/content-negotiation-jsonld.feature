@@ -4,7 +4,6 @@ Feature: Requests support content negotiation for JSON-LD resource
     * def testContainer = rootTestContainer.reserveContainer()
     * def exampleJson = karate.readAsString('../fixtures/example.json')
     * def resource = testContainer.createResource('.json', exampleJson, 'application/ld+json');
-    * assert resource.exists()
     * def expected = RDFUtils.jsonLdToTripleArray(exampleJson, resource.url)
     * headers clients.alice.getAuthHeaders('GET', resource.url)
     * url resource.url

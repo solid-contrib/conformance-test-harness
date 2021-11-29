@@ -134,7 +134,7 @@ class AccessDatasetAcpLegacyLegacyTest {
         final AccessDataset accessDataset = new AccessDatasetAcpLegacy(
                 TestUtils.loadStringFromFile("src/test/resources/utils/vcard.ttl"), ACL_URI
         );
-        assertTrue(accessDataset.apply(mockClient, RESOURCE_URI));
+        assertDoesNotThrow(() -> accessDataset.apply(mockClient, RESOURCE_URI));
     }
 
     @Test
@@ -145,14 +145,14 @@ class AccessDatasetAcpLegacyLegacyTest {
         final AccessDataset accessDataset = new AccessDatasetAcpLegacy(
                 TestUtils.loadStringFromFile("src/test/resources/utils/vcard.ttl"), ACL_URI
         );
-        assertFalse(accessDataset.apply(mockClient, RESOURCE_URI));
+        assertThrows(Exception.class, () -> accessDataset.apply(mockClient, RESOURCE_URI));
     }
 
     @Test
-    void applyNull() throws IOException, InterruptedException {
+    void applyNull() {
         final Client mockClient = mock(Client.class);
         final AccessDataset accessDataset = new AccessDatasetAcpLegacy(Collections.emptyList(), ACL_URI.toString());
-        assertTrue(accessDataset.apply(mockClient, RESOURCE_URI));
+        assertDoesNotThrow(() -> accessDataset.apply(mockClient, RESOURCE_URI));
     }
 
     @Test

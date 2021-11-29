@@ -21,7 +21,7 @@ Feature: Test ACL in applyMembers mode retrospectively applied
 
     # grant Bob read access to member resources
     * def access = testContainer.accessDatasetBuilder.setInheritableAgentAccess(testContainer.url, webIds.bob, ['read']).build()
-    * assert testContainer.setAccessDataset(access)
+    * testContainer.accessDataset = access
 
     # get the container ACR to confirm it changed
     Given url testContainer.aclUrl

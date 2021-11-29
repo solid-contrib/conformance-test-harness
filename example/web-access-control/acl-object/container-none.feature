@@ -6,20 +6,17 @@ Feature: Bob cannot read a container or children if he is not given any access
       function() {
         const testContainer = rootTestContainer.createContainer();
         const access = testContainer.accessDatasetBuilder.build();
-        if (testContainer.setAccessDataset(access)) {
-          const intermediateContainer = testContainer.reserveContainer();
-          const resource = intermediateContainer.createResource('.txt', 'hello', 'text/plain')
-          return {
-            containerUrl: testContainer.url,
-            intermediateContainerUrl: intermediateContainer.url,
-            resourceUrl: resource.url
-          }
+        testContainer.accessDataset = access
+        const intermediateContainer = testContainer.reserveContainer();
+        const resource = intermediateContainer.createResource('.txt', 'hello', 'text/plain')
+        return {
+          containerUrl: testContainer.url,
+          intermediateContainerUrl: intermediateContainer.url,
+          resourceUrl: resource.url
         }
-        return null;
       }
     """
     * def test = callonce setup
-    * assert test != null
 
   Scenario: Bob cannot read the container or its children
     Given url test.containerUrl

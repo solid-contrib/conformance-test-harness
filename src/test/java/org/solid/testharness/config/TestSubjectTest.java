@@ -182,7 +182,7 @@ public class TestSubjectTest {
 
         final Exception exception = assertThrows(TestHarnessInitializationException.class,
                 () -> testSubject.prepareServer());
-        assertEquals("Failed to prepare server: java.lang.Exception: Cannot create test run container",
+        assertEquals("Failed to prepare server: java.io.IOException",
                 exception.getMessage());
     }
 
@@ -251,7 +251,8 @@ public class TestSubjectTest {
 
         final Exception exception = assertThrows(TestHarnessInitializationException.class,
                 () -> testSubject.prepareServer());
-        assertEquals("Failed to create root ACL", exception.getMessage());
+        assertEquals("Failed to create root ACL: java.lang.Exception: Error response=500 trying to apply ACL",
+                exception.getMessage());
     }
 
     @Test

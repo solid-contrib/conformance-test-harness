@@ -4,7 +4,6 @@ Feature: Requests support content negotiation for Turtle resource
     * def testContainer = rootTestContainer.reserveContainer()
     * def exampleTurtle = karate.readAsString('../fixtures/example.ttl')
     * def resource = testContainer.createResource('.ttl', exampleTurtle, 'text/turtle');
-#    * assert resource.exists()
     * def expected = RDFUtils.turtleToTripleArray(exampleTurtle, 'http://example.org/')
     * headers clients.alice.getAuthHeaders('GET', resource.url)
     * url resource.url

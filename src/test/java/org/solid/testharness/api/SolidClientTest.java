@@ -29,6 +29,7 @@ import org.solid.testharness.http.SolidClientProvider;
 
 import java.util.Collections;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -45,5 +46,13 @@ public class SolidClientTest {
         final SolidClient solidClient = new SolidClient(solidClientProvider);
         final var headers = solidClient.getAuthHeaders("GET", "URL");
         assertTrue(headers.isEmpty());
+    }
+
+    @Test
+    void getAuthHeadersException() {
+        final SolidClientProvider solidClientProvider = mock(SolidClientProvider.class);
+        when(solidClientProvider.getClient()).thenThrow(new NullPointerException("FAIL"));
+        final SolidClient solidClient = new SolidClient(solidClientProvider);
+        assertThrows(TestHarnessException.class, () -> solidClient.getAuthHeaders("GET", "URL"));
     }
 }

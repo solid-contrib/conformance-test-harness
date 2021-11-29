@@ -46,11 +46,18 @@ class SolidContainerTest {
         final SolidClientProvider solidClientProvider = mock(SolidClientProvider.class);
         final SolidClient solidClient = new SolidClient(solidClientProvider);
         final SolidContainer solidContainer = SolidContainer.create(solidClient, TEST_URL.toString());
-        assertTrue(solidContainer.exists());
+        assertEquals(TEST_URL.toString(), solidContainer.getUrl());
     }
 
     @Test
-    void instantiate() {
+    void testCreateException() {
+        final SolidClientProvider solidClientProvider = mock(SolidClientProvider.class);
+        final SolidClient solidClient = new SolidClient(solidClientProvider);
+        assertThrows(TestHarnessException.class, () -> SolidContainer.create(solidClient, "NOT_CONTAINER"));
+    }
+
+    @Test
+    void instantiate() throws Exception {
         final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
         final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
         assertEquals(solidContainer, solidContainer.instantiate());
@@ -58,7 +65,15 @@ class SolidContainerTest {
     }
 
     @Test
-    void reserveContainer() {
+    void instantiateException() throws Exception {
+        final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
+        doThrow(new Exception("FAIL")).when(solidContainerProvider).instantiate();
+        final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
+        assertThrows(TestHarnessException.class, solidContainer::instantiate);
+    }
+
+    @Test
+    void reserveContainer() throws Exception {
         final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
         final SolidContainerProvider newContainer = mock(SolidContainerProvider.class);
         when(solidContainerProvider.reserveContainer(any())).thenReturn(newContainer);
@@ -69,7 +84,15 @@ class SolidContainerTest {
     }
 
     @Test
-    void createContainer() {
+    void reserveContainerException() {
+        final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
+        when(solidContainerProvider.reserveContainer(any())).thenThrow(new RuntimeException("FAIL"));
+        final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
+        assertThrows(TestHarnessException.class, solidContainer::reserveContainer);
+    }
+
+    @Test
+    void createContainer() throws Exception {
         final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
         final SolidContainerProvider newContainer = mock(SolidContainerProvider.class);
         when(solidContainerProvider.reserveContainer(any())).thenReturn(newContainer);
@@ -77,6 +100,14 @@ class SolidContainerTest {
         assertNotNull(solidContainer.createContainer());
         verify(solidContainerProvider).reserveContainer(any());
         verify(newContainer).instantiate();
+    }
+
+    @Test
+    void createContainerException() {
+        final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
+        when(solidContainerProvider.reserveContainer(any())).thenThrow(new RuntimeException("FAIL"));
+        final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
+        assertThrows(TestHarnessException.class, solidContainer::createContainer);
     }
 
     @Test
@@ -90,13 +121,29 @@ class SolidContainerTest {
     }
 
     @Test
+    void reserveResourceException() {
+        final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
+        when(solidContainerProvider.reserveResource(any())).thenThrow(new RuntimeException("FAIL"));
+        final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
+        assertThrows(TestHarnessException.class, () -> solidContainer.reserveResource(".txt"));
+    }
+
+    @Test
     void createResource() {
         final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
         final SolidResourceProvider newResource = mock(SolidResourceProvider.class);
         when(solidContainerProvider.createResource(any(), any(), any())).thenReturn(newResource);
         final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
         assertNotNull(solidContainer.createResource(".txt", "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN));
-        verify(solidContainerProvider).createResource(any(), any(), any());
+    }
+
+    @Test
+    void createResourceException() {
+        final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
+        when(solidContainerProvider.createResource(any(), any(), any())).thenThrow(new RuntimeException("FAIL"));
+        final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
+        assertThrows(TestHarnessException.class,
+                () -> solidContainer.createResource(".txt", "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN));
     }
 
     @Test
@@ -111,7 +158,15 @@ class SolidContainerTest {
     }
 
     @Test
-    void parseMembers() throws Exception {
+    void listMembersException() throws Exception {
+        final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
+        when(solidContainerProvider.getContentAsTurtle()).thenThrow(new Exception("FAIL"));
+        final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
+        assertThrows(TestHarnessException.class, solidContainer::listMembers);
+    }
+
+    @Test
+    void parseMembers() {
         final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
         when(solidContainerProvider.getUrl()).thenReturn(TEST_URL);
         final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
@@ -121,10 +176,26 @@ class SolidContainerTest {
     }
 
     @Test
+    void parseMembersException() {
+        final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
+        when(solidContainerProvider.getUrl()).thenThrow(new RuntimeException("FAIL"));
+        final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
+        assertThrows(TestHarnessException.class, () -> solidContainer.parseMembers(MEMBERS));
+    }
+
+    @Test
     void deleteContents() throws Exception {
         final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
         final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
         assertDoesNotThrow(solidContainer::deleteContents);
         verify(solidContainerProvider).deleteContents();
+    }
+
+    @Test
+    void deleteContentsException() throws Exception {
+        final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
+        doThrow(new Exception("FAIL")).when(solidContainerProvider).deleteContents();
+        final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
+        assertThrows(TestHarnessException.class, solidContainer::deleteContents);
     }
 }

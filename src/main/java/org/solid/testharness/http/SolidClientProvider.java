@@ -91,17 +91,21 @@ public class SolidClientProvider {
     public HttpHeaders createResource(final URI url, final String data, final String type) throws Exception {
         final HttpResponse<Void> response = client.put(url, data, type);
         if (!HttpUtils.isSuccessful(response.statusCode())) {
-            throw new Exception("Failed to create resource - status=" + response.statusCode());
+            throw new Exception("Failed to create " + url.toString() + ", response=" + response.statusCode());
         }
         return response.headers();
     }
 
-    public HttpResponse<String> createContainer(final URI url) throws Exception {
+    public HttpHeaders createContainer(final URI url) throws Exception {
         final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
                 .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_TEXT_TURTLE)
                 .header(HttpConstants.HEADER_LINK, HttpConstants.CONTAINER_LINK)
                 .PUT(HttpRequest.BodyPublishers.noBody());
-        return client.sendAuthorized(builder, HttpResponse.BodyHandlers.ofString());
+        final HttpResponse<String> response = client.sendAuthorized(builder, HttpResponse.BodyHandlers.ofString());
+        if (!HttpUtils.isSuccessful(response.statusCode())) {
+            throw new Exception("Failed to create " + url.toString() + ", response=" + response.statusCode());
+        }
+        return response.headers();
     }
 
     public URI getAclUri(final URI uri) throws IOException, InterruptedException {
@@ -123,10 +127,9 @@ public class SolidClientProvider {
         return acpLink != null ? Config.AccessControlMode.ACP : Config.AccessControlMode.WAC;
     }
 
-    public boolean createAcl(final URI url, final AccessDataset accessDataset)
-            throws IOException, InterruptedException {
+    public void createAcl(final URI url, final AccessDataset accessDataset) throws Exception {
         logger.debug("ACL: {} for {}", accessDataset.toString(), url);
-        return accessDataset.apply(client, url);
+        accessDataset.apply(client, url);
     }
 
     public AccessDataset getAcl(final URI url) throws IOException, InterruptedException {

@@ -33,8 +33,6 @@ import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.ParseErrorLogger;
 import org.eclipse.rdf4j.rio.helpers.RDFaParserSettings;
 import org.eclipse.rdf4j.rio.helpers.RDFaVersion;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -46,28 +44,59 @@ import java.util.stream.Collectors;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 
+/**
+ * Utility methods for testing RDF responses.
+ */
 public final class RDFUtils {
-    private static final Logger logger = LoggerFactory.getLogger(RDFUtils.class);
-
-    public static List<String> turtleToTripleArray(final String data, final String baseUri) throws Exception {
-        final Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.TURTLE);
-        final StringWriter sw = new StringWriter();
-        Rio.write(model, sw, RDFFormat.NTRIPLES);
-        return Arrays.asList(sw.toString().split("\n"));
+    /**
+     * Returns a list of triples from a Turtle input.
+     * @param data the Turtle data
+     * @param baseUri the base URI for this data
+     * @return the list of triples
+     */
+    public static List<String> turtleToTripleArray(final String data, final String baseUri) {
+        try {
+            final Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.TURTLE);
+            final StringWriter sw = new StringWriter();
+            Rio.write(model, sw, RDFFormat.NTRIPLES);
+            return Arrays.asList(sw.toString().split("\n"));
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to parse Turtle", e);
+        }
     }
 
-    public static List<String> jsonLdToTripleArray(final String data, final String baseUri) throws Exception {
-        final Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.JSONLD);
-        final StringWriter sw = new StringWriter();
-        Rio.write(model, sw, RDFFormat.NTRIPLES);
-        return Arrays.asList(sw.toString().split("\n"));
+    /**
+     * Returns a list of triples from a JSON-LD input.
+     * @param data the JSON-LD data
+     * @param baseUri the base URI for this data
+     * @return the list of triples
+     */
+    public static List<String> jsonLdToTripleArray(final String data, final String baseUri) {
+        try {
+            final Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.JSONLD);
+            final StringWriter sw = new StringWriter();
+            Rio.write(model, sw, RDFFormat.NTRIPLES);
+            return Arrays.asList(sw.toString().split("\n"));
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to parse JSON-LD", e);
+        }
     }
 
-    public static List<String> rdfaToTripleArray(final String data, final String baseUri) throws Exception {
-        final Model model = parseRdfa(data, baseUri);
-        final StringWriter sw = new StringWriter();
-        Rio.write(model, sw, RDFFormat.NTRIPLES);
-        return Arrays.asList(sw.toString().split("\n"));
+    /**
+     * Returns a list of triples from a RDFa input.
+     * @param data the RDFa data
+     * @param baseUri the base URI for this data
+     * @return the list of triples
+     */
+    public static List<String> rdfaToTripleArray(final String data, final String baseUri) {
+        try {
+            final Model model = parseRdfa(data, baseUri);
+            final StringWriter sw = new StringWriter();
+            Rio.write(model, sw, RDFFormat.NTRIPLES);
+            return Arrays.asList(sw.toString().split("\n"));
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to parse RDFa", e);
+        }
     }
 
     private static Model parseRdfa(final String data, final String baseUri) throws IOException {
@@ -77,16 +106,20 @@ public final class RDFUtils {
                 parserConfig, SimpleValueFactory.getInstance(), new ParseErrorLogger());
     }
 
-    public static List<String> parseContainerContents(final String data, final String url) throws Exception {
-        final Model model;
+    /**
+     * Returns a list of URIs representing the members of a container.
+     * @param data the container content data in Turtle format
+     * @param url the url of this container
+     * @return the list of member urls
+     */
+    public static List<String> parseContainerContents(final String data, final String url) {
         try {
-            model = Rio.parse(new StringReader(data), url, RDFFormat.TURTLE);
+            final Model model = Rio.parse(new StringReader(data), url, RDFFormat.TURTLE);
+            final Set<Value> resources = model.filter(iri(url), LDP.CONTAINS, null).objects();
+            return resources.stream().map(Object::toString).collect(Collectors.toList());
         } catch (Exception e) {
-            logger.error("RDF Parse Error: {} in {}", e, data);
-            throw (Exception) new Exception("Bad container listing").initCause(e);
+            throw new TestHarnessException("Bad container listing", e);
         }
-        final Set<Value> resources = model.filter(iri(url), LDP.CONTAINS, null).objects();
-        return resources.stream().map(Object::toString).collect(Collectors.toList());
     }
 
     private RDFUtils() { }

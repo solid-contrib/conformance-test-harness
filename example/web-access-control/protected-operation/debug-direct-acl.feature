@@ -15,7 +15,7 @@ Feature: Test ACL creation in apply mode
 
     # grant Bob read access
     * def access = testResource.accessDatasetBuilder.setAgentAccess(testResource.url, webIds.bob, ['read']).build()
-    * assert testResource.setAccessDataset(access)
+    * testResource.accessDataset = access
 
     # get the ACR to confirm it changed
     Given url testResource.aclUrl

@@ -51,6 +51,10 @@ public class SolidClient {
      * @return the headers to be added to the HTTP request
      */
     public Map<String, String> getAuthHeaders(final String method, final String uri) {
-        return solidClientProvider.getClient().getAuthHeaders(method, URI.create(uri));
+        try {
+            return solidClientProvider.getClient().getAuthHeaders(method, URI.create(uri));
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to prepare auth headers", e);
+        }
     }
 }

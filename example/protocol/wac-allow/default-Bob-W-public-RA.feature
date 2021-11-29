@@ -6,20 +6,16 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
       function() {
         const testContainer = rootTestContainer.reserveContainer();
         const resource = testContainer.createResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
-        if (resource.exists()) {
-          const access = testContainer.accessDatasetBuilder
-                .setInheritableAgentAccess(testContainer.url, webIds.bob, ['write'])
-                .setInheritablePublicAccess(testContainer.url, ['read', 'append'])
-                .build();
-          resource.container.setAccessDataset(access)
-        }
+        const access = testContainer.accessDatasetBuilder
+              .setInheritableAgentAccess(testContainer.url, webIds.bob, ['write'])
+              .setInheritablePublicAccess(testContainer.url, ['read', 'append'])
+              .build();
+        resource.container.accessDataset = access
         return resource;
       }
     """
     * def resource = callonce setup
-    * assert resource.exists()
-    * def resourceUrl = resource.url
-    * url resourceUrl
+    * url resource.url
 
   Scenario: There is no acl on the resource
     Given url resource.aclUrl
@@ -38,7 +34,7 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     And match response contains webIds.bob
 
   Scenario: Bob calls GET and the header shows RWA access for user, RA for public
-    Given headers clients.bob.getAuthHeaders('GET', resourceUrl)
+    Given headers clients.bob.getAuthHeaders('GET', resource.url)
     When method GET
     Then status 200
     And match header WAC-Allow != null
@@ -47,7 +43,7 @@ Feature: The WAC-Allow header shows user and public access modes with Bob write 
     And match result.public contains only ['read', 'append']
 
   Scenario: Bob calls HEAD and the header shows RWA access for user, RA for public
-    Given headers clients.bob.getAuthHeaders('HEAD', resourceUrl)
+    Given headers clients.bob.getAuthHeaders('HEAD', resource.url)
     When method HEAD
     Then status 200
     And match header WAC-Allow != null

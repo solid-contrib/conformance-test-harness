@@ -52,9 +52,13 @@ public final class SolidContainer extends SolidResource {
      * @return the container
      */
     public static SolidContainer create(final SolidClient solidClient, final String url) {
-        return new SolidContainer(
-                new SolidContainerProvider(solidClient.solidClientProvider, URI.create(url))
-        );
+        try {
+            return new SolidContainer(
+                    new SolidContainerProvider(solidClient.solidClientProvider, URI.create(url))
+            );
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to construct container", e);
+        }
     }
 
     /**
@@ -62,8 +66,12 @@ public final class SolidContainer extends SolidResource {
      * @return the container
      */
     public SolidContainer instantiate() {
-        solidContainerProvider.instantiate();
-        return this;
+        try {
+            solidContainerProvider.instantiate();
+            return this;
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to instantiate container", e);
+        }
     }
 
     /**
@@ -71,15 +79,24 @@ public final class SolidContainer extends SolidResource {
      * @return the new container
      */
     public SolidContainer reserveContainer() {
-        return new SolidContainer(solidContainerProvider.reserveContainer(UUID.randomUUID().toString()));
+        try {
+            return new SolidContainer(solidContainerProvider.reserveContainer(UUID.randomUUID().toString()));
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to reserve container", e);
+        }
     }
 
     /**
      * Create a new container as a child of this one using a random name.
      * @return the new container
      */
-    public SolidContainer createContainer() {
-        return new SolidContainer(solidContainerProvider.reserveContainer(UUID.randomUUID().toString()).instantiate());
+    public SolidContainer createContainer() throws TestHarnessException {
+        try {
+            return new SolidContainer(solidContainerProvider.reserveContainer(UUID.randomUUID().toString())
+                    .instantiate());
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to create container", e);
+        }
     }
 
     /**
@@ -88,7 +105,11 @@ public final class SolidContainer extends SolidResource {
      * @return the new resource
      */
     public SolidResource reserveResource(final String suffix) {
-        return new SolidResource(solidContainerProvider.reserveResource(UUID.randomUUID() + suffix));
+        try {
+            return new SolidResource(solidContainerProvider.reserveResource(UUID.randomUUID() + suffix));
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to reserve resource", e);
+        }
     }
 
     /**
@@ -100,16 +121,23 @@ public final class SolidContainer extends SolidResource {
      * @return the new resource
      */
     public SolidResource createResource(final String suffix, final String body, final String type) {
-        return new SolidResource(solidContainerProvider.createResource(UUID.randomUUID() + suffix, body, type));
+        try {
+            return new SolidResource(solidContainerProvider.createResource(UUID.randomUUID() + suffix, body, type));
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to create resource", e);
+        }
     }
 
     /**
      * Get a list of the members of this container.
      * @return a list of members
-     * @throws Exception
      */
-    public List<String> listMembers() throws Exception {
-        return RDFUtils.parseContainerContents(solidContainerProvider.getContentAsTurtle(), getUrl());
+    public List<String> listMembers() {
+        try {
+            return RDFUtils.parseContainerContents(solidContainerProvider.getContentAsTurtle(), getUrl());
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to get container member listing", e);
+        }
     }
 
     /**
@@ -117,18 +145,24 @@ public final class SolidContainer extends SolidResource {
      * Given container contents, parse to extract the list of members.
      * @param data The contents of this resource in Turtle format
      * @return a list of members
-     * @throws Exception
      */
     @Deprecated
-    public List<String> parseMembers(final String data) throws Exception {
-        return RDFUtils.parseContainerContents(data, getUrl());
+    public List<String> parseMembers(final String data) {
+        try {
+            return RDFUtils.parseContainerContents(data, getUrl());
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to parse container contents", e);
+        }
     }
 
     /**
      * Delete the contents of this container and any of their contents recursively but leave this container.
-     * @throws Exception
      */
-    public void deleteContents() throws Exception {
-        solidContainerProvider.deleteContents();
+    public void deleteContents() {
+        try {
+            solidContainerProvider.deleteContents();
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to delete container contents", e);
+        }
     }
 }
