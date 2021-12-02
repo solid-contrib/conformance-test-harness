@@ -143,21 +143,6 @@ public final class SolidContainer extends SolidResource {
     }
 
     /**
-     * @deprecated Use <code>RDFModel.parse(data, "text/turtle", getUrl()).getMembers()</code>
-     * Given container contents, parse to extract the list of members.
-     * @param data The contents of this resource in Turtle format
-     * @return a list of members
-     */
-    @Deprecated
-    public List<String> parseMembers(final String data) {
-        try {
-            return RDFModel.parse(data, HttpConstants.MEDIA_TYPE_TEXT_TURTLE, getUrl()).getMembers();
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to parse container contents", e);
-        }
-    }
-
-    /**
      * Delete the contents of this container and any of their contents recursively but leave this container.
      */
     public void deleteContents() {

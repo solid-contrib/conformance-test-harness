@@ -1,5 +1,13 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.0.12
+
+### Features
+* Add RDF parsing and querying library to the Karate environment.
+
+### Minor changes
+* Remove deprecated functions.
+
 ## Release 1.0.11
 
 ### Features

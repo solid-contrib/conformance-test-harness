@@ -66,15 +66,6 @@ public class SolidResource {
     }
 
     /**
-     * @deprecated Use exception handling to detect setup errors.
-     * @return <code>true</code> if the resource exists on the server
-     */
-    @Deprecated
-    public boolean exists() {
-        return solidResourceProvider.getUrl() != null;
-    }
-
-    /**
      * Returns the url of this resource.
      * @return the url
      */
@@ -128,17 +119,6 @@ public class SolidResource {
         } catch (Exception e) {
             throw new TestHarnessException("Failed to find storage link header", e);
         }
-    }
-
-    /**
-     * Return an <code>AccessDatasetBuilder</code>.
-     * @deprecated Use <code>getAccessDatasetBuilder()</code> as the owner is the client who created the resource.
-     * @param owner a WebId
-     * @return an access dataset builder
-     */
-    @Deprecated
-    public AccessDatasetBuilder getAccessDatasetBuilder(final String owner) {
-        return getAccessDatasetBuilder();
     }
 
     /**
