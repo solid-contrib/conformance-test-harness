@@ -46,7 +46,7 @@ function fn() {
     const Utils = Java.type('org.solid.testharness.api.Utils');
     const SolidContainer = Java.type('org.solid.testharness.api.SolidContainer');
     const SolidResource = Java.type('org.solid.testharness.api.SolidResource');
-    const RDFUtils = Java.type('org.solid.testharness.api.RDFUtils');
+    const RDFModel = Java.type('org.solid.testharness.api.RDFModel');
 
     return {
         // global variables
@@ -54,20 +54,35 @@ function fn() {
         clients: karate.toMap(testHarness.clients),
         webIds: config.webIds,
 
+        // namespaces
+        RDF: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+        XSD: 'http://www.w3.org/2001/XMLSchema#',
+        LDP: 'http://www.w3.org/ns/ldp#',
+        ACL: 'http://www.w3.org/ns/auth/acl#',
+        FOAF: 'http://xmlns.com/foaf/0.1/',
+        ACP: 'http://www.w3.org/ns/solid/acp#',
+
         // utility libraries
-        RDFUtils,
         SolidResource,
         SolidContainer,
 
         // useful functions
+        iri: (p1, p2) => {
+            return typeof p2 === 'undefined'
+                ? RDFModel.iri(p1)
+                : RDFModel.iri(p1, p2)
+        },
+        literal: (p1, p2) => {
+            return typeof p2 === 'undefined'
+                ? RDFModel.literal(p1)
+                : RDFModel.literal(p1, p2)
+        },
+        parse: (p1, p2, p3) => {
+            return RDFModel.parse(typeof p1 === 'string' ? p1 : JSON.stringify(p1), p2, p3)
+        },
         parseWacAllowHeader: (headers) => Utils.parseWacAllowHeader(headers),
         parseLinkHeaders: (headers) => Utils.parseLinkHeaders(headers),
         resolveUri: (base, target) => Utils.resolveUri(base, target),
         pause: (pause) => java.lang.Thread.sleep(pause),
-
-        // @deprecated - use rootTestContainer.reserveContainer()
-        createTestContainer: () => rootTestContainer.reserveContainer(),
-        // @deprecated - use rootTestContainer.createContainer()
-        createTestContainerImmediate: () => rootTestContainer.createContainer()
     };
 }

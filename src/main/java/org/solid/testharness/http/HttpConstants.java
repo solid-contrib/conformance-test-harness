@@ -45,10 +45,12 @@ public final class HttpConstants {
 
     public static final String MEDIA_TYPE_APPLICATION_FORM_URLENCODED = "application/x-www-form-urlencoded";
     public static final String MEDIA_TYPE_APPLICATION_JSON = "application/json";
+    public static final String MEDIA_TYPE_APPLICATION_JSON_LD = "application/ld+json";
     public static final String MEDIA_TYPE_APPLICATION_SPARQL_UPDATE = "application/sparql-update";
     public static final String MEDIA_TYPE_TEXT_PLAIN = "text/plain";
     public static final String MEDIA_TYPE_TEXT_TURTLE = "text/turtle";
     public static final String MEDIA_TYPE_TEXT_HTML = "text/html";
+    public static final String MEDIA_TYPE_APPLICATION_XHTML_XML = "application/xhtml+xml";
 
     public static final String METHOD_HEAD = "HEAD";
     public static final String METHOD_PATCH = "PATCH";

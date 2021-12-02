@@ -39,7 +39,8 @@ import static org.mockito.Mockito.*;
 class SolidContainerTest {
     private static final URI TEST_URL = URI.create("https://example.org/");
     private static final String CHLID = "https://example.org/test/";
-    private static final String MEMBERS = String.format("<%s> <%s> <%s>.", TEST_URL, LDP.CONTAINS, CHLID);
+    private static final String MEMBERS = String.format("<%s> a <%s>; <%s> <%s>.", TEST_URL, LDP.BASIC_CONTAINER,
+            LDP.CONTAINS, CHLID);
 
     @Test
     void testCreate() {

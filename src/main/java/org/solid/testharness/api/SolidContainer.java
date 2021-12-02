@@ -23,6 +23,7 @@
  */
 package org.solid.testharness.api;
 
+import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.utils.SolidContainerProvider;
 
 import java.net.URI;
@@ -134,14 +135,15 @@ public final class SolidContainer extends SolidResource {
      */
     public List<String> listMembers() {
         try {
-            return RDFUtils.parseContainerContents(solidContainerProvider.getContentAsTurtle(), getUrl());
+            return RDFModel.parse(solidContainerProvider.getContentAsTurtle(), HttpConstants.MEDIA_TYPE_TEXT_TURTLE,
+                    getUrl()).getMembers();
         } catch (Exception e) {
             throw new TestHarnessException("Failed to get container member listing", e);
         }
     }
 
     /**
-     * @deprecated Use <code>RDFUtils.parseContainerContents(data, url)</code>
+     * @deprecated Use <code>RDFModel.parse(data, "text/turtle", getUrl()).getMembers()</code>
      * Given container contents, parse to extract the list of members.
      * @param data The contents of this resource in Turtle format
      * @return a list of members
@@ -149,7 +151,7 @@ public final class SolidContainer extends SolidResource {
     @Deprecated
     public List<String> parseMembers(final String data) {
         try {
-            return RDFUtils.parseContainerContents(data, getUrl());
+            return RDFModel.parse(data, HttpConstants.MEDIA_TYPE_TEXT_TURTLE, getUrl()).getMembers();
         } catch (Exception e) {
             throw new TestHarnessException("Failed to parse container contents", e);
         }
