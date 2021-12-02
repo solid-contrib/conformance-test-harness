@@ -31,8 +31,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.config.TestCredentials;
-import org.solid.testharness.utils.TestData;
 import org.solid.testharness.utils.TestHarnessInitializationException;
+import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
 import javax.validation.ConstraintViolationException;
@@ -134,7 +134,7 @@ class AuthManagerTest {
     @Test
     void authenticateNullCredentials() {
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
-        when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
+        when(config.getServerRoot()).thenReturn(URI.create(TestUtils.SAMPLE_BASE));
         when(config.getCredentials("test4")).thenReturn(null);
 
         assertThrows(TestHarnessInitializationException.class,
@@ -144,7 +144,7 @@ class AuthManagerTest {
     @Test
     void authenticateMissingCredentials() {
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
-        when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
+        when(config.getServerRoot()).thenReturn(URI.create(TestUtils.SAMPLE_BASE));
         when(config.getCredentials("test5")).thenReturn(new TestCredentials());
 
         assertThrows(TestHarnessInitializationException.class,
@@ -154,7 +154,7 @@ class AuthManagerTest {
     @Test
     void authenticateRefreshCredentialsNoGrantType() {
         when(config.getSolidIdentityProvider()).thenReturn(baseUri.resolve("/nogranttypes/"));
-        when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
+        when(config.getServerRoot()).thenReturn(URI.create(TestUtils.SAMPLE_BASE));
         final TestCredentials credentials = new TestCredentials();
         credentials.refreshToken = Optional.of("REFRESH");
         credentials.clientId = Optional.of("CLIENTID");
@@ -170,7 +170,7 @@ class AuthManagerTest {
     @Test
     void authenticateRefreshCredentialsFails() {
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
-        when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
+        when(config.getServerRoot()).thenReturn(URI.create(TestUtils.SAMPLE_BASE));
         final TestCredentials credentials = new TestCredentials();
         credentials.refreshToken = Optional.of("REFRESH");
         credentials.clientId = Optional.of("CLIENTID");
@@ -186,7 +186,7 @@ class AuthManagerTest {
     @Test
     void authenticateRefreshCredentials() throws Exception {
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
-        when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
+        when(config.getServerRoot()).thenReturn(URI.create(TestUtils.SAMPLE_BASE));
         final TestCredentials credentials = new TestCredentials();
         credentials.refreshToken = Optional.of("REFRESH");
         credentials.clientId = Optional.of("CLIENTID");
@@ -348,7 +348,7 @@ class AuthManagerTest {
     @Test
     void authenticateClientCredentialsNoGrantType() {
         when(config.getSolidIdentityProvider()).thenReturn(baseUri.resolve("/nogranttypes/"));
-        when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
+        when(config.getServerRoot()).thenReturn(URI.create(TestUtils.SAMPLE_BASE));
         final TestCredentials credentials = new TestCredentials();
         credentials.clientId = Optional.of("CLIENTID");
         credentials.clientSecret = Optional.of("BADSECRET");
@@ -363,7 +363,7 @@ class AuthManagerTest {
     @Test
     void authenticateClientCredentialsFails() {
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
-        when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
+        when(config.getServerRoot()).thenReturn(URI.create(TestUtils.SAMPLE_BASE));
         final TestCredentials credentials = new TestCredentials();
         credentials.clientId = Optional.of("CLIENTID");
         credentials.clientSecret = Optional.of("BADSECRET");
@@ -378,7 +378,7 @@ class AuthManagerTest {
     @Test
     void authenticateClientCredentials() throws Exception {
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
-        when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
+        when(config.getServerRoot()).thenReturn(URI.create(TestUtils.SAMPLE_BASE));
         final TestCredentials credentials = new TestCredentials();
         credentials.clientId = Optional.of("CLIENTID");
         credentials.clientSecret = Optional.of("CLIENTSECRET");
@@ -401,7 +401,7 @@ class AuthManagerTest {
         if (userRegistrationEndpoint != null) {
             when(config.getUserRegistrationEndpoint()).thenReturn(idpBaseUri.resolve(userRegistrationEndpoint));
         }
-        when(config.getServerRoot()).thenReturn(URI.create(TestData.SAMPLE_BASE));
+        when(config.getServerRoot()).thenReturn(URI.create(TestUtils.SAMPLE_BASE));
         final TestCredentials credentials = new TestCredentials();
         credentials.username = Optional.of("USERNAME");
         credentials.password = Optional.of(password);

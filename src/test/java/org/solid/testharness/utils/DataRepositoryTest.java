@@ -54,10 +54,10 @@ import static org.mockito.Mockito.when;
 
 @QuarkusTest
 class DataRepositoryTest {
-    private static final IRI assertor = iri(TestData.SAMPLE_NS, "testharness");
-    private static final IRI testSubject = iri(TestData.SAMPLE_NS, "test");
-    private static final IRI featureIri = iri(TestData.SAMPLE_NS, "feature");
-    private static final IRI testCaseIri = iri(TestData.SAMPLE_NS, "testCase");
+    private static final IRI assertor = iri(TestUtils.SAMPLE_NS, "testharness");
+    private static final IRI testSubject = iri(TestUtils.SAMPLE_NS, "test");
+    private static final IRI featureIri = iri(TestUtils.SAMPLE_NS, "feature");
+    private static final IRI testCaseIri = iri(TestUtils.SAMPLE_NS, "testCase");
 
     @Test
     void addFeatureResult() {
@@ -219,10 +219,11 @@ class DataRepositoryTest {
 
     @Test
     void exportWriter() throws Exception {
+        final String sample = TestUtils.loadStringFromFile("src/test/resources/turtle-sample.ttl");
         final DataRepository dataRepository = setupRepository();
         final StringWriter wr = new StringWriter();
         dataRepository.export(wr);
-        assertTrue(wr.toString().contains(TestData.SAMPLE_TURTLE));
+        assertTrue(wr.toString().contains(sample));
     }
 
     @Test
@@ -265,7 +266,7 @@ class DataRepositoryTest {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             conn.setNamespace(DCTERMS.PREFIX, DCTERMS.NAMESPACE);
         }
-        dataRepository.load(TestUtils.getFileUrl("src/test/resources/rdfa-sample.html"), TestData.SAMPLE_BASE);
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/rdfa-sample.html"), TestUtils.SAMPLE_BASE);
         assertEquals(1, dataRepositorySize(dataRepository));
         final StringWriter sw = new StringWriter();
         dataRepository.export(sw);
@@ -276,7 +277,7 @@ class DataRepositoryTest {
     void loadRdfaBadUrl() {
         final DataRepository dataRepository = new DataRepository();
         assertThrows(TestHarnessInitializationException.class,
-                () -> dataRepository.load(new URL("file:/missing.txt"), TestData.SAMPLE_BASE)
+                () -> dataRepository.load(new URL("file:/missing.txt"), TestUtils.SAMPLE_BASE)
         );
     }
 
@@ -285,7 +286,7 @@ class DataRepositoryTest {
         final DataRepository dataRepository = new DataRepository();
         assertThrows(TestHarnessInitializationException.class,
                 () -> dataRepository.load(TestUtils.getFileUrl("src/test/resources/jsonld-sample.json"),
-                        TestData.SAMPLE_BASE)
+                        TestUtils.SAMPLE_BASE)
         );
     }
 
@@ -309,7 +310,7 @@ class DataRepositoryTest {
         final DataRepository dataRepository = new DataRepository();
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             final Statement st = Values.getValueFactory()
-                    .createStatement(iri(TestData.SAMPLE_NS, "bob"), RDF.type, FOAF.Person);
+                    .createStatement(iri(TestUtils.SAMPLE_NS, TestUtils.BOB), RDF.type, FOAF.Person);
             conn.add(st);
         }
         return dataRepository;

@@ -28,7 +28,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import org.jose4j.lang.JoseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.solid.testharness.utils.TestData;
+import org.solid.testharness.utils.TestUtils;
 
 import java.io.IOException;
 import java.net.URI;
@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 @QuarkusTestResource(ClientResource.class)
 class ClientTest {
-    private static final URI TEST_URL = URI.create(TestData.SAMPLE_BASE);
+    private static final URI TEST_URL = URI.create(TestUtils.SAMPLE_BASE);
     private URI baseUri;
 
     @BeforeEach
@@ -135,7 +135,7 @@ class ClientTest {
     void sendAuthorized() throws IOException, InterruptedException, JoseException {
         final Client client = new Client.Builder().withDpopSupport().build();
         client.setAccessToken("ACCESS");
-        final HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(URI.create(TestData.SAMPLE_BASE));
+        final HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(URI.create(TestUtils.SAMPLE_BASE));
         final HttpResponse<String> response = client.sendAuthorized(requestBuilder,
                 HttpResponse.BodyHandlers.ofString());
         final Map<String, List<String>> headers = response.request().headers().map();
@@ -270,7 +270,7 @@ class ClientTest {
     @Test
     void signRequestNoDpop() {
         final Client client = new Client.Builder().build();
-        final HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(TestData.SAMPLE_BASE));
+        final HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(TestUtils.SAMPLE_BASE));
         final HttpRequest request = client.signRequest(builder).build();
         assertFalse(request.headers().map().containsKey(HttpConstants.HEADER_DPOP));
     }
@@ -278,7 +278,7 @@ class ClientTest {
     @Test
     void signRequest() throws JoseException {
         final Client client = new Client.Builder().withDpopSupport().build();
-        final HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(TestData.SAMPLE_BASE));
+        final HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(TestUtils.SAMPLE_BASE));
         final HttpRequest request = client.signRequest(builder).build();
         assertTrue(request.headers().map().containsKey(HttpConstants.HEADER_DPOP));
     }

@@ -24,8 +24,11 @@
 package org.solid.testharness.utils;
 
 import org.eclipse.rdf4j.RDF4JException;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.util.RepositoryUtil;
@@ -40,10 +43,7 @@ import org.eclipse.rdf4j.rio.helpers.RDFaVersion;
 import org.slf4j.Logger;
 import org.solid.testharness.http.HttpUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -60,6 +60,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public final class TestUtils {
+    public static final String SAMPLE_BASE = "https://example.org";
+    public static final String SAMPLE_NS = SAMPLE_BASE + "/";
+    public static final String BOB = "bob";
+
+    public static final String PREFIXES = Namespaces.generateAllTurtlePrefixes() +
+            "@prefix ex: <" + SAMPLE_NS + "> .\n";
+
     public static URL getFileUrl(final String file) throws MalformedURLException {
         return Path.of(file).normalize().toUri().toURL();
     }
@@ -176,6 +183,26 @@ public final class TestUtils {
             conn.export(rdfWriter);
         } catch (RDF4JException e) {
             System.out.println("Failed to write repository: " + e);
+        }
+    }
+
+    public static Model createModel(final IRI subject, final IRI predicate, final Value object) {
+        return new ModelBuilder().add(subject, predicate, object).build();
+    }
+
+    public static void insertData(final DataRepository dataRepository, final String turtle) throws IOException {
+        insertData(dataRepository, new StringReader(turtle));
+    }
+
+    public static void insertData(final DataRepository dataRepository, final Reader reader) throws IOException {
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            conn.add(reader, SAMPLE_BASE, RDFFormat.TURTLE);
+        }
+    }
+
+    public static void insertData(final DataRepository dataRepository, final URL url) throws IOException {
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            conn.add(url, SAMPLE_BASE, RDFFormat.TURTLE);
         }
     }
 
