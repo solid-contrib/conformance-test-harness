@@ -134,17 +134,7 @@ public final class RDFModel {
      * @return the list of member urls
      */
     public List<String> getMembers() {
-        final IRI container;
-        try {
-            container = model.filter(null, RDF.type, LDP.BASIC_CONTAINER).subjects().stream()
-                    .filter(Resource::isIRI).map(IRI.class::cast).findFirst().orElse(null);
-            if (container == null) {
-                throw new Exception("The model does not represent a container");
-            }
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to get list of subjects", e);
-        }
-        return objects(container, LDP.CONTAINS);
+        return objects(null, LDP.CONTAINS);
     }
 
     /**

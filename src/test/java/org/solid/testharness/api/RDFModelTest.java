@@ -50,12 +50,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 class RDFModelTest {
-    private static final Logger logger = LoggerFactory.getLogger(RDFModelTest.class);
     private static final String TEST_URL = "https://example.org/";
     private static final String CHLID = "https://example.org/test/";
-    private static final String NO_MEMBERS = String.format("<%s> a <%s>.", TEST_URL, LDP.BASIC_CONTAINER);
-    private static final String MEMBERS = String.format("<%s> a <%s>; <%s> <%s>.", TEST_URL, LDP.BASIC_CONTAINER,
-            LDP.CONTAINS, CHLID);
+    private static final String NO_MEMBERS = String.format("<%s> a <%s>.", TEST_URL, LDP.RDF_SOURCE);
+    private static final String MEMBERS = String.format("<%s> <%s> <%s>.", TEST_URL, LDP.CONTAINS, CHLID);
     private static final IRI BOB_IRI = iri(TestUtils.SAMPLE_NS, TestUtils.BOB);
 
     private static final Model SAMPLE_HTML_MODEL;
@@ -148,6 +146,7 @@ class RDFModelTest {
 
     @Test
     void containsModelSizeDiff() {
+        ScenarioEngine.set(null);
         final RDFModel model = RDFModel.parse(SAMPLE_TURTLE, "text/turtle", TestUtils.SAMPLE_BASE);
         assertFalse(model.contains(new RDFModel(SAMPLE_MODEL2)));
     }
@@ -172,24 +171,6 @@ class RDFModelTest {
     void getMembersEmpty() {
         final List<String> members = RDFModel.parse(NO_MEMBERS, "text/turtle", TEST_URL).getMembers();
         assertTrue(members.isEmpty());
-    }
-
-    @Test
-    void getMembersFailsNotContainer() {
-        final Exception exception = assertThrows(Exception.class,
-                () -> RDFModel.parse(SAMPLE_TURTLE, "text/turtle", TEST_URL).getMembers()
-        );
-        assertTrue(exception.getMessage().contains("TestHarnessException: Failed to get list of subjects"));
-        assertTrue(exception.getMessage().contains("The model does not represent a container"));
-    }
-
-    @Test
-    void getMembersFails() {
-        final Exception exception = assertThrows(Exception.class,
-                () -> RDFModel.parse("BAD", "text/turtle", TEST_URL).getMembers()
-        );
-        assertTrue(exception.getMessage().contains("TestHarnessException: Failed to parse data"));
-        assertTrue(exception.getMessage().contains("RDFParseException: Unexpected end of file"));
     }
 
     @Test
