@@ -327,6 +327,7 @@ public class TestSubjectTest {
         when(config.getServerRoot()).thenReturn(URI.create("https://server/"));
         when(config.getReadTimeout()).thenReturn(5000);
         when(config.getAgent()).thenReturn("AGENT");
+        when(config.generateResourceId()).thenReturn("abcdef");
         if (mode.equals(WAC)) {
             when(config.getAccessControlMode()).thenReturn(WAC);
         } else {

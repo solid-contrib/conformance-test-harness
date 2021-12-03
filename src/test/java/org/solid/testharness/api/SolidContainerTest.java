@@ -23,6 +23,7 @@
  */
 package org.solid.testharness.api;
 
+import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.http.HttpConstants;
@@ -36,6 +37,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@QuarkusTest
 class SolidContainerTest {
     private static final URI TEST_URL = URI.create("https://example.org/");
     private static final String CHLID = "https://example.org/test/";

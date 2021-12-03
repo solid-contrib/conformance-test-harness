@@ -165,4 +165,12 @@ public class ConfigTest {
         config.setAccessControlMode(Config.AccessControlMode.WAC);
         assertEquals(Config.AccessControlMode.WAC, config.getAccessControlMode());
     }
+
+    @Test
+    void generateResourceId() {
+        final String id = config.generateResourceId();
+        assertNotNull(id);
+        assertNotEquals(id, config.generateResourceId());
+
+    }
 }

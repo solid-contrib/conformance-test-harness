@@ -50,7 +50,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import static org.solid.testharness.config.Config.AccessControlMode.ACP;
 import static org.solid.testharness.config.Config.AccessControlMode.ACP_LEGACY;
@@ -177,7 +176,7 @@ public class TestSubject {
             logger.debug("Root test container access controls: {}", rootTestContainer.getAccessDataset());
 
             // create a root container for all the test cases in this run
-            testRunContainer = rootTestContainer.reserveContainer(UUID.randomUUID().toString()).instantiate();
+            testRunContainer = rootTestContainer.reserveContainer(rootTestContainer.generateId()).instantiate();
             logger.debug("Test run container content: {}", testRunContainer.getContentAsTurtle());
             logger.debug("Test run container access controls: {}", testRunContainer.getAccessDataset());
         } catch (Exception e) {

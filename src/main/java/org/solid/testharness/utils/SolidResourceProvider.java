@@ -44,6 +44,7 @@ public class SolidResourceProvider {
     private URI aclUrl;
     private Boolean aclLinkAvailable;
     private boolean containerType;
+    private Config config;
 
     public SolidResourceProvider(final SolidClientProvider solidClientProvider, final URI url) {
         this(solidClientProvider, url, null, null);
@@ -59,6 +60,7 @@ public class SolidResourceProvider {
             throw new IllegalArgumentException("Parameter type is required");
         }
         this.solidClientProvider = solidClientProvider;
+        config = CDI.current().select(Config.class).get();
 
         containerType = url.toString().endsWith("/");
 
@@ -121,7 +123,6 @@ public class SolidResourceProvider {
 
     public AccessDatasetBuilder getAccessDatasetBuilder() throws Exception {
         final AccessDatasetBuilder builder = solidClientProvider.getAccessDatasetBuilder(getAclUrl());
-        final Config config = CDI.current().select(Config.class).get();
         final String owner = config.getWebIds().get(solidClientProvider.getClient().getUser());
         builder.setOwnerAccess(url.toString(), owner);
         return builder;
@@ -162,6 +163,10 @@ public class SolidResourceProvider {
 
     public void delete() throws Exception {
         solidClientProvider.deleteResourceRecursively(url);
+    }
+
+    public String generateId() {
+        return config.generateResourceId();
     }
 
     @Override
