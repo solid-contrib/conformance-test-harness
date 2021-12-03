@@ -166,24 +166,6 @@ class SolidContainerTest {
     }
 
     @Test
-    void parseMembers() {
-        final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
-        when(solidContainerProvider.getUrl()).thenReturn(TEST_URL);
-        final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
-        final List<String> members = solidContainer.parseMembers(MEMBERS);
-        assertEquals(1, members.size());
-        assertEquals(CHLID, members.get(0));
-    }
-
-    @Test
-    void parseMembersException() {
-        final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
-        when(solidContainerProvider.getUrl()).thenThrow(new RuntimeException("FAIL"));
-        final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
-        assertThrows(TestHarnessException.class, () -> solidContainer.parseMembers(MEMBERS));
-    }
-
-    @Test
     void deleteContents() throws Exception {
         final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
         final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);

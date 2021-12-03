@@ -34,7 +34,7 @@ import java.nio.file.Path;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class AbstractDataModelTests {
-    protected static String NS = TestData.SAMPLE_NS;
+    protected static String NS = TestUtils.SAMPLE_NS;
 
     public abstract String getTestFile();
 
@@ -43,7 +43,7 @@ public abstract class AbstractDataModelTests {
         try (Reader reader = Files.newBufferedReader(Path.of(getTestFile()))) {
             final DataRepository repository = new DataRepository();
             repository.postConstruct();
-            TestData.insertData(repository, reader);
+            TestUtils.insertData(repository, reader);
             QuarkusMock.installMockForType(repository, DataRepository.class);
         }
     }

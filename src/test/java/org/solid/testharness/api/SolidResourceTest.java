@@ -47,7 +47,7 @@ class SolidResourceTest {
         final SolidClient solidClient = new SolidClient(solidClientProvider);
         final SolidResource solidResource = SolidResource.create(solidClient, TEST_URL.toString(), "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
-        assertTrue(solidResource.exists());
+        assertNotNull(solidResource.solidResourceProvider.getUrl());
     }
 
     @Test
@@ -63,7 +63,7 @@ class SolidResourceTest {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
         when(solidResourceProvider.getUrl()).thenReturn(TEST_URL);
         final SolidResource resource = new SolidResource(solidResourceProvider);
-        assertTrue(resource.exists());
+        assertNotNull(resource.solidResourceProvider.getUrl());
     }
 
     @Test
@@ -71,7 +71,7 @@ class SolidResourceTest {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
         when(solidResourceProvider.getUrl()).thenReturn(null);
         final SolidResource resource = new SolidResource(solidResourceProvider);
-        assertFalse(resource.exists());
+        assertNull(resource.solidResourceProvider.getUrl());
     }
 
     @Test
@@ -172,15 +172,6 @@ class SolidResourceTest {
         when(solidResourceProvider.isStorageType()).thenThrow(new Exception("FAIL"));
         final SolidResource resource = new SolidResource(solidResourceProvider);
         assertThrows(TestHarnessException.class, resource::isStorageType);
-    }
-
-    @Test
-    void getAccessDatasetBuilderWithParam() throws Exception {
-        final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
-        final AccessDatasetBuilder accessDatasetBuilder = mock(AccessDatasetBuilder.class);
-        when(solidResourceProvider.getAccessDatasetBuilder()).thenReturn(accessDatasetBuilder);
-        final SolidResource resource = new SolidResource(solidResourceProvider);
-        assertEquals(accessDatasetBuilder, resource.getAccessDatasetBuilder("owner"));
     }
 
     @Test

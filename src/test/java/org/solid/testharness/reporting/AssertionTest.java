@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.solid.common.vocab.EARL;
 import org.solid.testharness.utils.AbstractDataModelTests;
 import org.solid.testharness.utils.Namespaces;
-import org.solid.testharness.utils.TestData;
+import org.solid.testharness.utils.TestUtils;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,7 +49,7 @@ class AssertionTest extends AbstractDataModelTests {
     @Test
     void getTest() {
         final Assertion assertion = new Assertion(iri(NS, "assertion1"));
-        assertEquals(TestData.SAMPLE_BASE + "/test", assertion.getTest());
+        assertEquals(TestUtils.SAMPLE_BASE + "/test", assertion.getTest());
     }
 
     @Test

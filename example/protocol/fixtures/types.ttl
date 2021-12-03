@@ -1,0 +1,18 @@
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@base <http://example.org/> .
+
+<#test>
+    <#iri> <#world> ;
+    <#string> "text"  ;
+    <#stringen> "texten"@en ;
+    <#decimal> "1.2"^^xsd:decimal ;
+    <#short> "1"^^xsd:short;
+    <#integer> "1234567890"^^xsd:integer;
+    <#int> "1234"^^xsd:int;
+    <#long> "1234567890"^^xsd:long;
+    <#float> "1234567890.0"^^xsd:float;
+    <#double> "1234567890.0"^^xsd:double;
+    <#date> "2021-11-01"^^xsd:date ;
+    <#dateTime> "2021-11-01T15:14:13.000Z"^^xsd:dateTime ;
+    <#boolean> "true"^^xsd:boolean
+.

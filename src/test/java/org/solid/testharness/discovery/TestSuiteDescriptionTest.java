@@ -50,9 +50,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 class TestSuiteDescriptionTest {
-    private static String NS = TestData.SAMPLE_NS;
-    private static String TCNS = TestData.SAMPLE_NS + "test-manifest-sample-1.ttl#";
-    private static String FNS = TestData.SAMPLE_NS + "test/";
+    private static String NS = TestUtils.SAMPLE_NS;
+    private static String TCNS = TestUtils.SAMPLE_NS + "test-manifest-sample-1.ttl#";
+    private static String FNS = TestUtils.SAMPLE_NS + "test/";
 
     @Inject
     DataRepository repository;

@@ -63,3 +63,9 @@ manifest:storage-headers
   td:preCondition "authentication", "acl" ;
   spec:testScript
     <https://github.com/solid/conformance-test-harness/example/protocol/storage/storage-headers.feature> .
+
+manifest:parsing-tests
+  a td:TestCase ;
+  td:reviewStatus td:unreviewed ;
+  spec:testScript
+    <https://github.com/solid/conformance-test-harness/example/parsing-tests.feature> .

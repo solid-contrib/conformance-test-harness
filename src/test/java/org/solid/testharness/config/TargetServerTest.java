@@ -54,8 +54,8 @@ public class TargetServerTest {
     @Test
     public void parseTargetServer() throws Exception {
         final URL testFile = TestUtils.getFileUrl("src/test/resources/config/targetserver-testing-feature.ttl");
-        TestData.insertData(dataRepository, testFile);
-        final TargetServer targetServer = new TargetServer(iri(TestData.SAMPLE_NS, "testserver"));
+        TestUtils.insertData(dataRepository, testFile);
+        final TargetServer targetServer = new TargetServer(iri(TestUtils.SAMPLE_NS, "testserver"));
         assertAll("targetServer",
                 () -> assertNotNull(targetServer.getFeatures()),
                 () -> assertEquals(true, targetServer.getFeatures().get("feature1")),
