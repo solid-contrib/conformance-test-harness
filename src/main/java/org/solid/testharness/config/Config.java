@@ -26,12 +26,14 @@ package org.solid.testharness.config;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.rdf4j.model.IRI;
+import org.hashids.Hashids;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.HttpUtils;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.File;
@@ -40,6 +42,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
@@ -57,6 +60,8 @@ public class Config {
     private File outputDir;
     private Map<String, String> webIds;
     private AccessControlMode accessControlMode;
+    private Hashids hashids;
+    private AtomicLong resourceCount = new AtomicLong();
 
     public enum AccessControlMode {
         ACP_LEGACY,
@@ -114,6 +119,11 @@ public class Config {
 
     @Inject
     PathMappings pathMappings;
+
+    @PostConstruct
+    void init() {
+        hashids = new Hashids(UUID.randomUUID().toString(), 6);
+    }
 
     public IRI getTestSubject() {
         if (testSubject == null && target.isPresent()) {
@@ -244,6 +254,10 @@ public class Config {
 
     public void setAccessControlMode(final AccessControlMode accessControlMode) {
         this.accessControlMode = accessControlMode;
+    }
+
+    public String generateResourceId() {
+        return hashids.encode(resourceCount.getAndIncrement());
     }
 
     public void logConfigSettings(final RunMode mode) {

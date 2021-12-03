@@ -28,7 +28,6 @@ import org.solid.testharness.utils.SolidContainerProvider;
 
 import java.net.URI;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * SolidContainer is extended from <code>SolidResource</code> and represents any container in a Solid server.
@@ -81,7 +80,7 @@ public final class SolidContainer extends SolidResource {
      */
     public SolidContainer reserveContainer() {
         try {
-            return new SolidContainer(solidContainerProvider.reserveContainer(UUID.randomUUID().toString()));
+            return new SolidContainer(solidContainerProvider.reserveContainer(solidContainerProvider.generateId()));
         } catch (Exception e) {
             throw new TestHarnessException("Failed to reserve container", e);
         }
@@ -93,7 +92,7 @@ public final class SolidContainer extends SolidResource {
      */
     public SolidContainer createContainer() throws TestHarnessException {
         try {
-            return new SolidContainer(solidContainerProvider.reserveContainer(UUID.randomUUID().toString())
+            return new SolidContainer(solidContainerProvider.reserveContainer(solidContainerProvider.generateId())
                     .instantiate());
         } catch (Exception e) {
             throw new TestHarnessException("Failed to create container", e);
@@ -107,7 +106,8 @@ public final class SolidContainer extends SolidResource {
      */
     public SolidResource reserveResource(final String suffix) {
         try {
-            return new SolidResource(solidContainerProvider.reserveResource(UUID.randomUUID() + suffix));
+            return new SolidResource(solidContainerProvider.reserveResource(solidContainerProvider.generateId()
+                    + suffix));
         } catch (Exception e) {
             throw new TestHarnessException("Failed to reserve resource", e);
         }
@@ -123,7 +123,8 @@ public final class SolidContainer extends SolidResource {
      */
     public SolidResource createResource(final String suffix, final String body, final String type) {
         try {
-            return new SolidResource(solidContainerProvider.createResource(UUID.randomUUID() + suffix, body, type));
+            return new SolidResource(solidContainerProvider.createResource(solidContainerProvider.generateId()
+                    + suffix, body, type));
         } catch (Exception e) {
             throw new TestHarnessException("Failed to create resource", e);
         }

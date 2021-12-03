@@ -45,6 +45,7 @@
         <commons.cli.version>1.5.0</commons.cli.version>
         <wiremock.version>2.27.2</wiremock.version>
         <solid.vocab.version>0.0.12</solid.vocab.version>
+        <hashids.version>1.0.3</hashids.version>
 
         <!-- package info -->
         <package.name>${project.name}</package.name>
@@ -227,6 +228,11 @@
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock</artifactId>
             <version>${wiremock.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hashids</groupId>
+            <artifactId>hashids</artifactId>
+            <version>${hashids.version}</version>
         </dependency>
     </dependencies>
     <build>

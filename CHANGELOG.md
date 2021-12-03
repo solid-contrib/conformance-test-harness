@@ -1,5 +1,12 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.0.13
+
+### Features
+
+### Minor changes
+* Shorten the generated names of test resources.
+
 ## Release 1.0.12
 
 ### Features

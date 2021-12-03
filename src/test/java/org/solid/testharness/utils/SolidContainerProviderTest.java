@@ -23,6 +23,7 @@
  */
 package org.solid.testharness.utils;
 
+import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.http.HttpConstants;
@@ -33,6 +34,7 @@ import java.net.URI;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@QuarkusTest
 class SolidContainerProviderTest {
     private static final URI ROOT_URL = URI.create("https://example.org/");
     private static final URI TEST_URL = ROOT_URL.resolve("/container/");

@@ -402,4 +402,11 @@ class SolidResourceProviderTest {
                 ROOT_URL.resolve("/container/"), null, null);
         assertEquals("SolidContainerProvider: " + ROOT_URL.resolve("/container/"), resource.toString());
     }
+
+    @Test
+    void generateId() {
+        final SolidResourceProvider resource = new SolidResourceProvider(solidClientProvider, TEST_URL);
+        when(config.generateResourceId()).thenReturn("abcdef");
+        assertEquals("abcdef", resource.generateId());
+    }
 }
