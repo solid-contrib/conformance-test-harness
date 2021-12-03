@@ -38,7 +38,6 @@ import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.ParseErrorLogger;
 import org.eclipse.rdf4j.rio.helpers.RDFaParserSettings;
 import org.eclipse.rdf4j.rio.helpers.RDFaVersion;
-import org.solid.common.vocab.RDF;
 import org.solid.testharness.http.HttpConstants;
 
 import java.io.StringReader;

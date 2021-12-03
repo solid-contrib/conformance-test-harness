@@ -32,8 +32,6 @@ import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.DCTERMS;
 import org.solid.common.vocab.FOAF;
 import org.solid.common.vocab.RDF;
