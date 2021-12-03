@@ -5,7 +5,7 @@ Feature: Requests support content negotiation for Turtle resource
     * def exampleTurtle = karate.readAsString('../fixtures/example.ttl')
     * def resource = testContainer.createResource('.ttl', exampleTurtle, 'text/turtle');
     * def expected = parse(exampleTurtle, 'text/turtle')
-    * configure headers clients.alice.getAuthHeaders('GET', resource.url)
+    * configure headers = clients.alice.getAuthHeaders('GET', resource.url)
     * url resource.url
 
   Scenario: Alice can GET the TTL example as JSON-LD
