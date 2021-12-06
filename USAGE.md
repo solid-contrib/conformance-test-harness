@@ -67,12 +67,19 @@ of the CTH, is maintained at https://github.com/solid/specification-tests/blob/m
 subjects: test-subjects.ttl
 sources:
   # Protocol spec & manifest
+  # Editor's draft (fully annotated)
   - https://solidproject.org/TR/protocol
   - https://github.com/solid/specification-tests/protocol/solid-protocol-test-manifest.ttl
 
   # WAC spec & manifest
+  # Editor's draft (fully annotated)
   - https://solid.github.io/web-access-control-spec
   - https://github.com/solid/specification-tests/web-access-control/web-access-control-test-manifest.ttl
+
+  # Published draft (not annotated)
+  # This is an example of how you could run tests for a specific version of the specification 
+  #  - https://solidproject.org/TR/2021/wac-20210711
+  #  - https://github.com/solid/specification-tests/web-access-control/web-access-control-test-manifest-20210711.ttl
 
 # The target is just an IRI or local name relative to the test-subjects file and is not expected to resolve to anything
 target: https://github.com/solid/conformance-test-harness/ess
