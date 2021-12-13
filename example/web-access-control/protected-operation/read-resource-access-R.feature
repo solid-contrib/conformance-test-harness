@@ -52,6 +52,6 @@ Feature: Bob can only read an RDF resource to which he is only granted read acce
     When method DELETE
     Then status 403
 
-#  Scenario: Bob cannot use an unknown method on the resource
-#    When method 'DAHU'
-#    Then status 400
+  Scenario: Bob cannot use an unknown method on the resource
+    * def response = clients.alice.sendAuthorized('DAHU', resource.url, null, null)
+    Then assert response.status == 405
