@@ -39,6 +39,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -125,6 +126,34 @@ public class Client {
 
     public String getUser() {
         return user;
+    }
+
+    @SuppressWarnings("checkstyle:MultipleStringLiterals") // cleaner to leave error messages local
+    public HttpResponse<String> send(@NotNull final String method, @NotNull final URI url, final String data,
+                                     final Map<String, Object> headers, final boolean authorized)
+            throws IOException, InterruptedException {
+        requireNonNull(url, "url is required");
+        requireNonNull(method, "method is required");
+        final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url);
+        if (data != null) {
+            builder.method(method, HttpRequest.BodyPublishers.ofString(data));
+        } else {
+            builder.method(method, HttpRequest.BodyPublishers.noBody());
+        }
+        if (headers != null) {
+            for (Map.Entry<String, Object> entry : headers.entrySet()) {
+                if (entry.getValue() instanceof String || entry.getValue() instanceof Number) {
+                    builder.header(entry.getKey(), String.valueOf(entry.getValue()));
+                } else if (entry.getValue() instanceof Collection) {
+                    ((Collection)entry.getValue()).forEach(o -> builder.header(entry.getKey(), String.valueOf(o)));
+                }
+            }
+        }
+        final HttpRequest request = authorized ? authorize(builder).build() : builder.build();
+        HttpUtils.logRequestToKarate(logger, request, data);
+        final HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpUtils.logResponseToKarate(logger, response);
+        return response;
     }
 
     public <T> HttpResponse<T> send(@NotNull final HttpRequest request,

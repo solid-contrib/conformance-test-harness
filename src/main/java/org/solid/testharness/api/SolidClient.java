@@ -26,6 +26,7 @@ package org.solid.testharness.api;
 import org.solid.testharness.http.SolidClientProvider;
 
 import java.net.URI;
+import java.net.http.HttpResponse;
 import java.util.Map;
 
 /**
@@ -55,6 +56,52 @@ public class SolidClient {
             return solidClientProvider.getClient().getAuthHeaders(method, URI.create(uri));
         } catch (Exception e) {
             throw new TestHarnessException("Failed to prepare auth headers", e);
+        }
+    }
+
+    /**
+     * Send a request to the server using the method, data and headers provided.
+     * @param method the method
+     * @param uri the URL of the resource
+     * @param data the request body (optional)
+     * @param headers a map of request headers (optional)
+     * @return a map containing the response using the keys: status, headers, body
+     */
+    public Map<String, Object> send(final String method, final String uri, final String data,
+                                    final Map<String, Object> headers) {
+        try {
+            final HttpResponse<String> response = solidClientProvider.getClient().send(method, URI.create(uri),
+                    data, headers, false);
+            return Map.of(
+                    "status", response.statusCode(),
+                    "body", response.body(),
+                    "headers", response.headers().map()
+            );
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to send request", e);
+        }
+    }
+
+    /**
+     * Send an authorized request to the server using the method, data and headers provided.
+     * @param method the method
+     * @param uri the URL of the resource
+     * @param data the request body (optional)
+     * @param headers a map of request headers (optional)
+     * @return a map containing the response using the keys: status, headers, body
+     */
+    public Map<String, Object> sendAuthorized(final String method, final String uri, final String data,
+                                    final Map<String, Object> headers) {
+        try {
+            final HttpResponse<String> response = solidClientProvider.getClient().send(method, URI.create(uri),
+                    data, headers, true);
+            return Map.of(
+                    "status", response.statusCode(),
+                    "body", response.body(),
+                    "headers", response.headers().map()
+            );
+        } catch (Exception e) {
+            throw new TestHarnessException("Failed to send authorized request", e);
         }
     }
 }

@@ -104,6 +104,54 @@ class ClientTest {
     }
 
     @Test
+    void sendRawEmpty() throws IOException, InterruptedException {
+        final Client client = new Client.Builder().build();
+        final HttpResponse<String> response = client.send("DAHU", baseUri.resolve("/dahu/no-auth"),
+                "TEXT", null, false);
+        assertEquals(200, response.statusCode());
+        assertEquals("", response.body());
+    }
+
+    @Test
+    void sendRawAuthEmpty() throws IOException, InterruptedException, JoseException {
+        final Client client = new Client.Builder().withDpopSupport().build();
+        client.setAccessToken("ACCESS");
+        final HttpResponse<String> response = client.send("DAHU", baseUri.resolve("/dahu/auth"),
+                null, null, true);
+        assertEquals(200, response.statusCode());
+        assertEquals("AUTHENTICATED", response.body());
+        assertEquals(HttpConstants.MEDIA_TYPE_TEXT_PLAIN,
+                response.headers().firstValue(HttpConstants.HEADER_CONTENT_TYPE).get());
+    }
+
+    @Test
+    void sendRawNullMethod() {
+        final Client client = new Client.Builder().build();
+        assertThrows(NullPointerException.class, () -> client.send(null, baseUri, null, null, false));
+    }
+
+    @Test
+    void sendRawNullUri() {
+        final Client client = new Client.Builder().build();
+        assertThrows(NullPointerException.class, () -> client.send("GET", null, null, null, false));
+    }
+
+    @Test
+    void sendRawWithHeaders() throws IOException, InterruptedException {
+        final Client client = new Client.Builder().build();
+        final Map<String, Object> headers = Map.of(
+                "INT", 5,
+                "FLOAT", 2.5f,
+                "STRING", "HEADER",
+                "LIST", List.of("ITEM1", "ITEM2"),
+                "SKIP", TEST_URL
+        );
+        final HttpResponse<String> response = client.send("DAHU", baseUri.resolve("/dahu/headers"),
+                null, headers, false);
+        assertEquals(200, response.statusCode());
+    }
+
+    @Test
     void send() throws IOException, InterruptedException {
         final Client client = new Client.Builder().build();
         final HttpRequest request = HttpRequest.newBuilder(baseUri.resolve("/get/404")).build();
@@ -135,7 +183,7 @@ class ClientTest {
     void sendAuthorized() throws IOException, InterruptedException, JoseException {
         final Client client = new Client.Builder().withDpopSupport().build();
         client.setAccessToken("ACCESS");
-        final HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(URI.create(TestUtils.SAMPLE_BASE));
+        final HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(baseUri.resolve("/get/turtle"));
         final HttpResponse<String> response = client.sendAuthorized(requestBuilder,
                 HttpResponse.BodyHandlers.ofString());
         final Map<String, List<String>> headers = response.request().headers().map();
@@ -270,7 +318,7 @@ class ClientTest {
     @Test
     void signRequestNoDpop() {
         final Client client = new Client.Builder().build();
-        final HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(TestUtils.SAMPLE_BASE));
+        final HttpRequest.Builder builder = HttpRequest.newBuilder(TEST_URL);
         final HttpRequest request = client.signRequest(builder).build();
         assertFalse(request.headers().map().containsKey(HttpConstants.HEADER_DPOP));
     }
@@ -278,7 +326,7 @@ class ClientTest {
     @Test
     void signRequest() throws JoseException {
         final Client client = new Client.Builder().withDpopSupport().build();
-        final HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(TestUtils.SAMPLE_BASE));
+        final HttpRequest.Builder builder = HttpRequest.newBuilder(TEST_URL);
         final HttpRequest request = client.signRequest(builder).build();
         assertTrue(request.headers().map().containsKey(HttpConstants.HEADER_DPOP));
     }

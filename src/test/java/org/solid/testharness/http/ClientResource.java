@@ -46,6 +46,25 @@ public class ClientResource implements QuarkusTestResourceLifecycleManager {
                 .dynamicPort());
         wireMockServer.start();
 
+        wireMockServer.stubFor(WireMock.request("DAHU", WireMock.urlEqualTo("/dahu/no-auth"))
+                .withRequestBody(containing("TEXT"))
+                .willReturn(WireMock.aResponse().withStatus(200)));
+
+        wireMockServer.stubFor(WireMock.request("DAHU", WireMock.urlEqualTo("/dahu/auth"))
+                .withHeader(HttpConstants.HEADER_AUTHORIZATION, containing(HttpConstants.PREFIX_DPOP))
+                .withHeader(HttpConstants.HEADER_AUTHORIZATION, matching(".*"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_TEXT_PLAIN)
+                        .withBody("AUTHENTICATED")));
+
+        wireMockServer.stubFor(WireMock.request("DAHU", WireMock.urlEqualTo("/dahu/headers"))
+                .withHeader("INT", matching("5"))
+                .withHeader("FLOAT", matching("2.5"))
+                .withHeader("STRING", matching("HEADER"))
+                .withHeader("LIST", matching("ITEM1"))
+                .withHeader("LIST", matching("ITEM2"))
+                .willReturn(WireMock.aResponse().withStatus(200)));
+
         wireMockServer.stubFor(WireMock.get(WireMock.urlEqualTo("/get/404"))
                 .willReturn(WireMock.aResponse().withStatus(404)));
 

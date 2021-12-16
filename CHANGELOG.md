@@ -3,6 +3,8 @@
 ## Release 1.0.13
 
 ### Features
+* Add `send` methods to the `SolidClient` API to allow testers to send requests with full control over the headers and
+  the ability to use methods not defined by the HTTP specification. 
 
 ### Minor changes
 * Shorten the generated names of test resources.
