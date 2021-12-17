@@ -98,6 +98,9 @@
       <summary><b>Feature:</b> {testCase.title} <a href="#{testCase.requirementAnchor}" class="opening" data-id="{testCase.requirementAnchor}">&#8593;</a>
         <span class="count">{testCase.countPassed}/{testCase.countScenarios}</span>
       </summary>
+      {#if testCase.description}
+      <pre property="dcterms:description">{testCase.description}</pre>
+      {/if}
       {#each testCase.scenarios}
       {#include scenario /}
       {/each}

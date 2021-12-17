@@ -34,6 +34,8 @@ import org.solid.testharness.config.PathMappings;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import java.io.IOException;
+
 import static org.eclipse.rdf4j.model.util.Values.iri;
 
 @ApplicationScoped
@@ -49,8 +51,17 @@ public class FeatureResultHandler implements SuiteReports {
     public Report featureReport(final Suite suite, final FeatureResult fr) {
         final String featurePath = fr.getDisplayName();
         final String featureIri = pathMappings.unmapFeaturePath(featurePath);
+        final FeatureFileParser featureFileParser;
+        try {
+            featureFileParser = new FeatureFileParser(
+                    fr.getFeature().getResource().getFile().toPath()
+            );
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read feature file when reporting its results", e);
+        }
+
         if (featureIri != null) {
-            dataRepository.addFeatureResult(suite, fr, iri(featureIri));
+            dataRepository.addFeatureResult(suite, fr, iri(featureIri), featureFileParser);
         } else {
             logger.warn("The feature {} could not be mapped back to an IRI", featurePath);
         }

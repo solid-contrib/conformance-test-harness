@@ -11,6 +11,9 @@
     </span>
     <span content="{generatedOutput.timestamp}" datatype="xsd:dateTime" property="prov:generatedAtTime"></span>
   </dd></dl>
+  {#if description}
+  <pre property="dcterms:description">{description}</pre>
+  {/if}
   {#if steps}
   <table>
     <caption>Scenario data</caption>

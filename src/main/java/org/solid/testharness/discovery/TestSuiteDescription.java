@@ -23,7 +23,6 @@
  */
 package org.solid.testharness.discovery;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.RDF4JException;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -40,12 +39,12 @@ import org.solid.testharness.config.Config;
 import org.solid.testharness.config.PathMappings;
 import org.solid.testharness.http.HttpUtils;
 import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.FeatureFileParser;
 import org.solid.testharness.utils.Namespaces;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.io.BufferedReader;
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
@@ -67,8 +66,6 @@ import static org.eclipse.rdf4j.model.util.Values.literal;
 @ApplicationScoped
 public class TestSuiteDescription {
     private static final Logger logger = LoggerFactory.getLogger(TestSuiteDescription.class);
-    private static final Pattern FEATURE_TITLE = Pattern.compile("^\\s*Feature\\s*:\\s*(\\S[^#]+)\\s*",
-            Pattern.CASE_INSENSITIVE);
     private static final Pattern VERSION_INFO = Pattern.compile("^v?(\\d+\\.\\d+\\.\\d+)(?: (\\d{4}-\\d{2}-\\d{2}))?$");
     private static final String START_OF_DAY = "T00:00:00Z";
     protected static IRI TEST_VERSION = iri(Namespaces.TESTS_REPO_URI, "version.txt");
@@ -276,7 +273,7 @@ public class TestSuiteDescription {
         }
         public void extractTitleIfNeeded() {
             if (!runnable) {
-                final String title = getFeatureTitle(featureFile);
+                final String title = FeatureFileParser.getFeatureTitle(featureFile);
                 if (title != null) {
                     conn.add(testCaseIri, DCTERMS.title, literal(title));
                 }
@@ -287,26 +284,6 @@ public class TestSuiteDescription {
         }
         public boolean isRunnable() {
             return runnable;
-        }
-
-        @SuppressWarnings("PMD.AssignmentInOperand") // this is a common pattern and changing it makes it less readable
-        private String getFeatureTitle(final File file) {
-            try (final BufferedReader br = Files.newBufferedReader(file.toPath())) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    if (StringUtils.isBlank(line)) continue;
-                    if (line.strip().startsWith("#")) continue; // ignore comments
-                    if (line.strip().startsWith("@")) continue; // ignore tags
-                    final Matcher matcher = FEATURE_TITLE.matcher(line);
-                    if (matcher.matches()) {
-                        return matcher.group(1).strip();
-                    }
-                }
-                logger.warn("FILE DOES NOT START WITH 'Feature:' {}", file.toPath());
-            } catch (Exception e) { // jacoco will not show full coverage for this try-with-resources line
-                logger.warn("FEATURE NOT READABLE: {} - {}", file.toPath(), e.getMessage());
-            }
-            return null;
         }
     }
 }

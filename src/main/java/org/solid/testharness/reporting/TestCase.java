@@ -49,6 +49,10 @@ public class TestCase extends DataModelBase {
         return getLiteralAsString(DCTERMS.title);
     }
 
+    public String getDescription() {
+        return getLiteralAsString(DCTERMS.description);
+    }
+
     public String getStatus() {
         return getIriAsString(TD.reviewStatus);
     }

@@ -1,5 +1,5 @@
 Feature: Feature 1 title
+Scenario: Scenario1 title
 # Scenario1 comment 1
 # Scenario1 comment 2
-Scenario: Scenario1 title
 Scenario: Scenario2 title

@@ -33,6 +33,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.common.vocab.DCTERMS;
 import org.solid.common.vocab.SOLID_TEST;
 import org.solid.common.vocab.TD;
 import org.solid.testharness.utils.*;
@@ -170,6 +171,7 @@ class ReportGeneratorTest {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             resultModel = QueryResults.asModel(conn.getStatements(null, null, null));
             resultModel.remove(null, TD.preCondition, null);
+            resultModel.remove(null, DCTERMS.description, null);
         }
 
         final StringWriter sw = new StringWriter();

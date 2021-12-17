@@ -72,66 +72,34 @@ class DataRepositoryTest {
         final Suite suite = Suite.forTempUse();
         final Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
-        final Scenario scenario1 = mock(Scenario.class);
-        when(scenario1.getName()).thenReturn("SCENARIO 1");
-        when(scenario1.getLine()).thenReturn(1);
-        final Scenario scenario2 = mock(Scenario.class);
-        when(scenario2.getName()).thenReturn("SCENARIO 2");
-        when(scenario2.getLine()).thenReturn(10);
-        final Step step1 = mock(Step.class);
-        when(step1.getPrefix()).thenReturn("When");
-        when(step1.getText()).thenReturn("method GET");
-        when(step1.getLine()).thenReturn(1);
-        when(step1.isBackground()).thenReturn(true);
-        final Step step2 = mock(Step.class);
-        when(step2.getPrefix()).thenReturn("Then");
-        when(step2.getText()).thenReturn("Status 200");
-        when(step2.getLine()).thenReturn(2);
-        final Result res1 = mock(Result.class);
-        when(res1.getStatus()).thenReturn("passed");
-        final Result res2 = mock(Result.class);
-        when(res2.getStatus()).thenReturn("skipped");
-
-        final FeatureResult fr = mock(FeatureResult.class);
-        when(fr.getDisplayName()).thenReturn("DISPLAY_NAME");
-        when(fr.getFeature()).thenReturn(feature);
-        when(fr.isFailed()).thenReturn(true);
-        when(fr.getDurationMillis()).thenReturn(1000.0);
-
-        final ScenarioResult sr1 = mock(ScenarioResult.class);
-        when(sr1.getScenario()).thenReturn(scenario1);
-        when(sr1.isFailed()).thenReturn(true);
-        when(sr1.getStartTime()).thenReturn(123456789L);
-        when(sr1.getEndTime()).thenReturn(123456789L);
-        when(sr1.getDurationMillis()).thenReturn(2000.0);
-
-        final ScenarioResult sr2 = mock(ScenarioResult.class);
-        when(sr2.getScenario()).thenReturn(scenario2);
-        when(sr2.isFailed()).thenReturn(false);
-        when(sr1.getStartTime()).thenReturn(123456789L);
-        when(sr1.getEndTime()).thenReturn(123456789L);
-        when(sr2.getDurationMillis()).thenReturn(3000.0);
-
-        when(fr.getScenarioResults()).thenReturn(List.of(sr1, sr2));
-
-        final StepResult str1 = mock(StepResult.class);
-        when(str1.getStep()).thenReturn(step1);
-        when(str1.getResult()).thenReturn(res1);
-        when(str1.getStepLog()).thenReturn("STEP1 LOG\n" +
+        final Scenario scenario1 = mockScenario("SCENARIO 1", 1, 0);
+        final Scenario scenario2 = mockScenario("SCENARIO 2", 10, 1);
+        final Step step1 = mockStep("When", "method GET", 1, true, List.of("STEP COMMENT"));
+        final Step step2 = mockStep("Then", "Status 200", 2, false, null);
+        final StepResult str1 = mockStepResult(step1, "passed", "STEP1 LOG\n" +
                 "js failed:\n>>>>?<<<<\n" +
                 "org.graalvm.polyglot.PolyglotException: EXCEPTION\n" +
                 "Caused by EXCEPTION2\nSTACK1\nSTACK2\n- <js>LAST\nother stuff");
-        final StepResult str2 = mock(StepResult.class);
-        when(str2.getStep()).thenReturn(step2);
-        when(str2.getResult()).thenReturn(res2);
-        when(str2.getStepLog()).thenReturn("");
-        when(sr1.getStepResults()).thenReturn(List.of(str1, str2));
+        final StepResult str2 = mockStepResult(step2, "skipped", "");
 
-        dataRepository.addFeatureResult(suite, fr, featureIri);
+        final ScenarioResult sr1 = mockScenarioResult(scenario1, true, 2000.0, List.of(str1, str2));
+        final ScenarioResult sr2 = mockScenarioResult(scenario2, false, 3000.0, null);
+
+        final FeatureResult fr = mockFeatureResult(feature, "DISPLAY_NAME", true, 1000.0, List.of(sr1, sr2));
+
+        final FeatureFileParser featureFileParser = mock(FeatureFileParser.class);
+        when(featureFileParser.getFeatureComments()).thenReturn("FEATURE COMMENT");
+        when(featureFileParser.getScenarioComments(0)).thenReturn("SCENARIO1 COMMENT");
+        when(featureFileParser.getScenarioComments(1)).thenReturn("");
+
+        dataRepository.addFeatureResult(suite, fr, featureIri, featureFileParser);
         final String result = TestUtils.repositoryToString(dataRepository);
         assertTrue(result.contains("dcterms:title \"FEATURE NAME\""));
+        assertTrue(result.contains("dcterms:description \"FEATURE COMMENT\""));
+        assertTrue(result.contains("dcterms:description \"SCENARIO1 COMMENT\""));
         assertTrue(result.contains("earl:outcome earl:failed"));
         assertTrue(result.contains("prov:value earl:passed"));
+        assertTrue(result.contains("dcterms:description \"STEP COMMENT\""));
         assertTrue(result.contains("dcterms:description \"\"\"STEP1 LOG\n" +
                 "EXCEPTION\nCaused by EXCEPTION2\nSTACK1\n- <js>LAST"));
     }
@@ -149,16 +117,16 @@ class DataRepositoryTest {
         final Suite suite = Suite.forTempUse();
         final Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
-        final FeatureResult fr = mock(FeatureResult.class);
-        when(fr.getDisplayName()).thenReturn("DISPLAY_NAME");
-        when(fr.getFeature()).thenReturn(feature);
-        when(fr.isFailed()).thenReturn(true);
-        when(fr.getDurationMillis()).thenReturn(1000.0);
-        when(fr.getScenarioResults()).thenReturn(Collections.emptyList());
 
-        dataRepository.addFeatureResult(suite, fr, featureIri);
+        final FeatureResult fr = mockFeatureResult(feature, "DISPLAY_NAME", true, 1000.0,
+                Collections.emptyList());
+
+        final FeatureFileParser featureFileParser = mock(FeatureFileParser.class);
+
+        dataRepository.addFeatureResult(suite, fr, featureIri, featureFileParser);
         final String result = TestUtils.repositoryToString(dataRepository);
         assertTrue(result.contains("dcterms:title \"FEATURE NAME\""));
+        assertFalse(result.contains("dcterms:description"));
         assertTrue(result.contains("earl:outcome earl:failed"));
     }
 
@@ -172,27 +140,14 @@ class DataRepositoryTest {
         final Suite suite = Suite.forTempUse();
         final Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
-        final Scenario scenario1 = mock(Scenario.class);
-        when(scenario1.getName()).thenReturn("SCENARIO 1");
-        when(scenario1.getLine()).thenReturn(1);
+        final Scenario scenario1 = mockScenario("SCENARIO 1", 1, 0);
 
-        final FeatureResult fr = mock(FeatureResult.class);
-        when(fr.getDisplayName()).thenReturn("DISPLAY_NAME");
-        when(fr.getFeature()).thenReturn(feature);
-        when(fr.isFailed()).thenReturn(true);
-        when(fr.getDurationMillis()).thenReturn(1000.0);
+        final ScenarioResult sr1 = mockScenarioResult(scenario1, true, 2000.0, Collections.emptyList());
+        final FeatureResult fr = mockFeatureResult(feature, "DISPLAY_NAME", true, 1000.0, List.of(sr1));
 
-        final ScenarioResult sr1 = mock(ScenarioResult.class);
-        when(sr1.getScenario()).thenReturn(scenario1);
-        when(sr1.isFailed()).thenReturn(true);
-        when(sr1.getStartTime()).thenReturn(123456789L);
-        when(sr1.getEndTime()).thenReturn(123456789L);
-        when(sr1.getDurationMillis()).thenReturn(2000.0);
+        final FeatureFileParser featureFileParser = mock(FeatureFileParser.class);
 
-        when(fr.getScenarioResults()).thenReturn(List.of(sr1));
-        when(sr1.getStepResults()).thenReturn(Collections.emptyList());
-
-        dataRepository.addFeatureResult(suite, fr, featureIri);
+        dataRepository.addFeatureResult(suite, fr, featureIri, featureFileParser);
         final String result = TestUtils.repositoryToString(dataRepository);
         assertFalse(result.contains("dcterms:title \"FEATURE NAME\""));
         assertTrue(result.contains("earl:outcome earl:failed"));
@@ -212,7 +167,9 @@ class DataRepositoryTest {
         when(fr.getFeature()).thenReturn(feature);
         when(fr.getScenarioResults()).thenThrow(new RuntimeException("FAILED"));
 
-        dataRepository.addFeatureResult(suite, fr, featureIri);
+        final FeatureFileParser featureFileParser = mock(FeatureFileParser.class);
+
+        dataRepository.addFeatureResult(suite, fr, featureIri, featureFileParser);
         final String result = TestUtils.repositoryToString(dataRepository);
         assertFalse(result.contains(featureIri.stringValue()));
     }
@@ -320,5 +277,63 @@ class DataRepositoryTest {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             return conn.size();
         }
+    }
+
+    private Scenario mockScenario(final String name, final int line, final int index) {
+        final Scenario scenario = mock(Scenario.class);
+        when(scenario.getName()).thenReturn(name);
+        when(scenario.getLine()).thenReturn(line);
+        final FeatureSection section = mock(FeatureSection.class);
+        when(section.getIndex()).thenReturn(index);
+        when(scenario.getSection()).thenReturn(section);
+        return scenario;
+    }
+
+    private Step mockStep(final String prefix, final String text, final int line, final boolean isBackground,
+                          final List<String> comments) {
+        final Step step = mock(Step.class);
+        when(step.getPrefix()).thenReturn(prefix);
+        when(step.getText()).thenReturn(text);
+        when(step.getLine()).thenReturn(line);
+        when(step.isBackground()).thenReturn(isBackground);
+        when(step.getComments()).thenReturn(comments);
+        return step;
+    }
+
+    private FeatureResult mockFeatureResult(final Feature feature, final String name, final boolean isFailed,
+                                            final double duration, final List<ScenarioResult> results) {
+        final FeatureResult fr = mock(FeatureResult.class);
+        when(fr.getDisplayName()).thenReturn(name);
+        when(fr.getFeature()).thenReturn(feature);
+        when(fr.isFailed()).thenReturn(isFailed);
+        when(fr.getDurationMillis()).thenReturn(duration);
+        if (results != null) {
+            when(fr.getScenarioResults()).thenReturn(results);
+        }
+        return fr;
+    }
+
+    private ScenarioResult mockScenarioResult(final Scenario scenario, final boolean isFailed, final double duration,
+                                              final List<StepResult> stepResults) {
+        final ScenarioResult sr = mock(ScenarioResult.class);
+        when(sr.getScenario()).thenReturn(scenario);
+        when(sr.isFailed()).thenReturn(isFailed);
+        when(sr.getStartTime()).thenReturn(123456789L);
+        when(sr.getEndTime()).thenReturn(123456789L);
+        when(sr.getDurationMillis()).thenReturn(duration);
+        if (stepResults != null) {
+            when(sr.getStepResults()).thenReturn(stepResults);
+        }
+        return sr;
+    }
+
+    private StepResult mockStepResult(final Step step, final String result, final String log) {
+        final StepResult str = mock(StepResult.class);
+        when(str.getStep()).thenReturn(step);
+        final Result res = mock(Result.class);
+        when(res.getStatus()).thenReturn(result);
+        when(str.getResult()).thenReturn(res);
+        when(str.getStepLog()).thenReturn(log);
+        return str;
     }
 }

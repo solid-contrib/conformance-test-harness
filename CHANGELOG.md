@@ -4,7 +4,8 @@
 
 ### Features
 * Add `send` methods to the `SolidClient` API to allow testers to send requests with full control over the headers and
-  the ability to use methods not defined by the HTTP specification. 
+  the ability to use methods not defined by the HTTP specification.
+* Push comments (for features, scenarios and steps) found in the test files through to the results reports.
 
 ### Minor changes
 * Shorten the generated names of test resources.
