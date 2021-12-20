@@ -165,6 +165,25 @@ class DataModelBaseTest extends AbstractDataModelTests {
     }
 
     @Test
+    void getModelListByObject() {
+        final DataModelBase reqModel = new DataModelBase(iri(NS, "requirement"),
+                DataModelBase.ConstructMode.INC_REFS);
+        final List<TestCase> models = reqModel.getModelListByObject(iri(NS, "requirementReference"), TestCase.class);
+        assertNotNull(models);
+        assertEquals(1, models.size());
+        assertEquals(NS + "TestCase", models.get(0).getTypesList());
+        assertEquals(4, reqModel.size());
+    }
+
+    @Test
+    void getEmptyModelListByObject() {
+        final DataModelBase reqModel = new DataModelBase(iri(NS, "requirement"),
+                DataModelBase.ConstructMode.INC_REFS);
+        final List<TestCase> models = reqModel.getModelListByObject(iri(NS, "missing"), TestCase.class);
+        assertNull(models);
+    }
+
+    @Test
     void getAsIri() {
         assertEquals(iri(NS, "iri"), dataModelBase.getAsIri(iri(NS, "hasIri")));
     }

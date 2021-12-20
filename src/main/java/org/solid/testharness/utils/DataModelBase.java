@@ -32,7 +32,6 @@ import org.eclipse.rdf4j.model.util.RDFCollections;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.repository.util.Connections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,29 +72,45 @@ public class DataModelBase {
         requireNonNull(subject, "subject is required");
         final DataRepository dataRepository = CDI.current().select(DataRepository.class).get();
         this.subject = subject;
-        try (RepositoryConnection conn = dataRepository.getConnection()) {
-            model = QueryResults.asModel(conn.getStatements(subject, null, null));
+        try (
+                RepositoryConnection conn = dataRepository.getConnection();
+                var statements = conn.getStatements(subject, null, null)
+        ) {
+            model = QueryResults.asModel(statements);
+            final List<Resource> resources = model.objects().stream()
+                    .filter(Value::isResource)
+                    .map(Resource.class::cast)
+                    .collect(Collectors.toList());
             final List<Statement> additions = new ArrayList<>();
             if (mode == ConstructMode.DEEP || mode == ConstructMode.DEEP_WITH_LISTS) {
                 // add triples referenced by the objects found so far
-                model.objects().stream()
-                        .filter(Value::isResource)
-                        .map(Resource.class::cast)
-                        .forEach(o -> additions.addAll(Iterations.asList(conn.getStatements(o, null, null))));
+                resources.forEach(o -> {
+                    try (var statements2 = conn.getStatements(o, null, null)) {
+                        additions.addAll(Iterations.asList(statements2));
+                    }
+                });
             }
             if (mode == ConstructMode.DEEP_WITH_LISTS) {
                 // add any RDF lists referenced by objects found so far
-                model.objects().stream()
-                        .filter(Value::isResource)
-                        .map(o -> conn.getStatements((Resource) o, RDF.first, null))
-                        .filter(RepositoryResult::hasNext)
-                        .map(RepositoryResult::next)
+                resources.stream()
+                        .map(o -> {
+                            try (var statements2 = conn.getStatements(o, RDF.first, null)) {
+                                if (statements2.hasNext()) {
+                                    return statements2.next();
+                                } else {
+                                    return null;
+                                }
+                            } // jacoco will not show full coverage for this try-with-resources line
+                        })
+                        .filter(Objects::nonNull)
                         .map(Statement::getSubject)
                         .forEach(s -> additions.addAll(Connections.getRDFCollection(conn, s, new LinkedHashModel())));
             }
             if (mode == ConstructMode.INC_REFS) {
                 // add triples that reference the subject
-                additions.addAll(Iterations.asList(conn.getStatements(null, null, subject)));
+                try (var statements2 = conn.getStatements(null, null, subject)) {
+                    additions.addAll(Iterations.asList(statements2));
+                }
             }
             model.addAll(additions);
         }

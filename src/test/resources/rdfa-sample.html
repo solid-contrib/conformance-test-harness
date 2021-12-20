@@ -1,5 +1,12 @@
-<html xmlns="http://www.w3.org/1999/xhtml" prefix="dc: http://purl.org/dc/terms/">
+<html xmlns="http://www.w3.org/1999/xhtml" prefix="dc: http://purl.org/dc/terms/ spec: http://www.w3.org/ns/spec#">
 <body about="doc">
    <h1 property="dc:title">TITLE</h1>
+   <ul>
+     <li rel="spec:requirement" resource="#spec1">Requirement 1</li>
+   </ul>
+   <section about="#spec1" typeof="spec:NormativeRequirement">
+     <dl><dt>Role</dt><dd property="spec:requirementSubject" resource="spec:Server">Server</dd></dl>
+     <dl><dt>Level</dt><dd property="spec:requirementLevel" resource="spec:MUST">MUST</dd></dl>
+   </section>
 </body>
 </html>

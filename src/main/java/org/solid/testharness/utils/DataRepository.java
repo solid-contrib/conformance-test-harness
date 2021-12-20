@@ -94,12 +94,40 @@ public class DataRepository implements Repository {
     public void load(final URL url, final String baseUri) {
         try (RepositoryConnection conn = getConnection()) {
             try {
-                logger.info("Loading {} with base {}", url.toString(), baseUri);
+                final IRI context = iri(url.toString());
+                logger.info("Loading {} with base {}", url, baseUri);
                 final ParserConfig parserConfig = new ParserConfig();
                 parserConfig.set(RDFaParserSettings.RDFA_COMPATIBILITY, RDFaVersion.RDFA_1_1);
                 conn.setParserConfig(parserConfig);
-                conn.add(url, baseUri, null);
-                logger.debug("Loaded data into repository, size={}", conn.size());
+                conn.add(url, baseUri, null, context);
+                logger.debug("Loaded data into temporary context, size={}", conn.size(context));
+                try (var statements = conn.getStatements(null, SPEC.requirement, null, context)) {
+                    if (statements.hasNext()) {
+                        // copy the spec and requirement triples to the main graph context
+                        final Resource spec = statements.next().getSubject();
+                        conn.add(spec, RDF.type, DOAP.Specification);
+                        try (var requirements = conn.getStatements(spec, SPEC.requirement, null, context)) {
+                            requirements.stream()
+                                    .peek(st -> conn.add(st, (Resource) null))
+                                    .map(Statement::getObject)
+                                    .filter(Value::isIRI)
+                                    .map(Resource.class::cast)
+                                    .forEach(req -> {
+                                        try (var details = conn.getStatements(req, null, null, context)) {
+                                            conn.add(details, (Resource) null);
+                                        }
+                                    });
+                        }
+                    } else {
+                        // copy all statements to main graph context
+                        try (var tempStatements = conn.getStatements(null, null, null, context)) {
+                            conn.add(tempStatements, (Resource) null);
+                        }
+                    }
+                }
+                // remove the temporary context
+                conn.clear(context);
+                logger.debug("Repository size={}", conn.size());
             } catch (IOException e) {
                 throw (TestHarnessInitializationException) new TestHarnessInitializationException(
                         "Failed to read data from %s: %s",

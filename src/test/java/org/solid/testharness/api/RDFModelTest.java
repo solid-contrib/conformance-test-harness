@@ -113,7 +113,7 @@ class RDFModelTest {
     void parseRdfa() {
         final RDFModel model = RDFModel.parse(SAMPLE_HTML, "text/html", TestUtils.SAMPLE_BASE);
         assertNotNull(model);
-        assertEquals(1, model.subjects(null, null).size());
+        assertEquals(2, model.subjects(null, null).size());
     }
 
     @Test

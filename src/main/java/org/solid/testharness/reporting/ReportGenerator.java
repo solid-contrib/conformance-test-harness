@@ -71,11 +71,12 @@ public class ReportGenerator {
     }
 
     private List<IRI> getSpecifications() {
-        try (RepositoryConnection conn = dataRepository.getConnection()) {
-            return Stream.concat(
-                            conn.getStatements(null, RDF.type, SPEC.Specification).stream(),
-                            conn.getStatements(null, RDF.type, DOAP.Specification).stream()
-                    ).map(Statement::getSubject)
+        try (
+                RepositoryConnection conn = dataRepository.getConnection();
+                var statements1 = conn.getStatements(null, RDF.type, SPEC.Specification);
+                var statements2 = conn.getStatements(null, RDF.type, DOAP.Specification)
+        ) {
+            return Stream.concat(statements1.stream(), statements2.stream()).map(Statement::getSubject)
                     .map(IRI.class::cast)
                     .distinct()
                     .collect(Collectors.toList());
@@ -83,8 +84,11 @@ public class ReportGenerator {
     }
 
     private List<IRI> getTestCases() {
-        try (RepositoryConnection conn = dataRepository.getConnection()) {
-            return conn.getStatements(null, RDF.type, TD.TestCase).stream()
+        try (
+                RepositoryConnection conn = dataRepository.getConnection();
+                var statements = conn.getStatements(null, RDF.type, TD.TestCase)
+        ) {
+            return statements.stream()
                     .map(Statement::getSubject)
                     .map(IRI.class::cast)
                     .collect(Collectors.toList());

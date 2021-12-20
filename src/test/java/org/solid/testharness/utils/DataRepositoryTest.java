@@ -265,12 +265,16 @@ class DataRepositoryTest {
         final DataRepository dataRepository = new DataRepository();
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             conn.setNamespace(DCTERMS.PREFIX, DCTERMS.NAMESPACE);
+            conn.setNamespace(SPEC.PREFIX, SPEC.NAMESPACE);
         }
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/rdfa-sample.html"), TestUtils.SAMPLE_BASE);
-        assertEquals(1, dataRepositorySize(dataRepository));
+        assertEquals(5, dataRepositorySize(dataRepository));
         final StringWriter sw = new StringWriter();
         dataRepository.export(sw);
-        assertTrue(sw.toString().contains("<https://example.org/doc> dcterms:title \"TITLE\" ."));
+        assertFalse(sw.toString().contains("dcterms:title \"TITLE\""));
+        assertTrue(sw.toString().contains("<https://example.org/doc> a <http://usefulinc.com/ns/doap#Specification>"));
+        assertTrue(sw.toString().contains("spec:requirement <https://example.org#spec1> ."));
+        assertTrue(sw.toString().contains("spec:requirementSubject spec:Server"));
     }
 
     @Test
