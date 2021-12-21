@@ -2,19 +2,6 @@
 
 The [Conformance Test Harness](https://github.com/solid/conformance-test-harness) (CTH) is used to run conformance tests against the [Solid specifications](https://solidproject.org/TR/).
 
-<!-- MarkdownTOC -->
-
-- [Prerequisites](#prerequisites)
-- [Configuration](#configuration)
-    - [Test Subject Description](#1-test-subject-description)
-    - [CTH Configuration](#2-cth-configuration)
-    - [Environment Variables](#3-environment-variables)
-    - [Command Line Options](#4-command-line-options)
-- [Execution](#execution)
-    - [Running in a Docker Container](#running-in-a-docker-container)
-- [Reports](#reports)
-
-<!-- /MarkdownTOC -->
 # Prerequisites
 
 The tests require 2 user accounts to be set up, referred to as `alice` and `bob`.
