@@ -572,3 +572,29 @@ To use the Docker image to run a set of local tests:
 |Coverage (HTML+RDFa)|`coverage.html`|
 |Results (HTML+RDFa)|`report.html`|
 |Results (Turtle)|`report.ttl`|
+
+The format of the coverage and results reports are very similar. An example of the coverage report is here:
+https://solid.github.io/specification-tests/coverage. The structure of the two reports is shown below. 
+
+**Coverage report**
+* **Specifications under test** - list of specification references.
+* **Test suite** - description of the specification tests software.
+* **Test coverage by specification requirement** - for each specification, a list of the requirements with a count of
+  the implemented test cases. 
+
+
+**Results report**
+* **Specifications under test** - list of specification references.
+* **Assertor** - description of the test harness software.
+* **Test suite** - description of the specification tests software.
+* **Test subject** - description of the software of the server under test.
+* **Results summary** - information about when the tests were run and the overall results.
+* **Outcomes Key** - a table of the symbols used to represent test outcomes.
+* **Results by specification requirement** - for each specification, a list of the requirements with a count of how many
+  tests passed versus how many are implemented in each case. The results  are shown as a table which also details which 
+  scenarios passed or failed within the test case.
+* **Results by test case** - for each implemented test case, a list of the scenarios tested for that test case and the
+  detailed log of the steps and results.
+
+Both reports have buttons allowing all sections to be expanded/collapsed, or for the results report, just the failing
+sections to be expanded.
