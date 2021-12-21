@@ -23,6 +23,7 @@
  */
 package org.solid.testharness.utils;
 
+import com.intuit.karate.StringUtils;
 import com.intuit.karate.Suite;
 import com.intuit.karate.core.FeatureResult;
 import com.intuit.karate.core.ScenarioResult;
@@ -149,17 +150,22 @@ public class DataRepository implements Repository {
         this.assertor = assertor;
     }
 
-    public void addFeatureResult(final Suite suite, final FeatureResult fr, final IRI featureIri) {
+    public void addFeatureResult(final Suite suite, final FeatureResult fr, final IRI featureIri,
+                                 final FeatureFileParser featureFileParser) {
         final long startTime = suite.startTime;
         try (RepositoryConnection conn = getConnection()) {
             final IRI testCaseIri = getTestCase(conn, featureIri);
             if (testCaseIri != null) {
                 conn.add(testCaseIri, DCTERMS.title, literal(fr.getFeature().getName()));
+                final String featureComments = featureFileParser.getFeatureComments();
+                if (featureComments != null) {
+                    conn.add(testCaseIri, DCTERMS.description, literal(featureComments));
+                }
             }
             createAssertion(conn, fr.isFailed() ? EARL.failed : EARL.passed,
                     new Date((long) (startTime + fr.getDurationMillis())), testCaseIri);
             for (ScenarioResult sr: fr.getScenarioResults()) {
-                createScenarioActivity(conn, sr, testCaseIri, featureIri);
+                createScenarioActivity(conn, sr, testCaseIri, featureIri, featureFileParser);
             }
         } catch (Exception e) {
             logger.error("Failed to load feature result", e);
@@ -195,12 +201,13 @@ public class DataRepository implements Repository {
     }
 
     private void createScenarioActivity(final RepositoryConnection conn, final ScenarioResult sr,
-                                        final IRI testCaseIri, final IRI featureIri) {
+                                        final IRI testCaseIri, final IRI featureIri,
+                                        final FeatureFileParser featureFileParser) {
         final ModelBuilder builder;
         final IRI scenarioIri = createNode();
         final IRI scenarioResultIri = createNode();
         builder = new ModelBuilder();
-        conn.add(builder.subject(scenarioIri)
+        builder.subject(scenarioIri)
                 .add(RDF.type, PROV.Activity)
                 .add(DCTERMS.title, sr.getScenario().getName())
                 .add(PROV.used, iri(featureIri.stringValue() + GITHUB_LINE_ANCHOR + sr.getScenario().getLine()))
@@ -209,8 +216,12 @@ public class DataRepository implements Repository {
                 .add(PROV.generated, scenarioResultIri)
                 .add(scenarioResultIri, RDF.type, PROV.Entity)
                 .add(scenarioResultIri, PROV.generatedAtTime, new Date(sr.getEndTime()))
-                .add(scenarioResultIri, PROV.value, sr.isFailed() ? EARL.failed : EARL.passed)
-                .build());
+                .add(scenarioResultIri, PROV.value, sr.isFailed() ? EARL.failed : EARL.passed);
+        final String scenarioComments = featureFileParser.getScenarioComments(sr.getScenario().getSection().getIndex());
+        if (!StringUtils.isBlank(scenarioComments)) {
+            conn.add(scenarioIri, DCTERMS.description, literal(scenarioComments));
+        }
+        conn.add(builder.build());
         if (testCaseIri != null) {
             conn.add(testCaseIri, DCTERMS.hasPart, scenarioIri);
         }
@@ -232,6 +243,10 @@ public class DataRepository implements Repository {
                     .add(PROV.generated, stepResultIri)
                     .add(stepResultIri, RDF.type, PROV.Entity)
                     .add(stepResultIri, PROV.value, EARL_RESULT.get(str.getResult().getStatus()));
+            if (str.getStep().getComments() != null) {
+                stepBuilder.add(stepIri, DCTERMS.description,
+                        str.getStep().getComments().stream().collect(Collectors.joining("\n")));
+            }
             if (!str.getStepLog().isEmpty()) {
                 stepBuilder.add(stepResultIri, DCTERMS.description, simplify(str.getStepLog()));
             }
@@ -265,7 +280,7 @@ public class DataRepository implements Repository {
                     .set(BasicWriterSettings.INLINE_BLANK_NODES, true);
             conn.export(rdfWriter);
         } catch (RDF4JException e) {
-            throw (Exception) new Exception("Failed to write repository: " + e).initCause(e);
+            throw new Exception("Failed to write repository", e);
         }
     }
 

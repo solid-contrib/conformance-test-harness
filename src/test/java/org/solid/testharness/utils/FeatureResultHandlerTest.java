@@ -26,14 +26,19 @@ package org.solid.testharness.utils;
 import com.intuit.karate.Suite;
 import com.intuit.karate.core.Feature;
 import com.intuit.karate.core.FeatureResult;
+import com.intuit.karate.resource.Resource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
+import java.io.File;
+import java.nio.file.Path;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest
@@ -49,7 +54,22 @@ class FeatureResultHandlerTest {
     void featureReport() {
         final FeatureResult fr = new FeatureResult(Feature.read("src/test/resources/test.feature"));
         featureResultHandler.featureReport(new Suite(), fr);
-        verify(dataRepository).addFeatureResult(any(), any(), eq(iri("https://example.org/features/test.feature")));
+        verify(dataRepository).addFeatureResult(any(), any(), eq(iri("https://example.org/features/test.feature")),
+                any());
+    }
+
+    @Test
+    void featureReportReadFiles() {
+        final FeatureResult fr = mock(FeatureResult.class);
+        when(fr.getDisplayName()).thenReturn("src/test/resources/test.feature");
+        final Feature feature = mock(Feature.class);
+        when(fr.getFeature()).thenReturn(feature);
+        final Resource resource = mock(Resource.class);
+        when(feature.getResource()).thenReturn(resource);
+        final File file = mock(File.class);
+        when(resource.getFile()).thenReturn(file);
+        when(file.toPath()).thenReturn(Path.of("/missing"));
+        assertThrows(RuntimeException.class, () -> featureResultHandler.featureReport(new Suite(), fr));
     }
 
     @Test
@@ -57,6 +77,6 @@ class FeatureResultHandlerTest {
         final FeatureResult fr = new FeatureResult(Feature.read("src/test/resources/test.feature"));
         fr.setDisplayName("FAIL");
         featureResultHandler.featureReport(new Suite(), fr);
-        verify(dataRepository, never()).addFeatureResult(any(), any(), any());
+        verify(dataRepository, never()).addFeatureResult(any(), any(), any(), any());
     }
 }

@@ -1,6 +1,32 @@
-# Comment
+# Feature comment 1
 
 @tag
-Feature: Feature 2 title
+# Feature comment 2
+Feature: Feature 2 title # with comment
+# Background comment 1
+  Background: Background steps
+    # Background step1 comment 1
+    * def something
+    # Background step2 comment 1
+    # Background step2 comment 2
+    When method
+    # Scenario1 comment 1
 
-Scenario: Scenario title
+  # Scenario1 comment 2
+  Scenario: Scenario1 title
+    # Scenario1 step1 comment 1
+    # Scenario1 step1 comment 2
+    Given url
+    When method
+    Then test
+
+  # Scenario2 comment 1
+  # Scenario2 comment 2
+  Scenario: Scenario2 title
+    Given url
+    When method
+    Then test
+
+  Scenario: Scenario3 title
+
+# lost comment

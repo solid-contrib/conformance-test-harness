@@ -13,6 +13,7 @@ manifest:group1-feature1
     spec:requirementReference <https://example.org/specification1#spec1> ;
     td:reviewStatus td:accepted ;
     dcterms:title "Group 1 Test case 1"@en ;
+    dcterms:description "Feature comments"@en;
     spec:testScript <https://example.org/test/group1/feature1> .
 
 manifest:group1-feature2

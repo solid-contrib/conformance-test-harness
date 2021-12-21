@@ -193,6 +193,7 @@ class ReportFragmentTest {
             }
         }
         requirement.getModel().remove(null, DCTERMS.hasPart, null);
+        requirement.getModel().remove(null, DCTERMS.description, null);
 
         final String report = render("specificationRequirements", List.of(requirement), "coverageMode", false);
         logger.debug("Report:\n{}", report);
@@ -303,6 +304,7 @@ class ReportFragmentTest {
         remove(null, null, iri(manifest, "group1-feature1"));
         remove(null, null, iri(manifest, "group1-feature2"));
         remove(null, null, iri(manifest, "group1-feature3"));
+        remove(iri(manifest, "group1-feature1"), DCTERMS.description, null);
 
         final SpecificationRequirement requirement = new SpecificationRequirement(requirementIri);
         for (TestCase testCase: requirement.getTestCases()) {

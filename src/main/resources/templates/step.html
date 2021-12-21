@@ -9,9 +9,12 @@
         </span>
   </td>
   <td>
+    {#if description}
+    <pre property="dcterms:description">{description}</pre>
+    {/if}
     {#if generatedOutput.description || scenario}
     <dl>
-      {/if}
+    {/if}
       {#if generatedOutput.description}
       <dt>Output</dt>
       <dd>
@@ -25,7 +28,7 @@
       <dd><a href="{scenario}" rel="prov:wasInformedBy">scenario</a></dd>
       -->
       {/if}
-      {#if generatedOutput.description || scenario}
+    {#if generatedOutput.description || scenario}
     </dl>
     {/if}
   </td>

@@ -33,6 +33,7 @@ results:node1f273av6vx12
 results:node1f273av6vx13
     a prov:Activity;
     dcterms:title "Group 1 Test case 1 Scenario 1"@en;
+    dcterms:description "Scenario comments"@en;
     prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=10,15> ;
     prov:startedAtTime "2021-04-15T13:00:01.000-04:00"^^xsd:dateTime ;
     prov:endedAtTime   "2021-04-15T13:01:01.000-04:00"^^xsd:dateTime ;
@@ -65,6 +66,7 @@ results:node1f273av6vx17a a prov:Entity; prov:value earl:passed .
 results:node1f273av6vx18
     a prov:Activity;
     dcterms:title "When method GET"@en;
+    dcterms:description "Step comments"@en;
     prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=20> ;
     prov:wasInformedBy results:node1f273av6vx13 ;
     prov:generated results:node1f273av6vx18a .

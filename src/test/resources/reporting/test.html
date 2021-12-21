@@ -43,7 +43,7 @@
             <th>Title</th>
             <th>Details</th>
             <th>Outcome</th>
-            <th>Scenarios</th>
+            <th>Test Scenarios</th>
         </tr>
         {#each it.testCases}
         {#include testcase coverageMode=false /}
@@ -85,9 +85,12 @@
             <th>Title</th>
             <th>Details</th>
             <th>Outcome</th>
-            <th>Scenarios</th>
+            <th>Test Scenarios</th>
         </tr>
         {#each testCases}
+        {#if it.description}
+        <pre about="{it.subject}" property="dcterms:description">{it.description}</pre>
+        {/if}
         {#include testcase coverageMode=false /}
         {/each}
     </table>

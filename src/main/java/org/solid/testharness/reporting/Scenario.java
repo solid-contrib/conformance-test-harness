@@ -46,6 +46,10 @@ public class Scenario extends DataModelBase {
         return getLiteralAsString(DCTERMS.title);
     }
 
+    public String getDescription() {
+        return getLiteralAsString(DCTERMS.description);
+    }
+
     public String getUsed() {
         return getIriAsString(PROV.used);
     }
