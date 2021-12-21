@@ -32,7 +32,6 @@ import org.eclipse.rdf4j.model.datatypes.XMLDateTime;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.*;
@@ -88,8 +87,11 @@ public class TestSuiteDescription {
     }
 
     public List<IRI> getTestCases(final boolean filtered) {
-        try (RepositoryConnection conn = dataRepository.getConnection()) {
-            return conn.getStatements(null, RDF.type, TD.TestCase).stream()
+        try (
+                RepositoryConnection conn = dataRepository.getConnection();
+                var statements = conn.getStatements(null, RDF.type, TD.TestCase)
+        ) {
+            return statements.stream()
                     .map(Statement::getSubject)
                     .filter(tc -> !filtered || !conn.hasStatement(null, EARL.test, tc, false))
                     .filter(Value::isIRI)
@@ -153,9 +155,12 @@ public class TestSuiteDescription {
         final List<IRI> statusList = statuses != null && !statuses.isEmpty()
                 ? statuses.stream().map(s -> iri(TD.NAMESPACE, s)).collect(Collectors.toList())
                 : null;
-        try (RepositoryConnection conn = dataRepository.getConnection()) {
+        try (
+                RepositoryConnection conn = dataRepository.getConnection();
+                var statements = conn.getStatements(null, RDF.type, TD.TestCase)
+        ) {
             // check test cases are applicable to the target and are not filtered out
-            conn.getStatements(null, RDF.type, TD.TestCase).stream()
+            statements.stream()
                     .map(Statement::getSubject)
                     .filter(Value::isIRI)
                     .map(IRI.class::cast)
@@ -175,19 +180,22 @@ public class TestSuiteDescription {
     @SuppressWarnings("PMD.CloseResource") // the connection is closed by the caller
     private boolean checkApplicability(final RepositoryConnection conn, final IRI testCase,
                                        final Set<String> serverFeatures) {
-        final RepositoryResult<Statement> preConditions = conn.getStatements(testCase, TD.preCondition, null);
-        if (preConditions.hasNext() && !preConditions.stream()
-                .map(Statement::getObject)
-                .filter(Value::isLiteral)
-                .map(Value::stringValue)
-                .allMatch(serverFeature ->
-                        serverFeatures != null && serverFeatures.contains(serverFeature)
-                )) {
-            // the test case has pre-conditions and they don't all match the set of server features
-            dataRepository.createAssertion(conn, EARL.inapplicable, new Date(), testCase);
-            return false;
-        }
-        return true;
+        try (
+            var preConditions = conn.getStatements(testCase, TD.preCondition, null)
+        ) {
+            if (preConditions.hasNext() && !preConditions.stream()
+                    .map(Statement::getObject)
+                    .filter(Value::isLiteral)
+                    .map(Value::stringValue)
+                    .allMatch(serverFeature ->
+                            serverFeatures != null && serverFeatures.contains(serverFeature)
+                    )) {
+                // the test case has pre-conditions and they don't all match the set of server features
+                dataRepository.createAssertion(conn, EARL.inapplicable, new Date(), testCase);
+                return false;
+            }
+            return true;
+        } // jacoco will not show full coverage for this try-with-resources line
     }
 
     private boolean checkFilters(final RepositoryConnection conn, final IRI testCase, final List<String> filters) {
@@ -208,8 +216,11 @@ public class TestSuiteDescription {
     }
 
     public void prepareTestCases(final Config.RunMode runMode) {
-        try (RepositoryConnection conn = dataRepository.getConnection()) {
-            featurePaths = conn.getStatements(null, RDF.type, TD.TestCase).stream()
+        try (
+                RepositoryConnection conn = dataRepository.getConnection();
+                var statements = conn.getStatements(null, RDF.type, TD.TestCase)
+        ) {
+            featurePaths = statements.stream()
                     .map(Statement::getSubject)
                     .filter(Value::isIRI)
                     .map(IRI.class::cast)
@@ -244,12 +255,14 @@ public class TestSuiteDescription {
         }
 
         public void findFeatureIri() {
-            conn.getStatements(testCaseIri, SPEC.testScript, null).stream()
-                    .map(Statement::getObject)
-                    .filter(Value::isIRI)
-                    .map(IRI.class::cast)
-                    .findFirst()
-                    .map(obj -> this.featureIri = obj);
+            try (var statements = conn.getStatements(testCaseIri, SPEC.testScript, null)) {
+                statements.stream()
+                        .map(Statement::getObject)
+                        .filter(Value::isIRI)
+                        .map(IRI.class::cast)
+                        .findFirst()
+                        .map(obj -> this.featureIri = obj);
+            }
         }
         public boolean isImplemented() {
             return featureIri != null;

@@ -26,9 +26,11 @@ package org.solid.testharness.discovery;
 import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.solid.common.vocab.*;
@@ -96,7 +98,6 @@ class TestSuiteDescriptionTest {
         assertTrue(ask(iri(NS, "test-manifest-sample-1.ttl#group1-feature1"),
                 SPEC.requirementReference, iri(NS, "specification1#spec1")));
         assertTrue(ask(iri(NS, "specification2"), RDF.type, DOAP.Specification));
-        assertTrue(ask(iri(NS, "specification2"), RDF.type, SPEC.Specification));
         assertTrue(ask(iri(NS, "test-manifest-sample-2.ttl#group4-feature1"),
                 SPEC.requirementReference, iri(NS, "specification2#spec1")));
     }
@@ -492,8 +493,11 @@ class TestSuiteDescriptionTest {
     }
 
     private long count(final Resource subject, final IRI predicate, final Value object) {
-        try (RepositoryConnection conn = repository.getConnection()) {
-            return conn.getStatements(subject, predicate, object, false).stream().count();
+        try (
+                RepositoryConnection conn = repository.getConnection();
+                RepositoryResult<Statement> statements = conn.getStatements(subject, predicate, object, false)
+        ) {
+            return statements.stream().count();
         }
     }
 }

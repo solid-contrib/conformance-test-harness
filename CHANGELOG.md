@@ -8,6 +8,7 @@
 
 ### Minor changes
 * Shorten the generated names of test resources.
+* Prevent unnecessary data from annotated specifications being included in the Turtle report. 
 
 ## Release 1.0.12
 

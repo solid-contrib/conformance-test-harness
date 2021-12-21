@@ -35,7 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.SOLID_TEST;
 import org.solid.common.vocab.TD;
-import org.solid.testharness.utils.*;
+import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.Namespaces;
+import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -119,10 +121,13 @@ class ReportGeneratorTest {
 
         // remove unused parts of test model
         final Model resultModel;
-        try (RepositoryConnection conn = dataRepository.getConnection()) {
+        try (
+                RepositoryConnection conn = dataRepository.getConnection();
+                var statements = conn.getStatements(null, null, null)
+        ) {
             final String namespace = iri(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl").toString())
                     .getNamespace();
-            resultModel = QueryResults.asModel(conn.getStatements(null, null, null));
+            resultModel = QueryResults.asModel(statements);
             resultModel.remove(null, SOLID_TEST.features, null);
             resultModel.remove(iri(namespace, "testserver2"), null, null);
             resultModel.remove(iri(namespace, "testserver2#test-subject-release"), null, null);
@@ -167,8 +172,11 @@ class ReportGeneratorTest {
 
         // remove unused parts of test model
         final Model resultModel;
-        try (RepositoryConnection conn = dataRepository.getConnection()) {
-            resultModel = QueryResults.asModel(conn.getStatements(null, null, null));
+        try (
+                RepositoryConnection conn = dataRepository.getConnection();
+                var statements = conn.getStatements(null, null, null)
+        ) {
+            resultModel = QueryResults.asModel(statements);
             resultModel.remove(null, TD.preCondition, null);
         }
 
