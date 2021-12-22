@@ -35,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.DCTERMS;
 import org.solid.common.vocab.SOLID_TEST;
-import org.solid.common.vocab.TD;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.Namespaces;
 import org.solid.testharness.utils.TestUtils;
@@ -130,9 +129,9 @@ class ReportGeneratorTest {
                     .getNamespace();
             resultModel = QueryResults.asModel(statements);
             resultModel.remove(null, SOLID_TEST.features, null);
+            resultModel.remove(null, SOLID_TEST.skip, null);
             resultModel.remove(iri(namespace, "testserver2"), null, null);
             resultModel.remove(iri(namespace, "testserver2#test-subject-release"), null, null);
-            resultModel.remove(null, TD.preCondition, null);
             logger.debug("Results contains {} triples", resultModel.size());
         }
 
@@ -178,7 +177,6 @@ class ReportGeneratorTest {
                 var statements = conn.getStatements(null, null, null)
         ) {
             resultModel = QueryResults.asModel(statements);
-            resultModel.remove(null, TD.preCondition, null);
             resultModel.remove(null, DCTERMS.description, null);
         }
 

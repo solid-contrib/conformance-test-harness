@@ -141,7 +141,7 @@ class ConformanceTestHarnessTest {
         when(testSuiteDescription.getFeaturePaths()).thenReturn(List.of("feature"));
 
         final TestSuiteResults results = mockResults(1);
-        when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
+        when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(results);
         assertEquals(1, conformanceTestHarness.runTestSuites(null, null).getFailCount());
         verify(authManager).registerUser(HttpConstants.ALICE);
         verify(authManager).registerUser(HttpConstants.BOB);
@@ -151,7 +151,7 @@ class ConformanceTestHarnessTest {
     void runTestSuiteInitError() {
         mockTargetServer();
         doThrow(new TestHarnessInitializationException("FAIL"))
-                .when(testSuiteDescription).setNonRunningTestAssertions(any(), any(), any());
+                .when(testSubject).loadTestSubjectConfig();
         assertThrows(TestHarnessInitializationException.class, () -> conformanceTestHarness.runTestSuites(null, null));
     }
 
@@ -160,7 +160,7 @@ class ConformanceTestHarnessTest {
         mockTargetServer();
         when(testSuiteDescription.getFeaturePaths()).thenReturn(List.of("feature"));
         final TestSuiteResults results = mockResults(1);
-        when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
+        when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(results);
         assertEquals(1, conformanceTestHarness.runTestSuites(null, null).getFailCount());
     }
 
@@ -199,7 +199,7 @@ class ConformanceTestHarnessTest {
         when(config.getWebIds())
                 .thenReturn(Map.of(HttpConstants.ALICE, "https://alice.target.example.org/profile/card#me"));
         final TestSuiteResults results = mockResults(1);
-        when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
+        when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(results);
         assertEquals(1, conformanceTestHarness.runSingleTest("test").getFailCount());
         assertNotNull(conformanceTestHarness.getClients());
         assertEquals(1, conformanceTestHarness.getClients().size());
@@ -209,7 +209,7 @@ class ConformanceTestHarnessTest {
     void getClientsNull() {
         mockTargetServer();
         final TestSuiteResults results = mockResults(1);
-        when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
+        when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(results);
         assertEquals(1, conformanceTestHarness.runSingleTest("test").getFailCount());
         assertNotNull(conformanceTestHarness.getClients());
         assertEquals(0, conformanceTestHarness.getClients().size());
@@ -240,7 +240,7 @@ class ConformanceTestHarnessTest {
 
     private void mockTargetServer() {
         final TargetServer targetServer = mock(TargetServer.class);
-        when(targetServer.getFeatures()).thenReturn(Map.of("feature", false));
+        when(targetServer.getFeatures()).thenReturn(List.of("feature"));
         when(testSubject.getTargetServer()).thenReturn(targetServer);
     }
 

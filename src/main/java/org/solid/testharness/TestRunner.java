@@ -31,6 +31,7 @@ import org.solid.testharness.utils.FeatureResultHandler;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class TestRunner {
@@ -39,24 +40,16 @@ public class TestRunner {
 
     @SuppressWarnings("unchecked")
     // Unavoidable as Runner.builder().path() takes a list or vararg of Strings
-    public TestSuiteResults runTests(final List<String> featurePaths, final int threads,
+    public TestSuiteResults runTests(final List<String> featurePaths, final int threads, final List<String> skip,
                                      final boolean enableReporting) {
-        // we can also create Features which may be useful when fetching from remote resource although this may cause
-        // problems with loading other features files due to classpath issues - Karate may need a RemoteResource type
-        // that knows how to fetch related resources from the same URL the feature came from
-//        List<Feature> featureList = featureFiles.stream()
-//              .map(f -> Feature.read(new FileResource(f.toFile()))).collect(Collectors.toList());
-//        logger.info("==== FEATURES {}", featureList);
-//        Results results = Runner.builder()
-//                .features(featureList)
-//                .tags(tags)
-//                .outputHtmlReport(true)
-//                .parallel(8);
-
-        Runner.Builder builder = Runner.builder().path(featurePaths);
-        if (enableReporting) {
-            builder = builder.outputHtmlReport(true).suiteReports(featureResultHandler);
+        final Runner.Builder builder = Runner.builder().path(featurePaths);
+        if (skip != null) {
+            builder.tags(skip.stream().map(tag -> "~@" + tag).collect(Collectors.toList()));
         }
+        if (enableReporting) {
+            builder.outputHtmlReport(true).suiteReports(featureResultHandler);
+        }
+//        builder.dryRun(true);
         final Results results = builder.parallel(threads);
         return new TestSuiteResults(results);
     }

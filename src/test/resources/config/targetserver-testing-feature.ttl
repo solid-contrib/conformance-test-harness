@@ -6,18 +6,17 @@ prefix solid: <http://www.w3.org/ns/solid/terms#>
 
 <testserver>
     a earl:Software, earl:TestSubject ;
-    doap:name "Enterprise Solid Server (Web Access Control version)";
-    doap:release <testserver#test-subject-release> ;
-    doap:developer <https://inrupt.com/profile/card/#us>;
-    doap:homepage <https://inrupt.com/products/enterprise-solid-server>;
-    doap:description "A production-grade Solid server produced and supported by Inrupt."@en;
-    doap:programming-language "Java" ;
+    solid-test:skip "tag1" ;
     solid-test:features "feature1" .
 
-<testserver#test-subject-release>
-    doap:name "ESS 1.0.9";
-    doap:revision "1.0.9";
-    doap:created "2021-03-05T00:00:00.001Z"^^xsd:dateTime .
+<testserver2>
+    a earl:Software, earl:TestSubject .
 
-<bad> a earl:Software, earl:TestSubject .
+# the following test cases can be deleted when users have migrated test-subjects.ttl
+<testserver-acp>
+    a earl:Software, earl:TestSubject ;
+    solid-test:features "acl" .
 
+<testserver-wac>
+    a earl:Software, earl:TestSubject ;
+    solid-test:features "acl", "wac-allow-public" .

@@ -24,12 +24,14 @@
 package org.solid.testharness.config;
 
 import io.quarkus.test.junit.QuarkusTest;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.solid.testharness.utils.*;
+import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
 import java.net.URL;
-import java.util.Map;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,16 +41,11 @@ public class TargetServerTest {
     @Inject
     DataRepository dataRepository;
 
-    @Test
-    public void constructor() {
-        final TargetServer targetServer = new TargetServer(
-                iri("https://github.com/solid/conformance-test-harness/css"),
-                Map.of("authentication", true, "acl", true, "wac-allow", true));
-        assertAll("targetServer",
-                () -> assertNotNull(targetServer.getFeatures()),
-                () -> assertEquals(true, targetServer.getFeatures().get("authentication")),
-                () -> assertNull(targetServer.getFeatures().get("feature2"))
-        );
+    @BeforeEach
+    void setUp() {
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            conn.clear();
+        }
     }
 
     @Test
@@ -58,8 +55,53 @@ public class TargetServerTest {
         final TargetServer targetServer = new TargetServer(iri(TestUtils.SAMPLE_NS, "testserver"));
         assertAll("targetServer",
                 () -> assertNotNull(targetServer.getFeatures()),
-                () -> assertEquals(true, targetServer.getFeatures().get("feature1")),
-                () -> assertNull(targetServer.getFeatures().get("feature2"))
+                () -> assertTrue(targetServer.getFeatures().contains("feature1")),
+                () -> assertFalse(targetServer.getFeatures().contains("feature2")),
+                () -> assertNotNull(targetServer.getSkipTags()),
+                () -> assertTrue(targetServer.getSkipTags().contains("tag1")),
+                () -> assertFalse(targetServer.getSkipTags().contains("tag2"))
+        );
+    }
+
+    @Test
+    public void parseTargetServerNoFeatures() throws Exception {
+        final URL testFile = TestUtils.getFileUrl("src/test/resources/config/targetserver-testing-feature.ttl");
+        TestUtils.insertData(dataRepository, testFile);
+        final TargetServer targetServer = new TargetServer(iri(TestUtils.SAMPLE_NS, "testserver2"));
+        assertAll("targetServer",
+                () -> assertNotNull(targetServer.getFeatures()),
+                () -> assertTrue(targetServer.getFeatures().isEmpty()),
+                () -> assertNotNull(targetServer.getSkipTags()),
+                () -> assertTrue(targetServer.getSkipTags().isEmpty())
+        );
+    }
+
+    @Test
+    public void parseTargetServerOldWac() throws Exception {
+        final URL testFile = TestUtils.getFileUrl("src/test/resources/config/targetserver-testing-feature.ttl");
+        TestUtils.insertData(dataRepository, testFile);
+        final TargetServer targetServer = new TargetServer(iri(TestUtils.SAMPLE_NS, "testserver-wac"));
+        assertAll("targetServer",
+                () -> assertNotNull(targetServer.getFeatures()),
+                () -> assertTrue(targetServer.getFeatures().contains("acl")),
+                () -> assertFalse(targetServer.getFeatures().contains("feature2")),
+                () -> assertNotNull(targetServer.getSkipTags()),
+                () -> assertTrue(targetServer.getSkipTags().isEmpty())
+        );
+    }
+
+    @Test
+    public void parseTargetServerOldAcp() throws Exception {
+        final URL testFile = TestUtils.getFileUrl("src/test/resources/config/targetserver-testing-feature.ttl");
+        TestUtils.insertData(dataRepository, testFile);
+        final TargetServer targetServer = new TargetServer(iri(TestUtils.SAMPLE_NS, "testserver-acp"));
+        assertAll("targetServer",
+                () -> assertNotNull(targetServer.getFeatures()),
+                () -> assertTrue(targetServer.getFeatures().contains("acl")),
+                () -> assertFalse(targetServer.getFeatures().contains("feature2")),
+                () -> assertNotNull(targetServer.getSkipTags()),
+                () -> assertTrue(targetServer.getSkipTags().contains("wac-allow-public")),
+                () -> assertFalse(targetServer.getSkipTags().contains("tag2"))
         );
     }
 }

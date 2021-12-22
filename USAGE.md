@@ -27,7 +27,7 @@ This is a Turtle file which describes the test subject and it's capabilities, pr
     doap:homepage <https://github.com/solid/community-server> ;
     doap:description "An open and modular implementation of the Solid specifications."@en ;
     doap:programming-language "TypeScript" ;
-    solid-test:features "authentication", "acl", "wac-allow" .
+    solid-test:skip "acp" .
     
 <css#test-subject-release>
     doap:name "CSS 0.9.0" ;
@@ -39,7 +39,8 @@ you specify it on the command line when running tests.
 
 There are some test subject specific configuration properties in this file:
 ```
-  solid-test:features "authentication", "acl", "wac-allow"  # server capabilities
+  solid-test:skip "acp"  # skip tests with these tags 
+  solid-test:features "acp-legacy"  # enable the legacy mode for ACP to conform to an early version of the specification
 ```
 An example of this file is provided in the test repository (https://github.com/solid/specification-tests),
 containing descriptions of the following Solid implementations:
@@ -68,7 +69,7 @@ subjects: test-subjects.ttl
 sources:
   # Protocol spec & manifest
   # Editor's draft (fully annotated)
-  - https://solidproject.org/TR/protocol
+  - https://solidproject.org/ED/protocol
   - https://github.com/solid/specification-tests/protocol/solid-protocol-test-manifest.ttl
 
   # WAC spec & manifest

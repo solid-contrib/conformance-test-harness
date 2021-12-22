@@ -4,5 +4,7 @@ prefix earl: <http://www.w3.org/ns/earl#>
 
 <target>
     a earl:Software, earl:TestSubject ;
-    doap:name "Test Subject"@en ;
-    solid-test:features "authentication", "acl". #, "wac-allow", "acp-legacy"
+#    solid-test:skip "acp" ;
+    solid-test:skip "wac-allow-public", "wac" ;
+#    solid-test:features "acp-legacy" ;
+    doap:name "Test Subject"@en .

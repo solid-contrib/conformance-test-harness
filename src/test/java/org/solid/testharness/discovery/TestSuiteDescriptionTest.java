@@ -35,14 +35,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.solid.common.vocab.*;
 import org.solid.testharness.config.Config;
-import org.solid.testharness.utils.*;
+import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.Namespaces;
+import org.solid.testharness.utils.TestHarnessInitializationException;
+import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.eclipse.rdf4j.model.util.Values.literal;
@@ -129,25 +131,9 @@ class TestSuiteDescriptionTest {
     @Test
     void setNonRunningTestAssertionsNull() throws MalformedURLException {
         testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
-        testSuiteDescription.setNonRunningTestAssertions(null, null, null);
+        testSuiteDescription.setNonRunningTestAssertions(null, null);
         assertEquals(6, count(null, RDF.type, TD.TestCase));
-        assertEquals(3, count(null, RDF.type, EARL.Assertion));
-        assertEquals(3, count(null, EARL.outcome, EARL.inapplicable));
-        assertTrue(ask(iri(TCNS, "group1-feature1"), RDF.type, TD.TestCase));
-        assertTrue(ask(iri(TCNS, "group1-feature2"), RDF.type, TD.TestCase));
-        assertTrue(ask(iri(TCNS, "group1-feature3"), RDF.type, TD.TestCase));
-        assertFalse(ask(null, EARL.test, iri(TCNS, "group1-feature1")));
-        assertFalse(ask(null, EARL.test, iri(TCNS, "group1-feature2")));
-        assertFalse(ask(null, EARL.test, iri(TCNS, "group1-feature3")));
-    }
-
-    @Test
-    void setNonRunningTestAssertionsEmptyFeatures() throws MalformedURLException {
-        testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
-        testSuiteDescription.setNonRunningTestAssertions(Collections.emptySet(), null, null);
-        assertEquals(6, count(null, RDF.type, TD.TestCase));
-        assertEquals(3, count(null, RDF.type, EARL.Assertion));
-        assertEquals(3, count(null, EARL.outcome, EARL.inapplicable));
+        assertEquals(0, count(null, RDF.type, EARL.Assertion));
         assertTrue(ask(iri(TCNS, "group1-feature1"), RDF.type, TD.TestCase));
         assertTrue(ask(iri(TCNS, "group1-feature2"), RDF.type, TD.TestCase));
         assertTrue(ask(iri(TCNS, "group1-feature3"), RDF.type, TD.TestCase));
@@ -159,10 +145,9 @@ class TestSuiteDescriptionTest {
     @Test
     void setNonRunningTestAssertionsEmptyFilters() throws MalformedURLException {
         testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
-        testSuiteDescription.setNonRunningTestAssertions(null, Collections.emptyList(), null);
+        testSuiteDescription.setNonRunningTestAssertions(Collections.emptyList(), null);
         assertEquals(6, count(null, RDF.type, TD.TestCase));
-        assertEquals(3, count(null, RDF.type, EARL.Assertion));
-        assertEquals(3, count(null, EARL.outcome, EARL.inapplicable));
+        assertEquals(0, count(null, RDF.type, EARL.Assertion));
         assertTrue(ask(iri(TCNS, "group1-feature1"), RDF.type, TD.TestCase));
         assertTrue(ask(iri(TCNS, "group1-feature2"), RDF.type, TD.TestCase));
         assertTrue(ask(iri(TCNS, "group1-feature3"), RDF.type, TD.TestCase));
@@ -174,69 +159,9 @@ class TestSuiteDescriptionTest {
     @Test
     void setNonRunningTestAssertionsEmptyStatuses() throws MalformedURLException {
         testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
-        testSuiteDescription.setNonRunningTestAssertions(null, null, Collections.emptyList());
-        assertEquals(6, count(null, RDF.type, TD.TestCase));
-        assertEquals(3, count(null, RDF.type, EARL.Assertion));
-        assertEquals(3, count(null, EARL.outcome, EARL.inapplicable));
-        assertTrue(ask(iri(TCNS, "group1-feature1"), RDF.type, TD.TestCase));
-        assertTrue(ask(iri(TCNS, "group1-feature2"), RDF.type, TD.TestCase));
-        assertTrue(ask(iri(TCNS, "group1-feature3"), RDF.type, TD.TestCase));
-        assertFalse(ask(null, EARL.test, iri(TCNS, "group1-feature1")));
-        assertFalse(ask(null, EARL.test, iri(TCNS, "group1-feature2")));
-        assertFalse(ask(null, EARL.test, iri(TCNS, "group1-feature3")));
-    }
-
-    @Test
-    void setNonRunningTestAssertionsOneFeature() throws MalformedURLException {
-        testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
-        testSuiteDescription.setNonRunningTestAssertions(Set.of("sf1"), null, null);
-        assertEquals(6, count(null, RDF.type, TD.TestCase));
-        assertEquals(2, count(null, RDF.type, EARL.Assertion));
-        assertEquals(2, count(null, EARL.outcome, EARL.inapplicable));
-        assertTrue(ask(iri(TCNS, "group1-feature1"), RDF.type, TD.TestCase));
-        assertTrue(ask(iri(TCNS, "group1-feature2"), RDF.type, TD.TestCase));
-        assertTrue(ask(iri(TCNS, "group1-feature3"), RDF.type, TD.TestCase));
-        assertTrue(ask(iri(TCNS, "group2-feature1"), RDF.type, TD.TestCase));
-        assertFalse(ask(null, EARL.test, iri(TCNS, "group1-feature1")));
-        assertFalse(ask(null, EARL.test, iri(TCNS, "group1-feature2")));
-        assertFalse(ask(null, EARL.test, iri(TCNS, "group1-feature3")));
-        assertFalse(ask(null, EARL.test, iri(TCNS, "group2-feature1")));
-    }
-
-    @Test
-    void setNonRunningTestAssertionsFeature1And2() throws MalformedURLException {
-        testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
-        testSuiteDescription.setNonRunningTestAssertions(Set.of("sf1",  "sf2"), null, null);
+        testSuiteDescription.setNonRunningTestAssertions(null, Collections.emptyList());
         assertEquals(6, count(null, RDF.type, TD.TestCase));
         assertEquals(0, count(null, RDF.type, EARL.Assertion));
-        assertEquals(0, count(null, EARL.outcome, EARL.inapplicable));
-    }
-
-    @Test
-    void setNonRunningTestAssertionsFeature1And3() throws MalformedURLException {
-        testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
-        testSuiteDescription.setNonRunningTestAssertions(Set.of("sf1",  "sf3"), null, null);
-        assertEquals(6, count(null, RDF.type, TD.TestCase));
-        assertEquals(2, count(null, RDF.type, EARL.Assertion));
-        assertEquals(2, count(null, EARL.outcome, EARL.inapplicable));
-        assertTrue(ask(iri(TCNS, "group1-feature1"), RDF.type, TD.TestCase));
-        assertTrue(ask(iri(TCNS, "group1-feature2"), RDF.type, TD.TestCase));
-        assertTrue(ask(iri(TCNS, "group1-feature3"), RDF.type, TD.TestCase));
-        assertTrue(ask(iri(TCNS, "group2-feature1"), RDF.type, TD.TestCase));
-        assertFalse(ask(null, EARL.test, iri(TCNS, "group1-feature1")));
-        assertFalse(ask(null, EARL.test, iri(TCNS, "group1-feature2")));
-        assertFalse(ask(null, EARL.test, iri(TCNS, "group1-feature3")));
-        assertFalse(ask(null, EARL.test, iri(TCNS, "group2-feature1")));
-    }
-
-    @Test
-    void setNonRunningTestAssertionsNoFeaturesFilterGroup1() throws MalformedURLException {
-        testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
-        testSuiteDescription.setNonRunningTestAssertions(null, List.of("group1"), null);
-        assertEquals(6, count(null, RDF.type, TD.TestCase));
-        assertEquals(3, count(null, RDF.type, EARL.Assertion));
-        assertEquals(0, count(null, EARL.outcome, EARL.untested));
-        assertEquals(3, count(null, EARL.outcome, EARL.inapplicable));
         assertTrue(ask(iri(TCNS, "group1-feature1"), RDF.type, TD.TestCase));
         assertTrue(ask(iri(TCNS, "group1-feature2"), RDF.type, TD.TestCase));
         assertTrue(ask(iri(TCNS, "group1-feature3"), RDF.type, TD.TestCase));
@@ -248,11 +173,10 @@ class TestSuiteDescriptionTest {
     @Test
     void setNonRunningTestAssertionsFilterGroup1() throws MalformedURLException {
         testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
-        testSuiteDescription.setNonRunningTestAssertions(Set.of("sf1", "sf2"), List.of("group1"), null);
+        testSuiteDescription.setNonRunningTestAssertions(List.of("group1"), null);
         assertEquals(6, count(null, RDF.type, TD.TestCase));
         assertEquals(3, count(null, RDF.type, EARL.Assertion));
         assertEquals(3, count(null, EARL.outcome, EARL.untested));
-        assertEquals(0, count(null, EARL.outcome, EARL.inapplicable));
         assertTrue(ask(iri(TCNS, "group1-feature1"), RDF.type, TD.TestCase));
         assertTrue(ask(iri(TCNS, "group1-feature2"), RDF.type, TD.TestCase));
         assertTrue(ask(iri(TCNS, "group1-feature3"), RDF.type, TD.TestCase));
@@ -264,7 +188,7 @@ class TestSuiteDescriptionTest {
     @Test
     void setNonRunningTestAssertionsStatuesAccepted() throws MalformedURLException {
         testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
-        testSuiteDescription.setNonRunningTestAssertions(Set.of("sf1",  "sf2"), null, List.of("accepted"));
+        testSuiteDescription.setNonRunningTestAssertions(null, List.of("accepted"));
         assertEquals(6, count(null, RDF.type, TD.TestCase));
         assertEquals(1, count(null, RDF.type, EARL.Assertion));
         assertEquals(1, count(null, EARL.outcome, EARL.untested));
@@ -283,7 +207,7 @@ class TestSuiteDescriptionTest {
     @Test
     void setNonRunningTestAssertionsStatusUnreviewed() throws MalformedURLException {
         testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
-        testSuiteDescription.setNonRunningTestAssertions(Set.of("sf1",  "sf2"), null, List.of("unreviewed"));
+        testSuiteDescription.setNonRunningTestAssertions(null, List.of("unreviewed"));
         assertEquals(6, count(null, RDF.type, TD.TestCase));
         assertEquals(5, count(null, RDF.type, EARL.Assertion));
         assertEquals(5, count(null, EARL.outcome, EARL.untested));
@@ -296,7 +220,7 @@ class TestSuiteDescriptionTest {
         testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
         add(iri(NS, "testcase"), RDF.type, TD.TestCase);
         add(iri(NS, "testcase"), TD.reviewStatus, literal("ACCEPTED"));
-        testSuiteDescription.setNonRunningTestAssertions(Set.of("sf1",  "sf2"), null, List.of("unreviewed"));
+        testSuiteDescription.setNonRunningTestAssertions(null, List.of("unreviewed"));
         assertEquals(7, count(null, RDF.type, TD.TestCase));
         assertEquals(6, count(null, RDF.type, EARL.Assertion));
         assertEquals(6, count(null, EARL.outcome, EARL.untested));
@@ -309,7 +233,7 @@ class TestSuiteDescriptionTest {
         testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
         add(iri(NS, "testcase"), RDF.type, TD.TestCase);
         add(iri(NS, "testcase"), TD.reviewStatus, literal("ACCEPTED"));
-        testSuiteDescription.setNonRunningTestAssertions(Set.of("sf1",  "sf2"), null, null);
+        testSuiteDescription.setNonRunningTestAssertions(null, null);
         assertEquals(7, count(null, RDF.type, TD.TestCase));
         assertEquals(0, count(null, RDF.type, EARL.Assertion));
         assertEquals(0, count(null, EARL.outcome, EARL.untested));
@@ -319,8 +243,7 @@ class TestSuiteDescriptionTest {
     void setNonRunningTestAssertionsMissingStatus() throws MalformedURLException {
         testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
         add(iri(NS, "testcase"), RDF.type, TD.TestCase);
-        testSuiteDescription.setNonRunningTestAssertions(Set.of("sf1",  "sf2"), null,
-                List.of("accepted", "unreviewed"));
+        testSuiteDescription.setNonRunningTestAssertions(null, List.of("accepted", "unreviewed"));
         assertEquals(7, count(null, RDF.type, TD.TestCase));
         assertEquals(1, count(null, RDF.type, EARL.Assertion));
         assertEquals(1, count(null, EARL.outcome, EARL.untested));

@@ -127,10 +127,9 @@ public class ConformanceTestHarness {
 
         // TODO: Consider running some initial tests to discover the features provided by a server
         testSubject.loadTestSubjectConfig();
-        final Map<String, Boolean> features = testSubject.getTargetServer().getFeatures();
 
-        testSuiteDescription.setNonRunningTestAssertions(features.keySet(), filters, statuses);
-        logger.info("==== APPLY FEATURE FILTERS: {}", features.keySet());
+        testSuiteDescription.setNonRunningTestAssertions(filters, statuses);
+        logger.info("==== SKIP TAGS:             {}", testSubject.getTargetServer().getSkipTags());
         logger.info("==== APPLY NAME FILTERS:    {}", filters);
         logger.info("==== APPLY STATUS FILTERS:  {}", statuses);
         logger.info("==== FILTERED TEST CASES ({}): {}",
@@ -144,7 +143,7 @@ public class ConformanceTestHarness {
             results = TestSuiteResults.emptyResults();
         } else {
             logger.info("==== RUNNING TEST CASES ({}): {}", featurePaths.size(), featurePaths);
-            setupTestHarness(features);
+            setupTestHarness();
             results = runTests(featurePaths, true);
         }
 
@@ -178,8 +177,7 @@ public class ConformanceTestHarness {
     public TestSuiteResults runSingleTest(final String uri) {
         try {
             testSubject.loadTestSubjectConfig();
-            final Map<String, Boolean> features = testSubject.getTargetServer().getFeatures();
-            setupTestHarness(features);
+            setupTestHarness();
         } catch (TestHarnessInitializationException e) {
             logger.error("Cannot run test", e);
             return null;
@@ -187,20 +185,21 @@ public class ConformanceTestHarness {
         return runTests(List.of(uri), false);
     }
 
-    private void setupTestHarness(final Map<String, Boolean> features) {
+    private void setupTestHarness() {
         logger.info("===================== REGISTER CLIENTS ========================");
         logger.info("Test subject root: {}", config.getServerRoot());
         if (config.getUserRegistrationEndpoint() != null) {
             registerUsers();
         }
-        registerClients(features.getOrDefault("authentication", false));
+        registerClients(true);
         logger.info("===================== PREPARE SERVER ========================");
         testSubject.prepareServer();
     }
 
     private TestSuiteResults runTests(final List<String> featurePaths, final boolean enableReporting) {
         logger.info("===================== RUN TESTS ========================");
-        final TestSuiteResults results = testRunner.runTests(featurePaths, config.getMaxThreads(), enableReporting);
+        final TestSuiteResults results = testRunner.runTests(featurePaths, config.getMaxThreads(),
+                testSubject.getTargetServer().getSkipTags(), enableReporting);
         reportGenerator.setResults(results);
         logger.info("{}", results);
         return results;

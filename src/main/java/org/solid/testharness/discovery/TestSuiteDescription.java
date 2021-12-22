@@ -51,7 +51,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -146,8 +145,7 @@ public class TestSuiteDescription {
         }
     }
 
-    public void setNonRunningTestAssertions(final Set<String> features, final List<String> filters,
-                                            final List<String> statuses) {
+    public void setNonRunningTestAssertions(final List<String> filters, final List<String> statuses) {
         final List<String> filterList = filters != null && !filters.isEmpty() ? filters : null;
         final List<IRI> statusList = statuses != null && !statuses.isEmpty()
                 ? statuses.stream().map(s -> iri(TD.NAMESPACE, s)).collect(Collectors.toList())
@@ -156,43 +154,20 @@ public class TestSuiteDescription {
                 RepositoryConnection conn = dataRepository.getConnection();
                 var statements = conn.getStatements(null, RDF.type, TD.TestCase)
         ) {
-            // check test cases are applicable to the target and are not filtered out
+            // check test cases are not filtered out
             statements.stream()
                     .map(Statement::getSubject)
                     .filter(Value::isIRI)
                     .map(IRI.class::cast)
                     .forEach(tc -> {
-                        if (checkApplicability(conn, tc, features)) {
-                            if (checkFilters(conn, tc, filterList)) {
-                                checkStatuses(conn, tc, statusList);
-                            }
+                        if (checkFilters(conn, tc, filterList)) {
+                            checkStatuses(conn, tc, statusList);
                         }
                     });
         } catch (RDF4JException e) {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException(e.toString())
                     .initCause(e);
         }
-    }
-
-    @SuppressWarnings("PMD.CloseResource") // the connection is closed by the caller
-    private boolean checkApplicability(final RepositoryConnection conn, final IRI testCase,
-                                       final Set<String> serverFeatures) {
-        try (
-            var preConditions = conn.getStatements(testCase, TD.preCondition, null)
-        ) {
-            if (preConditions.hasNext() && !preConditions.stream()
-                    .map(Statement::getObject)
-                    .filter(Value::isLiteral)
-                    .map(Value::stringValue)
-                    .allMatch(serverFeature ->
-                            serverFeatures != null && serverFeatures.contains(serverFeature)
-                    )) {
-                // the test case has pre-conditions and they don't all match the set of server features
-                dataRepository.createAssertion(conn, EARL.inapplicable, new Date(), testCase);
-                return false;
-            }
-            return true;
-        } // jacoco will not show full coverage for this try-with-resources line
     }
 
     private boolean checkFilters(final RepositoryConnection conn, final IRI testCase, final List<String> filters) {

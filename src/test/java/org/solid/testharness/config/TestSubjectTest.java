@@ -282,9 +282,9 @@ public class TestSubjectTest {
     @Test
     void setTargetServer() {
         final TargetServer targetServer = mock(TargetServer.class);
-        when(targetServer.getFeatures()).thenReturn(Map.of("feature1", true));
+        when(targetServer.getFeatures()).thenReturn(List.of("feature1"));
         testSubject.setTargetServer(targetServer);
-        assertTrue(testSubject.getTargetServer().getFeatures().get("feature1"));
+        assertTrue(testSubject.getTargetServer().getFeatures().contains("feature1"));
     }
 
     @Test
@@ -318,7 +318,7 @@ public class TestSubjectTest {
         final TargetServer targetServer = mock(TargetServer.class);
         testSubject.setTargetServer(targetServer);
         if (mode.equals(ACP_LEGACY)) {
-            when(targetServer.getFeatures()).thenReturn(Map.of("acp-legacy", true));
+            when(targetServer.getFeatures()).thenReturn(List.of("acp-legacy"));
         }
         when(config.isSetupRootAcl()).thenReturn(setupRootAcl);
         when(config.getWebIds())

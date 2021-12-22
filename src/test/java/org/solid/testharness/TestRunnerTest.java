@@ -25,64 +25,112 @@ package org.solid.testharness;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectSpy;
+import org.eclipse.rdf4j.model.IRI;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.solid.testharness.reporting.TestSuiteResults;
+import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.FeatureResultHandler;
+import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
 import java.util.Collections;
 import java.util.List;
 
+import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @QuarkusTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TestRunnerTest {
+    private static final IRI assertor = iri(TestUtils.SAMPLE_NS, "testharness");
+    private static final IRI testSubject = iri(TestUtils.SAMPLE_NS, "test");
 
     @Inject
     TestRunner testRunner;
+    @Inject
+    DataRepository dataRepository;
     @InjectSpy
     FeatureResultHandler featureResultHandler;
 
+    @BeforeAll
+    void setup() {
+        dataRepository.setAssertor(assertor);
+        dataRepository.setTestSubject(testSubject);
+    }
 
     @Test
     void runTests() {
-        final TestSuiteResults results = testRunner.runTests(List.of("src/test/resources/test.feature"), 1, true);
+        final TestSuiteResults results = testRunner.runTests(List.of("src/test/resources/test.feature"), 1,
+                Collections.emptyList(), true);
         assertNotNull(results);
         assertEquals(1, results.getFailCount());
     }
 
     @Test
     void runTestsEmpty() {
-        final TestSuiteResults results = testRunner.runTests(Collections.emptyList(), 10, true);
+        final TestSuiteResults results = testRunner.runTests(Collections.emptyList(), 10,
+                Collections.emptyList(), true);
         assertNotNull(results);
         assertEquals(0, results.getFailCount());
     }
 
     @Test
     void runTestsNoThreads() {
-        final TestSuiteResults results = testRunner.runTests(Collections.emptyList(), 0, true);
+        final TestSuiteResults results = testRunner.runTests(Collections.emptyList(), 0,
+                Collections.emptyList(), true);
         assertNotNull(results);
         assertEquals(0, results.getFailCount());
     }
 
     @Test
     void runTestsNoList() {
-        final TestSuiteResults results = testRunner.runTests(null, 1, true);
+        final TestSuiteResults results = testRunner.runTests(null, 1,
+                Collections.emptyList(), true);
         assertNotNull(results);
         assertEquals(0, results.getFailCount());
     }
 
     @Test
+    void runTestsNoTagList() {
+        final TestSuiteResults results = testRunner.runTests(List.of("src/test/resources/test.feature"), 1,
+                null, true);
+        assertNotNull(results);
+        assertEquals(1, results.getFailCount());
+    }
+
+    @Test
+    void runTestsWithTag1() {
+        final TestSuiteResults results = testRunner.runTests(List.of("src/test/resources/test.feature"), 1,
+                List.of("tag1"), true);
+        assertNotNull(results);
+        assertEquals(1, results.getFeatureSkipCount());
+    }
+
+    @Test
+    void runTestsWithTag2() {
+        final TestSuiteResults results = testRunner.runTests(List.of("src/test/resources/test.feature"), 1,
+                List.of("tag2"), true);
+        assertNotNull(results);
+        assertEquals(0, results.getScenarioPassCount());
+        assertEquals(1, results.getFailCount());
+        assertEquals(0, results.getFeatureSkipCount());
+    }
+
+    @Test
     void runTestsMissing() {
-        assertThrows(RuntimeException.class, () -> testRunner.runTests(List.of("missing.feature"), 1, true));
+        assertThrows(RuntimeException.class, () -> testRunner.runTests(List.of("missing.feature"), 1,
+                Collections.emptyList(), true));
     }
 
     @Test
     void runTestNoReporting() {
-        final TestSuiteResults results = testRunner.runTests(List.of("src/test/resources/test.feature"), 1, false);
+        final TestSuiteResults results = testRunner.runTests(List.of("src/test/resources/test.feature"), 1,
+                Collections.emptyList(), false);
         assertNotNull(results);
         assertEquals(1, results.getFailCount());
         verify(featureResultHandler, never()).featureReport(any(), any());
