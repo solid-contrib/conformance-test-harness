@@ -107,7 +107,7 @@ class ClientTest {
     void sendRawEmpty() throws IOException, InterruptedException {
         final Client client = new Client.Builder().build();
         final HttpResponse<String> response = client.send("DAHU", baseUri.resolve("/dahu/no-auth"),
-                "TEXT", null, false);
+                "TEXT", null, null, false);
         assertEquals(200, response.statusCode());
         assertEquals("", response.body());
     }
@@ -117,7 +117,7 @@ class ClientTest {
         final Client client = new Client.Builder().withDpopSupport().build();
         client.setAccessToken("ACCESS");
         final HttpResponse<String> response = client.send("DAHU", baseUri.resolve("/dahu/auth"),
-                null, null, true);
+                null, null, null, true);
         assertEquals(200, response.statusCode());
         assertEquals("AUTHENTICATED", response.body());
         assertEquals(HttpConstants.MEDIA_TYPE_TEXT_PLAIN,
@@ -127,13 +127,13 @@ class ClientTest {
     @Test
     void sendRawNullMethod() {
         final Client client = new Client.Builder().build();
-        assertThrows(NullPointerException.class, () -> client.send(null, baseUri, null, null, false));
+        assertThrows(NullPointerException.class, () -> client.send(null, baseUri, null, null, null, false));
     }
 
     @Test
     void sendRawNullUri() {
         final Client client = new Client.Builder().build();
-        assertThrows(NullPointerException.class, () -> client.send("GET", null, null, null, false));
+        assertThrows(NullPointerException.class, () -> client.send("GET", null, null, null, null, false));
     }
 
     @Test
@@ -147,7 +147,7 @@ class ClientTest {
                 "SKIP", TEST_URL
         );
         final HttpResponse<String> response = client.send("DAHU", baseUri.resolve("/dahu/headers"),
-                null, headers, false);
+                null, headers, null, false);
         assertEquals(200, response.statusCode());
     }
 

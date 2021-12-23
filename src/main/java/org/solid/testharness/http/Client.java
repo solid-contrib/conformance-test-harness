@@ -130,7 +130,7 @@ public class Client {
 
     @SuppressWarnings("checkstyle:MultipleStringLiterals") // cleaner to leave error messages local
     public HttpResponse<String> send(@NotNull final String method, @NotNull final URI url, final String data,
-                                     final Map<String, Object> headers, final boolean authorized)
+                                     final Map<String, Object> headers, final String version, final boolean authorized)
             throws IOException, InterruptedException {
         requireNonNull(url, "url is required");
         requireNonNull(method, "method is required");
@@ -139,6 +139,9 @@ public class Client {
             builder.method(method, HttpRequest.BodyPublishers.ofString(data));
         } else {
             builder.method(method, HttpRequest.BodyPublishers.noBody());
+        }
+        if (version != null) {
+            builder.version(HttpClient.Version.valueOf(version));
         }
         if (headers != null) {
             for (Map.Entry<String, Object> entry : headers.entrySet()) {

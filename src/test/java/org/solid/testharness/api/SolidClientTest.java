@@ -64,12 +64,12 @@ public class SolidClientTest {
     void send() throws IOException, InterruptedException {
         final Client client = mock(Client.class);
         final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "data");
-        when(client.send(any(), any(), any(), any(), eq(false))).thenReturn(mockStringResponse);
+        when(client.send(any(), any(), any(), any(), any(), eq(false))).thenReturn(mockStringResponse);
         final SolidClientProvider solidClientProvider = mock(SolidClientProvider.class);
         when(solidClientProvider.getClient()).thenReturn(client);
 
         final SolidClient solidClient = new SolidClient(solidClientProvider);
-        final var response = solidClient.send("GET", TestUtils.SAMPLE_BASE, "", null);
+        final var response = solidClient.send("GET", TestUtils.SAMPLE_BASE, "", null, null);
         assertFalse(response.isEmpty());
         assertEquals(200, response.get("status"));
         assertTrue(response.get("headers") instanceof Map);
@@ -82,19 +82,19 @@ public class SolidClientTest {
         when(solidClientProvider.getClient()).thenThrow(new NullPointerException("FAIL"));
         final SolidClient solidClient = new SolidClient(solidClientProvider);
         assertThrows(TestHarnessException.class,
-                () -> solidClient.send("GET", TestUtils.SAMPLE_BASE, "", null));
+                () -> solidClient.send("GET", TestUtils.SAMPLE_BASE, "", null, null));
     }
 
     @Test
     void sendAuthorized() throws IOException, InterruptedException {
         final Client client = mock(Client.class);
         final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "data");
-        when(client.send(any(), any(), any(), any(), eq(true))).thenReturn(mockStringResponse);
+        when(client.send(any(), any(), any(), any(), any(), eq(true))).thenReturn(mockStringResponse);
         final SolidClientProvider solidClientProvider = mock(SolidClientProvider.class);
         when(solidClientProvider.getClient()).thenReturn(client);
 
         final SolidClient solidClient = new SolidClient(solidClientProvider);
-        final var response = solidClient.sendAuthorized("GET", TestUtils.SAMPLE_BASE, "", null);
+        final var response = solidClient.sendAuthorized("GET", TestUtils.SAMPLE_BASE, "", null, null);
         assertFalse(response.isEmpty());
         assertEquals(200, response.get("status"));
         assertTrue(response.get("headers") instanceof Map);
@@ -107,6 +107,6 @@ public class SolidClientTest {
         when(solidClientProvider.getClient()).thenThrow(new NullPointerException("FAIL"));
         final SolidClient solidClient = new SolidClient(solidClientProvider);
         assertThrows(TestHarnessException.class,
-                () -> solidClient.sendAuthorized("GET", TestUtils.SAMPLE_BASE, "", null));
+                () -> solidClient.sendAuthorized("GET", TestUtils.SAMPLE_BASE, "", null, null));
     }
 }
