@@ -25,7 +25,9 @@ package org.solid.testharness;
 
 import com.intuit.karate.Results;
 import com.intuit.karate.Runner;
+import com.intuit.karate.core.Tag;
 import org.solid.testharness.reporting.TestSuiteResults;
+import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.FeatureResultHandler;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -38,6 +40,10 @@ public class TestRunner {
     @Inject
     FeatureResultHandler featureResultHandler;
 
+    @Inject
+    DataRepository dataRepository;
+
+
     @SuppressWarnings("unchecked")
     // Unavoidable as Runner.builder().path() takes a list or vararg of Strings
     public TestSuiteResults runTests(final List<String> featurePaths, final int threads, final List<String> skip,
@@ -49,8 +55,14 @@ public class TestRunner {
         if (enableReporting) {
             builder.outputHtmlReport(true).suiteReports(featureResultHandler);
         }
-//        builder.dryRun(true);
         final Results results = builder.parallel(threads);
+        if (skip != null && !skip.isEmpty()) {
+            results.getSuite().features.stream()
+                    .filter(f -> f.getTags() != null)
+                    .filter(f -> !f.getTags().isEmpty())
+                    .filter(f -> f.getTags().stream().map(Tag::getName).anyMatch(skip::contains))
+                    .forEach(f -> dataRepository.skipTestCase(f));
+        }
         return new TestSuiteResults(results);
     }
 }

@@ -25,6 +25,7 @@ package org.solid.testharness.utils;
 
 import com.intuit.karate.StringUtils;
 import com.intuit.karate.Suite;
+import com.intuit.karate.core.Feature;
 import com.intuit.karate.core.FeatureResult;
 import com.intuit.karate.core.ScenarioResult;
 import org.eclipse.rdf4j.RDF4JException;
@@ -44,9 +45,11 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.*;
+import org.solid.testharness.config.PathMappings;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
@@ -81,6 +84,9 @@ public class DataRepository implements Repository {
             "failed", EARL.failed,
             "skipped", EARL.untested
     );
+
+    @Inject
+    PathMappings pathMappings;
 
     @PostConstruct
     void postConstruct() {
@@ -197,6 +203,21 @@ public class DataRepository implements Repository {
                 .build());
         if (testCaseIri != null) {
             conn.add(featureAssertion, EARL.test, testCaseIri);
+        }
+    }
+
+    public void skipTestCase(final Feature feature) {
+        final IRI featureIri = iri(pathMappings.unmapFeaturePath(feature.getResource().getRelativePath()));
+        try (
+                RepositoryConnection conn = getConnection();
+                var statements = conn.getStatements(null, SPEC.testScript, featureIri)
+        ) {
+            if (statements.hasNext()) {
+                final IRI testCaseIri = (IRI) statements.next().getSubject();
+                // add assertion
+                createAssertion(conn, EARL.inapplicable, new Date(), testCaseIri);
+                conn.add(testCaseIri, DCTERMS.title, literal(feature.getName()));
+            }
         }
     }
 
