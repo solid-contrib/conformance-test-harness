@@ -53,9 +53,9 @@ Feature: Bob can only read an RDF resource to which he is only granted read acce
     Then status 403
 
   Scenario: Bob cannot use an unknown method on the resource
-    * def response = clients.alice.sendAuthorized('DAHU', resource.url, null, null, 'HTTP_1_1')
+    * def response = clients.bob.sendAuthorized('DAHU', resource.url, null, null, 'HTTP_1_1')
     Then assert response.status == 405
 
   Scenario: Bob cannot use an unknown method on the resource
-    * def response = clients.alice.sendAuthorized('DAHU', resource.url, null, null, 'HTTP_2')
+    * def response = clients.bob.sendAuthorized('DAHU', resource.url, null, null, 'HTTP_2')
     Then assert response.status == 405

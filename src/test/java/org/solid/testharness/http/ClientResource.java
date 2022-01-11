@@ -27,6 +27,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.http.Fault;
+import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 
 import java.net.URI;
@@ -64,6 +65,18 @@ public class ClientResource implements QuarkusTestResourceLifecycleManager {
                 .withHeader("LIST", matching("ITEM1"))
                 .withHeader("LIST", matching("ITEM2"))
                 .willReturn(WireMock.aResponse().withStatus(200)));
+
+        wireMockServer.stubFor(WireMock.request("RETRY", WireMock.urlEqualTo("/retry"))
+                .inScenario("RETRY").whenScenarioStateIs(Scenario.STARTED)
+                .willReturn(WireMock.aResponse().withFault(Fault.EMPTY_RESPONSE))
+                .willSetStateTo("FAILED"));
+
+        wireMockServer.stubFor(WireMock.request("RETRY", WireMock.urlEqualTo("/retry"))
+                .inScenario("RETRY").whenScenarioStateIs("FAILED")
+                .willReturn(WireMock.aResponse().withStatus(405)));
+
+        wireMockServer.stubFor(WireMock.request("RETRY", WireMock.urlEqualTo("/retryfails"))
+                .willReturn(WireMock.aResponse().withFault(Fault.EMPTY_RESPONSE)));
 
         wireMockServer.stubFor(WireMock.get(WireMock.urlEqualTo("/get/404"))
                 .willReturn(WireMock.aResponse().withStatus(404)));

@@ -113,12 +113,44 @@ class HttpUtilsTest {
     }
 
     @Test
+    void logToKarate() {
+        final ScenarioEngine se = ScenarioEngine.forTempUse();
+        ScenarioEngine.set(se);
+        final Logger logger = mock(Logger.class);
+        when(logger.isDebugEnabled()).thenReturn(true);
+        HttpUtils.logToKarate(logger, "FORMAT {}", "MESSAGE");
+        verify(logger, never()).isDebugEnabled();
+        verify(logger, never()).debug(anyString(), ArgumentMatchers.<Object>any());
+    }
+
+    @Test
+    void logToKarateFallback() {
+        ScenarioEngine.set(null);
+        final Logger logger = mock(Logger.class);
+        when(logger.isDebugEnabled()).thenReturn(true);
+        HttpUtils.logToKarate(logger, "FORMAT {}", "MESSAGE");
+        verify(logger).isDebugEnabled();
+        verify(logger).debug(anyString(), ArgumentMatchers.<Object[]>any());
+        verifyNoMoreInteractions(logger);
+    }
+
+    @Test
+    void logToKarateFallbackDisabled() {
+        ScenarioEngine.set(null);
+        final Logger logger = mock(Logger.class);
+        final HttpRequest request = mock(HttpRequest.class);
+        when(logger.isDebugEnabled()).thenReturn(false);
+        HttpUtils.logToKarate(logger, "FORMAT {}", "MESSAGE");
+        verify(logger, never()).debug(anyString(), ArgumentMatchers.<Object[]>any());
+    }
+
+    @Test
     void logRequestDisabled() {
         final Logger logger = mock(Logger.class);
         final HttpRequest request = mock(HttpRequest.class);
         when(logger.isDebugEnabled()).thenReturn(false);
         HttpUtils.logRequest(logger, request);
-        verify(logger, never()).debug(anyString(), ArgumentMatchers.<Object>any());
+        verify(logger, never()).debug(anyString(), ArgumentMatchers.<Object[]>any());
     }
 
     @Test
@@ -158,7 +190,7 @@ class HttpUtilsTest {
                 .build();
         HttpUtils.logRequestToKarate(logger, request, "body");
         verify(logger).isDebugEnabled();
-        verify(logger, times(1)).debug(anyString(), anyString());
+        verify(logger, times(1)).debug(anyString(), ArgumentMatchers.<Object[]>any());
         verifyNoMoreInteractions(logger);
     }
 
@@ -166,10 +198,12 @@ class HttpUtilsTest {
     void logRequestToKarateFallbackDisabled() {
         ScenarioEngine.set(null);
         final Logger logger = mock(Logger.class);
-        final HttpRequest request = mock(HttpRequest.class);
+        final HttpRequest request = HttpRequest.newBuilder(URI.create("https://example.org/"))
+                .header("key", "value")
+                .build();
         when(logger.isDebugEnabled()).thenReturn(false);
         HttpUtils.logRequestToKarate(logger, request, "body");
-        verify(logger, never()).debug(anyString(), ArgumentMatchers.<Object>any());
+        verify(logger, never()).debug(anyString(), ArgumentMatchers.<Object[]>any());
     }
 
     @Test
@@ -231,7 +265,7 @@ class HttpUtilsTest {
         when(response.body()).thenReturn("BODY");
         HttpUtils.logResponseToKarate(logger, response);
         verify(logger).isDebugEnabled();
-        verify(logger, times(1)).debug(anyString(), anyString());
+        verify(logger, times(1)).debug(anyString(), ArgumentMatchers.<Object[]>any());
         verifyNoMoreInteractions(logger);
     }
 
@@ -239,10 +273,16 @@ class HttpUtilsTest {
     void logResponseToKarateFallbackDisabled() {
         ScenarioEngine.set(null);
         final Logger logger = mock(Logger.class);
+        final HttpRequest request = HttpRequest.newBuilder(URI.create("https://example.org/")).build();
         final HttpResponse<String> response = mock(HttpResponse.class);
         when(logger.isDebugEnabled()).thenReturn(false);
+        when(response.request()).thenReturn(request);
+        when(response.uri()).thenReturn(URI.create("https://example.org/"));
+        when(response.statusCode()).thenReturn(400);
+        when(response.headers()).thenReturn(setupHeaders("key", List.of("value")));
+        when(response.body()).thenReturn(null);
         HttpUtils.logResponseToKarate(logger, response);
-        verify(logger, never()).debug(anyString(), ArgumentMatchers.<Object>any());
+        verify(logger, never()).debug(anyString(), ArgumentMatchers.<Object[]>any());
     }
 
     @Test
