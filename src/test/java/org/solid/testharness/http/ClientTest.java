@@ -32,6 +32,7 @@ import org.solid.testharness.utils.TestUtils;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
@@ -40,6 +41,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @QuarkusTest
 @QuarkusTestResource(ClientResource.class)
@@ -104,20 +106,22 @@ class ClientTest {
     }
 
     @Test
-    void sendRawEmpty() throws IOException, InterruptedException {
+    void sendRawEmpty() throws Exception {
         final Client client = new Client.Builder().build();
         final HttpResponse<String> response = client.send("DAHU", baseUri.resolve("/dahu/no-auth"),
-                "TEXT", null, false);
+                "TEXT", null, null, false);
+        assertEquals(HttpClient.Version.HTTP_1_1, response.version());
         assertEquals(200, response.statusCode());
         assertEquals("", response.body());
     }
 
     @Test
-    void sendRawAuthEmpty() throws IOException, InterruptedException, JoseException {
+    void sendRawAuthEmpty() throws Exception {
         final Client client = new Client.Builder().withDpopSupport().build();
         client.setAccessToken("ACCESS");
         final HttpResponse<String> response = client.send("DAHU", baseUri.resolve("/dahu/auth"),
-                null, null, true);
+                null, null, HttpClient.Version.HTTP_2.name(), true);
+        assertEquals(HttpClient.Version.HTTP_1_1, response.version());
         assertEquals(200, response.statusCode());
         assertEquals("AUTHENTICATED", response.body());
         assertEquals(HttpConstants.MEDIA_TYPE_TEXT_PLAIN,
@@ -125,19 +129,37 @@ class ClientTest {
     }
 
     @Test
+    void sendRawRetry() throws Exception {
+        final Client client = new Client.Builder().build();
+        final HttpResponse<String> response = client.send("RETRY", baseUri.resolve("/retry"),
+                "TEXT", null, null, false);
+        assertEquals(HttpClient.Version.HTTP_1_1, response.version());
+        assertEquals(405, response.statusCode());
+        assertEquals("", response.body());
+    }
+
+    @Test
+    void sendRawRetryFails() {
+        final Client client = new Client.Builder().build();
+        client.setMaxRetries(1);
+        assertThrows(ExecutionException.class, () -> client.send("RETRY", baseUri.resolve("/retryfails"),
+                "TEXT", null, null, false));
+    }
+
+    @Test
     void sendRawNullMethod() {
         final Client client = new Client.Builder().build();
-        assertThrows(NullPointerException.class, () -> client.send(null, baseUri, null, null, false));
+        assertThrows(NullPointerException.class, () -> client.send(null, baseUri, null, null, null, false));
     }
 
     @Test
     void sendRawNullUri() {
         final Client client = new Client.Builder().build();
-        assertThrows(NullPointerException.class, () -> client.send("GET", null, null, null, false));
+        assertThrows(NullPointerException.class, () -> client.send("GET", null, null, null, null, false));
     }
 
     @Test
-    void sendRawWithHeaders() throws IOException, InterruptedException {
+    void sendRawWithHeaders() throws Exception {
         final Client client = new Client.Builder().build();
         final Map<String, Object> headers = Map.of(
                 "INT", 5,
@@ -147,7 +169,7 @@ class ClientTest {
                 "SKIP", TEST_URL
         );
         final HttpResponse<String> response = client.send("DAHU", baseUri.resolve("/dahu/headers"),
-                null, headers, false);
+                null, headers, null, false);
         assertEquals(200, response.statusCode());
     }
 

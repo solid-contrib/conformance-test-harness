@@ -47,6 +47,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.net.http.HttpClient;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
@@ -95,6 +96,7 @@ public final class TestUtils {
     public static HttpResponse<String> mockStringResponse(final int status, final String body,
                                                           final Map<String, List<String>> headers) {
         final HttpResponse<String> mockResponse = mock(HttpResponse.class);
+        when(mockResponse.version()).thenReturn(HttpClient.Version.HTTP_1_1);
         when(mockResponse.statusCode()).thenReturn(status);
         when(mockResponse.body()).thenReturn(body);
         final HttpHeaders mockHeaders = HttpHeaders.of(headers, (k, v) -> true);

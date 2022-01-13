@@ -89,6 +89,16 @@ public final class HttpUtils {
         return "file".equals(protocol);
     }
 
+    public static void logToKarate(final Logger fallbackLogger, final String format, final Object... arguments) {
+        final com.intuit.karate.Logger logger = Optional.ofNullable(ScenarioEngine.get())
+                .map(se -> se.logger).orElse(null);
+        if (logger != null) {
+            logger.debug(format, arguments);
+        } else if (fallbackLogger.isDebugEnabled()) {
+            fallbackLogger.debug(format, arguments);
+        }
+    }
+
     public static void logRequest(final Logger logger, final HttpRequest request) {
         if (logger.isDebugEnabled()) {
             logger.debug("request:\n{}", formatRequestLog(request, null));
@@ -96,13 +106,7 @@ public final class HttpUtils {
     }
 
     public static void logRequestToKarate(final Logger fallbackLogger, final HttpRequest request, final String body) {
-        final com.intuit.karate.Logger logger = Optional.ofNullable(ScenarioEngine.get())
-                .map(se -> se.logger).orElse(null);
-        if (logger != null) {
-            logger.debug("request:\n{}", formatRequestLog(request, body));
-        } else if (fallbackLogger.isDebugEnabled()) {
-            fallbackLogger.debug("request:\n{}", formatRequestLog(request, body));
-        }
+        logToKarate(fallbackLogger, "request:\n{}", formatRequestLog(request, body));
     }
 
     private static String formatRequestLog(final HttpRequest request, final String body) {
@@ -122,18 +126,12 @@ public final class HttpUtils {
     }
 
     public static <T> void logResponseToKarate(final Logger fallbackLogger, final HttpResponse<T> response) {
-        final com.intuit.karate.Logger logger = Optional.ofNullable(ScenarioEngine.get())
-                .map(se -> se.logger).orElse(null);
-        if (logger != null) {
-            logger.debug("response:\n{}", formatResponseLog(response));
-        } else if (fallbackLogger.isDebugEnabled()) {
-            fallbackLogger.debug("response:\n{}", formatResponseLog(response));
-        }
+        logToKarate(fallbackLogger, "response:\n{}", formatResponseLog(response));
     }
 
     private static <T> String formatResponseLog(final HttpResponse<T> response) {
         final StringBuilder sb = new StringBuilder();
-        sb.append(RESPONSE_PREFIX).append(response.statusCode()).append('\n');
+        sb.append(RESPONSE_PREFIX).append(response.version()).append(' ').append(response.statusCode()).append('\n');
         logHeaders(sb, response.headers().map(), false);
         final T body = response.body();
         if (body != null) {

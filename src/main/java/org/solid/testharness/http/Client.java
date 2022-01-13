@@ -43,6 +43,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.UUID.randomUUID;
@@ -54,6 +55,7 @@ import static org.apache.commons.text.CharacterPredicates.LETTERS;
 // Duplicate string are null check error messages for same parameter
 public class Client {
     private static final Logger logger = LoggerFactory.getLogger(Client.class);
+    private static int MAX_RETRY = 10;
 
     private HttpClient httpClient;
     private String accessToken;
@@ -61,6 +63,7 @@ public class Client {
     private boolean dpopSupported;
     private String agent;
     private String user;
+    private int maxRetries = MAX_RETRY;
 
     public static class Builder {
         private final HttpClient.Builder clientBuilder;
@@ -128,10 +131,14 @@ public class Client {
         return user;
     }
 
+    public void setMaxRetries(final int maxRetries) {
+        this.maxRetries = maxRetries;
+    }
+
     @SuppressWarnings("checkstyle:MultipleStringLiterals") // cleaner to leave error messages local
     public HttpResponse<String> send(@NotNull final String method, @NotNull final URI url, final String data,
-                                     final Map<String, Object> headers, final boolean authorized)
-            throws IOException, InterruptedException {
+                                     final Map<String, Object> headers, final String version, final boolean authorized)
+            throws Exception {
         requireNonNull(url, "url is required");
         requireNonNull(method, "method is required");
         final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url);
@@ -139,6 +146,9 @@ public class Client {
             builder.method(method, HttpRequest.BodyPublishers.ofString(data));
         } else {
             builder.method(method, HttpRequest.BodyPublishers.noBody());
+        }
+        if (version != null) {
+            builder.version(HttpClient.Version.valueOf(version));
         }
         if (headers != null) {
             for (Map.Entry<String, Object> entry : headers.entrySet()) {
@@ -151,9 +161,36 @@ public class Client {
         }
         final HttpRequest request = authorized ? authorize(builder).build() : builder.build();
         HttpUtils.logRequestToKarate(logger, request, data);
-        final HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        final HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
+        final CompletableFuture<HttpResponse<String>> responseFuture =
+                httpClient.sendAsync(request, handler)
+                        .handleAsync((r, t) -> tryResend(httpClient, request, handler, 1, r, t))
+                        .thenCompose(Function.identity());
+        final HttpResponse<String> response = responseFuture.get();
         HttpUtils.logResponseToKarate(logger, response);
         return response;
+    }
+
+    private boolean shouldRetry(final HttpResponse<?> r, final Throwable t, final int count) {
+        if (r != null || count >= maxRetries) return false;
+        HttpUtils.logToKarate(logger, "Retry ({}) due to {}", count, t.toString());
+        return true;
+    }
+
+    private <T> CompletableFuture<HttpResponse<T>> tryResend(final HttpClient client, final HttpRequest request,
+                                                             final HttpResponse.BodyHandler<T> handler,
+                                                             final int count, final HttpResponse<T> resp,
+                                                             final Throwable t) {
+        if (shouldRetry(resp, t, count)) {
+            return client.sendAsync(request, handler)
+                    .handleAsync((r, x) -> tryResend(client, request, handler, count + 1, r, x))
+                    .thenCompose(Function.identity());
+        } else if (t != null) {
+            return CompletableFuture.failedFuture(t);
+        } else {
+            return CompletableFuture.completedFuture(resp);
+        }
     }
 
     public <T> HttpResponse<T> send(@NotNull final HttpRequest request,

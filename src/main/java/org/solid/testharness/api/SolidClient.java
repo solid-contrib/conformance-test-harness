@@ -65,14 +65,16 @@ public class SolidClient {
      * @param uri the URL of the resource
      * @param data the request body (optional)
      * @param headers a map of request headers (optional)
+     * @param version the HTTP version to use for the request (optional)
      * @return a map containing the response using the keys: status, headers, body
      */
     public Map<String, Object> send(final String method, final String uri, final String data,
-                                    final Map<String, Object> headers) {
+                                    final Map<String, Object> headers, final String version) {
         try {
             final HttpResponse<String> response = solidClientProvider.getClient().send(method, URI.create(uri),
-                    data, headers, false);
+                    data, headers, version, false);
             return Map.of(
+                    "version", response.version(),
                     "status", response.statusCode(),
                     "body", response.body(),
                     "headers", response.headers().map()
@@ -88,14 +90,16 @@ public class SolidClient {
      * @param uri the URL of the resource
      * @param data the request body (optional)
      * @param headers a map of request headers (optional)
+     * @param version the HTTP version to use for the request (optional)
      * @return a map containing the response using the keys: status, headers, body
      */
     public Map<String, Object> sendAuthorized(final String method, final String uri, final String data,
-                                    final Map<String, Object> headers) {
+                                    final Map<String, Object> headers, final String version) {
         try {
             final HttpResponse<String> response = solidClientProvider.getClient().send(method, URI.create(uri),
-                    data, headers, true);
+                    data, headers, version, true);
             return Map.of(
+                    "version", response.version(),
                     "status", response.statusCode(),
                     "body", response.body(),
                     "headers", response.headers().map()
