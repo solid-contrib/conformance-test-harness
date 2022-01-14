@@ -22,7 +22,7 @@
 
         <!-- plugins -->
         <quarkus.package.type>uber-jar</quarkus.package.type>
-        <compiler-plugin.version>3.8.1</compiler-plugin.version>
+        <compiler-plugin.version>3.9.0</compiler-plugin.version>
         <deploy.plugin.version>2.8.2</deploy.plugin.version>
         <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
         <release.plugin.version>2.5.3</release.plugin.version>
