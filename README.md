@@ -174,7 +174,7 @@ docker build -f src/main/docker/Dockerfile -t testharness .
 ```
 
 The CD workflow in GitHub also builds a Docker image and deploys it to DockerHub:
-https://hub.docker.com/r/solidconformancetestbeta/conformance-test-harness. This build incorporates the latest release
+https://hub.docker.com/r/solidproject/conformance-test-harness. This build incorporates the latest release
 of the tests from https://github.com/solid/specification-tests.
 
 ### 6. Release

@@ -4,7 +4,8 @@
 
 ### Features
 * Use tags on features or scenarios to specify when they depend on optional features. Testers can then choose to skip
-  tests with these tags. Skipped features or scenarios are marked with suitable assertions in the results report. 
+  tests with these tags. Skipped features or scenarios are marked with suitable assertions in the results report.
+* The docker image has moved to https://hub.docker.com/r/solidproject/conformance-test-harness.
 
 ## Release 1.0.13
 

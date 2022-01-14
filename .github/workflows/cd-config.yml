@@ -43,7 +43,7 @@ jobs:
 
           # Deploy the image
           mvn package -DskipTests \
-            -Dquarkus.container-image.image="docker.io/solidconformancetestbeta/conformance-test-harness:$LABEL" \
+            -Dquarkus.container-image.image="docker.io/solidproject/conformance-test-harness:$LABEL" \
             -Dquarkus.docker.dockerfile-jvm-path=src/main/docker/Dockerfile \
             -Dquarkus.container-image.additional-tags=latest \
             -Dquarkus.container-image.labels.version="$LABEL"

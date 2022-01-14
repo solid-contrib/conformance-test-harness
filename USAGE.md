@@ -334,7 +334,7 @@ The CTH can be executed both locally and within a Docker Container.
 
 ## Running in a Docker Container
 The simplest way to run the CTH is via the [Docker](https://www.docker.com/) image published to
-https://hub.docker.com/r/solidconformancetestbeta/conformance-test-harness.
+https://hub.docker.com/r/solidproject/conformance-test-harness.
 
 For ease of use, the Docker image includes the latest release of the tests, manifest files, and test subject
 configuration files from https://github.com/solid/specification-tests.
@@ -364,7 +364,7 @@ When you run the server in a container, there are some important things to remem
 
 Some additional notes on using the Docker image:
 * To run a specific version of the Docker image, you need to append a tag to the image name, e.g.
-  `solidconformancetestbeta/conformance-test-harness:1.0.0` 
+  `solidproject/conformance-test-harness:1.0.0` 
 * If you do not specify a version then Docker will use the latest image
 * If you want to see the reports, the `/reports` directory must be mapped to a local volume. Alternatively you could use 
 this image in your own image which could send the reports to an external location such as Amazon Web Services (AWS) S3.
@@ -376,7 +376,7 @@ internal ones. For example:
     -v "$(pwd)"/tests:/data \
     -v "$(pwd)"/config:/app/config \
     -v "$(pwd)"/reports/local:/reports \
-    --env-file=ess.env solidconformancetestbeta/conformance-test-harness \ 
+    --env-file=ess.env solidproject/conformance-test-harness \ 
     --output=/reports \
     --target=...
     ```
@@ -418,10 +418,10 @@ Executes tests against a publicly available server, in this case ESS (https://po
     # Environment variables are defined in an `env` file in the directory from which you run this script.
 
     mkdir reports/ess
-    docker pull solidconformancetestbeta/conformance-test-harness
+    docker pull solidproject/conformance-test-harness
     docker run -i --rm \
     -v "$(pwd)"/reports/ess:/reports \
-    --env-file=ess.env solidconformancetestbeta/conformance-test-harness \
+    --env-file=ess.env solidproject/conformance-test-harness \
     --output=/reports --target=https://github.com/solid/conformance-test-harness/ess
     ```
 
@@ -522,10 +522,10 @@ option):
     echo 'CSS is running'
 
     # Run the tests in the test harness
-    docker pull solidconformancetestbeta/conformance-test-harness
+    docker pull solidproject/conformance-test-harness
     docker run -i --rm \
     -v "$(pwd)"/reports/css:/reports \
-    --env-file=css.env --network=testnet solidconformancetestbeta/conformance-test-harness \
+    --env-file=css.env --network=testnet solidproject/conformance-test-harness \
     --output=/reports --target=https://github.com/solid/conformance-test-harness/css
     docker stop server
     docker rm server
@@ -563,7 +563,7 @@ To use the Docker image to run a set of local tests:
         -v "$(pwd)"/tests:/data 
         -v "$(pwd)"/config:/app/config \
         -v "$(pwd)"/reports/local:/reports \
-        --env-file=ess.env solidconformancetestbeta/conformance-test-harness \
+        --env-file=ess.env solidproject/conformance-test-harness \
         --output=/reports --target=https://github.com/solid/conformance-test-harness/ess
     ```
 
