@@ -23,6 +23,7 @@
  */
 package org.solid.testharness;
 
+import com.intuit.karate.core.Tag;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -33,6 +34,7 @@ import org.solid.common.vocab.EARL;
 import org.solid.common.vocab.RDF;
 import org.solid.testharness.api.SolidClient;
 import org.solid.testharness.config.Config;
+import org.solid.testharness.config.PathMappings;
 import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.discovery.TestSuiteDescription;
 import org.solid.testharness.http.AuthManager;
@@ -78,17 +80,18 @@ public class ConformanceTestHarness {
     DataRepository dataRepository;
     @Inject
     AuthManager authManager;
+    @Inject
+    PathMappings pathMappings;
 
     @SuppressWarnings("PMD.UseProperClassLoader") // this is not J2EE and the suggestion fails
     public void initialize() throws IOException {
-        final IRI assertor;
         // set up the report run and create the assertor information in the data repository
+        final IRI assertor = iri(Namespaces.TEST_HARNESS_URI);
+        dataRepository.setAssertor(assertor);
         reportGenerator.setStartTime(System.currentTimeMillis());
         try (final InputStream is = getClass().getClassLoader().getResourceAsStream("assertor.properties")) {
             final Properties properties = new Properties();
             properties.load(is);
-            assertor = iri(Namespaces.TEST_HARNESS_URI);
-            dataRepository.setAssertor(assertor);
             try (RepositoryConnection conn = dataRepository.getConnection()) {
                 final ModelBuilder builder = new ModelBuilder();
                 final IRI release = iri(Namespaces.RESULTS_URI, "assertor-release");
@@ -198,8 +201,19 @@ public class ConformanceTestHarness {
 
     private TestSuiteResults runTests(final List<String> featurePaths, final boolean enableReporting) {
         logger.info("===================== RUN TESTS ========================");
+        final List<String> skipTags = testSubject.getTargetServer().getSkipTags();
         final TestSuiteResults results = testRunner.runTests(featurePaths, config.getMaxThreads(),
-                testSubject.getTargetServer().getSkipTags(), enableReporting);
+                skipTags, enableReporting);
+        // any features which are skipped are not included in the feature reporting phase so add assertions now
+        if (skipTags != null && !skipTags.isEmpty()) {
+            results.getFeatures().stream()
+                    .filter(f -> f.getTags() != null)
+                    .filter(f -> !f.getTags().isEmpty())
+                    .filter(f -> f.getTags().stream().map(Tag::getName).anyMatch(skipTags::contains))
+                    .forEach(f -> dataRepository.createUntestedAssertion(
+                            f, pathMappings.unmapFeaturePath(f.getResource().getRelativePath())
+                    ));
+        }
         reportGenerator.setResults(results);
         logger.info("{}", results);
         return results;

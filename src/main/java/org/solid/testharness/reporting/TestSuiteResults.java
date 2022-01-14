@@ -25,10 +25,12 @@ package org.solid.testharness.reporting;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.karate.Results;
+import com.intuit.karate.core.Feature;
 
 import javax.enterprise.inject.spi.CDI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -42,6 +44,10 @@ public class TestSuiteResults {
 
     public TestSuiteResults(final Results results) {
         this.results = results;
+    }
+
+    public List<Feature> getFeatures() {
+        return this.results.getSuite().features;
     }
 
     public String getErrorMessages() {

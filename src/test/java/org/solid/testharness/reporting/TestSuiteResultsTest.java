@@ -24,6 +24,7 @@
 package org.solid.testharness.reporting;
 
 import com.intuit.karate.Results;
+import com.intuit.karate.Suite;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
@@ -51,6 +52,14 @@ class TestSuiteResultsTest {
         assertEquals(0, testSuiteResults.getTimeTakenMillis());
         assertEquals(0, testSuiteResults.getFailCount());
         assertNotNull(testSuiteResults.getResultDate());
+    }
+
+    @Test
+    void getFeatures() {
+        final Results results = mock(Results.class);
+        when(results.getSuite()).thenReturn(Suite.forTempUse());
+        final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
+        assertNull(testSuiteResults.getFeatures());
     }
 
     @Test

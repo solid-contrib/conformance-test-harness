@@ -25,17 +25,16 @@ package org.solid.testharness.utils;
 
 import com.intuit.karate.Suite;
 import com.intuit.karate.core.*;
+import com.intuit.karate.resource.Resource;
 import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.util.Values;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Test;
-import org.solid.common.vocab.DCTERMS;
-import org.solid.common.vocab.FOAF;
-import org.solid.common.vocab.RDF;
-import org.solid.common.vocab.SPEC;
+import org.solid.common.vocab.*;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -45,7 +44,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
@@ -72,8 +74,16 @@ class DataRepositoryTest {
         final Suite suite = Suite.forTempUse();
         final Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
-        final Scenario scenario1 = mockScenario("SCENARIO 1", 1, 0);
-        final Scenario scenario2 = mockScenario("SCENARIO 2", 10, 1);
+        final Scenario scenario1 = mockScenario("SCENARIO 1", 1, 0, null);
+        final Scenario scenario2 = mockScenario("SCENARIO 2", 10, 1, null);
+        final Scenario scenario3 = mockScenario("SCENARIO 3 IGNORED", 20, 2, List.of(Tag.IGNORE));
+        final Scenario scenario4 = mockScenario("SCENARIO 4 SKIPPED", 30, 3, List.of("skip"));
+        final List<FeatureSection> sections = Stream.of(scenario1, scenario2, scenario3, scenario4).map(sc -> {
+            final FeatureSection fs = new FeatureSection();
+            fs.setScenario(sc);
+            return fs;
+        }).collect(Collectors.toList());
+        when(feature.getSections()).thenReturn(sections);
         final Step step1 = mockStep("When", "method GET", 1, true, List.of("STEP COMMENT"));
         final Step step2 = mockStep("Then", "Status 200", 2, false, null);
         final StepResult str1 = mockStepResult(step1, "passed", "STEP1 LOG\n" +
@@ -99,6 +109,8 @@ class DataRepositoryTest {
         assertTrue(result.contains("dcterms:description \"SCENARIO1 COMMENT\""));
         assertTrue(result.contains("earl:outcome earl:failed"));
         assertTrue(result.contains("prov:value earl:passed"));
+        assertTrue(result.contains("prov:value earl:untested"));
+        assertTrue(result.contains("prov:value earl:inapplicable"));
         assertTrue(result.contains("dcterms:description \"STEP COMMENT\""));
         assertTrue(result.contains("dcterms:description \"\"\"STEP1 LOG\n" +
                 "EXCEPTION\nCaused by EXCEPTION2\nSTACK1\n- <js>LAST"));
@@ -140,7 +152,7 @@ class DataRepositoryTest {
         final Suite suite = Suite.forTempUse();
         final Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
-        final Scenario scenario1 = mockScenario("SCENARIO 1", 1, 0);
+        final Scenario scenario1 = mockScenario("SCENARIO 1", 1, 0, null);
 
         final ScenarioResult sr1 = mockScenarioResult(scenario1, true, 2000.0, Collections.emptyList());
         final FeatureResult fr = mockFeatureResult(feature, "DISPLAY_NAME", true, 1000.0, List.of(sr1));
@@ -172,6 +184,69 @@ class DataRepositoryTest {
         dataRepository.addFeatureResult(suite, fr, featureIri, featureFileParser);
         final String result = TestUtils.repositoryToString(dataRepository);
         assertFalse(result.contains(featureIri.stringValue()));
+    }
+
+    @Test
+    void createAssertion() {
+        final DataRepository dataRepository = new DataRepository();
+        dataRepository.postConstruct();
+        dataRepository.setAssertor(assertor);
+        dataRepository.setTestSubject(testSubject);
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            dataRepository.createAssertion(conn, EARL.passed, new Date(), testCaseIri);
+        }
+        final String result = TestUtils.repositoryToString(dataRepository);
+        assertTrue(result.contains("a earl:Assertion"));
+        assertTrue(result.contains("a earl:TestResult"));
+        assertTrue(result.contains("earl:test <" + testCaseIri + ">"));
+        assertTrue(result.contains("earl:outcome earl:passed"));
+    }
+
+    @Test
+    void createAssertionNoTestIri() {
+        final DataRepository dataRepository = new DataRepository();
+        dataRepository.postConstruct();
+        dataRepository.setAssertor(assertor);
+        dataRepository.setTestSubject(testSubject);
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            dataRepository.createAssertion(conn, EARL.failed, new Date(), null);
+        }
+        final String result = TestUtils.repositoryToString(dataRepository);
+        assertTrue(result.contains("a earl:Assertion"));
+        assertTrue(result.contains("a earl:TestResult"));
+        assertFalse(result.contains("earl:test <" + testCaseIri + ">"));
+        assertTrue(result.contains("earl:outcome earl:failed"));
+    }
+
+    @Test
+    void createUntestedAssertion() {
+        final DataRepository dataRepository = new DataRepository();
+        dataRepository.postConstruct();
+        dataRepository.setAssertor(assertor);
+        dataRepository.setTestSubject(testSubject);
+        final Feature feature = mockUntestedFeature();
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            conn.add(testCaseIri, SPEC.testScript, featureIri);
+        }
+        dataRepository.createUntestedAssertion(feature, featureIri.stringValue());
+        final String result = TestUtils.repositoryToString(dataRepository);
+        assertTrue(result.contains("a earl:Assertion"));
+        assertTrue(result.contains("a earl:TestResult"));
+        assertTrue(result.contains("earl:test <" + testCaseIri.stringValue() + ">"));
+        assertTrue(result.contains("earl:outcome earl:inapplicable"));
+        assertTrue(result.contains("dcterms:title \"FEATURE NAME\""));
+    }
+
+    @Test
+    void createUntestedAssertionNoStatements() {
+        final DataRepository dataRepository = new DataRepository();
+        dataRepository.postConstruct();
+        dataRepository.setAssertor(assertor);
+        dataRepository.setTestSubject(testSubject);
+        final Feature feature = mockUntestedFeature();
+        dataRepository.createUntestedAssertion(feature, featureIri.stringValue());
+        final String result = TestUtils.repositoryToString(dataRepository);
+        assertFalse(result.contains("a earl:Assertion"));
     }
 
     @Test
@@ -283,10 +358,15 @@ class DataRepositoryTest {
         }
     }
 
-    private Scenario mockScenario(final String name, final int line, final int index) {
+    private Scenario mockScenario(final String name, final int line, final int index, final List<String> tags) {
         final Scenario scenario = mock(Scenario.class);
         when(scenario.getName()).thenReturn(name);
         when(scenario.getLine()).thenReturn(line);
+        if (tags != null) {
+            when(scenario.getTags()).thenReturn(
+                    tags.stream().map(t -> new Tag(1, "@" + t)).collect(Collectors.toList())
+            );
+        }
         final FeatureSection section = mock(FeatureSection.class);
         when(section.getIndex()).thenReturn(index);
         when(scenario.getSection()).thenReturn(section);
@@ -339,5 +419,14 @@ class DataRepositoryTest {
         when(str.getResult()).thenReturn(res);
         when(str.getStepLog()).thenReturn(log);
         return str;
+    }
+
+    private Feature mockUntestedFeature() {
+        final Feature feature = mock(Feature.class);
+        final Resource resource = mock(Resource.class);
+        when(feature.getName()).thenReturn("FEATURE NAME");
+        when(feature.getResource()).thenReturn(resource);
+        when(resource.getRelativePath()).thenReturn("example/test");
+        return feature;
     }
 }

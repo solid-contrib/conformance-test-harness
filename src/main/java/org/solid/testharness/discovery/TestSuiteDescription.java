@@ -159,7 +159,7 @@ public class TestSuiteDescription {
                     .map(Statement::getSubject)
                     .filter(Value::isIRI)
                     .map(IRI.class::cast)
-                    .filter(tc -> failsFilterCheck(conn, tc, filterList) || failsStatusCheck(conn, tc, statusList))
+                    .filter(tc -> failsFilterCheck(tc, filterList) || failsStatusCheck(conn, tc, statusList))
                     .forEach(tc -> dataRepository.createAssertion(conn, EARL.untested, new Date(), tc));
         } catch (RDF4JException e) {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException(e.toString())
@@ -167,7 +167,7 @@ public class TestSuiteDescription {
         }
     }
 
-    private boolean failsFilterCheck(final RepositoryConnection conn, final IRI testCase, final List<String> filters) {
+    private boolean failsFilterCheck(final IRI testCase, final List<String> filters) {
         // the test case doesn't match the filter so will not be tested
         return filters != null && filters.stream().noneMatch(f -> testCase.stringValue().contains(f));
     }
@@ -240,7 +240,6 @@ public class TestSuiteDescription {
             }
             final File file = new File(mappedLocation.getPath());
             if (!file.exists()) {
-                // TODO: if starter feature files are auto-generated, read for @ignore as well
                 logger.warn("FEATURE NOT FOUND: {}", mappedLocation);
             } else {
                 featureFile = file;

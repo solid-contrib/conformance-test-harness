@@ -25,9 +25,7 @@ package org.solid.testharness.utils;
 
 import com.intuit.karate.StringUtils;
 import com.intuit.karate.Suite;
-import com.intuit.karate.core.Feature;
-import com.intuit.karate.core.FeatureResult;
-import com.intuit.karate.core.ScenarioResult;
+import com.intuit.karate.core.*;
 import org.eclipse.rdf4j.RDF4JException;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -45,18 +43,14 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.*;
-import org.solid.testharness.config.PathMappings;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URL;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -84,9 +78,6 @@ public class DataRepository implements Repository {
             "failed", EARL.failed,
             "skipped", EARL.untested
     );
-
-    @Inject
-    PathMappings pathMappings;
 
     @PostConstruct
     void postConstruct() {
@@ -170,8 +161,18 @@ public class DataRepository implements Repository {
             }
             createAssertion(conn, fr.isFailed() ? EARL.failed : EARL.passed,
                     new Date((long) (startTime + fr.getDurationMillis())), testCaseIri);
+            final Set<Scenario> srSet = new HashSet<>();
             for (ScenarioResult sr: fr.getScenarioResults()) {
-                createScenarioActivity(conn, sr, testCaseIri, featureIri, featureFileParser);
+                createScenarioActivity(conn, sr, sr.getScenario(), testCaseIri, featureIri, featureFileParser);
+                srSet.add(sr.getScenario());
+            }
+            // find scenarios which were not run (i.e. have no results)
+            final List<Scenario> otherScenarios = fr.getFeature().getSections().stream()
+                    .map(FeatureSection::getScenario)
+                    .filter(s -> !srSet.contains(s))
+                    .collect(Collectors.toList());
+            for (Scenario sc: otherScenarios) {
+                createScenarioActivity(conn, null, sc, testCaseIri, featureIri, featureFileParser);
             }
         } catch (Exception e) {
             logger.error("Failed to load feature result", e);
@@ -206,11 +207,10 @@ public class DataRepository implements Repository {
         }
     }
 
-    public void skipTestCase(final Feature feature) {
-        final IRI featureIri = iri(pathMappings.unmapFeaturePath(feature.getResource().getRelativePath()));
+    public void createUntestedAssertion(final Feature feature, final String featurePath) {
         try (
                 RepositoryConnection conn = getConnection();
-                var statements = conn.getStatements(null, SPEC.testScript, featureIri)
+                var statements = conn.getStatements(null, SPEC.testScript, iri(featurePath))
         ) {
             if (statements.hasNext()) {
                 final IRI testCaseIri = (IRI) statements.next().getSubject();
@@ -221,7 +221,8 @@ public class DataRepository implements Repository {
         }
     }
 
-    private void createScenarioActivity(final RepositoryConnection conn, final ScenarioResult sr,
+    private void createScenarioActivity(final RepositoryConnection conn,
+                                        final ScenarioResult sr, final Scenario sc,
                                         final IRI testCaseIri, final IRI featureIri,
                                         final FeatureFileParser featureFileParser) {
         final ModelBuilder builder;
@@ -230,15 +231,22 @@ public class DataRepository implements Repository {
         builder = new ModelBuilder();
         builder.subject(scenarioIri)
                 .add(RDF.type, PROV.Activity)
-                .add(DCTERMS.title, sr.getScenario().getName())
-                .add(PROV.used, iri(featureIri.stringValue() + GITHUB_LINE_ANCHOR + sr.getScenario().getLine()))
-                .add(PROV.startedAtTime, new Date(sr.getStartTime()))
-                .add(PROV.endedAtTime, new Date(sr.getEndTime()))
+                .add(DCTERMS.title, sc.getName())
+                .add(PROV.used, iri(featureIri.stringValue() + GITHUB_LINE_ANCHOR + sc.getLine()))
                 .add(PROV.generated, scenarioResultIri)
                 .add(scenarioResultIri, RDF.type, PROV.Entity)
-                .add(scenarioResultIri, PROV.generatedAtTime, new Date(sr.getEndTime()))
-                .add(scenarioResultIri, PROV.value, sr.isFailed() ? EARL.failed : EARL.passed);
-        final String scenarioComments = featureFileParser.getScenarioComments(sr.getScenario().getSection().getIndex());
+                .add(scenarioResultIri, PROV.generatedAtTime, sr != null ? new Date(sr.getEndTime()) : new Date());
+        if (sr != null) {
+            builder.subject(scenarioIri)
+                    .add(PROV.startedAtTime, new Date(sr.getStartTime()))
+                    .add(PROV.endedAtTime, new Date(sr.getEndTime()))
+                    .add(scenarioResultIri, PROV.value, sr.isFailed() ? EARL.failed : EARL.passed);
+        } else {
+            final boolean ignored = sc.getTags().stream().anyMatch(tag -> tag.getName().equals(Tag.IGNORE));
+            builder.subject(scenarioIri)
+                    .add(scenarioResultIri, PROV.value, ignored ? EARL.untested : EARL.inapplicable);
+        }
+        final String scenarioComments = featureFileParser.getScenarioComments(sc.getSection().getIndex());
         if (!StringUtils.isBlank(scenarioComments)) {
             conn.add(scenarioIri, DCTERMS.description, literal(scenarioComments));
         }
@@ -246,7 +254,7 @@ public class DataRepository implements Repository {
         if (testCaseIri != null) {
             conn.add(testCaseIri, DCTERMS.hasPart, scenarioIri);
         }
-        if (!sr.getStepResults().isEmpty()) {
+        if (sr != null && !sr.getStepResults().isEmpty()) {
             createStepActivityList(conn, sr, scenarioIri, featureIri);
         }
     }
@@ -266,7 +274,7 @@ public class DataRepository implements Repository {
                     .add(stepResultIri, PROV.value, EARL_RESULT.get(str.getResult().getStatus()));
             if (str.getStep().getComments() != null) {
                 stepBuilder.add(stepIri, DCTERMS.description,
-                        str.getStep().getComments().stream().collect(Collectors.joining("\n")));
+                        String.join("\n", str.getStep().getComments()));
             }
             if (!str.getStepLog().isEmpty()) {
                 stepBuilder.add(stepResultIri, DCTERMS.description, simplify(str.getStepLog()));
