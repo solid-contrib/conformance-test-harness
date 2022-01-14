@@ -34,7 +34,6 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Test;
 import org.solid.common.vocab.*;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
