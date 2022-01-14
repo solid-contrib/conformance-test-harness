@@ -59,7 +59,7 @@ public class TestSubjectSetupTest {
         final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
         assertEquals(new URL(testFileUrl, "default").toString(), targetServer.getSubject());
-        assertEquals(14, targetServer.size());
+        assertEquals(13, targetServer.size());
     }
 
     @Test
@@ -72,7 +72,7 @@ public class TestSubjectSetupTest {
         final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
         assertEquals(subject, targetServer.getSubject());
-        assertEquals(14, targetServer.size());
+        assertEquals(13, targetServer.size());
     }
 
     @Test

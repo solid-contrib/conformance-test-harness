@@ -9,15 +9,16 @@ prefix solid: <http://www.w3.org/ns/solid/terms#>
 
 <default>
     a earl:Software, earl:TestSubject ;
-    doap:name "Enterprise Solid Server (Web Access Control version)";
+    doap:name "TEST SERVER";
     doap:release <default#test-subject-release> ;
-    doap:developer <https://inrupt.com/profile/card/#us>;
-    doap:homepage <https://inrupt.com/products/enterprise-solid-server>;
-    doap:description "A production-grade Solid server produced and supported by Inrupt."@en;
-    doap:programming-language "Java" ;
-    solid-test:features "authentication", "acl", "wac-allow" .
+    doap:developer <https://example.org/profile/card/#us>;
+    doap:homepage <https://example.org/server>;
+    doap:description "DESCRIPTION"@en;
+    doap:programming-language "LANG" ;
+    solid-test:skip "acp" ;
+    solid-test:features "acp-legacy" .
 
 <default#test-subject-release>
-    doap:name "ESS 1.0.9";
-    doap:revision "1.0.9";
+    doap:name "VERSION NAME";
+    doap:revision "VERSION";
     doap:created "2021-03-05T00:00:00.001Z"^^xsd:dateTime .

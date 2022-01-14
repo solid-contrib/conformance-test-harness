@@ -51,7 +51,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -146,8 +145,7 @@ public class TestSuiteDescription {
         }
     }
 
-    public void setNonRunningTestAssertions(final Set<String> features, final List<String> filters,
-                                            final List<String> statuses) {
+    public void setNonRunningTestAssertions(final List<String> filters, final List<String> statuses) {
         final List<String> filterList = filters != null && !filters.isEmpty() ? filters : null;
         final List<IRI> statusList = statuses != null && !statuses.isEmpty()
                 ? statuses.stream().map(s -> iri(TD.NAMESPACE, s)).collect(Collectors.toList())
@@ -156,60 +154,28 @@ public class TestSuiteDescription {
                 RepositoryConnection conn = dataRepository.getConnection();
                 var statements = conn.getStatements(null, RDF.type, TD.TestCase)
         ) {
-            // check test cases are applicable to the target and are not filtered out
+            // add assertions to any filtered out tests
             statements.stream()
                     .map(Statement::getSubject)
                     .filter(Value::isIRI)
                     .map(IRI.class::cast)
-                    .forEach(tc -> {
-                        if (checkApplicability(conn, tc, features)) {
-                            if (checkFilters(conn, tc, filterList)) {
-                                checkStatuses(conn, tc, statusList);
-                            }
-                        }
-                    });
+                    .filter(tc -> failsFilterCheck(tc, filterList) || failsStatusCheck(conn, tc, statusList))
+                    .forEach(tc -> dataRepository.createAssertion(conn, EARL.untested, new Date(), tc));
         } catch (RDF4JException e) {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException(e.toString())
                     .initCause(e);
         }
     }
 
-    @SuppressWarnings("PMD.CloseResource") // the connection is closed by the caller
-    private boolean checkApplicability(final RepositoryConnection conn, final IRI testCase,
-                                       final Set<String> serverFeatures) {
-        try (
-            var preConditions = conn.getStatements(testCase, TD.preCondition, null)
-        ) {
-            if (preConditions.hasNext() && !preConditions.stream()
-                    .map(Statement::getObject)
-                    .filter(Value::isLiteral)
-                    .map(Value::stringValue)
-                    .allMatch(serverFeature ->
-                            serverFeatures != null && serverFeatures.contains(serverFeature)
-                    )) {
-                // the test case has pre-conditions and they don't all match the set of server features
-                dataRepository.createAssertion(conn, EARL.inapplicable, new Date(), testCase);
-                return false;
-            }
-            return true;
-        } // jacoco will not show full coverage for this try-with-resources line
+    private boolean failsFilterCheck(final IRI testCase, final List<String> filters) {
+        // the test case doesn't match the filter so will not be tested
+        return filters != null && filters.stream().noneMatch(f -> testCase.stringValue().contains(f));
     }
 
-    private boolean checkFilters(final RepositoryConnection conn, final IRI testCase, final List<String> filters) {
-        if (filters != null && filters.stream().noneMatch(f -> testCase.stringValue().contains(f))) {
-            // the test case doesn't match the filter so will not be tested
-            dataRepository.createAssertion(conn, EARL.untested, new Date(), testCase);
-            return false;
-        }
-        return true;
-    }
-
-    private void checkStatuses(final RepositoryConnection conn, final IRI testCase, final List<IRI> statuses) {
-        if (statuses != null &&
-                statuses.stream().noneMatch(s -> conn.hasStatement(testCase, TD.reviewStatus, s, false))) {
-            // the test case review status doesn't match the status list so will not be tested
-            dataRepository.createAssertion(conn, EARL.untested, new Date(), testCase);
-        }
+    private boolean failsStatusCheck(final RepositoryConnection conn, final IRI testCase, final List<IRI> statuses) {
+        // the test case review status doesn't match the status list so will not be tested
+        return statuses != null &&
+                statuses.stream().noneMatch(s -> conn.hasStatement(testCase, TD.reviewStatus, s, false));
     }
 
     public void prepareTestCases(final Config.RunMode runMode) {
@@ -274,7 +240,6 @@ public class TestSuiteDescription {
             }
             final File file = new File(mappedLocation.getPath());
             if (!file.exists()) {
-                // TODO: if starter feature files are auto-generated, read for @ignore as well
                 logger.warn("FEATURE NOT FOUND: {}", mappedLocation);
             } else {
                 featureFile = file;

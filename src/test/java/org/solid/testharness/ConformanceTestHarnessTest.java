@@ -24,8 +24,19 @@
 package org.solid.testharness;
 
 import com.intuit.karate.Results;
+import com.intuit.karate.core.Feature;
+import com.intuit.karate.core.Tag;
+import com.intuit.karate.resource.Resource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFWriter;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
+import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.config.Config;
@@ -37,11 +48,12 @@ import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.reporting.ReportGenerator;
 import org.solid.testharness.reporting.TestSuiteResults;
 import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.Namespaces;
 import org.solid.testharness.utils.TestHarnessInitializationException;
-import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -57,9 +69,9 @@ import static org.mockito.Mockito.*;
 class ConformanceTestHarnessTest {
     @Inject
     ConformanceTestHarness conformanceTestHarness;
-    @Inject
-    DataRepository dataRepository;
 
+    @InjectMock
+    DataRepository dataRepository;
     @InjectMock
     Config config;
     @InjectMock
@@ -67,7 +79,7 @@ class ConformanceTestHarnessTest {
     @InjectMock
     TestSuiteDescription testSuiteDescription;
     @InjectMock
-    ReportGenerator reportGenerator;
+    ReportGenerator reportGenerator; // this appears to be unused but is required for buildReports to run correctly
     @InjectMock
     TestRunner testRunner;
     @InjectMock
@@ -84,8 +96,19 @@ class ConformanceTestHarnessTest {
 
     @Test
     void initialize() throws Exception {
+        final Repository repository = new SailRepository(new MemoryStore());
+        Namespaces.addToRepository(repository);
+        when(dataRepository.getConnection()).thenReturn(repository.getConnection());
         conformanceTestHarness.initialize();
-        final String result = TestUtils.repositoryToString(dataRepository);
+        verify(dataRepository).setAssertor(any());
+        final StringWriter wr = new StringWriter();
+        final RDFWriter rdfWriter = Rio.createWriter(RDFFormat.TURTLE, wr);
+        try (RepositoryConnection conn = repository.getConnection()) {
+            rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true)
+                    .set(BasicWriterSettings.INLINE_BLANK_NODES, true);
+            conn.export(rdfWriter);
+        }
+        final String result = wr.toString();
         assertTrue(result.contains("a earl:Software"));
         assertTrue(result.contains("doap:name"));
         assertTrue(result.contains("doap:description"));
@@ -141,7 +164,7 @@ class ConformanceTestHarnessTest {
         when(testSuiteDescription.getFeaturePaths()).thenReturn(List.of("feature"));
 
         final TestSuiteResults results = mockResults(1);
-        when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
+        when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(results);
         assertEquals(1, conformanceTestHarness.runTestSuites(null, null).getFailCount());
         verify(authManager).registerUser(HttpConstants.ALICE);
         verify(authManager).registerUser(HttpConstants.BOB);
@@ -151,7 +174,7 @@ class ConformanceTestHarnessTest {
     void runTestSuiteInitError() {
         mockTargetServer();
         doThrow(new TestHarnessInitializationException("FAIL"))
-                .when(testSuiteDescription).setNonRunningTestAssertions(any(), any(), any());
+                .when(testSubject).loadTestSubjectConfig();
         assertThrows(TestHarnessInitializationException.class, () -> conformanceTestHarness.runTestSuites(null, null));
     }
 
@@ -160,8 +183,52 @@ class ConformanceTestHarnessTest {
         mockTargetServer();
         when(testSuiteDescription.getFeaturePaths()).thenReturn(List.of("feature"));
         final TestSuiteResults results = mockResults(1);
-        when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
+        when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(results);
         assertEquals(1, conformanceTestHarness.runTestSuites(null, null).getFailCount());
+    }
+
+    @Test
+    void runTestSuiteNullSkips() {
+        mockTargetServerWithSkips(null);
+        when(testSuiteDescription.getFeaturePaths()).thenReturn(List.of("feature"));
+        final Results results = mock(Results.class);
+        final TestSuiteResults tsResults = new TestSuiteResults(results);
+        when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(tsResults);
+        assertEquals(0, conformanceTestHarness.runTestSuites(null, null).getFailCount());
+        verify(results, never()).getSuite();
+    }
+
+    @Test
+    void runTestSuiteEmptySkips() {
+        mockTargetServerWithSkips(Collections.emptyList());
+        when(testSuiteDescription.getFeaturePaths()).thenReturn(List.of("feature"));
+        final Results results = mock(Results.class);
+        final TestSuiteResults tsResults = new TestSuiteResults(results);
+        when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(tsResults);
+        assertEquals(0, conformanceTestHarness.runTestSuites(null, null).getFailCount());
+        verify(results, never()).getSuite();
+    }
+
+    @Test
+    void runTestSuiteWithSkips() {
+        mockTargetServerWithSkips(List.of("skip"));
+        when(testSuiteDescription.getFeaturePaths()).thenReturn(List.of("feature"));
+        final Results results = mock(Results.class);
+        final Feature feature1 = mock(Feature.class);
+        when(feature1.getTags()).thenReturn(null);
+        final Feature feature2 = mock(Feature.class);
+        when(feature2.getTags()).thenReturn(Collections.emptyList());
+        final Feature feature3 = mock(Feature.class);
+        when(feature3.getTags()).thenReturn(List.of(new Tag(1, "@skip")));
+        final Resource resource = mock(Resource.class);
+        when(feature3.getResource()).thenReturn(resource);
+        when(resource.getRelativePath()).thenReturn("example/test");
+        final TestSuiteResults tsResults = mock(TestSuiteResults.class);
+        when(tsResults.getFeatures()).thenReturn(List.of(feature1, feature2, feature3));
+        when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(tsResults);
+        assertEquals(0, conformanceTestHarness.runTestSuites(null, null).getFailCount());
+        verify(results, never()).getSuite();
+        verify(dataRepository, times(1)).createUntestedAssertion(any(), any());
     }
 
     @Test
@@ -199,7 +266,7 @@ class ConformanceTestHarnessTest {
         when(config.getWebIds())
                 .thenReturn(Map.of(HttpConstants.ALICE, "https://alice.target.example.org/profile/card#me"));
         final TestSuiteResults results = mockResults(1);
-        when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
+        when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(results);
         assertEquals(1, conformanceTestHarness.runSingleTest("test").getFailCount());
         assertNotNull(conformanceTestHarness.getClients());
         assertEquals(1, conformanceTestHarness.getClients().size());
@@ -209,7 +276,7 @@ class ConformanceTestHarnessTest {
     void getClientsNull() {
         mockTargetServer();
         final TestSuiteResults results = mockResults(1);
-        when(testRunner.runTests(any(), anyInt(), anyBoolean())).thenReturn(results);
+        when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(results);
         assertEquals(1, conformanceTestHarness.runSingleTest("test").getFailCount());
         assertNotNull(conformanceTestHarness.getClients());
         assertEquals(0, conformanceTestHarness.getClients().size());
@@ -239,8 +306,13 @@ class ConformanceTestHarnessTest {
     }
 
     private void mockTargetServer() {
+        mockTargetServerWithSkips(null);
+    }
+
+    private void mockTargetServerWithSkips(final List<String> skipTags) {
         final TargetServer targetServer = mock(TargetServer.class);
-        when(targetServer.getFeatures()).thenReturn(Map.of("feature", false));
+        when(targetServer.getFeatures()).thenReturn(List.of("feature"));
+        when(targetServer.getSkipTags()).thenReturn(skipTags);
         when(testSubject.getTargetServer()).thenReturn(targetServer);
     }
 

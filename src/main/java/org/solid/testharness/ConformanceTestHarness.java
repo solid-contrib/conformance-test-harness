@@ -23,6 +23,7 @@
  */
 package org.solid.testharness;
 
+import com.intuit.karate.core.Tag;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -33,6 +34,7 @@ import org.solid.common.vocab.EARL;
 import org.solid.common.vocab.RDF;
 import org.solid.testharness.api.SolidClient;
 import org.solid.testharness.config.Config;
+import org.solid.testharness.config.PathMappings;
 import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.discovery.TestSuiteDescription;
 import org.solid.testharness.http.AuthManager;
@@ -78,17 +80,18 @@ public class ConformanceTestHarness {
     DataRepository dataRepository;
     @Inject
     AuthManager authManager;
+    @Inject
+    PathMappings pathMappings;
 
     @SuppressWarnings("PMD.UseProperClassLoader") // this is not J2EE and the suggestion fails
     public void initialize() throws IOException {
-        final IRI assertor;
         // set up the report run and create the assertor information in the data repository
+        final IRI assertor = iri(Namespaces.TEST_HARNESS_URI);
+        dataRepository.setAssertor(assertor);
         reportGenerator.setStartTime(System.currentTimeMillis());
         try (final InputStream is = getClass().getClassLoader().getResourceAsStream("assertor.properties")) {
             final Properties properties = new Properties();
             properties.load(is);
-            assertor = iri(Namespaces.TEST_HARNESS_URI);
-            dataRepository.setAssertor(assertor);
             try (RepositoryConnection conn = dataRepository.getConnection()) {
                 final ModelBuilder builder = new ModelBuilder();
                 final IRI release = iri(Namespaces.RESULTS_URI, "assertor-release");
@@ -127,10 +130,9 @@ public class ConformanceTestHarness {
 
         // TODO: Consider running some initial tests to discover the features provided by a server
         testSubject.loadTestSubjectConfig();
-        final Map<String, Boolean> features = testSubject.getTargetServer().getFeatures();
 
-        testSuiteDescription.setNonRunningTestAssertions(features.keySet(), filters, statuses);
-        logger.info("==== APPLY FEATURE FILTERS: {}", features.keySet());
+        testSuiteDescription.setNonRunningTestAssertions(filters, statuses);
+        logger.info("==== SKIP TAGS:             {}", testSubject.getTargetServer().getSkipTags());
         logger.info("==== APPLY NAME FILTERS:    {}", filters);
         logger.info("==== APPLY STATUS FILTERS:  {}", statuses);
         logger.info("==== FILTERED TEST CASES ({}): {}",
@@ -144,7 +146,7 @@ public class ConformanceTestHarness {
             results = TestSuiteResults.emptyResults();
         } else {
             logger.info("==== RUNNING TEST CASES ({}): {}", featurePaths.size(), featurePaths);
-            setupTestHarness(features);
+            setupTestHarness();
             results = runTests(featurePaths, true);
         }
 
@@ -178,8 +180,7 @@ public class ConformanceTestHarness {
     public TestSuiteResults runSingleTest(final String uri) {
         try {
             testSubject.loadTestSubjectConfig();
-            final Map<String, Boolean> features = testSubject.getTargetServer().getFeatures();
-            setupTestHarness(features);
+            setupTestHarness();
         } catch (TestHarnessInitializationException e) {
             logger.error("Cannot run test", e);
             return null;
@@ -187,20 +188,32 @@ public class ConformanceTestHarness {
         return runTests(List.of(uri), false);
     }
 
-    private void setupTestHarness(final Map<String, Boolean> features) {
+    private void setupTestHarness() {
         logger.info("===================== REGISTER CLIENTS ========================");
         logger.info("Test subject root: {}", config.getServerRoot());
         if (config.getUserRegistrationEndpoint() != null) {
             registerUsers();
         }
-        registerClients(features.getOrDefault("authentication", false));
+        registerClients(true);
         logger.info("===================== PREPARE SERVER ========================");
         testSubject.prepareServer();
     }
 
     private TestSuiteResults runTests(final List<String> featurePaths, final boolean enableReporting) {
         logger.info("===================== RUN TESTS ========================");
-        final TestSuiteResults results = testRunner.runTests(featurePaths, config.getMaxThreads(), enableReporting);
+        final List<String> skipTags = testSubject.getTargetServer().getSkipTags();
+        final TestSuiteResults results = testRunner.runTests(featurePaths, config.getMaxThreads(),
+                skipTags, enableReporting);
+        // any features which are skipped are not included in the feature reporting phase so add assertions now
+        if (skipTags != null && !skipTags.isEmpty()) {
+            results.getFeatures().stream()
+                    .filter(f -> f.getTags() != null)
+                    .filter(f -> !f.getTags().isEmpty())
+                    .filter(f -> f.getTags().stream().map(Tag::getName).anyMatch(skipTags::contains))
+                    .forEach(f -> dataRepository.createUntestedAssertion(
+                            f, pathMappings.unmapFeaturePath(f.getResource().getRelativePath())
+                    ));
+        }
         reportGenerator.setResults(results);
         logger.info("{}", results);
         return results;

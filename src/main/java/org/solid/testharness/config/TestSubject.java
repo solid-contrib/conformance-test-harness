@@ -140,7 +140,7 @@ public class TestSubject {
                 throw new Exception("Cannot get ACL url for root test container: " + rootTestContainer.getUrl());
             }
             Config.AccessControlMode accessControlMode = solidClientProvider.getAclType(aclUrl);
-            if (accessControlMode == ACP && targetServer.getFeatures().containsKey("acp-legacy")) {
+            if (accessControlMode == ACP && targetServer.getFeatures().contains("acp-legacy")) {
                 accessControlMode = ACP_LEGACY;
             }
             config.setAccessControlMode(accessControlMode);

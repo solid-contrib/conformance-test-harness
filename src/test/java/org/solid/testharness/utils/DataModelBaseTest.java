@@ -33,7 +33,6 @@ import org.solid.testharness.reporting.Step;
 import org.solid.testharness.reporting.TestCase;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
@@ -232,18 +231,18 @@ class DataModelBaseTest extends AbstractDataModelTests {
     }
 
     @Test
-    void getLiteralsAsStringSet() {
-        final Set<String> set = dataModelBase.getLiteralsAsStringSet(iri(NS, "hasStrings"));
-        assertNotNull(set);
-        assertEquals(2, set.size());
-        assertTrue(set.contains("string1") && set.contains("string2"));
+    void getLiteralsAsStringList() {
+        final List<String> list = dataModelBase.getLiteralsAsStringList(iri(NS, "hasStrings"));
+        assertNotNull(list);
+        assertEquals(2, list.size());
+        assertTrue(list.contains("string1") && list.contains("string2"));
     }
 
     @Test
     void getMissingLiteralsAsStringSet() {
-        final Set<String> set = dataModelBase.getLiteralsAsStringSet(iri(NS, "hasMissingStrings"));
-        assertNotNull(set);
-        assertEquals(0, set.size());
+        final List<String> list = dataModelBase.getLiteralsAsStringList(iri(NS, "hasMissingStrings"));
+        assertNotNull(list);
+        assertEquals(0, list.size());
     }
 
     @Test

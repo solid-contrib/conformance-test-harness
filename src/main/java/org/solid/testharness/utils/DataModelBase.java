@@ -216,9 +216,9 @@ public class DataModelBase {
         return value.map(Value::stringValue).orElse(null);
     }
 
-    protected Set<String> getLiteralsAsStringSet(final IRI predicate) {
+    protected List<String> getLiteralsAsStringList(final IRI predicate) {
         final Set<Literal> value = Models.getPropertyLiterals(model, subject, predicate);
-        return value.stream().map(Value::stringValue).collect(Collectors.toSet());
+        return value.stream().map(Value::stringValue).collect(Collectors.toList());
     }
 
     protected int getLiteralAsInt(final IRI predicate) {

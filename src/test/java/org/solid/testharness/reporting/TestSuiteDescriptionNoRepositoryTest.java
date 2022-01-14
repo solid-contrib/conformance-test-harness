@@ -49,7 +49,7 @@ class TestSuiteDescriptionNoRepositoryTest {
     void setNonRunningTestAssertionsException() {
         when(dataRepository.getConnection()).thenThrow(new RepositoryException("BAD REPOSITORY"));
         assertThrows(TestHarnessInitializationException.class,
-                () -> testSuiteDescription.setNonRunningTestAssertions(null, null, null));
+                () -> testSuiteDescription.setNonRunningTestAssertions(null, null));
     }
 
 

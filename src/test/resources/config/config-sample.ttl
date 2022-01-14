@@ -9,30 +9,31 @@
 
 <testserver>
     a earl:Software, earl:TestSubject ;
-    doap:name "Enterprise Solid Server (Web Access Control version)" ;
+    doap:name "TEST SERVER";
     doap:release <testserver#test-subject-release> ;
-    doap:developer <https://inrupt.com/profile/card/#us> ;
-    doap:homepage <https://inrupt.com/products/enterprise-solid-server> ;
-    doap:description "A production-grade Solid server produced and supported by Inrupt."@en ;
-    doap:programming-language "Java" ;
-    solid-test:features "authentication", "acl", "wac-allow" .
+    doap:developer <https://example.org/profile/card/#us>;
+    doap:homepage <https://example.org/server>;
+    doap:description "DESCRIPTION"@en;
+    doap:programming-language "LANG" ;
+    solid-test:skip "acp" ;
+    solid-test:features "acp-legacy" .
 
 <testserver#test-subject-release>
-    doap:name "ESS 1.0.9" ;
-    doap:revision "1.0.9" ;
+    doap:name "VERSION NAME";
+    doap:revision "VERSION";
     doap:created "2021-03-05T00:00:00.001Z"^^xsd:dateTime .
 
 <testserver2>
     a earl:Software, earl:TestSubject ;
-    doap:name "Community Solid Server" ;
+    doap:name "TEST SERVER2";
     doap:release <testserver2#test-subject-release> ;
-    doap:developer <https://github.com/solid> ;
-    doap:homepage <https://github.com/solid/community-server> ;
-    doap:description "An open and modular implementation of the Solid specifications."@en ;
-    doap:programming-language "TypeScript" ;
-    solid-test:features "authentication", "acl", "wac-allow" .
+    doap:developer <https://example.org/profile/card/#us>;
+    doap:homepage <https://example.org/server2>;
+    doap:description "DESCRIPTION2"@en;
+    doap:programming-language "LANG2" ;
+    solid-test:skip "wac" .
 
 <testserver2#test-subject-release>
-    doap:name "CSS 0.8.0" ;
-    doap:revision "0.8.0" ;
+    doap:name "VERSION NAME2";
+    doap:revision "VERSION2";
     doap:created "2021-03-04T00:00:00.001Z"^^xsd:dateTime .
