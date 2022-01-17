@@ -77,11 +77,15 @@ class DataRepositoryTest {
         final Scenario scenario2 = mockScenario("SCENARIO 2", 10, 1, null);
         final Scenario scenario3 = mockScenario("SCENARIO 3 IGNORED", 20, 2, List.of(Tag.IGNORE));
         final Scenario scenario4 = mockScenario("SCENARIO 4 SKIPPED", 30, 3, List.of("skip"));
-        final List<FeatureSection> sections = Stream.of(scenario1, scenario2, scenario3, scenario4).map(sc -> {
-            final FeatureSection fs = new FeatureSection();
-            fs.setScenario(sc);
-            return fs;
-        }).collect(Collectors.toList());
+        final ScenarioOutline scenarioOutline = mockScenarioOutline("SCENARIO OUTLINE SKIPPED", 40, 4, List.of("skip"));
+        final List<FeatureSection> sections = Stream.of(scenario1, scenario2, scenario3, scenario4, scenarioOutline)
+                .map(sc -> {
+                    if (sc instanceof Scenario) {
+                        return ((Scenario) sc).getSection();
+                    } else {
+                        return ((ScenarioOutline) sc).getSection();
+                    }
+                }).collect(Collectors.toList());
         when(feature.getSections()).thenReturn(sections);
         final Step step1 = mockStep("When", "method GET", 1, true, List.of("STEP COMMENT"));
         final Step step2 = mockStep("Then", "Status 200", 2, false, null);
@@ -113,6 +117,7 @@ class DataRepositoryTest {
         assertTrue(result.contains("dcterms:description \"STEP COMMENT\""));
         assertTrue(result.contains("dcterms:description \"\"\"STEP1 LOG\n" +
                 "EXCEPTION\nCaused by EXCEPTION2\nSTACK1\n- <js>LAST"));
+        assertTrue(result.contains("dcterms:title \"SCENARIO OUTLINE SKIPPED\""));
     }
 
     @Test
@@ -367,9 +372,27 @@ class DataRepositoryTest {
             );
         }
         final FeatureSection section = mock(FeatureSection.class);
+        when(section.getScenario()).thenReturn(scenario);
         when(section.getIndex()).thenReturn(index);
         when(scenario.getSection()).thenReturn(section);
         return scenario;
+    }
+
+    private ScenarioOutline mockScenarioOutline(final String name, final int line, final int index,
+                                                final List<String> tags) {
+        final ScenarioOutline scenarioOutline = mock(ScenarioOutline.class);
+        when(scenarioOutline.getName()).thenReturn(name);
+        when(scenarioOutline.getLine()).thenReturn(line);
+        if (tags != null) {
+            when(scenarioOutline.getTags()).thenReturn(
+                    tags.stream().map(t -> new Tag(1, "@" + t)).collect(Collectors.toList())
+            );
+        }
+        final FeatureSection section = mock(FeatureSection.class);
+        when(section.getScenarioOutline()).thenReturn(scenarioOutline);
+        when(section.getIndex()).thenReturn(index);
+        when(scenarioOutline.getSection()).thenReturn(section);
+        return scenarioOutline;
     }
 
     private Step mockStep(final String prefix, final String text, final int line, final boolean isBackground,
