@@ -161,18 +161,20 @@ public class DataRepository implements Repository {
             }
             createAssertion(conn, fr.isFailed() ? EARL.failed : EARL.passed,
                     new Date((long) (startTime + fr.getDurationMillis())), testCaseIri);
-            final Set<Scenario> srSet = new HashSet<>();
+            final Set<FeatureSection> sections = new HashSet<>();
+            final ScenarioData scenarioData = new ScenarioData();
             for (ScenarioResult sr: fr.getScenarioResults()) {
-                createScenarioActivity(conn, sr, sr.getScenario(), testCaseIri, featureIri, featureFileParser);
-                srSet.add(sr.getScenario());
+                createScenarioActivity(conn, sr, scenarioData.fromScenario(sr.getScenario()),
+                        testCaseIri, featureIri, featureFileParser);
+                sections.add(sr.getScenario().getSection());
             }
-            // find scenarios which were not run (i.e. have no results)
-            final List<Scenario> otherScenarios = fr.getFeature().getSections().stream()
-                    .map(FeatureSection::getScenario)
-                    .filter(s -> !srSet.contains(s))
+            // find scenario sections which were not run (i.e. have no results)
+            final List<FeatureSection> otherSections = fr.getFeature().getSections().stream()
+                    .filter(s -> !sections.contains(s))
                     .collect(Collectors.toList());
-            for (Scenario sc: otherScenarios) {
-                createScenarioActivity(conn, null, sc, testCaseIri, featureIri, featureFileParser);
+            for (FeatureSection section: otherSections) {
+                createScenarioActivity(conn, null, scenarioData.fromFeatureSection(section),
+                        testCaseIri, featureIri, featureFileParser);
             }
         } catch (Exception e) {
             logger.error("Failed to load feature result", e);
@@ -222,7 +224,7 @@ public class DataRepository implements Repository {
     }
 
     private void createScenarioActivity(final RepositoryConnection conn,
-                                        final ScenarioResult sr, final Scenario sc,
+                                        final ScenarioResult sr, final ScenarioData sc,
                                         final IRI testCaseIri, final IRI featureIri,
                                         final FeatureFileParser featureFileParser) {
         final ModelBuilder builder;
@@ -353,5 +355,51 @@ public class DataRepository implements Repository {
     @Override
     public ValueFactory getValueFactory() {
         return repository.getValueFactory();
+    }
+
+    private static class ScenarioData {
+        private FeatureSection section;
+        private int line;
+        private List<Tag> tags;
+        private String name;
+
+        public ScenarioData fromScenario(final Scenario scenario) {
+            section = scenario.getSection();
+            line = scenario.getLine();
+            tags = scenario.getTags();
+            name = scenario.getName();
+            return this;
+        }
+
+        public ScenarioData fromFeatureSection(final FeatureSection featureSection) {
+            if (featureSection.getScenario() != null) {
+                section = featureSection.getScenario().getSection();
+                line = featureSection.getScenario().getLine();
+                tags = featureSection.getScenario().getTags();
+                name = featureSection.getScenario().getName();
+            } else {
+                section = featureSection.getScenarioOutline().getSection();
+                line = featureSection.getScenarioOutline().getLine();
+                tags = featureSection.getScenarioOutline().getTags();
+                name = featureSection.getScenarioOutline().getName();
+            }
+            return this;
+        }
+
+        public FeatureSection getSection() {
+            return section;
+        }
+
+        public int getLine() {
+            return line;
+        }
+
+        public List<Tag> getTags() {
+            return tags;
+        }
+
+        public String getName() {
+            return name;
+        }
     }
 }
