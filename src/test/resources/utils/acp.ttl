@@ -1,49 +1,45 @@
 @prefix acp: <http://www.w3.org/ns/solid/acp#> .
-@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
 @prefix acr: <https://example.org/test.acl#> .
 @prefix acl: <http://www.w3.org/ns/auth/acl#> .
 
 acr:policy1 a acp:Policy;
-    acp:allOf acr:rule1 ;
+    acp:allOf acr:matcher1 ;
     acp:allow acl:Read, acl:Write .
 
 acr:accessPolicy1 a acp:Policy;
-    acp:allOf acr:rule1 ;
+    acp:allOf acr:matcher1 ;
     acp:allow acl:Read, acl:Write .
 
 acr:policy2 a acp:Policy;
-    acp:allOf acr:rule2 ;
+    acp:allOf acr:matcher2 ;
     acp:allow acl:Read, acl:Write .
 
 acr:accessPolicy2 a acp:Policy;
-    acp:allOf acr:rule2 ;
+    acp:allOf acr:matcher2 ;
     acp:allow acl:Read, acl:Write .
 
 acr:policy3 a acp:Policy;
-    acp:allOf acr:rule3 ;
+    acp:allOf acr:matcher3 ;
     acp:allow acl:Read .
 
 acr:policy4 a acp:Policy;
-    acp:allOf acr:rule4 ;
+    acp:allOf acr:matcher4 ;
     acp:allow acl:Write .
 
 acr:policy5 a acp:Policy;
-    acp:allOf acr:rule5 ;
+    acp:allOf acr:matcher5 ;
     acp:allow acl:Append .
 
-acr:rule1 a acp:Matcher;
+acr:matcher1 a acp:Matcher;
     acp:agent <https://example.org/alice#me> .
-acr:rule2 a acp:Matcher;
+acr:matcher2 a acp:Matcher;
     acp:agent <https://example.org/alice#me> .
 
-acr:rule3 a acp:Matcher;
-        acp:group [
-            a vcard:Group;
-            vcard:hasMember <https://example.org/alice#me>, <https://example.org/bob#me>
-          ] .
-acr:rule4 a acp:Matcher;
+acr:matcher3 a acp:Matcher;
+    acp:agent <https://example.org/alice#me>, <https://example.org/bob#me> .
+acr:matcher4 a acp:Matcher;
     acp:agent acp:PublicAgent .
-acr:rule5 a acp:Matcher;
+acr:matcher5 a acp:Matcher;
     acp:agent acp:AuthenticatedAgent .
 
 acr:accessControl1 a acp:AccessControl ;

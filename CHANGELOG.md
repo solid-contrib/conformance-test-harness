@@ -1,5 +1,11 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.0.15
+
+### Fix
+* Fix reporting error when creating assertions on skipped ScenarioOutline tests.
+* In ACP matcher support, replace acp:group with a simple list of agents.
+
 ## Release 1.0.14
 
 ### Features

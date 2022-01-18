@@ -69,10 +69,6 @@ public class AccessDatasetAcp implements AccessDataset {
             builder.setNamespace(PREFIX, namespace);
             builder.setNamespace(ACP.PREFIX, ACP.NAMESPACE);
             builder.setNamespace(ACL.PREFIX, ACL.NAMESPACE);
-            if (accessRules.stream().anyMatch(rule -> rule.getType() == AccessRule.AgentType.GROUP)) {
-                builder.setNamespace(VCARD.PREFIX, VCARD.NAMESPACE);
-            }
-
             final AtomicInteger i = new AtomicInteger();
             accessRules.forEach(rule -> {
                 i.addAndGet(1);
@@ -82,15 +78,15 @@ public class AccessDatasetAcp implements AccessDataset {
                 final List<String> controlAccessModes = extractControlModes(rule);
                 final IRI accessControlNode = iri(namespace, "accessControl" + i);
                 final IRI policyNode = iri(namespace, "policy" + i);
-                final IRI ruleNode = iri(namespace, "rule" + i);
+                final IRI matcherNode = iri(namespace, "matcher" + i);
                 builder.add(accessControlResource, rule.isInheritable() ? ACP.memberAccessControl : ACP.accessControl,
                                 accessControlNode)
                         .subject(accessControlNode)
                         .add(RDF.type, ACP.AccessControl)
                         .add(ACP.apply, policyNode)
                         .add(policyNode, RDF.type, ACP.Policy)
-                        .add(policyNode, ACP.allOf, ruleNode)
-                        .add(ruleNode, RDF.type, ACP.Matcher);
+                        .add(policyNode, ACP.allOf, matcherNode)
+                        .add(matcherNode, RDF.type, ACP.Matcher);
                 if (!accessModes.isEmpty()) {
                     accessModes.stream()
                             .map(mode -> standardModes.containsKey(mode) ? standardModes.get(mode) : iri(mode))
@@ -101,7 +97,7 @@ public class AccessDatasetAcp implements AccessDataset {
                     final IRI accessPolicyNode = iri(namespace, "accessPolicy" + i);
                     builder.add(accessControlNode, ACP.access, accessPolicyNode)
                             .add(accessPolicyNode, RDF.type, ACP.Policy)
-                            .add(accessPolicyNode, ACP.allOf, ruleNode);
+                            .add(accessPolicyNode, ACP.allOf, matcherNode);
                     controlAccessModes.stream()
                             .map(standardModes::get)
                             .forEach(mode -> builder.add(accessPolicyNode, ACP.allow, mode));
@@ -109,19 +105,16 @@ public class AccessDatasetAcp implements AccessDataset {
                 // Jacoco does not report switch coverage correctly
                 switch (rule.getType()) {
                     case AGENT:
-                        builder.add(ruleNode, ACP.agent, rule.getAgent());
+                        builder.add(matcherNode, ACP.agent, rule.getAgent());
                         break;
                     case PUBLIC:
-                        builder.add(ruleNode, ACP.agent, ACP.PublicAgent);
+                        builder.add(matcherNode, ACP.agent, ACP.PublicAgent);
                         break;
                     case AUTHENTICATED_USER:
-                        builder.add(ruleNode, ACP.agent, ACP.AuthenticatedAgent);
+                        builder.add(matcherNode, ACP.agent, ACP.AuthenticatedAgent);
                         break;
                     case GROUP:
-                        final BNode group = bnode();
-                        builder.add(ruleNode, ACP.group, group);
-                        builder.add(group, RDF.type, VCARD.Group);
-                        rule.getMembers().forEach(m -> builder.add(group, VCARD.hasMember, m));
+                        rule.getMembers().forEach(m -> builder.add(matcherNode, ACP.agent, m));
                         break;
                     default:
                         break;
