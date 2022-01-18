@@ -48,6 +48,7 @@ import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -190,7 +191,8 @@ public class SolidClientProvider {
                 members = parseContainerContents(getContentAsTurtle(url), url);
             } catch (Exception e) {
                 logger.error("Failed to get container members: {}", e.toString());
-                return CompletableFuture.completedFuture(null);
+                // server may have overwritten a container as a resource so attempt to delete it in the resource form
+                return client.deleteAsync(URI.create(HttpUtils.ensureNoSlashEnd(url.toString())));
             }
 
             // delete members via this method
@@ -209,6 +211,7 @@ public class SolidClientProvider {
             try {
                 failed = allCompletableFuture.thenApply(responses ->
                         responses.stream()
+                                .filter(Objects::nonNull)
                                 .filter(response -> !HttpUtils.isSuccessful(response.statusCode()))
                                 .map(response -> {
                                     logger.debug("BAD RESPONSE {} {} {}", response.statusCode(),

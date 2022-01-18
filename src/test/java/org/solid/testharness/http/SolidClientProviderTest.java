@@ -486,10 +486,12 @@ class SolidClientProviderTest {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(400, null);
 
         when(mockClient.getAsTurtle(eq(BASE_URL))).thenReturn(mockResponse);
+        when(mockClient.deleteAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
 
         final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
         assertDoesNotThrow(() -> solidClientProvider.deleteResourceRecursively(BASE_URL));
         verify(mockClient).getAsTurtle(BASE_URL);
+        verify(mockClient, times(1)).deleteAsync(any());
         verifyNoMoreInteractions(mockClient);
     }
 
@@ -499,11 +501,13 @@ class SolidClientProviderTest {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "NOT RDF");
 
         when(mockClient.getAsTurtle(eq(BASE_URL))).thenReturn(mockResponse);
+        when(mockClient.deleteAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
 
         final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
         assertDoesNotThrow(() -> solidClientProvider.deleteResourceRecursively(BASE_URL));
         verify(mockClient).getAsTurtle(BASE_URL);
-        verify(mockClient, never()).deleteAsync(any());
+        verify(mockClient, times(1)).deleteAsync(any());
+        verifyNoMoreInteractions(mockClient);
     }
 
     @Test
