@@ -214,6 +214,7 @@ public class ConformanceTestHarness {
                             f, pathMappings.unmapFeaturePath(f.getResource().getRelativePath())
                     ));
         }
+        results.summarizeOutcomes(dataRepository);
         reportGenerator.setResults(results);
         logger.info("{}", results);
         return results;

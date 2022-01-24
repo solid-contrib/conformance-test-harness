@@ -278,22 +278,20 @@ class ReportFragmentTest {
     @Test
     void testResultsSummary() {
         final Results results = mock(Results.class);
-        when(results.getFeaturesPassed()).thenReturn(1);
-        when(results.getFeaturesFailed()).thenReturn(2);
-        when(results.getFeaturesTotal()).thenReturn(3);
         when(results.getScenariosPassed()).thenReturn(4);
         when(results.getScenariosFailed()).thenReturn(5);
         when(results.getScenariosTotal()).thenReturn(6);
         when(results.getEndTime()).thenReturn(new Date(0).getTime());
         final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
         testSuiteResults.setStartTime(System.currentTimeMillis() - 1000);
+        testSuiteResults.summarizeOutcomes(dataRepository);
         final String report = render("testSuiteResults", testSuiteResults);
 
         final String reportStripped = StringUtils.normalizeSpace(report);
         assertThat(reportStripped, matchesPattern(".*datetime=\"Thu Jan 01 \\d\\d:00:00 \\w\\w\\w 1970\".*"));
         assertThat(reportStripped, matchesPattern(".*<dd>[0-9]+ ms</dd>.*"));
-        assertTrue(reportStripped.contains("<td>1</td> <td>2</td> <td>3</td>"));
-        assertTrue(reportStripped.contains("<td>4</td> <td>5</td> <td>6</td>"));
+        assertTrue(reportStripped.contains("<td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td>"));
+        assertTrue(reportStripped.contains("<td>4</td> <td>5</td> <td>N/A</td> <td>N/A</td> <td>6</td>"));
     }
 
     @Test

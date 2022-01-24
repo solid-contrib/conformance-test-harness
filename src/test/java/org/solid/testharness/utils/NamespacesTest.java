@@ -78,7 +78,7 @@ public class NamespacesTest {
     void buildAllTurtlePrefixes() {
         final String prefixes = Namespaces.generateAllTurtlePrefixes();
         assertEquals(14, prefixes.split("\n").length);
-        assertTrue(prefixes.startsWith("@prefix "));
+        assertTrue(prefixes.startsWith("prefix "));
     }
 
     @Test
@@ -90,14 +90,14 @@ public class NamespacesTest {
 
     @Test
     void buildTurtlePrefixes1() {
-        assertEquals("@prefix earl: <http://www.w3.org/ns/earl#> .\n",
+        assertEquals("prefix earl: <http://www.w3.org/ns/earl#>\n",
                 Namespaces.generateTurtlePrefixes(List.of(EARL.PREFIX))
         );
     }
 
     @Test
     void buildTurtlePrefixes2() {
-        assertEquals("@prefix earl: <http://www.w3.org/ns/earl#> .\n@prefix doap: <http://usefulinc.com/ns/doap#> .\n",
+        assertEquals("prefix earl: <http://www.w3.org/ns/earl#>\nprefix doap: <http://usefulinc.com/ns/doap#>\n",
                 Namespaces.generateTurtlePrefixes(List.of(EARL.PREFIX, DOAP.PREFIX))
         );
     }

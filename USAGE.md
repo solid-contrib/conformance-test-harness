@@ -304,22 +304,51 @@ quarkus.log.category."org.solid.testharness.http.AuthManager".level=DEBUG
 
 There is a special logging category, called `ResultLogger`, which outputs a summary of the results in JSON format at 
 `INFO` level (not necessarily in the order below):
-```json
+```json5
 {
+  "mustFeaturesPassed":0, // combination of MUST and MUST-NOT
+  "mustFeaturesFailed":0, // combination of MUST and MUST-NOT
   "scenariosPassed":0,
   "scenariosFailed":0,
+  "scenariosTotal":0,
   "featuresPassed":0,
   "featuresSkipped":0,
   "featuresFailed":0,
   "elapsedTime":1000.0,
   "totalTime":1000.0,
-  "resultDate":"2021-06-17 09:12:31 am"
+  "resultDate":"2021-06-17 09:12:31 am",
+  // results by requirement level and outcome
+  "MUST:passed":0,
+  "MUST:failed":0,
+  "MUST:inapplicable":0,
+  "MUST:untested":0,
+  "MUST-NOT:passed":0,
+  "MUST-NOT:failed":0,
+  "MUST-NOT:inapplicable":0,
+  "MUST-NOT:untested":0,
+  "SHOULD:passed":0,
+  "SHOULD:failed":0,
+  "SHOULD:inapplicable":0,
+  "SHOULD:untested":0,
+  "SHOULD-NOT:passed":0,
+  "SHOULD-NOT:failed":0,
+  "SHOULD-NOT:inapplicable":0,
+  "SHOULD-NOT:untested":0,
+  "MAY:passed":0,
+  "MAY:failed":0,
+  "MAY:inapplicable":0,
+  "MAY:untested":0,
 }
 ```
 This results in a log entry such as:
 ```
-2021-06-17 11:43:04,742 INFO  [ResultLogger] (main) {"resultDate":"2021-06-17 11:43:04 am","featuresFailed":0,"elapsedTime":7552.0,"scenariosPassed":4,"featuresSkipped":0,"totalTime":14401.0,"scenariosFailed":0,"featuresPassed":2}
+2021-06-17 11:43:04,742 INFO  [ResultLogger] (main) {"resultDate":"2021-06-17 11:43:04 am","elapsedTime":7552.0,"mustFeaturesPassed":0,"mustFeaturesFailed":0, ...}
 ```
+
+The Scenario counts represent the results of all individual tests that were run but does not indicate whether a test that 
+failed was related to a mandatory or optional requirement. The more important numbers are `mustFeaturesPassed` and 
+`mustFeaturesFailed` since they represent the results of the tests related to mandatory requirements and are a better
+indication of the server's conformance.
 
 ### Parallel Testing
 By default, the CTH will run tests in parallel, defaulting to 8 threads. You can either override this in the 

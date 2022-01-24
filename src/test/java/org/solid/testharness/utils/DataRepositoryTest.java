@@ -42,12 +42,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.eclipse.rdf4j.model.util.Values.bnode;
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -59,13 +58,12 @@ class DataRepositoryTest {
     private static final IRI testSubject = iri(TestUtils.SAMPLE_NS, "test");
     private static final IRI featureIri = iri(TestUtils.SAMPLE_NS, "feature");
     private static final IRI testCaseIri = iri(TestUtils.SAMPLE_NS, "testCase");
+    private static final IRI requirementIri = iri(TestUtils.SAMPLE_NS, "requirement");
+    private static final IRI assertionIri = iri(TestUtils.SAMPLE_NS, "assertion");
 
     @Test
     void addFeatureResult() {
-        final DataRepository dataRepository = new DataRepository();
-        dataRepository.postConstruct();
-        dataRepository.setAssertor(assertor);
-        dataRepository.setTestSubject(testSubject);
+        final DataRepository dataRepository = createRepository();
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             conn.add(testCaseIri, SPEC.testScript, featureIri);
         }
@@ -122,10 +120,7 @@ class DataRepositoryTest {
 
     @Test
     void addFeatureResultTestFailed() {
-        final DataRepository dataRepository = new DataRepository();
-        dataRepository.postConstruct();
-        dataRepository.setAssertor(assertor);
-        dataRepository.setTestSubject(testSubject);
+        final DataRepository dataRepository = createRepository();
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             conn.add(testCaseIri, SPEC.testScript, featureIri);
         }
@@ -148,10 +143,7 @@ class DataRepositoryTest {
 
     @Test
     void addFeatureResultNoTestCase() {
-        final DataRepository dataRepository = new DataRepository();
-        dataRepository.postConstruct();
-        dataRepository.setAssertor(assertor);
-        dataRepository.setTestSubject(testSubject);
+        final DataRepository dataRepository = createRepository();
 
         final Suite suite = Suite.forTempUse();
         final Feature feature = mock(Feature.class);
@@ -171,10 +163,7 @@ class DataRepositoryTest {
 
     @Test
     void addFeatureResultBadRdf() {
-        final DataRepository dataRepository = new DataRepository();
-        dataRepository.postConstruct();
-        dataRepository.setAssertor(assertor);
-        dataRepository.setTestSubject(testSubject);
+        final DataRepository dataRepository = createRepository();
         final Suite suite = Suite.forTempUse();
         final Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn(null);
@@ -192,10 +181,7 @@ class DataRepositoryTest {
 
     @Test
     void createAssertion() {
-        final DataRepository dataRepository = new DataRepository();
-        dataRepository.postConstruct();
-        dataRepository.setAssertor(assertor);
-        dataRepository.setTestSubject(testSubject);
+        final DataRepository dataRepository = createRepository();
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             dataRepository.createAssertion(conn, EARL.passed, new Date(), testCaseIri);
         }
@@ -208,10 +194,7 @@ class DataRepositoryTest {
 
     @Test
     void createAssertionNoTestIri() {
-        final DataRepository dataRepository = new DataRepository();
-        dataRepository.postConstruct();
-        dataRepository.setAssertor(assertor);
-        dataRepository.setTestSubject(testSubject);
+        final DataRepository dataRepository = createRepository();
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             dataRepository.createAssertion(conn, EARL.failed, new Date(), null);
         }
@@ -224,10 +207,7 @@ class DataRepositoryTest {
 
     @Test
     void createUntestedAssertion() {
-        final DataRepository dataRepository = new DataRepository();
-        dataRepository.postConstruct();
-        dataRepository.setAssertor(assertor);
-        dataRepository.setTestSubject(testSubject);
+        final DataRepository dataRepository = createRepository();
         final Feature feature = mockUntestedFeature();
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             conn.add(testCaseIri, SPEC.testScript, featureIri);
@@ -243,20 +223,49 @@ class DataRepositoryTest {
 
     @Test
     void createUntestedAssertionNoStatements() {
-        final DataRepository dataRepository = new DataRepository();
-        dataRepository.postConstruct();
-        dataRepository.setAssertor(assertor);
-        dataRepository.setTestSubject(testSubject);
+        final DataRepository dataRepository = createRepository();
         final Feature feature = mockUntestedFeature();
         dataRepository.createUntestedAssertion(feature, featureIri.stringValue());
         final String result = TestUtils.repositoryToString(dataRepository);
         assertFalse(result.contains("a earl:Assertion"));
     }
 
+    private DataRepository createRepository() {
+        final DataRepository dataRepository = new DataRepository();
+        dataRepository.postConstruct();
+        dataRepository.setAssertor(assertor);
+        dataRepository.setTestSubject(testSubject);
+        return dataRepository;
+    }
+
+    @Test
+    void countTestsPassed() {
+        final DataRepository dataRepository = createRepository();
+        createAssertion(dataRepository, SPEC.MUST, EARL.passed);
+        final Map<String, Integer> results = dataRepository.getOutcomeCounts();
+        assertEquals(1, results.get("MUST:passed"));
+    }
+
+    @Test
+    void countTestsFailed() {
+        final DataRepository dataRepository = createRepository();
+        createAssertion(dataRepository, SPEC.MAY, EARL.failed);
+        final Map<String, Integer> results = dataRepository.getOutcomeCounts();
+        assertEquals(1, results.get("MAY:failed"));
+    }
+
+    @Test
+    void countTestsNoOutcome() {
+        final DataRepository dataRepository = createRepository();
+        createAssertion(dataRepository, SPEC.SHOULD, null);
+        final Map<String, Integer> results = dataRepository.getOutcomeCounts();
+        assertEquals(0, results.size());
+    }
+
     @Test
     void exportWriter() throws Exception {
         final String sample = TestUtils.loadStringFromFile("src/test/resources/turtle-sample.ttl");
-        final DataRepository dataRepository = setupRepository();
+        final DataRepository dataRepository = setupMinimalRepository();
         final StringWriter wr = new StringWriter();
         dataRepository.export(wr);
         assertTrue(wr.toString().contains(sample));
@@ -264,7 +273,7 @@ class DataRepositoryTest {
 
     @Test
     void exportWriterFailing() throws IOException {
-        final DataRepository dataRepository = setupRepository();
+        final DataRepository dataRepository = setupMinimalRepository();
         final File tempFile = File.createTempFile("TestHarness-", ".tmp");
         tempFile.deleteOnExit();
         final Writer wr = Files.newBufferedWriter(tempFile.toPath());
@@ -346,7 +355,7 @@ class DataRepositoryTest {
         assertFalse(dataRepository.isInitialized());
     }
 
-    private DataRepository setupRepository() {
+    private DataRepository setupMinimalRepository() {
         final DataRepository dataRepository = new DataRepository();
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             final Statement st = Values.getValueFactory()
@@ -354,6 +363,19 @@ class DataRepositoryTest {
             conn.add(st);
         }
         return dataRepository;
+    }
+
+    private void createAssertion(final DataRepository dataRepository, final IRI requirementLevel, final IRI outcome) {
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            conn.add(requirementIri, SPEC.requirementLevel, requirementLevel);
+            conn.add(testCaseIri, SPEC.requirementReference, requirementIri);
+            if (outcome != null) {
+                conn.add(assertionIri, EARL.test, testCaseIri);
+                final IRI resultIri = iri(Namespaces.RESULTS_URI, bnode().getID());
+                conn.add(assertionIri, EARL.result, resultIri);
+                conn.add(resultIri, EARL.outcome, outcome);
+            }
+        }
     }
 
     private long dataRepositorySize(final DataRepository dataRepository) {

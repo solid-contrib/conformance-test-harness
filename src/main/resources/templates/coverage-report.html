@@ -24,7 +24,7 @@
 
 <section id="test-coverage-by-specification-requirement" rel="dcterms:hasPart" resource="#test-coverage-by-specification-requirement">
   <h2 property="dcterms:title">Test coverage by specification requirement</h2>
-  {#include buttons coverageMode=true /}
+  {#include buttons coverageMode=true requirementsMode=true /}
   <div datatype="rdf:HTML" property="dcterms:description">
   <ul>
   {#each specifications.orEmpty}
@@ -36,7 +36,7 @@
       {#if it.specificationRequirements}
       <ul>
       {#each it.specificationRequirements}
-        <li rel="spec:requirement" resource="{it.subject}" class="spec">
+        <li rel="spec:requirement" resource="{it.subject}" class="spec {it.requirementSubjectClass}">
           {#include requirement coverageMode=true}
           {#if it.testCases??}
           <table>

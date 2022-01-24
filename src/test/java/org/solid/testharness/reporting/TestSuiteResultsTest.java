@@ -27,6 +27,7 @@ import com.intuit.karate.Results;
 import com.intuit.karate.Suite;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
+import org.solid.testharness.utils.DataRepository;
 
 import java.util.Date;
 import java.util.Map;
@@ -144,6 +145,31 @@ class TestSuiteResultsTest {
     }
 
     @Test
+    void getCounts() {
+        final TestSuiteResults testSuiteResults = TestSuiteResults.emptyResults();
+        final DataRepository dataRepository = mock(DataRepository.class);
+        when(dataRepository.getOutcomeCounts()).thenReturn(Map.of(
+                "MUST:passed", 1,
+                "MUST:failed", 2,
+                "MUST-NOT:passed", 3,
+                "MUST-NOT:untested", 4
+        ));
+        testSuiteResults.summarizeOutcomes(dataRepository);
+        assertEquals(1, testSuiteResults.getCount("MUST", "passed"));
+        assertEquals(2, testSuiteResults.getCount("MUST", "failed"));
+        assertEquals(3, testSuiteResults.getCount("MUST-NOT", "passed"));
+        assertEquals(4, testSuiteResults.getCount("MUST-NOT", "untested"));
+        assertEquals(0, testSuiteResults.getCount("MUST-NOT", "inapplicable"));
+        assertEquals(3, testSuiteResults.getCount("MUST", ""));
+        assertEquals(7, testSuiteResults.getCount("MUST-NOT", ""));
+        assertEquals(0, testSuiteResults.getCount("MAY", ""));
+        assertEquals(4, testSuiteResults.getCount("", "passed"));
+        assertEquals(2, testSuiteResults.getCount("", "failed"));
+        assertEquals(4, testSuiteResults.getCount("", "untested"));
+        assertEquals(10, testSuiteResults.getCount("", ""));
+    }
+
+    @Test
     void toJson() {
         final Results results = mock(Results.class);
         when(results.getFeaturesPassed()).thenReturn(10);
@@ -154,6 +180,14 @@ class TestSuiteResultsTest {
         when(results.getElapsedTime()).thenReturn(1000d);
         when(results.getTimeTakenMillis()).thenReturn(1000d);
         final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
+        final DataRepository dataRepository = mock(DataRepository.class);
+        when(dataRepository.getOutcomeCounts()).thenReturn(Map.of(
+                "MUST:passed", 1,
+                "MUST:failed", 2,
+                "MUST-NOT:passed", 3,
+                "MUST-NOT:untested", 4
+        ));
+        testSuiteResults.summarizeOutcomes(dataRepository);
         assertTrue(testSuiteResults.toJson().contains("\"featuresPassed\":10"));
     }
 
