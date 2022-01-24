@@ -1,14 +1,14 @@
 <script>
   //<![CDATA[
+  let clientShowing = true;
   document.addEventListener("DOMContentLoaded", function () {
+    toggleClientRequirements();
+    fetchLatestTestsVersion();
     document.querySelectorAll("a:not([rel='doap:homepage'])").forEach(anchor => {
       anchor.href = anchor.href
               .replace('github.com/solid/specification-tests/', 'github.com/solid/specification-tests/blob/main/')
               .replace('github.com/solid/conformance-test-harness/', 'github.com/solid/conformance-test-harness/blob/main/')
     });
-
-    fetchLatestTestsVersion();
-
     window.addEventListener('hashchange', openTarget);
     openTarget();
   });
@@ -63,6 +63,14 @@
     }).catch((err) => {
       console.warn('Failed to get release versions from https://github.com/solid/specification-tests.', err);
     });
+  }
+
+  function toggleClientRequirements(elem) {
+      clientShowing = !clientShowing;
+      document.querySelectorAll('.client').forEach(e => e.style.display = clientShowing ? 'block': 'none');
+      if (elem) {
+          elem.innerText = clientShowing ? 'Hide client requirements' : 'Show client requirements';
+      }
   }
   //]]>
 </script>

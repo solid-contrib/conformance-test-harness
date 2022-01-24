@@ -28,9 +28,10 @@ import org.solid.common.vocab.SPEC;
 import org.solid.testharness.utils.DataModelBase;
 
 import java.util.List;
+import java.util.Locale;
 
 public class SpecificationRequirement extends DataModelBase {
-    private List<TestCase> testCases;
+    private final List<TestCase> testCases;
 
     public SpecificationRequirement(final IRI subject) {
         super(subject, ConstructMode.INC_REFS);
@@ -39,6 +40,11 @@ public class SpecificationRequirement extends DataModelBase {
 
     public String getRequirementSubject() {
         return getIriAsString(SPEC.requirementSubject);
+    }
+
+    public String getRequirementSubjectClass() {
+        final IRI iri = getAsIri(SPEC.requirementSubject);
+        return iri != null ? iri.getLocalName().toLowerCase(Locale.ROOT) : null;
     }
 
     public String getRequirementLevel() {
