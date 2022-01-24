@@ -81,7 +81,7 @@ function fn() {
             return RDFModel.parse(typeof p1 === 'string' ? p1 : JSON.stringify(p1), p2, p3)
         },
         parseWacAllowHeader: (headers) => Utils.parseWacAllowHeader(headers),
-        parseLinkHeaders: (headers) => Utils.parseLinkHeaders(headers),
+        parseLinkHeaders: (headers) => Utils.parseLinkHeaders(karate.toJava(headers)),
         resolveUri: (base, target) => Utils.resolveUri(base, target),
         pause: (pause) => java.lang.Thread.sleep(pause),
     };
