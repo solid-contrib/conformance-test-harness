@@ -40,25 +40,25 @@
   <div datatype="rdf:HTML" property="dcterms:description">
   <ul>
   {#each specifications.orEmpty}
-  <li rel="dcterms:hasPart" resource="{it.subject}" class="spec">
+  <li rel="dcterms:hasPart" resource="{it.subject}">
     <details id="{it.anchor}" {#if it.countFailed > 0}open="open" class="failed"{/if}>
-      <summary><b>Specification:</b> {it.subject} <a href="{it.subject}" class="ext"></a>
-        <span class="count">{it.countPassed}/{it.countRequirements}</span>
+      <summary><b>Specification:</b> {it.subject} <a href="{it.subject}"></a>
+        <span>{it.countPassed}/{it.countRequirements}</span>
       </summary>
       {#if it.specificationRequirements}
       <ul>
       {#each it.specificationRequirements}
-        <li rel="spec:requirement" resource="{it.subject}" class="spec {it.requirementSubjectClass}">
+        <li rel="spec:requirement" resource="{it.subject}" class="{it.requirementSubjectClass}">
           {#include requirement coverageMode=false}
           {#if it.testCases}
           <table rel="spec:requirement" resource="{it.subject}">
             <caption>Test cases</caption>
             <thead>
             <tr>
-              <th class="title">Title</th>
-              <th class="details">Details</th>
-              <th class="outcome">Outcome</th>
-              <th class="scenarios">Test Scenarios</th>
+              <th>Title</th>
+              <th>Details</th>
+              <th>Outcome</th>
+              <th>Test Scenarios</th>
             </tr>
             </thead>
             <tbody>
@@ -93,10 +93,10 @@
     <ul>
   {#for testCase in testCases}
   {#if testCase.scenarios}
-    <li about="{testCase.subject}" class="spec">
+    <li about="{testCase.subject}">
     <details id="{testCase.anchor}" {#if testCase.failed}open="open" class="failed"{/if}>
-      <summary><b>Feature:</b> {testCase.title} <a href="#{testCase.requirementAnchor}" class="opening" data-id="{testCase.requirementAnchor}">&#8593;</a>
-        <span class="count">{testCase.countPassed}/{testCase.countScenarios}</span>
+      <summary><b>Feature:</b> {testCase.title} <a href="#{testCase.requirementAnchor}" data-id="{testCase.requirementAnchor}">&#8593;</a>
+        <span>{testCase.countPassed}/{testCase.countScenarios}</span>
       </summary>
       {#if testCase.description}
       <pre property="dcterms:description">{testCase.description}</pre>
