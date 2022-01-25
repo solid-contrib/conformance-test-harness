@@ -8,9 +8,11 @@
   <dl>
     <dt>Version</dt>
     <dd rel="doap:release" resource="{subject}#test-subject-release">
+      {#if releaseName}
       <span property="doap:name" lang="" xml:lang="">{releaseName}</span>
+      {/if}
+      <span property="doap:revision" lang="" xml:lang="">{revision}</span>
       (<time datatype="xsd:dateTime" datetime="{releaseDate}" content="{releaseDate}" property="doap:created">{releaseDateAsDate}</time>)
-      <span content="{revision}" lang="" property="doap:revision" xml:lang=""></span>
     </dd>
   </dl>
 </section>
