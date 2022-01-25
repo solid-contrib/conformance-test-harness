@@ -120,4 +120,18 @@ public class NamespacesTest {
                 Namespaces.generateRdfaPrefixes(List.of(EARL.PREFIX, DOAP.PREFIX))
         );
     }
+
+    @Test
+    void addSpecifications() {
+        Namespaces.specNamespacesMap.clear();
+        Namespaces.addSpecification(iri(TestUtils.SAMPLE_NS, "testA"));
+        Namespaces.addSpecification(iri(TestUtils.SAMPLE_NS, "testB/"));
+        Namespaces.addSpecification(iri(TestUtils.SAMPLE_NS, "testC#"));
+        assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "testA#1")).startsWith("spec"));
+        assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "testA/2")).startsWith("spec"));
+        assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "testB#1")).startsWith("spec"));
+        assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "testB/2")).startsWith("spec"));
+        assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "testC#3")).startsWith("spec"));
+        assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "testC/3")).startsWith("spec"));
+    }
 }

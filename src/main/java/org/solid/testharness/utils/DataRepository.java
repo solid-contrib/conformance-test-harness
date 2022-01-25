@@ -142,6 +142,17 @@ public class DataRepository implements Repository {
         }
     }
 
+    public void identifySpecifications() {
+        try (
+                RepositoryConnection conn = getConnection();
+                var statements = conn.getStatements(null, RDF.type, DOAP.Specification)
+        ) {
+            while (statements.hasNext()) {
+                Namespaces.addSpecification((IRI) statements.next().getSubject());
+            }
+        }
+    }
+
     public void setTestSubject(final IRI testSubject) {
         this.testSubject = testSubject;
     }

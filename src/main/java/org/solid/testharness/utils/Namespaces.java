@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 
 public final class Namespaces {
     private static final Map<String, Namespace> namespaceMap;
+    static final Map<String, String> specNamespacesMap = new HashMap<>();
 
     public static final String TESTS_REPO_URI = "https://github.com/solid/specification-tests/";
     public static final String RESULTS_BASE_URI = TESTS_REPO_URI + UUID.randomUUID();
@@ -65,7 +66,7 @@ public final class Namespaces {
             return "";
         }
         return prefixes.stream()
-                .filter(p -> namespaceMap.containsKey(p))
+                .filter(namespaceMap::containsKey)
                 .map(p -> String.format(TURTLE_PREFIX_FORMAT, p, namespaceMap.get(p).iri))
                 .collect(Collectors.joining());
     }
@@ -75,7 +76,7 @@ public final class Namespaces {
             return "";
         }
         return prefixes.stream()
-                .filter(p -> namespaceMap.containsKey(p))
+                .filter(namespaceMap::containsKey)
                 .map(p -> String.format(RDFA_PREFIX_FORMAT, p, namespaceMap.get(p).iri))
                 .collect(Collectors.joining(" "));
     }
@@ -88,6 +89,14 @@ public final class Namespaces {
 
     public static void addToModel(final Model model) {
         namespaceMap.forEach((k, v) -> model.setNamespace(k, v.iri));
+    }
+
+    public static void addSpecification(final IRI iri) {
+        specNamespacesMap.put(iri.stringValue().replaceFirst("[/#]?$", ""), "spec" + specNamespacesMap.size());
+    }
+
+    public static String getSpecificationNamespace(final IRI iri) {
+        return specNamespacesMap.get(iri.getNamespace().replaceFirst("[/#]?$", ""));
     }
 
     static {

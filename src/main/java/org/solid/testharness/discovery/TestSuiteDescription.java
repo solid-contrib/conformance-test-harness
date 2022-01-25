@@ -104,6 +104,7 @@ public class TestSuiteDescription {
         for (final URL url: urlList) {
             dataRepository.load(pathMappings.mapUrl(url), url.toString());
         }
+        dataRepository.identifySpecifications();
     }
 
     public void getTestsVersion() {
@@ -203,12 +204,12 @@ public class TestSuiteDescription {
     }
 
     private class Feature {
-        private RepositoryConnection conn;
-        private IRI testCaseIri;
+        private final RepositoryConnection conn;
+        private final IRI testCaseIri;
         private IRI featureIri;
         private File featureFile;
         private String location;
-        private boolean runnable;
+        private final boolean runnable;
 
         public Feature(final RepositoryConnection conn, final IRI testCaseIri, final Config.RunMode runMode) {
             this.conn = conn;

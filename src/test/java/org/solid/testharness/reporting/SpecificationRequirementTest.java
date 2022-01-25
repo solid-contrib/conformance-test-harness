@@ -62,6 +62,12 @@ class SpecificationRequirementTest extends AbstractDataModelTests {
     }
 
     @Test
+    void getAnchor() {
+        final SpecificationRequirement requirement = new SpecificationRequirement(iri(SPEC_NS, "requirement"));
+        assertEquals("null_requirement", requirement.getAnchor());
+    }
+
+    @Test
     void getRequirementLevel() {
         final SpecificationRequirement requirement = new SpecificationRequirement(iri(SPEC_NS, "requirement"));
         assertEquals(SPEC.MUST.stringValue(), requirement.getRequirementLevel());

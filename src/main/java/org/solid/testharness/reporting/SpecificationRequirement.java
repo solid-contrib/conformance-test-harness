@@ -26,6 +26,7 @@ package org.solid.testharness.reporting;
 import org.eclipse.rdf4j.model.IRI;
 import org.solid.common.vocab.SPEC;
 import org.solid.testharness.utils.DataModelBase;
+import org.solid.testharness.utils.Namespaces;
 
 import java.util.List;
 import java.util.Locale;
@@ -36,6 +37,11 @@ public class SpecificationRequirement extends DataModelBase {
     public SpecificationRequirement(final IRI subject) {
         super(subject, ConstructMode.INC_REFS);
         testCases = getModelListByObject(SPEC.requirementReference, TestCase.class);
+    }
+
+    @Override
+    public String getAnchor() {
+        return Namespaces.getSpecificationNamespace(subject) + "_" + subject.getLocalName();
     }
 
     public String getRequirementSubject() {

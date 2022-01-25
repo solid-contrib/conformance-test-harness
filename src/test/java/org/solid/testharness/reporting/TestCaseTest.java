@@ -59,7 +59,7 @@ class TestCaseTest extends AbstractDataModelTests  {
     @Test
     void getRequirementAnchor() {
         final TestCase testCase = new TestCase(iri(NS, "test1"));
-        assertEquals("requirement1", testCase.getRequirementAnchor());
+        assertEquals("null_requirement1", testCase.getRequirementAnchor());
     }
 
     @Test
