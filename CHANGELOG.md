@@ -1,6 +1,6 @@
 # Solid Specification Conformance Test Harness
 
-## Release 1.0.15
+## Release 1.1.0
 
 ### Fix
 * Fix reporting error when creating assertions on skipped ScenarioOutline tests.
@@ -8,6 +8,7 @@
 * Add result counts to the report and command line output for each combination of requirement level and outcome.
 * Add result counts to the command line output for the combined passes and fails of mandatory requirements.
 * Add toggle for client requirements and initially hide them.
+* Various report improvements (styling and annotation related).
 
 ## Release 1.0.14
 
