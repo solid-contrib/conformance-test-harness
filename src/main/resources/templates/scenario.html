@@ -16,7 +16,7 @@
   {#if description}
   <pre property="dcterms:description">{description}</pre>
   {/if}
-  {#if steps}
+  {#if !steps.isEmpty}
   <table>
     <caption>Scenario data</caption>
     <thead>
@@ -28,9 +28,20 @@
     </tr>
     </thead>
     <tbody inlist="" rel="dcterms:hasPart">
-    {#each steps}
-    {#include step /}
-    {/each}
+      {#if !backgroundSteps.isEmpty}
+      <tr>
+        <th colspan="4">Background steps</th>
+      </tr>
+      {#each backgroundSteps}
+      {#include step /}
+      {/each}
+      <tr>
+        <th colspan="4">Scenario steps</th>
+      </tr>
+      {/if}
+      {#each steps}
+        {#include step /}
+      {/each}
     </tbody>
   </table>
   {/if}

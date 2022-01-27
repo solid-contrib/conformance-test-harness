@@ -75,15 +75,24 @@ class ScenarioTest extends AbstractDataModelTests {
     }
 
     @Test
+    void getBackgroundSteps() {
+        final Scenario scenario = new Scenario(iri(NS, "scenario1"));
+        assertFalse(scenario.getBackgroundSteps().isEmpty());
+        assertEquals(1, scenario.getBackgroundSteps().size());
+    }
+
+    @Test
     void getSteps() {
         final Scenario scenario = new Scenario(iri(NS, "scenario1"));
         assertFalse(scenario.getSteps().isEmpty());
+        assertEquals(1, scenario.getSteps().size());
     }
 
     @Test
     void getNoSteps() {
         final Scenario scenario = new Scenario(iri(NS, "scenario2"));
-        assertNull(scenario.getSteps());
+        assertEquals(0, scenario.getSteps().size());
+        assertEquals(0, scenario.getBackgroundSteps().size());
     }
 
     @Test

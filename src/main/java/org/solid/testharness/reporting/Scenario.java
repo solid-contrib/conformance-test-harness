@@ -29,16 +29,23 @@ import org.solid.common.vocab.DCTERMS;
 import org.solid.common.vocab.PROV;
 import org.solid.testharness.utils.DataModelBase;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Scenario extends DataModelBase {
     private GeneratedOutput generatedOutput;
+    private List<Step> steps;
 
     public Scenario(final IRI subject) {
         super(subject, ConstructMode.DEEP_WITH_LISTS);
         final List<GeneratedOutput> generatedOutputs = getModelList(PROV.generated, GeneratedOutput.class);
         if (generatedOutputs != null) {
             generatedOutput = generatedOutputs.get(0);
+        }
+        steps = getModelCollectionList(DCTERMS.hasPart, Step.class);
+        if (steps == null) {
+            steps = Collections.emptyList();
         }
     }
 
@@ -66,7 +73,11 @@ public class Scenario extends DataModelBase {
     }
 
     public List<Step> getSteps() {
-        return getModelCollectionList(DCTERMS.hasPart, Step.class);
+        return steps.stream().filter(s -> !s.isBackground()).collect(Collectors.toList());
+    }
+
+    public List<Step> getBackgroundSteps() {
+        return steps.stream().filter(Step::isBackground).collect(Collectors.toList());
     }
 
     public boolean isFailed() {

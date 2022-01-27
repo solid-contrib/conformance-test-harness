@@ -137,6 +137,34 @@ class ReportFragmentTest {
     }
 
     @Test
+    void scenarioReportWithBackground() throws IOException {
+        final Scenario scenario = new Scenario(
+                iri("https://github.com/solid/specification-tests/uuid#node1f273av6vx42"));
+        for (Step step: scenario.getBackgroundSteps()) {
+            scenario.getModel().addAll(step.getModel());
+        }
+        for (Step step: scenario.getSteps()) {
+            scenario.getModel().addAll(step.getModel());
+        }
+
+        final String report = render("scenarios", List.of(scenario));
+        logger.debug("Report:\n{}", report);
+
+        logger.debug("Scenario Model:\n{}", TestUtils.toTurtle(scenario.getModel()));
+        logger.debug("Scenario Model:\n{}", TestUtils.toTriples(scenario.getModel()));
+
+        final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
+        // remove section hasPart to compare
+        reportModel.remove(iri(BASE_URI), DCTERMS.hasPart, null);
+
+        logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
+        logger.debug("Report Model:\n{}", TestUtils.toTriples(reportModel));
+
+        TestUtils.showModelDifferences(reportModel, scenario.getModel(), logger);
+        assertTrue(Models.isomorphic(scenario.getModel(), reportModel));
+    }
+
+    @Test
     void testCaseReport() throws IOException {
         final IRI testCaseIri = iri(
                 TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl").toString(),

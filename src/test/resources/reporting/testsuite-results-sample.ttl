@@ -50,6 +50,7 @@ results:node1f273av6vx16
     a prov:Activity;
     dcterms:title "* def testContainer = rootTestContainer.reserveContainer()"@en;
     prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=11> ;
+    prov:wasInformedBy results:node1f273av6vx13 ;
     prov:generated results:node1f273av6vx16a .
 
 results:node1f273av6vx16a a prov:Entity; prov:value earl:passed .

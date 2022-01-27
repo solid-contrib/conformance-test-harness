@@ -21,7 +21,8 @@ ex:steps a rdf:List;
 ex:step1 a prov:Activity;
     dcterms:title "STEP1" .
 ex:step2 a prov:Activity;
-    dcterms:title "STEP2" .
+    dcterms:title "STEP2" ;
+    prov:wasInformedBy ex:step1.
 
 ex:scenario2 a prov:Activity.
 
