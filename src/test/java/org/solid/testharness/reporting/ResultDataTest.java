@@ -43,7 +43,7 @@ class ResultDataTest extends AbstractDataModelTests {
     @Test
     void getSubject() {
         final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList(), null);
-        assertTrue(resultData.getSubject().startsWith("https://github.com/solid/specification-tests/"));
+        assertNotNull(resultData.getIdentifier());
     }
 
     @Test
@@ -62,7 +62,7 @@ class ResultDataTest extends AbstractDataModelTests {
         assertTrue(prefixes.contains("td: http://www.w3.org/2006/03/test-description#"));
         assertTrue(prefixes.contains("prov: http://www.w3.org/ns/prov#"));
         assertTrue(prefixes.contains("spec: http://www.w3.org/ns/spec#"));
-        assertTrue(prefixes.contains("results: https://github.com/solid/specification-tests/"));
+        assertTrue(prefixes.contains("schema: http://schema.org/"));
     }
 
     @Test

@@ -36,11 +36,11 @@ import java.util.stream.Collectors;
 import static org.eclipse.rdf4j.model.util.Values.iri;
 
 public class ResultData {
-    private Assertor assertor;
-    private SpecificationTests specificationTests;
+    private final Assertor assertor;
+    private final SpecificationTests specificationTests;
     private TestSubject testSubject;
-    private List<Specification> specifications;
-    private List<TestCase> testCases;
+    private final List<Specification> specifications;
+    private final List<TestCase> testCases;
     private TestSuiteResults testSuiteResults;
 
     public ResultData(final List<IRI> specifications, final List<IRI> testCases, final TestSuiteResults results) {
@@ -56,14 +56,14 @@ public class ResultData {
         this.testCases = testCases.stream().map(TestCase::new).collect(Collectors.toList());
     }
 
-    public String getSubject() {
-        return Namespaces.RESULTS_BASE_URI;
+    public String getIdentifier() {
+        return Namespaces.RESULTS_UUID;
     }
 
     public String getPrefixes() {
         return Namespaces.generateRdfaPrefixes(List.of(RDF.PREFIX, RDFS.PREFIX, XSD.PREFIX, OWL.PREFIX, DCTERMS.PREFIX,
                 DOAP.PREFIX, SOLID.PREFIX, SOLID_TEST.PREFIX, EARL.PREFIX, TD.PREFIX, PROV.PREFIX, SPEC.PREFIX,
-                Namespaces.RESULTS_PREFIX));
+                Namespaces.SCHEMA_PREFIX));
     }
 
     public List<Specification> getSpecifications() {

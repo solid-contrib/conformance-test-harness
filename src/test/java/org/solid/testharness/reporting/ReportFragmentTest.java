@@ -364,7 +364,7 @@ class ReportFragmentTest {
     private String render(final String key, final Object object) {
         final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList(), null);
         return testTemplate.data(
-                "subject", resultData.getSubject(),
+                "identifier", resultData.getIdentifier(),
                 "prefixes", resultData.getPrefixes(),
                 key, object
         ).render();
@@ -373,7 +373,7 @@ class ReportFragmentTest {
     private String render(final String key1, final Object object1, final String key2, final Object object2) {
         final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList(), null);
         return testTemplate.data(
-                "subject", resultData.getSubject(),
+                "identifier", resultData.getIdentifier(),
                 "prefixes", resultData.getPrefixes(),
                 key1, object1,
                 key2, object2

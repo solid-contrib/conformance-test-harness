@@ -40,15 +40,16 @@ public final class Namespaces {
     static final Map<String, String> specNamespacesMap = new HashMap<>();
 
     public static final String TESTS_REPO_URI = "https://github.com/solid/specification-tests/";
-    public static final String RESULTS_BASE_URI = TESTS_REPO_URI + UUID.randomUUID();
-    public static final String RESULTS_URI = RESULTS_BASE_URI + "#";
-    public static final String RESULTS_PREFIX = "results";
+    public static final String RESULTS_UUID = UUID.randomUUID().toString();
+    public static final String RESULTS_URI = TESTS_REPO_URI + RESULTS_UUID + "#";
     public static final String TEST_HARNESS_URI = "https://github.com/solid/conformance-test-harness/";
     public static final String TEST_HARNESS_PREFIX = "test-harness";
     public static final String SPECIFICATION_TESTS_IRI = Namespaces.RESULTS_URI + "tests";
     public static final String TURTLE_PREFIX_FORMAT = "prefix %s: <%s>\n";
     public static final String RDFA_PREFIX_FORMAT = "%s: %s";
     public static final IRI SPEC_RELATED_CONTEXT = iri("https://github.com/solid/specification-tests/specifications");
+    public static final String SCHEMA_PREFIX = "schema";
+    public static final String SCHEMA_NS = "http://schema.org/";
 
     public static String shorten(final IRI iri) {
         final String term = iri.stringValue();
@@ -104,7 +105,6 @@ public final class Namespaces {
 
     static {
         namespaceMap = new HashMap<>();
-        namespaceMap.put(RESULTS_PREFIX, new Namespace(RESULTS_PREFIX, RESULTS_URI));
         namespaceMap.put(TEST_HARNESS_PREFIX, new Namespace(TEST_HARNESS_PREFIX, TEST_HARNESS_URI));
         namespaceMap.put(SPEC.PREFIX, new Namespace(SPEC.PREFIX, SPEC.NAMESPACE));
         namespaceMap.put(EARL.PREFIX, new Namespace(EARL.PREFIX, EARL.NAMESPACE));
@@ -118,6 +118,7 @@ public final class Namespaces {
         namespaceMap.put(RDF.PREFIX, new Namespace(RDF.PREFIX, RDF.NAMESPACE));
         namespaceMap.put(RDFS.PREFIX, new Namespace(RDFS.PREFIX, RDFS.NAMESPACE));
         namespaceMap.put(OWL.PREFIX, new Namespace(OWL.PREFIX, OWL.NAMESPACE));
+        namespaceMap.put(SCHEMA_PREFIX, new Namespace(SCHEMA_PREFIX, SCHEMA_NS));
     }
 
     private static class Namespace {

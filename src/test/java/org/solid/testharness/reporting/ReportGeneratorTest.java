@@ -97,7 +97,9 @@ class ReportGeneratorTest {
         final String report = sw.toString();
         logger.debug("OUTPUT:\n{}", report);
         assertTrue(report.length() > 1);
-        assertTrue(report.contains("rel=\"owl:sameAs\">https://github.com/solid/specification-tests/"));
+        assertTrue(report.contains("body about=\"\" typeof=\"schema:TechArticle\""));
+        assertTrue(report.contains("property=\"schema:identifier\""));
+        assertTrue(report.contains(Namespaces.RESULTS_UUID));
         assertTrue(report.contains("about=\"" + Namespaces.TEST_HARNESS_URI +
                 "\" id=\"assertor\" typeof=\"earl:Software\""));
         // TODO: ASSERT:
