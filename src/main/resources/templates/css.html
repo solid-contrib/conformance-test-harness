@@ -1,5 +1,5 @@
 <link href="https://dokie.li/media/css/basic.css" media="all" rel="stylesheet" title="Basic"/>
-<style type="text/css">
+<style>
   /*<![CDATA[*/
   /* More screen width */
   @media screen and (min-width: 100em) {
@@ -26,13 +26,17 @@
   }
 
   td dl {
-    margin-top: 0px;
-    margin-bottom: 0px;
+    margin-top: 0;
+    margin-bottom: 0;
   }
 
-  /* Table styling */
-  tr.backgroundStep {
-    color: darkgrey;
+  th[colspan="4"] {
+      font-size: small;
+      font-weight: 400;
+      border-top: 1pt solid #000;
+      border-bottom: 1pt solid #000;
+      padding-top: 0;
+      padding-bottom: 0;
   }
 
   td, th {
@@ -42,16 +46,16 @@
     padding: 0.25em;
   }
 
-  th.title {
-    width: 40%
-  }
-
-  th.scenarios {
+  /* First and third columns in requirements */
+  li[class]>table th:nth-child(1),
+  li[class]>table th:nth-child(4) {
     width: 40%
   }
 
   /* hide marker for spec elements in list as this is a document structure not an actual list */
-  li.spec::marker {
+  li[class]::marker,
+  li[rel="dcterms:hasPart"]::marker,
+  li[about]::marker {
     content: none;
   }
 
@@ -80,11 +84,13 @@
     margin-bottom: .5em;
   }
 
-  a.ext::after {
+  /* Summary with external link */
+  summary>a:not([data-id])::after {
     content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cg stroke-width='2.1' stroke='%2300e' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='17 13.5 17 19.5 5 19.5 5 7.5 11 7.5'%3E%3C/polyline%3E%3Cpath d='M14,4.5 L20,4.5 L20,10.5 M20,4.5 L11,13.5'%3E%3C/path%3E%3C/g%3E%3C/svg%3E");
   }
 
-  .count {
+  /* Summary with count */
+  summary>span:not([property]) {
     float: right;
   }
 

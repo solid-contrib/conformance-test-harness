@@ -29,6 +29,7 @@ import org.solid.common.vocab.SPEC;
 import org.solid.testharness.utils.AbstractDataModelTests;
 
 import java.util.List;
+import java.util.Locale;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,6 +47,24 @@ class SpecificationRequirementTest extends AbstractDataModelTests {
     void getRequirementSubject() {
         final SpecificationRequirement requirement = new SpecificationRequirement(iri(SPEC_NS, "requirement"));
         assertEquals(SPEC.Server.stringValue(), requirement.getRequirementSubject());
+    }
+
+    @Test
+    void getRequirementSubjectClass() {
+        final SpecificationRequirement requirement = new SpecificationRequirement(iri(SPEC_NS, "requirement"));
+        assertEquals(SPEC.Server.getLocalName().toLowerCase(Locale.ROOT), requirement.getRequirementSubjectClass());
+    }
+
+    @Test
+    void getRequirementSubjectClassNull() {
+        final SpecificationRequirement requirement = new SpecificationRequirement(iri(SPEC_NS, "requirementMissing"));
+        assertNull(requirement.getRequirementSubjectClass());
+    }
+
+    @Test
+    void getAnchor() {
+        final SpecificationRequirement requirement = new SpecificationRequirement(iri(SPEC_NS, "requirement"));
+        assertEquals("null_requirement", requirement.getAnchor());
     }
 
     @Test

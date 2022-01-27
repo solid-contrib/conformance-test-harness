@@ -1,13 +1,11 @@
 {#with it}
-<tr class="{background ? 'backgroundStep' : 'scenarioStep'}" resource="{subject}" typeof="{typesList}">
+<tr resource="{subject}" typeof="{typesList}">
   <td property="dcterms:title">{title}</td>
   <td>[<a href="{used}" rel="prov:used">line</a>]</td>
   <td rel="prov:generated" resource="{generatedOutput.subject}">
         <span about="{generatedOutput.subject}" typeof="{generatedOutput.typesList}" rel="prov:value"
               resource="{generatedOutput.value}" class="earl:{generatedOutput.valueLocalName}"
-              title="{generatedOutput.valueLocalName}">
-          {#include outcome value=generatedOutput.value /}
-        </span>
+              title="{generatedOutput.valueLocalName}">{#include outcome value=generatedOutput.value /}</span>
   </td>
   <td>
     {#if description}
@@ -17,10 +15,21 @@
     <dl>
     {/if}
       {#if generatedOutput.description}
-      <dt>Output</dt>
-      <dd>
-        <pre about="{generatedOutput.subject}" property="dcterms:description" datatype="xsd:string">{generatedOutput.description}</pre>
-      </dd>
+      {#if background}
+        <details>
+          <summary>
+            <dt>Output</dt>
+          </summary>
+          <dd>
+          <pre about="{generatedOutput.subject}" property="dcterms:description" datatype="xsd:string">{generatedOutput.description}</pre>
+          </dd>
+        </details>
+      {#else}
+        <dt>Output</dt>
+        <dd>
+            <pre about="{generatedOutput.subject}" property="dcterms:description" datatype="xsd:string">{generatedOutput.description}</pre>
+        </dd>
+      {/if}
       {/if}
       {#if scenario}
       <span resource="{scenario}" rel="prov:wasInformedBy"></span>

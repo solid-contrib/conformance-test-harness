@@ -31,6 +31,9 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.util.RDFCollections;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
@@ -68,7 +71,7 @@ public class DataRepository implements Repository {
                     "(- <js>[^\\r\\n]+).*",         // last line of stack
             Pattern.DOTALL);
 
-    private Repository repository = new SailRepository(new MemoryStore());
+    private final Repository repository = new SailRepository(new MemoryStore());
     // TODO: Determine if this should be a separate IRI to the base
     private IRI assertor;
     private IRI testSubject;
@@ -101,18 +104,18 @@ public class DataRepository implements Repository {
                 logger.debug("Loaded data into temporary context, size={}", conn.size(context));
                 try (var statements = conn.getStatements(null, SPEC.requirement, null, context)) {
                     if (statements.hasNext()) {
-                        // copy the spec and requirement triples to the main graph context
+                        // copy the spec and requirement triples to the spec-related graph context
                         final Resource spec = statements.next().getSubject();
-                        conn.add(spec, RDF.type, DOAP.Specification);
+                        conn.add(spec, RDF.type, DOAP.Specification, Namespaces.SPEC_RELATED_CONTEXT);
                         try (var requirements = conn.getStatements(spec, SPEC.requirement, null, context)) {
                             requirements.stream()
-                                    .peek(st -> conn.add(st, (Resource) null))
+                                    .peek(st -> conn.add(st, Namespaces.SPEC_RELATED_CONTEXT))
                                     .map(Statement::getObject)
                                     .filter(Value::isIRI)
                                     .map(Resource.class::cast)
                                     .forEach(req -> {
                                         try (var details = conn.getStatements(req, null, null, context)) {
-                                            conn.add(details, (Resource) null);
+                                            conn.add(details, Namespaces.SPEC_RELATED_CONTEXT);
                                         }
                                     });
                         }
@@ -136,6 +139,17 @@ public class DataRepository implements Repository {
             throw (TestHarnessInitializationException) new TestHarnessInitializationException(
                     "Failed to parse data: %s", e.toString()
             ).initCause(e);
+        }
+    }
+
+    public void identifySpecifications() {
+        try (
+                RepositoryConnection conn = getConnection();
+                var statements = conn.getStatements(null, RDF.type, DOAP.Specification)
+        ) {
+            while (statements.hasNext()) {
+                Namespaces.addSpecification((IRI) statements.next().getSubject());
+            }
         }
     }
 
@@ -304,12 +318,40 @@ public class DataRepository implements Repository {
         return JS_ERROR.matcher(data).replaceFirst("\n$1\n$2\n$3\n$4").replaceAll("\\R+", "\n");
     }
 
-    public void export(final Writer wr) throws Exception {
+    public Map<String, Integer> getOutcomeCounts() {
+        final Map<String, Integer> counts = new HashMap<>();
+        try (
+                RepositoryConnection conn = getConnection()
+        ) {
+            final String queryString = Namespaces.generateTurtlePrefixes(List.of(SPEC.PREFIX, EARL.PREFIX)) +
+                    "SELECT ?level ?outcome (COUNT(?outcome) AS ?count) " +
+                    "WHERE {" +
+                    "  ?r spec:requirementLevel ?level ." +
+                    "  ?t spec:requirementReference ?r ." +
+                    "  ?a earl:test ?t ;" +
+                    "     earl:result/earl:outcome ?outcome ." +
+                    "}" +
+                    "GROUP BY ?level ?outcome";
+            final TupleQuery tupleQuery = conn.prepareTupleQuery(queryString);
+            try (TupleQueryResult result = tupleQuery.evaluate()) {
+                while (result.hasNext()) {
+                    final BindingSet bindingSet = result.next();
+                    final String level = ((IRI)bindingSet.getValue("level")).getLocalName();
+                    final String outcome = ((IRI)bindingSet.getValue("outcome")).getLocalName();
+                    final int count = Integer.parseInt(bindingSet.getValue("count").stringValue());
+                    counts.put(level + ":" + outcome, count);
+                }
+            }
+        }
+        return counts;
+    }
+
+    public void export(final Writer wr, final Resource... contexts) throws Exception {
         final RDFWriter rdfWriter = Rio.createWriter(RDFFormat.TURTLE, wr);
         try (RepositoryConnection conn = getConnection()) {
             rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true)
                     .set(BasicWriterSettings.INLINE_BLANK_NODES, true);
-            conn.export(rdfWriter);
+            conn.export(rdfWriter, contexts);
         } catch (RDF4JException e) {
             throw new Exception("Failed to write repository", e);
         }

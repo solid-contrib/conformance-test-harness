@@ -29,11 +29,12 @@ import org.solid.common.vocab.EARL;
 import org.solid.common.vocab.SPEC;
 import org.solid.common.vocab.TD;
 import org.solid.testharness.utils.DataModelBase;
+import org.solid.testharness.utils.Namespaces;
 
 import java.util.List;
 
 public class TestCase extends DataModelBase {
-    private List<Scenario> scenarios;
+    private final List<Scenario> scenarios;
     private Assertion assertion;
 
     public TestCase(final IRI subject) {
@@ -67,7 +68,9 @@ public class TestCase extends DataModelBase {
 
     public String getRequirementAnchor() {
         final IRI requirement = getAsIri(SPEC.requirementReference);
-        return requirement != null ? requirement.getLocalName() : null;
+        return requirement != null
+                ? Namespaces.getSpecificationNamespace(requirement) + "_" + requirement.getLocalName()
+                : null;
     }
 
     public boolean isImplemented() {

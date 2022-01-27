@@ -10,7 +10,6 @@ prefix spec: <http://www.w3.org/ns/spec#>
     spec:requirement <https://example.org/specification2#spec1> .
 
 <https://example.org/specification2#spec1>
-    a spec:NormativeRequirement ;
     spec:requirementSubject spec:Server ;
     spec:requirementLevel spec:MUST ;
 #    schema:name "Requirement 1" ;

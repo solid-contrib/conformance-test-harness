@@ -26,17 +26,17 @@ package org.solid.testharness.reporting;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.karate.Results;
 import com.intuit.karate.core.Feature;
+import org.apache.commons.lang3.StringUtils;
+import org.solid.testharness.utils.DataRepository;
 
 import javax.enterprise.inject.spi.CDI;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public class TestSuiteResults {
-    Results results;
+    final Results results;
     long startTime;
+    Map<String, Integer> counts = new HashMap<>();
 
     public static TestSuiteResults emptyResults() {
         return new TestSuiteResults(null);
@@ -102,20 +102,40 @@ public class TestSuiteResults {
         return results != null ? new Date(results.getEndTime()) : new Date();
     }
 
+    public void summarizeOutcomes(final DataRepository dataRepository) {
+        counts = dataRepository.getOutcomeCounts();
+    }
+
+    public int getCount(final String level, final String outcome) {
+        final String keyPattern = StringUtils.defaultString(level) + ":" + StringUtils.defaultString(outcome);
+        if (counts.containsKey(keyPattern)) {
+            return counts.get(keyPattern);
+        } else {
+            return counts.entrySet().stream()
+                    .filter((entry) -> entry.getKey().contains(keyPattern))
+                    .mapToInt(Map.Entry::getValue)
+                    .sum();
+        }
+    }
+
     public String toJson() {
         try {
             final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a", Locale.getDefault());
             final ObjectMapper objectMapper = CDI.current().select(ObjectMapper.class).get();
-            return objectMapper.writeValueAsString(Map.of(
-                    "featuresPassed", this.getFeaturePassCount(),
-                    "featuresFailed", this.getFeatureFailCount(),
-                    "featuresSkipped", this.getFeatureSkipCount(),
-                    "scenariosPassed", this.getScenarioPassCount(),
-                    "scenariosFailed", this.getScenarioFailCount(),
-                    "elapsedTime", this.getElapsedTime(),
-                    "totalTime", this.getTimeTakenMillis(),
-                    "resultDate", sdf.format(getResultDate())
-            ));
+            final Map<String, Object> resultData = new HashMap<>();
+            resultData.put("mustFeaturesPassed", getCount("MUST", "passed") + getCount("MUST-NOT", "passed"));
+            resultData.put("mustFeaturesFailed", getCount("MUST", "failed") + getCount("MUST-NOT", "failed"));
+            resultData.put("featuresPassed", getFeaturePassCount());
+            resultData.put("featuresFailed", getFeatureFailCount());
+            resultData.put("featuresSkipped", getFeatureSkipCount());
+            resultData.put("scenariosPassed", getScenarioPassCount());
+            resultData.put("scenariosFailed", getScenarioFailCount());
+            resultData.put("scenariosTotal", getScenarioTotal());
+            resultData.put("elapsedTime", getElapsedTime());
+            resultData.put("totalTime", getTimeTakenMillis());
+            resultData.put("resultDate", sdf.format(getResultDate()));
+            resultData.putAll(counts);
+            return objectMapper.writeValueAsString(resultData);
         } catch (Exception e) {
             return "{}";
         }

@@ -8,15 +8,13 @@
   <dl><dt>End</dt><dd><time datatype="xsd:dateTime" datetime="{endTime}" content="{endTime}" property="prov:endedAtTime">{endTime}</time></dd></dl>
   {/if}
   <dl><dt>Outcome</dt><dd rel="prov:generated" resource="{generatedOutput.subject}" typeof="{generatedOutput.typesList}">
-    <span rel="prov:value" resource="{generatedOutput.value}" class="earl:{generatedOutput.valueLocalName}" title="{generatedOutput.valueLocalName}">
-      {#include outcome value=generatedOutput.value /}
-    </span>
+    <span rel="prov:value" resource="{generatedOutput.value}" class="earl:{generatedOutput.valueLocalName}" title="{generatedOutput.valueLocalName}">{#include outcome value=generatedOutput.value /}</span>
     <span content="{generatedOutput.timestamp}" datatype="xsd:dateTime" property="prov:generatedAtTime"></span>
   </dd></dl>
   {#if description}
   <pre property="dcterms:description">{description}</pre>
   {/if}
-  {#if steps}
+  {#if !steps.isEmpty}
   <table>
     <caption>Scenario data</caption>
     <thead>
@@ -28,9 +26,20 @@
     </tr>
     </thead>
     <tbody inlist="" rel="dcterms:hasPart">
-    {#each steps}
-    {#include step /}
-    {/each}
+      {#if !backgroundSteps.isEmpty}
+      <tr>
+        <th colspan="4">Background steps</th>
+      </tr>
+      {#each backgroundSteps}
+      {#include step /}
+      {/each}
+      <tr>
+        <th colspan="4">Scenario steps</th>
+      </tr>
+      {/if}
+      {#each steps}
+        {#include step /}
+      {/each}
     </tbody>
   </table>
   {/if}

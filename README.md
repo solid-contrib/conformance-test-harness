@@ -109,7 +109,7 @@ sources:
   - PATH_TO_SPECIFATION_DOC
   - PATH_TO_SPECIFATION_DOC
 mappings:
-  - prefix: https://github.com/solid/conformance-test-harness/example
+  - prefix: https://github.com/solid/conformance-test-harness/blob/main/example
     path: example
 ```
 This method works well when running your tests in an Integrated Development Environemnt (IDE) as it doesn't require

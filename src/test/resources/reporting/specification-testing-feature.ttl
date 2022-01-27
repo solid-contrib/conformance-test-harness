@@ -41,9 +41,6 @@ ex:specificationPass
     a doap:Specification ;
     spec:requirement <https://example.org/specificationPass#req> .
 
-<https://example.org/specificationPass#req>
-    a spec:NormativeRequirement .
-
 ex:testPass
     a td:TestCase ;
     spec:requirementReference <https://example.org/specificationPass#req> .

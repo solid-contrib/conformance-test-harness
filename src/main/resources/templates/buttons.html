@@ -3,3 +3,6 @@
 <button type="button" onclick="openFailed(this)">Open failed</button>
 {/if}
 <button type="button" onclick="closeAll(this)">Close all</button>
+{#if requirementsMode == true}
+<button type="button" onclick="toggleClientRequirements(this)" style="margin-left: 16px">Show client requirements</button>
+{/if}

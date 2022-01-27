@@ -8,7 +8,7 @@
   {#include js /}
 </head>
 
-<body about="" prefix="{prefixes}">
+<body about="" typeof="schema:TechArticle" prefix="{prefixes}">
 <main>
 <article>
 <h1 property="dcterms:title">Solid Specification - Conformance Test Suite Coverage Report</h1>
@@ -24,19 +24,19 @@
 
 <section id="test-coverage-by-specification-requirement" rel="dcterms:hasPart" resource="#test-coverage-by-specification-requirement">
   <h2 property="dcterms:title">Test coverage by specification requirement</h2>
-  {#include buttons coverageMode=true /}
+  {#include buttons coverageMode=true requirementsMode=true /}
   <div datatype="rdf:HTML" property="dcterms:description">
   <ul>
   {#each specifications.orEmpty}
-  <li rel="dcterms:hasPart" resource="{it.subject}" class="spec">
+  <li rel="dcterms:hasPart" resource="{it.subject}">
     <details id="{it.anchor}">
-      <summary><b>Specification:</b> {it.subject} <a href="{it.subject}" class="ext"></a>
-        <span class="count">{it.countRequirements}</span>
+      <summary><b>Specification:</b> {it.subject} <a href="{it.subject}"></a>
+        <span>{it.countRequirements}</span>
       </summary>
       {#if it.specificationRequirements}
       <ul>
       {#each it.specificationRequirements}
-        <li rel="spec:requirement" resource="{it.subject}" class="spec">
+        <li class="{it.requirementSubjectClass}">
           {#include requirement coverageMode=true}
           {#if it.testCases??}
           <table>

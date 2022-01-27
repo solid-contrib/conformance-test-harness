@@ -26,6 +26,7 @@ package org.solid.testharness.reporting;
 import com.intuit.karate.Results;
 import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -96,7 +97,9 @@ class ReportGeneratorTest {
         final String report = sw.toString();
         logger.debug("OUTPUT:\n{}", report);
         assertTrue(report.length() > 1);
-        assertTrue(report.contains("rel=\"owl:sameAs\">https://github.com/solid/specification-tests/"));
+        assertTrue(report.contains("body about=\"\" typeof=\"schema:TechArticle\""));
+        assertTrue(report.contains("property=\"schema:identifier\""));
+        assertTrue(report.contains(Namespaces.RESULTS_UUID));
         assertTrue(report.contains("about=\"" + Namespaces.TEST_HARNESS_URI +
                 "\" id=\"assertor\" typeof=\"earl:Software\""));
         // TODO: ASSERT:
@@ -123,7 +126,7 @@ class ReportGeneratorTest {
         final Model resultModel;
         try (
                 RepositoryConnection conn = dataRepository.getConnection();
-                var statements = conn.getStatements(null, null, null)
+                var statements = conn.getStatements(null, null, null, (Resource) null)
         ) {
             final String namespace = iri(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl").toString())
                     .getNamespace();
@@ -174,7 +177,7 @@ class ReportGeneratorTest {
         final Model resultModel;
         try (
                 RepositoryConnection conn = dataRepository.getConnection();
-                var statements = conn.getStatements(null, null, null)
+                var statements = conn.getStatements(null, null, null, (Resource) null)
         ) {
             resultModel = QueryResults.asModel(statements);
             resultModel.remove(null, DCTERMS.description, null);

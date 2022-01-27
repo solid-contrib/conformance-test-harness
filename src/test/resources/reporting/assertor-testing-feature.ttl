@@ -7,7 +7,7 @@ prefix earl: <http://www.w3.org/ns/earl#>
 <tester1> a earl:Software ;
    doap:name "TESTER1" ;
    doap:description "DESCRIPTION"@en ;
-   doap:programming-language "Java, KarateDSL" ;
+   doap:programming-language "Java" ;
    doap:created "2021-01-01T00:00:00.000Z"^^xsd:dateTime ;
    doap:developer <https://example.org/profile/card/#us>;
    doap:homepage <https://example.org/tester> ;

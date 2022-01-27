@@ -78,7 +78,7 @@ public class NamespacesTest {
     void buildAllTurtlePrefixes() {
         final String prefixes = Namespaces.generateAllTurtlePrefixes();
         assertEquals(14, prefixes.split("\n").length);
-        assertTrue(prefixes.startsWith("@prefix "));
+        assertTrue(prefixes.startsWith("prefix "));
     }
 
     @Test
@@ -90,14 +90,14 @@ public class NamespacesTest {
 
     @Test
     void buildTurtlePrefixes1() {
-        assertEquals("@prefix earl: <http://www.w3.org/ns/earl#> .\n",
+        assertEquals("prefix earl: <http://www.w3.org/ns/earl#>\n",
                 Namespaces.generateTurtlePrefixes(List.of(EARL.PREFIX))
         );
     }
 
     @Test
     void buildTurtlePrefixes2() {
-        assertEquals("@prefix earl: <http://www.w3.org/ns/earl#> .\n@prefix doap: <http://usefulinc.com/ns/doap#> .\n",
+        assertEquals("prefix earl: <http://www.w3.org/ns/earl#>\nprefix doap: <http://usefulinc.com/ns/doap#>\n",
                 Namespaces.generateTurtlePrefixes(List.of(EARL.PREFIX, DOAP.PREFIX))
         );
     }
@@ -119,5 +119,16 @@ public class NamespacesTest {
         assertEquals("earl: http://www.w3.org/ns/earl# doap: http://usefulinc.com/ns/doap#",
                 Namespaces.generateRdfaPrefixes(List.of(EARL.PREFIX, DOAP.PREFIX))
         );
+    }
+
+    @Test
+    void addSpecifications() {
+        Namespaces.specNamespacesMap.clear();
+        Namespaces.addSpecification(iri(TestUtils.SAMPLE_NS, "testA"));
+        Namespaces.addSpecification(iri(TestUtils.SAMPLE_NS, "testB/"));
+        assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "testA#1")).startsWith("spec"));
+        assertNull(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "testA/2")));
+        assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "testB/")).startsWith("spec"));
+        assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "testB/#2")).startsWith("spec"));
     }
 }

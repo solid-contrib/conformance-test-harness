@@ -137,6 +137,34 @@ class ReportFragmentTest {
     }
 
     @Test
+    void scenarioReportWithBackground() throws IOException {
+        final Scenario scenario = new Scenario(
+                iri("https://github.com/solid/specification-tests/uuid#node1f273av6vx42"));
+        for (Step step: scenario.getBackgroundSteps()) {
+            scenario.getModel().addAll(step.getModel());
+        }
+        for (Step step: scenario.getSteps()) {
+            scenario.getModel().addAll(step.getModel());
+        }
+
+        final String report = render("scenarios", List.of(scenario));
+        logger.debug("Report:\n{}", report);
+
+        logger.debug("Scenario Model:\n{}", TestUtils.toTurtle(scenario.getModel()));
+        logger.debug("Scenario Model:\n{}", TestUtils.toTriples(scenario.getModel()));
+
+        final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
+        // remove section hasPart to compare
+        reportModel.remove(iri(BASE_URI), DCTERMS.hasPart, null);
+
+        logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
+        logger.debug("Report Model:\n{}", TestUtils.toTriples(reportModel));
+
+        TestUtils.showModelDifferences(reportModel, scenario.getModel(), logger);
+        assertTrue(Models.isomorphic(scenario.getModel(), reportModel));
+    }
+
+    @Test
     void testCaseReport() throws IOException {
         final IRI testCaseIri = iri(
                 TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl").toString(),
@@ -174,6 +202,7 @@ class ReportFragmentTest {
         final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
         // remove section hasPart to compare
         reportModel.remove(iri(BASE_URI), DCTERMS.hasPart, null);
+        requirement.getModel().remove(requirementIri, null, null);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         TestUtils.showModelDifferences(reportModel, requirement.getModel(), logger);
@@ -203,6 +232,7 @@ class ReportFragmentTest {
         final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
         // remove section hasPart to compare
         reportModel.remove(iri(BASE_URI), DCTERMS.hasPart, null);
+        requirement.getModel().remove(requirementIri, null, null);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         TestUtils.showModelDifferences(reportModel, requirement.getModel(), logger);
@@ -221,8 +251,8 @@ class ReportFragmentTest {
         final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
-        TestUtils.showModelDifferences(reportModel, specification.getModel(), logger);
-        assertTrue(Models.isomorphic(reportModel, specification.getModel()));
+        assertTrue(reportModel.isEmpty());
+        assertTrue(report.contains("specification1"));
     }
 
     @Test
@@ -278,22 +308,20 @@ class ReportFragmentTest {
     @Test
     void testResultsSummary() {
         final Results results = mock(Results.class);
-        when(results.getFeaturesPassed()).thenReturn(1);
-        when(results.getFeaturesFailed()).thenReturn(2);
-        when(results.getFeaturesTotal()).thenReturn(3);
         when(results.getScenariosPassed()).thenReturn(4);
         when(results.getScenariosFailed()).thenReturn(5);
         when(results.getScenariosTotal()).thenReturn(6);
         when(results.getEndTime()).thenReturn(new Date(0).getTime());
         final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
         testSuiteResults.setStartTime(System.currentTimeMillis() - 1000);
+        testSuiteResults.summarizeOutcomes(dataRepository);
         final String report = render("testSuiteResults", testSuiteResults);
 
         final String reportStripped = StringUtils.normalizeSpace(report);
         assertThat(reportStripped, matchesPattern(".*datetime=\"Thu Jan 01 \\d\\d:00:00 \\w\\w\\w 1970\".*"));
         assertThat(reportStripped, matchesPattern(".*<dd>[0-9]+ ms</dd>.*"));
-        assertTrue(reportStripped.contains("<td>1</td> <td>2</td> <td>3</td>"));
-        assertTrue(reportStripped.contains("<td>4</td> <td>5</td> <td>6</td>"));
+        assertTrue(reportStripped.contains("<td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td>"));
+        assertTrue(reportStripped.contains("<td>4</td> <td>5</td> <td>N/A</td> <td>N/A</td> <td>6</td>"));
     }
 
     @Test
@@ -320,6 +348,7 @@ class ReportFragmentTest {
         final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
         // remove section hasPart to compare
         reportModel.remove(iri(BASE_URI), DCTERMS.hasPart, null);
+        requirement.getModel().remove(requirementIri, null, null);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         TestUtils.showModelDifferences(reportModel, requirement.getModel(), logger);
@@ -335,7 +364,7 @@ class ReportFragmentTest {
     private String render(final String key, final Object object) {
         final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList(), null);
         return testTemplate.data(
-                "subject", resultData.getSubject(),
+                "identifier", resultData.getIdentifier(),
                 "prefixes", resultData.getPrefixes(),
                 key, object
         ).render();
@@ -344,7 +373,7 @@ class ReportFragmentTest {
     private String render(final String key1, final Object object1, final String key2, final Object object2) {
         final ResultData resultData = new ResultData(Collections.emptyList(), Collections.emptyList(), null);
         return testTemplate.data(
-                "subject", resultData.getSubject(),
+                "identifier", resultData.getIdentifier(),
                 "prefixes", resultData.getPrefixes(),
                 key1, object1,
                 key2, object2

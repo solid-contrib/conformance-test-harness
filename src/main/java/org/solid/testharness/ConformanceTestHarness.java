@@ -105,7 +105,7 @@ public class ConformanceTestHarness {
                         ))
                         .add(DOAP.developer, iri(properties.getProperty("package.organizationUrl")))
                         .add(DOAP.homepage, iri(properties.getProperty("package.url")))
-                        .add(DOAP.programming_language, "Java, KarateDSL")
+                        .add(DOAP.programming_language, "Java")
                         .add(DOAP.release, release)
                         .add(release, DOAP.revision, properties.getProperty("package.version"))
                         .build());
@@ -214,6 +214,7 @@ public class ConformanceTestHarness {
                             f, pathMappings.unmapFeaturePath(f.getResource().getRelativePath())
                     ));
         }
+        results.summarizeOutcomes(dataRepository);
         reportGenerator.setResults(results);
         logger.info("{}", results);
         return results;
