@@ -313,9 +313,9 @@ class DataRepositoryTest {
             conn.setNamespace(SPEC.PREFIX, SPEC.NAMESPACE);
         }
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/rdfa-sample.html"), TestUtils.SAMPLE_BASE);
-        assertEquals(5, dataRepositorySize(dataRepository));
+        assertEquals(4, dataRepositorySize(dataRepository));
         final StringWriter sw = new StringWriter();
-        dataRepository.export(sw);
+        dataRepository.export(sw, Namespaces.SPEC_RELATED_CONTEXT);
         assertFalse(sw.toString().contains("dcterms:title \"TITLE\""));
         assertTrue(sw.toString().contains("<https://example.org/doc> a <http://usefulinc.com/ns/doap#Specification>"));
         assertTrue(sw.toString().contains("spec:requirement <https://example.org#spec1> ."));

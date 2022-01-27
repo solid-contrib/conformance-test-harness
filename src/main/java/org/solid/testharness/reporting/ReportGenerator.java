@@ -26,6 +26,7 @@ package org.solid.testharness.reporting;
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.solid.common.vocab.DOAP;
@@ -56,7 +57,7 @@ public class ReportGenerator {
     private long startTime;
 
     public void buildTurtleReport(final Writer writer) throws Exception {
-        dataRepository.export(writer);
+        dataRepository.export(writer, (Resource) null);
     }
 
     public void buildHtmlCoverageReport(final Writer writer) throws IOException {

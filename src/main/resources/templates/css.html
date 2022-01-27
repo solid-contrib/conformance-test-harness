@@ -47,13 +47,13 @@
   }
 
   /* First and third columns in requirements */
-  table[rel="spec:requirement"] th:nth-child(1),
-  table[rel="spec:requirement"] th:nth-child(4) {
+  li[class]>table th:nth-child(1),
+  li[class]>table th:nth-child(4) {
     width: 40%
   }
 
   /* hide marker for spec elements in list as this is a document structure not an actual list */
-  li[rel="spec:requirement"]::marker,
+  li[class]::marker,
   li[rel="dcterms:hasPart"]::marker,
   li[about]::marker {
     content: none;

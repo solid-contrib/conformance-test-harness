@@ -33,6 +33,8 @@ import org.solid.common.vocab.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.solid.testharness.api.RDFModel.iri;
+
 public final class Namespaces {
     private static final Map<String, Namespace> namespaceMap;
     static final Map<String, String> specNamespacesMap = new HashMap<>();
@@ -46,6 +48,7 @@ public final class Namespaces {
     public static final String SPECIFICATION_TESTS_IRI = Namespaces.RESULTS_URI + "tests";
     public static final String TURTLE_PREFIX_FORMAT = "prefix %s: <%s>\n";
     public static final String RDFA_PREFIX_FORMAT = "%s: %s";
+    public static final IRI SPEC_RELATED_CONTEXT = iri("https://github.com/solid/specification-tests/specifications");
 
     public static String shorten(final IRI iri) {
         final String term = iri.stringValue();

@@ -202,6 +202,7 @@ class ReportFragmentTest {
         final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
         // remove section hasPart to compare
         reportModel.remove(iri(BASE_URI), DCTERMS.hasPart, null);
+        requirement.getModel().remove(requirementIri, null, null);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         TestUtils.showModelDifferences(reportModel, requirement.getModel(), logger);
@@ -231,6 +232,7 @@ class ReportFragmentTest {
         final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
         // remove section hasPart to compare
         reportModel.remove(iri(BASE_URI), DCTERMS.hasPart, null);
+        requirement.getModel().remove(requirementIri, null, null);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         TestUtils.showModelDifferences(reportModel, requirement.getModel(), logger);
@@ -249,8 +251,8 @@ class ReportFragmentTest {
         final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
-        TestUtils.showModelDifferences(reportModel, specification.getModel(), logger);
-        assertTrue(Models.isomorphic(reportModel, specification.getModel()));
+        assertTrue(reportModel.isEmpty());
+        assertTrue(report.contains("specification1"));
     }
 
     @Test
@@ -346,6 +348,7 @@ class ReportFragmentTest {
         final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
         // remove section hasPart to compare
         reportModel.remove(iri(BASE_URI), DCTERMS.hasPart, null);
+        requirement.getModel().remove(requirementIri, null, null);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         TestUtils.showModelDifferences(reportModel, requirement.getModel(), logger);

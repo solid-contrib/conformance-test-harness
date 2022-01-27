@@ -11,7 +11,6 @@ prefix manifest: <https://example.org/manifests/test-manifest-sample-1.ttl#>
 prefix req: <https://example.org/specification#>
 
 req:requirement
-    a spec:NormativeRequirement ;
     spec:requirementSubject spec:Server ;
     spec:requirementLevel spec:MUST ;
     schema:name "Requirement 1" ;
@@ -44,9 +43,6 @@ ex:scenario1
 ex:result1
     a prov:Entity ;
     prov:value earl:failed .
-
-req:requirementPass
-    a spec:NormativeRequirement .
 
 manifest:testPass
     a td:TestCase ;

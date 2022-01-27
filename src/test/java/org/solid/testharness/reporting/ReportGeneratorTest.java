@@ -26,6 +26,7 @@ package org.solid.testharness.reporting;
 import com.intuit.karate.Results;
 import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -123,7 +124,7 @@ class ReportGeneratorTest {
         final Model resultModel;
         try (
                 RepositoryConnection conn = dataRepository.getConnection();
-                var statements = conn.getStatements(null, null, null)
+                var statements = conn.getStatements(null, null, null, (Resource) null)
         ) {
             final String namespace = iri(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl").toString())
                     .getNamespace();
@@ -174,7 +175,7 @@ class ReportGeneratorTest {
         final Model resultModel;
         try (
                 RepositoryConnection conn = dataRepository.getConnection();
-                var statements = conn.getStatements(null, null, null)
+                var statements = conn.getStatements(null, null, null, (Resource) null)
         ) {
             resultModel = QueryResults.asModel(statements);
             resultModel.remove(null, DCTERMS.description, null);

@@ -4,13 +4,6 @@
     {! HEADER !}
     {#if specifications??}
     {#include specification-header /}
-    {#each specifications}
-    <div about="{it.subject}">
-        {#each it.specificationRequirements.orEmpty}
-        <div rel="spec:requirement" resource="{it.subject}"/>
-        {/each}
-    </div>
-    {/each}
     {/if}
 
     {! ASSERTOR !}

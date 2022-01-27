@@ -104,18 +104,18 @@ public class DataRepository implements Repository {
                 logger.debug("Loaded data into temporary context, size={}", conn.size(context));
                 try (var statements = conn.getStatements(null, SPEC.requirement, null, context)) {
                     if (statements.hasNext()) {
-                        // copy the spec and requirement triples to the main graph context
+                        // copy the spec and requirement triples to the spec-related graph context
                         final Resource spec = statements.next().getSubject();
-                        conn.add(spec, RDF.type, DOAP.Specification);
+                        conn.add(spec, RDF.type, DOAP.Specification, Namespaces.SPEC_RELATED_CONTEXT);
                         try (var requirements = conn.getStatements(spec, SPEC.requirement, null, context)) {
                             requirements.stream()
-                                    .peek(st -> conn.add(st, (Resource) null))
+                                    .peek(st -> conn.add(st, Namespaces.SPEC_RELATED_CONTEXT))
                                     .map(Statement::getObject)
                                     .filter(Value::isIRI)
                                     .map(Resource.class::cast)
                                     .forEach(req -> {
                                         try (var details = conn.getStatements(req, null, null, context)) {
-                                            conn.add(details, (Resource) null);
+                                            conn.add(details, Namespaces.SPEC_RELATED_CONTEXT);
                                         }
                                     });
                         }
@@ -346,12 +346,12 @@ public class DataRepository implements Repository {
         return counts;
     }
 
-    public void export(final Writer wr) throws Exception {
+    public void export(final Writer wr, final Resource... contexts) throws Exception {
         final RDFWriter rdfWriter = Rio.createWriter(RDFFormat.TURTLE, wr);
         try (RepositoryConnection conn = getConnection()) {
             rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true)
                     .set(BasicWriterSettings.INLINE_BLANK_NODES, true);
-            conn.export(rdfWriter);
+            conn.export(rdfWriter, contexts);
         } catch (RDF4JException e) {
             throw new Exception("Failed to write repository", e);
         }

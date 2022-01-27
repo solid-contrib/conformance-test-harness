@@ -1,4 +1,4 @@
-<details id="{it.anchor}" rel="dcterms:hasPart" resource="{it.subject}" typeof="{it.typesList}" {#if it.failed}open="open" class="failed"{/if}>
+<details id="{it.anchor}" {#if it.failed}open="open" class="failed"{/if}>
   {#with it}
   <summary><b>Requirement:</b> {subject} <a href="{subject}"></a>
     <span>{#if coverageMode == false}{countPassed}/{/if}{countTestCases}</span>
@@ -6,22 +6,22 @@
   <dl>
     <dt>Requirement subject</dt>
     {#switch requirementSubject}
-    {#case 'http://www.w3.org/ns/spec#Server'}<dd rel="spec:requirementSubject" resource="{requirementSubject}">Server</dd>
-    {#case 'http://www.w3.org/ns/spec#Client'}<dd rel="spec:requirementSubject" resource="{requirementSubject}">Client</dd>
+    {#case 'http://www.w3.org/ns/spec#Server'}<dd>Server</dd>
+    {#case 'http://www.w3.org/ns/spec#Client'}<dd>Client</dd>
     {/switch}
   </dl>
   <dl>
     <dt>Requirement level</dt>
     {#switch requirementLevel}
-    {#case 'http://www.w3.org/ns/spec#MUST'}<dd property="spec:requirementLevel" resource="{requirementLevel}">MUST</dd>
-    {#case 'http://www.w3.org/ns/spec#MUST-NOT'}<dd property="spec:requirementLevel" resource="{requirementLevel}">MUST NOT</dd>
-    {#case 'http://www.w3.org/ns/spec#SHOULD'}<dd property="spec:requirementLevel" resource="{requirementLevel}">SHOULD</dd>
-    {#case 'http://www.w3.org/ns/spec#SHOULD-NOT'}<dd property="spec:requirementLevel" resource="{requirementLevel}">SHOULD NOT</dd>
-    {#case 'http://www.w3.org/ns/spec#MAY'}<dd property="spec:requirementLevel" resource="{requirementLevel}">MAY</dd>
+    {#case 'http://www.w3.org/ns/spec#MUST'}<dd >MUST</dd>
+    {#case 'http://www.w3.org/ns/spec#MUST-NOT'}<dd >MUST NOT</dd>
+    {#case 'http://www.w3.org/ns/spec#SHOULD'}<dd >SHOULD</dd>
+    {#case 'http://www.w3.org/ns/spec#SHOULD-NOT'}<dd >SHOULD NOT</dd>
+    {#case 'http://www.w3.org/ns/spec#MAY'}<dd >MAY</dd>
     {/switch}
   </dl>
   {#if statement}
-  <dl><dt>Statement</dt><dd property="spec:statement">{statement}</dd></dl>
+  <dl><dt>Statement</dt><dd>{statement}</dd></dl>
   {/if}
   {/with}
   {#insert/}

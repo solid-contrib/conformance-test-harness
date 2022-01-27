@@ -48,10 +48,10 @@
       {#if it.specificationRequirements}
       <ul>
       {#each it.specificationRequirements}
-        <li rel="spec:requirement" resource="{it.subject}" class="{it.requirementSubjectClass}">
+        <li class="{it.requirementSubjectClass}">
           {#include requirement coverageMode=false}
           {#if it.testCases}
-          <table rel="spec:requirement" resource="{it.subject}">
+          <table>
             <caption>Test cases</caption>
             <thead>
             <tr>
