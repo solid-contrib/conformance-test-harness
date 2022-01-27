@@ -5,9 +5,7 @@
   <td rel="prov:generated" resource="{generatedOutput.subject}">
         <span about="{generatedOutput.subject}" typeof="{generatedOutput.typesList}" rel="prov:value"
               resource="{generatedOutput.value}" class="earl:{generatedOutput.valueLocalName}"
-              title="{generatedOutput.valueLocalName}">
-          {#include outcome value=generatedOutput.value /}
-        </span>
+              title="{generatedOutput.valueLocalName}">{#include outcome value=generatedOutput.value /}</span>
   </td>
   <td>
     {#if description}

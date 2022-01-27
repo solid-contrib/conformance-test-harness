@@ -11,16 +11,16 @@
   <td>
     <dl>
       <dt>Status</dt>
-      <dd><a href="{status}" rel="td:reviewStatus">
+      <dd>
         {#switch status}
-        {#case 'http://www.w3.org/2006/03/test-description#unreviewed'}Unreviewed
-        {#case 'http://www.w3.org/2006/03/test-description#accepted'}Accepted
-        {#case 'http://www.w3.org/2006/03/test-description#assigned'}Assigned
-        {#case 'http://www.w3.org/2006/03/test-description#approved'}Approved
-        {#case 'http://www.w3.org/2006/03/test-description#rejected'}Rejected
-        {#case 'http://www.w3.org/2006/03/test-description#onhold'}On Hold
+        {#case 'http://www.w3.org/2006/03/test-description#unreviewed'}<a href="{status}" rel="td:reviewStatus">Unreviewed</a>
+        {#case 'http://www.w3.org/2006/03/test-description#accepted'}<a href="{status}" rel="td:reviewStatus">Accepted</a>
+        {#case 'http://www.w3.org/2006/03/test-description#assigned'}<a href="{status}" rel="td:reviewStatus">Assigned</a>
+        {#case 'http://www.w3.org/2006/03/test-description#approved'}<a href="{status}" rel="td:reviewStatus">Approved</a>
+        {#case 'http://www.w3.org/2006/03/test-description#rejected'}<a href="{status}" rel="td:reviewStatus">Rejected</a>
+        {#case 'http://www.w3.org/2006/03/test-description#onhold'}<a href="{status}" rel="td:reviewStatus">On Hold</a>
         {/switch}
-      </a></dd>
+      </dd>
     </dl>
 
     {#if assertion && coverageMode == false}
@@ -30,15 +30,15 @@
         <span rel="earl:assertedBy" resource="{assertion.assertedBy}"></span>
         <dl>
           <dt>Mode</dt>
-          <dd><a href="{assertion.mode}" rel="earl:mode">
+          <dd>
             {#switch assertion.mode}
-            {#case 'http://www.w3.org/ns/earl#automatic'}Automatic
-            {#case 'http://www.w3.org/ns/earl#manual'}Manual
-            {#case 'http://www.w3.org/ns/earl#semiAuto'}Semi-Automatic
-            {#case 'http://www.w3.org/ns/earl#undisclosed'}Undisclosed
-            {#case 'http://www.w3.org/ns/earl#unknownMode'}Unknown
+            {#case 'http://www.w3.org/ns/earl#automatic'}<a href="{assertion.mode}" rel="earl:mode">Automatic</a>
+            {#case 'http://www.w3.org/ns/earl#manual'}<a href="{assertion.mode}" rel="earl:mode">Manual</a>
+            {#case 'http://www.w3.org/ns/earl#semiAuto'}<a href="{assertion.mode}" rel="earl:mode">Semi-Automatic</a>
+            {#case 'http://www.w3.org/ns/earl#undisclosed'}<a href="{assertion.mode}" rel="earl:mode">Undisclosed</a>
+            {#case 'http://www.w3.org/ns/earl#unknownMode'}<a href="{assertion.mode}" rel="earl:mode">Unknown</a>
             {/switch}
-          </a></dd>
+          </dd>
         </dl>
       </div>
       <dl>
@@ -58,17 +58,13 @@
   <td about="{assertion.subject}" rel="earl:result" resource="{assertion.result.subject}">
     <span about="{assertion.result.subject}" typeof="{assertion.result.typesList}" rel="earl:outcome"
         resource="{assertion.result.outcome}" class="earl:{assertion.result.outcomeLocalName}"
-        title="{assertion.result.outcomeLocalName}">
-      {#include outcome value=assertion.result.outcome /}
-    </span>
+        title="{assertion.result.outcomeLocalName}">{#include outcome value=assertion.result.outcome /}</span>
   </td>
   <td>
     <ul>
       {#each scenarios.orEmpty}
       <li>
-        <span class="earl:{it.generatedOutput.valueLocalName}" title="{it.generatedOutput.valueLocalName}">
-          {#include outcome value=it.generatedOutput.value /}
-        </span>
+        <span class="earl:{it.generatedOutput.valueLocalName}" title="{it.generatedOutput.valueLocalName}">{#include outcome value=it.generatedOutput.value /}</span>
         <a href="#{it.anchor}" data-id="{it.anchor}">{it.title}</a>
       </li>
       {/each}

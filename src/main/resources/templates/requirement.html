@@ -5,24 +5,20 @@
   </summary>
   <dl>
     <dt>Requirement subject</dt>
-    <dd rel="spec:requirementSubject" resource="{requirementSubject}">
-      {#switch requirementSubject}
-      {#case 'http://www.w3.org/ns/spec#Server'}Server
-      {#case 'http://www.w3.org/ns/spec#Client'}Client
-      {/switch}
-    </dd>
+    {#switch requirementSubject}
+    {#case 'http://www.w3.org/ns/spec#Server'}<dd rel="spec:requirementSubject" resource="{requirementSubject}">Server</dd>
+    {#case 'http://www.w3.org/ns/spec#Client'}<dd rel="spec:requirementSubject" resource="{requirementSubject}">Client</dd>
+    {/switch}
   </dl>
   <dl>
     <dt>Requirement level</dt>
-    <dd property="spec:requirementLevel" resource="{requirementLevel}">
-      {#switch requirementLevel}
-      {#case 'http://www.w3.org/ns/spec#MUST'}MUST
-      {#case 'http://www.w3.org/ns/spec#MUST-NOT'}MUST NOT
-      {#case 'http://www.w3.org/ns/spec#SHOULD'}SHOULD
-      {#case 'http://www.w3.org/ns/spec#SHOULD-NOT'}SHOULD NOT
-      {#case 'http://www.w3.org/ns/spec#MAY'}MAY
-      {/switch}
-    </dd>
+    {#switch requirementLevel}
+    {#case 'http://www.w3.org/ns/spec#MUST'}<dd property="spec:requirementLevel" resource="{requirementLevel}">MUST</dd>
+    {#case 'http://www.w3.org/ns/spec#MUST-NOT'}<dd property="spec:requirementLevel" resource="{requirementLevel}">MUST NOT</dd>
+    {#case 'http://www.w3.org/ns/spec#SHOULD'}<dd property="spec:requirementLevel" resource="{requirementLevel}">SHOULD</dd>
+    {#case 'http://www.w3.org/ns/spec#SHOULD-NOT'}<dd property="spec:requirementLevel" resource="{requirementLevel}">SHOULD NOT</dd>
+    {#case 'http://www.w3.org/ns/spec#MAY'}<dd property="spec:requirementLevel" resource="{requirementLevel}">MAY</dd>
+    {/switch}
   </dl>
   {#if statement}
   <dl><dt>Statement</dt><dd property="spec:statement">{statement}</dd></dl>
