@@ -92,11 +92,11 @@ public final class Namespaces {
     }
 
     public static void addSpecification(final IRI iri) {
-        specNamespacesMap.put(iri.stringValue().replaceFirst("[/#]?$", ""), "spec" + specNamespacesMap.size());
+        specNamespacesMap.put(iri.stringValue(), "spec" + specNamespacesMap.size());
     }
 
     public static String getSpecificationNamespace(final IRI iri) {
-        return specNamespacesMap.get(iri.getNamespace().replaceFirst("[/#]?$", ""));
+        return specNamespacesMap.get(iri.getNamespace().replaceFirst("#?$", ""));
     }
 
     static {

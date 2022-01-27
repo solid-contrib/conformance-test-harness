@@ -59,7 +59,7 @@ This file can be used in place of command line settings if desired but is only r
 settings or map URLs or source files to a local file system. It can also control the level of logging but this is better
 controlled via environment variables.
 
-The file can have various formats though the example provided is YAML. It  must be in a specific location,
+The file can have various formats though the example provided is YAML. It must be in a specific location,
 `config/application.yaml`, in your current working directory. The default version of this file, used in the docker image
 of the CTH, is maintained at https://github.com/solid/specification-tests/blob/main/application.yaml.
 ```yaml
@@ -69,12 +69,12 @@ sources:
   # Protocol spec & manifest
   # Editor's draft (fully annotated)
   - https://solidproject.org/ED/protocol
-  - https://github.com/solid/specification-tests/protocol/solid-protocol-test-manifest.ttl
+  - https://github.com/solid/specification-tests/blob/main/protocol/solid-protocol-test-manifest.ttl
 
   # WAC spec & manifest
   # Editor's draft (fully annotated)
-  - https://solid.github.io/web-access-control-spec
-  - https://github.com/solid/specification-tests/web-access-control/web-access-control-test-manifest.ttl
+  - https://solid.github.io/web-access-control-spec/
+  - https://github.com/solid/specification-tests/blob/main/web-access-control/web-access-control-test-manifest.ttl
 
   # Published draft (not annotated)
   # This is an example of how you could run tests for a specific version of the specification 
@@ -86,8 +86,8 @@ target: https://github.com/solid/conformance-test-harness/ess
 
 # To map URLs from the manifest to local files:
 mappings:
-  - prefix: https://github.com/solid/conformance-test-harness/example
-    path: ./example
+  - prefix: https://github.com/solid/specification-tests/blob/main
+    path: ./data
 
 # Other configuration to override defaults
 agent: agent-string		# default = Solid-Conformance-Test-Suite
@@ -573,11 +573,11 @@ To use the Docker image to run a set of local tests:
     ```
     subjects: /data/test-subjects.ttl
     sources:
-        - https://github.com/solid/conformance-test-harness/example/protocol/solid-protocol-test-manifest.ttl
+        - https://github.com/solid/conformance-test-harness/blob/main/example/protocol/solid-protocol-test-manifest.ttl
         - https://solidproject.org/TR/protocol
     target: https://github.com/solid/conformance-test-harness/ess
     mappings:
-        - prefix: https://github.com/solid/conformance-test-harness/example/protocol
+        - prefix: https://github.com/solid/conformance-test-harness/blob/main/example/protocol
         path: /data
     ```
     **Notes**:

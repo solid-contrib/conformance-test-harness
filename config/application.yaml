@@ -2,14 +2,16 @@
   # local override of properties
   subjects: config/test-subjects.ttl
   sources:
-    - https://github.com/solid/conformance-test-harness/example/protocol/solid-protocol-test-manifest.ttl
-    - https://github.com/solid/conformance-test-harness/example/web-access-control/web-access-control-test-manifest.ttl
     - https://solidproject.org/TR/protocol
-    - https://github.com/solid/conformance-test-harness/example/web-access-control/web-access-control-spec.ttl
+    - https://github.com/solid/conformance-test-harness/blob/main/example/protocol/solid-protocol-test-manifest.ttl
+
+    - https://solid.github.io/web-access-control-spec/
+    - https://github.com/solid/conformance-test-harness/blob/main/example/web-access-control/web-access-control-spec.ttl
+    - https://github.com/solid/conformance-test-harness/blob/main/example/web-access-control/web-access-control-test-manifest.ttl
 
   # mapping feature URIs
   mappings:
-    - prefix: https://github.com/solid/conformance-test-harness/example
+    - prefix: https://github.com/solid/conformance-test-harness/blob/main/example
       path: example
 
 # Test profile

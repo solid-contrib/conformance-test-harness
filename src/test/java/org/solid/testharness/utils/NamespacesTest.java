@@ -126,12 +126,9 @@ public class NamespacesTest {
         Namespaces.specNamespacesMap.clear();
         Namespaces.addSpecification(iri(TestUtils.SAMPLE_NS, "testA"));
         Namespaces.addSpecification(iri(TestUtils.SAMPLE_NS, "testB/"));
-        Namespaces.addSpecification(iri(TestUtils.SAMPLE_NS, "testC#"));
         assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "testA#1")).startsWith("spec"));
-        assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "testA/2")).startsWith("spec"));
-        assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "testB#1")).startsWith("spec"));
-        assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "testB/2")).startsWith("spec"));
-        assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "testC#3")).startsWith("spec"));
-        assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "testC/3")).startsWith("spec"));
+        assertNull(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "testA/2")));
+        assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "testB/")).startsWith("spec"));
+        assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "testB/#2")).startsWith("spec"));
     }
 }

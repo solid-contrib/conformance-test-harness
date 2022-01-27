@@ -4,26 +4,26 @@ prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 prefix doap: <http://usefulinc.com/ns/doap#>
 prefix spec: <http://www.w3.org/ns/spec#>
 
+# Editor's draft (fully annotated)
+prefix wac: <https://solid.github.io/web-access-control-spec/#>
+
 <https://solid.github.io/web-access-control-spec/>
-  a spec:Specification, doap:Specification ;
+  a doap:Specification ;
   spec:requirement
-        <https://solid.github.io/web-access-control-spec#access-modes> ,
-        <https://solid.github.io/web-access-control-spec#access-objects> ,
-        <https://solid.github.io/web-access-control-spec#authorization-evaluation-context>
+        wac:access-modes ,
+        wac:access-objects ,
+        wac:authorization-evaluation-context
 .
 
-<https://solid.github.io/web-access-control-spec#access-modes>
-  a spec:NormativeRequirement ;
+wac:access-modes
   spec:requirementSubject spec:Server ;
   spec:requirementLevel spec:MUST .
 
-<https://solid.github.io/web-access-control-spec#access-objects>
-  a spec:NormativeRequirement ;
+wac:access-objects
   spec:requirementSubject spec:Server ;
   spec:requirementLevel spec:MUST .
 
-<https://solid.github.io/web-access-control-spec#authorization-evaluation-context>
-  a spec:NormativeRequirement ;
+wac:authorization-evaluation-context
   spec:requirementSubject spec:Server ;
   spec:requirementLevel spec:MUST .
 

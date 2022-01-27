@@ -4,11 +4,6 @@
   document.addEventListener("DOMContentLoaded", function () {
     toggleClientRequirements();
     fetchLatestTestsVersion();
-    document.querySelectorAll("a:not([rel='doap:homepage'])").forEach(anchor => {
-      anchor.href = anchor.href
-              .replace('github.com/solid/specification-tests/', 'github.com/solid/specification-tests/blob/main/')
-              .replace('github.com/solid/conformance-test-harness/', 'github.com/solid/conformance-test-harness/blob/main/')
-    });
     window.addEventListener('hashchange', openTarget);
     openTarget();
   });

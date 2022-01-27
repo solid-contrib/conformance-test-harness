@@ -360,13 +360,12 @@ class DataRepositoryTest {
         final DataRepository dataRepository = createRepository();
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             conn.add(iri(TestUtils.SAMPLE_NS, "specA"), RDF.type, DOAP.Specification);
-            conn.add(iri(TestUtils.SAMPLE_NS, "specB#"), RDF.type, DOAP.Specification);
-            conn.add(iri(TestUtils.SAMPLE_NS, "specC/"), RDF.type, DOAP.Specification);
+            conn.add(iri(TestUtils.SAMPLE_NS, "specB/"), RDF.type, DOAP.Specification);
         }
         dataRepository.identifySpecifications();
         assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "specA#1")).startsWith("spec"));
         assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "specB/2")).startsWith("spec"));
-        assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "specC#3")).startsWith("spec"));
+        assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "specB/#3")).startsWith("spec"));
     }
 
     private DataRepository setupMinimalRepository() {
