@@ -25,6 +25,7 @@ package org.solid.testharness.utils;
 
 import com.intuit.karate.Suite;
 import com.intuit.karate.core.*;
+import com.intuit.karate.http.HttpClientFactory;
 import com.intuit.karate.resource.Resource;
 import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.rdf4j.model.IRI;
@@ -68,7 +69,7 @@ class DataRepositoryTest {
             conn.add(testCaseIri, SPEC.testScript, featureIri);
         }
 
-        final Suite suite = Suite.forTempUse();
+        final Suite suite = Suite.forTempUse(HttpClientFactory.DEFAULT);
         final Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
         final Scenario scenario1 = mockScenario("SCENARIO 1", 1, 0, null);
@@ -125,7 +126,7 @@ class DataRepositoryTest {
             conn.add(testCaseIri, SPEC.testScript, featureIri);
         }
 
-        final Suite suite = Suite.forTempUse();
+        final Suite suite = Suite.forTempUse(HttpClientFactory.DEFAULT);
         final Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
 
@@ -145,7 +146,7 @@ class DataRepositoryTest {
     void addFeatureResultNoTestCase() {
         final DataRepository dataRepository = createRepository();
 
-        final Suite suite = Suite.forTempUse();
+        final Suite suite = Suite.forTempUse(HttpClientFactory.DEFAULT);
         final Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
         final Scenario scenario1 = mockScenario("SCENARIO 1", 1, 0, null);
@@ -164,7 +165,7 @@ class DataRepositoryTest {
     @Test
     void addFeatureResultBadRdf() {
         final DataRepository dataRepository = createRepository();
-        final Suite suite = Suite.forTempUse();
+        final Suite suite = Suite.forTempUse(HttpClientFactory.DEFAULT);
         final Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn(null);
         final FeatureResult fr = mock(FeatureResult.class);
