@@ -66,7 +66,8 @@ public class TestSuiteDescription {
     private static final Logger logger = LoggerFactory.getLogger(TestSuiteDescription.class);
     private static final Pattern VERSION_INFO = Pattern.compile("^v?(\\d+\\.\\d+\\.\\d+)(?: (\\d{4}-\\d{2}-\\d{2}))?$");
     private static final String START_OF_DAY = "T00:00:00Z";
-    protected static IRI TEST_VERSION = iri(Namespaces.TESTS_REPO_URI, "version.txt");
+    // ensure that the version file is avaiable in the same location to which test files were mapped
+    protected static IRI TEST_VERSION = iri(Namespaces.TESTS_REPO_URI, "blob/main/version.txt");
 
     private List<String> featurePaths;
     private String currentVersion;
