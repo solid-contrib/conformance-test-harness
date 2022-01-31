@@ -95,6 +95,10 @@ public final class Namespaces {
         namespaceMap.forEach((k, v) -> model.setNamespace(k, v.iri));
     }
 
+    public static void clearSpecificationNamespaces() {
+        specNamespacesMap.clear();
+    }
+
     public static void addSpecification(final IRI iri) {
         specNamespacesMap.put(iri.stringValue(), "spec" + specNamespacesMap.size());
     }

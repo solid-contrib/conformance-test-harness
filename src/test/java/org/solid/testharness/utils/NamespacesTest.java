@@ -123,7 +123,7 @@ public class NamespacesTest {
 
     @Test
     void addSpecifications() {
-        Namespaces.specNamespacesMap.clear();
+        Namespaces.clearSpecificationNamespaces();
         Namespaces.addSpecification(iri(TestUtils.SAMPLE_NS, "testA"));
         Namespaces.addSpecification(iri(TestUtils.SAMPLE_NS, "testB/"));
         assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "testA#1")).startsWith("spec"));

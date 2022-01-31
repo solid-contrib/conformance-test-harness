@@ -24,6 +24,7 @@
 package org.solid.testharness.http;
 
 import com.intuit.karate.core.ScenarioEngine;
+import com.intuit.karate.http.HttpClientFactory;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import jakarta.ws.rs.core.Link;
@@ -114,7 +115,7 @@ class HttpUtilsTest {
 
     @Test
     void logToKarate() {
-        final ScenarioEngine se = ScenarioEngine.forTempUse();
+        final ScenarioEngine se = ScenarioEngine.forTempUse(HttpClientFactory.DEFAULT);
         ScenarioEngine.set(se);
         final Logger logger = mock(Logger.class);
         when(logger.isDebugEnabled()).thenReturn(true);
@@ -168,7 +169,7 @@ class HttpUtilsTest {
 
     @Test
     void logRequestToKarate() {
-        final ScenarioEngine se = ScenarioEngine.forTempUse();
+        final ScenarioEngine se = ScenarioEngine.forTempUse(HttpClientFactory.DEFAULT);
         ScenarioEngine.set(se);
         final Logger logger = mock(Logger.class);
         when(logger.isDebugEnabled()).thenReturn(true);
@@ -235,7 +236,7 @@ class HttpUtilsTest {
 
     @Test
     void logResponseToKarate() {
-        final ScenarioEngine se = ScenarioEngine.forTempUse();
+        final ScenarioEngine se = ScenarioEngine.forTempUse(HttpClientFactory.DEFAULT);
         ScenarioEngine.set(se);
         final Logger logger = mock(Logger.class);
         final HttpRequest request = HttpRequest.newBuilder(URI.create("https://example.org/")).build();

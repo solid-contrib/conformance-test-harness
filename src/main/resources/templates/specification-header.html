@@ -1,12 +1,14 @@
 <section id="specifications-under-test">
   <h2>Specifications under test</h2>
-  {#if specifications}
-  <ul>
-    {#each specifications}
-    <li><a href="{it.subject}" title="Specification link">{it.subject}</a></li>
-    {/each}
-  </ul>
-  {#else}
-  <p>No specifications found.</p>
-  {/if}
+  <div datatype="rdf:HTML" property="dcterms:description">
+    {#if specifications}
+    <ul>
+      {#each specifications}
+      <li><a href="{it.subject}" title="Specification link">{it.subject}</a></li>
+      {/each}
+    </ul>
+    {#else}
+    <p>No specifications found.</p>
+    {/if}
+  </div>
 </section>
