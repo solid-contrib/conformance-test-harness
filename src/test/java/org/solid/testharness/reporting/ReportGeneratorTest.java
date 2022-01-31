@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.DCTERMS;
 import org.solid.common.vocab.SOLID_TEST;
+import org.solid.testharness.config.Config;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.Namespaces;
 import org.solid.testharness.utils.TestUtils;
@@ -56,6 +57,9 @@ import static org.mockito.Mockito.when;
 @QuarkusTest
 class ReportGeneratorTest {
     private static final Logger logger = LoggerFactory.getLogger(ReportGeneratorTest.class);
+
+    @Inject
+    Config config;
 
     @Inject
     DataRepository dataRepository;
@@ -130,6 +134,7 @@ class ReportGeneratorTest {
         ) {
             final String namespace = iri(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl").toString())
                     .getNamespace();
+            config.setTestSubject(iri(namespace, "testserver"));
             resultModel = QueryResults.asModel(statements);
             resultModel.remove(null, SOLID_TEST.features, null);
             resultModel.remove(null, SOLID_TEST.skip, null);

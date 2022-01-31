@@ -1,18 +1,20 @@
 <section about="{subject}" id="test-subject" typeof="{typesList}">
   <h2>Test subject</h2>
-  <dl><dt>Name</dt><dd property="doap:name" lang="" xml:lang="">{softwareName}</dd></dl>
-  <dl><dt>Description</dt><dd property="doap:description">{description}</dd></dl>
-  <dl><dt>Developer</dt><dd><a href="{developer}" rel="doap:developer">{developer}</a></dd></dl>
-  <dl><dt>Homepage</dt><dd><a href="{homepage}" rel="doap:homepage">{homepage}</a></dd></dl>
-  <dl><dt>Programming Language</dt><dd property="doap:programming-language" lang="" xml:lang="">{programmingLanguage}</dd></dl>
-  <dl>
-    <dt>Version</dt>
-    <dd rel="doap:release" resource="{subject}#test-subject-release">
-      {#if releaseName}
-      <span property="doap:name" lang="" xml:lang="">{releaseName}</span>
-      {/if}
-      <span property="doap:revision" lang="" xml:lang="">{revision}</span>
-      (<time datatype="xsd:dateTime" datetime="{releaseDate}" content="{releaseDate}" property="doap:created">{releaseDateAsDate}</time>)
-    </dd>
-  </dl>
+  <div datatype="rdf:HTML" property="dcterms:description">
+    <dl><dt>Name</dt><dd property="doap:name" lang="" xml:lang="">{softwareName}</dd></dl>
+    <dl><dt>Description</dt><dd property="doap:description">{description}</dd></dl>
+    <dl><dt>Developer</dt><dd><a href="{developer}" rel="doap:developer">{developer}</a></dd></dl>
+    <dl><dt>Homepage</dt><dd><a href="{homepage}" rel="doap:homepage">{homepage}</a></dd></dl>
+    <dl><dt>Programming Language</dt><dd property="doap:programming-language" lang="" xml:lang="">{programmingLanguage}</dd></dl>
+    <dl>
+      <dt>Version</dt>
+      <dd rel="doap:release" resource="{subject}#test-subject-release">
+        {#if releaseName}
+        <span property="doap:name" lang="" xml:lang="">{releaseName}</span>
+        {/if}
+        <span property="doap:revision" lang="" xml:lang="">{revision}</span>
+        (<time datatype="xsd:dateTime" datetime="{releaseDate}" content="{releaseDate}" property="doap:created">{releaseDateAsDate}</time>)
+      </dd>
+    </dl>
+  </div>
 </section>

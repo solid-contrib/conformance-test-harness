@@ -27,6 +27,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 import org.solid.common.vocab.TD;
 import org.solid.testharness.utils.AbstractDataModelTests;
+import org.solid.testharness.utils.Namespaces;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
@@ -58,6 +59,7 @@ class TestCaseTest extends AbstractDataModelTests  {
 
     @Test
     void getRequirementAnchor() {
+        Namespaces.clearSpecificationNamespaces();
         final TestCase testCase = new TestCase(iri(NS, "test1"));
         assertEquals("null_requirement1", testCase.getRequirementAnchor());
     }

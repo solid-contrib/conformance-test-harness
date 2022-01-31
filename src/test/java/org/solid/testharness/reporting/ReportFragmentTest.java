@@ -249,6 +249,7 @@ class ReportFragmentTest {
         logger.debug("Report:\n{}", report);
 
         final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
+        reportModel.remove(iri(BASE_URI), DCTERMS.description, null);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         assertTrue(reportModel.isEmpty());
@@ -265,6 +266,7 @@ class ReportFragmentTest {
         logger.debug("Report:\n{}", report);
 
         final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
+        reportModel.remove(iri(BASE_URI), DCTERMS.description, null);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         TestUtils.showModelDifferences(reportModel, assertor.getModel(), logger);
@@ -281,6 +283,7 @@ class ReportFragmentTest {
         logger.debug("Report:\n{}", report);
 
         final Model reportModel = TestUtils.parseRdfa(report, BASE_URI + "#tests");
+        reportModel.remove(specificationTestsIri, DCTERMS.description, null);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         TestUtils.showModelDifferences(reportModel, specificationTests.getModel(), logger);
@@ -299,6 +302,7 @@ class ReportFragmentTest {
         logger.debug("Report:\n{}", report);
 
         final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
+        reportModel.remove(testSubjectIri, DCTERMS.description, null);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         TestUtils.showModelDifferences(reportModel, testSubject.getModel(), logger);
