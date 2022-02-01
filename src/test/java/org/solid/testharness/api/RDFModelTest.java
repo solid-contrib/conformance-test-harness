@@ -24,7 +24,6 @@
 package org.solid.testharness.api;
 
 import com.intuit.karate.core.ScenarioEngine;
-import com.intuit.karate.http.HttpClientFactory;
 import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
@@ -152,8 +151,7 @@ class RDFModelTest {
 
     @Test
     void containsModelContentDiff() {
-        final ScenarioEngine se = ScenarioEngine.forTempUse(HttpClientFactory.DEFAULT);
-        ScenarioEngine.set(se);
+        ScenarioEngine.set(TestUtils.createEmptyScenarioEngine());
         final RDFModel model = RDFModel.parse(SAMPLE_TURTLE, "text/turtle", TestUtils.SAMPLE_BASE);
         assertFalse(model.contains(new RDFModel(SAMPLE_HTML_MODEL)));
     }
