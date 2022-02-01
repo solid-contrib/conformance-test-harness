@@ -23,9 +23,7 @@
  */
 package org.solid.testharness.utils;
 
-import com.intuit.karate.Suite;
 import com.intuit.karate.core.*;
-import com.intuit.karate.http.HttpClientFactory;
 import com.intuit.karate.resource.Resource;
 import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.rdf4j.model.IRI;
@@ -43,7 +41,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -69,7 +70,6 @@ class DataRepositoryTest {
             conn.add(testCaseIri, SPEC.testScript, featureIri);
         }
 
-        final Suite suite = Suite.forTempUse(HttpClientFactory.DEFAULT);
         final Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
         final Scenario scenario1 = mockScenario("SCENARIO 1", 1, 0, null);
@@ -104,7 +104,7 @@ class DataRepositoryTest {
         when(featureFileParser.getScenarioComments(0)).thenReturn("SCENARIO1 COMMENT");
         when(featureFileParser.getScenarioComments(1)).thenReturn("");
 
-        dataRepository.addFeatureResult(suite, fr, featureIri, featureFileParser);
+        dataRepository.addFeatureResult(TestUtils.createEmptySuite(), fr, featureIri, featureFileParser);
         final String result = TestUtils.repositoryToString(dataRepository);
         assertTrue(result.contains("dcterms:title \"FEATURE NAME\""));
         assertTrue(result.contains("dcterms:description \"FEATURE COMMENT\""));
@@ -126,7 +126,6 @@ class DataRepositoryTest {
             conn.add(testCaseIri, SPEC.testScript, featureIri);
         }
 
-        final Suite suite = Suite.forTempUse(HttpClientFactory.DEFAULT);
         final Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
 
@@ -135,7 +134,7 @@ class DataRepositoryTest {
 
         final FeatureFileParser featureFileParser = mock(FeatureFileParser.class);
 
-        dataRepository.addFeatureResult(suite, fr, featureIri, featureFileParser);
+        dataRepository.addFeatureResult(TestUtils.createEmptySuite(), fr, featureIri, featureFileParser);
         final String result = TestUtils.repositoryToString(dataRepository);
         assertTrue(result.contains("dcterms:title \"FEATURE NAME\""));
         assertFalse(result.contains("dcterms:description"));
@@ -146,7 +145,6 @@ class DataRepositoryTest {
     void addFeatureResultNoTestCase() {
         final DataRepository dataRepository = createRepository();
 
-        final Suite suite = Suite.forTempUse(HttpClientFactory.DEFAULT);
         final Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn("FEATURE NAME");
         final Scenario scenario1 = mockScenario("SCENARIO 1", 1, 0, null);
@@ -156,7 +154,7 @@ class DataRepositoryTest {
 
         final FeatureFileParser featureFileParser = mock(FeatureFileParser.class);
 
-        dataRepository.addFeatureResult(suite, fr, featureIri, featureFileParser);
+        dataRepository.addFeatureResult(TestUtils.createEmptySuite(), fr, featureIri, featureFileParser);
         final String result = TestUtils.repositoryToString(dataRepository);
         assertFalse(result.contains("dcterms:title \"FEATURE NAME\""));
         assertTrue(result.contains("earl:outcome earl:failed"));
@@ -165,7 +163,6 @@ class DataRepositoryTest {
     @Test
     void addFeatureResultBadRdf() {
         final DataRepository dataRepository = createRepository();
-        final Suite suite = Suite.forTempUse(HttpClientFactory.DEFAULT);
         final Feature feature = mock(Feature.class);
         when(feature.getName()).thenReturn(null);
         final FeatureResult fr = mock(FeatureResult.class);
@@ -175,7 +172,7 @@ class DataRepositoryTest {
 
         final FeatureFileParser featureFileParser = mock(FeatureFileParser.class);
 
-        dataRepository.addFeatureResult(suite, fr, featureIri, featureFileParser);
+        dataRepository.addFeatureResult(TestUtils.createEmptySuite(), fr, featureIri, featureFileParser);
         final String result = TestUtils.repositoryToString(dataRepository);
         assertFalse(result.contains(featureIri.stringValue()));
     }

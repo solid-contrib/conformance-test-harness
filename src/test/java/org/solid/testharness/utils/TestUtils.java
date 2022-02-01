@@ -23,6 +23,8 @@
  */
 package org.solid.testharness.utils;
 
+import com.intuit.karate.Suite;
+import com.intuit.karate.core.ScenarioEngine;
 import org.eclipse.rdf4j.RDF4JException;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
@@ -206,6 +208,14 @@ public final class TestUtils {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             conn.add(url, SAMPLE_BASE, RDFFormat.TURTLE);
         }
+    }
+
+    public static Suite createEmptySuite() {
+        return Suite.forTempUse(); // HttpClientFactory.DEFAULT - for Karate 1.2.0.RC2 onwards
+    }
+
+    public static ScenarioEngine createEmptyScenarioEngine() {
+        return ScenarioEngine.forTempUse(); // HttpClientFactory.DEFAULT - for Karate 1.2.0.RC2 onwards
     }
 
     private TestUtils() { }

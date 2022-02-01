@@ -24,7 +24,6 @@
 package org.solid.testharness.http;
 
 import com.intuit.karate.core.ScenarioEngine;
-import com.intuit.karate.http.HttpClientFactory;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import jakarta.ws.rs.core.Link;
@@ -32,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.slf4j.Logger;
 import org.solid.testharness.config.Config;
+import org.solid.testharness.utils.TestUtils;
 
 import java.net.URI;
 import java.net.http.HttpHeaders;
@@ -115,8 +115,7 @@ class HttpUtilsTest {
 
     @Test
     void logToKarate() {
-        final ScenarioEngine se = ScenarioEngine.forTempUse(HttpClientFactory.DEFAULT);
-        ScenarioEngine.set(se);
+        ScenarioEngine.set(TestUtils.createEmptyScenarioEngine());
         final Logger logger = mock(Logger.class);
         when(logger.isDebugEnabled()).thenReturn(true);
         HttpUtils.logToKarate(logger, "FORMAT {}", "MESSAGE");
@@ -139,7 +138,6 @@ class HttpUtilsTest {
     void logToKarateFallbackDisabled() {
         ScenarioEngine.set(null);
         final Logger logger = mock(Logger.class);
-        final HttpRequest request = mock(HttpRequest.class);
         when(logger.isDebugEnabled()).thenReturn(false);
         HttpUtils.logToKarate(logger, "FORMAT {}", "MESSAGE");
         verify(logger, never()).debug(anyString(), ArgumentMatchers.<Object[]>any());
@@ -169,8 +167,7 @@ class HttpUtilsTest {
 
     @Test
     void logRequestToKarate() {
-        final ScenarioEngine se = ScenarioEngine.forTempUse(HttpClientFactory.DEFAULT);
-        ScenarioEngine.set(se);
+        ScenarioEngine.set(TestUtils.createEmptyScenarioEngine());
         final Logger logger = mock(Logger.class);
         when(logger.isDebugEnabled()).thenReturn(true);
         final HttpRequest request = HttpRequest.newBuilder(URI.create("https://example.org/"))
@@ -236,8 +233,7 @@ class HttpUtilsTest {
 
     @Test
     void logResponseToKarate() {
-        final ScenarioEngine se = ScenarioEngine.forTempUse(HttpClientFactory.DEFAULT);
-        ScenarioEngine.set(se);
+        ScenarioEngine.set(TestUtils.createEmptyScenarioEngine());
         final Logger logger = mock(Logger.class);
         final HttpRequest request = HttpRequest.newBuilder(URI.create("https://example.org/")).build();
         final HttpResponse<String> response = mock(HttpResponse.class);

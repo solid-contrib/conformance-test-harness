@@ -24,11 +24,10 @@
 package org.solid.testharness.reporting;
 
 import com.intuit.karate.Results;
-import com.intuit.karate.Suite;
-import com.intuit.karate.http.HttpClientFactory;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.TestUtils;
 
 import java.util.Date;
 import java.util.Map;
@@ -59,7 +58,7 @@ class TestSuiteResultsTest {
     @Test
     void getFeatures() {
         final Results results = mock(Results.class);
-        when(results.getSuite()).thenReturn(Suite.forTempUse(HttpClientFactory.DEFAULT));
+        when(results.getSuite()).thenReturn(TestUtils.createEmptySuite());
         final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
         assertNull(testSuiteResults.getFeatures());
     }
