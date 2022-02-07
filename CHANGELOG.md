@@ -1,5 +1,10 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.1.1
+
+### Minor changes
+* Update Karate, Quarkus and Graal packages.
+
 ## Release 1.1.0
 
 ### Fix

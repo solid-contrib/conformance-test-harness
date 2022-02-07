@@ -1,6 +1,7 @@
-
 # conformance-test-harness
 The Conformance Test Harness (CTH) is used to run Solid conformance tests against Solid servers, and generate reports of the test results.
+
+For usage instructions see: [USAGE.md](USAGE.md)
 
 <!-- MarkdownTOC -->
 
