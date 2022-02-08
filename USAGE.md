@@ -358,9 +358,6 @@ MAXTHREADS=2
 ```
 
 # Execution
-The CTH can be executed both locally and within a Docker Container.
-
-## Running in a Docker Container
 The simplest way to run the CTH is via the [Docker](https://www.docker.com/) image published to
 https://hub.docker.com/r/solidproject/conformance-test-harness.
 
@@ -376,7 +373,7 @@ The Docker image works with the following internal structure:
 To use this image, you just need to provide:
 
 1. An environment file for the server you are testing; and,
-1. The test subject using the `target` option on the command line.
+2. The test subject using the `target` option on the command line.
 
 When you run the server in a container, there are some important things to remember:
 * You cannot use localhost, so you need to name your instance and use that name to access it from the test container.
@@ -384,7 +381,7 @@ When you run the server in a container, there are some important things to remem
 * When using a domain name, you may hit the problem that DPoP verification requires https unless you are using
   localhost hence using `https` in the above URL.
 * As the image uses `https`, you need to provide a SSL certificate to the server which can be generated
-  as a self-signed certificate (as seen in the CSS example below).
+  as a self-signed certificate (as seen in the CSS example mentioned below).
 * The CTH is set up to detect when you are using https://server, and will allow self-signed certificates. If you see an
   issue with DPoP verification rejecting self-signed certificates, the server being tested will need to be set up to
   have the same capability. For a Node based server, this is done by adding `NODE_TLS_REJECT_UNAUTHORIZED=0`
@@ -392,7 +389,7 @@ When you run the server in a container, there are some important things to remem
 
 Some additional notes on using the Docker image:
 * To run a specific version of the Docker image, you need to append a tag to the image name, e.g.
-  `solidproject/conformance-test-harness:1.0.0` 
+  `solidproject/conformance-test-harness:1.1.0` 
 * If you do not specify a version then Docker will use the latest image
 * If you want to see the reports, the `/reports` directory must be mapped to a local volume. Alternatively you could use 
 this image in your own image which could send the reports to an external location such as Amazon Web Services (AWS) S3.
@@ -416,30 +413,27 @@ internal ones. For example:
     git checkout v1.0.0
     ```  
 
-### Examples
+## Minimal example
+If you want to set up your own script, for example, in a CI workflow you could create a `.env` file containing a logging
+instruction and server credentials, such as this:
+```shell
+quarkus.log.category."com.intuit.karate".level=DEBUG
 
-The following examples demonstrate how a script can work with the Docker image and run tests against:
-1. A publicly available Solid server.
-1. A Solid server running in a Docker container.
-1. A publicly available Solid server with user supplied tests and configuration.
+SOLID_IDENTITY_PROVIDER=https://server/idp/
+USERS_ALICE_WEBID=https://server/alice/profile/card#me
+USERS_ALICE_USERNAME=alice@example.org
+USERS_ALICE_PASSWORD=?
+USERS_BOB_WEBID=https://server/bob/profile/card#me
+USERS_BOB_USERNAME=bob@example.org
+USERS_BOB_PASSWORD=?
+USER_REGISTRATION_ENDPOINT=https://server/idp/register/
 
-#### Example: Using a publicly available Solid Server
-Executes tests against a publicly available server, in this case ESS (https://pod.inrupt.com).
+RESOURCE_SERVER_ROOT=https://server
+TEST_CONTAINER=/alice/
+```
 
-1. Create a file for environment variables (e.g., `ess.env`) with the following contents (based on the 
-    client_credentials option):
-    ```shell
-    SOLID_IDENTITY_PROVIDER=
-    USERS_ALICE_WEBID=
-    USERS_ALICE_CLIENTSECRET=
-    USERS_BOB_WEBID=
-    USERS_BOB_CLIENTSECRET=
-    RESOURCE_SERVER_ROOT=https://pod.inrupt.com
-    TEST_CONTAINER=/pod-owner/shared-test/
-    ```
-
-1. Create a script based on the following:
-    ```shell
+Then you would need a script such as:
+```shell
     #!/bin/bash
 
     # This uses the test harness docker image with the default tests pulled from a repository.
@@ -451,149 +445,34 @@ Executes tests against a publicly available server, in this case ESS (https://po
     -v "$(pwd)"/reports/ess:/reports \
     --env-file=ess.env solidproject/conformance-test-harness \
     --output=/reports --target=https://github.com/solid/conformance-test-harness/ess
-    ```
+```
 
-1. Run `./ess.sh`.
-1. The reports will be created in the specified directory.
+## Using the provided script 
+There is a script to help you run tests here: https://github.com/solid/specification-tests/blob/main/run.sh. This can be
+used to run combinations of the following:
+* Run the tests against a publicly available Solid server or one in a local container.
+* Run the tests embedded in the image or your own version of the tests (e.g. if you have cloned the specification-tests
+  repository to write tests).
+* Use the image's CTH build or a local one if you are developing CTH.
 
-**Note**: To run against the ESS (ACP) version, you would just need to supply a different environment file and set the target as
-`ess`.
+Simply download a copy of the script into a directory and create a suitable `server.env` file as aboce, replacing
+`server` with the name of the server you are testing, matching the localname of the server from the `test-subjects.ttl`
+file.
 
-#### Example: Using a Solid Server in a Docker Container
-Some Solid servers (e.g., CSS) can be run in a Docker container. 
+1. To run the tests embedded in the image against a publicly available Solid server or CSS in a local container:
+  ```shell
+  ./run.sh server  # where server is replace with the target name matching your `env` file and `test-subjects.ttl`
+  ```
+2. Run your own version of the tests (e.g. if you have cloned the specification-tests repository to write tests).
+  ```shell
+  ./run.sh -d . server  # -d option allows you to specify the location of tests (current directory in this case)
+  ```
+3. Run the tests with a local build of the CTH.
+  ```shell
+  ./run.sh -l server  # use a local build of CTH assuming the image name is `testharness`
+  ```
 
-1. This example assumes you have an image of CSS available. If it has not been published, you can build your own:
-    ```shell
-    git clone https://github.com/solid/community-server
-    cd community-server
-    docker build --rm -f Dockerfile -t css:latest .
-    ```
-    **Note**: When using a container, you can't use http://localhost:3000 as this will not be accessible to the CTH
-    container. Once you switch to a named container, you will also need to switch to `https` and add a self-signed certificate
-    due to restrictions with DPoP. Additionally you will need to add `server` as an alias for `localhost` in your `/etc/hosts`
-    file.
-2. Create a file for environment variables (e.g., `css.env`) with the following contents (based on the local user registration
-option):
-    ```shell
-    SOLID_IDENTITY_PROVIDER=        # e.g. https://server/idp
-    USER_REGISTRATION_ENDPOINT=     # e.g. https://server/idp/register
-    USERS_ALICE_WEBID=              # e.g. https://server/alice/profile/card#me
-    USERS_ALICE_USERNAME=
-    USERS_ALICE_PASSWORD=
-    USERS_BOB_WEBID=                # e.g. https://server/bob/profile/card#me
-    USERS_BOB_USERNAME=
-    USERS_BOB_PASSWORD=
-    RESOURCE_SERVER_ROOT=           # e.g. https://server
-    TEST_CONTAINER=                 # e.g. /alice/
-    ```
-3. Create a script based on the following. Note that you will need to update the context and import list in the CSS
-   config section from the latest example at https://github.com/solid/community-server/blob/main/config/default.json.
-    ```shell
-    #!/bin/bash
-
-    # This uses the test harness docker image with the default tests pulled from a repository.
-    # Environment variables are defined in the file `env` in the directory from which you run this script.
-
-    mkdir -p reports/css config
-
-    # Create the configuration file needed to run CSS in https mode.
-    cat > ./config/css-config.json <<EOF
-    {
-    "@context": "",
-    "import": [],
-    "@graph": [
-        {
-        "comment": [
-            "An example of what a config could look like if HTTPS is required.",
-            "The http/server-factory import above has been omitted since that feature is set below."
-        ]
-        },
-        {
-        "comment": "The key/cert values should be replaces with paths to the correct files. The 'options' block can be removed if not needed.",
-        "@id": "urn:solid-server:default:ServerFactory",
-        "@type": "WebSocketServerFactory",
-        "baseServerFactory": {
-            "@id": "urn:solid-server:default:HttpServerFactory",
-            "@type": "BaseHttpServerFactory",
-            "handler": { "@id": "urn:solid-server:default:HttpHandler" },
-            "options_showStackTrace": { "@id": "urn:solid-server:default:variable:showStackTrace" },
-            "options_https": true,
-            "options_key": "/config/server.key",
-            "options_cert": "/config/server.cert"
-        },
-        "webSocketHandler": {
-            "@type": "UnsecureWebSocketsProtocol",
-            "source": { "@id": "urn:solid-server:default:ResourceStore" }
-        }
-        }
-    ]
-    }
-    EOF
-
-    # Create a self-signed certificate
-    openssl req -new -x509 -days 365 -nodes \
-    -out config/server.cert \
-    -keyout config/server.key \
-    -subj "/C=US/ST=California/L=Los Angeles/O=Security/OU=IT Department/CN=server"
-
-    # run CSS in a container enabling self-signed certificates
-    docker network create testnet
-    docker run -d --name=server --network=testnet --env NODE_TLS_REJECT_UNAUTHORIZED=0 \
-    -v "$(pwd)"/config:/config -p 443:443 -it css:latest \
-    -c /config/css-config.json --port=443 --baseUrl=https://server/
-    
-    # Wait for it to be ready
-    until $(curl --output /dev/null --silent --head --fail -k https://server); do
-    printf '.'
-    sleep 1
-    done
-    echo 'CSS is running'
-
-    # Run the tests in the test harness
-    docker pull solidproject/conformance-test-harness
-    docker run -i --rm \
-    -v "$(pwd)"/reports/css:/reports \
-    --env-file=css.env --network=testnet solidproject/conformance-test-harness \
-    --output=/reports --target=https://github.com/solid/conformance-test-harness/css
-    docker stop server
-    docker rm server
-    docker network rm testnet
-    ```
-4. Run this script.
-5. The reports will be created in the specified directory.
-
-#### Example: Using a publicly available Solid Server providing your own tests and configuration
-To use the Docker image to run a set of local tests:
-1. Create a directory such as `tests`. This directory should contain the tests, manifest files, and a test subject configuration file. For example:
-    * `protocol/test.feature`.
-    * `solid-protocol-test-manifest.ttl`.
-    * `test-subjects.ttl`.
-2. Create a directory called `config`.
-3. Create the file `config/application.yaml`. For example:
-    ```
-    subjects: /data/test-subjects.ttl
-    sources:
-        - https://github.com/solid/conformance-test-harness/blob/main/example/protocol/solid-protocol-test-manifest.ttl
-        - https://solidproject.org/TR/protocol
-    target: https://github.com/solid/conformance-test-harness/ess
-    mappings:
-        - prefix: https://github.com/solid/conformance-test-harness/blob/main/example/protocol
-        path: /data
-    ```
-    **Notes**:
-    * The paths are internal paths within the CTH Docker image so you next need to map them in the command line.
-    * You can set the default target here rather than on the command line - this has to be a URI from the `test-subjects.ttl`
-    file.
-    * The mapping prefix is whatever you have used within the test manifest file.
-4. The command line needs to map the local directories into the Docker image to replace the internal directories:
-    ```
-    docker run -i --rm \
-        -v "$(pwd)"/tests:/data 
-        -v "$(pwd)"/config:/app/config \
-        -v "$(pwd)"/reports/local:/reports \
-        --env-file=ess.env solidproject/conformance-test-harness \
-        --output=/reports --target=https://github.com/solid/conformance-test-harness/ess
-    ```
+You can add additional options for CTH after the commands above, for example, use `--filter` to select specific tests.
 
 # Reports
 |Report|Location|
