@@ -41,7 +41,7 @@ public class SolidContainerProvider extends SolidResourceProvider {
     }
 
     public SolidContainerProvider instantiate() throws Exception {
-        solidClientProvider.createContainer(this.url);
+        instantiateContainer();
         return this;
     }
 

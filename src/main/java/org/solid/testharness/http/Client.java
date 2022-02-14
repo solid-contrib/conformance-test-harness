@@ -55,7 +55,7 @@ import static org.apache.commons.text.CharacterPredicates.LETTERS;
 // Duplicate string are null check error messages for same parameter
 public class Client {
     private static final Logger logger = LoggerFactory.getLogger(Client.class);
-    private static int MAX_RETRY = 10;
+    private static final int MAX_RETRY = 10;
 
     private HttpClient httpClient;
     private String accessToken;
@@ -139,8 +139,8 @@ public class Client {
     public HttpResponse<String> send(@NotNull final String method, @NotNull final URI url, final String data,
                                      final Map<String, Object> headers, final String version, final boolean authorized)
             throws Exception {
-        requireNonNull(url, "url is required");
-        requireNonNull(method, "method is required");
+        requireNonNull(url, "url is required for send");
+        requireNonNull(method, "method is required for send");
         final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url);
         if (data != null) {
             builder.method(method, HttpRequest.BodyPublishers.ofString(data));
@@ -215,7 +215,7 @@ public class Client {
 
     @SuppressWarnings("checkstyle:MultipleStringLiterals")
     public HttpResponse<String> getAsTurtle(@NotNull final URI url) throws IOException, InterruptedException {
-        requireNonNull(url, "url is required");
+        requireNonNull(url, "url is required for getAsTurtle");
         final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
                 .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
         final HttpRequest request = authorize(builder).build();
@@ -224,9 +224,9 @@ public class Client {
 
     public HttpResponse<Void> put(@NotNull final URI url, final String data, final String type)
             throws IOException, InterruptedException {
-        requireNonNull(url, "url is required");
-        requireNonNull(data, "data is required");
-        requireNonNull(type, "type is required");
+        requireNonNull(url, "url is required for put");
+        requireNonNull(data, "data is required for put");
+        requireNonNull(type, "type is required for put");
         final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
                 .PUT(HttpRequest.BodyPublishers.ofString(data))
                 .header(HttpConstants.HEADER_CONTENT_TYPE, type);
@@ -239,9 +239,9 @@ public class Client {
 
     public HttpResponse<String> patch(@NotNull final URI url, final String data, final String type)
             throws IOException, InterruptedException {
-        requireNonNull(url, "url is required");
-        requireNonNull(data, "data is required");
-        requireNonNull(type, "type is required");
+        requireNonNull(url, "url is required for patch");
+        requireNonNull(data, "data is required for patch");
+        requireNonNull(type, "type is required for patch");
         final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
                 .method(HttpConstants.METHOD_PATCH, HttpRequest.BodyPublishers.ofString(data))
                 .header(HttpConstants.HEADER_CONTENT_TYPE, type);
@@ -253,7 +253,13 @@ public class Client {
     }
 
     public HttpResponse<Void> head(@NotNull final URI url) throws IOException, InterruptedException {
-        requireNonNull(url, "url is required");
+        try {
+            // short term addition to report errors whilst tracing a fault
+            requireNonNull(url, "url is required for head");
+        } catch (Exception e) {
+            logger.info("HEAD WITHOUT URL:", e);
+        }
+        requireNonNull(url, "url is required for head");
         final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
                 .method(HttpConstants.METHOD_HEAD, HttpRequest.BodyPublishers.noBody());
         final HttpRequest request = authorize(builder).build();
@@ -264,7 +270,7 @@ public class Client {
     }
 
     public CompletableFuture<HttpResponse<Void>> deleteAsync(@NotNull final URI url) {
-        requireNonNull(url, "url is required");
+        requireNonNull(url, "url is required for deleteAsync");
         logger.debug("Deleting {}", url);
         final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url).DELETE();
         final HttpRequest request = authorize(builder).build();
@@ -292,8 +298,8 @@ public class Client {
      * @return Map of authentication and agent headers
      */
     public Map<String, String> getAuthHeaders(@NotNull final String method, @NotNull final URI uri) {
-        requireNonNull(method, "method is required");
-        requireNonNull(uri, "uri is required");
+        requireNonNull(method, "method is required for getAuthHeaders");
+        requireNonNull(uri, "uri is required for getAuthHeaders");
         final Map<String, String> headers = new HashMap<>();
         if (accessToken == null) return headers;
         if (dpopSupported) {

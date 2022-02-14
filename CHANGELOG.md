@@ -1,5 +1,10 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.1.2
+
+### Minor changes
+* Get ACL link on container creation to avoid unnecessary HEAD request.
+
 ## Release 1.1.1
 
 ### Minor changes

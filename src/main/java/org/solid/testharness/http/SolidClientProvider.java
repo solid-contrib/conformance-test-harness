@@ -60,8 +60,8 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 public class SolidClientProvider {
     private static final Logger logger = LoggerFactory.getLogger(SolidClientProvider.class);
 
-    private Client client;
-    private AccessControlFactory accessControlFactory;
+    private final Client client;
+    private final AccessControlFactory accessControlFactory;
 
     public SolidClientProvider() {
         final ClientRegistry clientRegistry = CDI.current().select(ClientRegistry.class).get();
@@ -179,7 +179,7 @@ public class SolidClientProvider {
     private CompletableFuture<HttpResponse<Void>> deleteRecursive(final URI url, final AtomicInteger depth) {
         final List<URI> failed;
         if (url == null) {
-            throw new IllegalArgumentException("url is required");
+            throw new IllegalArgumentException("url is required for deleteRecursive");
         }
         if (isContainer(url)) {
             if (depth != null) {

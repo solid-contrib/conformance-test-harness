@@ -43,8 +43,8 @@ public class SolidResourceProvider {
     protected URI url;
     private URI aclUrl;
     private Boolean aclLinkAvailable;
-    private boolean containerType;
-    private Config config;
+    private final boolean containerType;
+    private final Config config;
 
     public SolidResourceProvider(final SolidClientProvider solidClientProvider, final URI url) {
         this(solidClientProvider, url, null, null);
@@ -68,14 +68,7 @@ public class SolidResourceProvider {
             final HttpHeaders headers;
             try {
                 headers = solidClientProvider.createResource(url, body, type);
-                if (headers != null && headers.allValues(HttpConstants.HEADER_LINK).size() != 0) {
-                    final URI aclLink = solidClientProvider.getAclUri(headers);
-                    if (aclLink != null) {
-                        logger.debug("ACL LINK {}", aclLink);
-                        aclUrl = url.resolve(aclLink);
-                        aclLinkAvailable = true;
-                    }
-                }
+                getAclUrl(url, headers);
             } catch (Exception e) {
                 logger.warn("Failed to create resource at {}: {}", url, e);
                 return;
@@ -97,6 +90,11 @@ public class SolidResourceProvider {
         return containerType;
     }
 
+    protected void instantiateContainer() throws Exception {
+        final HttpHeaders headers = solidClientProvider.createContainer(url);
+        getAclUrl(url, headers);
+    }
+
     public SolidContainerProvider getContainer() {
         if (containerType) {
             if ("/".equals(url.getPath())) {
@@ -107,6 +105,17 @@ public class SolidResourceProvider {
             }
         } else {
             return new SolidContainerProvider(solidClientProvider, this.url.resolve("."));
+        }
+    }
+
+    private void getAclUrl(final URI url, final HttpHeaders headers) {
+        if (headers != null && headers.allValues(HttpConstants.HEADER_LINK).size() != 0) {
+            final URI aclLink = solidClientProvider.getAclUri(headers);
+            if (aclLink != null) {
+                logger.debug("ACL LINK {}", aclLink);
+                aclUrl = url.resolve(aclLink);
+                aclLinkAvailable = true;
+            }
         }
     }
 
