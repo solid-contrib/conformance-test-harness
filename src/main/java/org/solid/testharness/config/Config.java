@@ -61,7 +61,7 @@ public class Config {
     private Map<String, String> webIds;
     private AccessControlMode accessControlMode;
     private Hashids hashids;
-    private AtomicLong resourceCount = new AtomicLong();
+    private final AtomicLong resourceCount = new AtomicLong();
 
     public enum AccessControlMode {
         ACP_LEGACY,
@@ -262,11 +262,14 @@ public class Config {
 
     public void logConfigSettings(final RunMode mode) {
         if (logger.isInfoEnabled()) {
-            logger.info("Sources:        {}", getTestSources());
-            logger.info("Path mappings:  {}", pathMappings.stringValue());
+            logger.info("Sources:         {}", getTestSources());
+            logger.info("Path mappings:   {}", pathMappings.stringValue());
             if (mode == RunMode.TEST) {
-                logger.info("Subjects URL:   {}", getSubjectsUrl());
-                logger.info("Target server:  {}", getTestSubject());
+                logger.info("Subjects URL:    {}", getSubjectsUrl());
+                logger.info("Target server:   {}", getTestSubject());
+                logger.info("Connect timeout: {}", getConnectTimeout());
+                logger.info("Read timeout:    {}", getReadTimeout());
+                logger.info("Max threads:     {}", getMaxThreads());
             }
         }
     }
