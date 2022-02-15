@@ -305,8 +305,10 @@ There is a special logging category, called `ResultLogger`, which outputs a summ
 `INFO` level (not necessarily in the order below):
 ```json5
 {
-  "mustFeaturesPassed":0, // combination of MUST and MUST-NOT
-  "mustFeaturesFailed":0, // combination of MUST and MUST-NOT
+  "mustFeatures": { // combination of MUST and MUST-NOT
+    "passed": 0,
+    "failed": 0
+  }, 
   "scenariosPassed":0,
   "scenariosFailed":0,
   "scenariosTotal":0,
@@ -315,33 +317,24 @@ There is a special logging category, called `ResultLogger`, which outputs a summ
   "featuresFailed":0,
   "elapsedTime":1000.0,
   "totalTime":1000.0,
-  "resultDate":"2021-06-17 09:12:31 am",
-  // results by requirement level and outcome
-  "MUST:passed":0,
-  "MUST:failed":0,
-  "MUST:inapplicable":0,
-  "MUST:untested":0,
-  "MUST-NOT:passed":0,
-  "MUST-NOT:failed":0,
-  "MUST-NOT:inapplicable":0,
-  "MUST-NOT:untested":0,
-  "SHOULD:passed":0,
-  "SHOULD:failed":0,
-  "SHOULD:inapplicable":0,
-  "SHOULD:untested":0,
-  "SHOULD-NOT:passed":0,
-  "SHOULD-NOT:failed":0,
-  "SHOULD-NOT:inapplicable":0,
-  "SHOULD-NOT:untested":0,
-  "MAY:passed":0,
-  "MAY:failed":0,
-  "MAY:inapplicable":0,
-  "MAY:untested":0,
+  "resultDate":"2021-06-17T09:12:31.000Z",
+  // results by requirement level and outcome, only non-zero values are included
+  "MUST": {
+    "passed": 0,
+    "failed": 0,
+    "untested": 0,
+    "inapplicable": 0
+  },
+  "MUST": { /* as above */ },
+  "MUST-NOT": { /* as above */ },
+  "SHOULD": { /* as above */ },
+  "SHOULD-NOT": { /* as above */ },
+  "MAY": { /* as above */ },
 }
 ```
 This results in a log entry such as:
 ```
-2021-06-17 11:43:04,742 INFO  [ResultLogger] (main) {"resultDate":"2021-06-17 11:43:04 am","elapsedTime":7552.0,"mustFeaturesPassed":0,"mustFeaturesFailed":0, ...}
+2021-06-17 11:43:04,742 INFO  [ResultLogger] (main) {"resultDate":"2021-06-17T11:12:31.000Z","elapsedTime":7552.0,"mustFeaturesPassed":0,"mustFeaturesFailed":0, ...}
 ```
 
 The Scenario counts represent the results of all individual tests that were run but does not indicate whether a test that 

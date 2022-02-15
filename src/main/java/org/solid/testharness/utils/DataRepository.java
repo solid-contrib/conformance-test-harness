@@ -46,6 +46,7 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.*;
+import org.solid.testharness.reporting.Scores;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -318,8 +319,9 @@ public class DataRepository implements Repository {
         return JS_ERROR.matcher(data).replaceFirst("\n$1\n$2\n$3\n$4").replaceAll("\\R+", "\n");
     }
 
-    public Map<String, Integer> getOutcomeCounts() {
-        final Map<String, Integer> counts = new HashMap<>();
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+    public Map<String, Scores> getOutcomeCounts() {
+        final Map<String, Scores> counts = new HashMap<>();
         try (
                 RepositoryConnection conn = getConnection()
         ) {
@@ -339,7 +341,12 @@ public class DataRepository implements Repository {
                     final String level = ((IRI)bindingSet.getValue("level")).getLocalName();
                     final String outcome = ((IRI)bindingSet.getValue("outcome")).getLocalName();
                     final int count = Integer.parseInt(bindingSet.getValue("count").stringValue());
-                    counts.put(level + ":" + outcome, count);
+                    Scores scores = counts.get(level);
+                    if (scores == null) {
+                        scores = new Scores();
+                        counts.put(level, scores);
+                    }
+                    scores.setScore(outcome, count);
                 }
             }
         }

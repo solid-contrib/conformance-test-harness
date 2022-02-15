@@ -32,6 +32,7 @@ import org.eclipse.rdf4j.model.util.Values;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Test;
 import org.solid.common.vocab.*;
+import org.solid.testharness.reporting.Scores;
 
 import java.io.File;
 import java.io.IOException;
@@ -240,23 +241,25 @@ class DataRepositoryTest {
     void countTestsPassed() {
         final DataRepository dataRepository = createRepository();
         createAssertion(dataRepository, SPEC.MUST, EARL.passed);
-        final Map<String, Integer> results = dataRepository.getOutcomeCounts();
-        assertEquals(1, results.get("MUST:passed"));
+        final Map<String, Scores> results = dataRepository.getOutcomeCounts();
+        assertEquals(1, results.get("MUST").getPassed());
     }
 
     @Test
     void countTestsFailed() {
         final DataRepository dataRepository = createRepository();
         createAssertion(dataRepository, SPEC.MAY, EARL.failed);
-        final Map<String, Integer> results = dataRepository.getOutcomeCounts();
-        assertEquals(1, results.get("MAY:failed"));
+        createAssertion(dataRepository, SPEC.MAY, EARL.untested);
+        final Map<String, Scores> results = dataRepository.getOutcomeCounts();
+        assertEquals(1, results.get("MAY").getFailed());
+        assertEquals(1, results.get("MAY").getUntested());
     }
 
     @Test
     void countTestsNoOutcome() {
         final DataRepository dataRepository = createRepository();
         createAssertion(dataRepository, SPEC.SHOULD, null);
-        final Map<String, Integer> results = dataRepository.getOutcomeCounts();
+        final Map<String, Scores> results = dataRepository.getOutcomeCounts();
         assertEquals(0, results.size());
     }
 
