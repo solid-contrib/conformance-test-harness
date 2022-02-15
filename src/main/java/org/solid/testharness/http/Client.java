@@ -253,12 +253,6 @@ public class Client {
     }
 
     public HttpResponse<Void> head(@NotNull final URI url) throws IOException, InterruptedException {
-        try {
-            // short term addition to report errors whilst tracing a fault
-            requireNonNull(url, "url is required for head");
-        } catch (Exception e) {
-            logger.info("HEAD WITHOUT URL:", e);
-        }
         requireNonNull(url, "url is required for head");
         final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
                 .method(HttpConstants.METHOD_HEAD, HttpRequest.BodyPublishers.noBody());

@@ -71,7 +71,7 @@ public class SolidResourceProvider {
                 getAclUrl(url, headers);
             } catch (Exception e) {
                 logger.warn("Failed to create resource at {}: {}", url, e);
-                return;
+                throw new RuntimeException("Failed to create resource at " + url, e);
             }
         }
         this.url = url;
@@ -83,7 +83,7 @@ public class SolidResourceProvider {
     }
 
     public String getContentAsTurtle() throws Exception {
-        return url != null ? solidClientProvider.getContentAsTurtle(url) : "";
+        return solidClientProvider.getContentAsTurtle(url);
     }
 
     public boolean isContainer() {
@@ -180,10 +180,6 @@ public class SolidResourceProvider {
 
     @Override
     public String toString() {
-        if (containerType) {
-            return "SolidContainerProvider: " + url.toString();
-        } else {
-            return "SolidResourceProvider: " + (url != null ? url.toString() : "null");
-        }
+        return (containerType ? "SolidContainerProvider: " : "SolidResourceProvider: ") + url;
     }
 }
