@@ -152,10 +152,9 @@ class SolidResourceProviderTest {
         when(solidClientProvider.createResource(TEST_URL, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN))
                 .thenThrow(new Exception());
 
-        final SolidResourceProvider resource = new SolidResourceProvider(solidClientProvider, TEST_URL, "hello",
-                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
-
-        assertNull(resource.getUrl());
+        assertThrows(Exception.class, () -> new SolidResourceProvider(solidClientProvider, TEST_URL, "hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN)
+        );
     }
 
     @Test
@@ -259,9 +258,9 @@ class SolidResourceProviderTest {
     void getUrlNull() throws Exception {
         when(solidClientProvider.createResource(TEST_URL, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN))
                 .thenThrow(new Exception("Failed as expected"));
-        final SolidResourceProvider resource = new SolidResourceProvider(solidClientProvider, TEST_URL, "hello",
-                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
-        assertNull(resource.getUrl());
+        assertThrows(Exception.class, () -> new SolidResourceProvider(solidClientProvider, TEST_URL, "hello",
+                HttpConstants.MEDIA_TYPE_TEXT_PLAIN)
+        );
     }
 
     @Test
@@ -315,15 +314,6 @@ class SolidResourceProviderTest {
         when(solidClientProvider.getContentAsTurtle(TEST_URL)).thenReturn("CONTENT");
         final SolidResourceProvider resource = new SolidResourceProvider(solidClientProvider, TEST_URL);
         assertEquals("CONTENT", resource.getContentAsTurtle());
-    }
-
-    @Test
-    void getContentAsTurtleEmpty() throws Exception {
-        when(solidClientProvider.createResource(TEST_URL, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN))
-                .thenThrow(new Exception("FAIL"));
-        final SolidResourceProvider resource = new SolidResourceProvider(solidClientProvider, TEST_URL,"hello",
-                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
-        assertEquals("", resource.getContentAsTurtle());
     }
 
     @Test
@@ -383,15 +373,6 @@ class SolidResourceProviderTest {
         final SolidResourceProvider resource = new SolidResourceProvider(solidClientProvider, TEST_URL, "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
         assertEquals("SolidResourceProvider: " + TEST_URL, resource.toString());
-    }
-
-    @Test
-    void emptyResourceToString() throws Exception {
-        when(solidClientProvider.createResource(TEST_URL, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN))
-                .thenThrow(new Exception("Failed as expected"));
-        final SolidResourceProvider resource = new SolidResourceProvider(solidClientProvider, TEST_URL, "hello",
-                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
-        assertEquals("SolidResourceProvider: null", resource.toString());
     }
 
     @Test

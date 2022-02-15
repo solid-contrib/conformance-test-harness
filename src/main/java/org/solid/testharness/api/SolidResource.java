@@ -58,7 +58,7 @@ public class SolidResource {
                                        final String body, final String type) {
         try {
             return new SolidResource(
-                    new SolidResourceProvider(solidClient.solidClientProvider, URI.create(url),body, type)
+                    new SolidResourceProvider(solidClient.solidClientProvider, URI.create(url), body, type)
             );
         } catch (Exception e) {
             throw new TestHarnessException("Failed to construct resource", e);
