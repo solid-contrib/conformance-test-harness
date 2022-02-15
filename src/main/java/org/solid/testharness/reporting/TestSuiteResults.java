@@ -30,13 +30,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.solid.testharness.utils.DataRepository;
 
 import javax.enterprise.inject.spi.CDI;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TestSuiteResults {
     final Results results;
     long startTime;
-    Map<String, Integer> counts = new HashMap<>();
+    Map<String, Scores> counts = new HashMap<>();
 
     public static TestSuiteResults emptyResults() {
         return new TestSuiteResults(null);
@@ -98,8 +103,10 @@ public class TestSuiteResults {
         return results != null ? results.getTimeTakenMillis() : 0;
     }
 
-    public Date getResultDate() {
-        return results != null ? new Date(results.getEndTime()) : new Date();
+    public ZonedDateTime getResultDate() {
+        return results != null
+                ? Instant.ofEpochMilli(results.getEndTime()).atZone(ZoneId.of("Z"))
+                : ZonedDateTime.now();
     }
 
     public void summarizeOutcomes(final DataRepository dataRepository) {
@@ -107,24 +114,31 @@ public class TestSuiteResults {
     }
 
     public int getCount(final String level, final String outcome) {
-        final String keyPattern = StringUtils.defaultString(level) + ":" + StringUtils.defaultString(outcome);
-        if (counts.containsKey(keyPattern)) {
-            return counts.get(keyPattern);
+        if (!StringUtils.isEmpty(level)) {
+            if (counts.containsKey(level)) {
+                if (StringUtils.isEmpty(outcome)) {
+                    return counts.get(level).getTotal();
+                } else {
+                    return counts.get(level).getScore(outcome);
+                }
+            } else {
+                return 0;
+            }
         } else {
-            return counts.entrySet().stream()
-                    .filter((entry) -> entry.getKey().contains(keyPattern))
-                    .mapToInt(Map.Entry::getValue)
+            return counts.values().stream()
+                    .mapToInt(s -> StringUtils.isEmpty(outcome) ? s.getTotal() : s.getScore(outcome))
                     .sum();
         }
     }
 
     public String toJson() {
         try {
-            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a", Locale.getDefault());
             final ObjectMapper objectMapper = CDI.current().select(ObjectMapper.class).get();
             final Map<String, Object> resultData = new HashMap<>();
-            resultData.put("mustFeaturesPassed", getCount("MUST", "passed") + getCount("MUST-NOT", "passed"));
-            resultData.put("mustFeaturesFailed", getCount("MUST", "failed") + getCount("MUST-NOT", "failed"));
+            final Scores mustFeatures = new Scores();
+            mustFeatures.setScore(Scores.PASSED, getCount("MUST", Scores.PASSED) + getCount("MUST-NOT", Scores.PASSED));
+            mustFeatures.setScore(Scores.FAILED, getCount("MUST", Scores.FAILED) + getCount("MUST-NOT", Scores.FAILED));
+            resultData.put("mustFeatures", mustFeatures);
             resultData.put("featuresPassed", getFeaturePassCount());
             resultData.put("featuresFailed", getFeatureFailCount());
             resultData.put("featuresSkipped", getFeatureSkipCount());
@@ -133,7 +147,7 @@ public class TestSuiteResults {
             resultData.put("scenariosTotal", getScenarioTotal());
             resultData.put("elapsedTime", getElapsedTime());
             resultData.put("totalTime", getTimeTakenMillis());
-            resultData.put("resultDate", sdf.format(getResultDate()));
+            resultData.put("resultDate", DateTimeFormatter.ISO_DATE_TIME.format(getResultDate()));
             resultData.putAll(counts);
             return objectMapper.writeValueAsString(resultData);
         } catch (Exception e) {

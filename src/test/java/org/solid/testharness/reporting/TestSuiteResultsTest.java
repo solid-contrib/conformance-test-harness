@@ -29,7 +29,8 @@ import org.junit.jupiter.api.Test;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestUtils;
 
-import java.util.Date;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -138,34 +139,38 @@ class TestSuiteResultsTest {
     @Test
     void getResultDate() {
         final Results results = mock(Results.class);
-        final Date now = new Date();
-        when(results.getEndTime()).thenReturn(now.getTime());
+        final ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Z"));
+        when(results.getEndTime()).thenReturn(now.toInstant().toEpochMilli());
         final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
-        assertEquals(testSuiteResults.getResultDate(), now);
+        assertEquals(testSuiteResults.getResultDate().toInstant().toEpochMilli(), now.toInstant().toEpochMilli());
     }
 
     @Test
     void getCounts() {
         final TestSuiteResults testSuiteResults = TestSuiteResults.emptyResults();
         final DataRepository dataRepository = mock(DataRepository.class);
+        final Scores must = new Scores();
+        must.setScore(Scores.PASSED, 1);
+        must.setScore(Scores.FAILED, 2);
+        final Scores mustNot = new Scores();
+        mustNot.setScore(Scores.PASSED, 3);
+        mustNot.setScore(Scores.UNTESTED, 4);
         when(dataRepository.getOutcomeCounts()).thenReturn(Map.of(
-                "MUST:passed", 1,
-                "MUST:failed", 2,
-                "MUST-NOT:passed", 3,
-                "MUST-NOT:untested", 4
+                "MUST", must,
+                "MUST-NOT", mustNot
         ));
         testSuiteResults.summarizeOutcomes(dataRepository);
-        assertEquals(1, testSuiteResults.getCount("MUST", "passed"));
-        assertEquals(2, testSuiteResults.getCount("MUST", "failed"));
-        assertEquals(3, testSuiteResults.getCount("MUST-NOT", "passed"));
-        assertEquals(4, testSuiteResults.getCount("MUST-NOT", "untested"));
-        assertEquals(0, testSuiteResults.getCount("MUST-NOT", "inapplicable"));
+        assertEquals(1, testSuiteResults.getCount("MUST", Scores.PASSED));
+        assertEquals(2, testSuiteResults.getCount("MUST", Scores.FAILED));
+        assertEquals(3, testSuiteResults.getCount("MUST-NOT", Scores.PASSED));
+        assertEquals(4, testSuiteResults.getCount("MUST-NOT", Scores.UNTESTED));
+        assertEquals(0, testSuiteResults.getCount("MUST-NOT", Scores.INAPPLICABLE));
         assertEquals(3, testSuiteResults.getCount("MUST", ""));
         assertEquals(7, testSuiteResults.getCount("MUST-NOT", ""));
         assertEquals(0, testSuiteResults.getCount("MAY", ""));
-        assertEquals(4, testSuiteResults.getCount("", "passed"));
-        assertEquals(2, testSuiteResults.getCount("", "failed"));
-        assertEquals(4, testSuiteResults.getCount("", "untested"));
+        assertEquals(4, testSuiteResults.getCount("", Scores.PASSED));
+        assertEquals(2, testSuiteResults.getCount("", Scores.FAILED));
+        assertEquals(4, testSuiteResults.getCount("", Scores.UNTESTED));
         assertEquals(10, testSuiteResults.getCount("", ""));
     }
 
@@ -181,11 +186,15 @@ class TestSuiteResultsTest {
         when(results.getTimeTakenMillis()).thenReturn(1000d);
         final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
         final DataRepository dataRepository = mock(DataRepository.class);
+        final Scores must = new Scores();
+        must.setScore(Scores.PASSED, 1);
+        must.setScore(Scores.FAILED, 2);
+        final Scores mustNot = new Scores();
+        mustNot.setScore(Scores.PASSED, 3);
+        mustNot.setScore(Scores.UNTESTED, 4);
         when(dataRepository.getOutcomeCounts()).thenReturn(Map.of(
-                "MUST:passed", 1,
-                "MUST:failed", 2,
-                "MUST-NOT:passed", 3,
-                "MUST-NOT:untested", 4
+                "MUST", must,
+                "MUST-NOT", mustNot
         ));
         testSuiteResults.summarizeOutcomes(dataRepository);
         assertTrue(testSuiteResults.toJson().contains("\"featuresPassed\":10"));

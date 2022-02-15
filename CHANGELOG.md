@@ -5,6 +5,7 @@
 ### Minor changes
 * Get ACL link on container creation to avoid unnecessary HEAD request.
 * Fix issue attempting to get ACL link when resource creation failed.
+* Improve JSON log format: structured scores and ISO8601 timestamp
 
 ## Release 1.1.1
 
