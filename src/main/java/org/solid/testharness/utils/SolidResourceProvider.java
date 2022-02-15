@@ -71,7 +71,7 @@ public class SolidResourceProvider {
                 getAclUrl(url, headers);
             } catch (Exception e) {
                 logger.warn("Failed to create resource at {}: {}", url, e);
-                throw new RuntimeException("Failed to create resource at " + url, e);
+                throw new RuntimeException("Failed to create resource at " + url + " caused by " + e, e);
             }
         }
         this.url = url;
