@@ -44,7 +44,7 @@
         <commons.text.version>1.9</commons.text.version>
         <commons.cli.version>1.5.0</commons.cli.version>
         <wiremock.version>2.27.2</wiremock.version>
-        <solid.vocab.version>0.0.13</solid.vocab.version>
+        <solid.vocab.version>0.0.14</solid.vocab.version>
         <hashids.version>1.0.3</hashids.version>
         <graal.version>21.3.1</graal.version>
 
