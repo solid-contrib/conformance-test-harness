@@ -38,6 +38,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,6 +54,8 @@ public class AuthManager {
     private static final Logger logger = LoggerFactory.getLogger(AuthManager.class);
 
     private static final Pattern LOGIN_FORM_ACTION = Pattern.compile(".*<form\\s.*method\\s*=\\s*\"post\".*",
+            Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern LOCATION = Pattern.compile(".*\"location\"\\s*:\\s*\"([^\"]+)\".*",
             Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     @Inject
@@ -179,14 +185,17 @@ public class AuthManager {
         final String appOrigin = config.getOrigin();
         final Registration clientRegistration = registerClient(client, oidcConfig, appOrigin);
         final String clientId = clientRegistration.getClientId();
+        final String codeVerifier = generateCodeVerifier();
 
-        final String authCode = requestAuthorizationCode(client, oidcConfig, appOrigin, clientId, userConfig);
+        final String authCode = requestAuthorizationCode(client, oidcConfig, appOrigin, clientId,
+                userConfig, codeVerifier);
 
         final Map<Object, Object> tokenRequestData = new HashMap<>();
         tokenRequestData.put(HttpConstants.GRANT_TYPE, HttpConstants.AUTHORIZATION_CODE_TYPE);
         tokenRequestData.put(HttpConstants.CODE, authCode);
         tokenRequestData.put(HttpConstants.REDIRECT_URI, appOrigin);
         tokenRequestData.put(HttpConstants.CLIENT_ID, clientId);
+        tokenRequestData.put(HttpConstants.CODE_VERIFIER, codeVerifier);
         final String authHeader = HttpConstants.PREFIX_BASIC +
                 base64Encode(clientId + ':' + clientRegistration.getClientSecret());
         return requestToken(authClient, oidcConfig, authHeader, tokenRequestData);
@@ -256,8 +265,8 @@ public class AuthManager {
 
     private String requestAuthorizationCode(final Client client, final OidcConfiguration oidcConfig,
                                             final String appOrigin, final String clientId,
-                                            final UserCredentials userConfig)
-            throws IOException, InterruptedException {
+                                            final UserCredentials userConfig, final String codeVerifier)
+            throws IOException, InterruptedException, NoSuchAlgorithmException {
         logger.debug("\n========== AUTHORIZE");
         final URI authorizeEndpoint = URI.create(oidcConfig.getAuthorizeEndpoint());
 
@@ -266,6 +275,9 @@ public class AuthManager {
         requestParams.put(HttpConstants.REDIRECT_URI, appOrigin);
         requestParams.put(HttpConstants.SCOPE, HttpConstants.OPENID);
         requestParams.put(HttpConstants.CLIENT_ID, clientId);
+        requestParams.put(HttpConstants.CODE_CHALLENGE_METHOD, "S256");
+        requestParams.put(HttpConstants.CODE_CHALLENGE, generateCodeChallenge(codeVerifier));
+
         final String authorizeUrl = requestParams.keySet().stream()
                 .map(key -> key + "=" + HttpUtils.encodeValue(requestParams.get(key)))
                 .collect(Collectors.joining("&", authorizeEndpoint + "?", ""));
@@ -274,7 +286,8 @@ public class AuthManager {
         HttpRequest request;
         do {
             logger.debug("Authorize URL {}", redirectUrl);
-            request = HttpUtils.newRequestBuilder(redirectUrl).build();
+            request = HttpUtils.newRequestBuilder(redirectUrl)
+                    .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_TEXT_HTML).build();
             HttpUtils.logRequest(logger, request);
             final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             HttpUtils.logResponse(logger, response);
@@ -312,15 +325,26 @@ public class AuthManager {
         final Map<Object, Object> data = new HashMap<>();
         data.put(HttpConstants.EMAIL, userConfig.username().get());
         data.put(HttpConstants.PASSWORD, userConfig.password().get());
-        final HttpResponse<Void> response = sendRequest(client, loginEndpoint, "POST",
+        final HttpResponse<String> response = sendRequest(client, loginEndpoint, "POST",
                 HttpUtils.ofFormData(data), HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED,
-                HttpResponse.BodyHandlers.discarding());
+                HttpResponse.BodyHandlers.ofString());
+        HttpUtils.logResponse(logger, response);
         if (!HttpUtils.isSuccessfulOrRedirect(response.statusCode())) {
             throw new TestHarnessInitializationException("Authorization failed with status code " +
                     response.statusCode());
         }
-        final Optional<String> locationHeader = response.headers().firstValue(HttpConstants.HEADER_LOCATION);
-        return locationHeader.map(authorizeEndpoint::resolve).orElse(null);
+        if (HttpUtils.isRedirect(response.statusCode())) {
+            final Optional<String> locationHeader = response.headers().firstValue(HttpConstants.HEADER_LOCATION);
+            return locationHeader.map(authorizeEndpoint::resolve).orElse(null);
+        } else {
+            // CSS v3 onwards may return the location in a JSON body instead of via a redirect
+            final Matcher m = LOCATION.matcher(response.body());
+            if (m.matches()) {
+                return authorizeEndpoint.resolve(m.group(1));
+            } else {
+                return null;
+            }
+        }
     }
 
     private Tokens requestToken(final Client authClient, final OidcConfiguration oidcConfig, final String authHeader,
@@ -364,5 +388,20 @@ public class AuthManager {
 
     private String base64Encode(final String data) {
         return Base64.getEncoder().encodeToString(data.getBytes());
+    }
+
+    private String generateCodeVerifier() {
+        final SecureRandom secureRandom = new SecureRandom();
+        final byte[] codeVerifier = new byte[32];
+        secureRandom.nextBytes(codeVerifier);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(codeVerifier);
+    }
+
+    private String generateCodeChallenge(final String codeVerifier) throws NoSuchAlgorithmException {
+        final byte[] bytes = codeVerifier.getBytes(StandardCharsets.US_ASCII);
+        final MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+        messageDigest.update(bytes, 0, bytes.length);
+        final byte[] digest = messageDigest.digest();
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
     }
 }

@@ -1,5 +1,9 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.1.3
+### Fix
+* Issues with login authentication mechanism and PKCE support.
+
 ## Release 1.1.2
 
 ### Minor changes
