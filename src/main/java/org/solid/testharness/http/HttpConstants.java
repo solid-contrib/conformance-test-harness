@@ -61,6 +61,9 @@ public final class HttpConstants {
 
     public static final String GRANT_TYPE = "grant_type";
     public static final String CODE = "code";
+    public static final String CODE_CHALLENGE_METHOD = "code_challenge_method";
+    public static final String CODE_CHALLENGE = "code_challenge";
+    public static final String CODE_VERIFIER = "code_verifier";
     public static final String AUTHORIZATION_METHOD = "client_secret_basic";
     public static final String AUTHORIZATION_CODE_TYPE = "authorization_code";
     public static final String CLIENT_CREDENTIALS = "client_credentials";

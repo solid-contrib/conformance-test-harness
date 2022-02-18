@@ -105,7 +105,7 @@ public class AuthenticationResource implements QuarkusTestResourceLifecycleManag
 
         // session login fails with bad password
         wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/login/password"))
-                .withRequestBody(containing(HttpConstants.PASSWORD + "=BADPASSWORD"))
+                .withRequestBody(containing(HttpConstants.PASSWORD + "=BADPASSWORD1"))
                 .willReturn(WireMock.aResponse().withStatus(403)));
 
         // session login succeeds with good password
@@ -171,16 +171,30 @@ public class AuthenticationResource implements QuarkusTestResourceLifecycleManag
 
         // authorization will get bad auth response after bad login
         wireMockServer.stubFor(WireMock.post(WireMock.urlPathEqualTo("/idp/login"))
-                .withRequestBody(containing(HttpConstants.PASSWORD + "=BADPASSWORD"))
+                .withRequestBody(containing(HttpConstants.PASSWORD + "=BADPASSWORD2"))
                 .willReturn(WireMock.aResponse()
                         .withStatus(401)));
 
-        // authorization will get no code after good login
+        // authorization will get no code after good login with location header
         wireMockServer.stubFor(WireMock.post(WireMock.urlPathEqualTo("/idp/login"))
-                .withRequestBody(containing(HttpConstants.PASSWORD + "=PASSWORD"))
+                .withRequestBody(containing(HttpConstants.PASSWORD + "=PASSWORD302"))
                 .willReturn(WireMock.aResponse()
                         .withHeader(HttpConstants.HEADER_LOCATION, "https://origin/form?code=badcode")
                         .withStatus(302)));
+
+        // authorization will get no code after good login with no location in json response
+        wireMockServer.stubFor(WireMock.post(WireMock.urlPathEqualTo("/idp/login"))
+                .withRequestBody(containing(HttpConstants.PASSWORD + "=PASSWORD200NOLOCATION"))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(200)));
+
+        // authorization will get no code after good login with location in json response
+        wireMockServer.stubFor(WireMock.post(WireMock.urlPathEqualTo("/idp/login"))
+                .withRequestBody(containing(HttpConstants.PASSWORD + "=PASSWORD200JSON"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
+                        .withBody("{ \"location\" : \"https://origin/form?code=badcode\" }")
+                        .withStatus(200)));
 
         // authorization will get immediate response but no authorization code
         wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/authorization"))

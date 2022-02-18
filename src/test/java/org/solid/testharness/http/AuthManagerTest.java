@@ -225,7 +225,7 @@ class AuthManagerTest {
     void authenticateLoginSessionFails() {
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
         when(config.overridingTrust()).thenReturn(false);
-        setupLogin(baseUri, "test8", "BADPASSWORD", "/login/password", null);
+        setupLogin(baseUri, "test8", "BADPASSWORD1", "/login/password", null);
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.authenticate("test8", true));
@@ -270,7 +270,7 @@ class AuthManagerTest {
     void authenticateLoginAuthorizationFailsFormBadLogin() {
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
         when(config.getOrigin()).thenReturn("https://origin/form");
-        setupLogin(baseUri, "test20", "BADPASSWORD", null, "/idp/register");
+        setupLogin(baseUri, "test20", "BADPASSWORD2", null, "/idp/register");
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.authenticate("test20", true));
@@ -282,7 +282,7 @@ class AuthManagerTest {
     void authenticateLoginAuthorizationFailsFormGoodLoginBadCode() {
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
         when(config.getOrigin()).thenReturn("https://origin/form");
-        setupLogin(baseUri, "test21", "PASSWORD", null, "/idp/register");
+        setupLogin(baseUri, "test21", "PASSWORD302", null, "/idp/register");
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.authenticate("test21", true));
@@ -291,10 +291,34 @@ class AuthManagerTest {
     }
 
     @Test
+    void authenticateLoginAuthorizationFailsFormGoodLoginNoRedirect() {
+        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
+        when(config.getOrigin()).thenReturn("https://origin/form");
+        setupLogin(baseUri, "test22", "PASSWORD200NOLOCATION", null, "/idp/register");
+
+        final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
+                () -> authManager.authenticate("test22", true));
+        assertEquals("Failed to follow authentication redirects", exception.getMessage());
+        verify(config, never()).getLoginEndpoint();
+    }
+
+    @Test
+    void authenticateLoginAuthorizationFailsFormGoodLoginJsonBadCode() {
+        when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
+        when(config.getOrigin()).thenReturn("https://origin/form");
+        setupLogin(baseUri, "test23", "PASSWORD200JSON", null, "/idp/register");
+
+        final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
+                () -> authManager.authenticate("test23", true));
+        assertEquals("Token exchange failed for grant type: authorization_code", exception.getMessage());
+        verify(config, never()).getLoginEndpoint();
+    }
+
+    @Test
     void authenticateLoginAuthorizationFailsWithoutRedirect() {
         when(clientRegistry.getClient(ClientRegistry.SESSION_BASED)).thenReturn(client);
         when(config.getOrigin()).thenReturn("https://origin/noredirect");
-        setupLogin(baseUri, "test11", "PASSWORD", "/login/password", null);
+        setupLogin(baseUri, "test11", "PASSWORD302", "/login/password", null);
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.authenticate("test11", true));
