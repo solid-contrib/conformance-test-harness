@@ -179,7 +179,7 @@ public class DataRepository implements Repository {
             final Set<FeatureSection> sections = new HashSet<>();
             final ScenarioData scenarioData = new ScenarioData();
             for (ScenarioResult sr: fr.getScenarioResults()) {
-                createScenarioActivity(conn, sr, scenarioData.fromScenario(sr.getScenario()),
+                createScenarioActivity(conn, fr, sr, scenarioData.fromScenario(sr.getScenario()),
                         testCaseIri, featureIri, featureFileParser);
                 sections.add(sr.getScenario().getSection());
             }
@@ -188,7 +188,7 @@ public class DataRepository implements Repository {
                     .filter(s -> !sections.contains(s))
                     .collect(Collectors.toList());
             for (FeatureSection section: otherSections) {
-                createScenarioActivity(conn, null, scenarioData.fromFeatureSection(section),
+                createScenarioActivity(conn, fr, null, scenarioData.fromFeatureSection(section),
                         testCaseIri, featureIri, featureFileParser);
             }
         } catch (Exception e) {
@@ -238,7 +238,7 @@ public class DataRepository implements Repository {
         }
     }
 
-    private void createScenarioActivity(final RepositoryConnection conn,
+    private void createScenarioActivity(final RepositoryConnection conn, final FeatureResult fr,
                                         final ScenarioResult sr, final ScenarioData sc,
                                         final IRI testCaseIri, final IRI featureIri,
                                         final FeatureFileParser featureFileParser) {
@@ -272,12 +272,12 @@ public class DataRepository implements Repository {
             conn.add(testCaseIri, DCTERMS.hasPart, scenarioIri);
         }
         if (sr != null && !sr.getStepResults().isEmpty()) {
-            createStepActivityList(conn, sr, scenarioIri, featureIri);
+            createStepActivityList(conn, fr, sr, scenarioIri, featureIri);
         }
     }
 
-    private void createStepActivityList(final RepositoryConnection conn, final ScenarioResult sr,
-                                        final IRI scenarioIri, final IRI featureIri) {
+    private void createStepActivityList(final RepositoryConnection conn, final FeatureResult fr,
+                                        final ScenarioResult sr, final IRI scenarioIri, final IRI featureIri) {
         final List<Resource> steps = sr.getStepResults().stream().map(str -> {
             final IRI stepIri = createNode();
             final IRI stepResultIri = createNode();
@@ -294,7 +294,20 @@ public class DataRepository implements Repository {
                         String.join("\n", str.getStep().getComments()));
             }
             if (!str.getStepLog().isEmpty()) {
-                stepBuilder.add(stepResultIri, DCTERMS.description, simplify(str.getStepLog()));
+                final String log;
+                if (str.getStepLog().contains("callonce lock:")) {
+                    // the step log is in another scenario result so copy it here
+                    log = fr.getScenarioResults().stream()
+                            .flatMap(s -> s.getStepResults().stream())
+                            .filter(s -> s.getStep() == str.getStep() && s.getStepLog().contains("lock acquired"))
+                            .map(StepResult::getStepLog)
+                            .findFirst()
+                            .map(s -> str.getStepLog() + s.substring(s.indexOf('\n') + 1))
+                            .orElse("");
+                } else {
+                    log = str.getStepLog();
+                }
+                stepBuilder.add(stepResultIri, DCTERMS.description, simplify(log));
             }
             if (!str.getStep().isBackground()) {
                 stepBuilder.add(stepIri, PROV.wasInformedBy, scenarioIri);

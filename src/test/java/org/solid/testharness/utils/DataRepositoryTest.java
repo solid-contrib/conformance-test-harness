@@ -121,6 +121,38 @@ class DataRepositoryTest {
     }
 
     @Test
+    void addFeatureResultCallOnce() {
+        final DataRepository dataRepository = createRepository();
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            conn.add(testCaseIri, SPEC.testScript, featureIri);
+        }
+
+        final Feature feature = mock(Feature.class);
+        when(feature.getName()).thenReturn("FEATURE NAME");
+        final Scenario scenario1 = mockScenario("SCENARIO 1", 1, 0, null);
+        final Scenario scenario2 = mockScenario("SCENARIO 2", 10, 1, null);
+        final Step step11 = mockStep("*", "callonce setup", 1, true, null);
+        final Step step12 = mockStep("Then", "Test1", 2, false, null);
+        final StepResult str11 = mockStepResult(step11, "passed", "Time callonce lock: setup\n");
+        final StepResult str12 = mockStepResult(step12, "passed", "");
+        final ScenarioResult sr1 = mockScenarioResult(scenario1, false, 2000.0, List.of(str11, str12));
+
+        final Step step22 = mockStep("Then", "Test2", 3, false, null);
+        final StepResult str21 = mockStepResult(step11, "passed", "Time lock acquired, begin\nSetup routine");
+        final StepResult str22 = mockStepResult(step22, "passed", "");
+        final ScenarioResult sr2 = mockScenarioResult(scenario2, false, 3000.0, List.of(str21, str22));
+
+        final FeatureResult fr = mockFeatureResult(feature, "DISPLAY_NAME", true, 1000.0, List.of(sr1, sr2));
+
+        final FeatureFileParser featureFileParser = mock(FeatureFileParser.class);
+
+        dataRepository.addFeatureResult(TestUtils.createEmptySuite(), fr, featureIri, featureFileParser);
+        final String result = TestUtils.repositoryToString(dataRepository);
+        assertTrue(result.contains("dcterms:description \"\"\"Time callonce lock: setup\nSetup routine"));
+        assertTrue(result.contains("dcterms:description \"\"\"Time lock acquired, begin\nSetup routine"));
+    }
+
+    @Test
     void addFeatureResultTestFailed() {
         final DataRepository dataRepository = createRepository();
         try (RepositoryConnection conn = dataRepository.getConnection()) {
