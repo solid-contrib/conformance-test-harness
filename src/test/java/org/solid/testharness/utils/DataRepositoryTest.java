@@ -95,8 +95,8 @@ class DataRepositoryTest {
                 "Caused by EXCEPTION2\nSTACK1\nSTACK2\n- <js>LAST\nother stuff");
         final StepResult str2 = mockStepResult(step2, "skipped", "");
 
-        final ScenarioResult sr1 = mockScenarioResult(scenario1, true, 2000.0, List.of(str1, str2));
-        final ScenarioResult sr2 = mockScenarioResult(scenario2, false, 3000.0, null);
+        final ScenarioResult sr1 = mockScenarioResult(scenario1, true, 2000.0, List.of(str1, str2), "FAIL");
+        final ScenarioResult sr2 = mockScenarioResult(scenario2, false, 3000.0, null, null);
 
         final FeatureResult fr = mockFeatureResult(feature, "DISPLAY_NAME", true, 1000.0, List.of(sr1, sr2));
 
@@ -135,12 +135,12 @@ class DataRepositoryTest {
         final Step step12 = mockStep("Then", "Test1", 2, false, null);
         final StepResult str11 = mockStepResult(step11, "passed", "Time callonce lock: setup\n");
         final StepResult str12 = mockStepResult(step12, "passed", "");
-        final ScenarioResult sr1 = mockScenarioResult(scenario1, false, 2000.0, List.of(str11, str12));
+        final ScenarioResult sr1 = mockScenarioResult(scenario1, false, 2000.0, List.of(str11, str12), null);
 
         final Step step22 = mockStep("Then", "Test2", 3, false, null);
         final StepResult str21 = mockStepResult(step11, "passed", "Time lock acquired, begin\nSetup routine");
         final StepResult str22 = mockStepResult(step22, "passed", "");
-        final ScenarioResult sr2 = mockScenarioResult(scenario2, false, 3000.0, List.of(str21, str22));
+        final ScenarioResult sr2 = mockScenarioResult(scenario2, false, 3000.0, List.of(str21, str22), null);
 
         final FeatureResult fr = mockFeatureResult(feature, "DISPLAY_NAME", true, 1000.0, List.of(sr1, sr2));
 
@@ -171,7 +171,7 @@ class DataRepositoryTest {
         final String result = TestUtils.repositoryToString(dataRepository);
         assertTrue(result.contains("dcterms:title \"FEATURE NAME\""));
         assertFalse(result.contains("dcterms:description"));
-        assertTrue(result.contains("earl:outcome earl:failed"));
+        assertTrue(result.contains("earl:outcome earl:untested"));
     }
 
     @Test
@@ -182,7 +182,8 @@ class DataRepositoryTest {
         when(feature.getName()).thenReturn("FEATURE NAME");
         final Scenario scenario1 = mockScenario("SCENARIO 1", 1, 0, null);
 
-        final ScenarioResult sr1 = mockScenarioResult(scenario1, true, 2000.0, Collections.emptyList());
+        final ScenarioResult sr1 = mockScenarioResult(scenario1, true, 2000.0,
+                Collections.emptyList(), "FAIL\nCANTTELL\n");
         final FeatureResult fr = mockFeatureResult(feature, "DISPLAY_NAME", true, 1000.0, List.of(sr1));
 
         final FeatureFileParser featureFileParser = mock(FeatureFileParser.class);
@@ -190,7 +191,7 @@ class DataRepositoryTest {
         dataRepository.addFeatureResult(TestUtils.createEmptySuite(), fr, featureIri, featureFileParser);
         final String result = TestUtils.repositoryToString(dataRepository);
         assertFalse(result.contains("dcterms:title \"FEATURE NAME\""));
-        assertTrue(result.contains("earl:outcome earl:failed"));
+        assertTrue(result.contains("earl:outcome earl:cantTell"));
     }
 
     @Test
@@ -237,13 +238,13 @@ class DataRepositoryTest {
     }
 
     @Test
-    void createUntestedAssertion() {
+    void createInapplicableAssertion() {
         final DataRepository dataRepository = createRepository();
         final Feature feature = mockUntestedFeature();
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             conn.add(testCaseIri, SPEC.testScript, featureIri);
         }
-        dataRepository.createUntestedAssertion(feature, featureIri.stringValue());
+        dataRepository.createSkippedAssertion(feature, featureIri.stringValue(), EARL.inapplicable);
         final String result = TestUtils.repositoryToString(dataRepository);
         assertTrue(result.contains("a earl:Assertion"));
         assertTrue(result.contains("a earl:TestResult"));
@@ -253,10 +254,10 @@ class DataRepositoryTest {
     }
 
     @Test
-    void createUntestedAssertionNoStatements() {
+    void createInapplicableAssertionNoStatements() {
         final DataRepository dataRepository = createRepository();
         final Feature feature = mockUntestedFeature();
-        dataRepository.createUntestedAssertion(feature, featureIri.stringValue());
+        dataRepository.createSkippedAssertion(feature, featureIri.stringValue(), EARL.inapplicable);
         final String result = TestUtils.repositoryToString(dataRepository);
         assertFalse(result.contains("a earl:Assertion"));
     }
@@ -488,10 +489,13 @@ class DataRepositoryTest {
     }
 
     private ScenarioResult mockScenarioResult(final Scenario scenario, final boolean isFailed, final double duration,
-                                              final List<StepResult> stepResults) {
+                                              final List<StepResult> stepResults, final String failLog) {
+        final StepResult str = mock(StepResult.class);
+        when(str.getStepLog()).thenReturn(failLog);
         final ScenarioResult sr = mock(ScenarioResult.class);
         when(sr.getScenario()).thenReturn(scenario);
         when(sr.isFailed()).thenReturn(isFailed);
+        when(sr.getFailedStep()).thenReturn(str);
         when(sr.getStartTime()).thenReturn(123456789L);
         when(sr.getEndTime()).thenReturn(123456789L);
         when(sr.getDurationMillis()).thenReturn(duration);

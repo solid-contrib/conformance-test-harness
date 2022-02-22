@@ -174,23 +174,26 @@ public class DataRepository implements Repository {
                     conn.add(testCaseIri, DCTERMS.description, literal(featureComments));
                 }
             }
-            createAssertion(conn, fr.isFailed() ? EARL.failed : EARL.passed,
-                    new Date((long) (startTime + fr.getDurationMillis())), testCaseIri);
             final Set<FeatureSection> sections = new HashSet<>();
             final ScenarioData scenarioData = new ScenarioData();
+            final Scores scores = new Scores();
             for (ScenarioResult sr: fr.getScenarioResults()) {
-                createScenarioActivity(conn, fr, sr, scenarioData.fromScenario(sr.getScenario()),
+                final IRI outcome = createScenarioActivity(conn, fr, sr, scenarioData.fromScenario(sr.getScenario()),
                         testCaseIri, featureIri, featureFileParser);
                 sections.add(sr.getScenario().getSection());
+                scores.incrementScore(outcome.getLocalName());
             }
             // find scenario sections which were not run (i.e. have no results)
             final List<FeatureSection> otherSections = fr.getFeature().getSections().stream()
                     .filter(s -> !sections.contains(s))
                     .collect(Collectors.toList());
             for (FeatureSection section: otherSections) {
-                createScenarioActivity(conn, fr, null, scenarioData.fromFeatureSection(section),
+                final IRI outcome = createScenarioActivity(conn, fr, null, scenarioData.fromFeatureSection(section),
                         testCaseIri, featureIri, featureFileParser);
+                scores.incrementScore(outcome.getLocalName());
             }
+            createAssertion(conn, scores.getOutcome(), new Date((long) (startTime + fr.getDurationMillis())),
+                    testCaseIri);
         } catch (Exception e) {
             logger.error("Failed to load feature result", e);
         }
@@ -224,7 +227,7 @@ public class DataRepository implements Repository {
         }
     }
 
-    public void createUntestedAssertion(final Feature feature, final String featurePath) {
+    public void createSkippedAssertion(final Feature feature, final String featurePath, final IRI outcome) {
         try (
                 RepositoryConnection conn = getConnection();
                 var statements = conn.getStatements(null, SPEC.testScript, iri(featurePath))
@@ -232,19 +235,20 @@ public class DataRepository implements Repository {
             if (statements.hasNext()) {
                 final IRI testCaseIri = (IRI) statements.next().getSubject();
                 // add assertion
-                createAssertion(conn, EARL.inapplicable, new Date(), testCaseIri);
+                createAssertion(conn, outcome, new Date(), testCaseIri);
                 conn.add(testCaseIri, DCTERMS.title, literal(feature.getName()));
             }
         }
     }
 
-    private void createScenarioActivity(final RepositoryConnection conn, final FeatureResult fr,
+    private IRI createScenarioActivity(final RepositoryConnection conn, final FeatureResult fr,
                                         final ScenarioResult sr, final ScenarioData sc,
                                         final IRI testCaseIri, final IRI featureIri,
                                         final FeatureFileParser featureFileParser) {
         final ModelBuilder builder;
         final IRI scenarioIri = createNode();
         final IRI scenarioResultIri = createNode();
+        final IRI outcome;
         builder = new ModelBuilder();
         builder.subject(scenarioIri)
                 .add(RDF.type, PROV.Activity)
@@ -254,14 +258,20 @@ public class DataRepository implements Repository {
                 .add(scenarioResultIri, RDF.type, PROV.Entity)
                 .add(scenarioResultIri, PROV.generatedAtTime, sr != null ? new Date(sr.getEndTime()) : new Date());
         if (sr != null) {
+            if (sr.isFailed() && sr.getFailedStep().getStepLog().contains("\nCANTTELL\n")) {
+                outcome = EARL.cantTell;
+            } else {
+                outcome = sr.isFailed() ? EARL.failed : EARL.passed;
+            }
             builder.subject(scenarioIri)
                     .add(PROV.startedAtTime, new Date(sr.getStartTime()))
                     .add(PROV.endedAtTime, new Date(sr.getEndTime()))
-                    .add(scenarioResultIri, PROV.value, sr.isFailed() ? EARL.failed : EARL.passed);
+                    .add(scenarioResultIri, PROV.value, outcome);
         } else {
             final boolean ignored = sc.getTags().stream().anyMatch(tag -> tag.getName().equals(Tag.IGNORE));
+            outcome = ignored ? EARL.untested : EARL.inapplicable;
             builder.subject(scenarioIri)
-                    .add(scenarioResultIri, PROV.value, ignored ? EARL.untested : EARL.inapplicable);
+                    .add(scenarioResultIri, PROV.value, outcome);
         }
         final String scenarioComments = featureFileParser.getScenarioComments(sc.getSection().getIndex());
         if (!StringUtils.isBlank(scenarioComments)) {
@@ -274,6 +284,7 @@ public class DataRepository implements Repository {
         if (sr != null && !sr.getStepResults().isEmpty()) {
             createStepActivityList(conn, fr, sr, scenarioIri, featureIri);
         }
+        return outcome;
     }
 
     private void createStepActivityList(final RepositoryConnection conn, final FeatureResult fr,
@@ -364,6 +375,34 @@ public class DataRepository implements Repository {
             }
         }
         return counts;
+    }
+
+    public Scores getScenarioCounts() {
+        final Scores scores = new Scores();
+        try (
+                RepositoryConnection conn = getConnection()
+        ) {
+            final String queryString = Namespaces.generateTurtlePrefixes(
+                    List.of(EARL.PREFIX, PROV.PREFIX, DCTERMS.PREFIX)
+            ) +
+                    "SELECT ?outcome (COUNT(?outcome) AS ?count) " +
+                    "WHERE {" +
+                    "  ?s a prov:Activity ;" +
+                    "    dcterms:hasPart ?l ;" +
+                    "    prov:generated/prov:value ?outcome ." +
+                    "}" +
+                    "GROUP BY ?outcome";
+            final TupleQuery tupleQuery = conn.prepareTupleQuery(queryString);
+            try (TupleQueryResult result = tupleQuery.evaluate()) {
+                while (result.hasNext()) {
+                    final BindingSet bindingSet = result.next();
+                    final String outcome = ((IRI)bindingSet.getValue("outcome")).getLocalName();
+                    final int count = Integer.parseInt(bindingSet.getValue("count").stringValue());
+                    scores.setScore(outcome, count);
+                }
+            }
+        }
+        return scores;
     }
 
     public void export(final Writer wr, final Resource... contexts) throws Exception {

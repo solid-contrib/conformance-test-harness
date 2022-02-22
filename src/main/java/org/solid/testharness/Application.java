@@ -100,7 +100,7 @@ public class Application implements QuarkusApplication {
                         conformanceTestHarness.cleanUp();
                     }
                 }
-                return results.getFailCount() == 0 || ignoreFailures ? 0 : 1;
+                return !results.hasFailures() || ignoreFailures ? 0 : 1;
             }
         } catch (Exception e) {
             logger.error("Application failed. Reason: {}", e.toString());

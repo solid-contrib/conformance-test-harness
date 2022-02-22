@@ -65,6 +65,7 @@ public class ConformanceTestHarness {
     private static final Logger resultLogger = LoggerFactory.getLogger("ResultLogger");
 
     private Map<String, SolidClient> clients;
+    private TestSuiteResults results;
 
     @Inject
     Config config;
@@ -126,7 +127,6 @@ public class ConformanceTestHarness {
 
     public TestSuiteResults runTestSuites(final List<String> filters, final List<String> statuses) {
         final List<String> featurePaths;
-        final TestSuiteResults results;
 
         // TODO: Consider running some initial tests to discover the features provided by a server
         testSubject.loadTestSubjectConfig();
@@ -158,18 +158,19 @@ public class ConformanceTestHarness {
         logger.info("===================== BUILD REPORTS ========================");
         final File outputDir = config.getOutputDirectory();
         logger.info("Reports location: {}", outputDir.getPath());
+        reportGenerator.setResults(results);
         try {
             if (mode == Config.RunMode.COVERAGE) {
                 final File coverageHtmlFile = new File(outputDir, "coverage.html");
-                logger.info("Coverage report HTML/RDFa file: {}", coverageHtmlFile.getPath());
+                logger.info("Coverage report HTML/RDFa file: {}", coverageHtmlFile.toPath().toUri());
                 reportGenerator.buildHtmlCoverageReport(Files.newBufferedWriter(coverageHtmlFile.toPath()));
             } else {
                 final File reportTurtleFile = new File(outputDir, "report.ttl");
-                logger.info("Report Turtle file: {}", reportTurtleFile.getPath());
+                logger.info("Report Turtle file: {}", reportTurtleFile.toPath().toUri());
                 reportGenerator.buildTurtleReport(Files.newBufferedWriter(reportTurtleFile.toPath()));
 
                 final File reportHtmlFile = new File(outputDir, "report.html");
-                logger.info("Report HTML/RDFa file: {}", reportHtmlFile.getPath());
+                logger.info("Report HTML/RDFa file: {}", reportHtmlFile.toPath().toUri());
                 reportGenerator.buildHtmlResultReport(Files.newBufferedWriter(reportHtmlFile.toPath()));
             }
         } catch (Exception e) {
@@ -202,7 +203,7 @@ public class ConformanceTestHarness {
     private TestSuiteResults runTests(final List<String> featurePaths, final boolean enableReporting) {
         logger.info("===================== RUN TESTS ========================");
         final List<String> skipTags = testSubject.getTargetServer().getSkipTags();
-        final TestSuiteResults results = testRunner.runTests(featurePaths, config.getMaxThreads(),
+        results = testRunner.runTests(featurePaths, config.getMaxThreads(),
                 skipTags, enableReporting);
         // any features which are skipped are not included in the feature reporting phase so add assertions now
         if (skipTags != null && !skipTags.isEmpty()) {
@@ -210,12 +211,19 @@ public class ConformanceTestHarness {
                     .filter(f -> f.getTags() != null)
                     .filter(f -> !f.getTags().isEmpty())
                     .filter(f -> f.getTags().stream().map(Tag::getName).anyMatch(skipTags::contains))
-                    .forEach(f -> dataRepository.createUntestedAssertion(
-                            f, pathMappings.unmapFeaturePath(f.getResource().getRelativePath())
+                    .forEach(f -> dataRepository.createSkippedAssertion(
+                            f, pathMappings.unmapFeaturePath(f.getResource().getRelativePath()), EARL.inapplicable
                     ));
         }
+        // any features which are @ignored are not included in the feature reporting phase so add assertions now
+        results.getFeatures().stream()
+                .filter(f -> f.getTags() != null)
+                .filter(f -> !f.getTags().isEmpty())
+                .filter(f -> f.getTags().stream().map(Tag::getName).anyMatch("ignore"::equals))
+                .forEach(f -> dataRepository.createSkippedAssertion(
+                        f, pathMappings.unmapFeaturePath(f.getResource().getRelativePath()), EARL.untested
+                ));
         results.summarizeOutcomes(dataRepository);
-        reportGenerator.setResults(results);
         logger.info("{}", results);
         return results;
     }

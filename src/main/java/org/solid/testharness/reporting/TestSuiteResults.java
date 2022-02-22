@@ -39,9 +39,13 @@ import java.util.List;
 import java.util.Map;
 
 public class TestSuiteResults {
+    public static final String MUST_NOT = "MUST-NOT";
+    public static final String MUST = "MUST";
     final Results results;
     long startTime;
     Map<String, Scores> counts = new HashMap<>();
+    Scores scenarioScores = new Scores();
+    int featuresTotal;
 
     public static TestSuiteResults emptyResults() {
         return new TestSuiteResults(null);
@@ -49,6 +53,10 @@ public class TestSuiteResults {
 
     public TestSuiteResults(final Results results) {
         this.results = results;
+    }
+
+    public Results getResults() {
+        return results;
     }
 
     public List<Feature> getFeatures() {
@@ -59,36 +67,12 @@ public class TestSuiteResults {
         return results != null ? results.getErrorMessages() : "";
     }
 
-    public int getFailCount() {
-        return results != null ? results.getFailCount() : 0;
-    }
-
-    public int getFeatureFailCount() {
-        return results != null ? results.getFeaturesFailed() : 0;
-    }
-
-    public int getFeaturePassCount() {
-        return results != null ? results.getFeaturesPassed() : 0;
-    }
-
-    public int getFeatureSkipCount() {
-        return results != null ? (int) results.toKarateJson().get("featuresSkipped") : 0;
+    public boolean hasFailures() {
+        return getScenarioCount(Scores.FAILED) != 0;
     }
 
     public int getFeatureTotal() {
-        return results != null ? results.getFeaturesTotal() : 0;
-    }
-
-    public int getScenarioFailCount() {
-        return results != null ? results.getScenariosFailed() : 0;
-    }
-
-    public int getScenarioPassCount() {
-        return results != null ? results.getScenariosPassed() : 0;
-    }
-
-    public int getScenarioTotal() {
-        return results != null ? results.getScenariosTotal() : 0;
+        return featuresTotal;
     }
 
     public void setStartTime(final long startTime) {
@@ -111,6 +95,8 @@ public class TestSuiteResults {
 
     public void summarizeOutcomes(final DataRepository dataRepository) {
         counts = dataRepository.getOutcomeCounts();
+        scenarioScores = dataRepository.getScenarioCounts();
+        featuresTotal = getCount(null, null);
     }
 
     public int getCount(final String level, final String outcome) {
@@ -131,20 +117,23 @@ public class TestSuiteResults {
         }
     }
 
+    public int getScenarioCount(final String outcome) {
+        if (StringUtils.isEmpty(outcome)) {
+            return scenarioScores.getTotal();
+        } else {
+            return scenarioScores.getScore(outcome);
+        }
+    }
+
     public String toJson() {
         try {
             final ObjectMapper objectMapper = CDI.current().select(ObjectMapper.class).get();
             final Map<String, Object> resultData = new HashMap<>();
             final Scores mustFeatures = new Scores();
-            mustFeatures.setScore(Scores.PASSED, getCount("MUST", Scores.PASSED) + getCount("MUST-NOT", Scores.PASSED));
-            mustFeatures.setScore(Scores.FAILED, getCount("MUST", Scores.FAILED) + getCount("MUST-NOT", Scores.FAILED));
+            mustFeatures.setScore(Scores.PASSED, getCount(MUST, Scores.PASSED) + getCount(MUST_NOT, Scores.PASSED));
+            mustFeatures.setScore(Scores.FAILED, getCount(MUST, Scores.FAILED) + getCount(MUST_NOT, Scores.FAILED));
             resultData.put("mustFeatures", mustFeatures);
-            resultData.put("featuresPassed", getFeaturePassCount());
-            resultData.put("featuresFailed", getFeatureFailCount());
-            resultData.put("featuresSkipped", getFeatureSkipCount());
-            resultData.put("scenariosPassed", getScenarioPassCount());
-            resultData.put("scenariosFailed", getScenarioFailCount());
-            resultData.put("scenariosTotal", getScenarioTotal());
+            resultData.put("scenarios", scenarioScores);
             resultData.put("elapsedTime", getElapsedTime());
             resultData.put("totalTime", getTimeTakenMillis());
             resultData.put("resultDate", DateTimeFormatter.ISO_DATE_TIME.format(getResultDate()));
@@ -158,10 +147,13 @@ public class TestSuiteResults {
     @Override
     public String toString() {
         if (getFeatureTotal() > 0) {
-            return String.format("Results:\n  Features  passed: %d, failed: %d, total: %d\n" +
+            return String.format("Results:\n  MustFeatures passed: %d, failed: %d\n  Total features: %d\n" +
                             "  Scenarios passed: %d, failed: %d, total: %d",
-                    results.getFeaturesPassed(), results.getFeaturesFailed(), results.getFeaturesTotal(),
-                    results.getScenariosPassed(), results.getScenariosFailed(), results.getScenariosTotal());
+                    getCount(MUST, Scores.PASSED) + getCount(MUST_NOT, Scores.PASSED),
+                    getCount(MUST, Scores.FAILED) + getCount(MUST_NOT, Scores.FAILED),
+                    featuresTotal,
+                    scenarioScores.getScore(Scores.PASSED), scenarioScores.getScore(Scores.FAILED),
+                    scenarioScores.getTotal());
         } else {
             return "Results: No features were run";
         }

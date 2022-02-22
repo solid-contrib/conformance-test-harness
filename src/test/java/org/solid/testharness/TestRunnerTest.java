@@ -68,7 +68,8 @@ class TestRunnerTest {
         final TestSuiteResults results = testRunner.runTests(List.of("src/test/resources/test.feature"), 1,
                 Collections.emptyList(), true);
         assertNotNull(results);
-        assertEquals(1, results.getFailCount());
+        assertEquals(1, results.getResults().getFeaturesTotal());
+        assertEquals(1, results.getResults().getFeaturesFailed());
     }
 
     @Test
@@ -76,7 +77,7 @@ class TestRunnerTest {
         final TestSuiteResults results = testRunner.runTests(Collections.emptyList(), 10,
                 Collections.emptyList(), true);
         assertNotNull(results);
-        assertEquals(0, results.getFailCount());
+        assertEquals(0, results.getResults().getFeaturesTotal());
     }
 
     @Test
@@ -84,7 +85,7 @@ class TestRunnerTest {
         final TestSuiteResults results = testRunner.runTests(Collections.emptyList(), 0,
                 Collections.emptyList(), true);
         assertNotNull(results);
-        assertEquals(0, results.getFailCount());
+        assertEquals(0, results.getResults().getFeaturesTotal());
     }
 
     @Test
@@ -92,7 +93,7 @@ class TestRunnerTest {
         final TestSuiteResults results = testRunner.runTests(null, 1,
                 Collections.emptyList(), true);
         assertNotNull(results);
-        assertEquals(0, results.getFailCount());
+        assertEquals(0, results.getResults().getFeaturesTotal());
     }
 
     @Test
@@ -100,7 +101,7 @@ class TestRunnerTest {
         final TestSuiteResults results = testRunner.runTests(List.of("src/test/resources/test.feature"), 1,
                 null, true);
         assertNotNull(results);
-        assertEquals(1, results.getFailCount());
+        assertEquals(1, results.getResults().getFeaturesFailed());
     }
 
     @Test
@@ -108,7 +109,7 @@ class TestRunnerTest {
         final TestSuiteResults results = testRunner.runTests(List.of("src/test/resources/test.feature"), 1,
                 List.of("tag1"), true);
         assertNotNull(results);
-        assertEquals(1, results.getFeatureSkipCount());
+        assertEquals(1, results.getResults().toKarateJson().get("featuresSkipped"));
     }
 
     @Test
@@ -116,9 +117,8 @@ class TestRunnerTest {
         final TestSuiteResults results = testRunner.runTests(List.of("src/test/resources/test.feature"), 1,
                 List.of("tag2"), true);
         assertNotNull(results);
-        assertEquals(0, results.getScenarioPassCount());
-        assertEquals(1, results.getFailCount());
-        assertEquals(0, results.getFeatureSkipCount());
+        assertEquals(0, results.getResults().toKarateJson().get("featuresSkipped"));
+        assertEquals(1, results.getResults().getFeaturesFailed());
     }
 
     @Test
@@ -132,7 +132,7 @@ class TestRunnerTest {
         final TestSuiteResults results = testRunner.runTests(List.of("src/test/resources/test.feature"), 1,
                 Collections.emptyList(), false);
         assertNotNull(results);
-        assertEquals(1, results.getFailCount());
+        assertEquals(1, results.getResults().getFeaturesFailed());
         verify(featureResultHandler, never()).featureReport(any(), any());
     }
 }

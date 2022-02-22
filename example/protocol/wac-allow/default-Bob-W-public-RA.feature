@@ -1,3 +1,4 @@
+@wac
 Feature: The WAC-Allow header shows user and public access modes with Bob write and public read, append as default on parent
 
   Background: Create test resource giving Bob default write access and public default read/append access

@@ -17,6 +17,7 @@
         <th>Requirement Level</th>
         <th>Passed</th>
         <th>Failed</th>
+        <th>Can't tell</th>
         <th>Inapplicable</th>
         <th>Untested</th>
         <th>Total</th>
@@ -27,6 +28,7 @@
         <td>MUST</td>
         <td>{getCount('MUST', 'passed')}</td>
         <td>{getCount('MUST', 'failed')}</td>
+        <td>{getCount('MUST', 'cantTell')}</td>
         <td>{getCount('MUST', 'inapplicable')}</td>
         <td>{getCount('MUST', 'untested')}</td>
         <td>{getCount('MUST', '')}</td>
@@ -35,6 +37,7 @@
         <td>MUST NOT</td>
         <td>{getCount('MUST-NOT', 'passed')}</td>
         <td>{getCount('MUST-NOT', 'failed')}</td>
+        <td>{getCount('MUST-NOT', 'cantTell')}</td>
         <td>{getCount('MUST-NOT', 'inapplicable')}</td>
         <td>{getCount('MUST-NOT', 'untested')}</td>
         <td>{getCount('MUST-NOT', '')}</td>
@@ -43,6 +46,7 @@
         <td>SHOULD</td>
         <td>{getCount('SHOULD', 'passed')}</td>
         <td>{getCount('SHOULD', 'failed')}</td>
+        <td>{getCount('SHOULD', 'cantTell')}</td>
         <td>{getCount('SHOULD', 'inapplicable')}</td>
         <td>{getCount('SHOULD', 'untested')}</td>
         <td>{getCount('SHOULD', '')}</td>
@@ -51,6 +55,7 @@
         <td>SHOULD NOT</td>
         <td>{getCount('SHOULD-NOT', 'passed')}</td>
         <td>{getCount('SHOULD-NOT', 'failed')}</td>
+        <td>{getCount('SHOULD-NOT', 'cantTell')}</td>
         <td>{getCount('SHOULD-NOT', 'inapplicable')}</td>
         <td>{getCount('SHOULD-NOT', 'untested')}</td>
         <td>{getCount('SHOULD-NOT', '')}</td>
@@ -59,6 +64,7 @@
         <td>MAY</td>
         <td>{getCount('MAY', 'passed')}</td>
         <td>{getCount('MAY', 'failed')}</td>
+        <td>{getCount('MAY', 'cantTell')}</td>
         <td>{getCount('MAY', 'inapplicable')}</td>
         <td>{getCount('MAY', 'untested')}</td>
         <td>{getCount('MAY', '')}</td>
@@ -69,6 +75,7 @@
         <th>Overall counts</th>
         <th>Passed</th>
         <th>Failed</th>
+        <th>Can't tell</th>
         <th>Inapplicable</th>
         <th>Untested</th>
         <th>Total</th>
@@ -79,17 +86,19 @@
         <td>All requirements (Features)</td>
         <td>{getCount('', 'passed')}</td>
         <td>{getCount('', 'failed')}</td>
+        <td>{getCount('', 'cantTell')}</td>
         <td>{getCount('', 'inapplicable')}</td>
         <td>{getCount('', 'untested')}</td>
         <td>{getCount('', '')}</td>
       </tr>
       <tr>
         <td>All tests (Scenarios)</td>
-        <td>{scenarioPassCount}</td>
-        <td>{scenarioFailCount}</td>
-        <td>N/A</td>
-        <td>N/A</td>
-        <td>{scenarioTotal}</td>
+        <td>{getScenarioCount('passed')}</td>
+        <td>{getScenarioCount('failed')}</td>
+        <td>{getScenarioCount('cantTell')}</td>
+        <td>{getScenarioCount('inapplicable')}</td>
+        <td>{getScenarioCount('untested')}</td>
+        <td>{getScenarioCount('')}</td>
       </tr>
       </tbody>
     </table>
