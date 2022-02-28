@@ -25,9 +25,11 @@ package org.solid.testharness.reporting;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.model.IRI;
 import org.solid.common.vocab.EARL;
 
+import java.util.Map;
 import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -155,5 +157,21 @@ public class Scores {
                 Optional.ofNullable(cantTell).orElse(0) +
                 Optional.ofNullable(untested).orElse(0) +
                 Optional.ofNullable(inapplicable).orElse(0);
+    }
+
+    public static int calcScore(final Map<String, Scores> scores, final String level, final String outcome) {
+        if (scores != null && level != null && scores.containsKey(level)) {
+            if (!StringUtils.isEmpty(outcome)) {
+                return scores.get(level).getScore(outcome);
+            } else {
+                return scores.get(level).getTotal();
+            }
+        } else if (scores != null && StringUtils.isEmpty(level)) {
+            return scores.values().stream()
+                    .mapToInt(s -> StringUtils.isEmpty(outcome) ? s.getTotal() : s.getScore(outcome))
+                    .sum();
+        } else {
+            return 0;
+        }
     }
 }

@@ -305,32 +305,32 @@ There is a special logging category, called `ResultLogger`, which outputs a summ
 `INFO` level. Note this is not necessarily in the order below and only non-zero values will be included.
 ```json5
 {
-  "scenarios": {
-    "passed": 0,
-    "failed": 0,
-    "cantTell": 0,
-    "untested": 0,
-    "inapplicable": 0
-  },
   "mustFeatures": { // combination of MUST and MUST-NOT
     "passed": 0,
     "failed": 0,
     "cantTell": 0,
     "untested": 0,
     "inapplicable": 0
-  }, 
-  "MUST": {
-    "passed": 0,
-    "failed": 0,
-    "cantTell": 0,
-    "untested": 0,
-    "inapplicable": 0
   },
-  "MUST": { /* as above */ },
-  "MUST-NOT": { /* as above */ },
-  "SHOULD": { /* as above */ },
-  "SHOULD-NOT": { /* as above */ },
-  "MAY": { /* as above */ },
+  "mustScenarios": { // combination of MUST and MUST-NOT
+    /* as above */
+  }, 
+  "features": {
+    "MUST": {
+      "passed": 0,
+      "failed": 0,
+      "cantTell": 0,
+      "untested": 0,
+      "inapplicable": 0
+    },
+    "MUST-NOT": { /* as above */ },
+    "SHOULD": { /* as above */ },
+    "SHOULD-NOT": { /* as above */ },
+    "MAY": { /* as above */ },
+  },
+  "scenarios": {
+    /* same structure as "features" */
+  },
   "elapsedTime":1000.0,
   "totalTime":1000.0,
   "resultDate":"2021-06-17T09:12:31.000Z",
@@ -345,8 +345,7 @@ The `mustFeatures` group are important since they represent the results of the t
 and give an indication of the server's overall conformance.
 
 ### Interpreting Result Counts
-The Scenario counts represent the results of all individual tests that were run but does not indicate whether a test that 
-failed was part of a mandatory or optional requirement. The possible outcomes for scenarios are:
+The Scenario counts represent the results of all individual tests that were run. The possible outcomes for scenarios are:
 * `passed` - the scenario test passed
 * `failed` - the scenario test failed 
 * `cantTell` - the scenario was aborted without a pass or fail being a clear outcome, normally because a condition was

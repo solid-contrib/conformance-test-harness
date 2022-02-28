@@ -26,6 +26,7 @@ package org.solid.testharness.utils;
 import com.intuit.karate.core.*;
 import com.intuit.karate.resource.Resource;
 import io.quarkus.test.junit.QuarkusTest;
+import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.util.Values;
@@ -274,7 +275,7 @@ class DataRepositoryTest {
     void countTestsPassed() {
         final DataRepository dataRepository = createRepository();
         createAssertion(dataRepository, SPEC.MUST, EARL.passed);
-        final Map<String, Scores> results = dataRepository.getOutcomeCounts();
+        final Map<String, Scores> results = dataRepository.getFeatureScores();
         assertEquals(1, results.get("MUST").getPassed());
     }
 
@@ -283,7 +284,7 @@ class DataRepositoryTest {
         final DataRepository dataRepository = createRepository();
         createAssertion(dataRepository, SPEC.MAY, EARL.failed);
         createAssertion(dataRepository, SPEC.MAY, EARL.untested);
-        final Map<String, Scores> results = dataRepository.getOutcomeCounts();
+        final Map<String, Scores> results = dataRepository.getFeatureScores();
         assertEquals(1, results.get("MAY").getFailed());
         assertEquals(1, results.get("MAY").getUntested());
     }
@@ -292,7 +293,29 @@ class DataRepositoryTest {
     void countTestsNoOutcome() {
         final DataRepository dataRepository = createRepository();
         createAssertion(dataRepository, SPEC.SHOULD, null);
-        final Map<String, Scores> results = dataRepository.getOutcomeCounts();
+        final Map<String, Scores> results = dataRepository.getFeatureScores();
+        assertEquals(0, results.size());
+    }
+
+    @Test
+    void getScenarioScores() {
+        final DataRepository dataRepository = createRepository();
+        createScenarioOutcome(dataRepository, SPEC.MAY, EARL.passed);
+        createScenarioOutcome(dataRepository, SPEC.MAY, EARL.failed);
+        createScenarioOutcome(dataRepository, SPEC.MUST, EARL.passed);
+        final Map<String, Scores> results = dataRepository.getScenarioScores();
+        assertEquals(1, results.get("MAY").getPassed());
+        assertEquals(1, results.get("MAY").getFailed());
+        assertEquals(1, results.get("MUST").getPassed());
+        assertEquals(2, results.get("MAY").getTotal());
+        assertEquals(1, results.get("MUST").getTotal());
+    }
+
+    @Test
+    void getScenarioScoresNoOutcome() {
+        final DataRepository dataRepository = createRepository();
+        createScenarioOutcome(dataRepository, SPEC.SHOULD, null);
+        final Map<String, Scores> results = dataRepository.getScenarioScores();
         assertEquals(0, results.size());
     }
 
@@ -421,6 +444,25 @@ class DataRepositoryTest {
                 final IRI resultIri = iri(Namespaces.RESULTS_URI, bnode().getID());
                 conn.add(assertionIri, EARL.result, resultIri);
                 conn.add(resultIri, EARL.outcome, outcome);
+            }
+        }
+    }
+
+    private void createScenarioOutcome(final DataRepository dataRepository, final IRI requirementLevel,
+                                       final IRI outcome) {
+        try (RepositoryConnection conn = dataRepository.getConnection()) {
+            final BNode requirement = bnode();
+            conn.add(requirement, SPEC.requirementLevel, requirementLevel);
+            final BNode testcase = bnode();
+            conn.add(testcase, SPEC.requirementReference, requirement);
+            final BNode activity = bnode();
+            conn.add(testcase, DCTERMS.hasPart, activity);
+            conn.add(activity, RDF.type, PROV.Activity);
+            conn.add(activity, DCTERMS.hasPart, bnode());
+            if (outcome != null) {
+                final BNode result = bnode();
+                conn.add(activity, PROV.generated, result);
+                conn.add(result, PROV.value, outcome);
             }
         }
     }

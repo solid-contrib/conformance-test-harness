@@ -26,7 +26,6 @@ package org.solid.testharness.reporting;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.karate.Results;
 import com.intuit.karate.core.Feature;
-import org.apache.commons.lang3.StringUtils;
 import org.solid.testharness.utils.DataRepository;
 
 import javax.enterprise.inject.spi.CDI;
@@ -43,9 +42,14 @@ public class TestSuiteResults {
     public static final String MUST = "MUST";
     final Results results;
     long startTime;
-    Map<String, Scores> counts = new HashMap<>();
-    Scores scenarioScores = new Scores();
+    Map<String, Scores> featureScores = new HashMap<>();
+    Map<String, Scores> scenarioScores = new HashMap<>();
     int featuresTotal;
+    int mustFeaturesPassed;
+    int mustFeaturesFailed;
+    int scenariosTotal;
+    int mustScenariosPassed;
+    int mustScenariosFailed;
 
     public static TestSuiteResults emptyResults() {
         return new TestSuiteResults(null);
@@ -59,6 +63,14 @@ public class TestSuiteResults {
         return results;
     }
 
+    public Map<String, Scores> getFeatureScores() {
+        return featureScores;
+    }
+
+    public Map<String, Scores> getScenarioScores() {
+        return scenarioScores;
+    }
+
     public List<Feature> getFeatures() {
         return this.results.getSuite().features;
     }
@@ -68,7 +80,7 @@ public class TestSuiteResults {
     }
 
     public boolean hasFailures() {
-        return getScenarioCount(Scores.FAILED) != 0;
+        return mustScenariosFailed != 0;
     }
 
     public int getFeatureTotal() {
@@ -94,35 +106,18 @@ public class TestSuiteResults {
     }
 
     public void summarizeOutcomes(final DataRepository dataRepository) {
-        counts = dataRepository.getOutcomeCounts();
-        scenarioScores = dataRepository.getScenarioCounts();
-        featuresTotal = getCount(null, null);
-    }
-
-    public int getCount(final String level, final String outcome) {
-        if (!StringUtils.isEmpty(level)) {
-            if (counts.containsKey(level)) {
-                if (StringUtils.isEmpty(outcome)) {
-                    return counts.get(level).getTotal();
-                } else {
-                    return counts.get(level).getScore(outcome);
-                }
-            } else {
-                return 0;
-            }
-        } else {
-            return counts.values().stream()
-                    .mapToInt(s -> StringUtils.isEmpty(outcome) ? s.getTotal() : s.getScore(outcome))
-                    .sum();
-        }
-    }
-
-    public int getScenarioCount(final String outcome) {
-        if (StringUtils.isEmpty(outcome)) {
-            return scenarioScores.getTotal();
-        } else {
-            return scenarioScores.getScore(outcome);
-        }
+        featureScores = dataRepository.getFeatureScores();
+        featuresTotal = Scores.calcScore(featureScores, null, null);
+        mustFeaturesPassed = Scores.calcScore(featureScores, MUST, Scores.PASSED) +
+                Scores.calcScore(featureScores, MUST_NOT, Scores.PASSED);
+        mustFeaturesFailed = Scores.calcScore(featureScores, MUST, Scores.FAILED) +
+                Scores.calcScore(featureScores, MUST_NOT, Scores.FAILED);
+        scenarioScores = dataRepository.getScenarioScores();
+        scenariosTotal = Scores.calcScore(scenarioScores, null, null);
+        mustScenariosPassed = Scores.calcScore(scenarioScores, MUST, Scores.PASSED) +
+                Scores.calcScore(scenarioScores, MUST_NOT, Scores.PASSED);
+        mustScenariosFailed = Scores.calcScore(scenarioScores, MUST, Scores.FAILED) +
+                Scores.calcScore(scenarioScores, MUST_NOT, Scores.FAILED);
     }
 
     public String toJson() {
@@ -130,14 +125,18 @@ public class TestSuiteResults {
             final ObjectMapper objectMapper = CDI.current().select(ObjectMapper.class).get();
             final Map<String, Object> resultData = new HashMap<>();
             final Scores mustFeatures = new Scores();
-            mustFeatures.setScore(Scores.PASSED, getCount(MUST, Scores.PASSED) + getCount(MUST_NOT, Scores.PASSED));
-            mustFeatures.setScore(Scores.FAILED, getCount(MUST, Scores.FAILED) + getCount(MUST_NOT, Scores.FAILED));
+            mustFeatures.setScore(Scores.PASSED, mustFeaturesPassed);
+            mustFeatures.setScore(Scores.FAILED, mustFeaturesFailed);
+            final Scores mustScenarios = new Scores();
+            mustScenarios.setScore(Scores.PASSED, mustScenariosPassed);
+            mustScenarios.setScore(Scores.FAILED, mustScenariosFailed);
             resultData.put("mustFeatures", mustFeatures);
+            resultData.put("features", featureScores);
+            resultData.put("mustScenarios", mustScenarios);
             resultData.put("scenarios", scenarioScores);
             resultData.put("elapsedTime", getElapsedTime());
             resultData.put("totalTime", getTimeTakenMillis());
             resultData.put("resultDate", DateTimeFormatter.ISO_DATE_TIME.format(getResultDate()));
-            resultData.putAll(counts);
             return objectMapper.writeValueAsString(resultData);
         } catch (Exception e) {
             return "{}";
@@ -147,13 +146,12 @@ public class TestSuiteResults {
     @Override
     public String toString() {
         if (getFeatureTotal() > 0) {
-            return String.format("Results:\n  MustFeatures passed: %d, failed: %d\n  Total features: %d\n" +
-                            "  Scenarios passed: %d, failed: %d, total: %d",
-                    getCount(MUST, Scores.PASSED) + getCount(MUST_NOT, Scores.PASSED),
-                    getCount(MUST, Scores.FAILED) + getCount(MUST_NOT, Scores.FAILED),
-                    featuresTotal,
-                    scenarioScores.getScore(Scores.PASSED), scenarioScores.getScore(Scores.FAILED),
-                    scenarioScores.getTotal());
+            return String.format("Results:\n" +
+                            "  MustFeatures  passed: %d, failed: %d\n  Total features:  %d\n" +
+                            "  MustScenarios passed: %d, failed: %d\n  Total scenarios: %d",
+                    mustFeaturesPassed, mustFeaturesFailed, featuresTotal,
+                    mustScenariosPassed, mustScenariosFailed, scenariosTotal
+            );
         } else {
             return "Results: No features were run";
         }

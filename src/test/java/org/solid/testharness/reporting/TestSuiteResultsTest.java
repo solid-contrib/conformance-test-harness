@@ -65,6 +65,18 @@ class TestSuiteResultsTest {
     }
 
     @Test
+    void getFeatureScores() {
+        final TestSuiteResults testSuiteResults = TestSuiteResults.emptyResults();
+        assertEquals(0, testSuiteResults.getFeatureScores().size());
+    }
+
+    @Test
+    void getScenarioScores() {
+        final TestSuiteResults testSuiteResults = TestSuiteResults.emptyResults();
+        assertEquals(0, testSuiteResults.getScenarioScores().size());
+    }
+
+    @Test
     void getErrorMessages() {
         final Results results = mock(Results.class);
         when(results.getErrorMessages()).thenReturn("ERRORS");
@@ -75,7 +87,7 @@ class TestSuiteResultsTest {
     @Test
     void hasFailures() {
         final TestSuiteResults testSuiteResults = TestSuiteResults.emptyResults();
-        testSuiteResults.scenarioScores.setScore(Scores.FAILED, 10);
+        addOutcomes(testSuiteResults);
         assertTrue(testSuiteResults.hasFailures());
     }
 
@@ -112,36 +124,6 @@ class TestSuiteResultsTest {
     }
 
     @Test
-    void getCounts() {
-        final TestSuiteResults testSuiteResults = TestSuiteResults.emptyResults();
-        addOutcomes(testSuiteResults);
-        assertEquals(1, testSuiteResults.getCount(TestSuiteResults.MUST, Scores.PASSED));
-        assertEquals(2, testSuiteResults.getCount(TestSuiteResults.MUST, Scores.FAILED));
-        assertEquals(2, testSuiteResults.getCount(TestSuiteResults.MUST_NOT, Scores.PASSED));
-        assertEquals(2, testSuiteResults.getCount(TestSuiteResults.MUST_NOT, Scores.UNTESTED));
-        assertEquals(3, testSuiteResults.getCount(TestSuiteResults.MUST_NOT, Scores.INAPPLICABLE));
-        assertEquals(3, testSuiteResults.getCount(TestSuiteResults.MUST, null));
-        assertEquals(10, testSuiteResults.getCount(TestSuiteResults.MUST_NOT, null));
-        assertEquals(5, testSuiteResults.getCount("MAY", null));
-        assertEquals(4, testSuiteResults.getCount(null, Scores.PASSED));
-        assertEquals(5, testSuiteResults.getCount(null, Scores.FAILED));
-        assertEquals(2, testSuiteResults.getCount(null, Scores.CANTTELL));
-        assertEquals(18, testSuiteResults.getCount(null, null));
-    }
-
-    @Test
-    void getScenarioCounts() {
-        final TestSuiteResults testSuiteResults = TestSuiteResults.emptyResults();
-        addOutcomes(testSuiteResults);
-        assertEquals(1, testSuiteResults.getScenarioCount(Scores.PASSED));
-        assertEquals(2, testSuiteResults.getScenarioCount(Scores.FAILED));
-        assertEquals(3, testSuiteResults.getScenarioCount(Scores.CANTTELL));
-        assertEquals(4, testSuiteResults.getScenarioCount(Scores.UNTESTED));
-        assertEquals(5, testSuiteResults.getScenarioCount(Scores.INAPPLICABLE));
-        assertEquals(15, testSuiteResults.getScenarioCount(null));
-    }
-
-    @Test
     void toJson() {
         final Results results = mock(Results.class);
         final ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Z"));
@@ -155,10 +137,13 @@ class TestSuiteResultsTest {
         final String json = testSuiteResults.toJson();
         assertTrue(json.contains("\"resultDate\":\"" + timestamp + "\""));
         assertTrue(json.contains("\"mustFeatures\":{\"passed\":3,\"failed\":4,\"total\":7}"));
+        assertTrue(json.contains("\"features\":{"));
         assertTrue(json.contains("\"MAY\":{\"passed\":1,\"failed\":1,\"cantTell\":1,\"untested\":1," +
                 "\"inapplicable\":1,\"total\":5}"));
-        assertTrue(json.contains("\"scenarios\":{\"passed\":1,\"failed\":2,\"cantTell\":3,\"untested\":4," +
-                "\"inapplicable\":5,\"total\":15}"));
+        assertTrue(json.contains("\"mustScenarios\":{\"passed\":23,\"failed\":24,\"total\":47}"));
+        assertTrue(json.contains("\"scenarios\":{"));
+        assertTrue(json.contains("\"MAY\":{\"passed\":11,\"failed\":11,\"cantTell\":11,\"untested\":11," +
+                "\"inapplicable\":11,\"total\":55}"));
     }
 
     @Test
@@ -166,7 +151,9 @@ class TestSuiteResultsTest {
         final TestSuiteResults testSuiteResults = TestSuiteResults.emptyResults();
         final String json = testSuiteResults.toJson();
         assertTrue(json.contains("\"mustFeatures\":{\"passed\":0,\"failed\":0,\"total\":0}"));
-        assertTrue(json.contains("\"scenarios\":{\"total\":0}"));
+        assertTrue(json.contains("\"mustScenarios\":{\"passed\":0,\"failed\":0,\"total\":0}"));
+        assertTrue(json.contains("\"features\":{}"));
+        assertTrue(json.contains("\"scenarios\":{}"));
     }
 
     @Test
@@ -181,8 +168,8 @@ class TestSuiteResultsTest {
     void testToString() {
         final TestSuiteResults testSuiteResults = TestSuiteResults.emptyResults();
         addOutcomes(testSuiteResults);
-        assertEquals("Results:\n  MustFeatures passed: 3, failed: 4\n  Total features: 18\n" +
-                "  Scenarios passed: 1, failed: 2, total: 15", testSuiteResults.toString());
+        assertEquals("Results:\n  MustFeatures  passed: 3, failed: 4\n  Total features:  18\n" +
+                "  MustScenarios passed: 23, failed: 24\n  Total scenarios: 138", testSuiteResults.toString());
     }
 
     @Test
@@ -192,12 +179,16 @@ class TestSuiteResultsTest {
     }
 
     private void addOutcomes(final TestSuiteResults testSuiteResults) {
-        when(dataRepository.getOutcomeCounts()).thenReturn(Map.of(
+        when(dataRepository.getFeatureScores()).thenReturn(Map.of(
                 TestSuiteResults.MUST, new Scores(1, 2, 0, 0, 0),
                 TestSuiteResults.MUST_NOT, new Scores(2, 2, 1, 2, 3),
                 "MAY", new Scores(1, 1, 1, 1, 1)
         ));
-        when(dataRepository.getScenarioCounts()).thenReturn(new Scores(1, 2, 3, 4, 5));
+        when(dataRepository.getScenarioScores()).thenReturn(Map.of(
+                TestSuiteResults.MUST, new Scores(11, 12, 0, 0, 0),
+                TestSuiteResults.MUST_NOT, new Scores(12, 12, 11, 12, 13),
+                "MAY", new Scores(11, 11, 11, 11, 11)
+        ));
         testSuiteResults.summarizeOutcomes(dataRepository);
     }
 }

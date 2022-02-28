@@ -6,6 +6,7 @@
 * Allow tests to exit with the `earl:cantTell` outcome when a precondition in not met for the test to continue.
 * Improve assertions at the scenario level to apply the correct outcomes.
 * Improve assertions at the feature level to derive outcomes from the scenarios that make up the feature.
+* Break scenario counts into each requirement level and show in results summary table.
 
 ## Release 1.1.3
 ### Fix

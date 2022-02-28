@@ -343,21 +343,39 @@ public class DataRepository implements Repository {
         return JS_ERROR.matcher(data).replaceFirst("\n$1\n$2\n$3\n$4").replaceAll("\\R+", "\n");
     }
 
+    public Map<String, Scores> getFeatureScores() {
+        final String queryString = Namespaces.generateTurtlePrefixes(List.of(SPEC.PREFIX, EARL.PREFIX)) +
+                "SELECT ?level ?outcome (COUNT(?outcome) AS ?count) " +
+                "WHERE {" +
+                "  [] earl:test [spec:requirementReference/spec:requirementLevel ?level] ;" +
+                "     earl:result/earl:outcome ?outcome ." +
+                "}" +
+                "GROUP BY ?level ?outcome";
+        return getScoresByOutcomeLevel(queryString);
+    }
+
+    public Map<String, Scores> getScenarioScores() {
+        final String queryString = Namespaces.generateTurtlePrefixes(
+                List.of(SPEC.PREFIX, PROV.PREFIX, DCTERMS.PREFIX)
+        ) +
+                "SELECT ?level ?outcome (COUNT(?outcome) AS ?count) " +
+                "WHERE {" +
+                "  ?t dcterms:hasPart ?s ;" +
+                "    spec:requirementReference/spec:requirementLevel ?level ." +
+                "  ?s a prov:Activity ;" +
+                "    dcterms:hasPart ?l ;" +
+                "    prov:generated/prov:value ?outcome ." +
+                "}" +
+                "GROUP BY ?level ?outcome";
+        return getScoresByOutcomeLevel(queryString);
+    }
+
     @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
-    public Map<String, Scores> getOutcomeCounts() {
+    private Map<String, Scores> getScoresByOutcomeLevel(final String queryString) {
         final Map<String, Scores> counts = new HashMap<>();
         try (
                 RepositoryConnection conn = getConnection()
         ) {
-            final String queryString = Namespaces.generateTurtlePrefixes(List.of(SPEC.PREFIX, EARL.PREFIX)) +
-                    "SELECT ?level ?outcome (COUNT(?outcome) AS ?count) " +
-                    "WHERE {" +
-                    "  ?r spec:requirementLevel ?level ." +
-                    "  ?t spec:requirementReference ?r ." +
-                    "  ?a earl:test ?t ;" +
-                    "     earl:result/earl:outcome ?outcome ." +
-                    "}" +
-                    "GROUP BY ?level ?outcome";
             final TupleQuery tupleQuery = conn.prepareTupleQuery(queryString);
             try (TupleQueryResult result = tupleQuery.evaluate()) {
                 while (result.hasNext()) {
@@ -375,34 +393,6 @@ public class DataRepository implements Repository {
             }
         }
         return counts;
-    }
-
-    public Scores getScenarioCounts() {
-        final Scores scores = new Scores();
-        try (
-                RepositoryConnection conn = getConnection()
-        ) {
-            final String queryString = Namespaces.generateTurtlePrefixes(
-                    List.of(EARL.PREFIX, PROV.PREFIX, DCTERMS.PREFIX)
-            ) +
-                    "SELECT ?outcome (COUNT(?outcome) AS ?count) " +
-                    "WHERE {" +
-                    "  ?s a prov:Activity ;" +
-                    "    dcterms:hasPart ?l ;" +
-                    "    prov:generated/prov:value ?outcome ." +
-                    "}" +
-                    "GROUP BY ?outcome";
-            final TupleQuery tupleQuery = conn.prepareTupleQuery(queryString);
-            try (TupleQueryResult result = tupleQuery.evaluate()) {
-                while (result.hasNext()) {
-                    final BindingSet bindingSet = result.next();
-                    final String outcome = ((IRI)bindingSet.getValue("outcome")).getLocalName();
-                    final int count = Integer.parseInt(bindingSet.getValue("count").stringValue());
-                    scores.setScore(outcome, count);
-                }
-            }
-        }
-        return scores;
     }
 
     public void export(final Writer wr, final Resource... contexts) throws Exception {

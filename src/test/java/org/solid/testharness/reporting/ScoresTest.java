@@ -26,10 +26,16 @@ package org.solid.testharness.reporting;
 import org.junit.jupiter.api.Test;
 import org.solid.common.vocab.EARL;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ScoresTest {
     private static final String MISSING = "missing";
+    private final Map<String, Scores> scores = Map.of(
+            "LEVEL1", new Scores(1, 2, 3, 4, 5),
+            "LEVEL2", new Scores(1, 2, 3, 4, 5)
+    );
 
     @Test
     void getPassed() {
@@ -149,5 +155,38 @@ class ScoresTest {
     void getTotalNulls() {
         final Scores scores = new Scores();
         assertEquals(0, scores.getTotal());
+    }
+
+    @Test
+    void calcScoreLevelOutcome() {
+        assertEquals(1, Scores.calcScore(scores, "LEVEL1", Scores.PASSED));
+    }
+
+    @Test
+    void calcScoreLevelTotal() {
+        assertEquals(15, Scores.calcScore(scores, "LEVEL1", null));
+        assertEquals(15, Scores.calcScore(scores, "LEVEL1", ""));
+    }
+
+    @Test
+    void calcScoreAllOutcome() {
+        assertEquals(2, Scores.calcScore(scores, null, Scores.PASSED));
+        assertEquals(10, Scores.calcScore(scores, "", Scores.INAPPLICABLE));
+    }
+
+    @Test
+    void calcScoreAllTotal() {
+        assertEquals(30, Scores.calcScore(scores, null, null));
+        assertEquals(30, Scores.calcScore(scores, "", ""));
+    }
+
+    @Test
+    void calcScoreMissingLevel() {
+        assertEquals(0, Scores.calcScore(scores, "MISSING", null));
+    }
+
+    @Test
+    void calcScoreNull() {
+        assertEquals(0, Scores.calcScore(null, null, null));
     }
 }
