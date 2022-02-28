@@ -75,33 +75,4 @@ public class TargetServerTest {
                 () -> assertTrue(targetServer.getSkipTags().isEmpty())
         );
     }
-
-    @Test
-    public void parseTargetServerOldWac() throws Exception {
-        final URL testFile = TestUtils.getFileUrl("src/test/resources/config/targetserver-testing-feature.ttl");
-        TestUtils.insertData(dataRepository, testFile);
-        final TargetServer targetServer = new TargetServer(iri(TestUtils.SAMPLE_NS, "testserver-wac"));
-        assertAll("targetServer",
-                () -> assertNotNull(targetServer.getFeatures()),
-                () -> assertTrue(targetServer.getFeatures().contains("acl")),
-                () -> assertFalse(targetServer.getFeatures().contains("feature2")),
-                () -> assertNotNull(targetServer.getSkipTags()),
-                () -> assertTrue(targetServer.getSkipTags().isEmpty())
-        );
-    }
-
-    @Test
-    public void parseTargetServerOldAcp() throws Exception {
-        final URL testFile = TestUtils.getFileUrl("src/test/resources/config/targetserver-testing-feature.ttl");
-        TestUtils.insertData(dataRepository, testFile);
-        final TargetServer targetServer = new TargetServer(iri(TestUtils.SAMPLE_NS, "testserver-acp"));
-        assertAll("targetServer",
-                () -> assertNotNull(targetServer.getFeatures()),
-                () -> assertTrue(targetServer.getFeatures().contains("acl")),
-                () -> assertFalse(targetServer.getFeatures().contains("feature2")),
-                () -> assertNotNull(targetServer.getSkipTags()),
-                () -> assertTrue(targetServer.getSkipTags().contains("wac-allow-public")),
-                () -> assertFalse(targetServer.getSkipTags().contains("tag2"))
-        );
-    }
 }

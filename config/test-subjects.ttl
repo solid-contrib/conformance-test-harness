@@ -5,6 +5,6 @@ prefix earl: <http://www.w3.org/ns/earl#>
 <target>
     a earl:Software, earl:TestSubject ;
 #    solid-test:skip "acp" ;
-    solid-test:skip "wac-allow-public", "wac" ;
+    solid-test:skip "wac-allow-public", "wac", "publicagent" ;
 #    solid-test:features "acp-legacy" ;
     doap:name "Test Subject"@en .

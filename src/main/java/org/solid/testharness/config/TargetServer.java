@@ -34,22 +34,14 @@ import java.util.List;
 public class TargetServer extends DataModelBase {
     private static final Logger logger = LoggerFactory.getLogger(TargetServer.class);
 
-    private List<String> features;
-    private List<String> skipTags;
+    private final List<String> features;
+    private final List<String> skipTags;
 
     public TargetServer(final IRI subject) {
         super(subject, ConstructMode.DEEP);
         logger.debug("Retrieved {} statements for {}", super.size(), subject);
         features = getLiteralsAsStringList(SOLID_TEST.features);
         skipTags = getLiteralsAsStringList(SOLID_TEST.skip);
-
-        // TODO: Remove once CI processes have migrated
-        // handle old feature list by converting to skip tags
-        if (skipTags.isEmpty() &&
-                features.contains("acl") &&
-                !features.contains("wac-allow-public")) {
-            skipTags.add("wac-allow-public");
-        }
     }
 
     public List<String> getFeatures() {
