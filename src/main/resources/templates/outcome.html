@@ -1,8 +1,8 @@
 {#switch value}
-{#case 'http://www.w3.org/ns/earl#passed'}<span>✔</span>
-{#case 'http://www.w3.org/ns/earl#failed'}<span>✗</span>
-{#case 'http://www.w3.org/ns/earl#cantTell'}<span>?</span>
-{#case 'http://www.w3.org/ns/earl#inapplicable'}<span>⌙</span>
-{#case 'http://www.w3.org/ns/earl#untested'}<span>○</span>
+{#case 'http://www.w3.org/ns/earl#passed'}<span class="earl:passed">✔</span>
+{#case 'http://www.w3.org/ns/earl#failed'}<span class="earl:failed">✗</span>
+{#case 'http://www.w3.org/ns/earl#cantTell'}<span class="earl:cantTell">?</span>
+{#case 'http://www.w3.org/ns/earl#inapplicable'}<span class="earl:inapplicable">⌙</span>
+{#case 'http://www.w3.org/ns/earl#untested'}<span class="earl:untested">○</span>
 {#else}<span>.</span>
 {/switch}

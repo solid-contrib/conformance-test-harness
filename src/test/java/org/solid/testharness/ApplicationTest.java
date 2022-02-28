@@ -23,11 +23,14 @@
  */
 package org.solid.testharness;
 
-import com.intuit.karate.Results;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.MockitoAnnotations;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.reporting.TestSuiteResults;
 import org.solid.testharness.utils.TestHarnessInitializationException;
@@ -45,6 +48,8 @@ import static org.mockito.Mockito.*;
 
 @QuarkusTest
 class ApplicationTest {
+    private AutoCloseable closeable;
+
     @Inject
     Application application;
 
@@ -52,6 +57,19 @@ class ApplicationTest {
     Config config;
     @InjectMock
     ConformanceTestHarness conformanceTestHarness;
+
+    @Captor
+    private ArgumentCaptor<List<String>> captor;
+
+    @BeforeEach
+    void setup() {
+        closeable = MockitoAnnotations.openMocks(this);
+    }
+
+    @AfterEach
+    public void releaseMocks() throws Exception {
+        closeable.close();
+    }
 
     @Test
     void badCommand() throws Exception {
@@ -110,7 +128,7 @@ class ApplicationTest {
 
     @Test
     void outputSkipped() throws Exception {
-        final TestSuiteResults results = mockResults(1, 0);
+        final TestSuiteResults results = mockResults(1, false);
         when(conformanceTestHarness.runTestSuites(any(), any())).thenReturn(results);
         assertEquals(0, application.run("--skip-reports"));
         verify(config, never()).setOutputDirectory(any());
@@ -119,7 +137,6 @@ class ApplicationTest {
 
     @Test
     void sourceOnce() throws Exception {
-        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
         assertEquals(0, application.run("--source", "source1", "--coverage"));
         verify(config).setTestSources(captor.capture());
         assertEquals(1, captor.getValue().size());
@@ -128,7 +145,6 @@ class ApplicationTest {
 
     @Test
     void sourceDouble() throws Exception {
-        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
         assertEquals(0, application.run("--source", "source1,source2", "--coverage"));
         verify(config).setTestSources(captor.capture());
         assertEquals(2, captor.getValue().size());
@@ -138,7 +154,6 @@ class ApplicationTest {
 
     @Test
     void sourceMultiple() throws Exception {
-        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
         assertEquals(0, application.run("--source", "source1", "--source", "source2", "--coverage"));
         verify(config).setTestSources(captor.capture());
         assertEquals(2, captor.getValue().size());
@@ -148,7 +163,6 @@ class ApplicationTest {
 
     @Test
     void sourceBlank() throws Exception {
-        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
         assertEquals(0, application.run("--source", "", "--coverage"));
         verify(config).setTestSources(captor.capture());
         assertEquals(0, captor.getValue().size());
@@ -162,7 +176,7 @@ class ApplicationTest {
 
     @Test
     void targetBlank() throws Exception {
-        final TestSuiteResults results = mockResults(1, 0);
+        final TestSuiteResults results = mockResults(1, false);
         when(conformanceTestHarness.runTestSuites(any(), any())).thenReturn(results);
         assertEquals(0, application.run("--target", ""));
         verify(config, never()).setTestSubject(any());
@@ -170,7 +184,7 @@ class ApplicationTest {
 
     @Test
     void target() throws Exception {
-        final TestSuiteResults results = mockResults(1, 0);
+        final TestSuiteResults results = mockResults(1, false);
         when(conformanceTestHarness.runTestSuites(any(), any())).thenReturn(results);
         when(config.getSubjectsUrl()).thenReturn(new URL("https://example.org/subjects.ttl"));
         assertEquals(0, application.run("--target", "test"));
@@ -179,7 +193,7 @@ class ApplicationTest {
 
     @Test
     void targetIri() throws Exception {
-        final TestSuiteResults results = mockResults(1, 0);
+        final TestSuiteResults results = mockResults(1, false);
         when(conformanceTestHarness.runTestSuites(any(), any())).thenReturn(results);
         when(config.getSubjectsUrl()).thenReturn(new URL("https://example.org/subjects.ttl"));
         assertEquals(0, application.run("--target", "https://example.org/test"));
@@ -200,7 +214,7 @@ class ApplicationTest {
 
     @Test
     void subjectsSet() throws Exception {
-        final TestSuiteResults results = mockResults(1, 0);
+        final TestSuiteResults results = mockResults(1, false);
         when(conformanceTestHarness.runTestSuites(any(), any())).thenReturn(results);
         assertEquals(0, application.run("--subjects", "subjectsfile"));
         verify(config).setSubjectsUrl("subjectsfile");
@@ -208,7 +222,6 @@ class ApplicationTest {
 
     @Test
     void filtersBlank() throws Exception {
-        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
         application.run("--filter", "");
         verify(conformanceTestHarness).runTestSuites(captor.capture(), any());
         assertTrue(captor.getValue().isEmpty());
@@ -216,7 +229,6 @@ class ApplicationTest {
 
     @Test
     void filters1() throws Exception {
-        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
         application.run("--filter", "filter1");
         verify(conformanceTestHarness).runTestSuites(captor.capture(), any());
         assertEquals(1, captor.getValue().size());
@@ -225,7 +237,6 @@ class ApplicationTest {
 
     @Test
     void filters2() throws Exception {
-        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
         application.run("--filter", "filter1,filter2");
         verify(conformanceTestHarness).runTestSuites(captor.capture(), any());
         assertEquals(2, captor.getValue().size());
@@ -245,7 +256,6 @@ class ApplicationTest {
 
     @Test
     void statusesBlank() throws Exception {
-        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
         application.run("--status", "");
         verify(conformanceTestHarness).runTestSuites(any(), captor.capture());
         assertTrue(captor.getValue().isEmpty());
@@ -253,7 +263,6 @@ class ApplicationTest {
 
     @Test
     void statuses1() throws Exception {
-        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
         application.run("--status", "status1");
         verify(conformanceTestHarness).runTestSuites(any(), captor.capture());
         assertEquals(1, captor.getValue().size());
@@ -262,7 +271,6 @@ class ApplicationTest {
 
     @Test
     void statuses2() throws Exception {
-        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
         application.run("--status", "status1,status2");
         verify(conformanceTestHarness).runTestSuites(any(), captor.capture());
         assertEquals(2, captor.getValue().size());
@@ -272,7 +280,6 @@ class ApplicationTest {
 
     @Test
     void statusesTwice() throws Exception {
-        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
         application.run("--status", "status1", "--status", "status2");
         verify(conformanceTestHarness).runTestSuites(any(), captor.capture());
         assertEquals(2, captor.getValue().size());
@@ -289,7 +296,7 @@ class ApplicationTest {
 
     @Test
     void runTestSuitesNoTearDown() throws Exception {
-        final TestSuiteResults results = mockResults(1, 0);
+        final TestSuiteResults results = mockResults(1, false);
         when(conformanceTestHarness.runTestSuites(any(), any())).thenReturn(results);
         assertEquals(0, application.run("--skip-teardown"));
         verify(conformanceTestHarness, never()).cleanUp();
@@ -297,7 +304,7 @@ class ApplicationTest {
 
     @Test
     void runTestSuitesWithTearDown() throws Exception {
-        final TestSuiteResults results = mockResults(1, 0);
+        final TestSuiteResults results = mockResults(1, false);
         when(conformanceTestHarness.runTestSuites(any(), any())).thenReturn(results);
         assertEquals(0, application.run());
         verify(conformanceTestHarness).cleanUp();
@@ -305,14 +312,14 @@ class ApplicationTest {
 
     @Test
     void runTestSuitesFailures() throws Exception {
-        final TestSuiteResults results = mockResults(1, 1);
+        final TestSuiteResults results = mockResults(1, true);
         when(conformanceTestHarness.runTestSuites(any(), any())).thenReturn(results);
         assertEquals(1, application.run());
     }
 
     @Test
     void runTestSuitesFailuresIgnoring() throws Exception {
-        final TestSuiteResults results = mockResults(1, 1);
+        final TestSuiteResults results = mockResults(1, true);
         when(conformanceTestHarness.runTestSuites(any(), any())).thenReturn(results);
         assertEquals(0, application.run("--ignore-failures"));
     }
@@ -325,7 +332,7 @@ class ApplicationTest {
 
     @Test
     void runWithNoOptions() throws Exception {
-        final TestSuiteResults results = mockResults(1, 0);
+        final TestSuiteResults results = mockResults(1, false);
         when(conformanceTestHarness.runTestSuites(any(), any())).thenReturn(results);
         assertEquals(0, application.run());
         verify(conformanceTestHarness, never()).prepareCoverageReport();
@@ -338,10 +345,11 @@ class ApplicationTest {
                 .thenThrow(new TestHarnessInitializationException("FAIL"));
         assertDoesNotThrow(() -> application.run());
     }
-    private TestSuiteResults mockResults(final int features, final int failures) {
-        final Results results = mock(Results.class);
-        when(results.getFeaturesTotal()).thenReturn(features);
-        when(results.getFailCount()).thenReturn(failures);
-        return new TestSuiteResults(results);
+
+    private TestSuiteResults mockResults(final int features, final boolean failed) {
+        final TestSuiteResults results = mock(TestSuiteResults.class);
+        when(results.getFeatureTotal()).thenReturn(features);
+        when(results.hasFailures()).thenReturn(failed);
+        return results;
     }
 }

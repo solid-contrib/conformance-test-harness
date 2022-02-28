@@ -31,8 +31,7 @@ import org.solid.testharness.reporting.TestSuiteResults;
 import javax.inject.Inject;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("solid")
 @QuarkusTest
@@ -55,6 +54,6 @@ public class TestScenarioRunner {
         final TestSuiteResults results = conformanceTestHarness.runSingleTest(uri);
         conformanceTestHarness.cleanUp();
         assertNotNull(results);
-        assertEquals(0, results.getFailCount(), results.getErrorMessages());
+        assertFalse(results.hasFailures(), results.getErrorMessages());
     }
 }

@@ -23,7 +23,6 @@
  */
 package org.solid.testharness;
 
-import com.intuit.karate.Results;
 import com.intuit.karate.core.Feature;
 import com.intuit.karate.core.Tag;
 import com.intuit.karate.resource.Resource;
@@ -136,6 +135,7 @@ class ConformanceTestHarnessTest {
         when(testSuiteDescription.getFeaturePaths()).thenReturn(null);
         final TestSuiteResults results = conformanceTestHarness.runTestSuites(null, null);
         assertNotNull(results);
+        assertNull(results.getResults());
         assertEquals(0, results.getFeatureTotal());
     }
 
@@ -145,6 +145,7 @@ class ConformanceTestHarnessTest {
         when(testSuiteDescription.getFeaturePaths()).thenReturn(Collections.emptyList());
         final TestSuiteResults results = conformanceTestHarness.runTestSuites(null, null);
         assertNotNull(results);
+        assertNull(results.getResults());
         assertEquals(0, results.getFeatureTotal());
     }
 
@@ -154,6 +155,7 @@ class ConformanceTestHarnessTest {
         when(testSuiteDescription.getFeaturePaths()).thenReturn(Collections.emptyList());
         final TestSuiteResults results = conformanceTestHarness.runTestSuites(Collections.emptyList(), null);
         assertNotNull(results);
+        assertNull(results.getResults());
         assertEquals(0, results.getFeatureTotal());
     }
 
@@ -163,9 +165,9 @@ class ConformanceTestHarnessTest {
         when(config.getUserRegistrationEndpoint()).thenReturn(URI.create("https://example.org/register"));
         when(testSuiteDescription.getFeaturePaths()).thenReturn(List.of("feature"));
 
-        final TestSuiteResults results = mockResults(1);
+        final TestSuiteResults results = mockResults(true);
         when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(results);
-        assertEquals(1, conformanceTestHarness.runTestSuites(null, null).getFailCount());
+        assertTrue(conformanceTestHarness.runTestSuites(null, null).hasFailures());
         verify(authManager).registerUser(HttpConstants.ALICE);
         verify(authManager).registerUser(HttpConstants.BOB);
     }
@@ -182,53 +184,50 @@ class ConformanceTestHarnessTest {
     void runTestSuitePass() {
         mockTargetServer();
         when(testSuiteDescription.getFeaturePaths()).thenReturn(List.of("feature"));
-        final TestSuiteResults results = mockResults(1);
+        final TestSuiteResults results = mockResults(true);
         when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(results);
-        assertEquals(1, conformanceTestHarness.runTestSuites(null, null).getFailCount());
+        assertTrue(conformanceTestHarness.runTestSuites(null, null).hasFailures());
     }
 
     @Test
     void runTestSuiteNullSkips() {
         mockTargetServerWithSkips(null);
         when(testSuiteDescription.getFeaturePaths()).thenReturn(List.of("feature"));
-        final Results results = mock(Results.class);
-        final TestSuiteResults tsResults = new TestSuiteResults(results);
-        when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(tsResults);
-        assertEquals(0, conformanceTestHarness.runTestSuites(null, null).getFailCount());
-        verify(results, never()).getSuite();
+        final TestSuiteResults results = mockResults(false);
+        when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(results);
+        assertFalse(conformanceTestHarness.runTestSuites(null, null).hasFailures());
     }
 
     @Test
     void runTestSuiteEmptySkips() {
         mockTargetServerWithSkips(Collections.emptyList());
         when(testSuiteDescription.getFeaturePaths()).thenReturn(List.of("feature"));
-        final Results results = mock(Results.class);
-        final TestSuiteResults tsResults = new TestSuiteResults(results);
-        when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(tsResults);
-        assertEquals(0, conformanceTestHarness.runTestSuites(null, null).getFailCount());
-        verify(results, never()).getSuite();
+        final TestSuiteResults results = mockResults(false);
+        when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(results);
+        assertFalse(conformanceTestHarness.runTestSuites(null, null).hasFailures());
     }
 
     @Test
     void runTestSuiteWithSkips() {
         mockTargetServerWithSkips(List.of("skip"));
         when(testSuiteDescription.getFeaturePaths()).thenReturn(List.of("feature"));
-        final Results results = mock(Results.class);
         final Feature feature1 = mock(Feature.class);
         when(feature1.getTags()).thenReturn(null);
         final Feature feature2 = mock(Feature.class);
         when(feature2.getTags()).thenReturn(Collections.emptyList());
         final Feature feature3 = mock(Feature.class);
         when(feature3.getTags()).thenReturn(List.of(new Tag(1, "@skip")));
+        final Feature feature4 = mock(Feature.class);
+        when(feature4.getTags()).thenReturn(List.of(new Tag(1, "@ignore")));
         final Resource resource = mock(Resource.class);
-        when(feature3.getResource()).thenReturn(resource);
         when(resource.getRelativePath()).thenReturn("example/test");
-        final TestSuiteResults tsResults = mock(TestSuiteResults.class);
-        when(tsResults.getFeatures()).thenReturn(List.of(feature1, feature2, feature3));
-        when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(tsResults);
-        assertEquals(0, conformanceTestHarness.runTestSuites(null, null).getFailCount());
-        verify(results, never()).getSuite();
-        verify(dataRepository, times(1)).createUntestedAssertion(any(), any());
+        when(feature3.getResource()).thenReturn(resource);
+        when(feature4.getResource()).thenReturn(resource);
+        final TestSuiteResults results = mockResults(false);
+        when(results.getFeatures()).thenReturn(List.of(feature1, feature2, feature3, feature4));
+        when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(results);
+        assertFalse(conformanceTestHarness.runTestSuites(null, null).hasFailures());
+        verify(dataRepository, times(2)).createSkippedAssertion(any(), any(), any());
     }
 
     @Test
@@ -265,9 +264,9 @@ class ConformanceTestHarnessTest {
         mockTargetServer();
         when(config.getWebIds())
                 .thenReturn(Map.of(HttpConstants.ALICE, "https://alice.target.example.org/profile/card#me"));
-        final TestSuiteResults results = mockResults(1);
+        final TestSuiteResults results = mockResults(true);
         when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(results);
-        assertEquals(1, conformanceTestHarness.runSingleTest("test").getFailCount());
+        assertTrue(conformanceTestHarness.runSingleTest("test").hasFailures());
         assertNotNull(conformanceTestHarness.getClients());
         assertEquals(1, conformanceTestHarness.getClients().size());
     }
@@ -275,9 +274,9 @@ class ConformanceTestHarnessTest {
     @Test
     void getClientsNull() {
         mockTargetServer();
-        final TestSuiteResults results = mockResults(1);
+        final TestSuiteResults results = mockResults(true);
         when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(results);
-        assertEquals(1, conformanceTestHarness.runSingleTest("test").getFailCount());
+        assertTrue(conformanceTestHarness.runSingleTest("test").hasFailures());
         assertNotNull(conformanceTestHarness.getClients());
         assertEquals(0, conformanceTestHarness.getClients().size());
     }
@@ -316,16 +315,9 @@ class ConformanceTestHarnessTest {
         when(testSubject.getTargetServer()).thenReturn(targetServer);
     }
 
-    private TestSuiteResults mockResults(final int failures) {
-        final Results results = mock(Results.class);
-        when(results.getFeaturesPassed()).thenReturn(10);
-        when(results.getFeaturesFailed()).thenReturn(0);
-        when(results.toKarateJson()).thenReturn(Map.of("featuresSkipped", 0));
-        when(results.getScenariosPassed()).thenReturn(20);
-        when(results.getScenariosFailed()).thenReturn(failures);
-        when(results.getElapsedTime()).thenReturn(1000d);
-        when(results.getTimeTakenMillis()).thenReturn(1000d);
-        when(results.getFailCount()).thenReturn(failures);
-        return new TestSuiteResults(results);
+    private TestSuiteResults mockResults(final boolean failed) {
+        final TestSuiteResults results = mock(TestSuiteResults.class);
+        when(results.hasFailures()).thenReturn(failed);
+        return results;
     }
 }

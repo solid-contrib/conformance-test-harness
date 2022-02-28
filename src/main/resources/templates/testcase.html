@@ -57,14 +57,14 @@
   {#else if isImplemented && assertion}
   <td about="{assertion.subject}" rel="earl:result" resource="{assertion.result.subject}">
     <span about="{assertion.result.subject}" typeof="{assertion.result.typesList}" rel="earl:outcome"
-        resource="{assertion.result.outcome}" class="earl:{assertion.result.outcomeLocalName}"
+        resource="{assertion.result.outcome}"
         title="{assertion.result.outcomeLocalName}">{#include outcome value=assertion.result.outcome /}</span>
   </td>
   <td>
     <ul>
       {#each scenarios.orEmpty}
       <li>
-        <span class="earl:{it.generatedOutput.valueLocalName}" title="{it.generatedOutput.valueLocalName}">{#include outcome value=it.generatedOutput.value /}</span>
+        <span title="{it.generatedOutput.valueLocalName}">{#include outcome value=it.generatedOutput.value /}</span>
         <a href="#{it.anchor}" data-id="{it.anchor}">{it.title}</a>
       </li>
       {/each}

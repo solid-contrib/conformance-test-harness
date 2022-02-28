@@ -84,5 +84,6 @@ function fn() {
         parseLinkHeaders: (headers) => Utils.parseLinkHeaders(karate.toJava(headers)),
         resolveUri: (base, target) => Utils.resolveUri(base, target),
         pause: (pause) => java.lang.Thread.sleep(pause),
+        cantTellIf: (failed) => { if (failed) karate.fail("CANTTELL"); }
     };
 }

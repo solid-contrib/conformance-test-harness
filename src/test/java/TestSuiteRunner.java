@@ -38,8 +38,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("solid")
 @QuarkusTest
@@ -66,6 +65,7 @@ public class TestSuiteRunner {
         final List<String> filters = List.of(
 //                "web-access-control",
 //                "storage"
+//                "default-AWC"
         );
         final TestSuiteResults results = conformanceTestHarness.runTestSuites(filters, null);
         assertNotNull(results);
@@ -73,7 +73,7 @@ public class TestSuiteRunner {
         if (results.getFeatureTotal() > 0) {
             conformanceTestHarness.cleanUp();
         }
-        assertEquals(0, results.getFailCount(), results.getErrorMessages());
+        assertFalse(results.hasFailures(), results.getErrorMessages());
     }
 
     @Test

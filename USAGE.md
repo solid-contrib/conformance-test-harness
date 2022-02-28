@@ -302,45 +302,67 @@ quarkus.log.category."org.solid.testharness.http.AuthManager".level=DEBUG
 **Note**: Tokens in responses or authorization headers as masked as a security measure.
 
 There is a special logging category, called `ResultLogger`, which outputs a summary of the results in JSON format at 
-`INFO` level (not necessarily in the order below):
+`INFO` level. Note this is not necessarily in the order below and only non-zero values will be included.
 ```json5
 {
   "mustFeatures": { // combination of MUST and MUST-NOT
     "passed": 0,
-    "failed": 0
-  }, 
-  "scenariosPassed":0,
-  "scenariosFailed":0,
-  "scenariosTotal":0,
-  "featuresPassed":0,
-  "featuresSkipped":0,
-  "featuresFailed":0,
-  "elapsedTime":1000.0,
-  "totalTime":1000.0,
-  "resultDate":"2021-06-17T09:12:31.000Z",
-  // results by requirement level and outcome, only non-zero values are included
-  "MUST": {
-    "passed": 0,
     "failed": 0,
+    "cantTell": 0,
     "untested": 0,
     "inapplicable": 0
   },
-  "MUST": { /* as above */ },
-  "MUST-NOT": { /* as above */ },
-  "SHOULD": { /* as above */ },
-  "SHOULD-NOT": { /* as above */ },
-  "MAY": { /* as above */ },
+  "mustScenarios": { // combination of MUST and MUST-NOT
+    /* as above */
+  }, 
+  "features": {
+    "MUST": {
+      "passed": 0,
+      "failed": 0,
+      "cantTell": 0,
+      "untested": 0,
+      "inapplicable": 0
+    },
+    "MUST-NOT": { /* as above */ },
+    "SHOULD": { /* as above */ },
+    "SHOULD-NOT": { /* as above */ },
+    "MAY": { /* as above */ },
+  },
+  "scenarios": {
+    /* same structure as "features" */
+  },
+  "elapsedTime":1000.0,
+  "totalTime":1000.0,
+  "resultDate":"2021-06-17T09:12:31.000Z",
 }
 ```
 This results in a log entry such as:
 ```
-2021-06-17 11:43:04,742 INFO  [ResultLogger] (main) {"resultDate":"2021-06-17T11:12:31.000Z","elapsedTime":7552.0,"mustFeaturesPassed":0,"mustFeaturesFailed":0, ...}
+2021-06-17 11:43:04,742 INFO  [ResultLogger] (main) {"resultDate":"2021-06-17T11:12:31.000Z","elapsedTime":7552.0,"mustFeatures": {"passed":0,"failed":0}, ...}
 ```
 
-The Scenario counts represent the results of all individual tests that were run but does not indicate whether a test that 
-failed was related to a mandatory or optional requirement. The more important numbers are `mustFeaturesPassed` and 
-`mustFeaturesFailed` since they represent the results of the tests related to mandatory requirements and are a better
-indication of the server's conformance.
+The `mustFeatures` group are important since they represent the results of the tests related to mandatory requirements
+and give an indication of the server's overall conformance.
+
+### Interpreting Result Counts
+The Scenario counts represent the results of all individual tests that were run. The possible outcomes for scenarios are:
+* `passed` - the scenario test passed
+* `failed` - the scenario test failed 
+* `cantTell` - the scenario was aborted without a pass or fail being a clear outcome, normally because a condition was
+  not met making the rest of the test redundant
+* `untested` - the scenario has the `@ignore' tag applied, so it is never run
+* `inapplicable` - the scenario has a skip tag applied, so it will not run if it depends on a feature not provided by
+  the server, or the CTH does not have the capability to test this feature
+
+The other counts are for features where a feature may contain more than one test scenario. The outcomes for features are
+determined by the following algorithm:
+* If it is filtered out of the test run, it is marked as `untested`
+* Else if it is tagged with `@ignore`, it is marked as `untested`
+* Else if it has a tag which causes it to be skipped, it is marked as `inapplicable`
+* Else if any scenarios failed, it is marked as `failed`
+* Else if any scenarios passed, it is marked as `passed` (some scenarios may be `inapplicable`, `cantTell` or `untested`)
+* Else of the remaining `inapplicable`, `cantTell` or `untested` pick the one with the highest count, in that order of 
+  preference (or `untested` if there were all counts are zero) 
 
 ### Parallel Testing
 By default, the CTH will run tests in parallel, defaulting to 8 threads. You can either override this in the 
