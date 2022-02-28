@@ -229,7 +229,6 @@ class ApplicationTest {
 
     @Test
     void filters1() throws Exception {
-//        final ArgumentCaptor<List<String>> captor = ArgumentCaptor.forClass(List.class);
         application.run("--filter", "filter1");
         verify(conformanceTestHarness).runTestSuites(captor.capture(), any());
         assertEquals(1, captor.getValue().size());
