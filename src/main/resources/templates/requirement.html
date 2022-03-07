@@ -1,4 +1,4 @@
-<details id="{it.anchor}" {#if it.failed}open="open" class="failed"{/if}>
+<details id="{it.anchor}" about="{it.subject}" {#if it.failed}open="open" class="failed"{/if}>
   {#with it}
   <summary><b>Requirement:</b> {subject} <a href="{subject}"></a>
     <span>{#if coverageMode == false}{countPassed}/{/if}{countTestCases}</span>
@@ -22,6 +22,18 @@
   </dl>
   {#if statement}
   <dl><dt>Statement</dt><dd>{statement}</dd></dl>
+  {/if}
+  {#if comments}
+  <dl>
+    <dt>Additional comments</dt>
+    <dd>
+      <ul>
+      {#for comment in comments}
+        <li property="rdfs:comment">{comment}</li>
+      {/for}
+      </ul>
+    </dd>
+  </dl>
   {/if}
   {/with}
   {#insert/}

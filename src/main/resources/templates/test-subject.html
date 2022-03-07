@@ -16,5 +16,17 @@
         (<time datatype="xsd:dateTime" datetime="{releaseDate}" content="{releaseDate}" property="doap:created">{releaseDateAsDate}</time>)
       </dd>
     </dl>
+    {#if comments}
+    <dl>
+      <dt>Additional comments</dt>
+      <dd>
+        <ul>
+          {#for comment in comments}
+          <li property="rdfs:comment">{comment}</li>
+          {/for}
+        </ul>
+      </dd>
+    </dl>
+    {/if}
   </div>
 </section>

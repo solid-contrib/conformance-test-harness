@@ -27,7 +27,8 @@ This is a Turtle file which describes the test subject and it's capabilities, pr
     doap:homepage <https://github.com/solid/community-server> ;
     doap:description "An open and modular implementation of the Solid specifications."@en ;
     doap:programming-language "TypeScript" ;
-    solid-test:skip "acp" .
+    solid-test:skip "acp" ;
+    rdfs:comment "Comment on the test subject"@en.
     
 <css#test-subject-release>
     doap:revision "0.9.0" ;
@@ -70,6 +71,8 @@ sources:
   # Editor's draft (fully annotated)
   - https://solidproject.org/ED/protocol
   - https://github.com/solid/specification-tests/blob/main/protocol/solid-protocol-test-manifest.ttl
+  # Additional comments on requirements (linked to requirement IRI and using rdfs:comment predicate)
+  - https://github.com/solid/specification-tests/blob/main/protocol/requirement-comments.ttl
 
   # WAC spec & manifest
   # Editor's draft (fully annotated)

@@ -23,10 +23,6 @@ manifest:content-negotiation-turtle
   spec:testScript
     <https://github.com/solid/conformance-test-harness/blob/main/example/protocol/content-negotiation/content-negotiation-turtle.feature> .
 
-manifest:content-negotiation-rdfa
-  a td:TestCase ;
-  td:reviewStatus td:unreviewed .
-
 manifest:writing-resource-containment
   a td:TestCase ;
   spec:requirementReference sopr:server-put-patch-intermediate-containers ;

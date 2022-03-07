@@ -16,7 +16,9 @@
     doap:description "DESCRIPTION"@en;
     doap:programming-language "LANG" ;
     solid-test:skip "acp" ;
-    solid-test:features "acp-legacy" .
+    solid-test:features "acp-legacy" ;
+    rdfs:comment "This is a comment about this server"@en ;
+    rdfs:comment "This is a second comment about this server"@en .
 
 <testserver#test-subject-release>
     doap:name "VERSION NAME";

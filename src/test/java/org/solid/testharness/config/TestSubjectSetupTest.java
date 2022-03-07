@@ -72,7 +72,7 @@ public class TestSubjectSetupTest {
         final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
         assertEquals(subject, targetServer.getSubject());
-        assertEquals(13, targetServer.size());
+        assertEquals(15, targetServer.size());
     }
 
     @Test
