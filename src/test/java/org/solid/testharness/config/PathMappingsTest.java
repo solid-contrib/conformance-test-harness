@@ -48,7 +48,7 @@ class PathMappingsTest {
     void getMappings() {
         final List<PathMappings.PathMapping> mappings = pathMappings.mappings();
         assertNotNull(mappings);
-        assertEquals(6, mappings.size());
+        assertEquals(7, mappings.size());
         assertEquals("https://example.org/test/group1", mappings.get(0).prefix());
         assertEquals(
                 TestUtils.getPathUri("src/test/resources/test-features/group1").toString(), mappings.get(0).path()
@@ -63,6 +63,7 @@ class PathMappingsTest {
                 pathMappingString("https://example.org/features", "src/test/resources"),
                 pathMappingString("https://example.org/specification", "src/test/resources/discovery/specification"),
                 pathMappingString("https://example.org/test-manifest", "src/test/resources/discovery/test-manifest"),
+                pathMappingString("https://example.org/additional", "src/test/resources/discovery/additional"),
                 pathMappingString("https://example.org/badmapping", "https://example.org:-1")
                 )) + "]", pathMappings.stringValue());
     }
@@ -90,7 +91,7 @@ class PathMappingsTest {
     @Test
     void setSingleFeatureMapping() {
         final TestMapping mapping = new TestMapping("https://example.org/test/group1/test.feature",
-                        "src/test/resources/test.feature"
+                "src/test/resources/test.feature"
         );
         assertEquals("https://example.org/test/group1/test.feature => " +
                 TestUtils.getPathUri("src/test/resources/test.feature"), mapping.stringValue());
@@ -154,7 +155,7 @@ class PathMappingsTest {
         assertEquals(URI.create("https://example.org/remote/test.feature"), path);
     }
 
-    public class TestMapping implements PathMappings.PathMapping {
+    public static class TestMapping implements PathMappings.PathMapping {
         public String prefix;
         public String path;
 
