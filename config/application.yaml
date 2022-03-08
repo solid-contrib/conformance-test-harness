@@ -4,6 +4,7 @@
   sources:
     - https://solidproject.org/TR/protocol
     - https://github.com/solid/conformance-test-harness/blob/main/example/protocol/solid-protocol-test-manifest.ttl
+    - https://github.com/solid/conformance-test-harness/blob/main/example/protocol/requirement-comments.ttl
 
     - https://solid.github.io/web-access-control-spec/
     - https://github.com/solid/conformance-test-harness/blob/main/example/web-access-control/web-access-control-spec.ttl
@@ -22,6 +23,7 @@
     - https://example.org/test-manifest-sample-2.ttl
     - https://example.org/specification-sample-1.ttl
     - https://example.org/specification-sample-2.ttl
+    - https://example.org/additional-comments.ttl
   target: testserver
   mappings:
     - prefix: https://example.org/test/group1

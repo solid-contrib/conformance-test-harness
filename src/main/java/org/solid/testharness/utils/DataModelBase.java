@@ -36,6 +36,7 @@ import org.eclipse.rdf4j.repository.util.Connections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.RDF;
+import org.solid.common.vocab.RDFS;
 
 import javax.enterprise.inject.spi.CDI;
 import javax.validation.constraints.NotNull;
@@ -139,6 +140,10 @@ public class DataModelBase {
 
     public String getAnchor() {
         return subject.getLocalName();
+    }
+
+    public List<String> getComments() {
+        return getLiteralsAsStringList(RDFS.comment);
     }
 
     protected String getIriAsString(final IRI predicate) {

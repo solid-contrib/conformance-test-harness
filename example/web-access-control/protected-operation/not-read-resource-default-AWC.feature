@@ -1,3 +1,4 @@
+# Some of the tests below are omitted for servers not implementing WAC
 Feature: Bob cannot read an RDF resource to which he is not granted default read access via the parent
 
   Background: Create test resource with all default access except read for Bob
@@ -28,6 +29,7 @@ Feature: Bob cannot read an RDF resource to which he is not granted default read
     Then status 403
 
   @wac
+  # Not applicable if server does not implement WAC
   Scenario: Bob can PUT to the resource but gets nothing back since he cannot read
     Given request '<> <http://www.w3.org/2000/01/rdf-schema#comment> "Bob replaced it." .'
     And headers clients.bob.getAuthHeaders('PUT', resource.url)

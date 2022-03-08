@@ -1,5 +1,9 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.1.5
+### Minor changes
+* When comments are linked to a test subject or a specification requirement, show them in the report.  
+
 ## Release 1.1.4
 ### Minor changes
 * When a background step is reused in multiple scenarios, ensure the log output is available in each scenario. 

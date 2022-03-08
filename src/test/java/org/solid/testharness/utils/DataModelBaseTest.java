@@ -71,24 +71,24 @@ class DataModelBaseTest extends AbstractDataModelTests {
 
     @Test
     void getModel() {
-        assertEquals(13, dataModelBase.getModel().size());
+        assertEquals(15, dataModelBase.getModel().size());
     }
 
     @Test
     void sizeShallow() {
-        assertEquals(13, dataModelBase.size());
+        assertEquals(15, dataModelBase.size());
     }
 
     @Test
     void sizeDeep() {
         final DataModelBase deepModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.DEEP);
-        assertEquals(18, deepModel.size());
+        assertEquals(20, deepModel.size());
     }
 
     @Test
     void sizeList() {
         final DataModelBase listModel = new DataModelBase(iri(NS, "test"), DataModelBase.ConstructMode.DEEP_WITH_LISTS);
-        assertEquals(20, listModel.size());
+        assertEquals(22, listModel.size());
     }
 
     @Test
@@ -294,6 +294,19 @@ class DataModelBaseTest extends AbstractDataModelTests {
     @Test
     void getAnchor() {
         assertEquals("test", dataModelBase.getAnchor());
+    }
+
+    @Test
+    void getComments() {
+        final List<String> comments = dataModelBase.getComments();
+        assertEquals(2, comments.size());
+        assertTrue(comments.get(0).contains("Comment "));
+    }
+
+    @Test
+    void getCommentsNone() {
+        final DataModelBase reqModel = new DataModelBase(iri(NS, "requirement"));
+        assertEquals(0, reqModel.getComments().size());
     }
 
     class TestClass extends DataModelBase {

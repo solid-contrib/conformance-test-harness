@@ -1,6 +1,7 @@
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 prefix earl: <http://www.w3.org/ns/earl#>
 prefix ex: <https://example.org/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 ex:test
     a earl:Software, earl:TestSubject ;
@@ -13,7 +14,9 @@ ex:test
     ex:hasDateTime "2021-04-08T12:30:00.000Z"^^xsd:dateTime ;
     ex:hasBNode [ ex:hasString "string"; ex:hasDateTime "2021-07-09T00:00:00.000Z"^^xsd:dateTime];
     ex:hasTest ex:test1 ;
-    ex:hasSteps (ex:step1 ex:step2) .
+    ex:hasSteps (ex:step1 ex:step2) ;
+    rdfs:comment "Comment 1"@en ;
+    rdfs:comment "Comment 2"@en .
 ex:test1 a earl:TestCase .
 ex:step1 a earl:Step .
 ex:step2 a earl:Step .

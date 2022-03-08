@@ -29,13 +29,11 @@ import io.quarkus.qute.EngineBuilder;
 import io.quarkus.qute.Template;
 import io.quarkus.test.junit.QuarkusTest;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.*;
@@ -48,13 +46,15 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @QuarkusTest
 class ReportFragmentTest {
@@ -86,6 +86,7 @@ class ReportFragmentTest {
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-2.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-2.ttl"));
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/discovery/additional-comments.ttl"));
         dataRepository.load(TestUtils.getFileUrl("src/test/resources/reporting/testsuite-results-sample.ttl"),
                 TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl").toString());
     }
@@ -202,7 +203,8 @@ class ReportFragmentTest {
         final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
         // remove section hasPart to compare
         reportModel.remove(iri(BASE_URI), DCTERMS.hasPart, null);
-        requirement.getModel().remove(requirementIri, null, null);
+        // remove unnecessary requirement triples
+        removeSubjectExcept(requirement.getModel(), requirementIri, RDFS.comment);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         TestUtils.showModelDifferences(reportModel, requirement.getModel(), logger);
@@ -232,7 +234,8 @@ class ReportFragmentTest {
         final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
         // remove section hasPart to compare
         reportModel.remove(iri(BASE_URI), DCTERMS.hasPart, null);
-        requirement.getModel().remove(requirementIri, null, null);
+        // remove unnecessary requirement triples
+        removeSubjectExcept(requirement.getModel(), requirementIri, RDFS.comment);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         TestUtils.showModelDifferences(reportModel, requirement.getModel(), logger);
@@ -351,7 +354,8 @@ class ReportFragmentTest {
         final Model reportModel = TestUtils.parseRdfa(report, BASE_URI);
         // remove section hasPart to compare
         reportModel.remove(iri(BASE_URI), DCTERMS.hasPart, null);
-        requirement.getModel().remove(requirementIri, null, null);
+        // remove unnecessary requirement triples
+        removeSubjectExcept(requirement.getModel(), requirementIri, RDFS.comment);
         logger.debug("Report Model:\n{}", TestUtils.toTurtle(reportModel));
 
         TestUtils.showModelDifferences(reportModel, requirement.getModel(), logger);
@@ -361,6 +365,15 @@ class ReportFragmentTest {
     private void remove(final Resource subject, final IRI predicate, final Value object) {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             conn.remove(subject, predicate, object);
+        }
+    }
+
+    private void removeSubjectExcept(final Model model, final Resource subject, final IRI predicate) {
+        final Iterator<Statement> it = model.getStatements(subject, null, null).iterator();
+        while (it.hasNext()) {
+            if (!it.next().getPredicate().equals(predicate)) {
+                it.remove();
+            }
         }
     }
 

@@ -1,0 +1,7 @@
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix sopr: <https://solidproject.org/TR/protocol#>
+
+sopr:server-representation-turtle-jsonld rdfs:comment "Note that there is no requirement to support RDFa in a similar way, though some implementations may choose to."@en .
+sopr:server-wac rdfs:comment "Publicly accessible versions of ESS implement ACP for access control in place of WAC."@en .
