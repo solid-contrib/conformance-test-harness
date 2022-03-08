@@ -158,13 +158,13 @@ public class ConformanceTestHarness {
         logger.info("===================== BUILD REPORTS ========================");
         final File outputDir = config.getOutputDirectory();
         logger.info("Reports location: {}", outputDir.getPath());
-        reportGenerator.setResults(results);
         try {
             if (mode == Config.RunMode.COVERAGE) {
                 final File coverageHtmlFile = new File(outputDir, "coverage.html");
                 logger.info("Coverage report HTML/RDFa file: {}", coverageHtmlFile.toPath().toUri());
                 reportGenerator.buildHtmlCoverageReport(Files.newBufferedWriter(coverageHtmlFile.toPath()));
             } else {
+                reportGenerator.setResults(results);
                 final File reportTurtleFile = new File(outputDir, "report.ttl");
                 logger.info("Report Turtle file: {}", reportTurtleFile.toPath().toUri());
                 reportGenerator.buildTurtleReport(Files.newBufferedWriter(reportTurtleFile.toPath()));
