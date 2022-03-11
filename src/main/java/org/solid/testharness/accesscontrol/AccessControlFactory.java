@@ -23,7 +23,7 @@
  */
 package org.solid.testharness.accesscontrol;
 
-import org.solid.testharness.config.Config;
+import org.solid.testharness.config.TestSubject;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -33,14 +33,14 @@ import java.net.URI;
 @ApplicationScoped
 public class AccessControlFactory {
     @Inject
-    Config config;
+    TestSubject testSubject;
 
     public AccessDatasetBuilder getAccessDatasetBuilder(final String uri) {
-        if (Config.AccessControlMode.WAC.equals(config.getAccessControlMode())) {
+        if (TestSubject.AccessControlMode.WAC.equals(testSubject.getAccessControlMode())) {
             return new AccessDatasetWacBuilder().setBaseUri(uri);
-        } else if (Config.AccessControlMode.ACP.equals(config.getAccessControlMode())) {
+        } else if (TestSubject.AccessControlMode.ACP.equals(testSubject.getAccessControlMode())) {
             return new AccessDatasetAcpBuilder().setBaseUri(uri);
-        } else if (Config.AccessControlMode.ACP_LEGACY.equals(config.getAccessControlMode())) {
+        } else if (TestSubject.AccessControlMode.ACP_LEGACY.equals(testSubject.getAccessControlMode())) {
             return new AccessDatasetAcpLegacyBuilder().setBaseUri(uri);
         } else {
             return null;
@@ -48,11 +48,11 @@ public class AccessControlFactory {
     }
 
     public AccessDataset createAccessDataset(final String acl, final URI baseUri) throws IOException {
-        if (Config.AccessControlMode.WAC.equals(config.getAccessControlMode())) {
+        if (TestSubject.AccessControlMode.WAC.equals(testSubject.getAccessControlMode())) {
             return new AccessDatasetWac(acl, baseUri);
-        } else if (Config.AccessControlMode.ACP.equals(config.getAccessControlMode())) {
+        } else if (TestSubject.AccessControlMode.ACP.equals(testSubject.getAccessControlMode())) {
             return new AccessDatasetAcp(acl, baseUri);
-        } else if (Config.AccessControlMode.ACP_LEGACY.equals(config.getAccessControlMode())) {
+        } else if (TestSubject.AccessControlMode.ACP_LEGACY.equals(testSubject.getAccessControlMode())) {
             return new AccessDatasetAcpLegacy(acl, baseUri);
         } else {
             return null;

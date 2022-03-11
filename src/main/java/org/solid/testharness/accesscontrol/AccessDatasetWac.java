@@ -31,7 +31,7 @@ import org.solid.common.vocab.ACL;
 import org.solid.common.vocab.FOAF;
 import org.solid.common.vocab.RDF;
 import org.solid.common.vocab.VCARD;
-import org.solid.testharness.config.Config;
+import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.http.Client;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.HttpUtils;
@@ -44,7 +44,6 @@ import java.util.Map;
 
 import static org.eclipse.rdf4j.model.util.Values.bnode;
 import static org.eclipse.rdf4j.model.util.Values.iri;
-import static org.solid.testharness.config.Config.AccessControlMode.WAC;
 
 public class AccessDatasetWac implements AccessDataset {
     static final Map<String, IRI> standardModes = Map.of(
@@ -124,8 +123,8 @@ public class AccessDatasetWac implements AccessDataset {
     }
 
     @Override
-    public Config.AccessControlMode getMode() {
-        return WAC;
+    public TestSubject.AccessControlMode getMode() {
+        return TestSubject.AccessControlMode.WAC;
     }
 
     @Override

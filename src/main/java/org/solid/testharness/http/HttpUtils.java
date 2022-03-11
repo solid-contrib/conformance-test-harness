@@ -49,9 +49,9 @@ public final class HttpUtils {
     private static final String REQUEST_PREFIX = "  > ";
     private static Config config;
 
-    private static Pattern AUTH_HEADER = Pattern.compile("^(\\S+)\\s.*([^\"]{6})$");
-    private static Pattern DPOP_HEADER = Pattern.compile("^.*([^\"]{6})$");
-    private static Pattern BODY_TOKENS = Pattern.compile("_token\"\\s*:\\s*\"[^\"]+([^\"]{6})\"");
+    private static final Pattern AUTH_HEADER = Pattern.compile("^(\\S+)\\s.*([^\"]{6})$");
+    private static final Pattern DPOP_HEADER = Pattern.compile("^.*([^\"]{6})$");
+    private static final Pattern BODY_TOKENS = Pattern.compile("_token\"\\s*:\\s*\"[^\"]+([^\"]{6})\"");
 
     public static String getAgent() {
         return getConfig().getAgent();
@@ -236,7 +236,6 @@ public final class HttpUtils {
         }
         return links.stream().map(Link::valueOf).collect(Collectors.toList());
     }
-
 
     private static Config getConfig() {
         synchronized (HttpUtils.class) {

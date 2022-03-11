@@ -30,7 +30,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.solid.common.vocab.ACL;
 import org.solid.common.vocab.ACP;
-import org.solid.testharness.config.Config;
+import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.http.Client;
 import org.solid.testharness.utils.TestUtils;
 
@@ -159,7 +159,7 @@ class AccessDatasetAcpTest {
     @Test
     void getMode() {
         final AccessDataset accessDataset = new AccessDatasetAcp(Collections.emptyList(), ACL_URI.toString());
-        assertEquals(Config.AccessControlMode.ACP, accessDataset.getMode());
+        assertEquals(TestSubject.AccessControlMode.ACP, accessDataset.getMode());
     }
 
     @Test
