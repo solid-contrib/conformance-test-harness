@@ -28,16 +28,16 @@ import org.solid.common.vocab.ACL;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.solid.testharness.utils.TestUtils.SAMPLE_BASE;
 
 class AccessDatasetWacBuilderTest {
-    private static final String BASE = "https://example.org";
-    private static final String TARGET = "https://example.org/target";
-    private static final String AGENT = "https://example.org/me";
+    private static final String TARGET = SAMPLE_BASE + "/target";
+    private static final String AGENT = SAMPLE_BASE + "/me";
 
     @Test
     void setOwnerAccessResource() {
         final AccessDataset accessDataset = new AccessDatasetWacBuilder()
-                .setBaseUri(BASE)
+                .setBaseUri(SAMPLE_BASE)
                 .setOwnerAccess(TARGET, AGENT)
                 .build();
         assertEquals(6, accessDataset.getModel().size());
@@ -48,7 +48,7 @@ class AccessDatasetWacBuilderTest {
     @Test
     void setOwnerAccessContainer() {
         final AccessDataset accessDataset = new AccessDatasetWacBuilder()
-                .setBaseUri(BASE)
+                .setBaseUri(SAMPLE_BASE)
                 .setOwnerAccess(TARGET + "/", AGENT)
                 .build();
         assertEquals(12, accessDataset.getModel().size());

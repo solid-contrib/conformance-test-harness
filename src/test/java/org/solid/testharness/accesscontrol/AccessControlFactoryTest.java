@@ -36,11 +36,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import static org.solid.testharness.config.TestSubject.AccessControlMode.*;
+import static org.solid.testharness.utils.TestUtils.SAMPLE_BASE;
 
 @QuarkusTest
 class AccessControlFactoryTest {
-    private static final String BASE = "https://example.org";
-    private static final URI BASE_URI = URI.create(BASE);
+    private static final URI BASE_URI = URI.create(SAMPLE_BASE);
 
     @InjectMock
     TestSubject testSubject;
@@ -51,28 +51,28 @@ class AccessControlFactoryTest {
     @Test
     void getAccessDatasetBuilderWac() {
         when(testSubject.getAccessControlMode()).thenReturn(WAC);
-        final AccessDatasetBuilder accessDatasetBuilder = accessControlFactory.getAccessDatasetBuilder(BASE);
+        final AccessDatasetBuilder accessDatasetBuilder = accessControlFactory.getAccessDatasetBuilder(SAMPLE_BASE);
         assertEquals(WAC, accessDatasetBuilder.build().getMode());
     }
 
     @Test
     void getAccessDatasetBuilderAcp() {
         when(testSubject.getAccessControlMode()).thenReturn(ACP);
-        final AccessDatasetBuilder accessDatasetBuilder = accessControlFactory.getAccessDatasetBuilder(BASE);
+        final AccessDatasetBuilder accessDatasetBuilder = accessControlFactory.getAccessDatasetBuilder(SAMPLE_BASE);
         assertEquals(ACP, accessDatasetBuilder.build().getMode());
     }
 
     @Test
     void getAccessDatasetBuilderAcpLegacy() {
         when(testSubject.getAccessControlMode()).thenReturn(ACP_LEGACY);
-        final AccessDatasetBuilder accessDatasetBuilder = accessControlFactory.getAccessDatasetBuilder(BASE);
+        final AccessDatasetBuilder accessDatasetBuilder = accessControlFactory.getAccessDatasetBuilder(SAMPLE_BASE);
         assertEquals(ACP_LEGACY, accessDatasetBuilder.build().getMode());
     }
 
     @Test
     void getAccessDatasetBuilderNull() {
         when(testSubject.getAccessControlMode()).thenReturn(null);
-        assertNull(accessControlFactory.getAccessDatasetBuilder(BASE));
+        assertNull(accessControlFactory.getAccessDatasetBuilder(SAMPLE_BASE));
     }
 
     @Test

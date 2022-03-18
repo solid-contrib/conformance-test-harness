@@ -47,6 +47,7 @@ import static org.mockito.Mockito.*;
 
 @QuarkusTest
 class HttpUtilsTest {
+    private static final URI BASE = URI.create(TestUtils.SAMPLE_BASE).resolve("/");
     @InjectMock
     Config config;
 
@@ -72,8 +73,8 @@ class HttpUtilsTest {
     void newRequestBuilder() {
         when(config.getAgent()).thenReturn("AGENT");
         when(config.getReadTimeout()).thenReturn(1111);
-        final HttpRequest request = HttpUtils.newRequestBuilder(URI.create("https://example.org")).build();
-        assertEquals("AGENT", request.headers().firstValue(HttpConstants.USER_AGENT).get());
+        final HttpRequest request = HttpUtils.newRequestBuilder(URI.create(TestUtils.SAMPLE_BASE)).build();
+        assertEquals("AGENT", request.headers().firstValue(HttpConstants.USER_AGENT).orElse(null));
     }
 
     @Test
@@ -156,7 +157,7 @@ class HttpUtilsTest {
     void logRequest() {
         final Logger logger = mock(Logger.class);
         when(logger.isDebugEnabled()).thenReturn(true);
-        final HttpRequest request = HttpRequest.newBuilder(URI.create("https://example.org/"))
+        final HttpRequest request = HttpRequest.newBuilder(BASE)
                 .header("key", "value")
                 .build();
         HttpUtils.logRequest(logger, request);
@@ -170,7 +171,7 @@ class HttpUtilsTest {
         ScenarioEngine.set(TestUtils.createEmptyScenarioEngine());
         final Logger logger = mock(Logger.class);
         when(logger.isDebugEnabled()).thenReturn(true);
-        final HttpRequest request = HttpRequest.newBuilder(URI.create("https://example.org/"))
+        final HttpRequest request = HttpRequest.newBuilder(BASE)
                 .header("key", "value")
                 .build();
         HttpUtils.logRequestToKarate(logger, request, "body");
@@ -183,7 +184,7 @@ class HttpUtilsTest {
         ScenarioEngine.set(null);
         final Logger logger = mock(Logger.class);
         when(logger.isDebugEnabled()).thenReturn(true);
-        final HttpRequest request = HttpRequest.newBuilder(URI.create("https://example.org/"))
+        final HttpRequest request = HttpRequest.newBuilder(BASE)
                 .header("key", "value")
                 .build();
         HttpUtils.logRequestToKarate(logger, request, "body");
@@ -196,7 +197,7 @@ class HttpUtilsTest {
     void logRequestToKarateFallbackDisabled() {
         ScenarioEngine.set(null);
         final Logger logger = mock(Logger.class);
-        final HttpRequest request = HttpRequest.newBuilder(URI.create("https://example.org/"))
+        final HttpRequest request = HttpRequest.newBuilder(BASE)
                 .header("key", "value")
                 .build();
         when(logger.isDebugEnabled()).thenReturn(false);
@@ -216,11 +217,11 @@ class HttpUtilsTest {
     @Test
     void logResponse() {
         final Logger logger = mock(Logger.class);
-        final HttpRequest request = HttpRequest.newBuilder(URI.create("https://example.org/")).build();
+        final HttpRequest request = HttpRequest.newBuilder(BASE).build();
         final HttpResponse<String> response = mock(HttpResponse.class);
         when(logger.isDebugEnabled()).thenReturn(true);
         when(response.request()).thenReturn(request);
-        when(response.uri()).thenReturn(URI.create("https://example.org/"));
+        when(response.uri()).thenReturn(BASE);
         when(response.statusCode()).thenReturn(400);
         when(response.headers()).thenReturn(setupHeaders("key", List.of("value")));
         when(response.body()).thenReturn("BODY");
@@ -235,11 +236,11 @@ class HttpUtilsTest {
     void logResponseToKarate() {
         ScenarioEngine.set(TestUtils.createEmptyScenarioEngine());
         final Logger logger = mock(Logger.class);
-        final HttpRequest request = HttpRequest.newBuilder(URI.create("https://example.org/")).build();
+        final HttpRequest request = HttpRequest.newBuilder(BASE).build();
         final HttpResponse<String> response = mock(HttpResponse.class);
         when(logger.isDebugEnabled()).thenReturn(true);
         when(response.request()).thenReturn(request);
-        when(response.uri()).thenReturn(URI.create("https://example.org/"));
+        when(response.uri()).thenReturn(BASE);
         when(response.statusCode()).thenReturn(400);
         when(response.headers()).thenReturn(setupHeaders("key", List.of("value")));
         when(response.body()).thenReturn("BODY");
@@ -252,11 +253,11 @@ class HttpUtilsTest {
     void logResponseToKarateFallback() {
         ScenarioEngine.set(null);
         final Logger logger = mock(Logger.class);
-        final HttpRequest request = HttpRequest.newBuilder(URI.create("https://example.org/")).build();
+        final HttpRequest request = HttpRequest.newBuilder(BASE).build();
         final HttpResponse<String> response = mock(HttpResponse.class);
         when(logger.isDebugEnabled()).thenReturn(true);
         when(response.request()).thenReturn(request);
-        when(response.uri()).thenReturn(URI.create("https://example.org/"));
+        when(response.uri()).thenReturn(BASE);
         when(response.statusCode()).thenReturn(400);
         when(response.headers()).thenReturn(setupHeaders("key", List.of("value")));
         when(response.body()).thenReturn("BODY");
@@ -270,11 +271,11 @@ class HttpUtilsTest {
     void logResponseToKarateFallbackDisabled() {
         ScenarioEngine.set(null);
         final Logger logger = mock(Logger.class);
-        final HttpRequest request = HttpRequest.newBuilder(URI.create("https://example.org/")).build();
+        final HttpRequest request = HttpRequest.newBuilder(BASE).build();
         final HttpResponse<String> response = mock(HttpResponse.class);
         when(logger.isDebugEnabled()).thenReturn(false);
         when(response.request()).thenReturn(request);
-        when(response.uri()).thenReturn(URI.create("https://example.org/"));
+        when(response.uri()).thenReturn(BASE);
         when(response.statusCode()).thenReturn(400);
         when(response.headers()).thenReturn(setupHeaders("key", List.of("value")));
         when(response.body()).thenReturn(null);
@@ -285,11 +286,11 @@ class HttpUtilsTest {
     @Test
     void logResponseVoid() {
         final Logger logger = mock(Logger.class);
-        final HttpRequest request = HttpRequest.newBuilder(URI.create("https://example.org/")).build();
+        final HttpRequest request = HttpRequest.newBuilder(BASE).build();
         final HttpResponse<Void> response = mock(HttpResponse.class);
         when(logger.isDebugEnabled()).thenReturn(true);
         when(response.request()).thenReturn(request);
-        when(response.uri()).thenReturn(URI.create("https://example.org/"));
+        when(response.uri()).thenReturn(BASE);
         when(response.statusCode()).thenReturn(400);
         when(response.headers()).thenReturn(setupHeaders("key", List.of("value")));
         when(response.body()).thenReturn(null);
@@ -404,17 +405,17 @@ class HttpUtilsTest {
 
     @Test
     void splitQueryNoQuery() {
-        assertTrue(HttpUtils.splitQuery(URI.create("https://example.org/")).isEmpty());
+        assertTrue(HttpUtils.splitQuery(BASE).isEmpty());
     }
 
     @Test
     void splitQueryEmptyQuery() {
-        assertTrue(HttpUtils.splitQuery(URI.create("https://example.org/?")).isEmpty());
+        assertTrue(HttpUtils.splitQuery(BASE.resolve("?")).isEmpty());
     }
 
     @Test
     void splitQuerySingle() {
-        final Map<String, List<String>> parts = HttpUtils.splitQuery(URI.create("https://example.org/?a=1"));
+        final Map<String, List<String>> parts = HttpUtils.splitQuery(BASE.resolve("?a=1"));
         assertFalse(parts.isEmpty());
         assertEquals(1, parts.keySet().size());
         assertTrue(parts.containsKey("a"));
@@ -424,7 +425,7 @@ class HttpUtilsTest {
 
     @Test
     void splitQuerySingleList() {
-        final Map<String, List<String>> parts = HttpUtils.splitQuery(URI.create("https://example.org/?a=1&a=2"));
+        final Map<String, List<String>> parts = HttpUtils.splitQuery(BASE.resolve("?a=1&a=2"));
         assertFalse(parts.isEmpty());
         assertEquals(1, parts.keySet().size());
         assertTrue(parts.containsKey("a"));
@@ -435,7 +436,7 @@ class HttpUtilsTest {
 
     @Test
     void splitQueryMultiple() {
-        final Map<String, List<String>> parts = HttpUtils.splitQuery(URI.create("https://example.org/?a=1&b=2"));
+        final Map<String, List<String>> parts = HttpUtils.splitQuery(BASE.resolve("?a=1&b=2"));
         assertFalse(parts.isEmpty());
         assertEquals(2, parts.keySet().size());
         assertTrue(parts.containsKey("a"));
@@ -448,7 +449,7 @@ class HttpUtilsTest {
 
     @Test
     void splitQueryKeyNoValue() {
-        final Map<String, List<String>> parts = HttpUtils.splitQuery(URI.create("https://example.org/?a="));
+        final Map<String, List<String>> parts = HttpUtils.splitQuery(BASE.resolve("?a="));
         assertFalse(parts.isEmpty());
         assertEquals(1, parts.keySet().size());
         assertTrue(parts.containsKey("a"));
@@ -458,7 +459,7 @@ class HttpUtilsTest {
 
     @Test
     void splitQueryKeyOnly() {
-        final Map<String, List<String>> parts = HttpUtils.splitQuery(URI.create("https://example.org/?a"));
+        final Map<String, List<String>> parts = HttpUtils.splitQuery(BASE.resolve("?a"));
         assertFalse(parts.isEmpty());
         assertEquals(1, parts.keySet().size());
         assertTrue(parts.containsKey("a"));

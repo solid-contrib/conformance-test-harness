@@ -26,16 +26,16 @@ package org.solid.testharness.accesscontrol;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.solid.testharness.utils.TestUtils.SAMPLE_BASE;
 
 class AccessDatasetAcpLegacyBuilderTest {
-    private static final String BASE = "https://example.org";
-    private static final String TARGET = "https://example.org/target";
-    private static final String AGENT = "https://example.org/me";
+    private static final String TARGET = SAMPLE_BASE + "/target";
+    private static final String AGENT = SAMPLE_BASE + "/me";
 
     @Test
     void setOwnerAccess() {
         final AccessDataset accessDataset = new AccessDatasetAcpLegacyBuilder()
-                .setBaseUri(BASE)
+                .setBaseUri(SAMPLE_BASE)
                 .setOwnerAccess(TARGET, AGENT)
                 .build();
         assertNull(accessDataset.getModel());

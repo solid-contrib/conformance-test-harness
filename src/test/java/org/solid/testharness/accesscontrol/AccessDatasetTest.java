@@ -98,7 +98,7 @@ class AccessDatasetTest {
     void parseTurtle() throws IOException {
         final AccessDataset accessDataset = new TestAccessDataset();
         accessDataset.parseTurtle(TestUtils.loadStringFromFile("src/test/resources/utils/vcard.ttl"),
-                "https://example.org");
+                TestUtils.SAMPLE_BASE);
         assertTrue(Models.isomorphic(testModel, accessDataset.getModel()));
     }
 
