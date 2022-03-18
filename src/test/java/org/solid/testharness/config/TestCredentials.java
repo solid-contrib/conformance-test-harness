@@ -25,6 +25,7 @@ package org.solid.testharness.config;
 
 import java.util.Optional;
 
+@SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName", "OptionalUsedAsFieldOrParameterType"})
 public class TestCredentials implements UserCredentials {
     public String webId;
     public Optional<String> refreshToken = Optional.empty();

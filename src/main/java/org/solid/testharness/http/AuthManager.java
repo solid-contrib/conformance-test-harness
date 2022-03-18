@@ -42,7 +42,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -71,55 +74,63 @@ public class AuthManager {
      * Track https://github.com/solid/solid-spec/issues/138 to see if any standard develops around account management
      */
 
-    public void registerUser(@NotNull final String user) throws Exception {
+    public void registerUser(@NotNull final String user) {
         logger.info("Registering user {} at {}", user, config.getUserRegistrationEndpoint());
         final UserCredentials userConfig = config.getCredentials(user);
-        final Client client = clientRegistry.getClient(ClientRegistry.DEFAULT);
-
-        final Map<Object, Object> data = new HashMap<>();
-        data.put(HttpConstants.EMAIL, userConfig.username().get());
-        data.put(HttpConstants.PASSWORD, userConfig.password().get());
-        data.put(HttpConstants.CONFIRM_PASSWORD, userConfig.password().get());
-        data.put("podName", user);
-        data.put("register", "ok");
-        data.put("createWebId", "ok");
-        data.put("createPod", "ok");
-        final HttpResponse<String> response = sendRequest(client, config.getUserRegistrationEndpoint(), "POST",
-                HttpUtils.ofFormData(data), HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED,
-                HttpResponse.BodyHandlers.ofString());
-        if (!HttpUtils.isSuccessfulOrRedirect(response.statusCode())) {
-            throw new TestHarnessInitializationException("User registration failed with status code "
-                    + response.statusCode());
+        if (userConfig == null) {
+            throw new TestHarnessInitializationException("No user credentials were provided for " + user);
         }
+        final Client client = new Client.Builder()
+                .withOptionalLocalhostSupport(config.getUserRegistrationEndpoint())
+                .build();
+        final Map<Object, Object> data = Map.of(
+            HttpConstants.EMAIL, userConfig.username().orElseThrow(),
+            HttpConstants.PASSWORD, userConfig.password().orElseThrow(),
+            HttpConstants.CONFIRM_PASSWORD, userConfig.password().orElseThrow(),
+            "podName", user,
+            "register", "ok",
+            "createWebId", "ok",
+            "createPod", "ok"
+        );
+        postRequest(client, config.getUserRegistrationEndpoint(),
+                HttpUtils.ofFormData(data), HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED,
+                HttpResponse.BodyHandlers.ofString(),
+                "User registration");
     }
 
-    public SolidClientProvider authenticate(@NotNull final String user, final boolean authRequired)
-            throws Exception {
+    public SolidClientProvider authenticate(@NotNull final String user) {
         requireNonNull(user, "user must not be null");
-        if (!authRequired) {
-            return new SolidClientProvider();
-        }
         final Client authClient;
         if (clientRegistry.hasClient(user)) {
             authClient = clientRegistry.getClient(user);
         } else {
             logger.debug("Build new client for {}", user);
-            final Client.Builder builder = new Client.Builder(user).withDpopSupport();
-            if (config.overridingTrust()) {
-                builder.withLocalhostSupport();
+            final UserCredentials userConfig = config.getCredentials(user);
+            if (userConfig == null) {
+                logger.warn("UserCredentials missing for {}", user);
+                throw new TestHarnessInitializationException("No user credentials were provided for " + user);
             }
-            authClient = builder.build();
+
+            authClient = new Client.Builder(user)
+                    .withDpopSupport()
+                    .withOptionalLocalhostSupport(config.getSolidIdentityProvider())
+                    .build();
             clientRegistry.register(user, authClient);
 
-            final OidcConfiguration oidcConfiguration = requestOidcConfiguration(authClient);
+            final OidcConfiguration oidcConfiguration = requestOidcConfiguration(authClient,
+                    config.getSolidIdentityProvider());
 
-            final UserCredentials userConfig = config.getCredentials(user);
             final Tokens tokens;
-            if (userConfig != null && userConfig.isUsingUsernamePassword()) {
-                tokens = loginAndGetAccessToken(authClient, userConfig, oidcConfiguration);
-            } else if (userConfig != null && userConfig.isUsingRefreshToken()) {
+            if (userConfig.isUsingUsernamePassword()) {
+                // create client with session support for login
+                final Client sessionClient = new Client.Builder()
+                        .withSessionSupport()
+                        .withOptionalLocalhostSupport(config.getSolidIdentityProvider())
+                        .build();
+                tokens = loginAndGetAccessToken(authClient, userConfig, oidcConfiguration, sessionClient);
+            } else if (userConfig.isUsingRefreshToken()) {
                 tokens = exchangeRefreshToken(authClient, userConfig, oidcConfiguration);
-            } else if (userConfig != null && userConfig.isUsingClientCredentials()) {
+            } else if (userConfig.isUsingClientCredentials()) {
                 tokens = clientCredentialsAccessToken(authClient, userConfig, oidcConfiguration);
             } else {
                 logger.warn("UserCredentials for {}: {}", user, userConfig);
@@ -131,177 +142,151 @@ public class AuthManager {
         return new SolidClientProvider(authClient);
     }
 
-    private Tokens exchangeRefreshToken(final Client authClient, final UserCredentials userConfig,
-                                        final OidcConfiguration oidcConfig) throws Exception {
+    Tokens exchangeRefreshToken(final Client authClient, final UserCredentials userConfig,
+                                final OidcConfiguration oidcConfig) {
         logger.info("Exchange refresh token for {}", authClient.getUser());
         if (!oidcConfig.getGrantTypesSupported().contains(HttpConstants.REFRESH_TOKEN)) {
-            throw new TestHarnessInitializationException("Identity Provider does not support grant type: %s",
+            throw new TestHarnessInitializationException("Identity Provider does not support grant type: " +
                     HttpConstants.REFRESH_TOKEN);
         }
-        final Map<Object, Object> data = Map.of(
-                HttpConstants.GRANT_TYPE, HttpConstants.REFRESH_TOKEN,
-                HttpConstants.REFRESH_TOKEN, userConfig.refreshToken()
+        return requestToken(authClient, oidcConfig,
+                userConfig.clientId().orElseThrow(),
+                userConfig.clientSecret().orElseThrow(),
+                Map.of(
+                        HttpConstants.GRANT_TYPE, HttpConstants.REFRESH_TOKEN,
+                        HttpConstants.REFRESH_TOKEN, userConfig.refreshToken()
+                )
         );
-        final String authHeader = HttpConstants.PREFIX_BASIC +
-                base64Encode(userConfig.clientId().get() + ':' + userConfig.clientSecret().get());
-        return requestToken(authClient, oidcConfig, authHeader, data);
     }
 
-    private Tokens clientCredentialsAccessToken(final Client authClient, final UserCredentials userConfig,
-                                        final OidcConfiguration oidcConfig) throws Exception {
+    Tokens clientCredentialsAccessToken(final Client authClient, final UserCredentials userConfig,
+                                        final OidcConfiguration oidcConfig) {
         logger.info("Use client credentials to get access token for {}", authClient.getUser());
         if (!oidcConfig.getGrantTypesSupported().contains(HttpConstants.CLIENT_CREDENTIALS)) {
-            throw new TestHarnessInitializationException("Identity Provider does not support grant type: %s",
+            throw new TestHarnessInitializationException("Identity Provider does not support grant type: " +
                     HttpConstants.CLIENT_CREDENTIALS);
         }
-
-        final Map<Object, Object> data = Map.of(
-                HttpConstants.GRANT_TYPE, HttpConstants.CLIENT_CREDENTIALS
+        return requestToken(authClient, oidcConfig,
+                userConfig.clientId().orElseThrow(),
+                userConfig.clientSecret().orElseThrow(),
+                Map.of(
+                        HttpConstants.GRANT_TYPE, HttpConstants.CLIENT_CREDENTIALS
+                )
         );
-        final String authHeader = HttpConstants.PREFIX_BASIC +
-                base64Encode(userConfig.clientId().get() + ':' + userConfig.clientSecret().get());
-        return requestToken(authClient, oidcConfig, authHeader, data);
     }
 
-    private Tokens loginAndGetAccessToken(final Client authClient, final UserCredentials userConfig,
-                                          final OidcConfiguration oidcConfig)
-            throws Exception {
+    Tokens loginAndGetAccessToken(final Client authClient, final UserCredentials userConfig,
+                                  final OidcConfiguration oidcConfig, final Client sessionClient) {
         logger.info("Login and get access token for {}", authClient.getUser());
         if (!oidcConfig.getGrantTypesSupported().contains(HttpConstants.AUTHORIZATION_CODE_TYPE)) {
-            throw new TestHarnessInitializationException("Identity Provider does not support grant type: %s",
+            throw new TestHarnessInitializationException("Identity Provider does not support grant type: " +
                     HttpConstants.AUTHORIZATION_CODE_TYPE);
         }
 
-        final Client.Builder builder = new Client.Builder().withSessionSupport();
-        if (config.overridingTrust()) {
-            builder.withLocalhostSupport();
-        }
-        final Client client = builder.build();
         if (config.getUserRegistrationEndpoint() == null) {
             // login to the session at the start instead of during the auth flow
-            startLoginSession(client, userConfig, config.getLoginEndpoint());
+            startLoginSession(sessionClient, userConfig, config.getLoginEndpoint());
         }
 
         final String appOrigin = config.getOrigin();
-        final Registration clientRegistration = registerClient(client, oidcConfig, appOrigin);
+        final Registration clientRegistration = registerClient(sessionClient, oidcConfig, appOrigin);
         final String clientId = clientRegistration.getClientId();
         final String codeVerifier = generateCodeVerifier();
 
-        final String authCode = requestAuthorizationCode(client, oidcConfig, appOrigin, clientId,
+        final String authCode = requestAuthorizationCode(sessionClient, oidcConfig, appOrigin, clientId,
                 userConfig, codeVerifier);
 
-        final Map<Object, Object> tokenRequestData = new HashMap<>();
-        tokenRequestData.put(HttpConstants.GRANT_TYPE, HttpConstants.AUTHORIZATION_CODE_TYPE);
-        tokenRequestData.put(HttpConstants.CODE, authCode);
-        tokenRequestData.put(HttpConstants.REDIRECT_URI, appOrigin);
-        tokenRequestData.put(HttpConstants.CLIENT_ID, clientId);
-        tokenRequestData.put(HttpConstants.CODE_VERIFIER, codeVerifier);
-        final String authHeader = HttpConstants.PREFIX_BASIC +
-                base64Encode(clientId + ':' + clientRegistration.getClientSecret());
-        return requestToken(authClient, oidcConfig, authHeader, tokenRequestData);
+        return requestToken(authClient, oidcConfig,
+                clientId,
+                clientRegistration.getClientSecret(),
+                Map.of(
+                        HttpConstants.GRANT_TYPE, HttpConstants.AUTHORIZATION_CODE_TYPE,
+                        HttpConstants.CODE, authCode,
+                        HttpConstants.REDIRECT_URI, appOrigin,
+                        HttpConstants.CLIENT_ID, clientId,
+                        HttpConstants.CODE_VERIFIER, codeVerifier
+                )
+        );
     }
 
-    private OidcConfiguration requestOidcConfiguration(final Client client) throws IOException, InterruptedException {
+    OidcConfiguration requestOidcConfiguration(final Client client, final URI solidIdentityProvider) {
         logger.debug("\n========== GET CONFIGURATION");
-        final URI solidIdentityProvider = config.getSolidIdentityProvider();
         final URI openIdEndpoint = solidIdentityProvider.resolve(HttpConstants.OPENID_CONFIGURATION);
-        final HttpRequest request = HttpUtils.newRequestBuilder(openIdEndpoint)
-                .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
-                .build();
-        HttpUtils.logRequest(logger, request);
-        final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        HttpUtils.logResponse(logger, response);
+        final HttpResponse<String> response = getRequest(client, openIdEndpoint,
+                HttpConstants.MEDIA_TYPE_APPLICATION_JSON, "OIDC configuration");
         try {
             final OidcConfiguration oidcConfig = objectMapper.readValue(response.body(), OidcConfiguration.class);
-            if (!solidIdentityProvider.toString().equals(oidcConfig.getIssuer())) {
+            if (!solidIdentityProvider.equals(oidcConfig.getIssuer())) {
                 throw new TestHarnessInitializationException("The configured issuer does not match the Solid IdP");
             }
             return oidcConfig;
         } catch (JsonProcessingException e) {
-            throw (TestHarnessInitializationException) new TestHarnessInitializationException(
-                    "Failed to read the OpenId configuration at %s: %s", openIdEndpoint.toString(), e.toString()
-            ).initCause(e);
+            throw new TestHarnessInitializationException("Failed to read the OIDC config at " + openIdEndpoint, e);
         }
     }
 
-    private void startLoginSession(final Client client, final UserCredentials userConfig, final URI loginEndpoint)
-            throws IOException, InterruptedException {
-        final Map<Object, Object> data = new HashMap<>();
-        data.put(HttpConstants.USERNAME, userConfig.username().get());
-        data.put(HttpConstants.PASSWORD, userConfig.password().get());
-        final HttpRequest request = HttpUtils.newRequestBuilder(loginEndpoint)
-                .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED)
-                .POST(HttpUtils.ofFormData(data))
-                .build();
-        HttpUtils.logRequest(logger, request);
-        final HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
-        HttpUtils.logResponse(logger, response);
-        if (!HttpUtils.isSuccessfulOrRedirect(response.statusCode())) {
-            throw new TestHarnessInitializationException("Login failed with status code " + response.statusCode());
-        }
+    void startLoginSession(final Client client, final UserCredentials userConfig, final URI loginEndpoint) {
+        logger.debug("\n========== START SESSION");
+        postRequest(client, loginEndpoint,
+                HttpUtils.ofFormData(Map.of(
+                        HttpConstants.USERNAME, userConfig.username().orElseThrow(),
+                        HttpConstants.PASSWORD, userConfig.password().orElseThrow()
+                )),
+                HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED,
+                HttpResponse.BodyHandlers.discarding(),
+                "Login");
     }
 
-    private Registration registerClient(final Client client, final OidcConfiguration oidcConfig, final String appOrigin)
-            throws IOException, InterruptedException {
+    Registration registerClient(final Client client, final OidcConfiguration oidcConfig,
+                                        final String appOrigin) {
         logger.debug("\n========== REGISTER");
         final Registration registration = new Registration();
         registration.setApplicationType("web");
         registration.setRedirectUris(List.of(appOrigin));
         registration.setTokenEndpointAuthMethod(HttpConstants.AUTHORIZATION_METHOD);
-        final String registrationBody = objectMapper.writeValueAsString(registration);
-        final HttpRequest request = HttpUtils.newRequestBuilder(URI.create(oidcConfig.getRegistrationEndpoint()))
-                .POST(HttpRequest.BodyPublishers.ofString(registrationBody))
-                .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
-                .build();
-        HttpUtils.logRequest(logger, request);
-        final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        HttpUtils.logResponse(logger, response);
-        if (!HttpUtils.isSuccessfulOrRedirect(response.statusCode())) {
-            throw new TestHarnessInitializationException("Registration failed with status code " +
-                    response.statusCode());
+        try {
+            final String registrationBody = objectMapper.writeValueAsString(registration);
+            final HttpResponse<String> response = postRequest(client, oidcConfig.getRegistrationEndpoint(),
+                    HttpRequest.BodyPublishers.ofString(registrationBody),
+                    HttpConstants.MEDIA_TYPE_APPLICATION_JSON,
+                    HttpResponse.BodyHandlers.ofString(),
+                    "Registration");
+            return objectMapper.readValue(response.body(), Registration.class);
+        } catch (IOException e) {
+            throw new TestHarnessInitializationException("Failed to process JSON in client registration", e);
         }
-        return objectMapper.readValue(response.body(), Registration.class);
     }
 
-    private String requestAuthorizationCode(final Client client, final OidcConfiguration oidcConfig,
+    String requestAuthorizationCode(final Client client, final OidcConfiguration oidcConfig,
                                             final String appOrigin, final String clientId,
-                                            final UserCredentials userConfig, final String codeVerifier)
-            throws IOException, InterruptedException, NoSuchAlgorithmException {
+                                            final UserCredentials userConfig, final String codeVerifier) {
         logger.debug("\n========== AUTHORIZE");
-        final URI authorizeEndpoint = URI.create(oidcConfig.getAuthorizeEndpoint());
-
-        final Map<String, String> requestParams = new HashMap<>();
-        requestParams.put(HttpConstants.RESPONSE_TYPE, HttpConstants.CODE);
-        requestParams.put(HttpConstants.REDIRECT_URI, appOrigin);
-        requestParams.put(HttpConstants.SCOPE, HttpConstants.OPENID);
-        requestParams.put(HttpConstants.CLIENT_ID, clientId);
-        requestParams.put(HttpConstants.CODE_CHALLENGE_METHOD, "S256");
-        requestParams.put(HttpConstants.CODE_CHALLENGE, generateCodeChallenge(codeVerifier));
+        final URI authorizeEndpoint = oidcConfig.getAuthorizeEndpoint();
+        final Map<String, String> requestParams = Map.of(
+            HttpConstants.RESPONSE_TYPE, HttpConstants.CODE,
+            HttpConstants.REDIRECT_URI, appOrigin,
+            HttpConstants.SCOPE, HttpConstants.OPENID,
+            HttpConstants.CLIENT_ID, clientId,
+            HttpConstants.CODE_CHALLENGE_METHOD, "S256",
+            HttpConstants.CODE_CHALLENGE, generateCodeChallenge(codeVerifier, "SHA-256")
+        );
 
         final String authorizeUrl = requestParams.keySet().stream()
                 .map(key -> key + "=" + HttpUtils.encodeValue(requestParams.get(key)))
                 .collect(Collectors.joining("&", authorizeEndpoint + "?", ""));
         URI redirectUrl = URI.create(authorizeUrl);
 
-        HttpRequest request;
         do {
             logger.debug("Authorize URL {}", redirectUrl);
-            request = HttpUtils.newRequestBuilder(redirectUrl)
-                    .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_TEXT_HTML).build();
-            HttpUtils.logRequest(logger, request);
-            final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            HttpUtils.logResponse(logger, response);
-            if (!HttpUtils.isSuccessfulOrRedirect(response.statusCode())) {
-                throw new TestHarnessInitializationException("Authorization failed with status code " +
-                        response.statusCode());
-            }
+            final HttpResponse<String> response = getRequest(client, redirectUrl,
+                    HttpConstants.MEDIA_TYPE_TEXT_HTML, "Authorization code");
             final Optional<String> locationHeader = response.headers().firstValue(HttpConstants.HEADER_LOCATION);
             redirectUrl = locationHeader.map(authorizeEndpoint::resolve).orElse(null);
             if (redirectUrl == null) {
                 final Matcher m = LOGIN_FORM_ACTION.matcher(response.body());
                 if (m.matches()) {
                     // login occurs during auth flow
-                    redirectUrl = idpLogin(client, config.getSolidIdentityProvider().resolve(response.uri()),
+                    redirectUrl = idpLogin(client, oidcConfig.getIssuer().resolve(response.uri()),
                             userConfig, authorizeEndpoint);
                 }
             }
@@ -320,19 +305,17 @@ public class AuthManager {
         return authCode;
     }
 
-    private URI idpLogin(final Client client, final URI loginEndpoint, final UserCredentials userConfig,
-                         final URI authorizeEndpoint) throws IOException, InterruptedException {
-        final Map<Object, Object> data = new HashMap<>();
-        data.put(HttpConstants.EMAIL, userConfig.username().get());
-        data.put(HttpConstants.PASSWORD, userConfig.password().get());
-        final HttpResponse<String> response = sendRequest(client, loginEndpoint, "POST",
-                HttpUtils.ofFormData(data), HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED,
-                HttpResponse.BodyHandlers.ofString());
-        HttpUtils.logResponse(logger, response);
-        if (!HttpUtils.isSuccessfulOrRedirect(response.statusCode())) {
-            throw new TestHarnessInitializationException("Authorization failed with status code " +
-                    response.statusCode());
-        }
+    URI idpLogin(final Client client, final URI loginEndpoint, final UserCredentials userConfig,
+                         final URI authorizeEndpoint) {
+        logger.debug("\n========== IDP LOGIN");
+        final HttpResponse<String> response = postRequest(client, loginEndpoint,
+                HttpUtils.ofFormData(Map.of(
+                        HttpConstants.EMAIL, userConfig.username().orElseThrow(),
+                        HttpConstants.PASSWORD, userConfig.password().orElseThrow()
+                )),
+                HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED,
+                HttpResponse.BodyHandlers.ofString(),
+                "Authorization");
         if (HttpUtils.isRedirect(response.statusCode())) {
             final Optional<String> locationHeader = response.headers().firstValue(HttpConstants.HEADER_LOCATION);
             return locationHeader.map(authorizeEndpoint::resolve).orElse(null);
@@ -347,42 +330,79 @@ public class AuthManager {
         }
     }
 
-    private Tokens requestToken(final Client authClient, final OidcConfiguration oidcConfig, final String authHeader,
-                                final Map<Object, Object> tokenRequestData
-    ) throws IOException, InterruptedException {
+    Tokens requestToken(final Client authClient, final OidcConfiguration oidcConfig,
+                                final String clientId, final String clientSecret,
+                                final Map<Object, Object> tokenRequestData) {
         logger.debug("\n========== ACCESS TOKEN");
+        final String authHeader = HttpConstants.PREFIX_BASIC + base64Encode(clientId + ':' + clientSecret);
         final HttpRequest.Builder requestBuilder = authClient.signRequest(
-                HttpUtils.newRequestBuilder(URI.create(oidcConfig.getTokenEndpoint()))
+                HttpUtils.newRequestBuilder(oidcConfig.getTokenEndpoint())
                         .header(HttpConstants.HEADER_AUTHORIZATION, authHeader)
                         .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED)
                         .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
                         .POST(HttpUtils.ofFormData(tokenRequestData))
         );
-        final HttpRequest request = requestBuilder.build();
-        HttpUtils.logRequest(logger, request);
-        final HttpResponse<String> response = authClient.send(request, HttpResponse.BodyHandlers.ofString());
-        HttpUtils.logResponse(logger, response);
+        final HttpResponse<String> response;
+        try {
+            final HttpRequest request = requestBuilder.build();
+            HttpUtils.logRequest(logger, request);
+            response = authClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpUtils.logResponse(logger, response);
+        } catch (Exception e) {
+            throw new TestHarnessInitializationException("Token exchange request failed", e);
+        }
         final String body = response.body();
-        if (response.statusCode() == HttpConstants.STATUS_OK) {
-            return objectMapper.readValue(response.body(), Tokens.class);
-        } else {
+        if (response.statusCode() != HttpConstants.STATUS_OK) {
             logger.error("FAILED TO GET ACCESS TOKEN {}", body);
-            throw new TestHarnessInitializationException("Token exchange failed for grant type: %s",
-                    (String) tokenRequestData.get(HttpConstants.GRANT_TYPE));
+            throw new TestHarnessInitializationException("Token exchange failed for grant type: " +
+                    tokenRequestData.get(HttpConstants.GRANT_TYPE));
+        }
+        try {
+            return objectMapper.readValue(response.body(), Tokens.class);
+        } catch (Exception e) {
+            throw new TestHarnessInitializationException("Failed to parse token response", e);
         }
     }
 
-    private <T> HttpResponse<T> sendRequest(final Client client, final URI uri, final String method,
-                                            final HttpRequest.BodyPublisher publisher, final String type,
-                                            final HttpResponse.BodyHandler<T> bodyHandler)
-            throws IOException, InterruptedException {
+    HttpResponse<String> getRequest(final Client client, final URI uri, final String type, final String stage) {
         final HttpRequest request = HttpUtils.newRequestBuilder(uri)
-                .header(HttpConstants.HEADER_CONTENT_TYPE, type)
-                .method(method, publisher)
+                .header(HttpConstants.HEADER_ACCEPT, type)
                 .build();
         HttpUtils.logRequest(logger, request);
-        final HttpResponse<T> response = client.send(request, bodyHandler);
+        final HttpResponse<String> response;
+        try {
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
+            throw new TestHarnessInitializationException(stage + " GET request failed", e);
+        }
         HttpUtils.logResponse(logger, response);
+        if (!HttpUtils.isSuccessfulOrRedirect(response.statusCode())) {
+            throw new TestHarnessInitializationException(stage + " GET request failed with status code " +
+                    response.statusCode());
+        }
+        return response;
+    }
+
+    <T> HttpResponse<T> postRequest(final Client client, final URI uri,
+                                            final HttpRequest.BodyPublisher publisher, final String type,
+                                            final HttpResponse.BodyHandler<T> bodyHandler,
+                                            final String stage) {
+        final HttpRequest request = HttpUtils.newRequestBuilder(uri)
+                .header(HttpConstants.HEADER_CONTENT_TYPE, type)
+                .POST(publisher)
+                .build();
+        HttpUtils.logRequest(logger, request);
+        final HttpResponse<T> response;
+        try {
+            response = client.send(request, bodyHandler);
+        } catch (Exception e) {
+            throw new TestHarnessInitializationException(stage + " POST request failed", e);
+        }
+        HttpUtils.logResponse(logger, response);
+        if (!HttpUtils.isSuccessfulOrRedirect(response.statusCode())) {
+            throw new TestHarnessInitializationException(stage + " POST request failed with status code " +
+                    response.statusCode());
+        }
         return response;
     }
 
@@ -397,9 +417,14 @@ public class AuthManager {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(codeVerifier);
     }
 
-    private String generateCodeChallenge(final String codeVerifier) throws NoSuchAlgorithmException {
+    String generateCodeChallenge(final String codeVerifier, final String algorithm) {
         final byte[] bytes = codeVerifier.getBytes(StandardCharsets.US_ASCII);
-        final MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+        final MessageDigest messageDigest;
+        try {
+            messageDigest = MessageDigest.getInstance(algorithm);
+        } catch (NoSuchAlgorithmException e) {
+            throw new TestHarnessInitializationException("Failed to generate code challenge", e);
+        }
         messageDigest.update(bytes, 0, bytes.length);
         final byte[] digest = messageDigest.digest();
         return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);

@@ -24,7 +24,10 @@
 package org.solid.testharness.config;
 
 import io.smallrye.config.WithName;
+import org.solid.testharness.http.HttpUtils;
+import org.solid.testharness.utils.TestHarnessInitializationException;
 
+import java.net.URI;
 import java.util.Optional;
 
 public interface UserCredentials {
@@ -43,6 +46,19 @@ public interface UserCredentials {
     Optional<String> username();
 
     Optional<String> password();
+
+    default URI getWebId() {
+        final URI uri;
+        try {
+            uri = URI.create(webId());
+        } catch (Exception e) {
+            throw new TestHarnessInitializationException("The webId " + webId() + " is missing or invalid", e);
+        }
+        if (!HttpUtils.isHttpProtocol(uri.getScheme())) {
+            throw new TestHarnessInitializationException("The webId " + webId() + " must be an absolute URL");
+        }
+        return uri;
+    }
 
     default boolean isUsingUsernamePassword() {
         return username().isPresent() && password().isPresent();

@@ -51,6 +51,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpHeaders;
+import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -77,6 +78,16 @@ public final class TestUtils {
     public static URI getPathUri(final String path) {
         final String uri = Path.of(path).toAbsolutePath().normalize().toUri().toString();
         return URI.create(HttpUtils.ensureNoSlashEnd(uri));
+    }
+
+    public static HttpRequest mockRequest() {
+        final Map<String, List<String>> headers = Collections.emptyMap();
+        final HttpHeaders mockHeaders = HttpHeaders.of(headers, (k, v) -> true);
+        final HttpRequest request = mock(HttpRequest.class);
+        when(request.method()).thenReturn("METHOD");
+        when(request.uri()).thenReturn(URI.create("uri"));
+        when(request.headers()).thenReturn(mockHeaders);
+        return request;
     }
 
     public static HttpResponse<Void> mockVoidResponse(final int status) {
