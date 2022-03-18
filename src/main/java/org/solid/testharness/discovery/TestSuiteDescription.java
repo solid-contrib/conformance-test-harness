@@ -164,8 +164,7 @@ public class TestSuiteDescription {
                     .filter(tc -> failsFilterCheck(tc, filterList) || failsStatusCheck(conn, tc, statusList))
                     .forEach(tc -> dataRepository.createAssertion(conn, EARL.untested, new Date(), tc));
         } catch (RDF4JException e) {
-            throw (TestHarnessInitializationException) new TestHarnessInitializationException(e.toString())
-                    .initCause(e);
+            throw new TestHarnessInitializationException("Failed to set non-running test assertions", e);
         }
     }
 
@@ -199,8 +198,7 @@ public class TestSuiteDescription {
                     .map(Feature::getLocation)
                     .collect(Collectors.toList());
         } catch (RDF4JException e) {
-            throw (TestHarnessInitializationException) new TestHarnessInitializationException(e.toString())
-                    .initCause(e);
+            throw new TestHarnessInitializationException("Failed to prepare test cases", e);
         }
     }
 

@@ -69,8 +69,7 @@ public interface PathMappings {
         try {
             return mapLocation(url.toString()).toURL();
         } catch (MalformedURLException e) {
-            throw (TestHarnessInitializationException) new TestHarnessInitializationException("Bad URL mapping: %s",
-                    e.toString()).initCause(e);
+            throw new TestHarnessInitializationException("Bad URL mapping", e);
         }
     }
 
