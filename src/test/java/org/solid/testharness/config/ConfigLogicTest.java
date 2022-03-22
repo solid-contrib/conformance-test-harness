@@ -28,6 +28,7 @@ import org.solid.testharness.utils.TestHarnessInitializationException;
 import org.solid.testharness.utils.TestUtils;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -195,6 +196,20 @@ public class ConfigLogicTest {
         final Config config = new Config();
         config.testContainer = Optional.of("test");
         assertEquals("test/", config.getTestContainer());
+    }
+
+    @Test
+    public void getSolidIdentityProviderNull() {
+        final Config config = new Config();
+        config.solidIdentityProvider = Optional.empty();
+        assertEquals(null, config.getSolidIdentityProvider());
+    }
+
+    @Test
+    public void getSolidIdentityProviderInvalid() {
+        final Config config = new Config();
+        config.solidIdentityProvider = Optional.of(URI.create("test"));
+        assertThrows(TestHarnessInitializationException.class, config::getSolidIdentityProvider);
     }
 
     @Test

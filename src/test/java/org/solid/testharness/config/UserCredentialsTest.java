@@ -41,7 +41,7 @@ public class UserCredentialsTest {
     private static final String TOKEN = "TOKEN";
 
     @Test
-    public void loginCredentials() {
+    void loginCredentials() {
         final TestCredentials userCredentials = new TestCredentials();
         userCredentials.username = Optional.of(USERNAME);
         userCredentials.password = Optional.of(PASSWORD);
@@ -53,27 +53,27 @@ public class UserCredentialsTest {
     }
 
     @Test
-    public void getWebId() {
+    void getWebId() {
         final TestCredentials userCredentials = new TestCredentials();
         userCredentials.webId = TestUtils.SAMPLE_BASE;
         assertEquals(URI.create(TestUtils.SAMPLE_BASE), userCredentials.getWebId());
     }
 
     @Test
-    public void getWebIdNull() {
+    void getWebIdNull() {
         final TestCredentials userCredentials = new TestCredentials();
         assertThrows(TestHarnessInitializationException.class, userCredentials::getWebId);
     }
 
     @Test
-    public void getWebIdBad() {
+    void getWebIdBad() {
         final TestCredentials userCredentials = new TestCredentials();
         userCredentials.webId = "file://example.org";
         assertThrows(TestHarnessInitializationException.class, userCredentials::getWebId);
     }
 
     @Test
-    public void partialLoginCredentials() {
+    void partialLoginCredentials() {
         final TestCredentials userCredentials = new TestCredentials();
         userCredentials.username = Optional.of(USERNAME);
         userCredentials.password = Optional.empty();
@@ -84,7 +84,7 @@ public class UserCredentialsTest {
     }
 
     @Test
-    public void refreshCredentials() {
+    void refreshCredentials() {
         final TestCredentials userCredentials = new TestCredentials();
         userCredentials.refreshToken = Optional.of(TOKEN);
         userCredentials.clientId = Optional.of(CLIENT_ID);
@@ -97,7 +97,7 @@ public class UserCredentialsTest {
     }
 
     @Test
-    public void partialRefreshCredentials() {
+    void partialRefreshCredentials() {
         final TestCredentials userCredentials = new TestCredentials();
         userCredentials.refreshToken = Optional.of(TOKEN);
         userCredentials.clientId = Optional.of(CLIENT_ID);
@@ -110,7 +110,7 @@ public class UserCredentialsTest {
     }
 
     @Test
-    public void clientCredentials() {
+    void clientCredentials() {
         final TestCredentials userCredentials = new TestCredentials();
         userCredentials.clientId = Optional.of(CLIENT_ID);
         userCredentials.clientSecret = Optional.of(CLIENT_SECRET);
@@ -121,7 +121,7 @@ public class UserCredentialsTest {
     }
 
     @Test
-    public void partialClientCredentials() {
+    void partialClientCredentials() {
         final TestCredentials userCredentials = new TestCredentials();
         userCredentials.clientId = Optional.empty();
         userCredentials.clientSecret = Optional.of(CLIENT_SECRET);
@@ -136,11 +136,24 @@ public class UserCredentialsTest {
     }
 
     @Test
-    public void emptyCredentials() {
+    void emptyCredentials() {
         final TestCredentials userCredentials = new TestCredentials();
         assertFalse(userCredentials.isUsingRefreshToken());
         assertFalse(userCredentials.isUsingUsernamePassword());
         assertEquals("UserCredentials: username=null, password=null, " +
                 "refreshToken=null, clientId=null, clientSecret=null", userCredentials.stringValue());
+    }
+
+    @Test
+    void getIdp() {
+        final TestCredentials userCredentials = new TestCredentials();
+        userCredentials.idp = Optional.of(URI.create(TestUtils.SAMPLE_BASE));
+        assertEquals(URI.create(TestUtils.SAMPLE_BASE), userCredentials.getIdp());
+    }
+    @Test
+    void getIdpInvalid() {
+        final TestCredentials userCredentials = new TestCredentials();
+        userCredentials.idp = Optional.of(URI.create("test"));
+        assertThrows(TestHarnessInitializationException.class, userCredentials::getIdp);
     }
 }

@@ -60,6 +60,13 @@ class OidcConfigurationTest {
     }
 
     @Test
+    void setIssuerEmpty() {
+        assertEquals("https://example.org/", oidcConfiguration.getIssuer().toString());
+        oidcConfiguration.setIssuer("");
+        assertEquals("https://example.org/", oidcConfiguration.getIssuer().toString());
+    }
+
+    @Test
     void getIssuerWithSlash() {
         oidcConfiguration.setIssuer("https://example.org/");
         assertEquals("https://example.org/", oidcConfiguration.getIssuer().toString());

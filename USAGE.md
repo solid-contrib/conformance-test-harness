@@ -120,7 +120,7 @@ Bob certain access as required for tests.
 USERS_ALICE_WEBID=
 USERS_BOB_WEBID=
 ```
-The identity provider must be specified in the config:
+A default identity provider can be specified in the config if it is shared between all users:
 ```shell
 SOLID_IDENTITY_PROVIDER=	# e.g., https://broker.pod.inrupt.com
 ```
@@ -153,14 +153,17 @@ This mechanism works well in CI environments where the credentials can be passed
 For each user, the following configuration information is required:
 * Client Id.
 * Client Secret.
+* OIDC Issuer (if not SOLID_IDENTITY_PROVIDER).
 
 The required environment variables are:
 ```shell
 # Authentication Configuration - Client Credentials
 USERS_ALICE_CLIENTID=
 USERS_ALICE_CLIENTSECRET=
+USERS_ALICE_IDP=
 USERS_BOB_CLIENTID=
 USERS_BOB_CLIENTSECRET=
+USERS_BOB_IDP=
 ```
 
 **Note**: The access tokens provided cause a 500 error on NSS so session based login is the only
@@ -183,6 +186,7 @@ For each user, the following configuration information is required:
 * Client Id.
 * Client Secret.
 * Refresh Token.
+* OIDC Issuer (if not SOLID_IDENTITY_PROVIDER).
 
 The required environment variables are:
 ```shell
@@ -190,9 +194,11 @@ The required environment variables are:
 USERS_ALICE_REFRESHTOKEN=
 USERS_ALICE_CLIENTID=
 USERS_ALICE_CLIENTSECRET=
+USERS_ALICE_IDP=
 USERS_BOB_REFRESHTOKEN=
 USERS_BOB_CLIENTID=
 USERS_BOB_CLIENTSECRET=
+USERS_BOB_IDP=
 ```
 
 **Note**: This mechanism will not work for NSS until support for refresh tokens is added:
@@ -224,6 +230,7 @@ added to their profiles.
 For each user, the following configuration information is required:
 * Username.
 * Password.
+* OIDC Issuer (if not SOLID_IDENTITY_PROVIDER).
 
 A URL for the login form is also required. 
 
@@ -233,8 +240,10 @@ The required environment variables are:
 LOGIN_ENDPOINT=		        # e.g., https://inrupt.net/login/password
 USERS_ALICE_USERNAME=
 USERS_ALICE_PASSWORD=
+USERS_ALICE_IDP=
 USERS_BOB_USERNAME=
 USERS_BOB_PASSWORD=
+USERS_BOB_IDP=
 ORIGIN=                     # optional as it defaults to https://tester
 ```
 
@@ -251,6 +260,7 @@ implementations will be added as required.
 For each user, the following configuration information is required:
 * Username.
 * Password.
+* OIDC Issuer (if not SOLID_IDENTITY_PROVIDER).
 
 A URL for the user registration form is also required.
 
@@ -260,8 +270,10 @@ The required environment variables are:
 USER_REGISTRATION_ENDPOINT=	# e.g., https://localhost:3000/idp/register
 USERS_ALICE_USERNAME=
 USERS_ALICE_PASSWORD=
+USERS_ALICE_IDP=
 USERS_BOB_USERNAME=
 USERS_BOB_PASSWORD=
+USERS_BOB_IDP=
 ORIGIN=                     # optional as it defaults to https://tester
  ```
 

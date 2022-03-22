@@ -43,6 +43,8 @@ public interface UserCredentials {
     @WithName("clientsecret")
     Optional<String> clientSecret();
 
+    Optional<URI> idp();
+
     Optional<String> username();
 
     Optional<String> password();
@@ -58,6 +60,13 @@ public interface UserCredentials {
             throw new TestHarnessInitializationException("The webId " + webId() + " must be an absolute URL");
         }
         return uri;
+    }
+
+    default URI getIdp() {
+        if (idp().isPresent() && !HttpUtils.isHttpProtocol(idp().get().getScheme())) {
+            throw new TestHarnessInitializationException("The IDP " + idp() + " be an absolute URL");
+        }
+        return idp().orElse(null);
     }
 
     default boolean isUsingUsernamePassword() {

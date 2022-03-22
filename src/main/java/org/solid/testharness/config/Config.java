@@ -93,7 +93,7 @@ public class Config {
 
     // properties normally found in environment variables or the .env file
     @ConfigProperty(name = "SOLID_IDENTITY_PROVIDER")
-    URI solidIdentityProvider;
+    Optional<URI> solidIdentityProvider;
     @ConfigProperty(name = "LOGIN_ENDPOINT")
     Optional<String> loginEndpoint;
     @ConfigProperty(name = "RESOURCE_SERVER_ROOT")
@@ -168,7 +168,10 @@ public class Config {
     }
 
     public URI getSolidIdentityProvider() {
-        return solidIdentityProvider.resolve("/");
+        if (solidIdentityProvider.isPresent() && !HttpUtils.isHttpProtocol(solidIdentityProvider.get().getScheme())) {
+            throw new TestHarnessInitializationException("SOLID_IDENTITY_PROVIDER must be an absolute URL");
+        }
+        return solidIdentityProvider.map(u -> u.resolve("/")).orElse(null);
     }
 
     public URI getLoginEndpoint() {

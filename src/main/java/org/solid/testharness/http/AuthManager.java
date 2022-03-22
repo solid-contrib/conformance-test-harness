@@ -110,22 +110,22 @@ public class AuthManager {
                 logger.warn("UserCredentials missing for {}", user);
                 throw new TestHarnessInitializationException("No user credentials were provided for " + user);
             }
+            final URI oidcIssuer = Optional.ofNullable(userConfig.getIdp()).orElse(config.getSolidIdentityProvider());
 
             authClient = new Client.Builder(user)
                     .withDpopSupport()
-                    .withOptionalLocalhostSupport(config.getSolidIdentityProvider())
+                    .withOptionalLocalhostSupport(oidcIssuer)
                     .build();
             clientRegistry.register(user, authClient);
 
-            final OidcConfiguration oidcConfiguration = requestOidcConfiguration(authClient,
-                    config.getSolidIdentityProvider());
+            final OidcConfiguration oidcConfiguration = requestOidcConfiguration(authClient, oidcIssuer);
 
             final Tokens tokens;
             if (userConfig.isUsingUsernamePassword()) {
                 // create client with session support for login
                 final Client sessionClient = new Client.Builder()
                         .withSessionSupport()
-                        .withOptionalLocalhostSupport(config.getSolidIdentityProvider())
+                        .withOptionalLocalhostSupport(oidcIssuer)
                         .build();
                 tokens = loginAndGetAccessToken(authClient, userConfig, oidcConfiguration, sessionClient);
             } else if (userConfig.isUsingRefreshToken()) {
@@ -209,14 +209,14 @@ public class AuthManager {
         );
     }
 
-    OidcConfiguration requestOidcConfiguration(final Client client, final URI solidIdentityProvider) {
+    OidcConfiguration requestOidcConfiguration(final Client client, final URI oidcIssuer) {
         logger.debug("\n========== GET CONFIGURATION");
-        final URI openIdEndpoint = solidIdentityProvider.resolve(HttpConstants.OPENID_CONFIGURATION);
+        final URI openIdEndpoint = oidcIssuer.resolve(HttpConstants.OPENID_CONFIGURATION);
         final HttpResponse<String> response = getRequest(client, openIdEndpoint,
                 HttpConstants.MEDIA_TYPE_APPLICATION_JSON, "OIDC configuration");
         try {
             final OidcConfiguration oidcConfig = objectMapper.readValue(response.body(), OidcConfiguration.class);
-            if (!solidIdentityProvider.equals(oidcConfig.getIssuer())) {
+            if (!oidcIssuer.equals(oidcConfig.getIssuer())) {
                 throw new TestHarnessInitializationException("The configured issuer does not match the Solid IdP");
             }
             return oidcConfig;

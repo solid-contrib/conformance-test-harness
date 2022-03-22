@@ -1,8 +1,19 @@
 # Solid Specification Conformance Test Harness
 
 ## Release 1.1.5
-### Minor changes
-* When comments are linked to a test subject or a specification requirement, show them in the report.  
+### Improvements
+* When comments are linked to a test subject or a specification requirement, show them in the report.
+* Config changes detailed in USAGE.md:
+  * Remove SETUP_ROOT_ACL option.
+  * Allow individual IDP for users which will override SOLID_IDENTITY_PROVIDER.
+  * Make RESOURCE_SERVER_ROOT optional - if omitted the first available storage from the WebID profile is used. This is
+    for backwards compatibility as it is no longer needed as its purpose is replace by the profile storage and/or
+    TEST_CONTAINER.
+  * TEST_CONTAINER is more flexible:
+    * An absolute URL to the storage location.
+    * A relative path applied to the storage location (from the profile or RESOURCE_SERVER_ROOT). 
+    * Omitted if the test should use the storage location from the profile directly.
+* Update Karate library to benefit from improved logging of HTTP requests & responses. 
 
 ## Release 1.1.4
 ### Minor changes
