@@ -102,24 +102,40 @@ origin: https://test    # default = https://tester, origin used for OIDC registr
 
 ## 3. Environment Variables
 
-The CTH execution can be controlled through the configuration of environment variables that are stored in a `.env` file.
+The CTH attempts to use a discovery process to determine the container in which to run tests.
+However, this depends on at least knowing the WebId of a user who can have full access to the test container.
+It is also possible to provide the location directly, overriding whatever is found in a WebId profile. This
+configuration (and more) is provided using environment variables stored in a `.env` file.
 
-### Server
-The CTH needs to know the root URL of the server being tested and the path to the container in which test files
-will be created. It can also create a root ACL if the filesystem is initially open:
+The definition of this configuration is split into:
+* Core configuration
+* Authentication details
+* Logging
+* Other
+
+### Core configuration
+The tests require two WebIds for users known as alice and bob. Alice has full access to the test container and can grant
+Bob certain access as required for tests.
+```shell
+USERS_ALICE_WEBID=
+USERS_BOB_WEBID=
 ```
-# Server Configuration
+The identity provider must be specified in the config:
+```shell
+SOLID_IDENTITY_PROVIDER=	# e.g., https://broker.pod.inrupt.com
+```
+The CTH will attempt to use a pod found in the WebId profile via the `pim:storage` predicate. You can use the following
+config if you want to use a particular container in that location by providing a relative path. Alternatively, if there 
+is no storage location available, or you want to use a test container in a different location (to which Alice must be
+granted full control), then you can provide an absolute URL:
+```shell
+TEST_CONTAINER=         # e.g., test/ or https://pod/test/
+```
+For backwards compatibility you can provide the resource server root and the test container path separately:
+```shell
 RESOURCE_SERVER_ROOT=	# e.g., https://pod.inrupt.com or https://pod-user.inrupt.net
 TEST_CONTAINER=         # e.g., pod-user/test or test
-SETUPROOTACL=           # boolean this tells the server to setup an ACL on the root
 ```
-These are used to construct the root location for any files created and destroyed by the tests (e.g., `https://pod.inrupt.com/pod-user/test/` or `https://pod-user.inrupt.net/test`).
-
-There are 2 reasons that the test container is defined in this way:
-1. Different implementations construct the Pod location from the WebID in different ways, as in the 2 examples above.
-2. If tests were run in the Pod owned by the `alice` user, the test container could be created by the CTH but
-   this is not possible if you are using a WebID from a different server's IdP. In this case, you need to grant the test 
-   user full access to a container in which files can be created. 
 
 ### Authentication
 There are 4 options for obtaining authentication access tokens when running tests:
@@ -128,8 +144,6 @@ There are 4 options for obtaining authentication access tokens when running test
 3. Session-based login.
 4. Register users locally (and login during the authorization code request).
 
-**Note**: For each option, a `SOLID_IDENTITY_PROVIDER` environment variable needs to be configured that provides the URL of the Solid Identity Provider.
-
 #### 1. Client Credentials
 The simplest authentication mechanism is based on the Solid Identity Provider offering the
 client credentials authorization flow and requires the users pre-register for these credentials.
@@ -137,18 +151,14 @@ client credentials authorization flow and requires the users pre-register for th
 This mechanism works well in CI environments where the credentials can be passed in as secrets.
 
 For each user, the following configuration information is required:
-* WebID.
 * Client Id.
 * Client Secret.
 
 The required environment variables are:
 ```shell
 # Authentication Configuration - Client Credentials
-SOLID_IDENTITY_PROVIDER=	# e.g., https://broker.pod.inrupt.com
-USERS_ALICE_WEBID=
 USERS_ALICE_CLIENTID=
 USERS_ALICE_CLIENTSECRET=
-USERS_BOB_WEBID=
 USERS_BOB_CLIENTID=
 USERS_BOB_CLIENTSECRET=
 ```
@@ -170,7 +180,6 @@ npx @inrupt/generate-oidc-token
 ```
 
 For each user, the following configuration information is required:
-* WebID.
 * Client Id.
 * Client Secret.
 * Refresh Token.
@@ -178,12 +187,9 @@ For each user, the following configuration information is required:
 The required environment variables are:
 ```shell
 # Authentication Configuration - Refresh Tokens
-SOLID_IDENTITY_PROVIDER=	# e.g., https://broker.pod.inrupt.com
-USERS_ALICE_WEBID=
 USERS_ALICE_REFRESHTOKEN=
 USERS_ALICE_CLIENTID=
 USERS_ALICE_CLIENTSECRET=
-USERS_BOB_WEBID=
 USERS_BOB_REFRESHTOKEN=
 USERS_BOB_CLIENTID=
 USERS_BOB_CLIENTSECRET=
@@ -216,7 +222,6 @@ added to their profiles.
     **Note**: By default, NSS does not add this to new profiles.
 
 For each user, the following configuration information is required:
-* WebID.
 * Username.
 * Password.
 
@@ -225,12 +230,9 @@ A URL for the login form is also required.
 The required environment variables are:
 ```shell
 # Authentication Configuration - Session-based Login
-SOLID_IDENTITY_PROVIDER=	# e.g., https://inrupt.net
 LOGIN_ENDPOINT=		        # e.g., https://inrupt.net/login/password
-USERS_ALICE_WEBID=
 USERS_ALICE_USERNAME=
 USERS_ALICE_PASSWORD=
-USERS_BOB_WEBID=
 USERS_BOB_USERNAME=
 USERS_BOB_PASSWORD=
 ORIGIN=                     # optional as it defaults to https://tester
@@ -255,18 +257,44 @@ A URL for the user registration form is also required.
 The required environment variables are:
 ```shell
 # Authentication Configuration - Register Users Locally
-SOLID_IDENTITY_PROVIDER=	# e.g., https://inrupt.net
 USER_REGISTRATION_ENDPOINT=	# e.g., https://localhost:3000/idp/register
-USERS_ALICE_WEBID=
 USERS_ALICE_USERNAME=
 USERS_ALICE_PASSWORD=
-USERS_BOB_WEBID=
 USERS_BOB_USERNAME=
 USERS_BOB_PASSWORD=
 ORIGIN=                     # optional as it defaults to https://tester
  ```
 
 This mechanism will work in CI environments where the credentials can be passed in as secrets.
+
+### Logging
+By default, the CTH only provides minimal logging. If you want to see the HTTP request/response exchanges in
+the logs, you can set `DEBUG` level for the categories shown below:
+* `com.intuit.karate` - HTTP interactions within test cases. **Note**: If this is not set to `DEBUG`, the log entries are
+  also excluded from the reports.
+* `org.solid.testharness.http.Client` - HTTP interactions during container and resource set up.
+* `org.solid.testharness.http.AuthManager` - HTTP interactions during the authentication flow before testing starts.
+
+In the environment file, this looks like this:
+```
+# Logging Levels
+quarkus.log.category."com.intuit.karate".level=DEBUG
+quarkus.log.category."org.solid.testharness.http.Client".level=DEBUG
+quarkus.log.category."org.solid.testharness.http.AuthManager".level=DEBUG
+```
+**Note**: Tokens in responses or authorization headers as masked as a security measure.
+
+There is a special logging category, called `ResultLogger`, which outputs a summary of the results in JSON format at
+`INFO` level. This is described in the [Reports](#reports) section of this document.
+
+### Other configuration
+#### Parallel testing
+By default, the CTH will run tests in parallel, defaulting to 8 threads. You can either override this in the
+YAML config file as mentioned previously, or you can do it with environment variables. For example:
+```
+# Parallel Testing
+MAXTHREADS=2
+```
 
 ## 4. Command Line Options
 
@@ -286,94 +314,6 @@ usage: run
  -t,--target <arg>    target server
 ```
 If `--coverage` is not specified then the default action is to run the tests and produce the results reports.
-
-### Logging
-By default, the CTH only provides minimal logging. If you want to see the HTTP request/response exchanges in
-the logs, you can set `DEBUG` level for the categories shown below:
-* `com.intuit.karate` - HTTP interactions within test cases. **Note**: If this is not set to `DEBUG`, the log entries are
-  also excluded from the reports.
-* `org.solid.testharness.http.Client` - HTTP interactions during container and resource set up.
-* `org.solid.testharness.http.AuthManager` - HTTP interactions during the authentication flow before testing starts.
-
-In the environment file, this looks like this:
-```
-# Logging Levels
-quarkus.log.category."com.intuit.karate".level=DEBUG
-quarkus.log.category."org.solid.testharness.http.Client".level=DEBUG
-quarkus.log.category."org.solid.testharness.http.AuthManager".level=DEBUG
-```
-**Note**: Tokens in responses or authorization headers as masked as a security measure.
-
-There is a special logging category, called `ResultLogger`, which outputs a summary of the results in JSON format at 
-`INFO` level. Note this is not necessarily in the order below and only non-zero values will be included.
-```json5
-{
-  "mustFeatures": { // combination of MUST and MUST-NOT
-    "passed": 0,
-    "failed": 0,
-    "cantTell": 0,
-    "untested": 0,
-    "inapplicable": 0
-  },
-  "mustScenarios": { // combination of MUST and MUST-NOT
-    /* as above */
-  }, 
-  "features": {
-    "MUST": {
-      "passed": 0,
-      "failed": 0,
-      "cantTell": 0,
-      "untested": 0,
-      "inapplicable": 0
-    },
-    "MUST-NOT": { /* as above */ },
-    "SHOULD": { /* as above */ },
-    "SHOULD-NOT": { /* as above */ },
-    "MAY": { /* as above */ },
-  },
-  "scenarios": {
-    /* same structure as "features" */
-  },
-  "elapsedTime":1000.0,
-  "totalTime":1000.0,
-  "resultDate":"2021-06-17T09:12:31.000Z",
-}
-```
-This results in a log entry such as:
-```
-2021-06-17 11:43:04,742 INFO  [ResultLogger] (main) {"resultDate":"2021-06-17T11:12:31.000Z","elapsedTime":7552.0,"mustFeatures": {"passed":0,"failed":0}, ...}
-```
-
-The `mustFeatures` group are important since they represent the results of the tests related to mandatory requirements
-and give an indication of the server's overall conformance.
-
-### Interpreting Result Counts
-The Scenario counts represent the results of all individual tests that were run. The possible outcomes for scenarios are:
-* `passed` - the scenario test passed
-* `failed` - the scenario test failed 
-* `cantTell` - the scenario was aborted without a pass or fail being a clear outcome, normally because a condition was
-  not met making the rest of the test redundant
-* `untested` - the scenario has the `@ignore' tag applied, so it is never run
-* `inapplicable` - the scenario has a skip tag applied, so it will not run if it depends on a feature not provided by
-  the server, or the CTH does not have the capability to test this feature
-
-The other counts are for features where a feature may contain more than one test scenario. The outcomes for features are
-determined by the following algorithm:
-* If it is filtered out of the test run, it is marked as `untested`
-* Else if it is tagged with `@ignore`, it is marked as `untested`
-* Else if it has a tag which causes it to be skipped, it is marked as `inapplicable`
-* Else if any scenarios failed, it is marked as `failed`
-* Else if any scenarios passed, it is marked as `passed` (some scenarios may be `inapplicable`, `cantTell` or `untested`)
-* Else of the remaining `inapplicable`, `cantTell` or `untested` pick the one with the highest count, in that order of 
-  preference (or `untested` if there were all counts are zero) 
-
-### Parallel Testing
-By default, the CTH will run tests in parallel, defaulting to 8 threads. You can either override this in the 
-YAML config file as mentioned previously, or you can do it with environment variables. For example:
-```
-# Parallel Testing
-MAXTHREADS=2
-```
 
 # Execution
 The simplest way to run the CTH is via the [Docker](https://www.docker.com/) image published to
@@ -493,6 +433,71 @@ file.
 You can add additional options for CTH after the commands above, for example, use `--filter` to select specific tests.
 
 # Reports
+
+## Log output
+Note this is not necessarily in the order below and only non-zero values will be included.
+```json5
+{
+  "mustFeatures": { // combination of MUST and MUST-NOT
+    "passed": 0,
+    "failed": 0,
+    "cantTell": 0,
+    "untested": 0,
+    "inapplicable": 0
+  },
+  "mustScenarios": { // combination of MUST and MUST-NOT
+    /* as above */
+  }, 
+  "features": {
+    "MUST": {
+      "passed": 0,
+      "failed": 0,
+      "cantTell": 0,
+      "untested": 0,
+      "inapplicable": 0
+    },
+    "MUST-NOT": { /* as above */ },
+    "SHOULD": { /* as above */ },
+    "SHOULD-NOT": { /* as above */ },
+    "MAY": { /* as above */ },
+  },
+  "scenarios": {
+    /* same structure as "features" */
+  },
+  "elapsedTime":1000.0,
+  "totalTime":1000.0,
+  "resultDate":"2021-06-17T09:12:31.000Z",
+}
+```
+This results in a log entry such as:
+```
+2021-06-17 11:43:04,742 INFO  [ResultLogger] (main) {"resultDate":"2021-06-17T11:12:31.000Z","elapsedTime":7552.0,"mustFeatures": {"passed":0,"failed":0}, ...}
+```
+
+The `mustFeatures` group are important since they represent the results of the tests related to mandatory requirements
+and give an indication of the server's overall conformance.
+
+### Interpreting Result Counts
+The Scenario counts represent the results of all individual tests that were run. The possible outcomes for scenarios are:
+* `passed` - the scenario test passed
+* `failed` - the scenario test failed
+* `cantTell` - the scenario was aborted without a pass or fail being a clear outcome, normally because a condition was
+  not met making the rest of the test redundant
+* `untested` - the scenario has the `@ignore' tag applied, so it is never run
+* `inapplicable` - the scenario has a skip tag applied, so it will not run if it depends on a feature not provided by
+  the server, or the CTH does not have the capability to test this feature
+
+The other counts are for features where a feature may contain more than one test scenario. The outcomes for features are
+determined by the following algorithm:
+* If it is filtered out of the test run, it is marked as `untested`
+* Else if it is tagged with `@ignore`, it is marked as `untested`
+* Else if it has a tag which causes it to be skipped, it is marked as `inapplicable`
+* Else if any scenarios failed, it is marked as `failed`
+* Else if any scenarios passed, it is marked as `passed` (some scenarios may be `inapplicable`, `cantTell` or `untested`)
+* Else of the remaining `inapplicable`, `cantTell` or `untested` pick the one with the highest count, in that order of
+  preference (or `untested` if there were all counts are zero)
+ 
+## Output report documents
 |Report|Location|
 |------|--------|
 |Coverage (HTML+RDFa)|`coverage.html`|

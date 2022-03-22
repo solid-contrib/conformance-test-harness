@@ -24,7 +24,6 @@
 package org.solid.testharness.config;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 import org.solid.testharness.utils.TestUtils;
@@ -39,7 +38,6 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
-@TestProfile(ConfigTestNormalProfile.class)
 class PathMappingsTest {
     @Inject
     PathMappings pathMappings;

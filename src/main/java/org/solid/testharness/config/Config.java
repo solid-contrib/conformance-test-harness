@@ -50,8 +50,6 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 @ApplicationScoped
 public class Config {
     private static final Logger logger = LoggerFactory.getLogger(Config.class);
-    private static final String SLASH = "/";
-    private static final List<String> TRUSTED_HOSTS = List.of("localhost", "server");
     public static final Integer DEFAULT_TIMEOUT = 5000;
 
     private IRI testSubject;
@@ -59,15 +57,8 @@ public class Config {
     private List<URL> testSources;
     private File outputDir;
     private Map<String, String> webIds;
-    private AccessControlMode accessControlMode;
     private Hashids hashids;
     private final AtomicLong resourceCount = new AtomicLong();
-
-    public enum AccessControlMode {
-        ACP_LEGACY,
-        ACP,
-        WAC
-    }
 
     public enum RunMode {
         COVERAGE,
@@ -99,18 +90,16 @@ public class Config {
     Integer maxThreads;
     @ConfigProperty(name = "origin", defaultValue = "https://tester")
     String origin;
-    @ConfigProperty(name = "setupRootAcl", defaultValue = "false")
-    Boolean setupRootAcl;
 
     // properties normally found in environment variables or the .env file
     @ConfigProperty(name = "SOLID_IDENTITY_PROVIDER")
-    String solidIdentityProvider;
+    URI solidIdentityProvider;
     @ConfigProperty(name = "LOGIN_ENDPOINT")
     Optional<String> loginEndpoint;
     @ConfigProperty(name = "RESOURCE_SERVER_ROOT")
-    String serverRoot;
+    Optional<String> serverRoot;
     @ConfigProperty(name = "TEST_CONTAINER")
-    String testContainer;
+    Optional<String> testContainer;
     @ConfigProperty(name = "USER_REGISTRATION_ENDPOINT")
     Optional<String> userRegistrationEndpoint;
 
@@ -179,7 +168,7 @@ public class Config {
     }
 
     public URI getSolidIdentityProvider() {
-        return URI.create(solidIdentityProvider).resolve(SLASH);
+        return solidIdentityProvider.resolve("/");
     }
 
     public URI getLoginEndpoint() {
@@ -190,16 +179,12 @@ public class Config {
         return userRegistrationEndpoint.map(URI::create).orElse(null);
     }
 
-    public URI getServerRoot() {
-        return URI.create(serverRoot).resolve(SLASH);
-    }
-
-    public boolean overridingTrust() {
-        return TRUSTED_HOSTS.contains(getServerRoot().getHost());
+    public String getServerRoot() {
+        return serverRoot.map(HttpUtils::ensureSlashEnd).orElse(null);
     }
 
     public String getTestContainer() {
-        return getServerRoot().resolve(HttpUtils.ensureSlashEnd(testContainer)).toString();
+        return testContainer.map(HttpUtils::ensureSlashEnd).orElse(null);
     }
 
     public UserCredentials getCredentials(final String user) {
@@ -244,18 +229,6 @@ public class Config {
         return origin;
     }
 
-    public boolean isSetupRootAcl() {
-        return setupRootAcl;
-    }
-
-    public AccessControlMode getAccessControlMode() {
-        return accessControlMode;
-    }
-
-    public void setAccessControlMode(final AccessControlMode accessControlMode) {
-        this.accessControlMode = accessControlMode;
-    }
-
     public String generateResourceId() {
         return hashids.encode(resourceCount.getAndIncrement());
     }
@@ -283,11 +256,7 @@ public class Config {
                     return Path.of(url).toAbsolutePath().normalize().toUri().toURL();
                 }
             } catch (MalformedURLException e) {
-                throw (TestHarnessInitializationException) new TestHarnessInitializationException(
-                        "%s - %s is not a valid file or URL: %s",
-                        param, url,
-                        e.toString()
-                ).initCause(e);
+                throw new TestHarnessInitializationException(param + " - " + url + " is not a valid file or URL", e);
             }
         }
         return null;

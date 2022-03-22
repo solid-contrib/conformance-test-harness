@@ -91,6 +91,7 @@ class ConformanceTestHarnessTest {
         tmp = Files.createTempDirectory(null);
         tmp.toFile().deleteOnExit();
         when(config.getOutputDirectory()).thenReturn(tmp.toFile());
+        when(config.getWebIds()).thenReturn(Map.of("alice", "https://alice.target.example.org/profile/card#me"));
     }
 
     @Test
@@ -160,7 +161,7 @@ class ConformanceTestHarnessTest {
     }
 
     @Test
-    void runTestSuiteWithRegistration() throws Exception {
+    void runTestSuiteWithRegistration() {
         mockTargetServer();
         when(config.getUserRegistrationEndpoint()).thenReturn(URI.create("https://example.org/register"));
         when(testSuiteDescription.getFeaturePaths()).thenReturn(List.of("feature"));
@@ -278,23 +279,15 @@ class ConformanceTestHarnessTest {
         when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(results);
         assertTrue(conformanceTestHarness.runSingleTest("test").hasFailures());
         assertNotNull(conformanceTestHarness.getClients());
-        assertEquals(0, conformanceTestHarness.getClients().size());
+        assertEquals(1, conformanceTestHarness.getClients().size());
     }
 
     @Test
-    void runSingleTestRegisterUsersException() throws Exception {
-        mockTargetServer();
-        when(config.getUserRegistrationEndpoint()).thenReturn(URI.create("https://example.org/register"));
-        doThrow(new Exception("FAIL")).when(authManager).registerUser(any());
-        assertNull(conformanceTestHarness.runSingleTest("test"));
-    }
-
-    @Test
-    void runSingleTestRegisterClientsException() throws Exception {
+    void runSingleTestRegisterClientsException() {
         mockTargetServer();
         when(config.getWebIds())
                 .thenReturn(Map.of(HttpConstants.ALICE, "https://alice.target.example.org/profile/card#me"));
-        when(authManager.authenticate(any(), anyBoolean())).thenThrow(TestHarnessInitializationException.class);
+        when(authManager.authenticate(any())).thenThrow(TestHarnessInitializationException.class);
         assertNull(conformanceTestHarness.runSingleTest("test"));
     }
 

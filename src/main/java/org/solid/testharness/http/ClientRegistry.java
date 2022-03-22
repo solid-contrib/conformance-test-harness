@@ -35,6 +35,7 @@ public class ClientRegistry {
     private Map<String, Client> registeredClientMap;
 
     public static final String DEFAULT = "default";
+    public static final String ALICE_WEBID = "alice-webid";
 
     @PostConstruct
     void postConstruct() {

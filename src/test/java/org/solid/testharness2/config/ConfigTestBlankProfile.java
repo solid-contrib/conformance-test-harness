@@ -28,10 +28,18 @@ import io.quarkus.test.junit.QuarkusTestProfile;
 import java.util.Map;
 
 public class ConfigTestBlankProfile implements QuarkusTestProfile {
+    @Override
     public String getConfigProfile() {
         return "blank";
     }
+
+    @Override
     public Map<String, String> getConfigOverrides() {
-        return Map.of("LOGIN_ENDPOINT", "", "USER_REGISTRATION_ENDPOINT", "");
+        return Map.of(
+                "RESOURCE_SERVER_ROOT", "",
+                "TEST_CONTAINER", "",
+                "LOGIN_ENDPOINT", "",
+                "USER_REGISTRATION_ENDPOINT", ""
+        );
     }
 }

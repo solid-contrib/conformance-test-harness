@@ -38,6 +38,8 @@ import org.solid.testharness.config.PathMappings;
 import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.discovery.TestSuiteDescription;
 import org.solid.testharness.http.AuthManager;
+import org.solid.testharness.http.Client;
+import org.solid.testharness.http.ClientRegistry;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.reporting.ReportGenerator;
 import org.solid.testharness.reporting.TestSuiteResults;
@@ -50,6 +52,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -83,6 +86,8 @@ public class ConformanceTestHarness {
     AuthManager authManager;
     @Inject
     PathMappings pathMappings;
+    @Inject
+    ClientRegistry clientRegistry;
 
     @SuppressWarnings("PMD.UseProperClassLoader") // this is not J2EE and the suggestion fails
     public void initialize() throws IOException {
@@ -191,11 +196,10 @@ public class ConformanceTestHarness {
 
     private void setupTestHarness() {
         logger.info("===================== REGISTER CLIENTS ========================");
-        logger.info("Test subject root: {}", config.getServerRoot());
         if (config.getUserRegistrationEndpoint() != null) {
             registerUsers();
         }
-        registerClients(true);
+        registerClients();
         logger.info("===================== PREPARE SERVER ========================");
         testSubject.prepareServer();
     }
@@ -234,27 +238,16 @@ public class ConformanceTestHarness {
     }
 
     private void registerUsers() {
-        try {
-            authManager.registerUser(HttpConstants.ALICE);
-            authManager.registerUser(HttpConstants.BOB);
-        } catch (Exception e) {
-            throw (TestHarnessInitializationException) new TestHarnessInitializationException(
-                    "Failed to register users: %s", e.toString()
-            ).initCause(e);
-        }
+        authManager.registerUser(HttpConstants.ALICE);
+        authManager.registerUser(HttpConstants.BOB);
     }
 
-    private void registerClients(final boolean authRequired) {
+    private void registerClients() {
         clients = new HashMap<>();
-        config.getWebIds().keySet().forEach(user -> {
-            try {
-                clients.put(user, new SolidClient(authManager.authenticate(user, authRequired)));
-            } catch (Exception e) {
-                throw (TestHarnessInitializationException) new TestHarnessInitializationException(
-                        "Failed to register clients: %s", e.toString()
-                ).initCause(e);
-            }
-        });
+        config.getWebIds().keySet().forEach(user -> clients.put(user, new SolidClient(authManager.authenticate(user))));
+        final URI webId = URI.create(config.getWebIds().get(HttpConstants.ALICE));
+        final Client client = new Client.Builder().followRedirects().withOptionalLocalhostSupport(webId).build();
+        clientRegistry.register(ClientRegistry.ALICE_WEBID, client);
     }
 
     /**

@@ -23,6 +23,7 @@
  */
 package org.solid.testharness.config;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -33,15 +34,16 @@ import org.eclipse.rdf4j.rio.Rio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.EARL;
+import org.solid.common.vocab.PIM;
 import org.solid.common.vocab.RDF;
-import org.solid.testharness.accesscontrol.AccessControlFactory;
-import org.solid.testharness.accesscontrol.AccessDataset;
+import org.solid.testharness.http.ClientRegistry;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClientProvider;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.SolidContainerProvider;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -50,23 +52,39 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import static org.solid.testharness.config.Config.AccessControlMode.ACP;
-import static org.solid.testharness.config.Config.AccessControlMode.ACP_LEGACY;
+import static org.eclipse.rdf4j.model.util.Values.iri;
 
 @ApplicationScoped
 public class TestSubject {
     private static final Logger logger = LoggerFactory.getLogger(TestSubject.class);
 
+    public enum AccessControlMode {
+        ACP_LEGACY,
+        ACP,
+        WAC
+    }
+
     private TargetServer targetServer;
+    private URI webId;
+    private SolidContainerProvider rootTestContainer;
     private SolidContainerProvider testRunContainer;
+    private AccessControlMode accessControlMode;
+    private SolidClientProvider ownerClient;
+    private SolidClientProvider publicClient;
 
     @Inject
     Config config;
     @Inject
     DataRepository dataRepository;
-    @Inject
-    AccessControlFactory accessControlFactory;
+
+    @PostConstruct
+    void init() {
+        webId = URI.create(config.getWebIds().get(HttpConstants.ALICE));
+        publicClient = new SolidClientProvider(ClientRegistry.ALICE_WEBID);
+        ownerClient = new SolidClientProvider(HttpConstants.ALICE);
+    }
 
     public void loadTestSubjectConfig()  {
         final IRI configuredTestSubject = config.getTestSubject();
@@ -89,7 +107,7 @@ public class TestSubject {
                 testSubject = (IRI) testSubjects.stream()
                         .filter(subject -> subject.equals(configuredTestSubject))
                         .findFirst()
-                        .orElseThrow(() -> new TestHarnessInitializationException("No config found for server: %s",
+                        .orElseThrow(() -> new TestHarnessInitializationException("No config found for server: " +
                                 configuredTestSubject.stringValue()));
                 loadSubjectIntoRepository(model, testSubject);
             }
@@ -97,10 +115,7 @@ public class TestSubject {
             dataRepository.setTestSubject(testSubject);
             logger.info("TestSubject {}", targetServer.getSubject());
         } catch (IOException e) {
-            throw (TestHarnessInitializationException) new TestHarnessInitializationException(
-                    "Failed to read config file %s: %s",
-                    config.getSubjectsUrl().toString(), e.toString()
-            ).initCause(e);
+            throw new TestHarnessInitializationException("Failed to read config file " + config.getSubjectsUrl(), e);
         }
     }
 
@@ -121,7 +136,7 @@ public class TestSubject {
     }
 
     /**
-     * Set up the root ACL for Alice (if required).
+     * Find the storage to be used for tests
      * Confirm access to the root test container and ACL.
      * Create a sub-container for this run and confirm access to it and its ACL.
      */
@@ -129,47 +144,12 @@ public class TestSubject {
         if (targetServer == null) {
             throw new TestHarnessInitializationException("No target server has been configured");
         }
-        final SolidClientProvider solidClientProvider = new SolidClientProvider(HttpConstants.ALICE);
+        final URI testContainerUri = findTestContainer();
+        logger.info("Test subject test container: {}", testContainerUri);
 
-        // Determine the ACL mode the server has implemented
-        final SolidContainerProvider rootTestContainer = new SolidContainerProvider(solidClientProvider,
-                URI.create(config.getTestContainer()));
-        try {
-            final URI aclUrl = rootTestContainer.getAclUrl();
-            if (aclUrl == null) {
-                throw new Exception("Cannot get ACL url for root test container: " + rootTestContainer.getUrl());
-            }
-            Config.AccessControlMode accessControlMode = solidClientProvider.getAclType(aclUrl);
-            if (accessControlMode == ACP && targetServer.getFeatures().contains("acp-legacy")) {
-                accessControlMode = ACP_LEGACY;
-            }
-            config.setAccessControlMode(accessControlMode);
-        } catch (Exception e) {
-            throw (TestHarnessInitializationException) new TestHarnessInitializationException(
-                    "Failed to determine access control mode: %s", e.toString()
-            ).initCause(e);
-        }
+        rootTestContainer = new SolidContainerProvider(ownerClient, testContainerUri);
+        determineAccessControlImplementation();
 
-        if (config.isSetupRootAcl()) {
-            logger.debug("Setup root acl");
-            try {
-                final SolidContainerProvider rootContainer = new SolidContainerProvider(solidClientProvider,
-                        config.getServerRoot());
-                final String alice = config.getCredentials(HttpConstants.ALICE).webId();
-                final List<String> modes = List.of(AccessDataset.READ, AccessDataset.WRITE, AccessDataset.CONTROL);
-                final AccessDataset accessDataset = accessControlFactory
-                        .getAccessDatasetBuilder(rootContainer.getAclUrl().toString())
-                        .setAgentAccess(rootContainer.getUrl().toString(), alice, modes)
-                        .setInheritableAgentAccess(rootContainer.getUrl().toString(), alice, modes)
-                        .build();
-                logger.info("ACL doc: {}", accessDataset.toString());
-                rootContainer.setAccessDataset(accessDataset);
-            } catch (Exception e) {
-                throw (TestHarnessInitializationException) new TestHarnessInitializationException(
-                        "Failed to create root ACL: %s", e.toString()
-                ).initCause(e);
-            }
-        }
         logger.debug("\n========== CHECK TEST SUBJECT ROOT");
         try {
             logger.debug("Root test container content: {}", rootTestContainer.getContentAsTurtle());
@@ -180,11 +160,110 @@ public class TestSubject {
             logger.debug("Test run container content: {}", testRunContainer.getContentAsTurtle());
             logger.debug("Test run container access controls: {}", testRunContainer.getAccessDataset());
         } catch (Exception e) {
-            throw (TestHarnessInitializationException) new TestHarnessInitializationException(
-                    "Failed to prepare server: %s", e.toString()
-            ).initCause(e);
+            throw new TestHarnessInitializationException("Failed to prepare server", e);
         }
     }
+
+    // Determine the ACL mode the server has implemented
+    private void determineAccessControlImplementation() {
+        try {
+            final URI aclUrl = rootTestContainer.getAclUrl();
+            if (aclUrl == null) {
+                throw new Exception("Cannot get ACL url for root test container: " + rootTestContainer.getUrl());
+            }
+            accessControlMode = ownerClient.getAclType(aclUrl);
+            if (accessControlMode == AccessControlMode.ACP && targetServer.getFeatures().contains("acp-legacy")) {
+                accessControlMode = AccessControlMode.ACP_LEGACY;
+            }
+        } catch (Exception e) {
+            throw new TestHarnessInitializationException("Failed to determine access control mode", e);
+        }
+    }
+
+    URI findTestContainer() {
+        final String testContainer = config.getTestContainer();
+        if (StringUtils.isEmpty(testContainer)) {
+            // find storage from profile
+            return findStorage();
+        }
+        final URI uri = URI.create(testContainer);
+        if (uri.isAbsolute()) {
+            // testContainer was absolute
+            return uri;
+        } else {
+            final String serverRoot = config.getServerRoot();
+            if (!StringUtils.isEmpty(serverRoot)) {
+                return URI.create(serverRoot).resolve(testContainer).normalize();
+            } else {
+                // find storage and resolve with testContainer
+                return findStorage().resolve(testContainer).normalize();
+            }
+        }
+    }
+
+    URI findStorage() {
+        final Model profile;
+        try {
+            profile = publicClient.getContentAsModel(webId);
+        } catch (Exception e) {
+            throw new TestHarnessInitializationException("Failed to read WebId profile for " + webId, e);
+        }
+        final List<URI> pods = profile.filter(iri(webId.toString()), PIM.storage, null)
+                .objects()
+                .stream()
+                .filter(Value::isIRI)
+                .map(Value::stringValue)
+                .map(URI::create)
+                .filter(this::isPodAccessible)
+                .collect(Collectors.toList());
+        if (pods.isEmpty()) {
+            throw new TestHarnessInitializationException("Pod provisioning is not yet implemented. " +
+                    "Please ensure the storage already exists for the test user.");
+//            return provisionPod();
+        } else {
+            return pods.get(0);
+        }
+    }
+
+    boolean isPodAccessible(final URI pod) {
+        try {
+            return ownerClient.hasStorageType(pod);
+        } catch (Exception e) {
+            logger.warn("Failed to check pod accessibility: " + pod);
+            return false;
+        }
+    }
+
+    /*
+    URI provisionPod() {
+        try {
+            final URI provisionEndpoint = URI.create("https://start.dev-next.inrupt.com");
+            HttpRequest.Builder builder = HttpUtils.newRequestBuilder(provisionEndpoint)
+                    .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
+                    .POST(HttpRequest.BodyPublishers.noBody());
+            final HttpResponse<String> response = ownerClient.getClient()
+                    .sendAuthorized(builder, HttpResponse.BodyHandlers.ofString());
+            if (!HttpUtils.isSuccessful(response.statusCode())) {
+                throw new TestHarnessInitializationException("Failed to provision pod at " + provisionEndpoint +
+                        ", response=" + response.statusCode());
+            }
+            // returns: id, profile, storage (as a uri)
+            // If you provision a new pod you should also add it to the WebID profile but this is only possible for
+            // registered clients
+            builder = HttpUtils.newRequestBuilder(webId)
+                    .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
+                    .POST(HttpRequest.BodyPublishers.ofString(response.body()));
+            final HttpResponse<Void> response2 = ownerClient.getClient()
+                    .sendAuthorized(builder, HttpResponse.BodyHandlers.discarding());
+            if (!HttpUtils.isSuccessful(response2.statusCode())) {
+                throw new TestHarnessInitializationException("Failed to update profile at " + webId +
+                        ", response=" + response2.statusCode());
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new TestHarnessInitializationException("Failed to provision pod for " + webId, e);
+        }
+    }
+    */
 
     public void tearDownServer() {
         try {
@@ -209,5 +288,9 @@ public class TestSubject {
 
     protected void setTestRunContainer(final SolidContainerProvider solidContainerProvider) {
         testRunContainer = solidContainerProvider;
+    }
+
+    public AccessControlMode getAccessControlMode() {
+        return accessControlMode;
     }
 }
