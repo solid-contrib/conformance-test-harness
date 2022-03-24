@@ -43,7 +43,6 @@ import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.SolidContainerProvider;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -71,20 +70,11 @@ public class TestSubject {
     private SolidContainerProvider rootTestContainer;
     private SolidContainerProvider testRunContainer;
     private AccessControlMode accessControlMode;
-    private SolidClientProvider ownerClient;
-    private SolidClientProvider publicClient;
 
     @Inject
     Config config;
     @Inject
     DataRepository dataRepository;
-
-    @PostConstruct
-    void init() {
-        webId = URI.create(config.getWebIds().get(HttpConstants.ALICE));
-        publicClient = new SolidClientProvider(ClientRegistry.ALICE_WEBID);
-        ownerClient = new SolidClientProvider(HttpConstants.ALICE);
-    }
 
     public void loadTestSubjectConfig()  {
         final IRI configuredTestSubject = config.getTestSubject();
@@ -147,8 +137,9 @@ public class TestSubject {
         final URI testContainerUri = findTestContainer();
         logger.info("Test subject test container: {}", testContainerUri);
 
+        final SolidClientProvider ownerClient = new SolidClientProvider(HttpConstants.ALICE);
         rootTestContainer = new SolidContainerProvider(ownerClient, testContainerUri);
-        determineAccessControlImplementation();
+        determineAccessControlImplementation(ownerClient);
 
         logger.debug("\n========== CHECK TEST SUBJECT ROOT");
         try {
@@ -165,7 +156,7 @@ public class TestSubject {
     }
 
     // Determine the ACL mode the server has implemented
-    private void determineAccessControlImplementation() {
+    private void determineAccessControlImplementation(final SolidClientProvider ownerClient) {
         try {
             final URI aclUrl = rootTestContainer.getAclUrl();
             if (aclUrl == null) {
@@ -202,6 +193,9 @@ public class TestSubject {
     }
 
     URI findStorage() {
+        final SolidClientProvider publicClient = new SolidClientProvider(ClientRegistry.ALICE_WEBID);
+        final SolidClientProvider ownerClient = new SolidClientProvider(HttpConstants.ALICE);
+        webId = URI.create(config.getWebIds().get(HttpConstants.ALICE));
         final Model profile;
         try {
             profile = publicClient.getContentAsModel(webId);
@@ -214,7 +208,7 @@ public class TestSubject {
                 .filter(Value::isIRI)
                 .map(Value::stringValue)
                 .map(URI::create)
-                .filter(this::isPodAccessible)
+                .filter(p -> isPodAccessible(p, ownerClient))
                 .collect(Collectors.toList());
         if (pods.isEmpty()) {
             throw new TestHarnessInitializationException("Pod provisioning is not yet implemented. " +
@@ -225,7 +219,7 @@ public class TestSubject {
         }
     }
 
-    boolean isPodAccessible(final URI pod) {
+    boolean isPodAccessible(final URI pod, final SolidClientProvider ownerClient) {
         try {
             return ownerClient.hasStorageType(pod);
         } catch (Exception e) {

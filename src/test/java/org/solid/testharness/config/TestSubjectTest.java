@@ -394,7 +394,6 @@ public class TestSubjectTest {
         // register owner client
         final Client mockClient = mock(Client.class);
         when(clientRegistry.getClient(HttpConstants.ALICE)).thenReturn(mockClient);
-        testSubject.init();
         if (mode != null) {
             final TargetServer targetServer = mock(TargetServer.class);
             if (mode.equals(ACP_LEGACY)) {

@@ -23,8 +23,12 @@
  */
 package org.solid.testharness.http;
 
+import org.solid.testharness.config.Config;
+
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,10 +41,17 @@ public class ClientRegistry {
     public static final String DEFAULT = "default";
     public static final String ALICE_WEBID = "alice-webid";
 
+    @Inject
+    Config config;
+
     @PostConstruct
     void postConstruct() {
         registeredClientMap = Collections.synchronizedMap(new HashMap<>());
         register(DEFAULT, new Client.Builder().build());
+        final URI webId = URI.create(config.getWebIds().get(HttpConstants.ALICE));
+        final Client client = new Client.Builder().followRedirects().withOptionalLocalhostSupport(webId).build();
+        register(ClientRegistry.ALICE_WEBID, client);
+
     }
 
     public void register(final String label, final Client client) {
