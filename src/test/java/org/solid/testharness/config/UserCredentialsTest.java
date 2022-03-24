@@ -49,7 +49,7 @@ public class UserCredentialsTest {
         assertFalse(userCredentials.isUsingRefreshToken());
         assertTrue(userCredentials.isUsingUsernamePassword());
         assertFalse(userCredentials.isUsingClientCredentials());
-        assertEquals("UserCredentials: username=***, password=***", userCredentials.stringValue());
+        assertEquals("UserCredentials: username=***, password=***, idp=null", userCredentials.stringValue());
     }
 
     @Test
@@ -89,11 +89,12 @@ public class UserCredentialsTest {
         userCredentials.refreshToken = Optional.of(TOKEN);
         userCredentials.clientId = Optional.of(CLIENT_ID);
         userCredentials.clientSecret = Optional.of(CLIENT_SECRET);
+        userCredentials.idp = Optional.of(URI.create(TestUtils.SAMPLE_BASE));
         assertTrue(userCredentials.isUsingRefreshToken());
         assertFalse(userCredentials.isUsingUsernamePassword());
         assertFalse(userCredentials.isUsingClientCredentials());
-        assertEquals("UserCredentials: refreshToken=***, clientId=***, clientSecret=***",
-                userCredentials.stringValue());
+        assertEquals("UserCredentials: refreshToken=***, clientId=***, clientSecret=***, idp=" +
+                        TestUtils.SAMPLE_BASE, userCredentials.stringValue());
     }
 
     @Test
@@ -117,7 +118,7 @@ public class UserCredentialsTest {
         assertTrue(userCredentials.isUsingClientCredentials());
         assertFalse(userCredentials.isUsingRefreshToken());
         assertFalse(userCredentials.isUsingUsernamePassword());
-        assertEquals("UserCredentials: clientId=***, clientSecret=***", userCredentials.stringValue());
+        assertEquals("UserCredentials: clientId=***, clientSecret=***, idp=null", userCredentials.stringValue());
     }
 
     @Test
@@ -141,7 +142,7 @@ public class UserCredentialsTest {
         assertFalse(userCredentials.isUsingRefreshToken());
         assertFalse(userCredentials.isUsingUsernamePassword());
         assertEquals("UserCredentials: username=null, password=null, " +
-                "refreshToken=null, clientId=null, clientSecret=null", userCredentials.stringValue());
+                "refreshToken=null, clientId=null, clientSecret=null, idp=null", userCredentials.stringValue());
     }
 
     @Test

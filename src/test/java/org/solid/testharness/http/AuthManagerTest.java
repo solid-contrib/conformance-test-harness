@@ -34,6 +34,7 @@ import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.inject.Inject;
 import java.net.URI;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -72,6 +73,8 @@ class AuthManagerTest {
 
     @Test
     void authenticateNoCredentials() {
+        when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
+                "https://alice.target.example.org/profile/card#me"));
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
         when(config.getCredentials("nocredentials")).thenReturn(new TestCredentials());
 
@@ -83,6 +86,8 @@ class AuthManagerTest {
 
     @Test
     void authenticateLoginSession() {
+        when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
+                "https://alice.target.example.org/profile/card#me"));
         when(config.getOrigin()).thenReturn("https://origin/goodcode");
         setupLogin(baseUri, "login", "/login/password", null);
 
@@ -92,6 +97,8 @@ class AuthManagerTest {
 
     @Test
     void authenticateLoginUserRegistration() {
+        when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
+                "https://alice.target.example.org/profile/card#me"));
         when(config.getOrigin()).thenReturn("https://origin/form");
         setupLogin(baseUri, "login", "/login/password",
                 "/idp/register");
@@ -102,6 +109,8 @@ class AuthManagerTest {
 
     @Test
     void authenticateRefreshCredentials() {
+        when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
+                "https://alice.target.example.org/profile/card#me"));
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
         final TestCredentials credentials = new TestCredentials();
         credentials.refreshToken = Optional.of("REFRESH");
@@ -115,6 +124,8 @@ class AuthManagerTest {
 
     @Test
     void authenticateClientCredentials() {
+        when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
+                "https://alice.target.example.org/profile/card#me"));
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
         final TestCredentials credentials = new TestCredentials();
         credentials.clientId = Optional.of("CLIENTID");

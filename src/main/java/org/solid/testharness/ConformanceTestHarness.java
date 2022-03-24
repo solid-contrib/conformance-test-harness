@@ -38,7 +38,6 @@ import org.solid.testharness.config.PathMappings;
 import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.discovery.TestSuiteDescription;
 import org.solid.testharness.http.AuthManager;
-import org.solid.testharness.http.Client;
 import org.solid.testharness.http.ClientRegistry;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.reporting.ReportGenerator;
@@ -52,7 +51,6 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -245,9 +243,6 @@ public class ConformanceTestHarness {
     private void registerClients() {
         clients = new HashMap<>();
         config.getWebIds().keySet().forEach(user -> clients.put(user, new SolidClient(authManager.authenticate(user))));
-        final URI webId = URI.create(config.getWebIds().get(HttpConstants.ALICE));
-        final Client client = new Client.Builder().followRedirects().withOptionalLocalhostSupport(webId).build();
-        clientRegistry.register(ClientRegistry.ALICE_WEBID, client);
     }
 
     /**

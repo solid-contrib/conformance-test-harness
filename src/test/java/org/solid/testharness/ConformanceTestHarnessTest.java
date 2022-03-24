@@ -91,7 +91,8 @@ class ConformanceTestHarnessTest {
         tmp = Files.createTempDirectory(null);
         tmp.toFile().deleteOnExit();
         when(config.getOutputDirectory()).thenReturn(tmp.toFile());
-        when(config.getWebIds()).thenReturn(Map.of("alice", "https://alice.target.example.org/profile/card#me"));
+        when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
+                "https://alice.target.example.org/profile/card#me"));
     }
 
     @Test

@@ -103,7 +103,7 @@ public class Application implements QuarkusApplication {
                 return !results.hasFailures() || ignoreFailures ? 0 : 1;
             }
         } catch (Exception e) {
-            logger.error("Application failed. Reason: {}", e.toString());
+            logger.error("Application failed", e);
         }
         return 1;
     }

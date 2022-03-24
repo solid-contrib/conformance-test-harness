@@ -51,7 +51,6 @@ public class ClientRegistry {
         final URI webId = URI.create(config.getWebIds().get(HttpConstants.ALICE));
         final Client client = new Client.Builder().followRedirects().withOptionalLocalhostSupport(webId).build();
         register(ClientRegistry.ALICE_WEBID, client);
-
     }
 
     public void register(final String label, final Client client) {

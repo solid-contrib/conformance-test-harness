@@ -84,6 +84,8 @@ class SolidClientProviderTest {
 
     @Test
     void createMissingNamedClient() {
+        when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
+                "https://alice.target.example.org/profile/card#me"));
         assertThrows(TestHarnessInitializationException.class, () -> new SolidClientProvider("nobody"));
     }
 
@@ -197,6 +199,8 @@ class SolidClientProviderTest {
 
     @Test
     void getAclUriFromHeadersWAC() {
+        when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
+                "https://alice.target.example.org/profile/card#me"));
         final Map<String, List<String>> headerMap = Map.of("Link",
                 List.of("<" + BASE_URL.resolve("test.acl") + ">; rel=\"acl\""));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
@@ -208,6 +212,8 @@ class SolidClientProviderTest {
 
     @Test
     void getAclUriFromHeadersACP() {
+        when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
+                "https://alice.target.example.org/profile/card#me"));
         final Map<String, List<String>> headerMap = Map.of("Link",
                 List.of("<" + BASE_URL.resolve("test?ext=acr") +
                         ">; rel=\"http://www.w3.org/ns/solid/acp#accessControl\""));

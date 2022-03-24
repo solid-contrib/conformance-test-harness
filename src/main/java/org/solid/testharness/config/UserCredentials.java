@@ -83,22 +83,22 @@ public interface UserCredentials {
 
     default String stringValue() {
         if (isUsingUsernamePassword()) {
-            return String.format("UserCredentials: username=%s, password=%s",
-                    mask(username()), mask(password())
+            return String.format("UserCredentials: username=%s, password=%s, idp=%s",
+                    mask(username()), mask(password()), getIdp()
             );
         } else if (isUsingRefreshToken()) {
-            return String.format("UserCredentials: refreshToken=%s, clientId=%s, clientSecret=%s",
-                    mask(refreshToken()), mask(clientId()), mask(clientSecret())
+            return String.format("UserCredentials: refreshToken=%s, clientId=%s, clientSecret=%s, idp=%s",
+                    mask(refreshToken()), mask(clientId()), mask(clientSecret()), getIdp()
             );
         } else if (isUsingClientCredentials()) {
-            return String.format("UserCredentials: clientId=%s, clientSecret=%s",
-                    mask(clientId()), mask(clientSecret())
+            return String.format("UserCredentials: clientId=%s, clientSecret=%s, idp=%s",
+                    mask(clientId()), mask(clientSecret()), getIdp()
             );
         } else {
             return String.format("UserCredentials: username=%s, password=%s, " +
-                            "refreshToken=%s, clientId=%s, clientSecret=%s",
+                            "refreshToken=%s, clientId=%s, clientSecret=%s, idp=%s",
                     mask(username()), mask(password()),
-                    mask(refreshToken()), mask(clientId()), mask(clientSecret())
+                    mask(refreshToken()), mask(clientId()), mask(clientSecret()), getIdp()
             );
         }
     }

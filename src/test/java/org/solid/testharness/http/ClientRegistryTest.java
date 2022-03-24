@@ -31,6 +31,8 @@ import org.solid.testharness.config.Config;
 
 import javax.inject.Inject;
 
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
@@ -46,6 +48,8 @@ class ClientRegistryTest {
     void setup() {
         when(config.getReadTimeout()).thenReturn(5000);
         when(config.getAgent()).thenReturn("AGENT");
+        when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
+                "https://alice.target.example.org/profile/card#me"));
     }
 
     @Test

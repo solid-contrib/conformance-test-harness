@@ -321,9 +321,10 @@ class SolidResourceProviderTest {
         final AccessDatasetBuilder accessDatasetBuilder = mock(AccessDatasetBuilder.class);
         when(solidClientProvider.getAccessDatasetBuilder(any())).thenReturn(accessDatasetBuilder);
         final Client client = mock(Client.class);
-        when(client.getUser()).thenReturn("alice");
+        when(client.getUser()).thenReturn(HttpConstants.ALICE);
         when(solidClientProvider.getClient()).thenReturn(client);
-        when(config.getWebIds()).thenReturn(Map.of("alice", "https://alice.target.example.org/profile/card#me"));
+        when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
+                "https://alice.target.example.org/profile/card#me"));
         final SolidResourceProvider resource = new SolidResourceProvider(solidClientProvider, TEST_URL);
         final AccessDatasetBuilder builder = resource.getAccessDatasetBuilder();
         assertNotNull(builder);

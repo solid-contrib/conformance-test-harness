@@ -89,7 +89,7 @@ public class Client {
         }
 
         public Builder withOptionalLocalhostSupport(final URI uri) {
-            requireNonNull(uri, "uri is required");
+            requireNonNull(uri, "uri is required to check localhost support");
             if (TRUSTED_HOSTS.contains(uri.getHost())) {
                 System.setProperty("jdk.internal.httpclient.disableHostnameVerification", Boolean.TRUE.toString());
                 clientBuilder.sslContext(LocalHostSupport.createSSLContext());

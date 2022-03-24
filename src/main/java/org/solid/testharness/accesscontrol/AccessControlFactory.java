@@ -23,6 +23,7 @@
  */
 package org.solid.testharness.accesscontrol;
 
+import io.quarkus.arc.Unremovable;
 import org.solid.testharness.config.TestSubject;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -31,6 +32,7 @@ import java.io.IOException;
 import java.net.URI;
 
 @ApplicationScoped
+@Unremovable
 public class AccessControlFactory {
     @Inject
     TestSubject testSubject;
