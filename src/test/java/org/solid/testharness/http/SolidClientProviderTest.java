@@ -24,8 +24,8 @@
 package org.solid.testharness.http;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.mockito.InjectMock;
+import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ import org.solid.common.vocab.ACP;
 import org.solid.common.vocab.PIM;
 import org.solid.testharness.accesscontrol.AccessDataset;
 import org.solid.testharness.config.Config;
-import org.solid.testharness.config.ConfigTestNormalProfile;
+import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 import org.solid.testharness.utils.TestUtils;
 
@@ -53,10 +53,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.solid.testharness.config.Config.AccessControlMode.WAC;
 
 @QuarkusTest
-@TestProfile(ConfigTestNormalProfile.class)
 class SolidClientProviderTest {
     private static final URI BASE_URL = URI.create("https://example.org/");
     private static final URI TEST_URL = BASE_URL.resolve("/test");
@@ -66,6 +64,8 @@ class SolidClientProviderTest {
     ClientRegistry clientRegistry;
     @InjectMock
     Config config;
+    @InjectMock
+    TestSubject testSubject;
 
     @BeforeEach
     void setup() {
@@ -84,6 +84,8 @@ class SolidClientProviderTest {
 
     @Test
     void createMissingNamedClient() {
+        when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
+                "https://alice.target.example.org/profile/card#me"));
         assertThrows(TestHarnessInitializationException.class, () -> new SolidClientProvider("nobody"));
     }
 
@@ -197,6 +199,8 @@ class SolidClientProviderTest {
 
     @Test
     void getAclUriFromHeadersWAC() {
+        when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
+                "https://alice.target.example.org/profile/card#me"));
         final Map<String, List<String>> headerMap = Map.of("Link",
                 List.of("<" + BASE_URL.resolve("test.acl") + ">; rel=\"acl\""));
         final HttpHeaders headers = HttpHeaders.of(headerMap, (k, v) -> true);
@@ -208,6 +212,8 @@ class SolidClientProviderTest {
 
     @Test
     void getAclUriFromHeadersACP() {
+        when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
+                "https://alice.target.example.org/profile/card#me"));
         final Map<String, List<String>> headerMap = Map.of("Link",
                 List.of("<" + BASE_URL.resolve("test?ext=acr") +
                         ">; rel=\"http://www.w3.org/ns/solid/acp#accessControl\""));
@@ -235,8 +241,8 @@ class SolidClientProviderTest {
         when(mockClient.head(any())).thenReturn(mockResponse);
 
         final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
-        final Config.AccessControlMode mode = solidClientProvider.getAclType(BASE_URL.resolve("/test.acl"));
-        assertEquals(WAC, mode);
+        final TestSubject.AccessControlMode mode = solidClientProvider.getAclType(BASE_URL.resolve("/test.acl"));
+        assertEquals(TestSubject.AccessControlMode.WAC, mode);
     }
 
     @Test
@@ -247,8 +253,8 @@ class SolidClientProviderTest {
         when(mockClient.head(any())).thenReturn(mockResponse);
 
         final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
-        final Config.AccessControlMode mode = solidClientProvider.getAclType(BASE_URL.resolve("/test.acl"));
-        assertEquals(Config.AccessControlMode.ACP, mode);
+        final TestSubject.AccessControlMode mode = solidClientProvider.getAclType(BASE_URL.resolve("/test.acl"));
+        assertEquals(TestSubject.AccessControlMode.ACP, mode);
     }
 
     @Test
@@ -259,8 +265,8 @@ class SolidClientProviderTest {
         when(mockClient.head(any())).thenReturn(mockResponse);
 
         final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
-        final Config.AccessControlMode mode = solidClientProvider.getAclType(BASE_URL.resolve("/test.acl"));
-        assertEquals(WAC, mode);
+        final TestSubject.AccessControlMode mode = solidClientProvider.getAclType(BASE_URL.resolve("/test.acl"));
+        assertEquals(TestSubject.AccessControlMode.WAC, mode);
     }
 
     @Test
@@ -271,8 +277,8 @@ class SolidClientProviderTest {
         when(mockClient.head(any())).thenReturn(mockResponse);
 
         final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
-        final Config.AccessControlMode mode = solidClientProvider.getAclType(BASE_URL.resolve("/test.acl"));
-        assertEquals(WAC, mode);
+        final TestSubject.AccessControlMode mode = solidClientProvider.getAclType(BASE_URL.resolve("/test.acl"));
+        assertEquals(TestSubject.AccessControlMode.WAC, mode);
     }
 
     @Test
@@ -302,7 +308,7 @@ class SolidClientProviderTest {
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "");
         when(mockClient.getAsTurtle(any())).thenReturn(mockResponse);
-        when(config.getAccessControlMode()).thenReturn(WAC);
+        when(testSubject.getAccessControlMode()).thenReturn(TestSubject.AccessControlMode.WAC);
 
         final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
         final AccessDataset accessDataset = solidClientProvider.getAcl(resourceAcl);
@@ -325,7 +331,7 @@ class SolidClientProviderTest {
     void getAccessDatasetBuilder() {
         final Client mockClient = mock(Client.class);
         final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
-        when(config.getAccessControlMode()).thenReturn(WAC);
+        when(testSubject.getAccessControlMode()).thenReturn(TestSubject.AccessControlMode.WAC);
         assertNotNull(solidClientProvider.getAccessDatasetBuilder(BASE_URL.resolve("/test.acl")));
     }
 
@@ -393,6 +399,20 @@ class SolidClientProviderTest {
                 () -> solidClientProvider.getContentAsTurtle(TEST_URL));
         assertEquals("Error response=400 trying to get content for " + TEST_URL,
                 exception.getMessage());
+    }
+
+    @Test
+    void getContainmentDataModel() throws Exception {
+        final Client mockClient = mock(Client.class);
+        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200,
+                TestUtils.loadStringFromFile("src/test/resources/turtle-sample.ttl"));
+
+        when(mockClient.getAsTurtle(eq(TEST_URL))).thenReturn(mockResponse);
+
+        final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
+        final Model model = solidClientProvider.getContentAsModel(TEST_URL);
+        assertEquals(1, model.size());
+        verify(mockClient).getAsTurtle(TEST_URL);
     }
 
     @Test

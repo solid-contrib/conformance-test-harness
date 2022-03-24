@@ -24,7 +24,10 @@
 package org.solid.testharness.config;
 
 import io.smallrye.config.WithName;
+import org.solid.testharness.http.HttpUtils;
+import org.solid.testharness.utils.TestHarnessInitializationException;
 
+import java.net.URI;
 import java.util.Optional;
 
 public interface UserCredentials {
@@ -40,9 +43,31 @@ public interface UserCredentials {
     @WithName("clientsecret")
     Optional<String> clientSecret();
 
+    Optional<URI> idp();
+
     Optional<String> username();
 
     Optional<String> password();
+
+    default URI getWebId() {
+        final URI uri;
+        try {
+            uri = URI.create(webId());
+        } catch (Exception e) {
+            throw new TestHarnessInitializationException("The webId " + webId() + " is missing or invalid", e);
+        }
+        if (!HttpUtils.isHttpProtocol(uri.getScheme())) {
+            throw new TestHarnessInitializationException("The webId " + webId() + " must be an absolute URL");
+        }
+        return uri;
+    }
+
+    default URI getIdp() {
+        if (idp().isPresent() && !HttpUtils.isHttpProtocol(idp().get().getScheme())) {
+            throw new TestHarnessInitializationException("The IDP " + idp() + " be an absolute URL");
+        }
+        return idp().orElse(null);
+    }
 
     default boolean isUsingUsernamePassword() {
         return username().isPresent() && password().isPresent();
@@ -58,22 +83,22 @@ public interface UserCredentials {
 
     default String stringValue() {
         if (isUsingUsernamePassword()) {
-            return String.format("UserCredentials: username=%s, password=%s",
-                    mask(username()), mask(password())
+            return String.format("UserCredentials: username=%s, password=%s, idp=%s",
+                    mask(username()), mask(password()), getIdp()
             );
         } else if (isUsingRefreshToken()) {
-            return String.format("UserCredentials: refreshToken=%s, clientId=%s, clientSecret=%s",
-                    mask(refreshToken()), mask(clientId()), mask(clientSecret())
+            return String.format("UserCredentials: refreshToken=%s, clientId=%s, clientSecret=%s, idp=%s",
+                    mask(refreshToken()), mask(clientId()), mask(clientSecret()), getIdp()
             );
         } else if (isUsingClientCredentials()) {
-            return String.format("UserCredentials: clientId=%s, clientSecret=%s",
-                    mask(clientId()), mask(clientSecret())
+            return String.format("UserCredentials: clientId=%s, clientSecret=%s, idp=%s",
+                    mask(clientId()), mask(clientSecret()), getIdp()
             );
         } else {
             return String.format("UserCredentials: username=%s, password=%s, " +
-                            "refreshToken=%s, clientId=%s, clientSecret=%s",
+                            "refreshToken=%s, clientId=%s, clientSecret=%s, idp=%s",
                     mask(username()), mask(password()),
-                    mask(refreshToken()), mask(clientId()), mask(clientSecret())
+                    mask(refreshToken()), mask(clientId()), mask(clientSecret()), getIdp()
             );
         }
     }

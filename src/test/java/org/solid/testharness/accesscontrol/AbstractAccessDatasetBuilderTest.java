@@ -25,7 +25,7 @@ package org.solid.testharness.accesscontrol;
 
 import org.eclipse.rdf4j.model.Model;
 import org.junit.jupiter.api.Test;
-import org.solid.testharness.config.Config;
+import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.http.Client;
 
 import java.net.URI;
@@ -165,10 +165,10 @@ class AbstractAccessDatasetBuilderTest {
     @Test
     void build() {
         final AbstractAccessDatasetBuilder builder = new TestAccessDatasetBuilder();
-        assertEquals(Config.AccessControlMode.WAC, builder.build().getMode());
+        assertEquals(TestSubject.AccessControlMode.WAC, builder.build().getMode());
     }
 
-    class TestAccessDataset implements AccessDataset {
+    static class TestAccessDataset implements AccessDataset {
         final List<AccessRule> accessRules;
 
         TestAccessDataset(final List<AccessRule> accessRules) {
@@ -180,8 +180,8 @@ class AbstractAccessDatasetBuilderTest {
         }
 
         @Override
-        public Config.AccessControlMode getMode() {
-            return Config.AccessControlMode.WAC;
+        public TestSubject.AccessControlMode getMode() {
+            return TestSubject.AccessControlMode.WAC;
         }
 
         @Override
@@ -197,7 +197,7 @@ class AbstractAccessDatasetBuilderTest {
         public void apply(final Client client, final URI uri) { }
     }
 
-    class TestAccessDatasetBuilder extends AbstractAccessDatasetBuilder {
+    static class TestAccessDatasetBuilder extends AbstractAccessDatasetBuilder {
         @Override
         protected AccessDataset internalBuild() {
             return new TestAccessDataset(accessRules);

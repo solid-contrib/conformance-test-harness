@@ -30,7 +30,7 @@ import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.solid.common.vocab.ACP;
 import org.solid.common.vocab.RDF;
 import org.solid.common.vocab.VCARD;
-import org.solid.testharness.config.Config;
+import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.http.Client;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.HttpUtils;
@@ -47,7 +47,6 @@ import java.util.stream.Collectors;
 
 import static org.eclipse.rdf4j.model.util.Values.bnode;
 import static org.eclipse.rdf4j.model.util.Values.iri;
-import static org.solid.testharness.config.Config.AccessControlMode.ACP_LEGACY;
 
 public class AccessDatasetAcpLegacy implements AccessDataset {
     static final Map<String, IRI> standardModes = Map.of(
@@ -162,8 +161,8 @@ public class AccessDatasetAcpLegacy implements AccessDataset {
     }
 
     @Override
-    public Config.AccessControlMode getMode() {
-        return ACP_LEGACY;
+    public TestSubject.AccessControlMode getMode() {
+        return TestSubject.AccessControlMode.ACP_LEGACY;
     }
 
     @Override

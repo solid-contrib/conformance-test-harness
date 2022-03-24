@@ -88,12 +88,12 @@ public class ConfigTest {
 
     @Test
     void getServerRoot() {
-        assertEquals(URI.create("https://target.example.org/"), config.getServerRoot());
+        assertEquals("https://target.example.org/", config.getServerRoot());
     }
 
     @Test
     void getTestContainer() {
-        assertEquals("https://target.example.org/test/", config.getTestContainer());
+        assertEquals("test/", config.getTestContainer());
     }
 
     @Test
@@ -152,18 +152,6 @@ public class ConfigTest {
     @Test
     public void getOrigin() {
         assertEquals("https://testharness", config.getOrigin());
-    }
-
-    @Test
-    public void isSetupRootAcl() {
-        assertTrue(config.isSetupRootAcl());
-    }
-
-    @Test
-    void setAccessControlMode() {
-        assertNull(config.getAccessControlMode());
-        config.setAccessControlMode(Config.AccessControlMode.WAC);
-        assertEquals(Config.AccessControlMode.WAC, config.getAccessControlMode());
     }
 
     @Test

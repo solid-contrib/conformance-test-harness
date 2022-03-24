@@ -25,6 +25,7 @@ package org.solid.testharness.config;
 
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.utils.TestHarnessInitializationException;
+import org.solid.testharness.utils.TestUtils;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -59,7 +60,7 @@ public class ConfigLogicTest {
     void getSubjectsUrlNoConfigException() {
         final Config config = new Config();
         config.subjectsFile = Optional.empty();
-        assertThrows(TestHarnessInitializationException.class, () -> config.getSubjectsUrl());
+        assertThrows(TestHarnessInitializationException.class, config::getSubjectsUrl);
     }
 
     @Test
@@ -72,8 +73,8 @@ public class ConfigLogicTest {
     @Test
     void getSubjectsUrlUseConfigHttps() throws MalformedURLException {
         final Config config = new Config();
-        config.subjectsFile = Optional.of("https://example.org");
-        assertEquals(new URL("https://example.org"), config.getSubjectsUrl());
+        config.subjectsFile = Optional.of(TestUtils.SAMPLE_BASE);
+        assertEquals(new URL(TestUtils.SAMPLE_BASE), config.getSubjectsUrl());
     }
 
     @Test
@@ -92,7 +93,7 @@ public class ConfigLogicTest {
     }
 
     @Test
-    void getSubjectsUrlUseConfigEmpty() throws MalformedURLException {
+    void getSubjectsUrlUseConfigEmpty() {
         final Config config = new Config();
         config.subjectsFile = Optional.of("  ");
         assertNull(config.getSubjectsUrl());
@@ -102,30 +103,30 @@ public class ConfigLogicTest {
     void getSubjectsUrlUseConfigBad() {
         final Config config = new Config();
         config.subjectsFile = Optional.of("http://domain:-100/invalid");
-        assertThrows(TestHarnessInitializationException.class, () -> config.getSubjectsUrl());
+        assertThrows(TestHarnessInitializationException.class, config::getSubjectsUrl);
     }
 
     @Test
     void getSubjectsUrlUseSet() throws MalformedURLException {
         final Config config = new Config();
-        config.setSubjectsUrl("https://example.org");
-        assertEquals(new URL("https://example.org"), config.getSubjectsUrl());
+        config.setSubjectsUrl(TestUtils.SAMPLE_BASE);
+        assertEquals(new URL(TestUtils.SAMPLE_BASE), config.getSubjectsUrl());
     }
 
     @Test
     void getTestSourcesNoConfigException() {
         final Config config = new Config();
         config.sourceList = Optional.empty();
-        assertThrows(TestHarnessInitializationException.class, () -> config.getTestSources());
+        assertThrows(TestHarnessInitializationException.class, config::getTestSources);
     }
 
     @Test
     void getTestSourcesUseConfigOne() throws MalformedURLException {
         final Config config = new Config();
-        config.sourceList = Optional.of(List.of("https://example.org"));
+        config.sourceList = Optional.of(List.of(TestUtils.SAMPLE_BASE));
         final List<URL> list = config.getTestSources();
         assertEquals(1, list.size());
-        assertEquals(new URL("https://example.org"), list.get(0));
+        assertEquals(new URL(TestUtils.SAMPLE_BASE), list.get(0));
     }
 
     @Test
@@ -142,7 +143,7 @@ public class ConfigLogicTest {
     void getTestSourcesUseConfigBad() {
         final Config config = new Config();
         config.sourceList = Optional.of(List.of("http://domain:-100/invalid"));
-        assertThrows(TestHarnessInitializationException.class, () -> config.getTestSources());
+        assertThrows(TestHarnessInitializationException.class, config::getTestSources);
     }
 
     @Test
@@ -172,42 +173,43 @@ public class ConfigLogicTest {
     @Test
     void getServerRootNoSlash() {
         final Config config = new Config();
-        config.serverRoot = "https://localhost";
-        assertEquals(URI.create("https://localhost/"), config.getServerRoot());
+        config.serverRoot = Optional.of("https://localhost");
+        assertEquals("https://localhost/", config.getServerRoot());
     }
 
     @Test
     void getServerRootWithSlash() {
         final Config config = new Config();
-        config.serverRoot = "https://localhost/";
-        assertEquals(URI.create("https://localhost/"), config.getServerRoot());
-    }
-
-    @Test
-    void overridingTrust() {
-        final Config config = new Config();
-        config.serverRoot = "https://localhost/";
-        assertTrue(config.overridingTrust());
-        config.serverRoot = "https://server/";
-        assertTrue(config.overridingTrust());
-        config.serverRoot = "https://example.org/";
-        assertFalse(config.overridingTrust());
+        config.serverRoot = Optional.of("https://localhost/");
+        assertEquals("https://localhost/", config.getServerRoot());
     }
 
     @Test
     public void getTestContainerWithSlashes() {
         final Config config = new Config();
-        config.serverRoot = "https://localhost/";
-        config.testContainer = "/test/";
-        assertEquals("https://localhost/test/", config.getTestContainer());
+        config.testContainer = Optional.of("/test/");
+        assertEquals("/test/", config.getTestContainer());
     }
 
     @Test
     public void getTestContainerNoSlashes() {
         final Config config = new Config();
-        config.serverRoot = "https://localhost";
-        config.testContainer = "test";
-        assertEquals("https://localhost/test/", config.getTestContainer());
+        config.testContainer = Optional.of("test");
+        assertEquals("test/", config.getTestContainer());
+    }
+
+    @Test
+    public void getSolidIdentityProviderNull() {
+        final Config config = new Config();
+        config.solidIdentityProvider = Optional.empty();
+        assertEquals(null, config.getSolidIdentityProvider());
+    }
+
+    @Test
+    public void getSolidIdentityProviderInvalid() {
+        final Config config = new Config();
+        config.solidIdentityProvider = Optional.of(URI.create("test"));
+        assertThrows(TestHarnessInitializationException.class, config::getSolidIdentityProvider);
     }
 
     @Test

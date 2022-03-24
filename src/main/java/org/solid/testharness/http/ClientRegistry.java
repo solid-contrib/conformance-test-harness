@@ -28,16 +28,18 @@ import org.solid.testharness.config.Config;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @ApplicationScoped
 public class ClientRegistry {
     private Map<String, Client> registeredClientMap;
 
     public static final String DEFAULT = "default";
-    public static final String SESSION_BASED = "session";
+    public static final String ALICE_WEBID = "alice-webid";
 
     @Inject
     Config config;
@@ -45,13 +47,10 @@ public class ClientRegistry {
     @PostConstruct
     void postConstruct() {
         registeredClientMap = Collections.synchronizedMap(new HashMap<>());
-        if (config.overridingTrust()) {
-            register(DEFAULT, new Client.Builder().withLocalhostSupport().build());
-            register(SESSION_BASED, new Client.Builder().withLocalhostSupport().withSessionSupport().build());
-        } else {
-            register(DEFAULT, new Client.Builder().build());
-            register(SESSION_BASED, new Client.Builder().withSessionSupport().build());
-        }
+        register(DEFAULT, new Client.Builder().build());
+        final URI webId = URI.create(config.getWebIds().get(HttpConstants.ALICE));
+        final Client client = new Client.Builder().followRedirects().withOptionalLocalhostSupport(webId).build();
+        register(ClientRegistry.ALICE_WEBID, client);
     }
 
     public void register(final String label, final Client client) {
@@ -67,9 +66,6 @@ public class ClientRegistry {
     }
 
     public Client getClient(final String label) {
-        if (label == null) {
-            return registeredClientMap.get(DEFAULT);
-        }
-        return registeredClientMap.get(label);
+        return registeredClientMap.get(Objects.requireNonNullElse(label, DEFAULT));
     }
 }

@@ -23,13 +23,16 @@
  */
 package org.solid.testharness.config;
 
+import java.net.URI;
 import java.util.Optional;
 
+@SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName", "OptionalUsedAsFieldOrParameterType"})
 public class TestCredentials implements UserCredentials {
     public String webId;
     public Optional<String> refreshToken = Optional.empty();
     public Optional<String> clientId = Optional.empty();
     public Optional<String> clientSecret = Optional.empty();
+    public Optional<URI> idp = Optional.empty();
     public Optional<String> username = Optional.empty();
     public Optional<String> password = Optional.empty();
 
@@ -51,6 +54,11 @@ public class TestCredentials implements UserCredentials {
     @Override
     public Optional<String> clientSecret() {
         return clientSecret;
+    }
+
+    @Override
+    public Optional<URI> idp() {
+        return idp;
     }
 
     @Override

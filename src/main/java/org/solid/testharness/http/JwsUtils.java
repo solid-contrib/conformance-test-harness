@@ -23,16 +23,24 @@
  */
 package org.solid.testharness.http;
 
+import org.apache.commons.text.RandomStringGenerator;
 import org.jose4j.jwk.RsaJsonWebKey;
+import org.jose4j.jwk.RsaJwkGenerator;
 import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.lang.JoseException;
 import org.jose4j.lang.UncheckedJoseException;
+import org.solid.testharness.utils.TestHarnessInitializationException;
 
+import static org.apache.commons.text.CharacterPredicates.DIGITS;
+import static org.apache.commons.text.CharacterPredicates.LETTERS;
 import static org.jose4j.jwx.HeaderParameterNames.TYPE;
 
 public final class JwsUtils {
+    private static final RandomStringGenerator GENERATOR = new RandomStringGenerator.Builder()
+            .withinRange('0', 'z').filteredBy(LETTERS, DIGITS).build();
+
     // TODO: Switch to elliptical curve as it is faster
     public static String generateDpopToken(final RsaJsonWebKey clientKey, final JwtClaims claims) {
         final JsonWebSignature jws = new JsonWebSignature();
@@ -47,6 +55,20 @@ public final class JwsUtils {
         } catch (final JoseException ex) {
             throw new UncheckedJoseException("Unable to generate DPoP token", ex);
         }
+    }
+
+    public static RsaJsonWebKey createClientKey() {
+        final RsaJsonWebKey clientKey;
+        final String identifier = GENERATOR.generate(12);
+        try {
+            clientKey = RsaJwkGenerator.generateJwk(2048);
+        } catch (JoseException e) {
+            throw new TestHarnessInitializationException("Failed to set up DPoP support", e);
+        }
+        clientKey.setKeyId(identifier);
+        clientKey.setUse("sig");
+        clientKey.setAlgorithm("RS256");
+        return clientKey;
     }
 
     private JwsUtils() { }

@@ -187,9 +187,7 @@ public class DataModelBase {
             } catch (InstantiationException | IllegalAccessException |
                     InvocationTargetException | NoSuchMethodException e) {
                 logger.error("Failed to create instance of {}", clazz.getName());
-                throw (RuntimeException) new RuntimeException(
-                        "Failed to create instance of " + clazz.getName()
-                ).initCause(e);
+                throw new RuntimeException( "Failed to create instance of " + clazz.getName(), e);
             }
         }).collect(Collectors.toList());
     }

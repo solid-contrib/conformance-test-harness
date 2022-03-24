@@ -25,7 +25,6 @@ package org.solid.testharness.http;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
-import org.jose4j.lang.JoseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.utils.TestUtils;
@@ -41,7 +40,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @QuarkusTest
 @QuarkusTestResource(ClientResource.class)
@@ -67,23 +65,35 @@ class ClientTest {
     }
 
     @Test
+    void buildWithRedirects() {
+        final Client client = new Client.Builder("user").followRedirects().build();
+        assertEquals(HttpClient.Redirect.NORMAL, client.getHttpClient().followRedirects());
+    }
+
+    @Test
     void buildWithSessionSupport() {
         final Client client = new Client.Builder("session").withSessionSupport().build();
         assertEquals("Client: user=session, dPoP=false, session=true, local=false", client.toString());
     }
 
     @Test
-    void buildWithLocalhostSUpport() {
-        final Client client = new Client.Builder("local").withLocalhostSupport().build();
+    void buildWithLocalhostSupport() {
+        final Client client = new Client.Builder("local")
+                .withOptionalLocalhostSupport(URI.create("http://server/")).build();
         assertEquals("Client: user=local, dPoP=false, session=false, local=true", client.toString());
     }
 
     @Test
-    void buildWithDpopSupport() throws Exception {
+    void buildWithoutLocalhostSupport() {
+        final Client client = new Client.Builder("notlocal").withOptionalLocalhostSupport(TEST_URL).build();
+        assertEquals("Client: user=notlocal, dPoP=false, session=false, local=false", client.toString());
+    }
+
+    @Test
+    void buildWithDpopSupport() {
         final Client client = new Client.Builder("dpop").withDpopSupport().build();
         assertEquals("Client: user=dpop, dPoP=true, session=false, local=false", client.toString());
     }
-
 
     @Test
     void getHttpClient() {
@@ -202,7 +212,7 @@ class ClientTest {
     }
 
     @Test
-    void sendAuthorized() throws IOException, InterruptedException, JoseException {
+    void sendAuthorized() throws IOException, InterruptedException {
         final Client client = new Client.Builder().withDpopSupport().build();
         client.setAccessToken("ACCESS");
         final HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(baseUri.resolve("/get/turtle"));
@@ -346,7 +356,7 @@ class ClientTest {
     }
 
     @Test
-    void signRequest() throws JoseException {
+    void signRequest() {
         final Client client = new Client.Builder().withDpopSupport().build();
         final HttpRequest.Builder builder = HttpRequest.newBuilder(TEST_URL);
         final HttpRequest request = client.signRequest(builder).build();
@@ -376,7 +386,7 @@ class ClientTest {
     }
 
     @Test
-    void getAuthHeadersDpop() throws JoseException {
+    void getAuthHeadersDpop() {
         final Client client = new Client.Builder().withDpopSupport().build();
         client.setAccessToken("ACCESS");
         final Map<String, String> headers = client.getAuthHeaders("GET", TEST_URL);

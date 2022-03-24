@@ -59,6 +59,17 @@ public class ConfigMissingTest {
         assertNull(config.getLoginEndpoint());
     }
 
+
+    @Test
+    void getServerRootNull() {
+        assertNull(config.getServerRoot());
+    }
+
+    @Test
+    public void getTestContainerNull() {
+        assertNull(config.getTestContainer());
+    }
+
     @Test
     void getUserRegistrationEndpoint() {
         assertNull(config.getUserRegistrationEndpoint());
@@ -93,8 +104,4 @@ public class ConfigMissingTest {
     public void getOrigin() {
         assertEquals("https://tester", config.getOrigin());
     }
-
-    @Test
-    public void isSetupRootAcl() {
-        assertFalse(config.isSetupRootAcl());
-    }}
+}

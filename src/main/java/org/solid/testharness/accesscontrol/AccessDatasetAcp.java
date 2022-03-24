@@ -29,7 +29,7 @@ import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.solid.common.vocab.ACL;
 import org.solid.common.vocab.ACP;
 import org.solid.common.vocab.RDF;
-import org.solid.testharness.config.Config;
+import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.http.Client;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.HttpUtils;
@@ -159,8 +159,8 @@ public class AccessDatasetAcp implements AccessDataset {
     }
 
     @Override
-    public Config.AccessControlMode getMode() {
-        return Config.AccessControlMode.ACP;
+    public TestSubject.AccessControlMode getMode() {
+        return TestSubject.AccessControlMode.ACP;
     }
 
     @Override

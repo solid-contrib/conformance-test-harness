@@ -29,7 +29,7 @@ import org.eclipse.rdf4j.model.util.Models;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.solid.common.vocab.ACL;
-import org.solid.testharness.config.Config;
+import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.http.Client;
 import org.solid.testharness.utils.TestUtils;
 
@@ -134,7 +134,7 @@ class AccessDatasetWacTest {
     @Test
     void getMode() {
         final AccessDataset accessDataset = new AccessDatasetWac(Collections.emptyList(), ACL_URI.toString());
-        assertEquals(Config.AccessControlMode.WAC, accessDataset.getMode());
+        assertEquals(TestSubject.AccessControlMode.WAC, accessDataset.getMode());
     }
 
     @Test

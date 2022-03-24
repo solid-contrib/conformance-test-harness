@@ -36,14 +36,13 @@ import org.solid.common.vocab.PIM;
 import org.solid.testharness.accesscontrol.AccessControlFactory;
 import org.solid.testharness.accesscontrol.AccessDataset;
 import org.solid.testharness.accesscontrol.AccessDatasetBuilder;
-import org.solid.testharness.config.Config;
+import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.inject.spi.CDI;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
-import java.io.StringReader;
-import java.net.URI;
+import java.io.StringReader;import java.net.URI;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -51,7 +50,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -72,7 +70,7 @@ public class SolidClientProvider {
         final ClientRegistry clientRegistry = CDI.current().select(ClientRegistry.class).get();
         client = clientRegistry.getClient(user);
         if (client == null) {
-            throw new TestHarnessInitializationException("Client '%s' has not been registered yet", user);
+            throw new TestHarnessInitializationException("Client has not been registered yet: " + user);
         }
         accessControlFactory = CDI.current().select(AccessControlFactory.class).get();
     }
@@ -123,9 +121,9 @@ public class SolidClientProvider {
         return aclLink.map(Link::getUri).orElse(null);
     }
 
-    public Config.AccessControlMode getAclType(final URI aclUri) throws IOException, InterruptedException {
+    public TestSubject.AccessControlMode getAclType(final URI aclUri) throws IOException, InterruptedException {
         final URI acpLink = getLinkByType(aclUri, ACP.AccessControlResource);
-        return acpLink != null ? Config.AccessControlMode.ACP : Config.AccessControlMode.WAC;
+        return acpLink != null ? TestSubject.AccessControlMode.ACP : TestSubject.AccessControlMode.WAC;
     }
 
     public void createAcl(final URI url, final AccessDataset accessDataset) throws Exception {
@@ -166,6 +164,10 @@ public class SolidClientProvider {
                     " trying to get content for " + url);
         }
         return response.body();
+    }
+
+    public Model getContentAsModel(final URI url) throws Exception {
+        return Rio.parse(new StringReader(getContentAsTurtle(url)), url.toString(), RDFFormat.TURTLE);
     }
 
     public void deleteResourceRecursively(final URI url) throws Exception {
@@ -228,7 +230,7 @@ public class SolidClientProvider {
                 if (failed != null && !failed.isEmpty()) {
                     logger.debug("FAILED {}", failed);
                 }
-            } catch (ExecutionException | InterruptedException e) {
+            } catch (Exception e) {
                 // Jacoco reports this as untested - it is hard to force this exception path
                 logger.error("Failed to execute requests", e);
             }
@@ -255,7 +257,7 @@ public class SolidClientProvider {
             model = Rio.parse(new StringReader(data), url.toString(), RDFFormat.TURTLE);
         } catch (Exception e) {
             logger.error("RDF Parse Error: {} in {}", e, data);
-            throw (Exception) new Exception("Bad container listing").initCause(e);
+            throw new Exception("Bad container listing", e);
         }
         return model.filter(iri(url.toString()), LDP.CONTAINS, null).objects().stream()
                 .map(Object::toString)

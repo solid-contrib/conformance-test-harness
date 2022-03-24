@@ -30,11 +30,11 @@ import org.junit.jupiter.api.Test;
 import org.solid.testharness.config.Config;
 
 import javax.inject.Inject;
-import javax.net.ssl.SSLContext;
-import java.security.NoSuchAlgorithmException;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @QuarkusTest
 class ClientRegistryTest {
@@ -48,21 +48,14 @@ class ClientRegistryTest {
     void setup() {
         when(config.getReadTimeout()).thenReturn(5000);
         when(config.getAgent()).thenReturn("AGENT");
+        when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
+                "https://alice.target.example.org/profile/card#me"));
     }
 
     @Test
     void register() {
         clientRegistry.register("registerTest", new Client.Builder("registerTest").build());
         assertEquals("registerTest", clientRegistry.getClient("registerTest").getUser());
-    }
-
-    @Test
-    void registerTrustedLocal() throws NoSuchAlgorithmException {
-        final SSLContext defaultContext = SSLContext.getDefault();
-        assertEquals(defaultContext, clientRegistry.getClient(ClientRegistry.DEFAULT).getHttpClient().sslContext());
-        when(config.overridingTrust()).thenReturn(true);
-        clientRegistry.postConstruct();
-        assertNotEquals(defaultContext, clientRegistry.getClient(ClientRegistry.DEFAULT).getHttpClient().sslContext());
     }
 
     @Test
@@ -87,11 +80,6 @@ class ClientRegistryTest {
     void getClient() {
         clientRegistry.register("newClient", new Client.Builder("newClient").build());
         assertEquals("newClient", clientRegistry.getClient("newClient").getUser());
-    }
-
-    @Test
-    void getClientSessionBased() {
-        assertTrue(clientRegistry.getClient(ClientRegistry.SESSION_BASED).getHttpClient().cookieHandler().isPresent());
     }
 
     @Test

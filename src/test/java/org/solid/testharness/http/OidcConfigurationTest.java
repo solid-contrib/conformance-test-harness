@@ -56,34 +56,41 @@ class OidcConfigurationTest {
 
     @Test
     void getIssuer() {
-        assertEquals("https://example.org/", oidcConfiguration.getIssuer());
+        assertEquals("https://example.org/", oidcConfiguration.getIssuer().toString());
+    }
+
+    @Test
+    void setIssuerEmpty() {
+        assertEquals("https://example.org/", oidcConfiguration.getIssuer().toString());
+        oidcConfiguration.setIssuer("");
+        assertEquals("https://example.org/", oidcConfiguration.getIssuer().toString());
     }
 
     @Test
     void getIssuerWithSlash() {
         oidcConfiguration.setIssuer("https://example.org/");
-        assertEquals("https://example.org/", oidcConfiguration.getIssuer());
+        assertEquals("https://example.org/", oidcConfiguration.getIssuer().toString());
     }
 
     @Test
     void getIssuerNull() {
-        oidcConfiguration.setIssuer(null);
-        assertEquals(null, oidcConfiguration.getIssuer());
+        final OidcConfiguration oidcConfiguration = new OidcConfiguration();
+        assertNull(oidcConfiguration.getIssuer());
     }
 
     @Test
     void getAuthorizeEndpoint() {
-        assertEquals("https://example.org/authorization", oidcConfiguration.getAuthorizeEndpoint());
+        assertEquals("https://example.org/authorization", oidcConfiguration.getAuthorizeEndpoint().toString());
     }
 
     @Test
     void getTokenEndpoint() {
-        assertEquals("https://example.org/token", oidcConfiguration.getTokenEndpoint());
+        assertEquals("https://example.org/token", oidcConfiguration.getTokenEndpoint().toString());
     }
 
     @Test
     void getRegistrationEndpoint() {
-        assertEquals("https://example.org/registration", oidcConfiguration.getRegistrationEndpoint());
+        assertEquals("https://example.org/registration", oidcConfiguration.getRegistrationEndpoint().toString());
     }
 
     @Test

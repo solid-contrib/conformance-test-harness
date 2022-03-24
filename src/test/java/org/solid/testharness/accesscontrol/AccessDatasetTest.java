@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.solid.common.vocab.RDF;
 import org.solid.common.vocab.VCARD;
-import org.solid.testharness.config.Config;
+import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.http.Client;
 import org.solid.testharness.utils.TestUtils;
 
@@ -40,7 +40,6 @@ import java.net.URI;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.solid.testharness.config.Config.AccessControlMode.WAC;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AccessDatasetTest {
@@ -54,7 +53,7 @@ class AccessDatasetTest {
     @Test
     void getMode() {
         final AccessDataset accessDataset = new TestAccessDataset();
-        assertEquals(WAC, accessDataset.getMode());
+        assertEquals(TestSubject.AccessControlMode.WAC, accessDataset.getMode());
     }
 
     @Test
@@ -99,7 +98,7 @@ class AccessDatasetTest {
     void parseTurtle() throws IOException {
         final AccessDataset accessDataset = new TestAccessDataset();
         accessDataset.parseTurtle(TestUtils.loadStringFromFile("src/test/resources/utils/vcard.ttl"),
-                "https://example.org");
+                TestUtils.SAMPLE_BASE);
         assertTrue(Models.isomorphic(testModel, accessDataset.getModel()));
     }
 
@@ -140,12 +139,12 @@ class AccessDatasetTest {
         assertFalse(accessDataset.isSubsetOf(new TestAccessDataset()));
     }
 
-    class TestAccessDataset implements AccessDataset {
+    static class TestAccessDataset implements AccessDataset {
         Model model;
 
         @Override
-        public Config.AccessControlMode getMode() {
-            return Config.AccessControlMode.WAC;
+        public TestSubject.AccessControlMode getMode() {
+            return TestSubject.AccessControlMode.WAC;
         }
 
         @Override

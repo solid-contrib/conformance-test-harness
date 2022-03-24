@@ -23,11 +23,8 @@
  */
 package org.solid.testharness.http;
 
-import org.apache.commons.text.RandomStringGenerator;
 import org.jose4j.jwk.RsaJsonWebKey;
-import org.jose4j.jwk.RsaJwkGenerator;
 import org.jose4j.jwt.JwtClaims;
-import org.jose4j.lang.JoseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,20 +38,20 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.UUID.randomUUID;
-import static org.apache.commons.text.CharacterPredicates.DIGITS;
-import static org.apache.commons.text.CharacterPredicates.LETTERS;
 
 @SuppressWarnings({"checkstyle:FinalClass", "PMD.AvoidDuplicateLiterals"})
 // Class is not final because it needs mocking for tests
 // Duplicate string are null check error messages for same parameter
 public class Client {
     private static final Logger logger = LoggerFactory.getLogger(Client.class);
+    private static final List<String> TRUSTED_HOSTS = List.of("localhost", "server");
     private static final int MAX_RETRY = 10;
 
     private HttpClient httpClient;
@@ -70,9 +67,6 @@ public class Client {
         private final String user;
         private RsaJsonWebKey clientKey;
 
-        private static final RandomStringGenerator GENERATOR = new RandomStringGenerator.Builder()
-                .withinRange('0', 'z').filteredBy(LETTERS, DIGITS).build();
-
         public Builder() {
             this("");
         }
@@ -83,24 +77,28 @@ public class Client {
                     .connectTimeout(HttpUtils.getConnectTimeout());
         }
 
+        public Builder followRedirects() {
+            clientBuilder.followRedirects(HttpClient.Redirect.NORMAL);
+            return this;
+        }
+
         public Builder withSessionSupport() {
             CookieHandler.setDefault(new CookieManager());
             clientBuilder.cookieHandler(CookieHandler.getDefault());
             return this;
         }
 
-        public Builder withLocalhostSupport() {
-            System.setProperty("jdk.internal.httpclient.disableHostnameVerification", Boolean.TRUE.toString());
-            clientBuilder.sslContext(LocalHostSupport.createSSLContext());
+        public Builder withOptionalLocalhostSupport(final URI uri) {
+            requireNonNull(uri, "uri is required to check localhost support");
+            if (TRUSTED_HOSTS.contains(uri.getHost())) {
+                System.setProperty("jdk.internal.httpclient.disableHostnameVerification", Boolean.TRUE.toString());
+                clientBuilder.sslContext(LocalHostSupport.createSSLContext());
+            }
             return this;
         }
 
-        public Builder withDpopSupport() throws JoseException {
-            final String identifier = GENERATOR.generate(12);
-            clientKey = RsaJwkGenerator.generateJwk(2048);
-            clientKey.setKeyId(identifier);
-            clientKey.setUse("sig");
-            clientKey.setAlgorithm("RS256");
+        public Builder withDpopSupport() {
+            clientKey = JwsUtils.createClientKey();
             return this;
         }
 

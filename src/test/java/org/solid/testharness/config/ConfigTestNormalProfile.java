@@ -38,13 +38,10 @@ public class ConfigTestNormalProfile implements QuarkusTestProfile {
     @Override
     public Map<String, String> getConfigOverrides() {
         return Map.of(
-                "quarkus.log.category.\"org.solid.testharness\".level", "INFO",
                 "SOLID_IDENTITY_PROVIDER", "https://idp.example.org",
                 "LOGIN_ENDPOINT", "https://example.org/login/password",
                 "RESOURCE_SERVER_ROOT", "https://target.example.org",
                 "TEST_CONTAINER", "test",
-                "USERS_ALICE_WEBID", "https://example.org/solid-test-suite-alice/profile/card#me",
-                "USERS_BOB_WEBID", "https://example.org/solid-test-suite-bob/profile/card#me",
                 "USER_REGISTRATION_ENDPOINT", "https://example.org/idp/register"
         );
     }

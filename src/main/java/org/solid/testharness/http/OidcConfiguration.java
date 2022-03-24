@@ -25,52 +25,56 @@ package org.solid.testharness.http;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import org.apache.commons.lang3.StringUtils;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OidcConfiguration {
-    private String issuer;
-    private String authorizeEndpoint;
-    private String tokenEndpoint;
-    private String registrationEndpoint;
+    private URI issuer;
+    private URI authorizeEndpoint;
+    private URI tokenEndpoint;
+    private URI registrationEndpoint;
     private List<String> grantTypesSupported = Collections.emptyList();
 
-    public String getIssuer() {
-        return HttpUtils.ensureSlashEnd(issuer);
+    public URI getIssuer() {
+        return issuer;
     }
 
     @JsonSetter("issuer")
     public void setIssuer(final String issuer) {
-        this.issuer = issuer;
+        if (!StringUtils.isEmpty(issuer)) {
+            this.issuer = URI.create(issuer + "/").normalize();
+        }
     }
 
-    public String getAuthorizeEndpoint() {
+    public URI getAuthorizeEndpoint() {
         return authorizeEndpoint;
     }
 
     @JsonSetter("authorization_endpoint")
     public void setAuthorizeEndpoint(final String authorizeEndpoint) {
-        this.authorizeEndpoint = authorizeEndpoint;
+        this.authorizeEndpoint = URI.create(authorizeEndpoint);
     }
 
-    public String getTokenEndpoint() {
+    public URI getTokenEndpoint() {
         return tokenEndpoint;
     }
 
     @JsonSetter("token_endpoint")
     public void setTokenEndpoint(final String tokenEndpoint) {
-        this.tokenEndpoint = tokenEndpoint;
+        this.tokenEndpoint = URI.create(tokenEndpoint);
     }
 
-    public String getRegistrationEndpoint() {
+    public URI getRegistrationEndpoint() {
         return registrationEndpoint;
     }
 
     @JsonSetter("registration_endpoint")
     public void setRegistrationEndpoint(final String registrationEndpoint) {
-        this.registrationEndpoint = registrationEndpoint;
+        this.registrationEndpoint = URI.create(registrationEndpoint);
     }
 
     @JsonSetter("grant_types_supported")

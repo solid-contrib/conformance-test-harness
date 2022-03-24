@@ -25,6 +25,7 @@ package org.solid.testharness.utils;
 
 import com.intuit.karate.Suite;
 import com.intuit.karate.core.ScenarioEngine;
+import com.intuit.karate.http.HttpClientFactory;
 import org.eclipse.rdf4j.RDF4JException;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
@@ -51,6 +52,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpHeaders;
+import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -77,6 +79,16 @@ public final class TestUtils {
     public static URI getPathUri(final String path) {
         final String uri = Path.of(path).toAbsolutePath().normalize().toUri().toString();
         return URI.create(HttpUtils.ensureNoSlashEnd(uri));
+    }
+
+    public static HttpRequest mockRequest() {
+        final Map<String, List<String>> headers = Collections.emptyMap();
+        final HttpHeaders mockHeaders = HttpHeaders.of(headers, (k, v) -> true);
+        final HttpRequest request = mock(HttpRequest.class);
+        when(request.method()).thenReturn("METHOD");
+        when(request.uri()).thenReturn(URI.create("uri"));
+        when(request.headers()).thenReturn(mockHeaders);
+        return request;
     }
 
     public static HttpResponse<Void> mockVoidResponse(final int status) {
@@ -211,11 +223,11 @@ public final class TestUtils {
     }
 
     public static Suite createEmptySuite() {
-        return Suite.forTempUse(); // HttpClientFactory.DEFAULT - for Karate 1.2.0.RC2 onwards
+        return Suite.forTempUse(HttpClientFactory.DEFAULT);
     }
 
     public static ScenarioEngine createEmptyScenarioEngine() {
-        return ScenarioEngine.forTempUse(); // HttpClientFactory.DEFAULT - for Karate 1.2.0.RC2 onwards
+        return ScenarioEngine.forTempUse(HttpClientFactory.DEFAULT);
     }
 
     private TestUtils() { }

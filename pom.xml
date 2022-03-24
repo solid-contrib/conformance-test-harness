@@ -35,7 +35,7 @@
 
         <!-- dependencies -->
         <quarkus.version>2.7.5.Final</quarkus.version>
-        <karate.version>1.2.0.RC1</karate.version>
+        <karate.version>1.2.0.RC5</karate.version>
         <hamcrest.version>2.2</hamcrest.version>
         <rdf4j.version>3.7.5</rdf4j.version>
         <semargl.version>0.7</semargl.version>
@@ -479,8 +479,6 @@
                         <configuration>
                             <excludedGroups>solid</excludedGroups>
                             <environmentVariables>
-                                <RESOURCE_SERVER_ROOT>https://example.org</RESOURCE_SERVER_ROOT>
-                                <TEST_CONTAINER>/solid-test-suite-alice/shared-test/</TEST_CONTAINER>
                                 <SOLID_IDENTITY_PROVIDER>https://broker.example.org/</SOLID_IDENTITY_PROVIDER>
                                 <USERS_ALICE_WEBID>https://example.org/solid-test-suite-alice/profile/card#me</USERS_ALICE_WEBID>
                                 <USERS_ALICE_CLIENTSECRET>ALICE_SECRET</USERS_ALICE_CLIENTSECRET>

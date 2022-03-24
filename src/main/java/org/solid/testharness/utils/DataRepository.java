@@ -131,15 +131,10 @@ public class DataRepository implements Repository {
                 conn.clear(context);
                 logger.debug("Repository size={}", conn.size());
             } catch (IOException e) {
-                throw (TestHarnessInitializationException) new TestHarnessInitializationException(
-                        "Failed to read data from %s: %s",
-                        url.toString(), e.toString()
-                ).initCause(e);
+                throw new TestHarnessInitializationException("Failed to read data from " + url, e);
             }
         } catch (RDF4JException | UnsupportedRDFormatException e) {
-            throw (TestHarnessInitializationException) new TestHarnessInitializationException(
-                    "Failed to parse data: %s", e.toString()
-            ).initCause(e);
+            throw new TestHarnessInitializationException("Failed to parse data", e);
         }
     }
 
