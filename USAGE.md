@@ -120,7 +120,8 @@ Bob certain access as required for tests.
 USERS_ALICE_WEBID=
 USERS_BOB_WEBID=
 ```
-A default identity provider can be specified in the config if it is shared between all users:
+A default identity provider can be specified in the config if it is shared between all users, but it is not required if
+the IDP value is set for each user:
 ```shell
 SOLID_IDENTITY_PROVIDER=	# e.g., https://broker.pod.inrupt.com
 ```
