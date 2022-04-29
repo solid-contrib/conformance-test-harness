@@ -404,7 +404,7 @@ class DataRepositoryTest {
         final File newDataDir = dataRepository.getDataDir();
         assertEquals(dataDir, newDataDir);
         assertFalse(dataRepository.isInitialized());
-        dataRepository.initialize();
+        dataRepository.init();
         assertTrue(dataRepository.isInitialized());
         assertNotNull(dataRepository.getValueFactory());
         assertTrue(dataRepository.isWritable());

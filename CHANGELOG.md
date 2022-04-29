@@ -1,5 +1,9 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.1.6
+### Minor changes
+* Update libraries and move repository
+ 
 ## Release 1.1.5
 ### Improvements
 * When comments are linked to a test subject or a specification requirement, show them in the report.

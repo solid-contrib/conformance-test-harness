@@ -26,7 +26,7 @@ package org.solid.testharness.utils;
 import com.intuit.karate.StringUtils;
 import com.intuit.karate.Suite;
 import com.intuit.karate.core.*;
-import org.eclipse.rdf4j.RDF4JException;
+import org.eclipse.rdf4j.common.exception.RDF4JException;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
@@ -252,6 +252,24 @@ public class DataRepository implements Repository {
                 .add(PROV.generated, scenarioResultIri)
                 .add(scenarioResultIri, RDF.type, PROV.Entity)
                 .add(scenarioResultIri, PROV.generatedAtTime, sr != null ? new Date(sr.getEndTime()) : new Date());
+        outcome = addOutcomeToScenario(sr, sc, builder, scenarioIri, scenarioResultIri);
+        final String scenarioComments = featureFileParser.getScenarioComments(sc.getSection().getIndex());
+        if (!StringUtils.isBlank(scenarioComments)) {
+            conn.add(scenarioIri, DCTERMS.description, literal(scenarioComments));
+        }
+        conn.add(builder.build());
+        if (testCaseIri != null) {
+            conn.add(testCaseIri, DCTERMS.hasPart, scenarioIri);
+        }
+        if (sr != null && !sr.getStepResults().isEmpty()) {
+            createStepActivityList(conn, fr, sr, scenarioIri, featureIri);
+        }
+        return outcome;
+    }
+
+    private IRI addOutcomeToScenario(final ScenarioResult sr, final ScenarioData sc, final ModelBuilder builder,
+                                     final IRI scenarioIri, final IRI scenarioResultIri) {
+        final IRI outcome;
         if (sr != null) {
             if (sr.isFailed() && sr.getFailedStep().getStepLog().contains("\nCANTTELL\n")) {
                 outcome = EARL.cantTell;
@@ -267,17 +285,6 @@ public class DataRepository implements Repository {
             outcome = ignored ? EARL.untested : EARL.inapplicable;
             builder.subject(scenarioIri)
                     .add(scenarioResultIri, PROV.value, outcome);
-        }
-        final String scenarioComments = featureFileParser.getScenarioComments(sc.getSection().getIndex());
-        if (!StringUtils.isBlank(scenarioComments)) {
-            conn.add(scenarioIri, DCTERMS.description, literal(scenarioComments));
-        }
-        conn.add(builder.build());
-        if (testCaseIri != null) {
-            conn.add(testCaseIri, DCTERMS.hasPart, scenarioIri);
-        }
-        if (sr != null && !sr.getStepResults().isEmpty()) {
-            createStepActivityList(conn, fr, sr, scenarioIri, featureIri);
         }
         return outcome;
     }
@@ -411,11 +418,9 @@ public class DataRepository implements Repository {
         return repository.getDataDir();
     }
 
-    @SuppressWarnings("deprecation")
-    // Ignore warning as we have to override this to complete the interface
     @Override
-    public void initialize() throws RepositoryException {
-        repository.initialize();
+    public void init() throws RepositoryException {
+        repository.init();
     }
 
     @Override

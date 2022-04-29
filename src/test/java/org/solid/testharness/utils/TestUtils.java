@@ -26,7 +26,7 @@ package org.solid.testharness.utils;
 import com.intuit.karate.Suite;
 import com.intuit.karate.core.ScenarioEngine;
 import com.intuit.karate.http.HttpClientFactory;
-import org.eclipse.rdf4j.RDF4JException;
+import org.eclipse.rdf4j.common.exception.RDF4JException;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Value;
