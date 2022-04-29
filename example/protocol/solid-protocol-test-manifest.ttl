@@ -70,3 +70,9 @@ manifest:slash-semantics-exclude
   td:reviewStatus td:unreviewed ;
   spec:testScript
     <https://github.com/solid-contrib/conformance-test-harness/blob/main/example/protocol/writing-resource/slash-semantics-exclude.feature> .
+
+manifest:websockets
+  a td:TestCase ;
+  td:reviewStatus td:unreviewed ;
+  spec:testScript
+    <https://github.com/solid-contrib/conformance-test-harness/blob/main/example/protocol/notifications/websockets.feature> .
