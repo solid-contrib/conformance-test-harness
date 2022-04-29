@@ -83,13 +83,13 @@ The following is an illustration of the component architecture for the Test Harn
 
 ## Writing Tests
 
-Refer to the notes in the [specification-test repository](https://github.com/solid/specification-tests).
+Refer to the notes in the [specification-test repository](https://github.com/solid-contrib/specification-tests).
 
 ## Processes
 The following steps describe the release process.
 ### 1. Checkout
 ```shell
-git clone git@github.com:solid/conformance-test-harness.git
+git clone git@github.com:solid-contrib/conformance-test-harness.git
 ```
 
 ### 2. Setting up the Environment
@@ -110,7 +110,7 @@ sources:
   - PATH_TO_SPECIFATION_DOC
   - PATH_TO_SPECIFATION_DOC
 mappings:
-  - prefix: https://github.com/solid/conformance-test-harness/blob/main/example
+  - prefix: https://github.com/solid-contrib/conformance-test-harness/blob/main/example
     path: example
 ```
 This method works well when running your tests in an Integrated Development Environemnt (IDE) as it doesn't require
@@ -176,7 +176,7 @@ docker build -f src/main/docker/Dockerfile -t testharness .
 
 The CD workflow in GitHub also builds a Docker image and deploys it to DockerHub:
 https://hub.docker.com/r/solidproject/conformance-test-harness. This build incorporates the latest release
-of the tests from https://github.com/solid/specification-tests.
+of the tests from https://github.com/solid-contrib/specification-tests.
 
 ### 6. Release
 1. Check config files, scripts and examples here and in the specification-tests repo for any changes.
@@ -199,7 +199,7 @@ of the tests from https://github.com/solid/specification-tests.
     ```shell
     ./mvnw release:perform -Darguments="-Dmaven.deploy.skip=true -DskipTests"
     ```
-6. Create the release in GitHub - [Create a new release](https://github.com/solid/conformance-test-harness/releases/new):
+6. Create the release in GitHub - [Create a new release](https://github.com/solid-contrib/conformance-test-harness/releases/new):
    * Choose the tag that was just created.
    * Add a title, e.g. `Release 1.0.0`.
    * Add some content describing notable changes.

@@ -1,5 +1,5 @@
 prefix td: <http://www.w3.org/2006/03/test-description#>
-prefix test-harness: <https://github.com/solid/conformance-test-harness/>
+prefix test-harness: <https://github.com/solid-contrib/conformance-test-harness/>
 prefix earl: <http://www.w3.org/ns/earl#>
 prefix ex: <https://example.org/>
 

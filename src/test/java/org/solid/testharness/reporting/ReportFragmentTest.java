@@ -93,8 +93,8 @@ class ReportFragmentTest {
 
     @Test
     void stepReport() throws IOException {
-        remove(iri("https://github.com/solid/specification-tests/uuid#node1f273av6vx13"), null, null);
-        final Step step = new Step(iri("https://github.com/solid/specification-tests/uuid#node1f273av6vx18"));
+        remove(iri("https://github.com/solid-contrib/specification-tests/uuid#node1f273av6vx13"), null, null);
+        final Step step = new Step(iri("https://github.com/solid-contrib/specification-tests/uuid#node1f273av6vx18"));
 
         final String report = render("steps", List.of(step));
         logger.debug("Report:\n{}", report);
@@ -115,7 +115,7 @@ class ReportFragmentTest {
     @Test
     void scenarioReport() throws IOException {
         final Scenario scenario = new Scenario(
-                iri("https://github.com/solid/specification-tests/uuid#node1f273av6vx13"));
+                iri("https://github.com/solid-contrib/specification-tests/uuid#node1f273av6vx13"));
         for (Step step: scenario.getSteps()) {
             scenario.getModel().addAll(step.getModel());
         }
@@ -140,7 +140,7 @@ class ReportFragmentTest {
     @Test
     void scenarioReportWithBackground() throws IOException {
         final Scenario scenario = new Scenario(
-                iri("https://github.com/solid/specification-tests/uuid#node1f273av6vx42"));
+                iri("https://github.com/solid-contrib/specification-tests/uuid#node1f273av6vx42"));
         for (Step step: scenario.getBackgroundSteps()) {
             scenario.getModel().addAll(step.getModel());
         }
@@ -171,9 +171,9 @@ class ReportFragmentTest {
                 TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl").toString(),
                 "#group1-feature1"
         );
-        remove(iri("https://github.com/solid/conformance-test-harness/testserver"), null, null);
-        remove(null, null, iri("https://github.com/solid/specification-tests/uuid#node1f273av6vx13"));
-        remove(null, null, iri("https://github.com/solid/specification-tests/uuid#node1f273av6vx42"));
+        remove(iri("https://github.com/solid-contrib/conformance-test-harness/testserver"), null, null);
+        remove(null, null, iri("https://github.com/solid-contrib/specification-tests/uuid#node1f273av6vx13"));
+        remove(null, null, iri("https://github.com/solid-contrib/specification-tests/uuid#node1f273av6vx42"));
         final TestCase testCase = new TestCase(testCaseIri);
         testCase.getModel().addAll(testCase.getAssertion().getModel());
 
@@ -215,7 +215,7 @@ class ReportFragmentTest {
     void requirementReportWithTestCases() throws IOException {
         final IRI requirementIri = iri(BASE_URI, "specification1#spec1");
         remove(null, SPEC.requirement, requirementIri);
-        remove(iri("https://github.com/solid/conformance-test-harness/testserver"), null, null);
+        remove(iri("https://github.com/solid-contrib/conformance-test-harness/testserver"), null, null);
         final SpecificationRequirement requirement = new SpecificationRequirement(requirementIri);
         for (TestCase testCase: requirement.getTestCases()) {
             requirement.getModel().addAll(testCase.getModel());
@@ -334,7 +334,7 @@ class ReportFragmentTest {
     void requirementCoverageReportWithTestCases() throws IOException {
         final IRI requirementIri = iri(BASE_URI, "specification1#spec1");
         remove(null, SPEC.requirement, requirementIri);
-        remove(iri("https://github.com/solid/conformance-test-harness/testserver"), null, null);
+        remove(iri("https://github.com/solid-contrib/conformance-test-harness/testserver"), null, null);
         final String manifest = TestUtils.getFileUrl("src/test/resources/discovery/test-manifest-sample-1.ttl") + "#";
         remove(null, null, iri(manifest, "group1-feature1"));
         remove(null, null, iri(manifest, "group1-feature2"));

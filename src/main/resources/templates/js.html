@@ -45,7 +45,7 @@
   function fetchLatestTestsVersion() {
     const warning = document.querySelector('#version-warning');
     if (!warning) return;
-    fetch('https://api.github.com/repos/solid/specification-tests/tags').then((response) => {
+    fetch('https://api.github.com/repos/solid-contrib/specification-tests/tags').then((response) => {
       return response.json();
     }).then((data) => {
       if (data && data.length && data[0].name) {
@@ -56,7 +56,7 @@
         }
       }
     }).catch((err) => {
-      console.warn('Failed to get release versions from https://github.com/solid/specification-tests.', err);
+      console.warn('Failed to get release versions from https://github.com/solid-contrib/specification-tests.', err);
     });
   }
 

@@ -6,7 +6,7 @@
 @prefix doap: <http://usefulinc.com/ns/doap#> .
 @prefix td: <http://www.w3.org/2006/03/test-description#> .
 
-@prefix manifest: <https://github.com/solid/conformance-test-harness/example/test-suite-decription.ttl#> .
+@prefix manifest: <https://github.com/solid-contrib/conformance-test-harness/example/test-suite-decription.ttl#> .
 
 # This is a placeholder for an example test suite description document that will describe the tests cases in this examples directory.
 # It contains thoughts about what needs including but makes not assumptions about the vocabs used.

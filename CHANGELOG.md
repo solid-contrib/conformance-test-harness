@@ -143,7 +143,7 @@
 ## Release 1.0.0
 This is the first major release of the Conformance Test Harness. Most people will only need to use the containerized
 version of this package which comes pre-loaded with a test of tests from the
-[Specification Tests Repository](https://github.com/solid/specification-tests). The container image is available on
+[Specification Tests Repository](https://github.com/solid-contrib/specification-tests). The container image is available on
 [DockerHub](https://hub.docker.com/r/solidconformancetestbeta/conformance-test-harness) along with detailed instructions
 on how to use it.
 

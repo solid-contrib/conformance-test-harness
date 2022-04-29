@@ -6,9 +6,9 @@ prefix dcterms: <http://purl.org/dc/terms/>
 prefix doap: <http://usefulinc.com/ns/doap#>
 prefix td: <http://www.w3.org/2006/03/test-description#>
 prefix prov: <http://www.w3.org/ns/prov#>
-prefix test-harness: <https://github.com/solid/conformance-test-harness/>
+prefix test-harness: <https://github.com/solid-contrib/conformance-test-harness/>
 
-prefix results: <https://github.com/solid/specification-tests/uuid#>
+prefix results: <https://github.com/solid-contrib/specification-tests/uuid#>
 prefix manifest: <#>
 
 manifest:group1-feature1
@@ -18,7 +18,7 @@ manifest:group1-feature1
 # Assertion for the TestCase
 results:node1f273av6vx11
     a earl:Assertion;
-    earl:assertedBy <https://github.com/solid/conformance-test-harness/>;
+    earl:assertedBy <https://github.com/solid-contrib/conformance-test-harness/>;
     earl:test manifest:group1-feature1;
     earl:subject test-harness:testserver;
     earl:mode earl:automatic;
@@ -34,7 +34,7 @@ results:node1f273av6vx13
     a prov:Activity;
     dcterms:title "Group 1 Test case 1 Scenario 1"@en;
     dcterms:description "Scenario comments"@en;
-    prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=10,15> ;
+    prov:used <https://github.com/solid-contrib/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=10,15> ;
     prov:startedAtTime "2021-04-15T13:00:01.000-04:00"^^xsd:dateTime ;
     prov:endedAtTime   "2021-04-15T13:01:01.000-04:00"^^xsd:dateTime ;
     prov:generated results:node1f273av6vx14 ;
@@ -49,7 +49,7 @@ results:node1f273av6vx14
 results:node1f273av6vx16
     a prov:Activity;
     dcterms:title "* def testContainer = rootTestContainer.reserveContainer()"@en;
-    prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=11> ;
+    prov:used <https://github.com/solid-contrib/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=11> ;
     prov:wasInformedBy results:node1f273av6vx13 ;
     prov:generated results:node1f273av6vx16a .
 
@@ -58,7 +58,7 @@ results:node1f273av6vx16a a prov:Entity; prov:value earl:passed .
 results:node1f273av6vx17
     a prov:Activity;
     dcterms:title "Given header Accept = 'application/ld+json'"@en;
-    prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=19> ;
+    prov:used <https://github.com/solid-contrib/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=19> ;
     prov:wasInformedBy results:node1f273av6vx13 ;
     prov:generated results:node1f273av6vx17a .
 
@@ -68,7 +68,7 @@ results:node1f273av6vx18
     a prov:Activity;
     dcterms:title "When method GET"@en;
     dcterms:description "Step comments"@en;
-    prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=20> ;
+    prov:used <https://github.com/solid-contrib/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=20> ;
     prov:wasInformedBy results:node1f273av6vx13 ;
     prov:generated results:node1f273av6vx18a .
 
@@ -109,7 +109,7 @@ results:node1f273av6vx18a
 results:node1f273av6vx42
     a prov:Activity;
     dcterms:title "Group 1 Test case 1 Scenario 2"@en;
-    prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=25,35> ;
+    prov:used <https://github.com/solid-contrib/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=25,35> ;
     prov:startedAtTime "2021-04-15T13:02:01.000-04:00"^^xsd:dateTime ;
     prov:endedAtTime   "2021-04-15T13:04:01.000-04:00"^^xsd:dateTime ;
     prov:generated results:node1f273av6vx43 ;
@@ -123,7 +123,7 @@ results:node1f273av6vx43
 results:node1f273av6vx45
     a prov:Activity;
     dcterms:title "* def testContainer = rootTestContainer.reserveContainer()"@en;
-    prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=26> ;
+    prov:used <https://github.com/solid-contrib/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=26> ;
     prov:generated results:node1f273av6vx45a .
 
 results:node1f273av6vx45a a prov:Entity; prov:value earl:passed .
@@ -131,7 +131,7 @@ results:node1f273av6vx45a a prov:Entity; prov:value earl:passed .
 results:node1f273av6vx53
     a prov:Activity;
     dcterms:title "Given header Accept = 'text/turtle'"@en;
-    prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=34> ;
+    prov:used <https://github.com/solid-contrib/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=34> ;
     prov:wasInformedBy results:node1f273av6vx42 ;
     prov:generated results:node1f273av6vx53a .
 
@@ -140,7 +140,7 @@ results:node1f273av6vx53a a prov:Entity; prov:value earl:passed .
 results:node1f273av6vx54
     a prov:Activity;
     dcterms:title "When method GET"@en;
-    prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=35> ;
+    prov:used <https://github.com/solid-contrib/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=35> ;
     prov:wasInformedBy results:node1f273av6vx42 ;
     prov:generated results:node1f273av6vx54a .
 
@@ -178,7 +178,7 @@ results:node1f273av6vx54a a prov:Entity; prov:value earl:passed ;
 results:node1f273av6vx55
     a prov:Activity;
     dcterms:title "Then status 200"@en;
-    prov:used <https://github.com/solid/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=36> ;
+    prov:used <https://github.com/solid-contrib/specification-tests/protocol/content-negotiation/content-negotiation-turtle.feature#line=36> ;
     prov:wasInformedBy results:node1f273av6vx42 ;
     prov:generated results:node1f273av6vx55a .
 

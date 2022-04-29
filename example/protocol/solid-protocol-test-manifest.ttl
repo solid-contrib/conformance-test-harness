@@ -14,59 +14,59 @@ manifest:content-negotiation-jsonld
   spec:requirementReference sopr:server-representation-turtle-jsonld ;
   td:reviewStatus td:accepted ;
   spec:testScript
-    <https://github.com/solid/conformance-test-harness/blob/main/example/protocol/content-negotiation/content-negotiation-jsonld.feature> .
+    <https://github.com/solid-contrib/conformance-test-harness/blob/main/example/protocol/content-negotiation/content-negotiation-jsonld.feature> .
 
 manifest:content-negotiation-turtle
   a td:TestCase ;
   spec:requirementReference sopr:server-representation-turtle-jsonld ;
   td:reviewStatus td:accepted ;
   spec:testScript
-    <https://github.com/solid/conformance-test-harness/blob/main/example/protocol/content-negotiation/content-negotiation-turtle.feature> .
+    <https://github.com/solid-contrib/conformance-test-harness/blob/main/example/protocol/content-negotiation/content-negotiation-turtle.feature> .
 
 manifest:writing-resource-containment
   a td:TestCase ;
   spec:requirementReference sopr:server-put-patch-intermediate-containers ;
   td:reviewStatus td:accepted ;
   spec:testScript
-    <https://github.com/solid/conformance-test-harness/blob/main/example/protocol/writing-resource/containment.feature> .
+    <https://github.com/solid-contrib/conformance-test-harness/blob/main/example/protocol/writing-resource/containment.feature> .
 
 manifest:wac-allow-access-Bob-W-public-RA
   a td:TestCase ;
   spec:requirementReference sopr:server-wac ;
   td:reviewStatus td:accepted ;
   spec:testScript
-    <https://github.com/solid/conformance-test-harness/blob/main/example/protocol/wac-allow/access-Bob-W-public-RA.feature> .
+    <https://github.com/solid-contrib/conformance-test-harness/blob/main/example/protocol/wac-allow/access-Bob-W-public-RA.feature> .
 
 manifest:wac-allow-default-Bob-W-public-RA
   a td:TestCase ;
   spec:requirementReference sopr:server-wac ;
   td:reviewStatus td:accepted ;
   spec:testScript
-    <https://github.com/solid/conformance-test-harness/blob/main/example/protocol/wac-allow/default-Bob-W-public-RA.feature> .
+    <https://github.com/solid-contrib/conformance-test-harness/blob/main/example/protocol/wac-allow/default-Bob-W-public-RA.feature> .
 
 manifest:wac-allow-access-public-R
   a td:TestCase ;
   spec:requirementReference sopr:server-wac ;
   td:reviewStatus td:unreviewed ;
   spec:testScript
-    <https://github.com/solid/conformance-test-harness/blob/main/example/protocol/wac-allow/access-public-R.feature> .
+    <https://github.com/solid-contrib/conformance-test-harness/blob/main/example/protocol/wac-allow/access-public-R.feature> .
 
 manifest:storage-headers
   a td:TestCase ;
   spec:requirementReference sopr:server-link-storage ;
   td:reviewStatus td:unreviewed ;
   spec:testScript
-    <https://github.com/solid/conformance-test-harness/blob/main/example/protocol/storage/storage-headers.feature> .
+    <https://github.com/solid-contrib/conformance-test-harness/blob/main/example/protocol/storage/storage-headers.feature> .
 
 #manifest:parsing-tests
 #  a td:TestCase ;
 #  td:reviewStatus td:unreviewed ;
 #  spec:testScript
-#    <https://github.com/solid/conformance-test-harness/blob/main/example/parsing-tests.feature> .
+#    <https://github.com/solid-contrib/conformance-test-harness/blob/main/example/parsing-tests.feature> .
 
 manifest:slash-semantics-exclude
   a td:TestCase ;
   spec:requirementReference sopr:server-uri-trailing-slash-distinct, sopr:server-uri-redirect-differing ;
   td:reviewStatus td:unreviewed ;
   spec:testScript
-    <https://github.com/solid/conformance-test-harness/blob/main/example/protocol/writing-resource/slash-semantics-exclude.feature> .
+    <https://github.com/solid-contrib/conformance-test-harness/blob/main/example/protocol/writing-resource/slash-semantics-exclude.feature> .

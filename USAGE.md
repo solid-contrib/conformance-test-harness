@@ -1,6 +1,6 @@
 # Usage: conformance-test-harness
 
-The [Conformance Test Harness](https://github.com/solid/conformance-test-harness) (CTH) is used to run conformance tests against the [Solid specifications](https://solidproject.org/TR/).
+The [Conformance Test Harness](https://github.com/solid-contrib/conformance-test-harness) (CTH) is used to run conformance tests against the [Solid specifications](https://solidproject.org/TR/).
 
 # Prerequisites
 
@@ -42,7 +42,7 @@ There are some test subject specific configuration properties in this file:
   solid-test:skip "acp"  # skip tests with these tags 
   solid-test:features "acp-legacy"  # enable the legacy mode for ACP to conform to an early version of the specification
 ```
-An example of this file is provided in the test repository (https://github.com/solid/specification-tests),
+An example of this file is provided in the test repository (https://github.com/solid-contrib/specification-tests),
 containing descriptions of the following Solid implementations:
 * `<css>` - [Community Solid Server](https://github.com/solid/community-server) (CSS).
 * `<ess>` - [Enterprise Solid Server](https://inrupt.com/products/enterprise-solid-server) (ESS) in Access Control Policies (ACP) compatibility mode.
@@ -62,7 +62,7 @@ controlled via environment variables.
 
 The file can have various formats though the example provided is YAML. It must be in a specific location,
 `config/application.yaml`, in your current working directory. The default version of this file, used in the docker image
-of the CTH, is maintained at https://github.com/solid/specification-tests/blob/main/application.yaml.
+of the CTH, is maintained at https://github.com/solid-contrib/specification-tests/blob/main/application.yaml.
 ```yaml
 # The first 3 can be ignored if using the command line settings: subjects, source and target 
 subjects: test-subjects.ttl
@@ -70,26 +70,26 @@ sources:
   # Protocol spec & manifest
   # Editor's draft (fully annotated)
   - https://solidproject.org/ED/protocol
-  - https://github.com/solid/specification-tests/blob/main/protocol/solid-protocol-test-manifest.ttl
+  - https://github.com/solid-contrib/specification-tests/blob/main/protocol/solid-protocol-test-manifest.ttl
   # Additional comments on requirements (linked to requirement IRI and using rdfs:comment predicate)
-  - https://github.com/solid/specification-tests/blob/main/protocol/requirement-comments.ttl
+  - https://github.com/solid-contrib/specification-tests/blob/main/protocol/requirement-comments.ttl
 
   # WAC spec & manifest
   # Editor's draft (fully annotated)
   - https://solid.github.io/web-access-control-spec/
-  - https://github.com/solid/specification-tests/blob/main/web-access-control/web-access-control-test-manifest.ttl
+  - https://github.com/solid-contrib/specification-tests/blob/main/web-access-control/web-access-control-test-manifest.ttl
 
   # Published draft (not annotated)
   # This is an example of how you could run tests for a specific version of the specification 
   #  - https://solidproject.org/TR/2021/wac-20210711
-  #  - https://github.com/solid/specification-tests/web-access-control/web-access-control-test-manifest-20210711.ttl
+  #  - https://github.com/solid-contrib/specification-tests/web-access-control/web-access-control-test-manifest-20210711.ttl
 
 # The target is just an IRI or local name relative to the test-subjects file and is not expected to resolve to anything
-target: https://github.com/solid/conformance-test-harness/ess
+target: https://github.com/solid-contrib/conformance-test-harness/ess
 
 # To map URLs from the manifest to local files:
 mappings:
-  - prefix: https://github.com/solid/specification-tests/blob/main
+  - prefix: https://github.com/solid-contrib/specification-tests/blob/main
     path: ./data
 
 # Other configuration to override defaults
@@ -333,12 +333,12 @@ The simplest way to run the CTH is via the [Docker](https://www.docker.com/) ima
 https://hub.docker.com/r/solidproject/conformance-test-harness.
 
 For ease of use, the Docker image includes the latest release of the tests, manifest files, and test subject
-configuration files from https://github.com/solid/specification-tests.
+configuration files from https://github.com/solid-contrib/specification-tests.
 
 The Docker image works with the following internal structure:
 * `/app/harness` - contains the executable jar file.
-* `/app/config` - contains the default application.yaml file from https://github.com/solid/specification-tests.
-* `/data` - contains the contents of the https://github.com/solid/specification-tests test repository.
+* `/app/config` - contains the default application.yaml file from https://github.com/solid-contrib/specification-tests.
+* `/data` - contains the contents of the https://github.com/solid-contrib/specification-tests test repository.
 * `/reports` - the directory into which reports are written.
 
 To use this image, you just need to provide:
@@ -379,7 +379,7 @@ internal ones. For example:
 * If you want to run a specific release of the tests then you will need to clone the repository, checkout the specific
   version and then treat them as local tests, as shown above.
     ```shell
-    git clone https://github.com/solid/specification-tests /data
+    git clone https://github.com/solid-contrib/specification-tests /data
     cd /data
     git checkout v1.0.0
     ```  
@@ -415,11 +415,11 @@ Then you would need a script such as:
     docker run -i --rm \
     -v "$(pwd)"/reports/ess:/reports \
     --env-file=ess.env solidproject/conformance-test-harness \
-    --output=/reports --target=https://github.com/solid/conformance-test-harness/ess
+    --output=/reports --target=https://github.com/solid-contrib/conformance-test-harness/ess
 ```
 
 ## Using the provided script 
-There is a script to help you run tests here: https://github.com/solid/specification-tests/blob/main/run.sh. This can be
+There is a script to help you run tests here: https://github.com/solid-contrib/specification-tests/blob/main/run.sh. This can be
 used to run combinations of the following:
 * Run the tests against a publicly available Solid server or one in a local container.
 * Run the tests embedded in the image or your own version of the tests (e.g. if you have cloned the specification-tests

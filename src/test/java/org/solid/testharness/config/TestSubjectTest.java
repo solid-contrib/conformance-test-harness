@@ -107,7 +107,7 @@ public class TestSubjectTest {
     @Test
     void setupDifferentTargetSingleConfig() throws MalformedURLException {
         setupMockConfigMin(CONFIG_SAMPLE_SINGLE,
-                "https://github.com/solid/conformance-test-harness/missing");
+                "https://github.com/solid-contrib/conformance-test-harness/missing");
         assertThrows(TestHarnessInitializationException.class, () -> testSubject.loadTestSubjectConfig());
     }
 

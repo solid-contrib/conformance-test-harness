@@ -10,7 +10,7 @@
    doap:programming-language "Java" ;
    doap:created "2021-02-16T00:00:00.001Z"^^xsd:dateTime ;
    doap:developer <https://inrupt.com/profile/card/#us>;
-   doap:homepage <https://github.com/solid/conformance-test-harness> ;
+   doap:homepage <https://github.com/solid-contrib/conformance-test-harness> ;
    doap:release <#assertor-release> .
 
 <#assertor-release> doap:revision "0.0.1-SNAPSHOT" .

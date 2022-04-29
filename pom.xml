@@ -11,7 +11,7 @@
         <url>https://inrupt.com</url>
     </organization>
     <inceptionYear>2021</inceptionYear>
-    <url>https://github.com/solid/conformance-test-harness</url>
+    <url>https://github.com/solid-contrib/conformance-test-harness</url>
 
     <properties>
         <maven.compiler.parameters>true</maven.compiler.parameters>
@@ -460,9 +460,9 @@
     </build>
 
     <scm>
-        <connection>scm:git:git://github.com/solid/conformance-test-harness.git</connection>
-        <developerConnection>scm:git:git@github.com:solid/conformance-test-harness.git</developerConnection>
-        <url>https://github.com/solid/conformance-test-harness</url>
+        <connection>scm:git:git://github.com/solid-contrib/conformance-test-harness.git</connection>
+        <developerConnection>scm:git:git@github.com:solid-contrib/conformance-test-harness.git</developerConnection>
+        <url>https://github.com/solid-contrib/conformance-test-harness</url>
         <tag>v1.0.7</tag>
     </scm>
 

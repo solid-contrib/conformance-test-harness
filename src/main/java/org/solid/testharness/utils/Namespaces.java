@@ -39,15 +39,16 @@ public final class Namespaces {
     private static final Map<String, Namespace> namespaceMap;
     static final Map<String, String> specNamespacesMap = new HashMap<>();
 
-    public static final String TESTS_REPO_URI = "https://github.com/solid/specification-tests/";
+    public static final String TESTS_REPO_URI = "https://github.com/solid-contrib/specification-tests/";
     public static final String RESULTS_UUID = UUID.randomUUID().toString();
     public static final String RESULTS_URI = TESTS_REPO_URI + RESULTS_UUID + "#";
-    public static final String TEST_HARNESS_URI = "https://github.com/solid/conformance-test-harness/";
+    public static final String TEST_HARNESS_URI = "https://github.com/solid-contrib/conformance-test-harness/";
     public static final String TEST_HARNESS_PREFIX = "test-harness";
     public static final String SPECIFICATION_TESTS_IRI = Namespaces.RESULTS_URI + "tests";
     public static final String TURTLE_PREFIX_FORMAT = "prefix %s: <%s>\n";
     public static final String RDFA_PREFIX_FORMAT = "%s: %s";
-    public static final IRI SPEC_RELATED_CONTEXT = iri("https://github.com/solid/specification-tests/specifications");
+    public static final IRI SPEC_RELATED_CONTEXT =
+            iri("https://github.com/solid-contrib/specification-tests/specifications");
     public static final String SCHEMA_PREFIX = "schema";
     public static final String SCHEMA_NS = "http://schema.org/";
 

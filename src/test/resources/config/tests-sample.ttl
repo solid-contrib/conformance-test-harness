@@ -9,7 +9,7 @@
    doap:programming-language "KarateDSL" ;
    doap:created "2021-11-16T00:00:00.001Z"^^xsd:dateTime ;
    doap:developer <https://solidproject.org>;
-   doap:homepage <https://github.com/solid/specification-tests> ;
+   doap:homepage <https://github.com/solid-contrib/specification-tests> ;
    doap:release <#tests-release> .
 
 <#tests-release> doap:revision "0.0.1" .

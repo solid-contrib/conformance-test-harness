@@ -42,14 +42,14 @@ public class ConfigOverriddenTest {
 
     @BeforeAll
     void setup() {
-        config.setTestSubject(iri("https://github.com/solid/conformance-test-harness/testserver2"));
+        config.setTestSubject(iri("https://github.com/solid-contrib/conformance-test-harness/testserver2"));
         config.setSubjectsUrl("https://example.org/test-subjects.ttl");
         config.setTestSources(List.of("https://example.org/testsuite.ttl"));
     }
 
     @Test
     void getTestSubjectChanged() {
-        assertEquals("https://github.com/solid/conformance-test-harness/testserver2",
+        assertEquals("https://github.com/solid-contrib/conformance-test-harness/testserver2",
                 config.getTestSubject().stringValue()
         );
     }

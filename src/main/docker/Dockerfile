@@ -1,6 +1,6 @@
 FROM openjdk:11
 COPY target/solid-conformance-test-harness-runner.jar /app/harness/
-RUN git clone https://github.com/solid/specification-tests /data
+RUN git clone https://github.com/solid-contrib/specification-tests /data
 WORKDIR /data
 RUN git checkout $(git describe --abbrev=0 --tags)
 RUN mkdir -p /app/config/

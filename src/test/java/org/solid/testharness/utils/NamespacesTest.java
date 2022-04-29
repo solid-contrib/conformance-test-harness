@@ -45,7 +45,7 @@ public class NamespacesTest {
         assertNotNull(dataRepository);
         dataRepository.postConstruct();
         final StringReader reader = new StringReader(
-                "<https://github.com/solid/conformance-test-harness/> a <http://www.w3.org/ns/earl#Software> ."
+                "<https://github.com/solid-contrib/conformance-test-harness/> a <http://www.w3.org/ns/earl#Software> ."
         );
         TestUtils.insertData(dataRepository, reader);
         assertTrue(TestUtils.repositoryToString(dataRepository).contains("earl:Software"));
