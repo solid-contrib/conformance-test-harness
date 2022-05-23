@@ -29,7 +29,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.utils.TestUtils;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -45,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTestResource(ClientResource.class)
 class ClientTest {
     private static final URI TEST_URL = URI.create(TestUtils.SAMPLE_BASE);
+    private static final HttpResponse.BodyHandler<String> STRING_BODY_HANDLER = HttpResponse.BodyHandlers.ofString();
     private URI baseUri;
 
     @BeforeEach
@@ -135,7 +135,7 @@ class ClientTest {
         assertEquals(200, response.statusCode());
         assertEquals("AUTHENTICATED", response.body());
         assertEquals(HttpConstants.MEDIA_TYPE_TEXT_PLAIN,
-                response.headers().firstValue(HttpConstants.HEADER_CONTENT_TYPE).get());
+                response.headers().firstValue(HttpConstants.HEADER_CONTENT_TYPE).orElse(null));
     }
 
     @Test
@@ -184,17 +184,17 @@ class ClientTest {
     }
 
     @Test
-    void send() throws IOException, InterruptedException {
+    void send() throws Exception {
         final Client client = new Client.Builder().build();
         final HttpRequest request = HttpRequest.newBuilder(baseUri.resolve("/get/404")).build();
-        final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        final HttpResponse<String> response = client.send(request, STRING_BODY_HANDLER);
         assertEquals(404, response.statusCode());
     }
 
     @Test
     void sendNullRequest() {
         final Client client = new Client.Builder().build();
-        assertThrows(NullPointerException.class, () -> client.send(null, HttpResponse.BodyHandlers.ofString()));
+        assertThrows(NullPointerException.class, () -> client.send(null, STRING_BODY_HANDLER));
     }
 
     @Test
@@ -208,16 +208,16 @@ class ClientTest {
     void sendFail() {
         final Client client = new Client.Builder().build();
         final HttpRequest request = HttpRequest.newBuilder(baseUri.resolve("/get/fault")).build();
-        assertThrows(IOException.class, () -> client.send(request, HttpResponse.BodyHandlers.ofString()));
+        assertThrows(Exception.class, () -> client.send(request, STRING_BODY_HANDLER));
     }
 
     @Test
-    void sendAuthorized() throws IOException, InterruptedException {
+    void sendAuthorized() throws Exception {
         final Client client = new Client.Builder().withDpopSupport().build();
         client.setAccessToken("ACCESS");
         final HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(baseUri.resolve("/get/turtle"));
         final HttpResponse<String> response = client.sendAuthorized(requestBuilder,
-                HttpResponse.BodyHandlers.ofString());
+                STRING_BODY_HANDLER);
         final Map<String, List<String>> headers = response.request().headers().map();
         assertTrue(headers.containsKey(HttpConstants.HEADER_AUTHORIZATION));
         assertTrue(headers.get(HttpConstants.HEADER_AUTHORIZATION).get(0).startsWith(HttpConstants.PREFIX_DPOP));
@@ -228,7 +228,7 @@ class ClientTest {
     void sendAuthorizedNullRequestBuilder() {
         final Client client = new Client.Builder().build();
         assertThrows(NullPointerException.class,
-                () -> client.sendAuthorized(null, HttpResponse.BodyHandlers.ofString()));
+                () -> client.sendAuthorized(null, STRING_BODY_HANDLER));
     }
 
     @Test
@@ -242,8 +242,8 @@ class ClientTest {
     void sendAuthorizedFail() {
         final Client client = new Client.Builder().build();
         final HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(baseUri.resolve("/get/fault"));
-        assertThrows(IOException.class,
-                () -> client.sendAuthorized(requestBuilder, HttpResponse.BodyHandlers.ofString()));
+        assertThrows(Exception.class,
+                () -> client.sendAuthorized(requestBuilder, STRING_BODY_HANDLER));
     }
 
     @Test
@@ -318,7 +318,7 @@ class ClientTest {
     }
 
     @Test
-    void head() throws IOException, InterruptedException {
+    void head() throws Exception {
         final Client client = new Client.Builder().build();
         final HttpResponse<Void> response = client.head(baseUri.resolve("/head"));
         assertEquals(200, response.statusCode());
