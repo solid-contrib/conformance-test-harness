@@ -29,18 +29,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandler;
+import java.net.http.HttpResponse.BodyHandlers;
+import java.net.http.HttpTimeoutException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
@@ -133,12 +136,25 @@ public class Client {
         this.maxRetries = maxRetries;
     }
 
+    /**
+     * Build an HTTP request with authorization if required and send it with retry capability.
+     * Used by SolidClient .
+     * @param method      HTTP method
+     * @param url         Target URL
+     * @param data        Request body
+     * @param headers     Header map
+     * @param version     HTTP version 1.1 or 2
+     * @param authorized  Is authorization needed
+     * @return Response
+     * @throws Exception any exception
+     */
     @SuppressWarnings("checkstyle:MultipleStringLiterals") // cleaner to leave error messages local
     public HttpResponse<String> send(@NotNull final String method, @NotNull final URI url, final String data,
                                      final Map<String, Object> headers, final String version, final boolean authorized)
-            throws Exception {
+            throws ExecutionException, InterruptedException {
         requireNonNull(url, "url is required for send");
         requireNonNull(method, "method is required for send");
+        // build HTTP request
         final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url);
         if (data != null) {
             builder.method(method, HttpRequest.BodyPublishers.ofString(data));
@@ -148,6 +164,7 @@ public class Client {
         if (version != null) {
             builder.version(HttpClient.Version.valueOf(version));
         }
+        // add headers to the request
         if (headers != null) {
             for (Map.Entry<String, Object> entry : headers.entrySet()) {
                 if (entry.getValue() instanceof String || entry.getValue() instanceof Number) {
@@ -157,27 +174,103 @@ public class Client {
                 }
             }
         }
+        // add authorization headers if required and complete the request building
         final HttpRequest request = authorized ? authorize(builder).build() : builder.build();
-        HttpUtils.logRequestToKarate(logger, request, data);
+        final BodyHandler<String> handler = BodyHandlers.ofString();
 
-        final HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
-        final CompletableFuture<HttpResponse<String>> responseFuture =
-                httpClient.sendAsync(request, handler)
-                        .handleAsync((r, t) -> tryResend(httpClient, request, handler, 1, r, t))
-                        .thenCompose(Function.identity());
-        final HttpResponse<String> response = responseFuture.get();
+        // send the request with retries
+        HttpUtils.logRequestToKarate(logger, request, data);
+        final HttpResponse<String> response = send(request, handler);
         HttpUtils.logResponseToKarate(logger, response);
         return response;
     }
 
+    public <T> HttpResponse<T> send(@NotNull final HttpRequest request,
+                                    @NotNull final BodyHandler<T> responseHandler)
+            throws ExecutionException, InterruptedException {
+        requireNonNull(request, "request is required");
+        requireNonNull(responseHandler, "responseHandler is required");
+        final CompletableFuture<HttpResponse<T>> responseFuture = sendAsync(request, responseHandler);
+        return responseFuture.get();
+    }
+
+    public <T> HttpResponse<T> sendAuthorized(final String data, @NotNull final HttpRequest.Builder requestBuilder,
+                                              @NotNull final BodyHandler<T> responseHandler)
+            throws ExecutionException, InterruptedException {
+        requireNonNull(requestBuilder, "requestBuilder is required");
+        requireNonNull(responseHandler, "responseHandler is required");
+        final HttpRequest request = authorize(requestBuilder).build();
+        HttpUtils.logRequestToKarate(logger, request, data);
+        final HttpResponse<T> response = send(request, responseHandler);
+        HttpUtils.logResponseToKarate(logger, response);
+        return response;
+    }
+
+    @SuppressWarnings("checkstyle:MultipleStringLiterals")
+    public HttpResponse<String> getAsTurtle(@NotNull final URI url) throws InterruptedException, ExecutionException {
+        requireNonNull(url, "url is required for getAsTurtle");
+        final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
+                .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
+        final HttpRequest request = authorize(builder).build();
+        return send(request, BodyHandlers.ofString());
+    }
+
+    public HttpResponse<Void> put(@NotNull final URI url, final String data, final String type)
+            throws ExecutionException, InterruptedException {
+        requireNonNull(url, "url is required for put");
+        requireNonNull(data, "data is required for put");
+        requireNonNull(type, "type is required for put");
+        final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
+                .PUT(HttpRequest.BodyPublishers.ofString(data))
+                .header(HttpConstants.HEADER_CONTENT_TYPE, type);
+        return sendAuthorized(data, builder, BodyHandlers.discarding());
+    }
+
+    public HttpResponse<String> patch(@NotNull final URI url, final String data, final String type)
+            throws InterruptedException, ExecutionException {
+        requireNonNull(url, "url is required for patch");
+        requireNonNull(data, "data is required for patch");
+        requireNonNull(type, "type is required for patch");
+        final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
+                .method(HttpConstants.METHOD_PATCH, HttpRequest.BodyPublishers.ofString(data))
+                .header(HttpConstants.HEADER_CONTENT_TYPE, type);
+        return sendAuthorized(data, builder, BodyHandlers.ofString());
+    }
+
+    public HttpResponse<Void> head(@NotNull final URI url) throws InterruptedException, ExecutionException {
+        requireNonNull(url, "url is required for head");
+        final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
+                .method(HttpConstants.METHOD_HEAD, HttpRequest.BodyPublishers.noBody());
+        return sendAuthorized(null, builder, BodyHandlers.discarding());
+    }
+
+    public CompletableFuture<HttpResponse<Void>> deleteAsync(@NotNull final URI url) {
+        requireNonNull(url, "url is required for deleteAsync");
+        logger.debug("Deleting {}", url);
+        final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url).DELETE();
+        final HttpRequest request = authorize(builder).build();
+        return sendAsync(request, BodyHandlers.discarding());
+    }
+
+    private <T> CompletableFuture<HttpResponse<T>> sendAsync(@NotNull final HttpRequest request,
+                                                             @NotNull final BodyHandler<T> responseHandler) {
+        requireNonNull(request, "request is required");
+        requireNonNull(responseHandler, "responseHandler is required");
+        return httpClient.sendAsync(request, responseHandler)
+                .handleAsync((r, t) -> tryResend(httpClient, request, responseHandler, 1, r, t))
+                .thenCompose(Function.identity());
+    }
+
+    // Retry on timeout exception
     private boolean shouldRetry(final HttpResponse<?> r, final Throwable t, final int count) {
         if (r != null || count >= maxRetries) return false;
+        if (!(t.getCause() instanceof HttpTimeoutException)) return false;
         HttpUtils.logToKarate(logger, "Retry ({}) due to {}", count, t.toString());
         return true;
     }
 
     private <T> CompletableFuture<HttpResponse<T>> tryResend(final HttpClient client, final HttpRequest request,
-                                                             final HttpResponse.BodyHandler<T> handler,
+                                                             final BodyHandler<T> handler,
                                                              final int count, final HttpResponse<T> resp,
                                                              final Throwable t) {
         if (shouldRetry(resp, t, count)) {
@@ -189,84 +282,6 @@ public class Client {
         } else {
             return CompletableFuture.completedFuture(resp);
         }
-    }
-
-    public <T> HttpResponse<T> send(@NotNull final HttpRequest request,
-                                    @NotNull final HttpResponse.BodyHandler<T> responseBodyHandler)
-            throws IOException, InterruptedException {
-        requireNonNull(request, "request is required");
-        requireNonNull(responseBodyHandler, "responseBodyHandler is required");
-        return httpClient.send(request, responseBodyHandler);
-    }
-
-    public <T> HttpResponse<T> sendAuthorized(@NotNull final HttpRequest.Builder requestBuilder,
-                                              @NotNull final HttpResponse.BodyHandler<T> responseBodyHandler)
-            throws IOException, InterruptedException {
-        requireNonNull(requestBuilder, "requestBuilder is required");
-        requireNonNull(responseBodyHandler, "responseBodyHandler is required");
-        final HttpRequest request = authorize(requestBuilder).build();
-        HttpUtils.logRequestToKarate(logger, request, null);
-        final HttpResponse<T> response = httpClient.send(request, responseBodyHandler);
-        HttpUtils.logResponseToKarate(logger, response);
-        return response;
-    }
-
-    @SuppressWarnings("checkstyle:MultipleStringLiterals")
-    public HttpResponse<String> getAsTurtle(@NotNull final URI url) throws IOException, InterruptedException {
-        requireNonNull(url, "url is required for getAsTurtle");
-        final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
-                .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
-        final HttpRequest request = authorize(builder).build();
-        return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-    }
-
-    public HttpResponse<Void> put(@NotNull final URI url, final String data, final String type)
-            throws IOException, InterruptedException {
-        requireNonNull(url, "url is required for put");
-        requireNonNull(data, "data is required for put");
-        requireNonNull(type, "type is required for put");
-        final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
-                .PUT(HttpRequest.BodyPublishers.ofString(data))
-                .header(HttpConstants.HEADER_CONTENT_TYPE, type);
-        final HttpRequest request = authorize(builder).build();
-        HttpUtils.logRequestToKarate(logger, request, data);
-        final HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
-        HttpUtils.logResponseToKarate(logger, response);
-        return response;
-    }
-
-    public HttpResponse<String> patch(@NotNull final URI url, final String data, final String type)
-            throws IOException, InterruptedException {
-        requireNonNull(url, "url is required for patch");
-        requireNonNull(data, "data is required for patch");
-        requireNonNull(type, "type is required for patch");
-        final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
-                .method(HttpConstants.METHOD_PATCH, HttpRequest.BodyPublishers.ofString(data))
-                .header(HttpConstants.HEADER_CONTENT_TYPE, type);
-        final HttpRequest request = authorize(builder).build();
-        HttpUtils.logRequestToKarate(logger, request, data);
-        final HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        HttpUtils.logResponseToKarate(logger, response);
-        return response;
-    }
-
-    public HttpResponse<Void> head(@NotNull final URI url) throws IOException, InterruptedException {
-        requireNonNull(url, "url is required for head");
-        final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
-                .method(HttpConstants.METHOD_HEAD, HttpRequest.BodyPublishers.noBody());
-        final HttpRequest request = authorize(builder).build();
-        HttpUtils.logRequestToKarate(logger, request, null);
-        final HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
-        HttpUtils.logResponseToKarate(logger, response);
-        return response;
-    }
-
-    public CompletableFuture<HttpResponse<Void>> deleteAsync(@NotNull final URI url) {
-        requireNonNull(url, "url is required for deleteAsync");
-        logger.debug("Deleting {}", url);
-        final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url).DELETE();
-        final HttpRequest request = authorize(builder).build();
-        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding());
     }
 
     /**

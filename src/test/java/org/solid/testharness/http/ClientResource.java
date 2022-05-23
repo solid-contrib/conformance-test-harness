@@ -27,24 +27,29 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.http.Fault;
+import com.github.tomakehurst.wiremock.http.Request;
+import com.github.tomakehurst.wiremock.http.Response;
 import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.absent;
-import static com.github.tomakehurst.wiremock.client.WireMock.containing;
-import static com.github.tomakehurst.wiremock.client.WireMock.matching;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 public class ClientResource implements QuarkusTestResourceLifecycleManager {
+    private static final Logger logger = LoggerFactory.getLogger(ClientResource.class);
+
     private WireMockServer wireMockServer;
 
     @Override
     public Map<String, String> start() {
-        wireMockServer = new WireMockServer(WireMockConfiguration.options()
-                .dynamicPort());
+        wireMockServer = new WireMockServer(WireMockConfiguration.options().dynamicPort());
+        wireMockServer.addMockServiceRequestListener(ClientResource::requestReceived);
+
         wireMockServer.start();
 
         wireMockServer.stubFor(WireMock.request("DAHU", WireMock.urlEqualTo("/dahu/no-auth"))
@@ -68,7 +73,7 @@ public class ClientResource implements QuarkusTestResourceLifecycleManager {
 
         wireMockServer.stubFor(WireMock.request("RETRY", WireMock.urlEqualTo("/retry"))
                 .inScenario("RETRY").whenScenarioStateIs(Scenario.STARTED)
-                .willReturn(WireMock.aResponse().withFault(Fault.EMPTY_RESPONSE))
+                .willReturn(WireMock.aResponse().withStatus(200).withFixedDelay(1100))
                 .willSetStateTo("FAILED"));
 
         wireMockServer.stubFor(WireMock.request("RETRY", WireMock.urlEqualTo("/retry"))
@@ -76,7 +81,7 @@ public class ClientResource implements QuarkusTestResourceLifecycleManager {
                 .willReturn(WireMock.aResponse().withStatus(405)));
 
         wireMockServer.stubFor(WireMock.request("RETRY", WireMock.urlEqualTo("/retryfails"))
-                .willReturn(WireMock.aResponse().withFault(Fault.EMPTY_RESPONSE)));
+                .willReturn(WireMock.aResponse().withStatus(200).withFixedDelay(1100)));
 
         wireMockServer.stubFor(WireMock.get(WireMock.urlEqualTo("/get/404"))
                 .willReturn(WireMock.aResponse().withStatus(404)));
@@ -127,6 +132,17 @@ public class ClientResource implements QuarkusTestResourceLifecycleManager {
                 .willReturn(WireMock.aResponse().withStatus(204)));
 
         return Collections.emptyMap();
+    }
+
+    protected static void requestReceived(final Request inRequest, final Response inResponse) {
+        logger.info("WireMock request at URL: {}\n" +
+                        "  request headers: \n{}" +
+                        "  request body: {}\n" +
+                        "  response headers: \n{}" +
+                        "  response body: {}",
+                inRequest.getAbsoluteUrl(),
+                inRequest.getHeaders(), inRequest.getBodyAsString(),
+                inResponse.getHeaders(), inResponse.getBodyAsString());
     }
 
     @Override

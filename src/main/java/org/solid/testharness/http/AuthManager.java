@@ -56,10 +56,12 @@ import static java.util.Objects.requireNonNull;
 public class AuthManager {
     private static final Logger logger = LoggerFactory.getLogger(AuthManager.class);
 
-    private static final Pattern LOGIN_FORM_ACTION = Pattern.compile(".*<form\\s.*method\\s*=\\s*\"post\".*",
+    private static final Pattern LOGIN_FORM_ACTION = Pattern.compile(
+            ".*?(?><form\\s).*?(?>method)[^=]*+=[^\"]*+\"post\".*+",
             Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern LOCATION = Pattern.compile(".*\"location\"\\s*:\\s*\"([^\"]+)\".*",
             Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final String IDP_GRANT_ERROR = "Identity Provider does not support grant type: ";
 
     @Inject
     Config config;
@@ -146,7 +148,7 @@ public class AuthManager {
                                 final OidcConfiguration oidcConfig) {
         logger.info("Exchange refresh token for {}", authClient.getUser());
         if (!oidcConfig.getGrantTypesSupported().contains(HttpConstants.REFRESH_TOKEN)) {
-            throw new TestHarnessInitializationException("Identity Provider does not support grant type: " +
+            throw new TestHarnessInitializationException(IDP_GRANT_ERROR +
                     HttpConstants.REFRESH_TOKEN);
         }
         return requestToken(authClient, oidcConfig,
@@ -163,7 +165,7 @@ public class AuthManager {
                                         final OidcConfiguration oidcConfig) {
         logger.info("Use client credentials to get access token for {}", authClient.getUser());
         if (!oidcConfig.getGrantTypesSupported().contains(HttpConstants.CLIENT_CREDENTIALS)) {
-            throw new TestHarnessInitializationException("Identity Provider does not support grant type: " +
+            throw new TestHarnessInitializationException(IDP_GRANT_ERROR +
                     HttpConstants.CLIENT_CREDENTIALS);
         }
         return requestToken(authClient, oidcConfig,
@@ -179,7 +181,7 @@ public class AuthManager {
                                   final OidcConfiguration oidcConfig, final Client sessionClient) {
         logger.info("Login and get access token for {}", authClient.getUser());
         if (!oidcConfig.getGrantTypesSupported().contains(HttpConstants.AUTHORIZATION_CODE_TYPE)) {
-            throw new TestHarnessInitializationException("Identity Provider does not support grant type: " +
+            throw new TestHarnessInitializationException(IDP_GRANT_ERROR +
                     HttpConstants.AUTHORIZATION_CODE_TYPE);
         }
 
@@ -384,9 +386,9 @@ public class AuthManager {
     }
 
     <T> HttpResponse<T> postRequest(final Client client, final URI uri,
-                                            final HttpRequest.BodyPublisher publisher, final String type,
-                                            final HttpResponse.BodyHandler<T> bodyHandler,
-                                            final String stage) {
+                                    final HttpRequest.BodyPublisher publisher, final String type,
+                                    final HttpResponse.BodyHandler<T> bodyHandler,
+                                    final String stage) {
         final HttpRequest request = HttpUtils.newRequestBuilder(uri)
                 .header(HttpConstants.HEADER_CONTENT_TYPE, type)
                 .POST(publisher)

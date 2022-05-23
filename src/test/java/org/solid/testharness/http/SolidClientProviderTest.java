@@ -148,7 +148,7 @@ class SolidClientProviderTest {
     void createContainer() throws Exception {
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(201, "");
-        doReturn(mockResponse).when(mockClient).sendAuthorized(any(), any());
+        doReturn(mockResponse).when(mockClient).sendAuthorized(null, any(), any());
 
         final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
         final HttpHeaders headers = solidClientProvider.createContainer(BASE_URL.resolve("/test/"));
@@ -160,7 +160,7 @@ class SolidClientProviderTest {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(412);
-        doReturn(mockResponse).when(mockClient).sendAuthorized(any(), any());
+        doReturn(mockResponse).when(mockClient).sendAuthorized(null, any(), any());
 
         final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
         final Exception exception = assertThrows(Exception.class,

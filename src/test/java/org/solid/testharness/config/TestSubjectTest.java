@@ -157,7 +157,7 @@ class TestSubjectTest {
         final Client mockClient = setupMockConfig(WAC, null);
         final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "");
         when(mockClient.getAsTurtle(any())).thenReturn(mockStringResponse);
-        doReturn(mockStringResponse).when(mockClient).sendAuthorized(any(), any());
+        doReturn(mockStringResponse).when(mockClient).sendAuthorized(null, any(), any());
         final HttpResponse<Void> mockVoidResponse = TestUtils.mockVoidResponse(200, ACL_HEADER);
         when(mockClient.head(any())).thenReturn(mockVoidResponse);
 
@@ -173,7 +173,7 @@ class TestSubjectTest {
 
         final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "");
         when(mockClient.getAsTurtle(any())).thenReturn(mockStringResponse);
-        doReturn(mockStringResponse).when(mockClient).sendAuthorized(any(), any());
+        doReturn(mockStringResponse).when(mockClient).sendAuthorized(null, any(), any());
         final HttpResponse<Void> mockVoidResponse = TestUtils.mockVoidResponse(200, Map.of(HttpConstants.HEADER_LINK,
                 List.of("<https://example.org/.acl>; rel=\"acl\"",
                         "<http://www.w3.org/ns/solid/acp#AccessControlResource>; rel=\"type\"")));
@@ -191,7 +191,7 @@ class TestSubjectTest {
 
         final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "");
         when(mockClient.getAsTurtle(any())).thenReturn(mockStringResponse);
-        doReturn(mockStringResponse).when(mockClient).sendAuthorized(any(), any());
+        doReturn(mockStringResponse).when(mockClient).sendAuthorized(null, any(), any());
         final HttpResponse<Void> mockVoidResponse = TestUtils.mockVoidResponse(200, Map.of(HttpConstants.HEADER_LINK,
                 List.of("<https://example.org/.acl>; rel=\"acl\"",
                         "<http://www.w3.org/ns/solid/acp#AccessControlResource>; rel=\"type\"")));
@@ -227,7 +227,7 @@ class TestSubjectTest {
 
         final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "");
         when(mockClient.getAsTurtle(any())).thenReturn(mockStringResponse);
-        when(mockClient.sendAuthorized(any(), any())).thenThrow(TestUtils.createException(""));
+        when(mockClient.sendAuthorized(null, any(), any())).thenThrow(TestUtils.createException(""));
 
         final Exception exception = assertThrows(TestHarnessInitializationException.class,
                 () -> testSubject.prepareServer());

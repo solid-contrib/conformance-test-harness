@@ -216,8 +216,7 @@ class ClientTest {
         final Client client = new Client.Builder().withDpopSupport().build();
         client.setAccessToken("ACCESS");
         final HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(baseUri.resolve("/get/turtle"));
-        final HttpResponse<String> response = client.sendAuthorized(requestBuilder,
-                STRING_BODY_HANDLER);
+        final HttpResponse<String> response = client.sendAuthorized(null, requestBuilder, STRING_BODY_HANDLER);
         final Map<String, List<String>> headers = response.request().headers().map();
         assertTrue(headers.containsKey(HttpConstants.HEADER_AUTHORIZATION));
         assertTrue(headers.get(HttpConstants.HEADER_AUTHORIZATION).get(0).startsWith(HttpConstants.PREFIX_DPOP));
@@ -227,23 +226,21 @@ class ClientTest {
     @Test
     void sendAuthorizedNullRequestBuilder() {
         final Client client = new Client.Builder().build();
-        assertThrows(NullPointerException.class,
-                () -> client.sendAuthorized(null, STRING_BODY_HANDLER));
+        assertThrows(NullPointerException.class, () -> client.sendAuthorized(null, null, STRING_BODY_HANDLER));
     }
 
     @Test
     void sendAuthorizedNullHandler() {
         final Client client = new Client.Builder().build();
         final HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(baseUri);
-        assertThrows(NullPointerException.class, () -> client.sendAuthorized(requestBuilder, null));
+        assertThrows(NullPointerException.class, () -> client.sendAuthorized(null, requestBuilder, null));
     }
 
     @Test
     void sendAuthorizedFail() {
         final Client client = new Client.Builder().build();
         final HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(baseUri.resolve("/get/fault"));
-        assertThrows(Exception.class,
-                () -> client.sendAuthorized(requestBuilder, STRING_BODY_HANDLER));
+        assertThrows(Exception.class,() -> client.sendAuthorized(null, requestBuilder, STRING_BODY_HANDLER));
     }
 
     @Test

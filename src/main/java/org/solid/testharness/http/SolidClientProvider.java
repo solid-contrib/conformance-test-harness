@@ -42,14 +42,17 @@ import org.solid.testharness.utils.TestHarnessInitializationException;
 import javax.enterprise.inject.spi.CDI;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
-import java.io.StringReader;import java.net.URI;
+import java.io.StringReader;
+import java.net.URI;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -100,14 +103,14 @@ public class SolidClientProvider {
                 .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_TEXT_TURTLE)
                 .header(HttpConstants.HEADER_LINK, HttpConstants.CONTAINER_LINK)
                 .PUT(HttpRequest.BodyPublishers.noBody());
-        final HttpResponse<String> response = client.sendAuthorized(builder, HttpResponse.BodyHandlers.ofString());
+        final HttpResponse<String> response = client.sendAuthorized(null, builder, BodyHandlers.ofString());
         if (!HttpUtils.isSuccessful(response.statusCode())) {
             throw new Exception("Failed to create " + url.toString() + ", response=" + response.statusCode());
         }
         return response.headers();
     }
 
-    public URI getAclUri(final URI uri) throws IOException, InterruptedException {
+    public URI getAclUri(final URI uri) throws InterruptedException, ExecutionException {
         final HttpResponse<Void> response = client.head(uri);
         return getAclUri(response.headers());
     }
@@ -121,17 +124,17 @@ public class SolidClientProvider {
         return aclLink.map(Link::getUri).orElse(null);
     }
 
-    public TestSubject.AccessControlMode getAclType(final URI aclUri) throws IOException, InterruptedException {
+    public TestSubject.AccessControlMode getAclType(final URI aclUri) throws InterruptedException, ExecutionException {
         final URI acpLink = getLinkByType(aclUri, ACP.AccessControlResource);
         return acpLink != null ? TestSubject.AccessControlMode.ACP : TestSubject.AccessControlMode.WAC;
     }
 
     public void createAcl(final URI url, final AccessDataset accessDataset) throws Exception {
-        logger.debug("ACL: {} for {}", accessDataset.toString(), url);
+        logger.debug("ACL: {} for {}", accessDataset, url);
         accessDataset.apply(client, url);
     }
 
-    public AccessDataset getAcl(final URI url) throws IOException, InterruptedException {
+    public AccessDataset getAcl(final URI url) throws IOException, InterruptedException, ExecutionException {
         final HttpResponse<String> response = client.getAsTurtle(url);
         if (!HttpUtils.isSuccessful(response.statusCode())) {
             return null;
@@ -143,11 +146,11 @@ public class SolidClientProvider {
         return accessControlFactory.getAccessDatasetBuilder(aclUrl.toString());
     }
 
-    public boolean hasStorageType(final URI uri) throws IOException, InterruptedException {
+    public boolean hasStorageType(final URI uri) throws InterruptedException, ExecutionException {
         return getLinkByType(uri, PIM.Storage) != null;
     }
 
-    private URI getLinkByType(final URI uri, final IRI type) throws IOException, InterruptedException {
+    private URI getLinkByType(final URI uri, final IRI type) throws InterruptedException, ExecutionException {
         final HttpResponse<Void> response = client.head(uri);
         final List<Link> links = HttpUtils.parseLinkHeaders(response.headers());
         return links.stream()
@@ -223,7 +226,7 @@ public class SolidClientProvider {
                                 })
                                 .collect(Collectors.toList())
                 ).exceptionally(ex -> {
-                    // TODO: We don't know which one failed
+                    // We don't know which one failed
                     logger.error("Failed to delete resources", ex);
                     return null;
                 }).get();
@@ -238,6 +241,10 @@ public class SolidClientProvider {
                 depth.decrementAndGet();
             }
         }
+        return deleteContainer(url, depth);
+    }
+
+    private CompletableFuture<HttpResponse<Void>> deleteContainer(final URI url, final AtomicInteger depth) {
         // delete the container unless depth counting to avoid this
         if (depth == null || depth.get() > 0) {
             logger.debug("DELETE RESOURCE {}", url);
