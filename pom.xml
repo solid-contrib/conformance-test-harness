@@ -55,6 +55,11 @@
         <package.url>${project.url}</package.url>
         <package.version>${project.version}</package.version>
         <package.buildTime>${maven.build.timestamp}</package.buildTime>
+
+        <properties>
+            <sonar.organization>solid-contrib</sonar.organization>
+            <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        </properties>
     </properties>
     <dependencyManagement>
         <dependencies>
