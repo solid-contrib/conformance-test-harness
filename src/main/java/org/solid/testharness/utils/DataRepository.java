@@ -77,7 +77,7 @@ public class DataRepository implements Repository {
     private IRI assertor;
     private IRI testSubject;
 
-    public static Map<String, IRI> EARL_RESULT = Map.of(
+    public static final Map<String, IRI> EARL_RESULT = Map.of(
             "passed", EARL.passed,
             "failed", EARL.failed,
             "skipped", EARL.untested

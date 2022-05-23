@@ -1,5 +1,9 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.1.7
+### Minor changes
+* Retry HTTP requests after timeouts to make tests more resilient. 
+
 ## Release 1.1.6
 ### Minor changes
 * Update libraries and move repository

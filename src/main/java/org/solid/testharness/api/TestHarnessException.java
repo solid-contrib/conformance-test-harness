@@ -25,7 +25,7 @@ package org.solid.testharness.api;
 
 public class TestHarnessException extends RuntimeException {
     private static final long serialVersionUID = -3676037765799217562L;
-    private String message;
+    private final String message;
 
     public TestHarnessException(final String message, final Throwable cause) {
         super(message, cause);

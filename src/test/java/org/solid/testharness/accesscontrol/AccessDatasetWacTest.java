@@ -51,7 +51,8 @@ class AccessDatasetWacTest {
     private static final URI CONTAINER_URI = URI.create("https://example.org/test/");
     private static final String AGENT1 = "https://example.org/alice#me";
     private static final String AGENT2 = "https://example.org/bob#me";
-    private static final URI ACL_URI = URI.create("https://example.org/test.acl");
+    private static final String ACL_URI_STR = "https://example.org/test.acl";
+    private static final URI ACL_URI = URI.create(ACL_URI_STR);
     private Model testModel;
 
     @BeforeEach
@@ -72,7 +73,7 @@ class AccessDatasetWacTest {
                 null, List.of("write"), null));
         accessRules.add(new AccessRule(RESOURCE_URI, false, AccessRule.AgentType.AUTHENTICATED_USER,
                 null, List.of("append"), null));
-        final AccessDataset accessDataset = new AccessDatasetWac(accessRules, ACL_URI.toString());
+        final AccessDataset accessDataset = new AccessDatasetWac(accessRules, ACL_URI_STR);
         assertTrue(Models.isomorphic(accessDataset.getModel(), testModel));
     }
 
@@ -81,7 +82,7 @@ class AccessDatasetWacTest {
         final List<AccessRule> accessRules = new ArrayList<>();
         accessRules.add(new AccessRule(RESOURCE_URI, false, AccessRule.AgentType.AGENT,
                 AGENT1, List.of("controlRead"), null));
-        assertThrows(RuntimeException.class, () -> new AccessDatasetWac(accessRules, ACL_URI.toString()));
+        assertThrows(RuntimeException.class, () -> new AccessDatasetWac(accessRules, ACL_URI_STR));
     }
 
     @Test
@@ -89,7 +90,7 @@ class AccessDatasetWacTest {
         final List<AccessRule> accessRules = new ArrayList<>();
         accessRules.add(new AccessRule(RESOURCE_URI, false, AccessRule.AgentType.AGENT,
                 AGENT1, List.of("https://example.org/specialMode"), null));
-        final AccessDataset accessDataset = new AccessDatasetWac(accessRules, ACL_URI.toString());
+        final AccessDataset accessDataset = new AccessDatasetWac(accessRules, ACL_URI_STR);
         assertTrue(accessDataset.getModel().contains(null, ACL.mode, iri("https://example.org/specialMode")));
     }
 
@@ -103,7 +104,7 @@ class AccessDatasetWacTest {
     }
 
     @Test
-    void apply() throws IOException, InterruptedException {
+    void apply() throws Exception {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockVoidResponse = TestUtils.mockVoidResponse(200);
         when(mockClient.put(any(), any(), any())).thenReturn(mockVoidResponse);
@@ -114,7 +115,7 @@ class AccessDatasetWacTest {
     }
 
     @Test
-    void applyFails() throws IOException, InterruptedException {
+    void applyFails() throws Exception {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockVoidResponse = TestUtils.mockVoidResponse(403);
         when(mockClient.put(any(), any(), any())).thenReturn(mockVoidResponse);
@@ -127,19 +128,19 @@ class AccessDatasetWacTest {
     @Test
     void applyNull() {
         final Client mockClient = mock(Client.class);
-        final AccessDataset accessDataset = new AccessDatasetWac(Collections.emptyList(), ACL_URI.toString());
+        final AccessDataset accessDataset = new AccessDatasetWac(Collections.emptyList(), ACL_URI_STR);
         assertDoesNotThrow(() -> accessDataset.apply(mockClient, RESOURCE_URI));
     }
 
     @Test
     void getMode() {
-        final AccessDataset accessDataset = new AccessDatasetWac(Collections.emptyList(), ACL_URI.toString());
+        final AccessDataset accessDataset = new AccessDatasetWac(Collections.emptyList(), ACL_URI_STR);
         assertEquals(TestSubject.AccessControlMode.WAC, accessDataset.getMode());
     }
 
     @Test
     void getSetModel() {
-        final AccessDataset accessDataset = new AccessDatasetWac(Collections.emptyList(), ACL_URI.toString());
+        final AccessDataset accessDataset = new AccessDatasetWac(Collections.emptyList(), ACL_URI_STR);
         assertNull(accessDataset.getModel());
         accessDataset.setModel(new LinkedHashModel());
         assertNotNull(accessDataset.getModel());

@@ -38,8 +38,6 @@ import org.solid.testharness.utils.TestHarnessInitializationException;
 import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpResponse;
@@ -50,12 +48,11 @@ import java.util.Map;
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.solid.testharness.config.TestSubject.AccessControlMode.*;
 
 @QuarkusTest
-public class TestSubjectTest {
+class TestSubjectTest {
     private static final URI TEST_URL = URI.create("https://localhost/container/");
     private static final String ALICE_WEBID = "https://alice.target.example.org/profile/card#me";
     private static final String CONFIG_SAMPLE = "src/test/resources/config/config-sample.ttl";
@@ -76,13 +73,13 @@ public class TestSubjectTest {
     ClientRegistry clientRegistry;
 
     @Test
-    void setupMissingTarget() throws MalformedURLException {
+    void setupMissingTarget() throws Exception {
         setupMockConfigMin(CONFIG_SAMPLE, null);
         assertThrows(TestHarnessInitializationException.class, () -> testSubject.loadTestSubjectConfig());
     }
 
     @Test
-    void setupMissingTargetSingleConfig() throws MalformedURLException {
+    void setupMissingTargetSingleConfig() throws Exception {
         final URL testFileUrl = TestUtils.getFileUrl(CONFIG_SAMPLE_SINGLE);
         setupMockConfigMin(CONFIG_SAMPLE_SINGLE, null);
         testSubject.loadTestSubjectConfig();
@@ -93,7 +90,7 @@ public class TestSubjectTest {
     }
 
     @Test
-    void setupTargetMultipleConfig() throws MalformedURLException {
+    void setupTargetMultipleConfig() throws Exception {
         final URL testFileUrl = TestUtils.getFileUrl(CONFIG_SAMPLE);
         final String subject = new URL(testFileUrl, "testserver").toString();
         setupMockConfigMin(CONFIG_SAMPLE, subject);
@@ -105,26 +102,26 @@ public class TestSubjectTest {
     }
 
     @Test
-    void setupDifferentTargetSingleConfig() throws MalformedURLException {
+    void setupDifferentTargetSingleConfig() throws Exception {
         setupMockConfigMin(CONFIG_SAMPLE_SINGLE,
                 "https://github.com/solid-contrib/conformance-test-harness/missing");
         assertThrows(TestHarnessInitializationException.class, () -> testSubject.loadTestSubjectConfig());
     }
 
     @Test
-    void setupConfigWithoutServer() throws MalformedURLException {
+    void setupConfigWithoutServer() throws Exception {
         setupMockConfigMin("src/test/resources/config/harness-sample.ttl", null);
         assertThrows(TestHarnessInitializationException.class, () -> testSubject.loadTestSubjectConfig());
     }
 
     @Test
-    void setupBadConfig() throws MalformedURLException {
+    void setupBadConfig() throws Exception {
         setupMockConfigMin("jsonld-sample.json", null);
         assertThrows(TestHarnessInitializationException.class, () -> testSubject.loadTestSubjectConfig());
     }
 
     @Test
-    void prepareServerWithoutServer() throws MalformedURLException {
+    void prepareServerWithoutServer() throws Exception {
         setupMockConfigMin(null, null);
         testSubject.setTargetServer(null);
         assertThrows(TestHarnessInitializationException.class, () -> testSubject.prepareServer());
@@ -134,7 +131,7 @@ public class TestSubjectTest {
     void prepareServerAccessControlModeNoAcl() throws Exception {
         final Client mockClient = setupMockConfig(WAC, null);
         final HttpResponse<Void> mockVoidResponseNoLink = TestUtils.mockVoidResponse(200);
-        when(mockClient.head(eq(URI.create(SERVER_TEST_STORAGE)))).thenReturn(mockVoidResponseNoLink);
+        when(mockClient.head(URI.create(SERVER_TEST_STORAGE))).thenReturn(mockVoidResponseNoLink);
 
         final Exception exception = assertThrows(TestHarnessInitializationException.class,
                 () -> testSubject.prepareServer());
@@ -147,8 +144,8 @@ public class TestSubjectTest {
     void prepareServerAccessControlModeThrows() throws Exception {
         final Client mockClient = setupMockConfig(WAC, null);
         final HttpResponse<Void> mockVoidResponseLink = TestUtils.mockVoidResponse(200, ACL_HEADER);
-        when(mockClient.head(eq(URI.create(SERVER_TEST_STORAGE)))).thenReturn(mockVoidResponseLink);
-        when(mockClient.head(eq(URI.create("https://server/test/.acl")))).thenThrow(new IOException());
+        when(mockClient.head(URI.create(SERVER_TEST_STORAGE))).thenReturn(mockVoidResponseLink);
+        when(mockClient.head(URI.create("https://server/test/.acl"))).thenThrow(TestUtils.createException(""));
 
         final Exception exception = assertThrows(TestHarnessInitializationException.class,
                 () -> testSubject.prepareServer());
@@ -160,7 +157,7 @@ public class TestSubjectTest {
         final Client mockClient = setupMockConfig(WAC, null);
         final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "");
         when(mockClient.getAsTurtle(any())).thenReturn(mockStringResponse);
-        doReturn(mockStringResponse).when(mockClient).sendAuthorized(any(), any());
+        doReturn(mockStringResponse).when(mockClient).sendAuthorized(eq(null), any(), any());
         final HttpResponse<Void> mockVoidResponse = TestUtils.mockVoidResponse(200, ACL_HEADER);
         when(mockClient.head(any())).thenReturn(mockVoidResponse);
 
@@ -176,7 +173,7 @@ public class TestSubjectTest {
 
         final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "");
         when(mockClient.getAsTurtle(any())).thenReturn(mockStringResponse);
-        doReturn(mockStringResponse).when(mockClient).sendAuthorized(any(), any());
+        doReturn(mockStringResponse).when(mockClient).sendAuthorized(eq(null), any(), any());
         final HttpResponse<Void> mockVoidResponse = TestUtils.mockVoidResponse(200, Map.of(HttpConstants.HEADER_LINK,
                 List.of("<https://example.org/.acl>; rel=\"acl\"",
                         "<http://www.w3.org/ns/solid/acp#AccessControlResource>; rel=\"type\"")));
@@ -194,7 +191,7 @@ public class TestSubjectTest {
 
         final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "");
         when(mockClient.getAsTurtle(any())).thenReturn(mockStringResponse);
-        doReturn(mockStringResponse).when(mockClient).sendAuthorized(any(), any());
+        doReturn(mockStringResponse).when(mockClient).sendAuthorized(eq(null), any(), any());
         final HttpResponse<Void> mockVoidResponse = TestUtils.mockVoidResponse(200, Map.of(HttpConstants.HEADER_LINK,
                 List.of("<https://example.org/.acl>; rel=\"acl\"",
                         "<http://www.w3.org/ns/solid/acp#AccessControlResource>; rel=\"type\"")));
@@ -211,10 +208,10 @@ public class TestSubjectTest {
         final Client mockClient = setupMockConfig(WAC, null);
 
         final HttpResponse<Void> mockVoidResponseLink = TestUtils.mockVoidResponse(200, ACL_HEADER);
-        when(mockClient.head(eq(URI.create(SERVER_TEST_STORAGE)))).thenReturn(mockVoidResponseLink);
-        when(mockClient.head(eq(URI.create("https://server/test/.acl")))).thenReturn(mockVoidResponseLink);
+        when(mockClient.head(URI.create(SERVER_TEST_STORAGE))).thenReturn(mockVoidResponseLink);
+        when(mockClient.head(URI.create("https://server/test/.acl"))).thenReturn(mockVoidResponseLink);
 
-        when(mockClient.getAsTurtle(any())).thenThrow(new IOException());
+        when(mockClient.getAsTurtle(any())).thenThrow(TestUtils.createException(""));
 
         final Exception exception = assertThrows(TestHarnessInitializationException.class,
                 () -> testSubject.prepareServer());
@@ -225,12 +222,12 @@ public class TestSubjectTest {
     void prepareServerContainerFails() throws Exception {
         final Client mockClient = setupMockConfig(WAC, null);
         final HttpResponse<Void> mockVoidResponseLink = TestUtils.mockVoidResponse(200, ACL_HEADER);
-        when(mockClient.head(eq(URI.create(SERVER_TEST_STORAGE)))).thenReturn(mockVoidResponseLink);
-        when(mockClient.head(eq(URI.create("https://server/test/.acl")))).thenReturn(mockVoidResponseLink);
+        when(mockClient.head(URI.create(SERVER_TEST_STORAGE))).thenReturn(mockVoidResponseLink);
+        when(mockClient.head(URI.create("https://server/test/.acl"))).thenReturn(mockVoidResponseLink);
 
         final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "");
         when(mockClient.getAsTurtle(any())).thenReturn(mockStringResponse);
-        when(mockClient.sendAuthorized(any(), any())).thenThrow(new IOException());
+        when(mockClient.sendAuthorized(eq(null), any(), any())).thenThrow(TestUtils.createException(""));
 
         final Exception exception = assertThrows(TestHarnessInitializationException.class,
                 () -> testSubject.prepareServer());
@@ -238,7 +235,7 @@ public class TestSubjectTest {
     }
 
     @Test
-    void findTestContainerProfileBased() throws IOException, InterruptedException {
+    void findTestContainerProfileBased() throws Exception {
         final Client ownerClient = setupMockConfig(null, List.of("/storage1/"));
         final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204, STORAGE_HEADER);
         when(ownerClient.head(any())).thenReturn(mockResponse);
@@ -247,14 +244,14 @@ public class TestSubjectTest {
     }
 
     @Test
-    void findTestContainerAbsolute() throws IOException, InterruptedException {
+    void findTestContainerAbsolute() throws Exception {
         setupMockConfig(null, null);
         when(config.getTestContainer()).thenReturn(SERVER_TEST_STORAGE);
         assertEquals(URI.create(SERVER_TEST_STORAGE), testSubject.findTestContainer());
     }
 
     @Test
-    void findTestContainerRootRelative() throws IOException, InterruptedException {
+    void findTestContainerRootRelative() throws Exception {
         setupMockConfig(null, null);
         when(config.getServerRoot()).thenReturn("https://server/");
         when(config.getTestContainer()).thenReturn("/test/");
@@ -262,7 +259,7 @@ public class TestSubjectTest {
     }
 
     @Test
-    void findTestContainerProfileRelative() throws IOException, InterruptedException {
+    void findTestContainerProfileRelative() throws Exception {
         final Client ownerClient = setupMockConfig(null, List.of("/storage1/"));
         final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204, STORAGE_HEADER);
         when(ownerClient.head(any())).thenReturn(mockResponse);
@@ -275,7 +272,7 @@ public class TestSubjectTest {
     void findStorageProfile() throws Exception {
         final Client ownerClient = setupMockConfig(null, List.of("/storage1/", "/storage2/"));
         final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204, STORAGE_HEADER);
-        when(ownerClient.head(any())).thenThrow(new IOException("BAD POD")).thenReturn(mockResponse);
+        when(ownerClient.head(any())).thenThrow(TestUtils.createException("BAD POD")).thenReturn(mockResponse);
         final URI storage = testSubject.findStorage();
         assertEquals("/storage2/", storage.getPath());
     }
@@ -283,7 +280,7 @@ public class TestSubjectTest {
     @Test
     void findStorageProfileException() throws Exception {
         final Client webIdClient = mock(Client.class);
-        when(webIdClient.getAsTurtle(any())).thenThrow(new IOException("FAIL"));
+        when(webIdClient.getAsTurtle(any())).thenThrow(TestUtils.createException("FAIL"));
         when(clientRegistry.getClient(ClientRegistry.ALICE_WEBID)).thenReturn(webIdClient);
         setupMockConfig(null, null);
         final Exception exception = assertThrows(TestHarnessInitializationException.class,
@@ -300,7 +297,7 @@ public class TestSubjectTest {
     }
 
     @Test
-    void loadTestSubjectConfigTarget1() throws MalformedURLException {
+    void loadTestSubjectConfigTarget1() throws Exception {
         final URL testFileUrl = TestUtils.getFileUrl(CONFIG_SAMPLE);
         final String subject = new URL(testFileUrl, "testserver").toString();
         when(config.getSubjectsUrl()).thenReturn(testFileUrl);
@@ -346,7 +343,7 @@ public class TestSubjectTest {
         final SolidClientProvider mockSolidClientProvider = mock(SolidClientProvider.class);
         testSubject.setTestRunContainer(new SolidContainerProvider(mockSolidClientProvider, TEST_URL));
         assertDoesNotThrow(() -> testSubject.tearDownServer());
-        verify(mockSolidClientProvider).deleteResourceRecursively(eq(TEST_URL));
+        verify(mockSolidClientProvider).deleteResourceRecursively(TEST_URL);
     }
 
     @Test
@@ -355,10 +352,10 @@ public class TestSubjectTest {
         testSubject.setTestRunContainer(new SolidContainerProvider(mockSolidClientProvider, TEST_URL));
         doThrow(new Exception("FAIL")).when(mockSolidClientProvider).deleteResourceRecursively(any());
         assertDoesNotThrow(() -> testSubject.tearDownServer());
-        verify(mockSolidClientProvider).deleteResourceRecursively(eq(TEST_URL));
+        verify(mockSolidClientProvider).deleteResourceRecursively(TEST_URL);
     }
 
-    private void setupMockConfigMin(final String subjectsFile, final String subject) throws MalformedURLException {
+    private void setupMockConfigMin(final String subjectsFile, final String subject) throws Exception {
         when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE, ALICE_WEBID));
         if (subjectsFile != null) {
             when(config.getSubjectsUrl()).thenReturn(TestUtils.getFileUrl(subjectsFile));
@@ -369,7 +366,7 @@ public class TestSubjectTest {
     }
 
     private Client setupMockConfig(final TestSubject.AccessControlMode mode, final List<String> storageList)
-            throws IOException, InterruptedException {
+            throws Exception {
         when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE, ALICE_WEBID));
         when(config.getTestContainer()).thenReturn("/test/");
         when(config.getServerRoot()).thenReturn("https://server/");
