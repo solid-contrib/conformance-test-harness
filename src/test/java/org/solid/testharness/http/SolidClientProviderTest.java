@@ -32,9 +32,10 @@ import org.junit.jupiter.api.Test;
 import org.solid.common.vocab.ACP;
 import org.solid.common.vocab.PIM;
 import org.solid.testharness.accesscontrol.AccessDataset;
+import org.solid.testharness.api.TestHarnessApiException;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.config.TestSubject;
-import org.solid.testharness.utils.TestHarnessInitializationException;
+import org.solid.testharness.utils.TestHarnessException;
 import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
@@ -84,7 +85,7 @@ class SolidClientProviderTest {
     void createMissingNamedClient() {
         when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
                 "https://alice.target.example.org/profile/card#me"));
-        assertThrows(TestHarnessInitializationException.class, () -> new SolidClientProvider("nobody"));
+        assertThrows(TestHarnessException.class, () -> new SolidClientProvider("nobody"));
     }
 
     @Test
@@ -98,7 +99,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void createNamedClient() {
+    void createNamedClient() throws Exception {
         clientRegistry.register("user1", new Client.Builder("user1").build());
         final SolidClientProvider solidClientProvider = new SolidClientProvider("user1");
         final Client client = solidClientProvider.getClient();
@@ -108,7 +109,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void createStatically() {
+    void createStatically() throws Exception {
         clientRegistry.register("user2", new Client.Builder("user2").build());
         final SolidClientProvider solidClientProvider = SolidClientProvider.create("user2");
         final Client client = solidClientProvider.getClient();
@@ -131,7 +132,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void createResourceFails() throws Exception {
+    void createResourceFails() {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(412);
         when(mockClient.put(TEST_URL, "DATA", HttpConstants.MEDIA_TYPE_TEXT_PLAIN)).thenReturn(mockResponse);
@@ -156,7 +157,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void createContainerFails() throws Exception {
+    void createContainerFails() {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(412);
@@ -170,7 +171,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void getAclUriFromUri() throws Exception {
+    void getAclUriFromUri() {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204, Map.of(HttpConstants.HEADER_LINK,
                 List.of("<" + BASE_URL.resolve("test.acl") + ">; rel=\"acl\"")));
@@ -183,7 +184,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void getAclUriFails() throws Exception {
+    void getAclUriFails() {
         final Client mockClient = mock(Client.class);
         when(mockClient.head(any())).thenThrow(TestUtils.createException("Failed"));
 
@@ -229,7 +230,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void getAclTypeWAC() throws Exception {
+    void getAclTypeWAC() {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204);
         when(mockClient.head(any())).thenReturn(mockResponse);
@@ -240,7 +241,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void getAclTypeACP() throws Exception {
+    void getAclTypeACP() {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204, Map.of(HttpConstants.HEADER_LINK,
                 List.of("<" + ACP.AccessControlResource.toString() + ">; rel=\"type\"")));
@@ -252,7 +253,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void getAclTypeWrongRel() throws Exception {
+    void getAclTypeWrongRel() {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204, Map.of(HttpConstants.HEADER_LINK,
                 List.of("<" + ACP.AccessControlResource.toString() + ">; rel=\"xxxx\"")));
@@ -264,7 +265,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void getAclTypeWrongUrl() throws Exception {
+    void getAclTypeWrongUrl() {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204, Map.of(HttpConstants.HEADER_LINK,
                 List.of("<https://example.org>; rel=\"type\"")));
@@ -297,7 +298,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void getAcl() throws Exception {
+    void getAcl() {
         final URI resourceAcl = BASE_URL.resolve("/test.acl");
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "");
@@ -310,7 +311,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void getAclFails() throws Exception {
+    void getAclFails() {
         final URI resourceAcl = BASE_URL.resolve("/test.acl");
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(404, "");
@@ -330,7 +331,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void hasStorageTypeFalse() throws Exception {
+    void hasStorageTypeFalse() {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204);
         when(mockClient.head(any())).thenReturn(mockResponse);
@@ -340,7 +341,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void hasStorageTypeTrue() throws Exception {
+    void hasStorageTypeTrue() {
         final Client mockClient = mock(Client.class);
         final HttpResponse<Void> mockResponse = TestUtils.mockVoidResponse(204, Map.of(HttpConstants.HEADER_LINK,
                 List.of("<" + PIM.Storage.toString() + ">; rel=\"type\"")));
@@ -360,12 +361,12 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void createAclFails() throws Exception {
+    void createAclFails() {
         final AccessDataset accessDataset = mock(AccessDataset.class);
-        doThrow(new Exception("FAIL")).when(accessDataset).apply(any(), any());
+        doThrow(new TestHarnessApiException("FAIL")).when(accessDataset).apply(any(), any());
         final Client mockClient = mock(Client.class);
         final SolidClientProvider solidClientProvider = new SolidClientProvider(mockClient);
-        assertThrows(Exception.class,
+        assertThrows(TestHarnessApiException.class,
                 () -> solidClientProvider.createAcl(BASE_URL.resolve("/test.acl"), accessDataset));
     }
 
@@ -382,7 +383,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void getContainmentDataFails() throws Exception {
+    void getContainmentDataFails() {
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(400, null);
 
@@ -424,7 +425,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void deleteContents() throws Exception {
+    void deleteContents() {
         final String data = turtleList(BASE_URL, BASE_URL.resolve("test"), BASE_URL.resolve("test2"));
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, data);
@@ -445,7 +446,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void deleteContentsOneFails() throws Exception {
+    void deleteContentsOneFails() {
         final String data = turtleList(BASE_URL, BASE_URL.resolve("test"), BASE_URL.resolve("test2"));
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, data);
@@ -467,7 +468,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void deleteContainerOneException() throws Exception {
+    void deleteContainerOneException() {
         final String data = turtleList(BASE_URL, BASE_URL.resolve("test"), BASE_URL.resolve("test2"));
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, data);
@@ -495,7 +496,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void deleteContainerListFails() throws Exception {
+    void deleteContainerListFails() {
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(400, null);
 
@@ -510,7 +511,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void deleteContainerListParseException() throws Exception {
+    void deleteContainerListParseException() {
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "NOT RDF");
 
@@ -525,7 +526,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void deleteContainer() throws Exception {
+    void deleteContainer() {
         final String data = turtleList(BASE_URL, BASE_URL.resolve("test"), BASE_URL.resolve("test2"));
         final Client mockClient = mock(Client.class);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, data);
@@ -549,7 +550,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void deleteContainerDeep() throws Exception {
+    void deleteContainerDeep() {
         final String data = turtleList(BASE_URL, BASE_URL.resolve("test"), BASE_URL.resolve("child/"));
         final String data2 = turtleList(BASE_URL.resolve("child/"),
                 BASE_URL.resolve("test2"), BASE_URL.resolve("test3"));
@@ -596,7 +597,7 @@ class SolidClientProviderTest {
     }
 
     @Test
-    void testToStringNamed() {
+    void testToStringNamed() throws Exception {
         clientRegistry.register("toStringUser", new Client.Builder("toStringUser").build());
         final SolidClientProvider solidClientProvider = new SolidClientProvider("toStringUser");
         solidClientProvider.getClient().setAccessToken("ACCESS");

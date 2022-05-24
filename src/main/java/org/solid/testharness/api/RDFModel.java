@@ -54,9 +54,9 @@ import java.util.stream.Collectors;
  * Utility methods for testing RDF responses.
  */
 public final class RDFModel {
-    private Model model;
-    private Logger logger;
-    private static Map<String, RDFFormat> CONTENT_TYPES = Map.of(
+    private final Model model;
+    private final Logger logger;
+    private static final Map<String, RDFFormat> CONTENT_TYPES = Map.of(
             HttpConstants.MEDIA_TYPE_TEXT_TURTLE, RDFFormat.TURTLE,
             HttpConstants.MEDIA_TYPE_APPLICATION_JSON_LD, RDFFormat.JSONLD,
             HttpConstants.MEDIA_TYPE_TEXT_HTML, RDFFormat.RDFA,
@@ -90,7 +90,7 @@ public final class RDFModel {
                 return new RDFModel(Rio.parse(new StringReader(data), baseUri, format));
             }
         } catch (Exception e) {
-            throw new TestHarnessException("Failed to parse data", e);
+            throw new TestHarnessApiException("Failed to parse data", e);
         }
     }
 
@@ -102,7 +102,7 @@ public final class RDFModel {
      */
     public boolean contains(final RDFModel subset) {
         try {
-            if (subset == null || subset.model.size() == 0) {
+            if (subset == null || subset.model.isEmpty()) {
                 throw new IllegalArgumentException("The subset model must exist and have at least one statement");
             }
             if (Models.isSubset(subset.model, model)) {
@@ -124,7 +124,7 @@ public final class RDFModel {
                 return false;
             }
         } catch (Exception e) {
-            throw new TestHarnessException("Contains test failed", e);
+            throw new TestHarnessApiException("Contains test failed", e);
         }
     }
 
@@ -147,7 +147,7 @@ public final class RDFModel {
             final Set<Resource> subjects = model.filter(null, predicate, object).subjects();
             return subjects.stream().map(Resource::stringValue).collect(Collectors.toList());
         } catch (Exception e) {
-            throw new TestHarnessException("Failed to get list of subjects", e);
+            throw new TestHarnessApiException("Failed to get list of subjects", e);
         }
     }
 
@@ -162,7 +162,7 @@ public final class RDFModel {
             final Set<IRI> predicates = model.filter(subject, null, object).predicates();
             return predicates.stream().map(IRI::stringValue).collect(Collectors.toList());
         } catch (Exception e) {
-            throw new TestHarnessException("Failed to get list of predicates", e);
+            throw new TestHarnessApiException("Failed to get list of predicates", e);
         }
     }
 
@@ -177,7 +177,7 @@ public final class RDFModel {
             final Set<Value> objects = model.filter(subject, predicate, null).objects();
             return objects.stream().map(Value::stringValue).collect(Collectors.toList());
         } catch (Exception e) {
-            throw new TestHarnessException("Failed to get list of objects", e);
+            throw new TestHarnessApiException("Failed to get list of objects", e);
         }
     }
 
@@ -192,7 +192,7 @@ public final class RDFModel {
         try {
             return model.contains(subject, predicate, object);
         } catch (Exception e) {
-            throw new TestHarnessException("Failed testing if model contains the statement", e);
+            throw new TestHarnessApiException("Failed testing if model contains the statement", e);
         }
     }
 
@@ -205,7 +205,7 @@ public final class RDFModel {
         try {
             return Values.iri(iri);
         } catch (Exception e) {
-            throw new TestHarnessException("Failed to create an IRI", e);
+            throw new TestHarnessApiException("Failed to create an IRI", e);
         }
     }
 
@@ -219,7 +219,7 @@ public final class RDFModel {
         try {
             return Values.iri(namespace, localName);
         } catch (Exception e) {
-            throw new TestHarnessException("Failed to create an IRI", e);
+            throw new TestHarnessApiException("Failed to create an IRI", e);
         }
     }
 
@@ -233,7 +233,7 @@ public final class RDFModel {
         try {
             return Values.literal(value, true);
         } catch (Exception e) {
-            throw new TestHarnessException("Failed to create a literal", e);
+            throw new TestHarnessApiException("Failed to create a literal", e);
         }
     }
 
@@ -246,7 +246,7 @@ public final class RDFModel {
         try {
             return Values.literal(value);
         } catch (Exception e) {
-            throw new TestHarnessException("Failed to create a decimal literal", e);
+            throw new TestHarnessApiException("Failed to create a decimal literal", e);
         }
     }
 
@@ -259,7 +259,7 @@ public final class RDFModel {
         try {
             return Values.literal(value);
         } catch (Exception e) {
-            throw new TestHarnessException("Failed to create an integer literal", e);
+            throw new TestHarnessApiException("Failed to create an integer literal", e);
         }
     }
 
@@ -273,7 +273,7 @@ public final class RDFModel {
         try {
             return Values.literal(value, datatype);
         } catch (Exception e) {
-            throw new TestHarnessException("Failed to create an " + datatype + " literal", e);
+            throw new TestHarnessApiException("Failed to create an " + datatype + " literal", e);
         }
     }
     /**
@@ -286,7 +286,7 @@ public final class RDFModel {
         try {
             return Values.literal(value, language);
         } catch (Exception e) {
-            throw new TestHarnessException("Failed to create a string with encoding", e);
+            throw new TestHarnessApiException("Failed to create a string with encoding", e);
         }
     }
 

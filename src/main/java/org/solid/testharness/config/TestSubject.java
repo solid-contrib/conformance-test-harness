@@ -41,6 +41,7 @@ import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClientProvider;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.SolidContainerProvider;
+import org.solid.testharness.utils.TestHarnessException;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -66,7 +67,6 @@ public class TestSubject {
     }
 
     private TargetServer targetServer;
-    private URI webId;
     private SolidContainerProvider rootTestContainer;
     private SolidContainerProvider testRunContainer;
     private AccessControlMode accessControlMode;
@@ -134,15 +134,15 @@ public class TestSubject {
         if (targetServer == null) {
             throw new TestHarnessInitializationException("No target server has been configured");
         }
-        final URI testContainerUri = findTestContainer();
-        logger.info("Test subject test container: {}", testContainerUri);
-
-        final SolidClientProvider ownerClient = new SolidClientProvider(HttpConstants.ALICE);
-        rootTestContainer = new SolidContainerProvider(ownerClient, testContainerUri);
-        determineAccessControlImplementation(ownerClient);
-
-        logger.debug("\n========== CHECK TEST SUBJECT ROOT");
         try {
+            final URI testContainerUri = findTestContainer();
+            logger.info("Test subject test container: {}", testContainerUri);
+
+            final SolidClientProvider ownerClient = new SolidClientProvider(HttpConstants.ALICE);
+            rootTestContainer = new SolidContainerProvider(ownerClient, testContainerUri);
+            determineAccessControlImplementation(ownerClient);
+
+            logger.debug("\n========== CHECK TEST SUBJECT ROOT");
             logger.debug("Root test container content: {}", rootTestContainer.getContentAsTurtle());
             logger.debug("Root test container access controls: {}", rootTestContainer.getAccessDataset());
 
@@ -150,28 +150,26 @@ public class TestSubject {
             testRunContainer = rootTestContainer.reserveContainer(rootTestContainer.generateId()).instantiate();
             logger.debug("Test run container content: {}", testRunContainer.getContentAsTurtle());
             logger.debug("Test run container access controls: {}", testRunContainer.getAccessDataset());
-        } catch (Exception e) {
+        } catch (TestHarnessException | RuntimeException e) {
             throw new TestHarnessInitializationException("Failed to prepare server", e);
         }
     }
 
     // Determine the ACL mode the server has implemented
-    private void determineAccessControlImplementation(final SolidClientProvider ownerClient) {
-        try {
-            final URI aclUrl = rootTestContainer.getAclUrl();
-            if (aclUrl == null) {
-                throw new Exception("Cannot get ACL url for root test container: " + rootTestContainer.getUrl());
-            }
-            accessControlMode = ownerClient.getAclType(aclUrl);
-            if (accessControlMode == AccessControlMode.ACP && targetServer.getFeatures().contains("acp-legacy")) {
-                accessControlMode = AccessControlMode.ACP_LEGACY;
-            }
-        } catch (Exception e) {
-            throw new TestHarnessInitializationException("Failed to determine access control mode", e);
+    private void determineAccessControlImplementation(final SolidClientProvider ownerClient)
+            throws TestHarnessException {
+        final URI aclUrl = rootTestContainer.getAclUrl();
+        if (aclUrl == null) {
+            throw new TestHarnessException("Cannot get ACL url for root test container: " +
+                    rootTestContainer.getUrl());
+        }
+        accessControlMode = ownerClient.getAclType(aclUrl);
+        if (accessControlMode == AccessControlMode.ACP && targetServer.getFeatures().contains("acp-legacy")) {
+            accessControlMode = AccessControlMode.ACP_LEGACY;
         }
     }
 
-    URI findTestContainer() {
+    URI findTestContainer() throws TestHarnessException {
         final String testContainer = config.getTestContainer();
         if (StringUtils.isEmpty(testContainer)) {
             // find storage from profile
@@ -192,10 +190,10 @@ public class TestSubject {
         }
     }
 
-    URI findStorage() {
+    URI findStorage() throws TestHarnessException {
         final SolidClientProvider publicClient = new SolidClientProvider(ClientRegistry.ALICE_WEBID);
         final SolidClientProvider ownerClient = new SolidClientProvider(HttpConstants.ALICE);
-        webId = URI.create(config.getWebIds().get(HttpConstants.ALICE));
+        final URI webId = URI.create(config.getWebIds().get(HttpConstants.ALICE));
         final Model profile;
         try {
             profile = publicClient.getContentAsModel(webId);
@@ -223,7 +221,7 @@ public class TestSubject {
         try {
             return ownerClient.hasStorageType(pod);
         } catch (Exception e) {
-            logger.warn("Failed to check pod accessibility: " + pod);
+            logger.warn("Failed to check pod accessibility: {}", pod);
             return false;
         }
     }

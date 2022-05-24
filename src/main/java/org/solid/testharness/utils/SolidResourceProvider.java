@@ -46,12 +46,13 @@ public class SolidResourceProvider {
     private final boolean containerType;
     private final Config config;
 
-    public SolidResourceProvider(final SolidClientProvider solidClientProvider, final URI url) {
+    public SolidResourceProvider(final SolidClientProvider solidClientProvider, final URI url)
+            throws TestHarnessException {
         this(solidClientProvider, url, null, null);
     }
 
-    public SolidResourceProvider(final SolidClientProvider solidClientProvider, final URI url, final String body,
-                                 final String type) {
+    public SolidResourceProvider(final SolidClientProvider solidClientProvider, final URI url,
+                                 final String body, final String type) throws TestHarnessException {
         if (solidClientProvider == null)
             throw new IllegalArgumentException("Parameter solidClientProvider is required");
         if (url == null) throw new IllegalArgumentException("Parameter url is required");
@@ -65,14 +66,8 @@ public class SolidResourceProvider {
         containerType = url.toString().endsWith("/");
 
         if (body != null) {
-            final HttpHeaders headers;
-            try {
-                headers = solidClientProvider.createResource(url, body, type);
-                getAclUrl(url, headers);
-            } catch (Exception e) {
-                logger.warn("Failed to create resource at {}: {}", url, e);
-                throw new RuntimeException("Failed to create resource at " + url + " caused by " + e, e);
-            }
+            final HttpHeaders headers = solidClientProvider.createResource(url, body, type);
+            getAclUrl(url, headers);
         }
         this.url = url;
         logger.debug("SolidResourceProvider proxy for: {}", url);
@@ -82,7 +77,7 @@ public class SolidResourceProvider {
         return url;
     }
 
-    public String getContentAsTurtle() throws Exception {
+    public String getContentAsTurtle() throws TestHarnessException {
         return solidClientProvider.getContentAsTurtle(url);
     }
 
@@ -90,26 +85,26 @@ public class SolidResourceProvider {
         return containerType;
     }
 
-    protected void instantiateContainer() throws Exception {
+    protected void instantiateContainer() throws TestHarnessException {
         final HttpHeaders headers = solidClientProvider.createContainer(url);
         getAclUrl(url, headers);
     }
 
-    public SolidContainerProvider getContainer() {
+    @SuppressWarnings("java:S1130") // false-positive
+    public SolidContainerProvider getContainer() throws TestHarnessException {
+        SolidContainerProvider solidContainerProvider = null;
         if (containerType) {
-            if ("/".equals(url.getPath())) {
-                // already at root
-                return null;
-            } else {
-                return new SolidContainerProvider(solidClientProvider, this.url.resolve(".."));
+            if (!"/".equals(url.getPath())) {
+                solidContainerProvider = new SolidContainerProvider(solidClientProvider, this.url.resolve(".."));
             }
         } else {
-            return new SolidContainerProvider(solidClientProvider, this.url.resolve("."));
+            solidContainerProvider = new SolidContainerProvider(solidClientProvider, this.url.resolve("."));
         }
+        return solidContainerProvider;
     }
 
     private void getAclUrl(final URI url, final HttpHeaders headers) {
-        if (headers != null && headers.allValues(HttpConstants.HEADER_LINK).size() != 0) {
+        if (headers != null && !headers.allValues(HttpConstants.HEADER_LINK).isEmpty()) {
             final URI aclLink = solidClientProvider.getAclUri(headers);
             if (aclLink != null) {
                 logger.debug("ACL LINK {}", aclLink);
@@ -119,7 +114,7 @@ public class SolidResourceProvider {
         }
     }
 
-    public URI getAclUrl() throws Exception {
+    public URI getAclUrl() {
         if (aclUrl == null && !Boolean.FALSE.equals(aclLinkAvailable)) {
             final URI aclLink = solidClientProvider.getAclUri(url);
             if (aclLink != null) {
@@ -130,24 +125,25 @@ public class SolidResourceProvider {
         return aclUrl;
     }
 
-    public AccessDatasetBuilder getAccessDatasetBuilder() throws Exception {
-        final AccessDatasetBuilder builder = solidClientProvider.getAccessDatasetBuilder(getAclUrl());
+    public <T extends AccessDataset> AccessDatasetBuilder<T> getAccessDatasetBuilder() {
+        final AccessDatasetBuilder<T> builder = solidClientProvider.getAccessDatasetBuilder(getAclUrl());
         final String owner = config.getWebIds().get(solidClientProvider.getClient().getUser());
         builder.setOwnerAccess(url.toString(), owner);
         return builder;
     }
 
-    public AccessDataset getAccessDataset() throws Exception {
+    public AccessDataset getAccessDataset() {
         return getAclUrl() != null ? solidClientProvider.getAcl(aclUrl) : null;
     }
 
-    public void setAccessDataset(final AccessDataset accessDataset) throws Exception {
-        final URI aclUrl = getAclUrl();
-        if (aclUrl == null) throw new Exception("Failed to find ACL Link for this resource");
-        solidClientProvider.createAcl(aclUrl, accessDataset);
+    public void setAccessDataset(final AccessDataset accessDataset) throws TestHarnessException {
+        final URI uri = getAclUrl();
+        if (uri == null) throw new TestHarnessException("Failed to find ACL Link for this resource");
+        solidClientProvider.createAcl(uri, accessDataset);
     }
 
-    public SolidContainerProvider findStorage() throws Exception {
+    @SuppressWarnings("java:S1130") // false-positive
+    public SolidContainerProvider findStorage() throws TestHarnessException {
         URI testUri = url;
         boolean linkFound = false;
         boolean rootTested = false;
@@ -166,11 +162,11 @@ public class SolidResourceProvider {
         return linkFound ? new SolidContainerProvider(solidClientProvider, testUri) : null;
     }
 
-    public boolean isStorageType() throws Exception {
+    public boolean isStorageType() {
         return solidClientProvider.hasStorageType(url);
     }
 
-    public void delete() throws Exception {
+    public void delete() {
         solidClientProvider.deleteResourceRecursively(url);
     }
 

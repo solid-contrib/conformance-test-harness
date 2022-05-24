@@ -30,6 +30,7 @@ import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClientProvider;
 import org.solid.testharness.utils.SolidContainerProvider;
 import org.solid.testharness.utils.SolidResourceProvider;
+import org.solid.testharness.utils.TestHarnessException;
 
 import java.net.URI;
 import java.util.List;
@@ -40,8 +41,8 @@ import static org.mockito.Mockito.*;
 @QuarkusTest
 class SolidContainerTest {
     private static final URI TEST_URL = URI.create("https://example.org/");
-    private static final String CHLID = "https://example.org/test/";
-    private static final String MEMBERS = String.format("<%s> <%s> <%s>.", TEST_URL, LDP.CONTAINS, CHLID);
+    private static final String CHILD = "https://example.org/test/";
+    private static final String MEMBERS = String.format("<%s> <%s> <%s>.", TEST_URL, LDP.CONTAINS, CHILD);
 
     @Test
     void testCreate() {
@@ -55,7 +56,7 @@ class SolidContainerTest {
     void testCreateException() {
         final SolidClientProvider solidClientProvider = mock(SolidClientProvider.class);
         final SolidClient solidClient = new SolidClient(solidClientProvider);
-        assertThrows(TestHarnessException.class, () -> SolidContainer.create(solidClient, "NOT_CONTAINER"));
+        assertThrows(TestHarnessApiException.class, () -> SolidContainer.create(solidClient, "NOT_CONTAINER"));
     }
 
     @Test
@@ -69,9 +70,9 @@ class SolidContainerTest {
     @Test
     void instantiateException() throws Exception {
         final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
-        doThrow(new Exception("FAIL")).when(solidContainerProvider).instantiate();
+        doThrow(new TestHarnessException("FAIL")).when(solidContainerProvider).instantiate();
         final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
-        assertThrows(TestHarnessException.class, solidContainer::instantiate);
+        assertThrows(TestHarnessApiException.class, solidContainer::instantiate);
     }
 
     @Test
@@ -86,11 +87,11 @@ class SolidContainerTest {
     }
 
     @Test
-    void reserveContainerException() {
+    void reserveContainerException() throws TestHarnessException {
         final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
-        when(solidContainerProvider.reserveContainer(any())).thenThrow(new RuntimeException("FAIL"));
+        when(solidContainerProvider.reserveContainer(any())).thenThrow(new TestHarnessException("FAIL"));
         final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
-        assertThrows(TestHarnessException.class, solidContainer::reserveContainer);
+        assertThrows(TestHarnessApiException.class, solidContainer::reserveContainer);
     }
 
     @Test
@@ -105,15 +106,15 @@ class SolidContainerTest {
     }
 
     @Test
-    void createContainerException() {
+    void createContainerException() throws TestHarnessException {
         final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
-        when(solidContainerProvider.reserveContainer(any())).thenThrow(new RuntimeException("FAIL"));
+        when(solidContainerProvider.reserveContainer(any())).thenThrow(new TestHarnessException("FAIL"));
         final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
-        assertThrows(TestHarnessException.class, solidContainer::createContainer);
+        assertThrows(TestHarnessApiException.class, solidContainer::createContainer);
     }
 
     @Test
-    void reserveResource() {
+    void reserveResource() throws TestHarnessException {
         final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
         final SolidResourceProvider newResource = mock(SolidResourceProvider.class);
         when(solidContainerProvider.reserveResource(any())).thenReturn(newResource);
@@ -123,15 +124,15 @@ class SolidContainerTest {
     }
 
     @Test
-    void reserveResourceException() {
+    void reserveResourceException() throws TestHarnessException {
         final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
-        when(solidContainerProvider.reserveResource(any())).thenThrow(new RuntimeException("FAIL"));
+        when(solidContainerProvider.reserveResource(any())).thenThrow(new TestHarnessException("FAIL"));
         final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
-        assertThrows(TestHarnessException.class, () -> solidContainer.reserveResource(".txt"));
+        assertThrows(TestHarnessApiException.class, () -> solidContainer.reserveResource(".txt"));
     }
 
     @Test
-    void createResource() {
+    void createResource() throws TestHarnessException {
         final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
         final SolidResourceProvider newResource = mock(SolidResourceProvider.class);
         when(solidContainerProvider.createResource(any(), any(), any())).thenReturn(newResource);
@@ -140,11 +141,11 @@ class SolidContainerTest {
     }
 
     @Test
-    void createResourceException() {
+    void createResourceException() throws TestHarnessException {
         final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
         when(solidContainerProvider.createResource(any(), any(), any())).thenThrow(new RuntimeException("FAIL"));
         final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
-        assertThrows(TestHarnessException.class,
+        assertThrows(TestHarnessApiException.class,
                 () -> solidContainer.createResource(".txt", "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN));
     }
 
@@ -156,19 +157,19 @@ class SolidContainerTest {
         final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
         final List<String> members = solidContainer.listMembers();
         assertEquals(1, members.size());
-        assertEquals(CHLID, members.get(0));
+        assertEquals(CHILD, members.get(0));
     }
 
     @Test
     void listMembersException() throws Exception {
         final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
-        when(solidContainerProvider.getContentAsTurtle()).thenThrow(new Exception("FAIL"));
+        when(solidContainerProvider.getContentAsTurtle()).thenThrow(new TestHarnessException("FAIL"));
         final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
-        assertThrows(TestHarnessException.class, solidContainer::listMembers);
+        assertThrows(TestHarnessApiException.class, solidContainer::listMembers);
     }
 
     @Test
-    void deleteContents() throws Exception {
+    void deleteContents() {
         final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
         final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
         assertDoesNotThrow(solidContainer::deleteContents);
@@ -176,10 +177,10 @@ class SolidContainerTest {
     }
 
     @Test
-    void deleteContentsException() throws Exception {
+    void deleteContentsException() {
         final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
-        doThrow(new Exception("FAIL")).when(solidContainerProvider).deleteContents();
+        doThrow(new RuntimeException("FAIL")).when(solidContainerProvider).deleteContents();
         final SolidContainer solidContainer = new SolidContainer(solidContainerProvider);
-        assertThrows(TestHarnessException.class, solidContainer::deleteContents);
+        assertThrows(TestHarnessApiException.class, solidContainer::deleteContents);
     }
 }

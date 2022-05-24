@@ -95,7 +95,7 @@ class AccessDatasetWacTest {
     }
 
     @Test
-    void constructFromDoc() throws IOException {
+    void constructFromDoc() throws Exception {
         final AccessDataset accessDataset = new AccessDatasetWac(
                 TestUtils.loadStringFromFile("src/test/resources/utils/vcard.ttl"),
                 ACL_URI

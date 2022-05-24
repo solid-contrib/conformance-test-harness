@@ -23,14 +23,37 @@
  */
 package org.solid.testharness.utils;
 
+import java.util.concurrent.CompletionException;
+
 public class TestHarnessInitializationException extends RuntimeException {
     private static final long serialVersionUID = -3676037765799217561L;
 
+    private final String message;
+
     public TestHarnessInitializationException(final String message) {
         super(message);
+        this.message = message;
     }
 
     public TestHarnessInitializationException(final String message, final Throwable cause) {
         super(message, cause);
+        this.message = message;
+    }
+
+    @Override
+    public String getMessage() {
+        final StringBuilder sb = new StringBuilder();
+        if (message != null) {
+            sb.append(message);
+        }
+        if (getCause() != null) {
+            sb.append(" Caused by: ");
+            if (getCause() instanceof CompletionException) {
+                sb.append(getCause().getCause());
+            } else {
+                sb.append(getCause());
+            }
+        }
+        return sb.toString();
     }
 }

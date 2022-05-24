@@ -120,7 +120,7 @@ class AccessDatasetAcpTest {
     }
 
     @Test
-    void constructFromDoc() throws IOException {
+    void constructFromDoc() throws Exception {
         final AccessDataset accessDataset = new AccessDatasetAcp(
                 TestUtils.loadStringFromFile("src/test/resources/utils/vcard.ttl"),
                 ACL_URI

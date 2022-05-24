@@ -43,7 +43,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
@@ -146,12 +145,11 @@ public class Client {
      * @param version     HTTP version 1.1 or 2
      * @param authorized  Is authorization needed
      * @return Response
-     * @throws Exception any exception
      */
     @SuppressWarnings("checkstyle:MultipleStringLiterals") // cleaner to leave error messages local
-    public HttpResponse<String> send(@NotNull final String method, @NotNull final URI url, final String data,
-                                     final Map<String, Object> headers, final String version, final boolean authorized)
-            throws ExecutionException, InterruptedException {
+    public HttpResponse<String> send(@NotNull final String method, @NotNull final URI url,
+                                     final String data, final Map<String, Object> headers,
+                                     final String version, final boolean authorized) {
         requireNonNull(url, "url is required for send");
         requireNonNull(method, "method is required for send");
         // build HTTP request
@@ -186,17 +184,15 @@ public class Client {
     }
 
     public <T> HttpResponse<T> send(@NotNull final HttpRequest request,
-                                    @NotNull final BodyHandler<T> responseHandler)
-            throws ExecutionException, InterruptedException {
+                                    @NotNull final BodyHandler<T> responseHandler) {
         requireNonNull(request, "request is required");
         requireNonNull(responseHandler, "responseHandler is required");
         final CompletableFuture<HttpResponse<T>> responseFuture = sendAsync(request, responseHandler);
-        return responseFuture.get();
+        return responseFuture.join();
     }
 
     public <T> HttpResponse<T> sendAuthorized(final String data, @NotNull final HttpRequest.Builder requestBuilder,
-                                              @NotNull final BodyHandler<T> responseHandler)
-            throws ExecutionException, InterruptedException {
+                                              @NotNull final BodyHandler<T> responseHandler) {
         requireNonNull(requestBuilder, "requestBuilder is required");
         requireNonNull(responseHandler, "responseHandler is required");
         final HttpRequest request = authorize(requestBuilder).build();
@@ -207,7 +203,7 @@ public class Client {
     }
 
     @SuppressWarnings("checkstyle:MultipleStringLiterals")
-    public HttpResponse<String> getAsTurtle(@NotNull final URI url) throws InterruptedException, ExecutionException {
+    public HttpResponse<String> getAsTurtle(@NotNull final URI url) {
         requireNonNull(url, "url is required for getAsTurtle");
         final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
                 .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
@@ -215,8 +211,7 @@ public class Client {
         return send(request, BodyHandlers.ofString());
     }
 
-    public HttpResponse<Void> put(@NotNull final URI url, final String data, final String type)
-            throws ExecutionException, InterruptedException {
+    public HttpResponse<Void> put(@NotNull final URI url, final String data, final String type) {
         requireNonNull(url, "url is required for put");
         requireNonNull(data, "data is required for put");
         requireNonNull(type, "type is required for put");
@@ -226,8 +221,7 @@ public class Client {
         return sendAuthorized(data, builder, BodyHandlers.discarding());
     }
 
-    public HttpResponse<String> patch(@NotNull final URI url, final String data, final String type)
-            throws InterruptedException, ExecutionException {
+    public HttpResponse<String> patch(@NotNull final URI url, final String data, final String type) {
         requireNonNull(url, "url is required for patch");
         requireNonNull(data, "data is required for patch");
         requireNonNull(type, "type is required for patch");
@@ -237,7 +231,7 @@ public class Client {
         return sendAuthorized(data, builder, BodyHandlers.ofString());
     }
 
-    public HttpResponse<Void> head(@NotNull final URI url) throws InterruptedException, ExecutionException {
+    public HttpResponse<Void> head(@NotNull final URI url) {
         requireNonNull(url, "url is required for head");
         final HttpRequest.Builder builder = HttpUtils.newRequestBuilder(url)
                 .method(HttpConstants.METHOD_HEAD, HttpRequest.BodyPublishers.noBody());

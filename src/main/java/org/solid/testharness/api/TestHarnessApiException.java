@@ -23,28 +23,30 @@
  */
 package org.solid.testharness.api;
 
-import org.junit.jupiter.api.Test;
+public class TestHarnessApiException extends RuntimeException {
+    private static final long serialVersionUID = -3676037765799217562L;
+    private final String message;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-class TestHarnessExceptionTest {
-    @Test
-    void simpleMessage() {
-        final TestHarnessException exception = new TestHarnessException("message", new Exception("FAIL"));
-        assertEquals("org.solid.testharness.api.TestHarnessException: message\n" +
-                "Caused by: java.lang.Exception: FAIL", exception.getMessage());
+    public TestHarnessApiException(final String message) {
+        super(message);
+        this.message = message;
     }
 
-    @Test
-    void noMessage() {
-        final TestHarnessException exception = new TestHarnessException(null, new Exception("FAIL"));
-        assertEquals("org.solid.testharness.api.TestHarnessException: \n" +
-                "Caused by: java.lang.Exception: FAIL", exception.getMessage());
+    public TestHarnessApiException(final String message, final Throwable cause) {
+        super(message, cause);
+        this.message = message;
     }
 
-    @Test
-    void noCause() {
-        final TestHarnessException exception = new TestHarnessException("message", null);
-        assertEquals("org.solid.testharness.api.TestHarnessException: message", exception.getMessage());
+    @Override
+    public String getMessage() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getName()).append(": ");
+        if (message != null) {
+            sb.append(message);
+        }
+        if (getCause() != null) {
+            sb.append("\nCaused by: ").append(getCause());
+        }
+        return sb.toString();
     }
 }

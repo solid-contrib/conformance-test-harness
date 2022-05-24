@@ -59,7 +59,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.mock;
@@ -231,8 +231,8 @@ public final class TestUtils {
         return ScenarioEngine.forTempUse(HttpClientFactory.DEFAULT);
     }
 
-    public static ExecutionException createException(final String error) {
-        return new ExecutionException(new Exception(error));
+    public static CompletionException createException(final String error) {
+        return new CompletionException(new Exception(error));
     }
 
     private TestUtils() { }

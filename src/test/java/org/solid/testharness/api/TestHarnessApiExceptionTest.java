@@ -21,23 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.solid.testharness.utils;
+package org.solid.testharness.api;
 
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TestHarnessInitializationExceptionTest {
+class TestHarnessApiExceptionTest {
     @Test
-    void simpleConstructor() {
-        final TestHarnessInitializationException exception = new TestHarnessInitializationException("message",
-                new Exception("FAIL"));
-        assertEquals("message Caused by: java.lang.Exception: FAIL", exception.getMessage());
+    void simpleMessage() {
+        final TestHarnessApiException exception = new TestHarnessApiException("message");
+        assertEquals("org.solid.testharness.api.TestHarnessApiException: message", exception.getMessage());
     }
 
     @Test
-    void simpleMessage() {
-        final TestHarnessInitializationException exception = new TestHarnessInitializationException("message");
-        assertEquals("message", exception.getMessage());
+    void simpleMessageWithCause() {
+        final TestHarnessApiException exception = new TestHarnessApiException("message", new Exception("FAIL"));
+        assertEquals("org.solid.testharness.api.TestHarnessApiException: message\n" +
+                "Caused by: java.lang.Exception: FAIL", exception.getMessage());
+    }
+
+    @Test
+    void noMessage() {
+        final TestHarnessApiException exception = new TestHarnessApiException(null, new Exception("FAIL"));
+        assertEquals("org.solid.testharness.api.TestHarnessApiException: \n" +
+                "Caused by: java.lang.Exception: FAIL", exception.getMessage());
+    }
+
+    @Test
+    void noCause() {
+        final TestHarnessApiException exception = new TestHarnessApiException("message", null);
+        assertEquals("org.solid.testharness.api.TestHarnessApiException: message", exception.getMessage());
     }
 }

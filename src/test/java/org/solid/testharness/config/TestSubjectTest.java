@@ -135,9 +135,8 @@ class TestSubjectTest {
 
         final Exception exception = assertThrows(TestHarnessInitializationException.class,
                 () -> testSubject.prepareServer());
-        assertEquals("Failed to determine access control mode", exception.getMessage());
-        assertEquals("Cannot get ACL url for root test container: https://server/test/",
-                exception.getCause().getMessage());
+        assertTrue(exception.getMessage().contains("Failed to prepare server"));
+        assertTrue(exception.getMessage().contains("Cannot get ACL url for root test container: https://server/test/"));
     }
 
     @Test
@@ -145,11 +144,12 @@ class TestSubjectTest {
         final Client mockClient = setupMockConfig(WAC, null);
         final HttpResponse<Void> mockVoidResponseLink = TestUtils.mockVoidResponse(200, ACL_HEADER);
         when(mockClient.head(URI.create(SERVER_TEST_STORAGE))).thenReturn(mockVoidResponseLink);
-        when(mockClient.head(URI.create("https://server/test/.acl"))).thenThrow(TestUtils.createException(""));
+        when(mockClient.head(URI.create("https://server/test/.acl"))).thenThrow(TestUtils.createException("FAIL"));
 
         final Exception exception = assertThrows(TestHarnessInitializationException.class,
                 () -> testSubject.prepareServer());
-        assertEquals("Failed to determine access control mode", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Failed to prepare server"));
+        assertTrue(exception.getMessage().contains("FAIL"));
     }
 
     @Test
@@ -211,11 +211,12 @@ class TestSubjectTest {
         when(mockClient.head(URI.create(SERVER_TEST_STORAGE))).thenReturn(mockVoidResponseLink);
         when(mockClient.head(URI.create("https://server/test/.acl"))).thenReturn(mockVoidResponseLink);
 
-        when(mockClient.getAsTurtle(any())).thenThrow(TestUtils.createException(""));
+        when(mockClient.getAsTurtle(any())).thenThrow(TestUtils.createException("FAIL"));
 
         final Exception exception = assertThrows(TestHarnessInitializationException.class,
                 () -> testSubject.prepareServer());
-        assertEquals("Failed to prepare server", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Failed to prepare server"));
+        assertTrue(exception.getMessage().contains("FAIL"));
     }
 
     @Test
@@ -227,11 +228,12 @@ class TestSubjectTest {
 
         final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "");
         when(mockClient.getAsTurtle(any())).thenReturn(mockStringResponse);
-        when(mockClient.sendAuthorized(eq(null), any(), any())).thenThrow(TestUtils.createException(""));
+        when(mockClient.sendAuthorized(eq(null), any(), any())).thenThrow(TestUtils.createException("FAIL"));
 
         final Exception exception = assertThrows(TestHarnessInitializationException.class,
                 () -> testSubject.prepareServer());
-        assertEquals("Failed to prepare server", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Failed to prepare server"));
+        assertTrue(exception.getMessage().contains("FAIL"));
     }
 
     @Test
@@ -285,7 +287,7 @@ class TestSubjectTest {
         setupMockConfig(null, null);
         final Exception exception = assertThrows(TestHarnessInitializationException.class,
                 () -> testSubject.findStorage());
-        assertEquals("Failed to read WebId profile for " + ALICE_WEBID, exception.getMessage());
+        assertTrue(exception.getMessage().contains("Failed to read WebId profile for " + ALICE_WEBID));
     }
 
     @Test
@@ -293,7 +295,7 @@ class TestSubjectTest {
         setupMockConfig(null, Collections.emptyList());
         final Exception exception = assertThrows(TestHarnessInitializationException.class,
                 () -> testSubject.findStorage());
-        assertTrue(exception.getMessage().startsWith("Pod provisioning is not yet implemented"));
+        assertTrue(exception.getMessage().contains("Pod provisioning is not yet implemented"));
     }
 
     @Test
@@ -350,7 +352,7 @@ class TestSubjectTest {
     void tearDownServerFails() throws Exception {
         final SolidClientProvider mockSolidClientProvider = mock(SolidClientProvider.class);
         testSubject.setTestRunContainer(new SolidContainerProvider(mockSolidClientProvider, TEST_URL));
-        doThrow(new Exception("FAIL")).when(mockSolidClientProvider).deleteResourceRecursively(any());
+        doThrow(TestUtils.createException("FAIL")).when(mockSolidClientProvider).deleteResourceRecursively(any());
         assertDoesNotThrow(() -> testSubject.tearDownServer());
         verify(mockSolidClientProvider).deleteResourceRecursively(TEST_URL);
     }
@@ -365,8 +367,7 @@ class TestSubjectTest {
         }
     }
 
-    private Client setupMockConfig(final TestSubject.AccessControlMode mode, final List<String> storageList)
-            throws Exception {
+    private Client setupMockConfig(final TestSubject.AccessControlMode mode, final List<String> storageList) {
         when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE, ALICE_WEBID));
         when(config.getTestContainer()).thenReturn("/test/");
         when(config.getServerRoot()).thenReturn("https://server/");

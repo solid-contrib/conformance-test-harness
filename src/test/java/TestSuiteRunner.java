@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("solid")
 @QuarkusTest
-public class TestSuiteRunner {
+class TestSuiteRunner {
     @Inject
     Config config;
     @Inject

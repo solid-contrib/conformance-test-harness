@@ -32,7 +32,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UtilsTest {
+class UtilsTest {
     @Test
     void parseLinkHeaders() {
         final List<Map<String, String>> links = Utils.parseLinkHeaders(setupHeaders(HttpConstants.HEADER_LINK,
@@ -92,7 +92,7 @@ public class UtilsTest {
     @Test
     void parseWacAllowHeaderEmptyGroup() {
         final Map<String, List<String>> header = Utils.parseWacAllowHeader(
-                Map.of(HttpConstants.HEADER_WAC_ALLOW, List.of("user=\"read\", public="))
+                Map.of(HttpConstants.HEADER_WAC_ALLOW, List.of("user=\"read\", public=\"\""))
         );
         assertEquals(1, header.get("user").size());
         assertEquals("read", header.get("user").get(0));
@@ -122,7 +122,7 @@ public class UtilsTest {
 
     @Test
     void parseWacAllowHeaderNull() {
-        assertThrows(TestHarnessException.class, () -> Utils.parseWacAllowHeader(null));
+        assertThrows(TestHarnessApiException.class, () -> Utils.parseWacAllowHeader(null));
     }
 
     @Test
@@ -133,7 +133,7 @@ public class UtilsTest {
 
     @Test
     void resolveUriException() {
-        assertThrows(TestHarnessException.class, () -> Utils.resolveUri("~://?", ""));
+        assertThrows(TestHarnessApiException.class, () -> Utils.resolveUri("~://?", ""));
     }
 
     @Test

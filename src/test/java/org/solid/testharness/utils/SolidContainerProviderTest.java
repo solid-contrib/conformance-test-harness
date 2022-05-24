@@ -62,21 +62,21 @@ class SolidContainerProviderTest {
     }
 
     @Test
-    void testCreate() {
+    void testCreate() throws Exception {
         final SolidContainerProvider container = new SolidContainerProvider(solidClientProvider, TEST_URL);
         assertTrue(container.isContainer());
         assertEquals(TEST_URL, container.getUrl());
     }
 
     @Test
-    void instantiate() {
+    void instantiate() throws Exception {
         final SolidContainerProvider container = new SolidContainerProvider(solidClientProvider, TEST_URL);
         assertDoesNotThrow(container::instantiate);
     }
 
     @Test
     void instantiateBadResponse() throws Exception {
-        when(solidClientProvider.createContainer(any())).thenThrow(new Exception("FAIL"));
+        when(solidClientProvider.createContainer(any())).thenThrow(new TestHarnessException("FAIL"));
         final SolidContainerProvider container = new SolidContainerProvider(solidClientProvider, TEST_URL);
         final Exception exception = assertThrows(Exception.class, container::instantiate);
         assertEquals("FAIL", exception.getMessage());
@@ -84,7 +84,7 @@ class SolidContainerProviderTest {
 
     @Test
     void instantiateException() throws Exception {
-        when(solidClientProvider.createContainer(any())).thenThrow(new Exception("FAIL"));
+        when(solidClientProvider.createContainer(any())).thenThrow(new TestHarnessException("FAIL"));
         final SolidContainerProvider container = new SolidContainerProvider(solidClientProvider, TEST_URL);
         final Exception exception = assertThrows(Exception.class, container::instantiate);
         assertEquals("FAIL", exception.getMessage());
@@ -121,7 +121,7 @@ class SolidContainerProviderTest {
     }
 
     @Test
-    void createResourceException() {
+    void createResourceException() throws Exception {
         final SolidContainerProvider container = new SolidContainerProvider(solidClientProvider, TEST_URL);
         assertThrows(Exception.class, () -> container.createResource("filename.suffix", "hello", null));
     }

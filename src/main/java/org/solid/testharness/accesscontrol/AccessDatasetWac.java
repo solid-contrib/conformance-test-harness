@@ -31,12 +31,12 @@ import org.solid.common.vocab.ACL;
 import org.solid.common.vocab.FOAF;
 import org.solid.common.vocab.RDF;
 import org.solid.common.vocab.VCARD;
+import org.solid.testharness.api.TestHarnessApiException;
 import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.http.Client;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.HttpUtils;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpResponse;
 import java.util.List;
@@ -62,20 +62,15 @@ public class AccessDatasetWac implements AccessDataset {
     // switch uses an enum so cannot test a default option
     public AccessDatasetWac(final List<AccessRule> accessRules, final String aclUri) {
         if (!accessRules.isEmpty()) {
-            final ModelBuilder builder = new ModelBuilder();
-            builder.setNamespace(ACL.PREFIX, ACL.NAMESPACE);
-            if (accessRules.stream().anyMatch(rule -> rule.getType() == AccessRule.AgentType.PUBLIC)) {
-                builder.setNamespace(FOAF.PREFIX, FOAF.NAMESPACE);
-            }
-            if (accessRules.stream().anyMatch(rule -> rule.getType() == AccessRule.AgentType.GROUP)) {
-                builder.setNamespace(VCARD.PREFIX, VCARD.NAMESPACE);
+            final ModelBuilder builder = setupModel(accessRules);
+            // validate control rules
+            if (accessRules.stream().map(AccessRule::getAccess)
+                    .anyMatch(a -> a.contains(CONTROL_READ) ^ a.contains(CONTROL_WRITE))) {
+                throw new TestHarnessApiException("For WAC, you must either use Control, or " +
+                        "ControlRead and ControlWrite must be the same");
             }
             // TODO: Pair rules if same agent and modes?
             accessRules.forEach(rule -> {
-                if (rule.getAccess().contains(CONTROL_READ) ^ rule.getAccess().contains(CONTROL_WRITE)) {
-                    throw new RuntimeException("For WAC, you must either use Control, or " +
-                            "ControlRead and ControlWrite must be the same");
-                }
                 builder.subject(bnode())
                         .add(RDF.type, ACL.Authorization)
                         .add(rule.isInheritable() ? ACL.default_ : ACL.accessTo, rule.getTargetIri());
@@ -107,17 +102,29 @@ public class AccessDatasetWac implements AccessDataset {
         }
     }
 
-    public AccessDatasetWac(final String acl, final URI baseUri) throws IOException {
+    private ModelBuilder setupModel(final List<AccessRule> accessRules) {
+        final ModelBuilder builder = new ModelBuilder();
+        builder.setNamespace(ACL.PREFIX, ACL.NAMESPACE);
+        if (accessRules.stream().anyMatch(rule -> rule.getType() == AccessRule.AgentType.PUBLIC)) {
+            builder.setNamespace(FOAF.PREFIX, FOAF.NAMESPACE);
+        }
+        if (accessRules.stream().anyMatch(rule -> rule.getType() == AccessRule.AgentType.GROUP)) {
+            builder.setNamespace(VCARD.PREFIX, VCARD.NAMESPACE);
+        }
+        return builder;
+    }
+
+    public AccessDatasetWac(final String acl, final URI baseUri) {
         parseTurtle(acl, baseUri.toString());
     }
 
     @Override
-    public void apply(final Client client, final URI uri) throws Exception {
+    public void apply(final Client client, final URI uri) {
         if (model != null) {
             final HttpResponse<Void> response = client.put(uri, asTurtle(),
                     HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
             if (!HttpUtils.isSuccessful(response.statusCode())) {
-                throw new Exception("Error response=" + response.statusCode() + " trying to apply ACL");
+                throw new TestHarnessApiException("Error response=" + response.statusCode() + " trying to apply ACL");
             }
         }
     }

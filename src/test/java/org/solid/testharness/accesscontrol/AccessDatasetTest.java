@@ -95,7 +95,7 @@ class AccessDatasetTest {
     }
 
     @Test
-    void parseTurtle() throws IOException {
+    void parseTurtle() throws Exception {
         final AccessDataset accessDataset = new TestAccessDataset();
         accessDataset.parseTurtle(TestUtils.loadStringFromFile("src/test/resources/utils/vcard.ttl"),
                 TestUtils.SAMPLE_BASE);

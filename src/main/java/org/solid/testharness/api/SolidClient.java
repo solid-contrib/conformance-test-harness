@@ -54,8 +54,8 @@ public class SolidClient {
     public Map<String, String> getAuthHeaders(final String method, final String uri) {
         try {
             return solidClientProvider.getClient().getAuthHeaders(method, URI.create(uri));
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to prepare auth headers", e);
+        } catch (RuntimeException e) {
+            throw new TestHarnessApiException("Failed to prepare auth headers", e);
         }
     }
 
@@ -79,8 +79,8 @@ public class SolidClient {
                     "body", response.body(),
                     "headers", response.headers().map()
             );
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to send request", e);
+        } catch (RuntimeException e) {
+            throw new TestHarnessApiException("Failed to send request", e);
         }
     }
 
@@ -104,8 +104,8 @@ public class SolidClient {
                     "body", response.body(),
                     "headers", response.headers().map()
             );
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to send authorized request", e);
+        } catch (RuntimeException e) {
+            throw new TestHarnessApiException("Failed to send authorized request", e);
         }
     }
 }

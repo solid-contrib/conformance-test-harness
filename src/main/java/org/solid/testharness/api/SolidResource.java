@@ -27,6 +27,7 @@ import org.solid.testharness.accesscontrol.AccessDataset;
 import org.solid.testharness.accesscontrol.AccessDatasetBuilder;
 import org.solid.testharness.utils.SolidContainerProvider;
 import org.solid.testharness.utils.SolidResourceProvider;
+import org.solid.testharness.utils.TestHarnessException;
 
 import java.net.URI;
 
@@ -60,8 +61,8 @@ public class SolidResource {
             return new SolidResource(
                     new SolidResourceProvider(solidClient.solidClientProvider, URI.create(url), body, type)
             );
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to construct resource", e);
+        } catch (TestHarnessException | RuntimeException e) {
+            throw new TestHarnessApiException("Failed to construct resource", e);
         }
     }
 
@@ -79,8 +80,12 @@ public class SolidResource {
      * @return A SolidContainer representing the container or null if the resource is the server root.
      */
     public SolidContainer getContainer() {
-        final SolidContainerProvider solidContainerProvider = solidResourceProvider.getContainer();
-        return solidContainerProvider != null ? new SolidContainer(solidContainerProvider) : null;
+        try {
+            final SolidContainerProvider solidContainerProvider = solidResourceProvider.getContainer();
+            return solidContainerProvider != null ? new SolidContainer(solidContainerProvider) : null;
+        } catch (TestHarnessException | RuntimeException e) {
+            throw new TestHarnessApiException("Failed to get ACL url", e);
+        }
     }
 
     /**
@@ -91,8 +96,8 @@ public class SolidResource {
         try {
             final URI aclUrl = solidResourceProvider.getAclUrl();
             return aclUrl != null ? aclUrl.toString() : null;
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to get ACL url", e);
+        } catch (RuntimeException e) {
+            throw new TestHarnessApiException("Failed to get ACL url", e);
         }
     }
 
@@ -104,8 +109,8 @@ public class SolidResource {
         try {
             final SolidResourceProvider storage = solidResourceProvider.findStorage();
             return storage != null ? new SolidResource(storage) : null;
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to find storage for this resource", e);
+        } catch (TestHarnessException | RuntimeException e) {
+            throw new TestHarnessApiException("Failed to find storage for this resource", e);
         }
     }
 
@@ -116,20 +121,21 @@ public class SolidResource {
     public boolean isStorageType() {
         try {
             return solidResourceProvider.isStorageType();
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to find storage link header", e);
+        } catch (RuntimeException e) {
+            throw new TestHarnessApiException("Failed to find storage link header", e);
         }
     }
 
     /**
      * Return an <code>AccessDatasetBuilder</code>.
      * @return an access dataset builder
+     * @param <T> AccessDataset type
      */
-    public AccessDatasetBuilder getAccessDatasetBuilder() {
+    public <T extends AccessDataset> AccessDatasetBuilder<T> getAccessDatasetBuilder() {
         try {
             return solidResourceProvider.getAccessDatasetBuilder();
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to create AccessDatasetBuilder", e);
+        } catch (RuntimeException e) {
+            throw new TestHarnessApiException("Failed to create AccessDatasetBuilder", e);
         }
     }
 
@@ -140,8 +146,8 @@ public class SolidResource {
     public AccessDataset getAccessDataset() {
         try {
             return solidResourceProvider.getAccessDataset();
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to get the access dataset", e);
+        } catch (RuntimeException e) {
+            throw new TestHarnessApiException("Failed to get the access dataset", e);
         }
     }
 
@@ -152,8 +158,8 @@ public class SolidResource {
     public void setAccessDataset(final AccessDataset accessDataset) {
         try {
             solidResourceProvider.setAccessDataset(accessDataset);
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to apply the ACL", e);
+        } catch (TestHarnessException | RuntimeException e) {
+            throw new TestHarnessApiException("Failed to apply the ACL", e);
         }
     }
 
@@ -163,8 +169,8 @@ public class SolidResource {
     public void delete() {
         try {
             solidResourceProvider.delete();
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to delete the resource", e);
+        } catch (RuntimeException e) {
+            throw new TestHarnessApiException("Failed to delete the resource", e);
         }
     }
 

@@ -29,7 +29,8 @@ import org.solid.testharness.http.SolidClientProvider;
 import java.net.URI;
 
 public class SolidContainerProvider extends SolidResourceProvider {
-    public SolidContainerProvider(final SolidClientProvider solidClientProvider, final URI url) {
+    public SolidContainerProvider(final SolidClientProvider solidClientProvider, final URI url)
+            throws TestHarnessException {
         super(solidClientProvider, validateUrl(url), null, null);
     }
 
@@ -40,25 +41,28 @@ public class SolidContainerProvider extends SolidResourceProvider {
         return url;
     }
 
-    public SolidContainerProvider instantiate() throws Exception {
+    public SolidContainerProvider instantiate() throws TestHarnessException {
         instantiateContainer();
         return this;
     }
 
-    public SolidContainerProvider reserveContainer(final String name) {
+    public SolidContainerProvider reserveContainer(final String name) throws TestHarnessException {
         return new SolidContainerProvider(super.solidClientProvider, url.resolve(HttpUtils.ensureSlashEnd(name)));
     }
 
-    public SolidResourceProvider reserveResource(final String name) {
+    @SuppressWarnings("java:S1130") // false-positive
+    public SolidResourceProvider reserveResource(final String name) throws TestHarnessException {
         return new SolidResourceProvider(super.solidClientProvider, url.resolve(HttpUtils.ensureNoSlashEnd(name)));
     }
 
-    public SolidResourceProvider createResource(final String name, final String body, final String type) {
+    @SuppressWarnings("java:S1130") // false-positive
+    public SolidResourceProvider createResource(final String name, final String body, final String type)
+            throws TestHarnessException {
         final URI childUrl = url.resolve(HttpUtils.ensureNoSlashEnd(name));
         return new SolidResourceProvider(super.solidClientProvider, childUrl, body, type);
     }
 
-    public void deleteContents() throws Exception {
+    public void deleteContents() {
         solidClientProvider.deleteContentsRecursively(url);
     }
 }

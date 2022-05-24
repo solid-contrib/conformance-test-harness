@@ -27,17 +27,17 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TestHarnessInitializationExceptionTest {
+class TestHarnessExceptionTest {
     @Test
     void simpleConstructor() {
-        final TestHarnessInitializationException exception = new TestHarnessInitializationException("message",
+        final TestHarnessException exception = new TestHarnessException("message",
                 new Exception("FAIL"));
-        assertEquals("message Caused by: java.lang.Exception: FAIL", exception.getMessage());
+        assertEquals("message", exception.getMessage());
     }
 
     @Test
     void simpleMessage() {
-        final TestHarnessInitializationException exception = new TestHarnessInitializationException("message");
+        final TestHarnessException exception = new TestHarnessException("message");
         assertEquals("message", exception.getMessage());
     }
 }

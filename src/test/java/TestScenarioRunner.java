@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("solid")
 @QuarkusTest
-public class TestScenarioRunner {
+class TestScenarioRunner {
     @Inject
     ConformanceTestHarness conformanceTestHarness;
 

@@ -106,7 +106,7 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void exchangeRefreshToken() throws Exception {
+    void exchangeRefreshToken() {
         final OidcConfiguration oidcConfig = mockOidcConfig(List.of(HttpConstants.REFRESH_TOKEN));
         final Client client = mockSigningClient();
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "{\"access_token\":\"token\"}");
@@ -129,7 +129,7 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void clientCredentialsAccessToken() throws Exception {
+    void clientCredentialsAccessToken() {
         final OidcConfiguration oidcConfig = mockOidcConfig(List.of(HttpConstants.CLIENT_CREDENTIALS));
         final Client client = mockSigningClient();
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "{\"access_token\":\"token\"}");
@@ -152,7 +152,7 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void loginAndGetAccessTokenStartSession() throws Exception {
+    void loginAndGetAccessTokenStartSession() {
         final OidcConfiguration oidcConfig = mockOidcConfig(List.of(HttpConstants.AUTHORIZATION_CODE_TYPE));
         final Client authClient = mockSigningClient();
         when(config.getSolidIdentityProvider()).thenReturn(TEST_URI);
@@ -179,7 +179,7 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void loginAndGetAccessTokenUserRegistration() throws Exception {
+    void loginAndGetAccessTokenUserRegistration() {
         final OidcConfiguration oidcConfig = mockOidcConfig(List.of(HttpConstants.AUTHORIZATION_CODE_TYPE));
         final Client authClient = mockSigningClient();
         when(config.getSolidIdentityProvider()).thenReturn(TEST_URI);
@@ -219,7 +219,7 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void requestOidcConfiguration() throws Exception {
+    void requestOidcConfiguration() {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200,
                 "{\"issuer\":\"" + TEST_URI + "\"}");
         doReturn(mockResponse).when(client).send(any(), any());
@@ -228,7 +228,7 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void requestOidcConfigurationNoMatch() throws Exception {
+    void requestOidcConfigurationNoMatch() {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "{\"issuer\":\"BAD\"}");
         doReturn(mockResponse).when(client).send(any(), any());
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
@@ -237,24 +237,24 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void requestOidcConfigurationJsonError() throws Exception {
+    void requestOidcConfigurationJsonError() {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "not json");
         doReturn(mockResponse).when(client).send(any(), any());
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.requestOidcConfiguration(client, TEST_URI));
-        assertEquals("Failed to read the OIDC config at " + TEST_URI.resolve(HttpConstants.OPENID_CONFIGURATION),
-                exception.getMessage());
+        assertTrue(exception.getMessage().startsWith("Failed to read the OIDC config at " +
+                TEST_URI.resolve(HttpConstants.OPENID_CONFIGURATION)));
     }
 
     @Test
-    void startLoginSession() throws Exception {
+    void startLoginSession() {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "OK");
         doReturn(mockResponse).when(client).send(any(), any());
         assertDoesNotThrow(() -> authManager.startLoginSession(client, testCredentials, TEST_URI));
     }
 
     @Test
-    void registerClient() throws Exception {
+    void registerClient() {
         final OidcConfiguration oidcConfig = mockOidcConfig(null);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "{\"client_id\":\"CLIENTID\"}");
         doReturn(mockResponse).when(client).send(any(), any());
@@ -263,17 +263,17 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void registerClientFailed() throws Exception {
+    void registerClientFailed() {
         final OidcConfiguration oidcConfig = mockOidcConfig(null);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "not json");
         doReturn(mockResponse).when(client).send(any(), any());
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.registerClient(client, oidcConfig, "ORIGIN"));
-        assertEquals("Failed to process JSON in client registration", exception.getMessage());
+        assertTrue(exception.getMessage().startsWith("Failed to process JSON in client registration"));
     }
 
     @Test
-    void requestAuthorizationCodeImmediate() throws Exception {
+    void requestAuthorizationCodeImmediate() {
         final OidcConfiguration oidcConfig = mockOidcConfig(null);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(
                 302, "",
@@ -285,7 +285,7 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void requestAuthorizationCodeRedirect() throws Exception {
+    void requestAuthorizationCodeRedirect() {
         final OidcConfiguration oidcConfig = mockOidcConfig(null);
         final HttpResponse<String> mockResponse1 = TestUtils.mockStringResponse(
                 302, "",
@@ -300,7 +300,7 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void requestAuthorizationCodeRedirectForm() throws Exception {
+    void requestAuthorizationCodeRedirectForm() {
         final OidcConfiguration oidcConfig = mockOidcConfig(null);
         final HttpResponse<String> mockResponse1 = TestUtils.mockStringResponse(200, "<form method=\"POST\"");
         when(mockResponse1.uri()).thenReturn(TEST_URI.resolve("/login"));
@@ -315,7 +315,7 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void requestAuthorizationCodeImmediateNoCode() throws Exception {
+    void requestAuthorizationCodeImmediateNoCode() {
         final OidcConfiguration oidcConfig = mockOidcConfig(null);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(
                 302, "",
@@ -328,7 +328,7 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void requestAuthorizationCodeNoRedirectNotForm() throws Exception {
+    void requestAuthorizationCodeNoRedirectNotForm() {
         final OidcConfiguration oidcConfig = mockOidcConfig(null);
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "NOFORM");
         doReturn(mockResponse).when(client).send(any(), any());
@@ -339,7 +339,7 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void idpLoginRedirect() throws Exception {
+    void idpLoginRedirect() {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(
                 302, "",
                 Map.of(HttpConstants.HEADER_LOCATION, List.of(TEST_URI.resolve("/redirect").toString())));
@@ -349,7 +349,7 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void idpLoginRedirectNoHeader() throws Exception {
+    void idpLoginRedirectNoHeader() {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(302, "");
         doReturn(mockResponse).when(client).send(any(), any());
         final URI uri = authManager.idpLogin(client, TEST_URI,  testCredentials, TEST_URI.resolve("/auth"));
@@ -357,7 +357,7 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void idpLoginJson() throws Exception {
+    void idpLoginJson() {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "{\"location\":\"newloc\"}");
         doReturn(mockResponse).when(client).send(any(), any());
         final URI uri = authManager.idpLogin(client, TEST_URI,  testCredentials, TEST_URI.resolve("/auth"));
@@ -365,7 +365,7 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void idpLoginJsonFailed() throws Exception {
+    void idpLoginJsonFailed() {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "no location");
         doReturn(mockResponse).when(client).send(any(), any());
         final URI uri = authManager.idpLogin(client, TEST_URI,  testCredentials, TEST_URI.resolve("/auth"));
@@ -373,7 +373,7 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void requestToken() throws Exception {
+    void requestToken() {
         final OidcConfiguration oidcConfig = mockOidcConfig(null);
         final Client client = mockSigningClient();
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "{\"access_token\":\"TOKEN\"}");
@@ -383,7 +383,7 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void requestTokenRequestFailed() throws Exception {
+    void requestTokenRequestFailed() {
         final OidcConfiguration oidcConfig = mockOidcConfig(null);
         final Client client = mockSigningClient();
         when(client.send(any(), any())).thenThrow(TestUtils.createException("FAIL"));
@@ -391,11 +391,11 @@ class AuthManagerMethodTest {
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.requestToken(client, oidcConfig,
                         "id", "secret", grantType));
-        assertEquals("Token exchange request failed", exception.getMessage());
+        assertTrue(exception.getMessage().startsWith("Token exchange request failed"));
     }
 
     @Test
-    void requestTokenBadResponse() throws Exception {
+    void requestTokenBadResponse() {
         final OidcConfiguration oidcConfig = mockOidcConfig(null);
         final Client client = mockSigningClient();
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(400, "ERROR");
@@ -408,7 +408,7 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void requestTokenTokenParsingFail() throws Exception {
+    void requestTokenTokenParsingFail() {
         final OidcConfiguration oidcConfig = mockOidcConfig(null);
         final Client client = mockSigningClient();
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "not json");
@@ -417,11 +417,11 @@ class AuthManagerMethodTest {
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.requestToken(client, oidcConfig,
                         "id", "secret", tokenRequestData));
-        assertEquals("Failed to parse token response", exception.getMessage());
+        assertTrue(exception.getMessage().startsWith("Failed to parse token response"));
     }
 
     @Test
-    void getRequest() throws Exception {
+    void getRequest() {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "Good response");
         doReturn(mockResponse).when(client).send(any(), any());
         final HttpResponse<String> response = authManager.getRequest(client, TEST_URI,
@@ -431,16 +431,16 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void getRequestFailed() throws Exception {
+    void getRequestFailed() {
         when(client.send(any(), any())).thenThrow(TestUtils.createException("FAIL"));
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.getRequest(client, TEST_URI,
                         HttpConstants.MEDIA_TYPE_TEXT_TURTLE, "Test"));
-        assertEquals("Test GET request failed", exception.getMessage());
+        assertTrue(exception.getMessage().startsWith("Test GET request failed"));
     }
 
     @Test
-    void getRequestBadResponse() throws Exception {
+    void getRequestBadResponse() {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(404, "Not found");
         doReturn(mockResponse).when(client).send(any(), any());
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
@@ -450,7 +450,7 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void postRequest() throws Exception {
+    void postRequest() {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "Good response");
         doReturn(mockResponse).when(client).send(any(), any());
         final HttpResponse<String> response = authManager.postRequest(client, TEST_URI,
@@ -462,18 +462,18 @@ class AuthManagerMethodTest {
     }
 
     @Test
-    void postRequestFailed() throws Exception {
+    void postRequestFailed() {
         when(client.send(any(), any())).thenThrow(TestUtils.createException("FAIL"));
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.postRequest(client, TEST_URI,
                         EMPTY_FORM_DATA,
                         HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED,
                         STRING_BODY_HANDLER, "Test"));
-        assertEquals("Test POST request failed", exception.getMessage());
+        assertTrue(exception.getMessage().startsWith("Test POST request failed"));
     }
 
     @Test
-    void postRequestBadResponse() throws Exception {
+    void postRequestBadResponse() {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(404, "Not found");
         doReturn(mockResponse).when(client).send(any(), any());
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
@@ -493,7 +493,7 @@ class AuthManagerMethodTest {
     void generateCodeChallengeThrows() {
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.generateCodeChallenge("CODE_VERIFIER", "UNKNOWN"));
-        assertEquals("Failed to generate code challenge", exception.getMessage());
+        assertTrue(exception.getMessage().startsWith("Failed to generate code challenge"));
     }
 
     OidcConfiguration mockOidcConfig(final List<String> grantTypes) {

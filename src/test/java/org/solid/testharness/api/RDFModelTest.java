@@ -81,7 +81,7 @@ class RDFModelTest {
         final Exception exception = assertThrows(Exception.class,
                 () -> RDFModel.parse(null, "application/json", null)
         );
-        assertTrue(exception.getMessage().contains("TestHarnessException: Failed to parse data"));
+        assertTrue(exception.getMessage().contains("TestHarnessApiException: Failed to parse data"));
         assertTrue(exception.getMessage().contains("contentType 'application/json' is not supported"));
     }
 
@@ -90,7 +90,7 @@ class RDFModelTest {
         final Exception exception = assertThrows(Exception.class,
                 () -> RDFModel.parse("BAD", "text/turtle", null)
         );
-        assertTrue(exception.getMessage().contains("TestHarnessException: Failed to parse data"));
+        assertTrue(exception.getMessage().contains("TestHarnessApiException: Failed to parse data"));
         assertTrue(exception.getMessage().contains("RDFParseException: Unexpected end of file"));
     }
 
@@ -122,7 +122,7 @@ class RDFModelTest {
         final Exception exception = assertThrows(Exception.class,
                 () -> model.contains(null)
         );
-        assertTrue(exception.getMessage().contains("TestHarnessException: Contains test failed"));
+        assertTrue(exception.getMessage().contains("TestHarnessApiException: Contains test failed"));
         assertTrue(exception.getMessage().contains("IllegalArgumentException: The subset model"));
     }
 
@@ -132,7 +132,7 @@ class RDFModelTest {
         final Exception exception = assertThrows(Exception.class,
                 () -> model.contains(new RDFModel(new ModelBuilder().build()))
         );
-        assertTrue(exception.getMessage().contains("TestHarnessException: Contains test failed"));
+        assertTrue(exception.getMessage().contains("TestHarnessApiException: Contains test failed"));
         assertTrue(exception.getMessage().contains("IllegalArgumentException: The subset model"));
     }
 
@@ -191,7 +191,7 @@ class RDFModelTest {
         final Exception exception = assertThrows(Exception.class,
                 () -> model.subjects(RDF.type, FOAF.Person)
         );
-        assertTrue(exception.getMessage().contains("TestHarnessException: Failed to get list of subjects"));
+        assertTrue(exception.getMessage().contains("TestHarnessApiException: Failed to get list of subjects"));
         assertTrue(exception.getMessage().contains("NullPointerException"));
     }
 
@@ -216,7 +216,7 @@ class RDFModelTest {
         final Exception exception = assertThrows(Exception.class,
                 () -> model.predicates(BOB_IRI, FOAF.Person)
         );
-        assertTrue(exception.getMessage().contains("TestHarnessException: Failed to get list of predicates"));
+        assertTrue(exception.getMessage().contains("TestHarnessApiException: Failed to get list of predicates"));
         assertTrue(exception.getMessage().contains("NullPointerException"));
     }
 
@@ -241,7 +241,7 @@ class RDFModelTest {
         final Exception exception = assertThrows(Exception.class,
                 () -> model.objects(BOB_IRI, RDF.type)
         );
-        assertTrue(exception.getMessage().contains("TestHarnessException: Failed to get list of objects"));
+        assertTrue(exception.getMessage().contains("TestHarnessApiException: Failed to get list of objects"));
         assertTrue(exception.getMessage().contains("NullPointerException"));
     }
 
@@ -264,7 +264,7 @@ class RDFModelTest {
                 () -> model.contains(BOB_IRI, RDF.type, FOAF.Person)
         );
         assertTrue(exception.getMessage()
-                .contains("TestHarnessException: Failed testing if model contains the statement"));
+                .contains("TestHarnessApiException: Failed testing if model contains the statement"));
         assertTrue(exception.getMessage().contains("NullPointerException"));
     }
 
@@ -279,7 +279,7 @@ class RDFModelTest {
                 () -> RDFModel.iri(null)
         );
         assertTrue(exception.getMessage()
-                .contains("TestHarnessException: Failed to create an IRI"));
+                .contains("TestHarnessApiException: Failed to create an IRI"));
         assertTrue(exception.getMessage().contains("NullPointerException"));
     }
 
@@ -294,13 +294,13 @@ class RDFModelTest {
                 () -> RDFModel.iri(null, null)
         );
         assertTrue(exception.getMessage()
-                .contains("TestHarnessException: Failed to create an IRI"));
+                .contains("TestHarnessApiException: Failed to create an IRI"));
         assertTrue(exception.getMessage().contains("NullPointerException"));
     }
 
     @Test
     void literalObject() {
-        final Literal literal = RDFModel.literal(Integer.valueOf(5));
+        final Literal literal = RDFModel.literal(5);
         assertEquals("5", literal.stringValue());
         assertEquals(XSD.INT, literal.getDatatype());
     }
@@ -310,7 +310,7 @@ class RDFModelTest {
         final Exception exception = assertThrows(Exception.class,
                 () -> RDFModel.literal(SAMPLE_MODEL)
         );
-        assertTrue(exception.getMessage().contains("TestHarnessException: Failed to create a literal"));
+        assertTrue(exception.getMessage().contains("TestHarnessApiException: Failed to create a literal"));
         assertTrue(exception.getMessage().contains("IllegalArgumentException"));
     }
 
@@ -326,7 +326,7 @@ class RDFModelTest {
         final Exception exception = assertThrows(Exception.class,
                 () -> RDFModel.literal((BigDecimal) null)
         );
-        assertTrue(exception.getMessage().contains("TestHarnessException: Failed to create a decimal literal"));
+        assertTrue(exception.getMessage().contains("TestHarnessApiException: Failed to create a decimal literal"));
         assertTrue(exception.getMessage().contains("NullPointerException"));
     }
 
@@ -342,7 +342,7 @@ class RDFModelTest {
         final Exception exception = assertThrows(Exception.class,
                 () -> RDFModel.literal((BigInteger) null)
         );
-        assertTrue(exception.getMessage().contains("TestHarnessException: Failed to create an integer literal"));
+        assertTrue(exception.getMessage().contains("TestHarnessApiException: Failed to create an integer literal"));
         assertTrue(exception.getMessage().contains("NullPointerException"));
     }
 
@@ -358,7 +358,7 @@ class RDFModelTest {
         final Exception exception = assertThrows(Exception.class,
                 () -> RDFModel.literal(null, XSD.BOOLEAN)
         );
-        assertTrue(exception.getMessage().contains("TestHarnessException: Failed to create an " +
+        assertTrue(exception.getMessage().contains("TestHarnessApiException: Failed to create an " +
                 "http://www.w3.org/2001/XMLSchema#boolean literal"));
         assertTrue(exception.getMessage().contains("NullPointerException"));
     }
@@ -367,7 +367,7 @@ class RDFModelTest {
     void literalString() {
         final Literal literal = RDFModel.literal("hello", "en");
         assertEquals("hello", literal.stringValue());
-        assertEquals("en", literal.getLanguage().get());
+        assertEquals("en", literal.getLanguage().orElse(""));
     }
 
     @Test
@@ -375,7 +375,7 @@ class RDFModelTest {
         final Exception exception = assertThrows(Exception.class,
                 () -> RDFModel.literal(null, "en")
         );
-        assertTrue(exception.getMessage().contains("TestHarnessException: Failed to create a string with encoding"));
+        assertTrue(exception.getMessage().contains("TestHarnessApiException: Failed to create a string with encoding"));
         assertTrue(exception.getMessage().contains("NullPointerException"));
     }
 }
