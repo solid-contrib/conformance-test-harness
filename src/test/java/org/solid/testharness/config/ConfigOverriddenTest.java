@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ConfigOverriddenTest {
+class ConfigOverriddenTest {
     @Inject
     Config config;
 

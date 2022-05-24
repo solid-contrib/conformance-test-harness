@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
 @TestProfile(ConfigTestNormalProfile.class)
-public class ConfigTest {
+class ConfigTest {
     @Inject
     Config config;
 
@@ -145,12 +145,12 @@ public class ConfigTest {
     }
 
     @Test
-    public void getMaxThreads() {
+    void getMaxThreads() {
         assertEquals(4, config.getMaxThreads());
     }
 
     @Test
-    public void getOrigin() {
+    void getOrigin() {
         assertEquals("https://testharness", config.getOrigin());
     }
 

@@ -43,7 +43,7 @@ public final class Bootstrap {
                 try {
                     INSTANCE = new Bootstrap();
                 } catch (RuntimeException e) {
-                    logger.error("{}", e);
+                    logger.error("Bootstrap failed", e);
                 }
             }
             return INSTANCE;

@@ -32,8 +32,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UserCredentialsTest {
-
+class UserCredentialsTest {
     private static final String USERNAME = "USERNAME";
     private static final String PASSWORD = "PASSWORD";
     private static final String CLIENT_ID = "CLIENT_ID";

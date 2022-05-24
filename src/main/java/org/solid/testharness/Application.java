@@ -143,7 +143,7 @@ public class Application implements QuarkusApplication {
             config.setTestSources(Arrays.stream(cmd.getOptionValues(SOURCE))
                     .filter(s -> !StringUtils.isBlank(s))
                     .collect(Collectors.toList()));
-            logger.debug("Suite = {}", config.getTestSources().toString());
+            logger.debug("Suite = {}", config.getTestSources());
         }
 
         if (!cmd.hasOption(COVERAGE)) {

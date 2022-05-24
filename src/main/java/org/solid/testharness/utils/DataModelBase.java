@@ -173,7 +173,7 @@ public class DataModelBase {
 
     protected <T extends DataModelBase> List<T> getModelListByObject(final IRI predicate, final Class<T> clazz) {
         final Set<Value> values = model.filter(null, predicate, subject).subjects()
-                .stream().map(o -> (Value) o).collect(Collectors.toSet());
+                .stream().map(Value.class::cast).collect(Collectors.toSet());
         if (!values.isEmpty()) {
             return getModelList(clazz, values);
         }

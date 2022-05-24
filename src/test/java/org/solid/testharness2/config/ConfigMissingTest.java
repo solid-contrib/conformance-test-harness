@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 @TestProfile(ConfigTestBlankProfile.class)
-public class ConfigMissingTest {
+class ConfigMissingTest {
     @Inject
     Config config;
 
@@ -66,7 +66,7 @@ public class ConfigMissingTest {
     }
 
     @Test
-    public void getTestContainerNull() {
+    void getTestContainerNull() {
         assertNull(config.getTestContainer());
     }
 
@@ -96,12 +96,12 @@ public class ConfigMissingTest {
     }
 
     @Test
-    public void getMaxThreads() {
+    void getMaxThreads() {
         assertEquals(8, config.getMaxThreads());
     }
 
     @Test
-    public void getOrigin() {
+    void getOrigin() {
         assertEquals("https://tester", config.getOrigin());
     }
 }

@@ -38,7 +38,7 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
-public class NamespacesTest {
+class NamespacesTest {
     @Test
     void addToRepository() throws Exception {
         final DataRepository dataRepository = new DataRepository();

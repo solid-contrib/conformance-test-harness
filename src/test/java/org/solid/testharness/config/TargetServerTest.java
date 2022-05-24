@@ -37,7 +37,7 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
-public class TargetServerTest {
+class TargetServerTest {
     @Inject
     DataRepository dataRepository;
 
@@ -49,7 +49,7 @@ public class TargetServerTest {
     }
 
     @Test
-    public void parseTargetServer() throws Exception {
+    void parseTargetServer() throws Exception {
         final URL testFile = TestUtils.getFileUrl("src/test/resources/config/targetserver-testing-feature.ttl");
         TestUtils.insertData(dataRepository, testFile);
         final TargetServer targetServer = new TargetServer(iri(TestUtils.SAMPLE_NS, "testserver"));
@@ -64,7 +64,7 @@ public class TargetServerTest {
     }
 
     @Test
-    public void parseTargetServerNoFeatures() throws Exception {
+    void parseTargetServerNoFeatures() throws Exception {
         final URL testFile = TestUtils.getFileUrl("src/test/resources/config/targetserver-testing-feature.ttl");
         TestUtils.insertData(dataRepository, testFile);
         final TargetServer targetServer = new TargetServer(iri(TestUtils.SAMPLE_NS, "testserver2"));
