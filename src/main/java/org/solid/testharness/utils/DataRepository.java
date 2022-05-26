@@ -55,8 +55,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.URL;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.eclipse.rdf4j.model.util.Values.*;
 
@@ -64,13 +64,7 @@ import static org.eclipse.rdf4j.model.util.Values.*;
 public class DataRepository implements Repository {
     private static final Logger logger = LoggerFactory.getLogger(DataRepository.class);
     private static final String GITHUB_LINE_ANCHOR = "#L";
-    private static final Pattern JS_ERROR = Pattern.compile(
-            "\\Rjs failed:\\R>>>>.*<<<<\\Rorg.graalvm.polyglot.PolyglotException: " +
-                    "([^\\r\\n]+)\\R" +             // exception message
-                    "(?:(Caused[^\\r\\n]+)\\R)?" +  // optional cause
-                    "(?:([^\\r\\n]+).*)?" +         // first line of stack trace
-                    "(- <js>[^\\r\\n]+).*",         // last line of stack
-            Pattern.DOTALL);
+    private static final String POLYGLOT_EXCEPTION = "org.graalvm.polyglot.PolyglotException: ";
 
     private final Repository repository = new SailRepository(new MemoryStore());
     // TODO: Determine if this should be a separate IRI to the base
@@ -109,6 +103,8 @@ public class DataRepository implements Repository {
                     conn.add(spec, RDF.type, DOAP.Specification, Namespaces.SPEC_RELATED_CONTEXT);
                     try (var requirements = conn.getStatements(spec, SPEC.requirement, null, context)) {
                         requirements.stream().forEach(st -> conn.add(st, Namespaces.SPEC_RELATED_CONTEXT));
+                    }
+                    try (var requirements = conn.getStatements(spec, SPEC.requirement, null, context)) {
                         requirements.stream()
                                 .map(Statement::getObject)
                                 .filter(Value::isIRI)
@@ -338,9 +334,38 @@ public class DataRepository implements Repository {
         return iri(Namespaces.RESULTS_URI, bnode().getID());
     }
 
-    private String simplify(final String data) {
-        // strip out unnecessary logging and remove blank lines
-        return JS_ERROR.matcher(data).replaceFirst("\n$1\n$2\n$3\n$4").replaceAll("\\R+", "\n");
+    // strip out unnecessary logging and remove blank lines
+    static String simplify(final String data) {
+        // split and filter out unused lines
+        final List<String> lines = Arrays.stream(data.strip().split("\\R"))
+                .map(String::strip)
+                .filter(line -> !line.equals("js failed:"))
+                .filter(line -> !line.matches("^>>>>.*<<<<$"))
+                .collect(Collectors.toList());
+        final int count = lines.size();
+        // find Polyglot exception and reformat it
+        int exceptionLine = IntStream.range(0, count)
+                .filter(i-> lines.get(i).startsWith(POLYGLOT_EXCEPTION))
+                .findFirst()
+                .orElse(-1);
+        if (exceptionLine != -1) {
+            lines.set(exceptionLine, lines.get(exceptionLine).substring(POLYGLOT_EXCEPTION.length()));
+            if (lines.get(exceptionLine + 1).startsWith("Caused by")) {
+                exceptionLine += 1;
+            }
+            // find stack trace start and end
+            final int stackStarts = exceptionLine + 1;
+            final int stackEnds = IntStream.range(stackStarts, count)
+                    .filter(i-> lines.get(i).startsWith("- <js>"))
+                    .findFirst()
+                    .orElse(count);
+            return IntStream.range(0, count)
+                    .filter(i -> i <= stackStarts || i == stackEnds)
+                    .mapToObj(lines::get)
+                    .collect(Collectors.joining("\n"));
+        } else {
+            return String.join("\n", lines);
+        }
     }
 
     public Map<String, Scores> getFeatureScores() {

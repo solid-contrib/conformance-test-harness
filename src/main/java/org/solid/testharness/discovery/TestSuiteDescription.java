@@ -136,7 +136,7 @@ public class TestSuiteDescription {
         releaseDate = null;
         try {
             final String str = new String(Files.readAllBytes(Paths.get(pathMappings.mapIri(testVersion))));
-            final Matcher matcher = VERSION_INFO.matcher(str.trim());
+            final Matcher matcher = VERSION_INFO.matcher(str.strip());
             if (matcher.matches()) {
                 currentVersion = matcher.group(1);
                 releaseDate = matcher.group(2);

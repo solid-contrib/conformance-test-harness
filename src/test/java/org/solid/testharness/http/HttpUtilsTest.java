@@ -479,7 +479,7 @@ class HttpUtilsTest {
     @Test
     void parseLinkHeadersTwoInOne() {
         final List<Link> links = HttpUtils.parseLinkHeaders(setupHeaders(HttpConstants.HEADER_LINK,
-                List.of("<https://example.org/next>; rel=\"next\", <https://example.org/last>; rel=\"last\"")));
+                List.of("<https://example.org/next>; rel=\"next\"  , <https://example.org/last>; rel=\"last\"")));
         assertEquals(2, links.size());
         assertEquals(URI.create("https://example.org/next"), links.get(0).getUri());
         assertEquals("next", links.get(0).getRel());

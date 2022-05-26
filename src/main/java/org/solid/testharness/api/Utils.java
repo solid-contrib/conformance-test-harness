@@ -64,7 +64,7 @@ public final class Utils {
                 .map(Map.Entry::getValue)
                 .orElse(Collections.emptyList());
         if (links.size() == 1 && links.get(0).contains(",")) {
-            links = Arrays.asList(links.get(0).split("\\s*,\\s*"));
+            links = Arrays.stream(links.get(0).split(",")).map(String::strip).collect(Collectors.toList());
         }
         return links.stream().map(Link::valueOf).map(l -> {
             final var map = new HashMap<String, String>();

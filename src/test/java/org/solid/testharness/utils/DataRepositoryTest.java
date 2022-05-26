@@ -425,6 +425,19 @@ class DataRepositoryTest {
         assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "specB/#3")).startsWith("spec"));
     }
 
+    @Test
+    void simplify() {
+        final String log = "STEP1 LOG\n" +
+                "js failed:\n>>>>?<<<<\n" +
+                "org.graalvm.polyglot.PolyglotException: EXCEPTION\n" +
+                "Caused by EXCEPTION2\nSTACK1\nSTACK2\n- <js>LAST\nother stuff\nmore";
+        assertEquals("STEP1 LOG\n" +
+                "EXCEPTION\n" +
+                "Caused by EXCEPTION2\n" +
+                "STACK1\n" +
+                "- <js>LAST", DataRepository.simplify(log));
+    }
+
     private DataRepository setupMinimalRepository() {
         final DataRepository dataRepository = new DataRepository();
         try (RepositoryConnection conn = dataRepository.getConnection()) {
