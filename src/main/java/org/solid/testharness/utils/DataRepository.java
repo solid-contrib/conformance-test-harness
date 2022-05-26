@@ -95,44 +95,42 @@ public class DataRepository implements Repository {
 
     public void load(final URL url, final String baseUri) {
         try (RepositoryConnection conn = getConnection()) {
-            try {
-                final IRI context = iri(url.toString());
-                logger.info("Loading {} with base {}", url, baseUri);
-                final ParserConfig parserConfig = new ParserConfig();
-                parserConfig.set(RDFaParserSettings.RDFA_COMPATIBILITY, RDFaVersion.RDFA_1_1);
-                conn.setParserConfig(parserConfig);
-                conn.add(url, baseUri, null, context);
-                logger.debug("Loaded data into temporary context, size={}", conn.size(context));
-                try (var statements = conn.getStatements(null, SPEC.requirement, null, context)) {
-                    if (statements.hasNext()) {
-                        // copy the spec and requirement triples to the spec-related graph context
-                        final Resource spec = statements.next().getSubject();
-                        conn.add(spec, RDF.type, DOAP.Specification, Namespaces.SPEC_RELATED_CONTEXT);
-                        try (var requirements = conn.getStatements(spec, SPEC.requirement, null, context)) {
-                            requirements.stream()
-                                    .peek(st -> conn.add(st, Namespaces.SPEC_RELATED_CONTEXT))
-                                    .map(Statement::getObject)
-                                    .filter(Value::isIRI)
-                                    .map(Resource.class::cast)
-                                    .forEach(req -> {
-                                        try (var details = conn.getStatements(req, null, null, context)) {
-                                            conn.add(details, Namespaces.SPEC_RELATED_CONTEXT);
-                                        }
-                                    });
-                        }
-                    } else {
-                        // copy all statements to main graph context
-                        try (var tempStatements = conn.getStatements(null, null, null, context)) {
-                            conn.add(tempStatements, (Resource) null);
-                        }
+            final IRI context = iri(url.toString());
+            logger.info("Loading {} with base {}", url, baseUri);
+            final ParserConfig parserConfig = new ParserConfig();
+            parserConfig.set(RDFaParserSettings.RDFA_COMPATIBILITY, RDFaVersion.RDFA_1_1);
+            conn.setParserConfig(parserConfig);
+            conn.add(url, baseUri, null, context);
+            logger.debug("Loaded data into temporary context, size={}", conn.size(context));
+            try (var statements = conn.getStatements(null, SPEC.requirement, null, context)) {
+                if (statements.hasNext()) {
+                    // copy the spec and requirement triples to the spec-related graph context
+                    final Resource spec = statements.next().getSubject();
+                    conn.add(spec, RDF.type, DOAP.Specification, Namespaces.SPEC_RELATED_CONTEXT);
+                    try (var requirements = conn.getStatements(spec, SPEC.requirement, null, context)) {
+                        requirements.stream().forEach(st -> conn.add(st, Namespaces.SPEC_RELATED_CONTEXT));
+                        requirements.stream()
+                                .map(Statement::getObject)
+                                .filter(Value::isIRI)
+                                .map(Resource.class::cast)
+                                .forEach(req -> {
+                                    try (var details = conn.getStatements(req, null, null, context)) {
+                                        conn.add(details, Namespaces.SPEC_RELATED_CONTEXT);
+                                    }
+                                });
+                    }
+                } else {
+                    // copy all statements to main graph context
+                    try (var tempStatements = conn.getStatements(null, null, null, context)) {
+                        conn.add(tempStatements, (Resource) null);
                     }
                 }
-                // remove the temporary context
-                conn.clear(context);
-                logger.debug("Repository size={}", conn.size());
-            } catch (IOException e) {
-                throw new TestHarnessInitializationException("Failed to read data from " + url, e);
             }
+            // remove the temporary context
+            conn.clear(context);
+            logger.debug("Repository size={}", conn.size());
+        } catch (IOException e) {
+            throw new TestHarnessInitializationException("Failed to read data from " + url, e);
         } catch (RDF4JException | UnsupportedRDFormatException e) {
             throw new TestHarnessInitializationException("Failed to parse data", e);
         }
@@ -397,14 +395,14 @@ public class DataRepository implements Repository {
         return counts;
     }
 
-    public void export(final Writer wr, final Resource... contexts) throws Exception {
+    public void export(final Writer wr, final Resource... contexts) throws TestHarnessException {
         final RDFWriter rdfWriter = Rio.createWriter(RDFFormat.TURTLE, wr);
         try (RepositoryConnection conn = getConnection()) {
             rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true)
                     .set(BasicWriterSettings.INLINE_BLANK_NODES, true);
             conn.export(rdfWriter, contexts);
         } catch (RDF4JException e) {
-            throw new Exception("Failed to write repository", e);
+            throw new TestHarnessException("Failed to write repository", e);
         }
     }
 

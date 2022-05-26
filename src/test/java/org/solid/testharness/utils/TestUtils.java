@@ -96,6 +96,7 @@ public final class TestUtils {
         return mockVoidResponse(status, Collections.emptyMap());
     }
 
+    @SuppressWarnings("unchecked")
     public static HttpResponse<Void> mockVoidResponse(final int status, final Map<String, List<String>> headers) {
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(status);
@@ -108,6 +109,7 @@ public final class TestUtils {
         return mockStringResponse(status, body, Collections.emptyMap());
     }
 
+    @SuppressWarnings("unchecked")
     public static HttpResponse<String> mockStringResponse(final int status, final String body,
                                                           final Map<String, List<String>> headers) {
         final HttpResponse<String> mockResponse = mock(HttpResponse.class);
@@ -179,7 +181,7 @@ public final class TestUtils {
         final StringWriter sw = new StringWriter();
         try {
             repository.export(sw);
-        } catch (Exception e) {
+        } catch (TestHarnessException e) {
             return "";
         }
         return sw.toString();

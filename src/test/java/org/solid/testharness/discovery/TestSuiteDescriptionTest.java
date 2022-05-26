@@ -33,6 +33,8 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.solid.common.vocab.*;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.utils.DataRepository;
@@ -54,9 +56,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 class TestSuiteDescriptionTest {
-    private static String NS = TestUtils.SAMPLE_NS;
-    private static String TCNS = TestUtils.SAMPLE_NS + "test-manifest-sample-1.ttl#";
-    private static String FNS = TestUtils.SAMPLE_NS + "test/";
+    private static final String NS = TestUtils.SAMPLE_NS;
+    private static final String TCNS = TestUtils.SAMPLE_NS + "test-manifest-sample-1.ttl#";
 
     @Inject
     DataRepository repository;
@@ -320,17 +321,18 @@ class TestSuiteDescriptionTest {
     @Test
     void prepareTestCasesTitle() {
         add(iri(NS, "group1-feature1"), RDF.type, TD.TestCase);
+        final String featureNS = TestUtils.SAMPLE_NS + "test/";
         add(iri(NS, "group1-feature1"), SPEC.testScript,
-                iri(FNS, "group1/feature1"));
+                iri(featureNS, "group1/feature1"));
         add(iri(NS, "group1-feature2"), RDF.type, TD.TestCase);
         add(iri(NS, "group1-feature2"), SPEC.testScript,
-                iri(FNS, "group1/feature2"));
+                iri(featureNS, "group1/feature2"));
         add(iri(NS, "group2-feature1"), RDF.type, TD.TestCase);
         add(iri(NS, "group2-feature1"), SPEC.testScript,
-                iri(FNS, "group2/feature1"));
+                iri(featureNS, "group2/feature1"));
         add(iri(NS, "group2-feature2"), RDF.type, TD.TestCase);
         add(iri(NS, "group2-feature2"), SPEC.testScript,
-                iri(FNS, "group2/"));
+                iri(featureNS, "group2/"));
         testSuiteDescription.prepareTestCases(Config.RunMode.COVERAGE);
         assertTrue(ask(iri(NS, "group1-feature1"), DCTERMS.title, literal("Feature 1 title")));
         assertTrue(ask(iri(NS, "group1-feature2"), DCTERMS.title, literal("Feature 2 title")));
@@ -368,7 +370,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void getTestsVersion() {
-        TestSuiteDescription.TEST_VERSION = iri(NS, "features/discovery/test-version.txt");
+        TestSuiteDescription.testVersion = iri(NS, "features/discovery/test-version.txt");
         testSuiteDescription.getTestsVersion();
         assertTrue(ask(iri(Namespaces.SPECIFICATION_TESTS_IRI), RDF.type, DOAP.Project));
         assertTrue(ask(iri(Namespaces.SPECIFICATION_TESTS_IRI), DOAP.created,
@@ -376,31 +378,14 @@ class TestSuiteDescriptionTest {
         assertTrue(ask(iri(Namespaces.RESULTS_URI, "tests-release"), DOAP.revision, literal("1.0.0")));
     }
 
-    @Test
-    void getTestsVersionPartial() {
-        TestSuiteDescription.TEST_VERSION = iri(NS, "features/discovery/test-version-partial.txt");
+    @ParameterizedTest
+    @CsvSource({"partial,1.0.1", "empty,unknown", "missing,unknown"})
+    void getTestsVersionOther(final String name, final String revision) {
+        TestSuiteDescription.testVersion = iri(NS, "features/discovery/test-version-" + name + ".txt");
         testSuiteDescription.getTestsVersion();
         assertTrue(ask(iri(Namespaces.SPECIFICATION_TESTS_IRI), RDF.type, DOAP.Project));
         assertFalse(ask(iri(Namespaces.SPECIFICATION_TESTS_IRI), DOAP.created, null));
-        assertTrue(ask(iri(Namespaces.RESULTS_URI, "tests-release"), DOAP.revision, literal("1.0.1")));
-    }
-
-    @Test
-    void getTestsVersionNoVersion() {
-        TestSuiteDescription.TEST_VERSION = iri(NS, "features/discovery/test-version-empty.txt");
-        testSuiteDescription.getTestsVersion();
-        assertTrue(ask(iri(Namespaces.SPECIFICATION_TESTS_IRI), RDF.type, DOAP.Project));
-        assertFalse(ask(iri(Namespaces.SPECIFICATION_TESTS_IRI), DOAP.created, null));
-        assertTrue(ask(iri(Namespaces.RESULTS_URI, "tests-release"), DOAP.revision, literal("unknown")));
-    }
-
-    @Test
-    void getTestsVersionMissing() {
-        TestSuiteDescription.TEST_VERSION = iri(NS, "features/discovery/test-version-missing.txt");
-        testSuiteDescription.getTestsVersion();
-        assertTrue(ask(iri(Namespaces.SPECIFICATION_TESTS_IRI), RDF.type, DOAP.Project));
-        assertFalse(ask(iri(Namespaces.SPECIFICATION_TESTS_IRI), DOAP.created, null));
-        assertTrue(ask(iri(Namespaces.RESULTS_URI, "tests-release"), DOAP.revision, literal("unknown")));
+        assertTrue(ask(iri(Namespaces.RESULTS_URI, "tests-release"), DOAP.revision, literal(revision)));
     }
 
     private void add(final Resource subject, final IRI predicate, final Value object) {

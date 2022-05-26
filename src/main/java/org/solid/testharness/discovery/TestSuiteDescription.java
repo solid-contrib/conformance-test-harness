@@ -66,8 +66,8 @@ public class TestSuiteDescription {
     private static final Logger logger = LoggerFactory.getLogger(TestSuiteDescription.class);
     private static final Pattern VERSION_INFO = Pattern.compile("^v?(\\d+\\.\\d+\\.\\d+)(?: (\\d{4}-\\d{2}-\\d{2}))?$");
     private static final String START_OF_DAY = "T00:00:00Z";
-    // ensure that the version file is avaiable in the same location to which test files were mapped
-    protected static IRI TEST_VERSION = iri(Namespaces.TESTS_REPO_URI, "blob/main/version.txt");
+    // ensure that the version file is available in the same location to which test files were mapped
+    protected static IRI testVersion = iri(Namespaces.TESTS_REPO_URI, "blob/main/version.txt");
 
     private List<String> featurePaths;
     private String currentVersion;
@@ -135,7 +135,7 @@ public class TestSuiteDescription {
         currentVersion = null;
         releaseDate = null;
         try {
-            final String str = new String(Files.readAllBytes(Paths.get(pathMappings.mapIri(TEST_VERSION))));
+            final String str = new String(Files.readAllBytes(Paths.get(pathMappings.mapIri(testVersion))));
             final Matcher matcher = VERSION_INFO.matcher(str.trim());
             if (matcher.matches()) {
                 currentVersion = matcher.group(1);
@@ -185,16 +185,13 @@ public class TestSuiteDescription {
                 var statements = conn.getStatements(null, RDF.type, TD.TestCase)
         ) {
             featurePaths = statements.stream()
+                    // get testcase subjects as IRIs, find features and either extract titles if not executable
+                    // or add to execution list
                     .map(Statement::getSubject)
                     .filter(Value::isIRI)
                     .map(IRI.class::cast)
                     .map(tc -> new Feature(conn, tc, runMode))
-                    .peek(Feature::findFeatureIri)
-                    .filter(Feature::isImplemented)
-                    .peek(Feature::locateFeature)
-                    .filter(Feature::isFound)
-                    .peek(Feature::extractTitleIfNeeded)
-                    .filter(Feature::isRunnable)
+                    .filter(Feature::isExecutable)
                     .map(Feature::getLocation)
                     .collect(Collectors.toList());
         } catch (RDF4JException e) {
@@ -215,23 +212,29 @@ public class TestSuiteDescription {
             this.testCaseIri = testCaseIri;
             // test is runnable when not in coverage mode and it doesn't have an assertion already
             runnable = runMode == Config.RunMode.TEST && !conn.hasStatement(null, EARL.test, testCaseIri, false);
+            findFeatureIri();
+            if (featureIri != null) {
+                // found feature IRI
+                locateFeature();
+            }
+            if (featureFile != null && !runnable) {
+                // found feature file so extract title if not runnable
+                extractTitle();
+            }
         }
 
         public void findFeatureIri() {
             try (var statements = conn.getStatements(testCaseIri, SPEC.testScript, null)) {
-                statements.stream()
+                this.featureIri = statements.stream()
                         .map(Statement::getObject)
                         .filter(Value::isIRI)
                         .map(IRI.class::cast)
                         .findFirst()
-                        .map(obj -> this.featureIri = obj);
+                        .orElse(null);
             }
         }
-        public boolean isImplemented() {
-            return featureIri != null;
-        }
 
-        public void locateFeature() {
+        private void locateFeature() {
             // map feature IRI to file
             final URI mappedLocation = pathMappings.mapIri(featureIri);
             if (HttpUtils.isHttpProtocol(mappedLocation.getScheme())) {
@@ -246,22 +249,17 @@ public class TestSuiteDescription {
                 location = mappedLocation.toString();
             }
         }
-        public boolean isFound() {
-            return featureFile != null;
-        }
-        public void extractTitleIfNeeded() {
-            if (!runnable) {
-                final String title = FeatureFileParser.getFeatureTitle(featureFile);
-                if (title != null) {
-                    conn.add(testCaseIri, DCTERMS.title, literal(title));
-                }
+        private void extractTitle() {
+            final String title = FeatureFileParser.getFeatureTitle(featureFile);
+            if (title != null) {
+                conn.add(testCaseIri, DCTERMS.title, literal(title));
             }
         }
         public String getLocation() {
             return location;
         }
-        public boolean isRunnable() {
-            return runnable;
+        public boolean isExecutable() {
+            return runnable && featureFile != null;
         }
     }
 }
