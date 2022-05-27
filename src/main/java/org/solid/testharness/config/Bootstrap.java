@@ -27,6 +27,7 @@ import io.quarkus.runtime.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.ConformanceTestHarness;
+import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.enterprise.inject.spi.CDI;
 
@@ -36,17 +37,17 @@ import javax.enterprise.inject.spi.CDI;
 public final class Bootstrap {
     private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
 
-    private static Bootstrap INSTANCE;
+    private static Bootstrap instance;
     public static Bootstrap getInstance() {
         synchronized (Bootstrap.class) {
-            if (INSTANCE == null) {
+            if (instance == null) {
                 try {
-                    INSTANCE = new Bootstrap();
+                    instance = new Bootstrap();
                 } catch (RuntimeException e) {
                     logger.error("Bootstrap failed", e);
                 }
             }
-            return INSTANCE;
+            return instance;
         }
     }
 
@@ -56,7 +57,7 @@ public final class Bootstrap {
         final Application app = Application.currentApplication();
         if (app == null) {
             logger.error("BOOTSTRAP - APP INSTANCE {}", app);
-            throw new RuntimeException("Features cannot be tested directly from the IDE. " +
+            throw new TestHarnessInitializationException("Features cannot be tested directly from the IDE. " +
                     "Use the TestScenarioRunner instead.");
         }
         logger.debug("BOOTSTRAP - APP INSTANCE {}", app);

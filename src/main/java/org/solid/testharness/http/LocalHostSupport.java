@@ -23,6 +23,8 @@
  */
 package org.solid.testharness.http;
 
+import org.solid.testharness.utils.TestHarnessInitializationException;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -40,21 +42,25 @@ public final class LocalHostSupport {
                 }
 
                 @Override
+                @SuppressWarnings("java:S4830")
                 public void checkClientTrusted(final X509Certificate[] certs, final String authType) {
+                    // not implemented
                 }
 
                 @Override
+                @SuppressWarnings("java:S4830")
                 public void checkServerTrusted(final X509Certificate[] certs, final String authType) {
+                    // not implemented
                 }
             }
         };
         try {
             // Allow self-signed certificates for testing
-            final SSLContext sslContext = SSLContext.getInstance("SSL");
+            final SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
             sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
             return sslContext;
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
-            throw new RuntimeException("Failed to setup localhost ssl support", e);
+            throw new TestHarnessInitializationException("Failed to setup localhost ssl support", e);
         }
     }
 

@@ -237,7 +237,7 @@ public class TestSuiteDescription {
         private void locateFeature() {
             // map feature IRI to file
             final URI mappedLocation = pathMappings.mapIri(featureIri);
-            if (HttpUtils.isHttpProtocol(mappedLocation.getScheme())) {
+            if (HttpUtils.isHttpProtocol(mappedLocation)) {
                 throw new TestHarnessInitializationException("Remote test cases are not yet supported - " +
                         "use mappings to point to local copies");
             }

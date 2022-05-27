@@ -101,16 +101,16 @@ class HttpUtilsTest {
 
     @Test
     void isHttpProtocol() {
-        assertTrue(HttpUtils.isHttpProtocol("http"));
-        assertTrue(HttpUtils.isHttpProtocol("https"));
-        assertFalse(HttpUtils.isHttpProtocol("ws"));
+        assertTrue(HttpUtils.isHttpProtocol(URI.create("http://example.org")));
+        assertTrue(HttpUtils.isHttpProtocol(URI.create("https://example.org")));
+        assertFalse(HttpUtils.isHttpProtocol(URI.create("ws://example.org")));
         assertFalse(HttpUtils.isHttpProtocol(null));
     }
 
     @Test
     void isFileProtocol() {
-        assertTrue(HttpUtils.isFileProtocol("file"));
-        assertFalse(HttpUtils.isFileProtocol("files"));
+        assertTrue(HttpUtils.isFileProtocol(URI.create("file://path")));
+        assertFalse(HttpUtils.isFileProtocol(URI.create("files://path")));
         assertFalse(HttpUtils.isFileProtocol(null));
     }
 

@@ -33,8 +33,6 @@ import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.util.Connections;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.RDF;
 import org.solid.common.vocab.RDFS;
 
@@ -51,7 +49,6 @@ import java.util.stream.Collectors;
 import static java.util.Objects.requireNonNull;
 
 public class DataModelBase {
-    private static final Logger logger = LoggerFactory.getLogger(DataModelBase.class);
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
     @NotNull
@@ -154,6 +151,7 @@ public class DataModelBase {
         return null;
     }
 
+    @SuppressWarnings("java:S1168")
     protected <T extends DataModelBase> List<T> getModelList(final IRI predicate, final Class<T> clazz) {
         final Set<Value> values = model.filter(subject, predicate, null).objects();
         if (!values.isEmpty()) {
@@ -162,6 +160,7 @@ public class DataModelBase {
         return null;
     }
 
+    @SuppressWarnings("java:S1168")
     protected <T extends DataModelBase> List<T> getModelCollectionList(final IRI predicate, final Class<T> clazz) {
         final Resource node = Models.objectResource(model.filter(subject, predicate, null)).orElse(null);
         if (node != null) {
@@ -171,6 +170,7 @@ public class DataModelBase {
         return null;
     }
 
+    @SuppressWarnings("java:S1168")
     protected <T extends DataModelBase> List<T> getModelListByObject(final IRI predicate, final Class<T> clazz) {
         final Set<Value> values = model.filter(null, predicate, subject).subjects()
                 .stream().map(Value.class::cast).collect(Collectors.toSet());
@@ -180,13 +180,13 @@ public class DataModelBase {
         return null;
     }
 
+    @SuppressWarnings("java:S112")
     private <T extends DataModelBase> List<T> getModelList(final Class<T> clazz, final Collection<Value> values) {
         return values.stream().filter(Value::isIRI).map(v -> {
             try {
                 return clazz.getDeclaredConstructor(IRI.class).newInstance((IRI) v);
             } catch (InstantiationException | IllegalAccessException |
                     InvocationTargetException | NoSuchMethodException e) {
-                logger.error("Failed to create instance of {}", clazz.getName());
                 throw new RuntimeException( "Failed to create instance of " + clazz.getName(), e);
             }
         }).collect(Collectors.toList());

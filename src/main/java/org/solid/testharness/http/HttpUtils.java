@@ -81,12 +81,12 @@ public final class HttpUtils {
         return code >= 200 && code < 400;
     }
 
-    public static boolean isHttpProtocol(final String protocol) {
-        return "http".equals(protocol) || "https".equals(protocol);
+    public static boolean isHttpProtocol(final URI uri) {
+        return uri != null && ("http".equals(uri.getScheme()) || "https".equals(uri.getScheme()));
     }
 
-    public static boolean isFileProtocol(final String protocol) {
-        return "file".equals(protocol);
+    public static boolean isFileProtocol(final URI uri) {
+        return uri != null && "file".equals(uri.getScheme());
     }
 
     public static void logToKarate(final Logger fallbackLogger, final String format, final Object... arguments) {

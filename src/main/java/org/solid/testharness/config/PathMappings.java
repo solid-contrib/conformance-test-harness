@@ -49,10 +49,10 @@ public interface PathMappings {
 
     default String unmapFeaturePath(final String path) {
         URI uri = URI.create(path);
-        if (HttpUtils.isHttpProtocol(uri.getScheme())) {
+        if (HttpUtils.isHttpProtocol(uri)) {
             return uri.toString();
         }
-        if (!HttpUtils.isFileProtocol(uri.getScheme())) {
+        if (!HttpUtils.isFileProtocol(uri)) {
             uri = Path.of(path).toAbsolutePath().normalize().toUri();
         }
         final String finalPath = uri.toString();

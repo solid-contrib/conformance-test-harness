@@ -56,14 +56,14 @@ public interface UserCredentials {
         } catch (Exception e) {
             throw new TestHarnessInitializationException("The webId " + webId() + " is missing or invalid", e);
         }
-        if (!HttpUtils.isHttpProtocol(uri.getScheme())) {
+        if (!HttpUtils.isHttpProtocol(uri)) {
             throw new TestHarnessInitializationException("The webId " + webId() + " must be an absolute URL");
         }
         return uri;
     }
 
     default URI getIdp() {
-        if (idp().isPresent() && !HttpUtils.isHttpProtocol(idp().get().getScheme())) {
+        if (idp().isPresent() && !HttpUtils.isHttpProtocol(idp().orElse(null))) {
             throw new TestHarnessInitializationException("The IDP " + idp() + " be an absolute URL");
         }
         return idp().orElse(null);

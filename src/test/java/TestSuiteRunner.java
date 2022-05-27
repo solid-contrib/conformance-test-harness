@@ -77,11 +77,11 @@ class TestSuiteRunner {
     }
 
     @Test
-    @Disabled
+    @Disabled("not used in normal test runs")
     void testSuiteCoverage() throws Exception {
         conformanceTestHarness.initialize();
         config.logConfigSettings(Config.RunMode.COVERAGE);
         conformanceTestHarness.prepareCoverageReport();
-        conformanceTestHarness.buildReports(Config.RunMode.COVERAGE);
+        assertDoesNotThrow(() -> conformanceTestHarness.buildReports(Config.RunMode.COVERAGE));
     }
 }

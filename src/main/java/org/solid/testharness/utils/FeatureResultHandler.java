@@ -48,6 +48,7 @@ public class FeatureResultHandler implements SuiteReports {
     PathMappings pathMappings;
 
     @Override
+    @SuppressWarnings("java:S112")
     public Report featureReport(final Suite suite, final FeatureResult fr) {
         final String featurePath = fr.getDisplayName();
         final String featureIri = pathMappings.unmapFeaturePath(featurePath);

@@ -168,7 +168,7 @@ public class Config {
     }
 
     public URI getSolidIdentityProvider() {
-        if (solidIdentityProvider.isPresent() && !HttpUtils.isHttpProtocol(solidIdentityProvider.get().getScheme())) {
+        if (solidIdentityProvider.isPresent() && !HttpUtils.isHttpProtocol(solidIdentityProvider.orElse(null))) {
             throw new TestHarnessInitializationException("SOLID_IDENTITY_PROVIDER must be an absolute URL");
         }
         return solidIdentityProvider.map(u -> u.resolve("/")).orElse(null);
