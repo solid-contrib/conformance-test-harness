@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -423,6 +423,31 @@ class DataRepositoryTest {
         assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "specA#1")).startsWith("spec"));
         assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "specB/2")).startsWith("spec"));
         assertTrue(Namespaces.getSpecificationNamespace(iri(TestUtils.SAMPLE_NS, "specB/#3")).startsWith("spec"));
+    }
+
+    @Test
+    void simplify() {
+        final String log = "STEP1 LOG\n" +
+                "js failed:\n>>>>?<<<<\n" +
+                "org.graalvm.polyglot.PolyglotException: EXCEPTION\n" +
+                "Caused by EXCEPTION2\nSTACK1\nSTACK2\n- <js>LAST\nother stuff\nmore";
+        assertEquals("STEP1 LOG\n" +
+                "EXCEPTION\n" +
+                "Caused by EXCEPTION2\n" +
+                "STACK1\n" +
+                "- <js>LAST", DataRepository.simplify(log));
+    }
+
+    @Test
+    void simplifyNoCause() {
+        final String log = "STEP1 LOG\n" +
+                "js failed:\n>>>>?<<<<\n" +
+                "org.graalvm.polyglot.PolyglotException: EXCEPTION\n" +
+                "STACK1\nSTACK2\n- <js>LAST\nother stuff\nmore";
+        assertEquals("STEP1 LOG\n" +
+                "EXCEPTION\n" +
+                "STACK1\n" +
+                "- <js>LAST", DataRepository.simplify(log));
     }
 
     private DataRepository setupMinimalRepository() {

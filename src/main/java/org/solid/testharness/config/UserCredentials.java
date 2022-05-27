@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -56,14 +56,14 @@ public interface UserCredentials {
         } catch (Exception e) {
             throw new TestHarnessInitializationException("The webId " + webId() + " is missing or invalid", e);
         }
-        if (!HttpUtils.isHttpProtocol(uri.getScheme())) {
+        if (!HttpUtils.isHttpProtocol(uri)) {
             throw new TestHarnessInitializationException("The webId " + webId() + " must be an absolute URL");
         }
         return uri;
     }
 
     default URI getIdp() {
-        if (idp().isPresent() && !HttpUtils.isHttpProtocol(idp().get().getScheme())) {
+        if (idp().isPresent() && !HttpUtils.isHttpProtocol(idp().orElse(null))) {
             throw new TestHarnessInitializationException("The IDP " + idp() + " be an absolute URL");
         }
         return idp().orElse(null);

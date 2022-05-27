@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,15 +30,14 @@ import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.solid.common.vocab.ACP;
 import org.solid.common.vocab.RDF;
 import org.solid.common.vocab.VCARD;
+import org.solid.testharness.api.TestHarnessApiException;
 import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.http.Client;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.HttpUtils;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,20 +61,14 @@ public class AccessDatasetAcpLegacy implements AccessDataset {
     public AccessDatasetAcpLegacy(final List<AccessRule> accessRules, final String aclUri) {
         final String namespace = aclUri + "#";
         if (!accessRules.isEmpty()) {
-            final ModelBuilder builder = new ModelBuilder();
-            // add document namespace and any others needed
-            builder.setNamespace(PREFIX, namespace);
-            builder.setNamespace(ACP.PREFIX, ACP.NAMESPACE);
-            if (accessRules.stream().anyMatch(rule -> rule.getType() == AccessRule.AgentType.GROUP)) {
-                builder.setNamespace(VCARD.PREFIX, VCARD.NAMESPACE);
-            }
+            final ModelBuilder builder = setupModel(accessRules, namespace);
             final AtomicInteger i = new AtomicInteger();
             accessRules.forEach(rule -> {
                 i.addAndGet(1);
                 final List<String> accessModes = rule.getAccess().stream()
                         .filter(mode -> !controlModes.contains(mode))
                         .collect(Collectors.toList());
-                final List<String> controlAccessModes = extractControlModes(rule);
+                final List<String> controlAccessModes = AccessDatasetAcp.extractControlModes(rule);
                 final IRI policyNode = iri(namespace, "policy" + i);
                 final IRI ruleNode = iri(namespace, "rule" + i);
                 builder.subject(iri(aclUri))
@@ -83,21 +76,8 @@ public class AccessDatasetAcpLegacy implements AccessDataset {
                         .add(policyNode, RDF.type, ACP.Policy)
                         .add(policyNode, ACP.allOf, ruleNode)
                         .add(ruleNode, RDF.type, ACP.Rule);
-                if (!accessModes.isEmpty()) {
-                    accessModes.stream()
-                            .map(mode -> standardModes.containsKey(mode) ? standardModes.get(mode) : iri(mode))
-                            .distinct()
-                            .forEach(mode -> builder.add(policyNode, ACP.allow, mode));
-                }
-                if (!controlAccessModes.isEmpty()) {
-                    final IRI accessPolicyNode = iri(namespace, "accessPolicy" + i);
-                    builder.add(iri(aclUri), rule.isInheritable() ? ACP.accessMembers : ACP.access, accessPolicyNode)
-                            .add(accessPolicyNode, RDF.type, ACP.Policy)
-                            .add(accessPolicyNode, ACP.allOf, ruleNode);
-                    controlAccessModes.stream()
-                            .map(standardModes::get)
-                            .forEach(mode -> builder.add(accessPolicyNode, ACP.allow, mode));
-                }
+                addPolicy(builder, accessModes, policyNode);
+                addAccessPolicy(aclUri, namespace, builder, i, rule, controlAccessModes, ruleNode);
                 // Jacoco does not report switch coverage correctly
                 switch (rule.getType()) {
                     case AGENT:
@@ -124,38 +104,51 @@ public class AccessDatasetAcpLegacy implements AccessDataset {
         }
     }
 
-    private List<String> extractControlModes(final AccessRule rule) {
-        final List<String> controlModes = new ArrayList<>();
-        if (rule.getAccess().contains(CONTROL)) {
-            if (rule.getAccess().contains(CONTROL_READ) || rule.getAccess().contains(CONTROL_WRITE)) {
-                throw new RuntimeException("For ACP, you cannot use Control and either of " +
-                        "ControlRead or ControlWrite");
-            } else {
-                // in ACP CONTROL can be a shorthand for CONTROL_READ and CONTROL_WRITE
-                controlModes.addAll(List.of(READ, WRITE));
-            }
-        } else {
-            if (rule.getAccess().contains(CONTROL_READ)) {
-                controlModes.add(READ);
-            }
-            if (rule.getAccess().contains(CONTROL_WRITE)) {
-                controlModes.add(WRITE);
-            }
+    private void addAccessPolicy(final String aclUri, final String namespace, final ModelBuilder builder,
+                                 final AtomicInteger i, final AccessRule rule, final List<String> controlAccessModes,
+                                 final IRI ruleNode) {
+        if (!controlAccessModes.isEmpty()) {
+            final IRI accessPolicyNode = iri(namespace, "accessPolicy" + i);
+            builder.add(iri(aclUri), rule.isInheritable() ? ACP.accessMembers : ACP.access, accessPolicyNode)
+                    .add(accessPolicyNode, RDF.type, ACP.Policy)
+                    .add(accessPolicyNode, ACP.allOf, ruleNode);
+            controlAccessModes.stream()
+                    .map(standardModes::get)
+                    .forEach(mode -> builder.add(accessPolicyNode, ACP.allow, mode));
         }
-        return controlModes;
     }
 
-    public AccessDatasetAcpLegacy(final String acl, final URI baseUri) throws IOException {
+    private void addPolicy(final ModelBuilder builder, final List<String> accessModes, final IRI policyNode) {
+        if (!accessModes.isEmpty()) {
+            accessModes.stream()
+                    .map(mode -> standardModes.containsKey(mode) ? standardModes.get(mode) : iri(mode))
+                    .distinct()
+                    .forEach(mode -> builder.add(policyNode, ACP.allow, mode));
+        }
+    }
+
+    private ModelBuilder setupModel(final List<AccessRule> accessRules, final String namespace) {
+        final ModelBuilder builder = new ModelBuilder();
+        // add document namespace and any others needed
+        builder.setNamespace(PREFIX, namespace);
+        builder.setNamespace(ACP.PREFIX, ACP.NAMESPACE);
+        if (accessRules.stream().anyMatch(rule -> rule.getType() == AccessRule.AgentType.GROUP)) {
+            builder.setNamespace(VCARD.PREFIX, VCARD.NAMESPACE);
+        }
+        return builder;
+    }
+
+    public AccessDatasetAcpLegacy(final String acl, final URI baseUri) {
         parseTurtle(acl, baseUri.toString());
     }
 
     @Override
-    public void apply(final Client client, final URI uri) throws Exception {
+    public void apply(final Client client, final URI uri) {
         if (model != null) {
             final HttpResponse<String> response = client.patch(uri, asSparqlInsert(),
                     HttpConstants.MEDIA_TYPE_APPLICATION_SPARQL_UPDATE);
             if (!HttpUtils.isSuccessful(response.statusCode())) {
-                throw new Exception("Error response=" + response.statusCode() + " trying to apply ACL");
+                throw new TestHarnessApiException("Error response=" + response.statusCode() + " trying to apply ACL");
             }
         }
     }

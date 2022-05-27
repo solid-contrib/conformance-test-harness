@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -81,12 +81,12 @@ public final class HttpUtils {
         return code >= 200 && code < 400;
     }
 
-    public static boolean isHttpProtocol(final String protocol) {
-        return "http".equals(protocol) || "https".equals(protocol);
+    public static boolean isHttpProtocol(final URI uri) {
+        return uri != null && ("http".equals(uri.getScheme()) || "https".equals(uri.getScheme()));
     }
 
-    public static boolean isFileProtocol(final String protocol) {
-        return "file".equals(protocol);
+    public static boolean isFileProtocol(final URI uri) {
+        return uri != null && "file".equals(uri.getScheme());
     }
 
     public static void logToKarate(final Logger fallbackLogger, final String format, final Object... arguments) {
@@ -187,11 +187,11 @@ public final class HttpUtils {
     }
 
     public static String ensureSlashEnd(final String value) {
-        return value != null ? value.replaceAll("/*$", "") + "/" : null;
+        return value != null ? StringUtils.stripEnd(value, "/") + "/" : null;
     }
 
     public static String ensureNoSlashEnd(final String value) {
-        return value != null ? value.replaceAll("/*$", "") : null;
+        return StringUtils.stripEnd(value, "/");
     }
 
     public static String encodeValue(@NotNull final String value) {
@@ -232,7 +232,7 @@ public final class HttpUtils {
         List<String> links = headers.allValues(HttpConstants.HEADER_LINK);
         // TODO: the following must be applied to all link headers, then the whole list flattened
         if (links.size() == 1 && links.get(0).contains(",")) {
-            links = Arrays.asList(links.get(0).split("\\s*,\\s*"));
+            links = Arrays.stream(links.get(0).split(",")).map(String::strip).collect(Collectors.toList());
         }
         return links.stream().map(Link::valueOf).collect(Collectors.toList());
     }

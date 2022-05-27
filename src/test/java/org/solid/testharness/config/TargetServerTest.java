@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,7 @@ import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
-public class TargetServerTest {
+class TargetServerTest {
     @Inject
     DataRepository dataRepository;
 
@@ -49,7 +49,7 @@ public class TargetServerTest {
     }
 
     @Test
-    public void parseTargetServer() throws Exception {
+    void parseTargetServer() throws Exception {
         final URL testFile = TestUtils.getFileUrl("src/test/resources/config/targetserver-testing-feature.ttl");
         TestUtils.insertData(dataRepository, testFile);
         final TargetServer targetServer = new TargetServer(iri(TestUtils.SAMPLE_NS, "testserver"));
@@ -64,7 +64,7 @@ public class TargetServerTest {
     }
 
     @Test
-    public void parseTargetServerNoFeatures() throws Exception {
+    void parseTargetServerNoFeatures() throws Exception {
         final URL testFile = TestUtils.getFileUrl("src/test/resources/config/targetserver-testing-feature.ttl");
         TestUtils.insertData(dataRepository, testFile);
         final TargetServer targetServer = new TargetServer(iri(TestUtils.SAMPLE_NS, "testserver2"));

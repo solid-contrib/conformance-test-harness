@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -119,7 +119,7 @@ class AccessDatasetAcpLegacyLegacyTest {
     }
 
     @Test
-    void constructFromDoc() throws IOException {
+    void constructFromDoc() throws Exception {
         final AccessDataset accessDataset = new AccessDatasetAcpLegacy(
                 TestUtils.loadStringFromFile("src/test/resources/utils/vcard.ttl"),
                 ACL_URI

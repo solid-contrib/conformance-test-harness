@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClientProvider;
 import org.solid.testharness.utils.SolidContainerProvider;
 import org.solid.testharness.utils.SolidResourceProvider;
+import org.solid.testharness.utils.TestHarnessException;
 
 import java.net.URI;
 
@@ -54,7 +55,7 @@ class SolidResourceTest {
     void testCreateException() {
         final SolidClientProvider solidClientProvider = mock(SolidClientProvider.class);
         final SolidClient solidClient = new SolidClient(solidClientProvider);
-        assertThrows(TestHarnessException.class,
+        assertThrows(TestHarnessApiException.class,
                 () ->  SolidResource.create(solidClient, null, null, null));
     }
 
@@ -91,7 +92,7 @@ class SolidResourceTest {
     }
 
     @Test
-    void getContainer() {
+    void getContainer() throws Exception {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
         final SolidContainerProvider solidContainerProvider = mock(SolidContainerProvider.class);
         when(solidResourceProvider.getContainer()).thenReturn(solidContainerProvider);
@@ -101,7 +102,7 @@ class SolidResourceTest {
     }
 
     @Test
-    void getContainerNull() {
+    void getContainerNull() throws Exception {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
         when(solidResourceProvider.getContainer()).thenReturn(null);
         final SolidResource solidResource = new SolidResource(solidResourceProvider);
@@ -109,7 +110,15 @@ class SolidResourceTest {
     }
 
     @Test
-    void getAclUrl() throws Exception {
+    void getContainerException() throws Exception {
+        final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
+        when(solidResourceProvider.getContainer()).thenThrow(new TestHarnessException("FAIL"));
+        final SolidResource solidResource = new SolidResource(solidResourceProvider);
+        assertThrows(TestHarnessApiException.class, solidResource::getContainer);
+    }
+
+    @Test
+    void getAclUrl() {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
         when(solidResourceProvider.getAclUrl()).thenReturn(TEST_URL);
         final SolidResource solidResource = new SolidResource(solidResourceProvider);
@@ -117,7 +126,7 @@ class SolidResourceTest {
     }
 
     @Test
-    void getAclUrlNull() throws Exception {
+    void getAclUrlNull() {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
         when(solidResourceProvider.getAclUrl()).thenReturn(null);
         final SolidResource solidResource = new SolidResource(solidResourceProvider);
@@ -125,11 +134,11 @@ class SolidResourceTest {
     }
 
     @Test
-    void getAclUrlException() throws Exception {
+    void getAclUrlException() {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
-        when(solidResourceProvider.getAclUrl()).thenThrow(new Exception("FAIL"));
+        when(solidResourceProvider.getAclUrl()).thenThrow(new TestHarnessApiException("FAIL"));
         final SolidResource solidResource = new SolidResource(solidResourceProvider);
-        assertThrows(TestHarnessException.class, solidResource::getAclUrl);
+        assertThrows(TestHarnessApiException.class, solidResource::getAclUrl);
     }
 
     @Test
@@ -153,13 +162,13 @@ class SolidResourceTest {
     @Test
     void findStorageException() throws Exception {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
-        when(solidResourceProvider.findStorage()).thenThrow(new Exception("FAIL"));
+        when(solidResourceProvider.findStorage()).thenThrow(new TestHarnessApiException("FAIL"));
         final SolidResource solidResource = new SolidResource(solidResourceProvider);
-        assertThrows(TestHarnessException.class, solidResource::findStorage);
+        assertThrows(TestHarnessApiException.class, solidResource::findStorage);
     }
 
     @Test
-    void isStorageType() throws Exception {
+    void isStorageType() {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
         when(solidResourceProvider.isStorageType()).thenReturn(true);
         final SolidResource resource = new SolidResource(solidResourceProvider);
@@ -167,15 +176,15 @@ class SolidResourceTest {
     }
 
     @Test
-    void isStorageTypeException() throws Exception {
+    void isStorageTypeException() {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
-        when(solidResourceProvider.isStorageType()).thenThrow(new Exception("FAIL"));
+        when(solidResourceProvider.isStorageType()).thenThrow(new TestHarnessApiException("FAIL"));
         final SolidResource resource = new SolidResource(solidResourceProvider);
-        assertThrows(TestHarnessException.class, resource::isStorageType);
+        assertThrows(TestHarnessApiException.class, resource::isStorageType);
     }
 
     @Test
-    void getAccessDatasetBuilder() throws Exception {
+    void getAccessDatasetBuilder() {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
         final AccessDatasetBuilder accessDatasetBuilder = mock(AccessDatasetBuilder.class);
         when(solidResourceProvider.getAccessDatasetBuilder()).thenReturn(accessDatasetBuilder);
@@ -184,15 +193,15 @@ class SolidResourceTest {
     }
 
     @Test
-    void getAccessDatasetBuilderException() throws Exception {
+    void getAccessDatasetBuilderException() {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
-        when(solidResourceProvider.getAccessDatasetBuilder()).thenThrow(new Exception("FAIL"));
+        when(solidResourceProvider.getAccessDatasetBuilder()).thenThrow(new TestHarnessApiException("FAIL"));
         final SolidResource resource = new SolidResource(solidResourceProvider);
-        assertThrows(TestHarnessException.class, resource::getAccessDatasetBuilder);
+        assertThrows(TestHarnessApiException.class, resource::getAccessDatasetBuilder);
     }
 
     @Test
-    void getAccessDataset() throws Exception {
+    void getAccessDataset() {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
         final AccessDataset accessDataset = mock(AccessDataset.class);
         when(solidResourceProvider.getAccessDataset()).thenReturn(accessDataset);
@@ -201,12 +210,11 @@ class SolidResourceTest {
     }
 
     @Test
-    void getAccessDatasetException() throws Exception {
+    void getAccessDatasetException() {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
-        final AccessDataset accessDataset = mock(AccessDataset.class);
-        when(solidResourceProvider.getAccessDataset()).thenThrow(new Exception("FAIL"));
+        when(solidResourceProvider.getAccessDataset()).thenThrow(new RuntimeException("FAIL"));
         final SolidResource resource = new SolidResource(solidResourceProvider);
-        assertThrows(TestHarnessException.class, resource::getAccessDataset);
+        assertThrows(TestHarnessApiException.class, resource::getAccessDataset);
     }
 
     @Test
@@ -220,13 +228,13 @@ class SolidResourceTest {
     @Test
     void setAccessDatasetException() throws Exception {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
-        doThrow(new Exception("FAIL")).when(solidResourceProvider).setAccessDataset(any());
+        doThrow(new TestHarnessApiException("FAIL")).when(solidResourceProvider).setAccessDataset(any());
         final SolidResource resource = new SolidResource(solidResourceProvider);
-        assertThrows(TestHarnessException.class, () -> resource.setAccessDataset(null));
+        assertThrows(TestHarnessApiException.class, () -> resource.setAccessDataset(null));
     }
 
     @Test
-    void delete() throws Exception {
+    void delete() {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
         final SolidResource resource = new SolidResource(solidResourceProvider);
         assertDoesNotThrow(resource::delete);
@@ -234,11 +242,11 @@ class SolidResourceTest {
     }
 
     @Test
-    void deleteException() throws Exception {
+    void deleteException() {
         final SolidResourceProvider solidResourceProvider = mock(SolidResourceProvider.class);
-        doThrow(new Exception("FAIL")).when(solidResourceProvider).delete();
+        doThrow(new TestHarnessApiException("FAIL")).when(solidResourceProvider).delete();
         final SolidResource resource = new SolidResource(solidResourceProvider);
-        assertThrows(TestHarnessException.class, resource::delete);
+        assertThrows(TestHarnessApiException.class, resource::delete);
     }
 
     @Test

@@ -21,50 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.solid.testharness.reporting;
+package org.solid.testharness.utils;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.solid.common.vocab.EARL;
-import org.solid.testharness.utils.DataModelBase;
+public class TestHarnessException extends Exception {
+    private static final long serialVersionUID = -3676037765799217561L;
 
-import java.util.List;
-
-public class Assertion extends DataModelBase {
-    private TestResult testResult;
-
-    public Assertion(final IRI subject) {
-        super(subject, ConstructMode.DEEP);
-        final List<TestResult> results = getModelList(EARL.result, TestResult.class);
-        if (results != null) {
-            testResult = results.get(0);
-        }
+    public TestHarnessException(final String message) {
+        super(message);
     }
 
-    public String getAssertedBy() {
-        return getIriAsString(EARL.assertedBy);
-    }
-
-    public String getTest() {
-        return getIriAsString(EARL.test);
-    }
-
-    public String getTestSubject() {
-        return getIriAsString(EARL.subject);
-    }
-
-    public String getMode() {
-        return getIriAsString(EARL.mode);
-    }
-
-    public TestResult getResult() {
-        return testResult;
-    }
-
-    public boolean isFailed() {
-        return testResult.isFailed();
-    }
-
-    public boolean isPassed() {
-        return testResult.isPassed();
+    public TestHarnessException(final String message, final Throwable cause) {
+        super(message, cause);
     }
 }

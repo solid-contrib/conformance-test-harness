@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.solid.testharness.api;
+package org.solid.testharness.utils;
 
 import org.junit.jupiter.api.Test;
 
@@ -29,22 +29,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TestHarnessExceptionTest {
     @Test
+    void simpleConstructor() {
+        final TestHarnessException exception = new TestHarnessException("message",
+                new Exception("FAIL"));
+        assertEquals("message", exception.getMessage());
+    }
+
+    @Test
     void simpleMessage() {
-        final TestHarnessException exception = new TestHarnessException("message", new Exception("FAIL"));
-        assertEquals("org.solid.testharness.api.TestHarnessException: message\n" +
-                "Caused by: java.lang.Exception: FAIL", exception.getMessage());
-    }
-
-    @Test
-    void noMessage() {
-        final TestHarnessException exception = new TestHarnessException(null, new Exception("FAIL"));
-        assertEquals("org.solid.testharness.api.TestHarnessException: \n" +
-                "Caused by: java.lang.Exception: FAIL", exception.getMessage());
-    }
-
-    @Test
-    void noCause() {
-        final TestHarnessException exception = new TestHarnessException("message", null);
-        assertEquals("org.solid.testharness.api.TestHarnessException: message", exception.getMessage());
+        final TestHarnessException exception = new TestHarnessException("message");
+        assertEquals("message", exception.getMessage());
     }
 }

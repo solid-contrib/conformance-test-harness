@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ class TestHarnessInitializationExceptionTest {
     void simpleConstructor() {
         final TestHarnessInitializationException exception = new TestHarnessInitializationException("message",
                 new Exception("FAIL"));
-        assertEquals("message", exception.getMessage());
+        assertEquals("message Caused by: java.lang.Exception: FAIL", exception.getMessage());
     }
 
     @Test

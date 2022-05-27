@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("solid")
 @QuarkusTest
-public class TestSuiteRunner {
+class TestSuiteRunner {
     @Inject
     Config config;
     @Inject
@@ -77,11 +77,11 @@ public class TestSuiteRunner {
     }
 
     @Test
-    @Disabled
+    @Disabled("not used in normal test runs")
     void testSuiteCoverage() throws Exception {
         conformanceTestHarness.initialize();
         config.logConfigSettings(Config.RunMode.COVERAGE);
         conformanceTestHarness.prepareCoverageReport();
-        conformanceTestHarness.buildReports(Config.RunMode.COVERAGE);
+        assertDoesNotThrow(() -> conformanceTestHarness.buildReports(Config.RunMode.COVERAGE));
     }
 }

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,7 @@ import org.solid.common.vocab.RDF;
 import org.solid.common.vocab.SPEC;
 import org.solid.common.vocab.TD;
 import org.solid.testharness.utils.DataRepository;
+import org.solid.testharness.utils.TestHarnessException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -56,7 +57,8 @@ public class ReportGenerator {
     private TestSuiteResults testSuiteResults;
     private long startTime;
 
-    public void buildTurtleReport(final Writer writer) throws Exception {
+    @SuppressWarnings("java:S1130") // false-positive
+    public void buildTurtleReport(final Writer writer) throws TestHarnessException {
         dataRepository.export(writer, (Resource) null);
     }
 

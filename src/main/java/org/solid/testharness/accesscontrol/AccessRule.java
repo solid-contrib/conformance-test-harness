@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@
 package org.solid.testharness.accesscontrol;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.util.Values;
 
 import java.net.URI;
 import java.util.Collections;
@@ -40,12 +41,12 @@ public class AccessRule {
         AGENT
     }
 
-    private URI target;
-    private boolean inheritable;
-    private AgentType type;
-    private IRI agent;
-    private List<IRI> members;
-    private List<String> access;
+    private final URI target;
+    private final boolean inheritable;
+    private final AgentType type;
+    private final IRI agent;
+    private final List<IRI> members;
+    private final List<String> access;
 
     public IRI getTargetIri() {
         return target != null ? iri(target.toString()) : null;
@@ -79,7 +80,7 @@ public class AccessRule {
         this.agent = agent != null ? iri(agent) : null;
         this.access = access != null ? access : Collections.emptyList();
         this.members = members != null
-                ? members.stream().map(m -> iri(m)).collect(Collectors.toList())
+                ? members.stream().map(Values::iri).collect(Collectors.toList())
                 : Collections.emptyList();
     }
 }

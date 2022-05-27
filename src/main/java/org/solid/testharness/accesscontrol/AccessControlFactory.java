@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,6 @@ import org.solid.testharness.config.TestSubject;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.io.IOException;
 import java.net.URI;
 
 @ApplicationScoped
@@ -37,19 +36,19 @@ public class AccessControlFactory {
     @Inject
     TestSubject testSubject;
 
-    public AccessDatasetBuilder getAccessDatasetBuilder(final String uri) {
+    public <T extends AccessDataset> AccessDatasetBuilder<T> getAccessDatasetBuilder(final String uri) {
         if (TestSubject.AccessControlMode.WAC.equals(testSubject.getAccessControlMode())) {
-            return new AccessDatasetWacBuilder().setBaseUri(uri);
+            return (AccessDatasetBuilder<T>) new AccessDatasetWacBuilder().setBaseUri(uri);
         } else if (TestSubject.AccessControlMode.ACP.equals(testSubject.getAccessControlMode())) {
-            return new AccessDatasetAcpBuilder().setBaseUri(uri);
+            return (AccessDatasetBuilder<T>) new AccessDatasetAcpBuilder().setBaseUri(uri);
         } else if (TestSubject.AccessControlMode.ACP_LEGACY.equals(testSubject.getAccessControlMode())) {
-            return new AccessDatasetAcpLegacyBuilder().setBaseUri(uri);
+            return (AccessDatasetBuilder<T>) new AccessDatasetAcpLegacyBuilder().setBaseUri(uri);
         } else {
             return null;
         }
     }
 
-    public AccessDataset createAccessDataset(final String acl, final URI baseUri) throws IOException {
+    public AccessDataset createAccessDataset(final String acl, final URI baseUri) {
         if (TestSubject.AccessControlMode.WAC.equals(testSubject.getAccessControlMode())) {
             return new AccessDatasetWac(acl, baseUri);
         } else if (TestSubject.AccessControlMode.ACP.equals(testSubject.getAccessControlMode())) {

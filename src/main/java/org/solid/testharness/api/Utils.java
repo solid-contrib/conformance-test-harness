@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,7 +51,7 @@ public final class Utils {
      */
     public static List<Map<String, String>> parseLinkHeaders(final Map<String, List<String>> headers) {
         if (headers == null) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         // Link can be multi-valued (comma separated) or multi-instance so this builds a list from both forms
         // TODO: This is temporary as a link can contain a comma so this is not safe - a parser is required
@@ -62,9 +62,9 @@ public final class Utils {
                 .filter(entry -> "link".equals(entry.getKey().toLowerCase(Locale.ROOT)))
                 .findFirst()
                 .map(Map.Entry::getValue)
-                .orElse(Collections.EMPTY_LIST);
+                .orElse(Collections.emptyList());
         if (links.size() == 1 && links.get(0).contains(",")) {
-            links = Arrays.asList(links.get(0).split("\\s*,\\s*"));
+            links = Arrays.stream(links.get(0).split(",")).map(String::strip).collect(Collectors.toList());
         }
         return links.stream().map(Link::valueOf).map(l -> {
             final var map = new HashMap<String, String>();
@@ -76,13 +76,13 @@ public final class Utils {
         }).collect(Collectors.toList());
     }
 
-    // This method deliberately creates objects in a loop dependent on the structure of the header
-    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     /**
      * Returns a map of the permission groups found in a WAC-Allow header. Each group contains a list of permissions.
      * @param headers a map of the response headers
      * @return the map of permissions groups and permissions
      */
+    // This method deliberately creates objects in a loop dependent on the structure of the header
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     public static Map<String, List<String>> parseWacAllowHeader(@NotNull final Map<String, List<String>> headers) {
         try {
             Objects.requireNonNull(headers, "headers is required");
@@ -97,7 +97,9 @@ public final class Utils {
             if (header.isPresent()) {
                 final String wacAllowHeader = header.get().getValue().get(0);
                 // note this does not support imbalanced quotes
-                final Pattern p = Pattern.compile("(\\w+)\\s*=\\s*\"?\\s*((?:\\s*[^\",\\s]+)*)\\s*\"?");
+                final Pattern p = Pattern.compile(
+                        "(\\w+)[ \\t]*+=[ \\t]*+\"[ \\t]*+((?:[ \\t]*+[^\", \\t]+)*+)[ \\t]*+\""
+                );
                 final Matcher m = p.matcher(wacAllowHeader);
                 while (m.find()) {
                     if (!permissions.containsKey(m.group(1))) {
@@ -105,7 +107,7 @@ public final class Utils {
                     }
                     if (!m.group(2).isEmpty()) {
                         permissions.get(m.group(1)).addAll(
-                                Arrays.asList(m.group(2).toLowerCase(Locale.ROOT).split("\\s+"))
+                                Arrays.asList(m.group(2).toLowerCase(Locale.ROOT).split("[ \\t]++"))
                         );
                     }
                 }
@@ -116,7 +118,7 @@ public final class Utils {
                     Map.Entry::getKey,
                     entry -> List.copyOf(entry.getValue())));
         } catch (Exception e) {
-            throw new TestHarnessException("Failed to parse WAC-Allow header", e);
+            throw new TestHarnessApiException("Failed to parse WAC-Allow header", e);
         }
     }
 
@@ -126,12 +128,12 @@ public final class Utils {
      * @param target the new target
      * @return the resolved URI
      */
-    public static String resolveUri(@NotNull final String baseUri, @NotNull final String target) {
+    public static String resolveUri(final String baseUri, final String target) {
         try {
             if (baseUri == null || target == null) return null;
             return URI.create(baseUri).resolve(URI.create(target)).toString();
         } catch (Exception e) {
-            throw new TestHarnessException("Failed to resolve URI", e);
+            throw new TestHarnessApiException("Failed to resolve URI", e);
         }
     }
 

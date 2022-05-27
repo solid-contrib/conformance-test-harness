@@ -21,45 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.solid.testharness.utils;
+package org.solid.testharness.api;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class MaskingLogModifierTest {
+class TestHarnessApiExceptionTest {
     @Test
-    void enableForUri() {
-        assertTrue(MaskingLogModifier.INSTANCE.enableForUri(""));
+    void simpleMessage() {
+        final TestHarnessApiException exception = new TestHarnessApiException("message");
+        assertEquals("org.solid.testharness.api.TestHarnessApiException: message", exception.getMessage());
     }
 
     @Test
-    void uri() {
-        assertEquals("uri", MaskingLogModifier.INSTANCE.uri("uri"));
+    void simpleMessageWithCause() {
+        final TestHarnessApiException exception = new TestHarnessApiException("message", new Exception("FAIL"));
+        assertEquals("org.solid.testharness.api.TestHarnessApiException: message\n" +
+                "Caused by: java.lang.Exception: FAIL", exception.getMessage());
     }
 
     @Test
-    void authorizationHeader() {
-        assertEquals("Bearer ***abcdef", MaskingLogModifier.INSTANCE.header("AUTHORIZATION", "Bearer xxxabcdef"));
+    void noMessage() {
+        final TestHarnessApiException exception = new TestHarnessApiException(null, new Exception("FAIL"));
+        assertEquals("org.solid.testharness.api.TestHarnessApiException: \n" +
+                "Caused by: java.lang.Exception: FAIL", exception.getMessage());
     }
 
     @Test
-    void dpopHeader() {
-        assertEquals("***abcdef", MaskingLogModifier.INSTANCE.header("DPOP", "xxxabcdef"));
-    }
-
-    @Test
-    void otherHeader() {
-        assertEquals("Other", MaskingLogModifier.INSTANCE.header("OTHER", "Other"));
-    }
-
-    @Test
-    void request() {
-        assertEquals("Request", MaskingLogModifier.INSTANCE.request("URI", "Request"));
-    }
-
-    @Test
-    void response() {
-        assertEquals("Response", MaskingLogModifier.INSTANCE.response("URI", "Response"));
+    void noCause() {
+        final TestHarnessApiException exception = new TestHarnessApiException("message", null);
+        assertEquals("org.solid.testharness.api.TestHarnessApiException: message", exception.getMessage());
     }
 }

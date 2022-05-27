@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -101,16 +101,16 @@ class HttpUtilsTest {
 
     @Test
     void isHttpProtocol() {
-        assertTrue(HttpUtils.isHttpProtocol("http"));
-        assertTrue(HttpUtils.isHttpProtocol("https"));
-        assertFalse(HttpUtils.isHttpProtocol("ws"));
+        assertTrue(HttpUtils.isHttpProtocol(URI.create("http://example.org")));
+        assertTrue(HttpUtils.isHttpProtocol(URI.create("https://example.org")));
+        assertFalse(HttpUtils.isHttpProtocol(URI.create("ws://example.org")));
         assertFalse(HttpUtils.isHttpProtocol(null));
     }
 
     @Test
     void isFileProtocol() {
-        assertTrue(HttpUtils.isFileProtocol("file"));
-        assertFalse(HttpUtils.isFileProtocol("files"));
+        assertTrue(HttpUtils.isFileProtocol(URI.create("file://path")));
+        assertFalse(HttpUtils.isFileProtocol(URI.create("files://path")));
         assertFalse(HttpUtils.isFileProtocol(null));
     }
 
@@ -479,7 +479,7 @@ class HttpUtilsTest {
     @Test
     void parseLinkHeadersTwoInOne() {
         final List<Link> links = HttpUtils.parseLinkHeaders(setupHeaders(HttpConstants.HEADER_LINK,
-                List.of("<https://example.org/next>; rel=\"next\", <https://example.org/last>; rel=\"last\"")));
+                List.of("<https://example.org/next>; rel=\"next\"  , <https://example.org/last>; rel=\"last\"")));
         assertEquals(2, links.size());
         assertEquals(URI.create("https://example.org/next"), links.get(0).getUri());
         assertEquals("next", links.get(0).getRel());

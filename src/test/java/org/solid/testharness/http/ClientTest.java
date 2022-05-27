@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,7 @@ import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -116,7 +117,7 @@ class ClientTest {
     }
 
     @Test
-    void sendRawEmpty() throws Exception {
+    void sendRawEmpty() {
         final Client client = new Client.Builder().build();
         final HttpResponse<String> response = client.send("DAHU", baseUri.resolve("/dahu/no-auth"),
                 "TEXT", null, null, false);
@@ -126,7 +127,7 @@ class ClientTest {
     }
 
     @Test
-    void sendRawAuthEmpty() throws Exception {
+    void sendRawAuthEmpty() {
         final Client client = new Client.Builder().withDpopSupport().build();
         client.setAccessToken("ACCESS");
         final HttpResponse<String> response = client.send("DAHU", baseUri.resolve("/dahu/auth"),
@@ -139,7 +140,7 @@ class ClientTest {
     }
 
     @Test
-    void sendRawRetry() throws Exception {
+    void sendRawRetry() {
         final Client client = new Client.Builder().build();
         final HttpResponse<String> response = client.send("RETRY", baseUri.resolve("/retry"),
                 "TEXT", null, null, false);
@@ -152,7 +153,7 @@ class ClientTest {
     void sendRawRetryFails() {
         final Client client = new Client.Builder().build();
         client.setMaxRetries(1);
-        assertThrows(ExecutionException.class, () -> client.send("RETRY", baseUri.resolve("/retryfails"),
+        assertThrows(CompletionException.class, () -> client.send("RETRY", baseUri.resolve("/retryfails"),
                 "TEXT", null, null, false));
     }
 
@@ -169,7 +170,7 @@ class ClientTest {
     }
 
     @Test
-    void sendRawWithHeaders() throws Exception {
+    void sendRawWithHeaders() {
         final Client client = new Client.Builder().build();
         final Map<String, Object> headers = Map.of(
                 "INT", 5,
@@ -184,7 +185,7 @@ class ClientTest {
     }
 
     @Test
-    void send() throws Exception {
+    void send() {
         final Client client = new Client.Builder().build();
         final HttpRequest request = HttpRequest.newBuilder(baseUri.resolve("/get/404")).build();
         final HttpResponse<String> response = client.send(request, STRING_BODY_HANDLER);
@@ -212,7 +213,7 @@ class ClientTest {
     }
 
     @Test
-    void sendAuthorized() throws Exception {
+    void sendAuthorized() {
         final Client client = new Client.Builder().withDpopSupport().build();
         client.setAccessToken("ACCESS");
         final HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(baseUri.resolve("/get/turtle"));
@@ -244,14 +245,14 @@ class ClientTest {
     }
 
     @Test
-    void getAsTurtleNoAuth() throws Exception {
+    void getAsTurtleNoAuth() {
         final Client client = new Client.Builder().build();
         final HttpResponse<String> response = client.getAsTurtle(baseUri.resolve("/get/turtle"));
         assertEquals("TURTLE-NOAUTH", response.body());
     }
 
     @Test
-    void getAsTurtleDpop() throws Exception {
+    void getAsTurtleDpop() {
         final Client client = new Client.Builder().withDpopSupport().build();
         client.setAccessToken("ACCESS");
         final HttpResponse<String> response = client.getAsTurtle(baseUri.resolve("/get/turtle"));
@@ -259,7 +260,7 @@ class ClientTest {
     }
 
     @Test
-    void getAsTurtleBearer() throws Exception {
+    void getAsTurtleBearer() {
         final Client client = new Client.Builder().build();
         client.setAccessToken("ACCESS");
         final HttpResponse<String> response = client.getAsTurtle(baseUri.resolve("/get/turtle"));
@@ -273,7 +274,7 @@ class ClientTest {
     }
 
     @Test
-    void patch() throws Exception {
+    void patch() {
         final Client client = new Client.Builder().build();
         final HttpResponse<String> response = client.patch(baseUri.resolve("/patch"), "TEXT",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
@@ -281,7 +282,7 @@ class ClientTest {
     }
 
     @Test
-    void putText() throws Exception {
+    void putText() {
         final Client client = new Client.Builder().build();
         final HttpResponse<Void> response = client.put(baseUri.resolve("/put"), "TEXT",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
@@ -289,7 +290,7 @@ class ClientTest {
     }
 
     @Test
-    void putTurtle() throws Exception {
+    void putTurtle() {
         final Client client = new Client.Builder().build();
         final HttpResponse<Void> response = client.put(baseUri.resolve("/put"), "TURTLE",
                 HttpConstants.MEDIA_TYPE_TEXT_TURTLE);
@@ -315,7 +316,7 @@ class ClientTest {
     }
 
     @Test
-    void head() throws Exception {
+    void head() {
         final Client client = new Client.Builder().build();
         final HttpResponse<Void> response = client.head(baseUri.resolve("/head"));
         assertEquals(200, response.statusCode());

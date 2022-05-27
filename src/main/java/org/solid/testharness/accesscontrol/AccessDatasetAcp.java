@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,12 +29,12 @@ import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.solid.common.vocab.ACL;
 import org.solid.common.vocab.ACP;
 import org.solid.common.vocab.RDF;
+import org.solid.testharness.api.TestHarnessApiException;
 import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.http.Client;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.HttpUtils;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
@@ -61,11 +61,7 @@ public class AccessDatasetAcp implements AccessDataset {
         final String namespace = aclUri + "#";
         final IRI accessControlResource = iri(aclUri);
         if (!accessRules.isEmpty()) {
-            final ModelBuilder builder = new ModelBuilder();
-            // add document namespace and any others needed
-            builder.setNamespace(PREFIX, namespace);
-            builder.setNamespace(ACP.PREFIX, ACP.NAMESPACE);
-            builder.setNamespace(ACL.PREFIX, ACL.NAMESPACE);
+            final ModelBuilder builder = setupModel(namespace);
             final AtomicInteger i = new AtomicInteger();
             accessRules.forEach(rule -> {
                 i.addAndGet(1);
@@ -84,21 +80,8 @@ public class AccessDatasetAcp implements AccessDataset {
                         .add(policyNode, RDF.type, ACP.Policy)
                         .add(policyNode, ACP.allOf, matcherNode)
                         .add(matcherNode, RDF.type, ACP.Matcher);
-                if (!accessModes.isEmpty()) {
-                    accessModes.stream()
-                            .map(mode -> standardModes.containsKey(mode) ? standardModes.get(mode) : iri(mode))
-                            .distinct()
-                            .forEach(mode -> builder.add(policyNode, ACP.allow, mode));
-                }
-                if (!controlAccessModes.isEmpty()) {
-                    final IRI accessPolicyNode = iri(namespace, "accessPolicy" + i);
-                    builder.add(accessControlNode, ACP.access, accessPolicyNode)
-                            .add(accessPolicyNode, RDF.type, ACP.Policy)
-                            .add(accessPolicyNode, ACP.allOf, matcherNode);
-                    controlAccessModes.stream()
-                            .map(standardModes::get)
-                            .forEach(mode -> builder.add(accessPolicyNode, ACP.allow, mode));
-                }
+                addPolicy(builder, accessModes, policyNode);
+                addAccessPolicy(namespace, builder, i, controlAccessModes, accessControlNode, matcherNode);
                 // Jacoco does not report switch coverage correctly
                 switch (rule.getType()) {
                     case AGENT:
@@ -122,38 +105,70 @@ public class AccessDatasetAcp implements AccessDataset {
         }
     }
 
-    private List<String> extractControlModes(final AccessRule rule) {
-        final List<String> controlModes = new ArrayList<>();
+    private void addAccessPolicy(final String namespace, final ModelBuilder builder, final AtomicInteger i,
+                                 final List<String> controlAccessModes, final IRI accessControlNode,
+                                 final IRI matcherNode) {
+        if (!controlAccessModes.isEmpty()) {
+            final IRI accessPolicyNode = iri(namespace, "accessPolicy" + i);
+            builder.add(accessControlNode, ACP.access, accessPolicyNode)
+                    .add(accessPolicyNode, RDF.type, ACP.Policy)
+                    .add(accessPolicyNode, ACP.allOf, matcherNode);
+            controlAccessModes.stream()
+                    .map(standardModes::get)
+                    .forEach(mode -> builder.add(accessPolicyNode, ACP.allow, mode));
+        }
+    }
+
+    private void addPolicy(final ModelBuilder builder, final List<String> accessModes, final IRI policyNode) {
+        if (!accessModes.isEmpty()) {
+            accessModes.stream()
+                    .map(mode -> standardModes.containsKey(mode) ? standardModes.get(mode) : iri(mode))
+                    .distinct()
+                    .forEach(mode -> builder.add(policyNode, ACP.allow, mode));
+        }
+    }
+
+    private ModelBuilder setupModel(final String namespace) {
+        final ModelBuilder builder = new ModelBuilder();
+        // add document namespace and any others needed
+        builder.setNamespace(PREFIX, namespace);
+        builder.setNamespace(ACP.PREFIX, ACP.NAMESPACE);
+        builder.setNamespace(ACL.PREFIX, ACL.NAMESPACE);
+        return builder;
+    }
+
+    static List<String> extractControlModes(final AccessRule rule) {
+        final List<String> controlAccessModes = new ArrayList<>();
         if (rule.getAccess().contains(CONTROL)) {
             if (rule.getAccess().contains(CONTROL_READ) || rule.getAccess().contains(CONTROL_WRITE)) {
-                throw new RuntimeException("For ACP, you cannot use Control and either of " +
+                throw new TestHarnessApiException("For ACP, you cannot use Control and either of " +
                         "ControlRead or ControlWrite");
             } else {
                 // in ACP CONTROL can be a shorthand for CONTROL_READ and CONTROL_WRITE
-                controlModes.addAll(List.of(READ, WRITE));
+                controlAccessModes.addAll(List.of(READ, WRITE));
             }
         } else {
             if (rule.getAccess().contains(CONTROL_READ)) {
-                controlModes.add(READ);
+                controlAccessModes.add(READ);
             }
             if (rule.getAccess().contains(CONTROL_WRITE)) {
-                controlModes.add(WRITE);
+                controlAccessModes.add(WRITE);
             }
         }
-        return controlModes;
+        return controlAccessModes;
     }
 
-    public AccessDatasetAcp(final String acl, final URI baseUri) throws IOException {
+    public AccessDatasetAcp(final String acl, final URI baseUri) {
         parseTurtle(acl, baseUri.toString());
     }
 
     @Override
-    public void apply(final Client client, final URI uri) throws Exception {
+    public void apply(final Client client, final URI uri) {
         if (model != null) {
             final HttpResponse<String> response = client.patch(uri, asSparqlInsert(),
                     HttpConstants.MEDIA_TYPE_APPLICATION_SPARQL_UPDATE);
             if (!HttpUtils.isSuccessful(response.statusCode())) {
-                throw new Exception("Error response=" + response.statusCode() + " trying to apply ACL");
+                throw new TestHarnessApiException("Error response=" + response.statusCode() + " trying to apply ACL");
             }
         }
     }

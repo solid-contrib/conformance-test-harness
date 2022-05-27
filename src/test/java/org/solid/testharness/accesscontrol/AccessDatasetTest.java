@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -95,7 +95,7 @@ class AccessDatasetTest {
     }
 
     @Test
-    void parseTurtle() throws IOException {
+    void parseTurtle() throws Exception {
         final AccessDataset accessDataset = new TestAccessDataset();
         accessDataset.parseTurtle(TestUtils.loadStringFromFile("src/test/resources/utils/vcard.ttl"),
                 TestUtils.SAMPLE_BASE);

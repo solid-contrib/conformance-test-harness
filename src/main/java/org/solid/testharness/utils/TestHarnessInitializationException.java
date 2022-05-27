@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,14 +23,37 @@
  */
 package org.solid.testharness.utils;
 
+import java.util.concurrent.CompletionException;
+
 public class TestHarnessInitializationException extends RuntimeException {
     private static final long serialVersionUID = -3676037765799217561L;
 
+    private final String message;
+
     public TestHarnessInitializationException(final String message) {
         super(message);
+        this.message = message;
     }
 
     public TestHarnessInitializationException(final String message, final Throwable cause) {
         super(message, cause);
+        this.message = message;
+    }
+
+    @Override
+    public String getMessage() {
+        final StringBuilder sb = new StringBuilder();
+        if (message != null) {
+            sb.append(message);
+        }
+        if (getCause() != null) {
+            sb.append(" Caused by: ");
+            if (getCause() instanceof CompletionException) {
+                sb.append(getCause().getCause());
+            } else {
+                sb.append(getCause());
+            }
+        }
+        return sb.toString();
     }
 }

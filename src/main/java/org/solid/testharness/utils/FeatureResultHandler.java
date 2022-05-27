@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,6 +48,7 @@ public class FeatureResultHandler implements SuiteReports {
     PathMappings pathMappings;
 
     @Override
+    @SuppressWarnings("java:S112")
     public Report featureReport(final Suite suite, final FeatureResult fr) {
         final String featurePath = fr.getDisplayName();
         final String featureIri = pathMappings.unmapFeaturePath(featurePath);

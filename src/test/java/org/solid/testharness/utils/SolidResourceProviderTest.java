@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,6 +48,7 @@ class SolidResourceProviderTest {
     private static final URI ROOT_URL = URI.create("https://example.org/");
     private static final URI TEST_URL = ROOT_URL.resolve("resource");
     private static final URI TEST_ACL_URL = URI.create(TEST_URL + ".acl");
+    private static final URI BAD_URI = URI.create("test");
     SolidClientProvider solidClientProvider;
 
     @InjectMock
@@ -70,7 +71,7 @@ class SolidResourceProviderTest {
         assertEquals("Parameter url is required", exception.getMessage());
 
         exception = assertThrows(IllegalArgumentException.class, () ->
-                new SolidResourceProvider(solidClientProvider, URI.create("test"), null, null)
+                new SolidResourceProvider(solidClientProvider, BAD_URI, null, null)
         );
         assertEquals("The url must be absolute", exception.getMessage());
 
@@ -81,7 +82,7 @@ class SolidResourceProviderTest {
     }
 
     @Test
-    void testConstructorNoBody() {
+    void testConstructorNoBody() throws Exception {
         final SolidResourceProvider resource = new SolidResourceProvider(solidClientProvider, TEST_URL);
         assertEquals(TEST_URL, resource.getUrl());
     }
@@ -150,9 +151,9 @@ class SolidResourceProviderTest {
     @Test
     void resourceNotExists() throws Exception {
         when(solidClientProvider.createResource(TEST_URL, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN))
-                .thenThrow(new Exception());
+                .thenThrow(new TestHarnessException("FAIL"));
 
-        assertThrows(Exception.class, () -> new SolidResourceProvider(solidClientProvider, TEST_URL, "hello",
+        assertThrows(TestHarnessException.class, () -> new SolidResourceProvider(solidClientProvider, TEST_URL, "hello",
                 HttpConstants.MEDIA_TYPE_TEXT_PLAIN)
         );
     }
@@ -257,9 +258,10 @@ class SolidResourceProviderTest {
     @Test
     void getUrlNull() throws Exception {
         when(solidClientProvider.createResource(TEST_URL, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN))
-                .thenThrow(new Exception("Failed as expected"));
-        assertThrows(Exception.class, () -> new SolidResourceProvider(solidClientProvider, TEST_URL, "hello",
-                HttpConstants.MEDIA_TYPE_TEXT_PLAIN)
+                .thenThrow(new TestHarnessException("Failed as expected"));
+        assertThrows(TestHarnessException.class,
+                () -> new SolidResourceProvider(solidClientProvider, TEST_URL, "hello",
+                        HttpConstants.MEDIA_TYPE_TEXT_PLAIN)
         );
     }
 
@@ -358,16 +360,6 @@ class SolidResourceProviderTest {
     }
 
     @Test
-    void deleteException() throws Exception {
-        when(solidClientProvider.createResource(TEST_URL, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN))
-                .thenReturn(null);
-        final SolidResourceProvider resource = new SolidResourceProvider(solidClientProvider, TEST_URL, "hello",
-                HttpConstants.MEDIA_TYPE_TEXT_PLAIN);
-        doThrow(new Exception("Failed as expected")).when(solidClientProvider).deleteResourceRecursively(TEST_URL);
-        assertThrows(Exception.class, resource::delete);
-    }
-
-    @Test
     void resourceToString() throws Exception {
         when(solidClientProvider.createResource(TEST_URL, "hello", HttpConstants.MEDIA_TYPE_TEXT_PLAIN))
                 .thenReturn(null);
@@ -386,7 +378,7 @@ class SolidResourceProviderTest {
     }
 
     @Test
-    void generateId() {
+    void generateId() throws Exception {
         final SolidResourceProvider resource = new SolidResourceProvider(solidClientProvider, TEST_URL);
         when(config.generateResourceId()).thenReturn("abcdef");
         assertEquals("abcdef", resource.generateId());

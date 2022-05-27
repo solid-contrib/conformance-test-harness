@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@ import java.util.Optional;
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ConfigLogicTest {
+class ConfigLogicTest {
 
     @Test
     void getTestSubjectsAbsolute() {
@@ -185,42 +185,42 @@ public class ConfigLogicTest {
     }
 
     @Test
-    public void getTestContainerWithSlashes() {
+    void getTestContainerWithSlashes() {
         final Config config = new Config();
         config.testContainer = Optional.of("/test/");
         assertEquals("/test/", config.getTestContainer());
     }
 
     @Test
-    public void getTestContainerNoSlashes() {
+    void getTestContainerNoSlashes() {
         final Config config = new Config();
         config.testContainer = Optional.of("test");
         assertEquals("test/", config.getTestContainer());
     }
 
     @Test
-    public void getSolidIdentityProviderNull() {
+    void getSolidIdentityProviderNull() {
         final Config config = new Config();
         config.solidIdentityProvider = Optional.empty();
         assertEquals(null, config.getSolidIdentityProvider());
     }
 
     @Test
-    public void getSolidIdentityProviderInvalid() {
+    void getSolidIdentityProviderInvalid() {
         final Config config = new Config();
         config.solidIdentityProvider = Optional.of(URI.create("test"));
         assertThrows(TestHarnessInitializationException.class, config::getSolidIdentityProvider);
     }
 
     @Test
-    public void getLoginEndpointNull() {
+    void getLoginEndpointNull() {
         final Config config = new Config();
         config.loginEndpoint = Optional.empty();
         assertEquals(null, config.getLoginEndpoint());
     }
 
     @Test
-    public void getUserRegistrationEndpointNull() {
+    void getUserRegistrationEndpointNull() {
         final Config config = new Config();
         config.userRegistrationEndpoint = Optional.empty();
         assertEquals(null, config.getUserRegistrationEndpoint());

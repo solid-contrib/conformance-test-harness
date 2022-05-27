@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
+import org.solid.testharness.api.TestHarnessApiException;
 import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.http.Client;
 
@@ -87,8 +88,13 @@ public interface AccessDataset {
         return sw.toString().replaceAll("@prefix ([^:]+): <([^>]+)> .", "PREFIX $1: <$2>");
     }
 
-    default void parseTurtle(String data, String baseUri) throws IOException {
-        final Model model = Rio.parse(new StringReader(data), baseUri, RDFFormat.TURTLE);
+    default void parseTurtle(String data, String baseUri) {
+        final Model model;
+        try {
+            model = Rio.parse(new StringReader(data), baseUri, RDFFormat.TURTLE);
+        } catch (IOException | RuntimeException e) {
+            throw new TestHarnessApiException("Failed to parse Turtle", e);
+        }
         setModel(model);
     }
 
@@ -99,5 +105,5 @@ public interface AccessDataset {
         return Models.isSubset(getModel(), otherAccessDataset.getModel());
     }
 
-    void apply(Client client, URI uri) throws Exception;
+    void apply(Client client, URI uri);
 }

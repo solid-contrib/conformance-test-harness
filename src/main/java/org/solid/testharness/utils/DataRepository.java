@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -55,8 +55,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.URL;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.eclipse.rdf4j.model.util.Values.*;
 
@@ -64,13 +64,7 @@ import static org.eclipse.rdf4j.model.util.Values.*;
 public class DataRepository implements Repository {
     private static final Logger logger = LoggerFactory.getLogger(DataRepository.class);
     private static final String GITHUB_LINE_ANCHOR = "#L";
-    private static final Pattern JS_ERROR = Pattern.compile(
-            "\\Rjs failed:\\R>>>>.*<<<<\\Rorg.graalvm.polyglot.PolyglotException: " +
-                    "([^\\r\\n]+)\\R" +             // exception message
-                    "(?:(Caused[^\\r\\n]+)\\R)?" +  // optional cause
-                    "(?:([^\\r\\n]+).*)?" +         // first line of stack trace
-                    "(- <js>[^\\r\\n]+).*",         // last line of stack
-            Pattern.DOTALL);
+    private static final String POLYGLOT_EXCEPTION = "org.graalvm.polyglot.PolyglotException: ";
 
     private final Repository repository = new SailRepository(new MemoryStore());
     // TODO: Determine if this should be a separate IRI to the base
@@ -95,44 +89,44 @@ public class DataRepository implements Repository {
 
     public void load(final URL url, final String baseUri) {
         try (RepositoryConnection conn = getConnection()) {
-            try {
-                final IRI context = iri(url.toString());
-                logger.info("Loading {} with base {}", url, baseUri);
-                final ParserConfig parserConfig = new ParserConfig();
-                parserConfig.set(RDFaParserSettings.RDFA_COMPATIBILITY, RDFaVersion.RDFA_1_1);
-                conn.setParserConfig(parserConfig);
-                conn.add(url, baseUri, null, context);
-                logger.debug("Loaded data into temporary context, size={}", conn.size(context));
-                try (var statements = conn.getStatements(null, SPEC.requirement, null, context)) {
-                    if (statements.hasNext()) {
-                        // copy the spec and requirement triples to the spec-related graph context
-                        final Resource spec = statements.next().getSubject();
-                        conn.add(spec, RDF.type, DOAP.Specification, Namespaces.SPEC_RELATED_CONTEXT);
-                        try (var requirements = conn.getStatements(spec, SPEC.requirement, null, context)) {
-                            requirements.stream()
-                                    .peek(st -> conn.add(st, Namespaces.SPEC_RELATED_CONTEXT))
-                                    .map(Statement::getObject)
-                                    .filter(Value::isIRI)
-                                    .map(Resource.class::cast)
-                                    .forEach(req -> {
-                                        try (var details = conn.getStatements(req, null, null, context)) {
-                                            conn.add(details, Namespaces.SPEC_RELATED_CONTEXT);
-                                        }
-                                    });
-                        }
-                    } else {
-                        // copy all statements to main graph context
-                        try (var tempStatements = conn.getStatements(null, null, null, context)) {
-                            conn.add(tempStatements, (Resource) null);
-                        }
+            final IRI context = iri(url.toString());
+            logger.info("Loading {} with base {}", url, baseUri);
+            final ParserConfig parserConfig = new ParserConfig();
+            parserConfig.set(RDFaParserSettings.RDFA_COMPATIBILITY, RDFaVersion.RDFA_1_1);
+            conn.setParserConfig(parserConfig);
+            conn.add(url, baseUri, null, context);
+            logger.debug("Loaded data into temporary context, size={}", conn.size(context));
+            try (var statements = conn.getStatements(null, SPEC.requirement, null, context)) {
+                if (statements.hasNext()) {
+                    // copy the spec and requirement triples to the spec-related graph context
+                    final Resource spec = statements.next().getSubject();
+                    conn.add(spec, RDF.type, DOAP.Specification, Namespaces.SPEC_RELATED_CONTEXT);
+                    try (var requirements = conn.getStatements(spec, SPEC.requirement, null, context)) {
+                        requirements.stream().forEach(st -> conn.add(st, Namespaces.SPEC_RELATED_CONTEXT));
+                    }
+                    try (var requirements = conn.getStatements(spec, SPEC.requirement, null, context)) {
+                        requirements.stream()
+                                .map(Statement::getObject)
+                                .filter(Value::isIRI)
+                                .map(Resource.class::cast)
+                                .forEach(req -> {
+                                    try (var details = conn.getStatements(req, null, null, context)) {
+                                        conn.add(details, Namespaces.SPEC_RELATED_CONTEXT);
+                                    }
+                                });
+                    }
+                } else {
+                    // copy all statements to main graph context
+                    try (var tempStatements = conn.getStatements(null, null, null, context)) {
+                        conn.add(tempStatements, (Resource) null);
                     }
                 }
-                // remove the temporary context
-                conn.clear(context);
-                logger.debug("Repository size={}", conn.size());
-            } catch (IOException e) {
-                throw new TestHarnessInitializationException("Failed to read data from " + url, e);
             }
+            // remove the temporary context
+            conn.clear(context);
+            logger.debug("Repository size={}", conn.size());
+        } catch (IOException e) {
+            throw new TestHarnessInitializationException("Failed to read data from " + url, e);
         } catch (RDF4JException | UnsupportedRDFormatException e) {
             throw new TestHarnessInitializationException("Failed to parse data", e);
         }
@@ -340,9 +334,38 @@ public class DataRepository implements Repository {
         return iri(Namespaces.RESULTS_URI, bnode().getID());
     }
 
-    private String simplify(final String data) {
-        // strip out unnecessary logging and remove blank lines
-        return JS_ERROR.matcher(data).replaceFirst("\n$1\n$2\n$3\n$4").replaceAll("\\R+", "\n");
+    // strip out unnecessary logging and remove blank lines
+    static String simplify(final String data) {
+        // split and filter out unused lines
+        final List<String> lines = Arrays.stream(data.strip().split("\\R"))
+                .map(String::strip)
+                .filter(line -> !line.equals("js failed:"))
+                .filter(line -> !line.matches("^>>>>.*<<<<$"))
+                .collect(Collectors.toList());
+        final int count = lines.size();
+        // find Polyglot exception and reformat it
+        int exceptionLine = IntStream.range(0, count)
+                .filter(i-> lines.get(i).startsWith(POLYGLOT_EXCEPTION))
+                .findFirst()
+                .orElse(-1);
+        if (exceptionLine != -1) {
+            lines.set(exceptionLine, lines.get(exceptionLine).substring(POLYGLOT_EXCEPTION.length()));
+            if (lines.get(exceptionLine + 1).startsWith("Caused by")) {
+                exceptionLine += 1;
+            }
+            // find stack trace start and end
+            final int stackStarts = exceptionLine + 1;
+            final int stackEnds = IntStream.range(stackStarts, count)
+                    .filter(i-> lines.get(i).startsWith("- <js>"))
+                    .findFirst()
+                    .orElse(count);
+            return IntStream.range(0, count)
+                    .filter(i -> i <= stackStarts || i == stackEnds)
+                    .mapToObj(lines::get)
+                    .collect(Collectors.joining("\n"));
+        } else {
+            return String.join("\n", lines);
+        }
     }
 
     public Map<String, Scores> getFeatureScores() {
@@ -397,14 +420,14 @@ public class DataRepository implements Repository {
         return counts;
     }
 
-    public void export(final Writer wr, final Resource... contexts) throws Exception {
+    public void export(final Writer wr, final Resource... contexts) throws TestHarnessException {
         final RDFWriter rdfWriter = Rio.createWriter(RDFFormat.TURTLE, wr);
         try (RepositoryConnection conn = getConnection()) {
             rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true)
                     .set(BasicWriterSettings.INLINE_BLANK_NODES, true);
             conn.export(rdfWriter, contexts);
         } catch (RDF4JException e) {
-            throw new Exception("Failed to write repository", e);
+            throw new TestHarnessException("Failed to write repository", e);
         }
     }
 

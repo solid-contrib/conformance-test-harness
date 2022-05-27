@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,11 +23,16 @@
  */
 package org.solid.testharness.api;
 
-public class TestHarnessException extends RuntimeException {
+public class TestHarnessApiException extends RuntimeException {
     private static final long serialVersionUID = -3676037765799217562L;
     private final String message;
 
-    public TestHarnessException(final String message, final Throwable cause) {
+    public TestHarnessApiException(final String message) {
+        super(message);
+        this.message = message;
+    }
+
+    public TestHarnessApiException(final String message, final Throwable cause) {
         super(message, cause);
         this.message = message;
     }

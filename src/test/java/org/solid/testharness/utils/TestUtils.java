@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -59,7 +59,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.mock;
@@ -96,6 +96,7 @@ public final class TestUtils {
         return mockVoidResponse(status, Collections.emptyMap());
     }
 
+    @SuppressWarnings("unchecked")
     public static HttpResponse<Void> mockVoidResponse(final int status, final Map<String, List<String>> headers) {
         final HttpResponse<Void> mockResponse = mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(status);
@@ -108,6 +109,7 @@ public final class TestUtils {
         return mockStringResponse(status, body, Collections.emptyMap());
     }
 
+    @SuppressWarnings("unchecked")
     public static HttpResponse<String> mockStringResponse(final int status, final String body,
                                                           final Map<String, List<String>> headers) {
         final HttpResponse<String> mockResponse = mock(HttpResponse.class);
@@ -179,7 +181,7 @@ public final class TestUtils {
         final StringWriter sw = new StringWriter();
         try {
             repository.export(sw);
-        } catch (Exception e) {
+        } catch (TestHarnessException e) {
             return "";
         }
         return sw.toString();
@@ -231,8 +233,8 @@ public final class TestUtils {
         return ScenarioEngine.forTempUse(HttpClientFactory.DEFAULT);
     }
 
-    public static ExecutionException createException(final String error) {
-        return new ExecutionException(new Exception(error));
+    public static CompletionException createException(final String error) {
+        return new CompletionException(new Exception(error));
     }
 
     private TestUtils() { }

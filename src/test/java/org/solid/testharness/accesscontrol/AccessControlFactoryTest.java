@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.solid.testharness.config.TestSubject;
 
 import javax.inject.Inject;
-import java.io.IOException;
 import java.net.URI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -76,28 +75,28 @@ class AccessControlFactoryTest {
     }
 
     @Test
-    void createAccessDatasetWac() throws IOException {
+    void createAccessDatasetWac() {
         when(testSubject.getAccessControlMode()).thenReturn(WAC);
         final AccessDataset accessDataset = accessControlFactory.createAccessDataset("", BASE_URI);
         assertEquals(WAC, accessDataset.getMode());
     }
 
     @Test
-    void createAccessDatasetAcp() throws IOException {
+    void createAccessDatasetAcp() {
         when(testSubject.getAccessControlMode()).thenReturn(ACP);
         final AccessDataset accessDataset = accessControlFactory.createAccessDataset("", BASE_URI);
         assertEquals(ACP, accessDataset.getMode());
     }
 
     @Test
-    void createAccessDatasetAcpLegacy() throws IOException {
+    void createAccessDatasetAcpLegacy() {
         when(testSubject.getAccessControlMode()).thenReturn(ACP_LEGACY);
         final AccessDataset accessDataset = accessControlFactory.createAccessDataset("", BASE_URI);
         assertEquals(ACP_LEGACY, accessDataset.getMode());
     }
 
     @Test
-    void createAccessDatasetNull() throws IOException {
+    void createAccessDatasetNull() {
         when(testSubject.getAccessControlMode()).thenReturn(null);
         assertNull(accessControlFactory.createAccessDataset("", BASE_URI));
     }

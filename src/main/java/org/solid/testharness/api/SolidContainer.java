@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@ package org.solid.testharness.api;
 
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.utils.SolidContainerProvider;
+import org.solid.testharness.utils.TestHarnessException;
 
 import java.net.URI;
 import java.util.List;
@@ -38,7 +39,7 @@ import java.util.List;
  * calls through to a <a href="#SolidContainerProvider">SolidContainerProvider</a> object.
  */
 public final class SolidContainer extends SolidResource {
-    private SolidContainerProvider solidContainerProvider;
+    private final SolidContainerProvider solidContainerProvider;
 
     public SolidContainer(final SolidContainerProvider solidContainerProvider) {
         super(solidContainerProvider);
@@ -56,8 +57,8 @@ public final class SolidContainer extends SolidResource {
             return new SolidContainer(
                     new SolidContainerProvider(solidClient.solidClientProvider, URI.create(url))
             );
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to construct container", e);
+        } catch (TestHarnessException | RuntimeException e) {
+            throw new TestHarnessApiException("Failed to construct container", e);
         }
     }
 
@@ -69,8 +70,8 @@ public final class SolidContainer extends SolidResource {
         try {
             solidContainerProvider.instantiate();
             return this;
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to instantiate container", e);
+        } catch (TestHarnessException | RuntimeException e) {
+            throw new TestHarnessApiException("Failed to instantiate container", e);
         }
     }
 
@@ -81,8 +82,8 @@ public final class SolidContainer extends SolidResource {
     public SolidContainer reserveContainer() {
         try {
             return new SolidContainer(solidContainerProvider.reserveContainer(solidContainerProvider.generateId()));
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to reserve container", e);
+        } catch (TestHarnessException | RuntimeException e) {
+            throw new TestHarnessApiException("Failed to reserve container", e);
         }
     }
 
@@ -90,12 +91,12 @@ public final class SolidContainer extends SolidResource {
      * Create a new container as a child of this one using a random name.
      * @return the new container
      */
-    public SolidContainer createContainer() throws TestHarnessException {
+    public SolidContainer createContainer() throws TestHarnessApiException {
         try {
             return new SolidContainer(solidContainerProvider.reserveContainer(solidContainerProvider.generateId())
                     .instantiate());
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to create container", e);
+        } catch (TestHarnessException | RuntimeException e) {
+            throw new TestHarnessApiException("Failed to create container", e);
         }
     }
 
@@ -108,8 +109,8 @@ public final class SolidContainer extends SolidResource {
         try {
             return new SolidResource(solidContainerProvider.reserveResource(solidContainerProvider.generateId()
                     + suffix));
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to reserve resource", e);
+        } catch (TestHarnessException | RuntimeException e) {
+            throw new TestHarnessApiException("Failed to reserve resource", e);
         }
     }
 
@@ -125,8 +126,8 @@ public final class SolidContainer extends SolidResource {
         try {
             return new SolidResource(solidContainerProvider.createResource(solidContainerProvider.generateId()
                     + suffix, body, type));
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to create resource", e);
+        } catch (TestHarnessException | RuntimeException e) {
+            throw new TestHarnessApiException("Failed to create resource", e);
         }
     }
 
@@ -138,8 +139,8 @@ public final class SolidContainer extends SolidResource {
         try {
             return RDFModel.parse(solidContainerProvider.getContentAsTurtle(), HttpConstants.MEDIA_TYPE_TEXT_TURTLE,
                     getUrl()).getMembers();
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to get container member listing", e);
+        } catch (TestHarnessException | RuntimeException e) {
+            throw new TestHarnessApiException("Failed to get container member listing", e);
         }
     }
 
@@ -149,8 +150,8 @@ public final class SolidContainer extends SolidResource {
     public void deleteContents() {
         try {
             solidContainerProvider.deleteContents();
-        } catch (Exception e) {
-            throw new TestHarnessException("Failed to delete container contents", e);
+        } catch (RuntimeException e) {
+            throw new TestHarnessApiException("Failed to delete container contents", e);
         }
     }
 }

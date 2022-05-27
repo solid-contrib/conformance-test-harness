@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class SolidClientTest {
+class SolidClientTest {
     @Test
     void getAuthHeaders() {
         final Client client = mock(Client.class);
@@ -57,11 +57,11 @@ public class SolidClientTest {
         final SolidClientProvider solidClientProvider = mock(SolidClientProvider.class);
         when(solidClientProvider.getClient()).thenThrow(new NullPointerException("FAIL"));
         final SolidClient solidClient = new SolidClient(solidClientProvider);
-        assertThrows(TestHarnessException.class, () -> solidClient.getAuthHeaders("GET", "URL"));
+        assertThrows(TestHarnessApiException.class, () -> solidClient.getAuthHeaders("GET", "URL"));
     }
 
     @Test
-    void send() throws Exception {
+    void send() {
         final Client client = mock(Client.class);
         final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "data");
         when(client.send(any(), any(), any(), any(), any(), eq(false))).thenReturn(mockStringResponse);
@@ -82,12 +82,12 @@ public class SolidClientTest {
         final SolidClientProvider solidClientProvider = mock(SolidClientProvider.class);
         when(solidClientProvider.getClient()).thenThrow(new NullPointerException("FAIL"));
         final SolidClient solidClient = new SolidClient(solidClientProvider);
-        assertThrows(TestHarnessException.class,
+        assertThrows(TestHarnessApiException.class,
                 () -> solidClient.send("GET", TestUtils.SAMPLE_BASE, "", null, null));
     }
 
     @Test
-    void sendAuthorized() throws Exception {
+    void sendAuthorized() {
         final Client client = mock(Client.class);
         final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "data");
         when(client.send(any(), any(), any(), any(), any(), eq(true))).thenReturn(mockStringResponse);
@@ -108,7 +108,7 @@ public class SolidClientTest {
         final SolidClientProvider solidClientProvider = mock(SolidClientProvider.class);
         when(solidClientProvider.getClient()).thenThrow(new NullPointerException("FAIL"));
         final SolidClient solidClient = new SolidClient(solidClientProvider);
-        assertThrows(TestHarnessException.class,
+        assertThrows(TestHarnessApiException.class,
                 () -> solidClient.sendAuthorized("GET", TestUtils.SAMPLE_BASE, "", null, null));
     }
 }

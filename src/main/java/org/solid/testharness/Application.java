@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -122,57 +122,19 @@ public class Application implements QuarkusApplication {
             logger.error("The skip-reports option cannot apply when the coverage option is used");
             return 1;
         }
-        if (!cmd.hasOption(SKIP_REPORTS)) {
-            final File outputDir;
-            if (cmd.hasOption(OUTPUT) && !StringUtils.isBlank(cmd.getOptionValue(OUTPUT))) {
-                outputDir = Path.of(cmd.getOptionValue(OUTPUT)).toAbsolutePath().normalize().toFile();
-                logger.debug("Output = {}", outputDir.getPath());
-            } else {
-                outputDir = Path.of("").toAbsolutePath().toFile();
-            }
-            try (final Formatter formatter = new Formatter()) {
-                if (!validateOutputDir(outputDir.toPath(), formatter)) {
-                    logger.error("{}", formatter);
-                    return 1;
-                }
-            }
-            config.setOutputDirectory(outputDir);
+        if (!cmd.hasOption(SKIP_REPORTS) && !handleReportOptions(cmd)) {
+            return 1;
         }
 
         if (cmd.hasOption(SOURCE)) {
             config.setTestSources(Arrays.stream(cmd.getOptionValues(SOURCE))
                     .filter(s -> !StringUtils.isBlank(s))
                     .collect(Collectors.toList()));
-            logger.debug("Suite = {}", config.getTestSources().toString());
+            logger.debug("Suite = {}", config.getTestSources());
         }
 
         if (!cmd.hasOption(COVERAGE)) {
-            if (cmd.hasOption(SUBJECTS)) {
-                config.setSubjectsUrl(cmd.getOptionValue(SUBJECTS));
-                logger.debug("Subjects = {}", config.getSubjectsUrl());
-            }
-            logger.debug("TARGET SETTING {}", cmd.getOptionValue(TARGET));
-            if (cmd.hasOption(TARGET) && !StringUtils.isBlank(cmd.getOptionValue(TARGET))) {
-                final String subjectsBaseUri = iri(config.getSubjectsUrl().toString()).getNamespace();
-                final String target = cmd.getOptionValue(TARGET);
-                final IRI testSubject = target.contains(":")
-                        ? iri(target)
-                        : iri(subjectsBaseUri, target);
-                logger.debug("Target: {}", testSubject);
-                config.setTestSubject(testSubject);
-            }
-            if (cmd.hasOption(FILTER)) {
-                filters = Arrays.stream(cmd.getOptionValues(FILTER))
-                        .filter(s -> !StringUtils.isBlank(s))
-                        .collect(Collectors.toList());
-                logger.debug("Filters = {}", filters);
-            }
-            if (cmd.hasOption(STATUS)) {
-                statuses = Arrays.stream(cmd.getOptionValues(STATUS))
-                        .filter(s -> !StringUtils.isBlank(s))
-                        .collect(Collectors.toList());
-                logger.debug("Statuses = {}", statuses);
-            }
+            handleTestRunOptions(cmd);
         }
         runMode = cmd.hasOption(COVERAGE) ? Config.RunMode.COVERAGE : Config.RunMode.TEST;
         skipReports = cmd.hasOption(SKIP_REPORTS);
@@ -180,6 +142,53 @@ public class Application implements QuarkusApplication {
         ignoreFailures = cmd.hasOption(IGNORE_FAILURES);
         config.logConfigSettings(runMode);
         return -1;
+    }
+
+    private void handleTestRunOptions(final CommandLine cmd) {
+        if (cmd.hasOption(SUBJECTS)) {
+            config.setSubjectsUrl(cmd.getOptionValue(SUBJECTS));
+            logger.debug("Subjects = {}", config.getSubjectsUrl());
+        }
+        logger.debug("TARGET SETTING {}", cmd.getOptionValue(TARGET));
+        if (cmd.hasOption(TARGET) && !StringUtils.isBlank(cmd.getOptionValue(TARGET))) {
+            final String subjectsBaseUri = iri(config.getSubjectsUrl().toString()).getNamespace();
+            final String target = cmd.getOptionValue(TARGET);
+            final IRI testSubject = target.contains(":")
+                    ? iri(target)
+                    : iri(subjectsBaseUri, target);
+            logger.debug("Target: {}", testSubject);
+            config.setTestSubject(testSubject);
+        }
+        if (cmd.hasOption(FILTER)) {
+            filters = Arrays.stream(cmd.getOptionValues(FILTER))
+                    .filter(s -> !StringUtils.isBlank(s))
+                    .collect(Collectors.toList());
+            logger.debug("Filters = {}", filters);
+        }
+        if (cmd.hasOption(STATUS)) {
+            statuses = Arrays.stream(cmd.getOptionValues(STATUS))
+                    .filter(s -> !StringUtils.isBlank(s))
+                    .collect(Collectors.toList());
+            logger.debug("Statuses = {}", statuses);
+        }
+    }
+
+    private boolean handleReportOptions(final CommandLine cmd) {
+        final File outputDir;
+        if (cmd.hasOption(OUTPUT) && !StringUtils.isBlank(cmd.getOptionValue(OUTPUT))) {
+            outputDir = Path.of(cmd.getOptionValue(OUTPUT)).toAbsolutePath().normalize().toFile();
+            logger.debug("Output = {}", outputDir.getPath());
+        } else {
+            outputDir = Path.of("").toAbsolutePath().toFile();
+        }
+        try (final Formatter formatter = new Formatter()) {
+            if (!validateOutputDir(outputDir.toPath(), formatter)) {
+                logger.error("{}", formatter);
+                return false;
+            }
+        }
+        config.setOutputDirectory(outputDir);
+        return true;
     }
 
     private Options setupOptions() {

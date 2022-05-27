@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 @TestProfile(ConfigTestBlankProfile.class)
-public class ConfigMissingTest {
+class ConfigMissingTest {
     @Inject
     Config config;
 
@@ -66,7 +66,7 @@ public class ConfigMissingTest {
     }
 
     @Test
-    public void getTestContainerNull() {
+    void getTestContainerNull() {
         assertNull(config.getTestContainer());
     }
 
@@ -96,12 +96,12 @@ public class ConfigMissingTest {
     }
 
     @Test
-    public void getMaxThreads() {
+    void getMaxThreads() {
         assertEquals(8, config.getMaxThreads());
     }
 
     @Test
-    public void getOrigin() {
+    void getOrigin() {
         assertEquals("https://tester", config.getOrigin());
     }
 }

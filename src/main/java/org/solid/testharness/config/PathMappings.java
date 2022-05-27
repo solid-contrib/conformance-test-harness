@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Solid
+ * Copyright (c) 2019 - 2022 W3C Solid Community Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,10 +49,10 @@ public interface PathMappings {
 
     default String unmapFeaturePath(final String path) {
         URI uri = URI.create(path);
-        if (HttpUtils.isHttpProtocol(uri.getScheme())) {
+        if (HttpUtils.isHttpProtocol(uri)) {
             return uri.toString();
         }
-        if (!HttpUtils.isFileProtocol(uri.getScheme())) {
+        if (!HttpUtils.isFileProtocol(uri)) {
             uri = Path.of(path).toAbsolutePath().normalize().toUri();
         }
         final String finalPath = uri.toString();
