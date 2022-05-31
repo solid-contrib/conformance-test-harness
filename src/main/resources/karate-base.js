@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 function fn() {
+    if (karate.env === 'karate') return {}
     const bootstrap = Java.type('org.solid.testharness.config.Bootstrap').getInstance();
     if (!bootstrap) {
         karate.log('Scenario was not bootstrapped')

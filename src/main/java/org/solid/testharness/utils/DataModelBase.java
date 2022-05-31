@@ -151,7 +151,7 @@ public class DataModelBase {
         return null;
     }
 
-    @SuppressWarnings("java:S1168")
+    @SuppressWarnings({"java:S1168", "PMD"})
     protected <T extends DataModelBase> List<T> getModelList(final IRI predicate, final Class<T> clazz) {
         final Set<Value> values = model.filter(subject, predicate, null).objects();
         if (!values.isEmpty()) {
@@ -160,7 +160,7 @@ public class DataModelBase {
         return null;
     }
 
-    @SuppressWarnings("java:S1168")
+    @SuppressWarnings({"java:S1168", "PMD"})
     protected <T extends DataModelBase> List<T> getModelCollectionList(final IRI predicate, final Class<T> clazz) {
         final Resource node = Models.objectResource(model.filter(subject, predicate, null)).orElse(null);
         if (node != null) {
@@ -170,7 +170,7 @@ public class DataModelBase {
         return null;
     }
 
-    @SuppressWarnings("java:S1168")
+    @SuppressWarnings({"java:S1168", "PMD"})
     protected <T extends DataModelBase> List<T> getModelListByObject(final IRI predicate, final Class<T> clazz) {
         final Set<Value> values = model.filter(null, predicate, subject).subjects()
                 .stream().map(Value.class::cast).collect(Collectors.toSet());
