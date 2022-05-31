@@ -223,7 +223,7 @@ public class TestSuiteDescription {
             }
         }
 
-        public void findFeatureIri() {
+        private void findFeatureIri() {
             try (var statements = conn.getStatements(testCaseIri, SPEC.testScript, null)) {
                 this.featureIri = statements.stream()
                         .map(Statement::getObject)

@@ -275,7 +275,7 @@ public class DataRepository implements Repository {
                     .add(PROV.endedAtTime, new Date(sr.getEndTime()))
                     .add(scenarioResultIri, PROV.value, outcome);
         } else {
-            final boolean ignored = sc.getTags().stream().anyMatch(tag -> tag.getName().equals(Tag.IGNORE));
+            final boolean ignored = sc.getTags().stream().anyMatch(tag -> Tag.IGNORE.equals(tag.getName()));
             outcome = ignored ? EARL.untested : EARL.inapplicable;
             builder.subject(scenarioIri)
                     .add(scenarioResultIri, PROV.value, outcome);
@@ -339,7 +339,7 @@ public class DataRepository implements Repository {
         // split and filter out unused lines
         final List<String> lines = Arrays.stream(data.strip().split("\\R"))
                 .map(String::strip)
-                .filter(line -> !line.equals("js failed:"))
+                .filter(line -> !"js failed:".equals(line))
                 .filter(line -> !line.matches("^>>>>.*<<<<$"))
                 .collect(Collectors.toList());
         final int count = lines.size();

@@ -38,6 +38,7 @@ import java.net.http.HttpHeaders;
 
 public class SolidResourceProvider {
     private static final Logger logger = LoggerFactory.getLogger(SolidResourceProvider.class);
+    private static final String ROOT = "/";
 
     protected SolidClientProvider solidClientProvider;
     protected URI url;
@@ -63,7 +64,7 @@ public class SolidResourceProvider {
         this.solidClientProvider = solidClientProvider;
         config = CDI.current().select(Config.class).get();
 
-        containerType = url.toString().endsWith("/");
+        containerType = url.toString().endsWith(ROOT);
 
         if (body != null) {
             final HttpHeaders headers = solidClientProvider.createResource(url, body, type);
@@ -94,7 +95,7 @@ public class SolidResourceProvider {
     public SolidContainerProvider getContainer() throws TestHarnessException {
         SolidContainerProvider solidContainerProvider = null;
         if (containerType) {
-            if (!"/".equals(url.getPath())) {
+            if (!ROOT.equals(url.getPath())) {
                 solidContainerProvider = new SolidContainerProvider(solidClientProvider, this.url.resolve(".."));
             }
         } else {
@@ -150,10 +151,10 @@ public class SolidResourceProvider {
         while (!linkFound && !rootTested) {
             linkFound = solidClientProvider.hasStorageType(testUri);
             if (!linkFound) {
-                final boolean atRoot = "/".equals(testUri.getPath());
+                final boolean atRoot = ROOT.equals(testUri.getPath());
                 if (!atRoot) {
                     // haven't got to the root so keep going
-                    testUri = testUri.getPath().endsWith("/") ? testUri.resolve("..") : testUri.resolve(".");
+                    testUri = testUri.getPath().endsWith(ROOT) ? testUri.resolve("..") : testUri.resolve(".");
                 } else {
                     rootTested = true;
                 }
