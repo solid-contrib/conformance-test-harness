@@ -34,7 +34,7 @@
         <jacoco-plugin.version>0.8.8</jacoco-plugin.version>
 
         <!-- dependencies -->
-        <quarkus.version>2.9.2.Final</quarkus.version>
+        <quarkus.version>2.10.0.Final</quarkus.version>
         <karate.version>1.2.1.RC2</karate.version>
         <graal.version>22.0.0.2</graal.version>
         <hamcrest.version>2.2</hamcrest.version>
