@@ -23,7 +23,6 @@
  */
 package org.solid.testharness.utils;
 
-import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.datatypes.XMLDateTime;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -84,7 +83,7 @@ public class DataModelBase {
                 // add triples referenced by the objects found so far
                 resources.forEach(o -> {
                     try (var statements2 = conn.getStatements(o, null, null)) {
-                        additions.addAll(Iterations.asList(statements2));
+                        statements2.forEach(additions::add);
                     }
                 });
             }
@@ -107,7 +106,7 @@ public class DataModelBase {
             if (mode == ConstructMode.INC_REFS) {
                 // add triples that reference the subject
                 try (var statements2 = conn.getStatements(null, null, subject)) {
-                    additions.addAll(Iterations.asList(statements2));
+                    statements2.forEach(additions::add);
                 }
             }
             model.addAll(additions);
@@ -182,9 +181,9 @@ public class DataModelBase {
 
     @SuppressWarnings("java:S112")
     private <T extends DataModelBase> List<T> getModelList(final Class<T> clazz, final Collection<Value> values) {
-        return values.stream().filter(Value::isIRI).map(v -> {
+        return values.stream().filter(Value::isIRI).map(IRI.class::cast).map(v -> {
             try {
-                return clazz.getDeclaredConstructor(IRI.class).newInstance((IRI) v);
+                return clazz.getDeclaredConstructor(IRI.class).newInstance(v);
             } catch (InstantiationException | IllegalAccessException |
                     InvocationTargetException | NoSuchMethodException e) {
                 throw new RuntimeException( "Failed to create instance of " + clazz.getName(), e);
