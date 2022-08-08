@@ -79,7 +79,7 @@ function fn() {
                 : RDFModel.literal(p1, p2)
         },
         parse: (p1, p2, p3) => {
-            return RDFModel.parse(typeof p1 === 'string' ? p1 : karate.pretty(p1), p2, p3)
+            return RDFModel.parse(typeof p1 === 'string' ? p1 : karate.toString(p1), p2, p3)
         },
         parseWacAllowHeader: (headers) => Utils.parseWacAllowHeader(headers),
         parseLinkHeaders: (headers) => Utils.parseLinkHeaders(karate.toJava(headers)),
