@@ -189,11 +189,15 @@ public class DataRepository implements Repository {
     }
 
     private IRI getTestCase(final RepositoryConnection conn, final IRI featureIri) {
-        return conn.getStatements(null, SPEC.testScript, featureIri).stream()
-                .map(Statement::getSubject)
-                .filter(Value::isIRI)
-                .map(IRI.class::cast)
-                .findFirst().orElse(null);
+        try (
+                var statements = conn.getStatements(null, SPEC.testScript, featureIri)
+        ) {
+            return statements.stream()
+                    .map(Statement::getSubject)
+                    .filter(Value::isIRI)
+                    .map(IRI.class::cast)
+                    .findFirst().orElse(null);
+        }
     }
 
     public void createAssertion(final RepositoryConnection conn, final Value outcome, final Date date,

@@ -128,7 +128,7 @@ class TestSubjectTest {
     }
 
     @Test
-    void prepareServerAccessControlModeNoAcl() throws Exception {
+    void prepareServerAccessControlModeNoAcl() {
         final Client mockClient = setupMockConfig(WAC, null);
         final HttpResponse<Void> mockVoidResponseNoLink = TestUtils.mockVoidResponse(200);
         when(mockClient.head(URI.create(SERVER_TEST_STORAGE))).thenReturn(mockVoidResponseNoLink);
@@ -140,7 +140,7 @@ class TestSubjectTest {
     }
 
     @Test
-    void prepareServerAccessControlModeThrows() throws Exception {
+    void prepareServerAccessControlModeThrows() {
         final Client mockClient = setupMockConfig(WAC, null);
         final HttpResponse<Void> mockVoidResponseLink = TestUtils.mockVoidResponse(200, ACL_HEADER);
         when(mockClient.head(URI.create(SERVER_TEST_STORAGE))).thenReturn(mockVoidResponseLink);
@@ -153,7 +153,7 @@ class TestSubjectTest {
     }
 
     @Test
-    void prepareServerWacMode() throws Exception {
+    void prepareServerWacMode() {
         final Client mockClient = setupMockConfig(WAC, null);
         final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "");
         when(mockClient.getAsTurtle(any())).thenReturn(mockStringResponse);
@@ -168,7 +168,7 @@ class TestSubjectTest {
     }
 
     @Test
-    void prepareServerAcpMode() throws Exception {
+    void prepareServerAcpMode() {
         final Client mockClient = setupMockConfig(ACP, null);
 
         final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "");
@@ -186,7 +186,7 @@ class TestSubjectTest {
     }
 
     @Test
-    void prepareServerAcpLegacyMode() throws Exception {
+    void prepareServerAcpLegacyMode() {
         final Client mockClient = setupMockConfig(ACP_LEGACY, null);
 
         final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "");
@@ -204,7 +204,7 @@ class TestSubjectTest {
     }
 
     @Test
-    void prepareServerThrows() throws Exception {
+    void prepareServerThrows() {
         final Client mockClient = setupMockConfig(WAC, null);
 
         final HttpResponse<Void> mockVoidResponseLink = TestUtils.mockVoidResponse(200, ACL_HEADER);
@@ -220,7 +220,7 @@ class TestSubjectTest {
     }
 
     @Test
-    void prepareServerContainerFails() throws Exception {
+    void prepareServerContainerFails() {
         final Client mockClient = setupMockConfig(WAC, null);
         final HttpResponse<Void> mockVoidResponseLink = TestUtils.mockVoidResponse(200, ACL_HEADER);
         when(mockClient.head(URI.create(SERVER_TEST_STORAGE))).thenReturn(mockVoidResponseLink);
@@ -280,7 +280,7 @@ class TestSubjectTest {
     }
 
     @Test
-    void findStorageProfileException() throws Exception {
+    void findStorageProfileException() {
         final Client webIdClient = mock(Client.class);
         when(webIdClient.getAsTurtle(any())).thenThrow(TestUtils.createException("FAIL"));
         when(clientRegistry.getClient(ClientRegistry.ALICE_WEBID)).thenReturn(webIdClient);
@@ -291,7 +291,7 @@ class TestSubjectTest {
     }
 
     @Test
-    void findStorageProvisionFails() throws Exception {
+    void findStorageProvisionFails() {
         setupMockConfig(null, Collections.emptyList());
         final Exception exception = assertThrows(TestHarnessInitializationException.class,
                 () -> testSubject.findStorage());
@@ -346,6 +346,12 @@ class TestSubjectTest {
         testSubject.setTestRunContainer(new SolidContainerProvider(mockSolidClientProvider, TEST_URL));
         assertDoesNotThrow(() -> testSubject.tearDownServer());
         verify(mockSolidClientProvider).deleteResourceRecursively(TEST_URL);
+    }
+
+    @Test
+    void tearDownServerNoContainer() {
+        testSubject.setTestRunContainer(null);
+        assertDoesNotThrow(() -> testSubject.tearDownServer());
     }
 
     @Test
