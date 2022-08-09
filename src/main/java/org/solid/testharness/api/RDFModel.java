@@ -197,6 +197,16 @@ public final class RDFModel {
     }
 
     /**
+     * Convert the model to triples.
+     * @return the triples
+     */
+    public String asTriples() {
+        final StringWriter sw = new StringWriter();
+        Rio.write(model, sw, RDFFormat.NTRIPLES);
+        return sw.toString();
+    }
+
+    /**
      * Returns an <code>IRI</code> instance.
      * @param iri the iri as a string
      * @return the IRI

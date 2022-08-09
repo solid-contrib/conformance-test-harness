@@ -259,7 +259,9 @@ public class TestSubject {
 
     public void tearDownServer() {
         try {
-            testRunContainer.delete();
+            if (testRunContainer != null) {
+                testRunContainer.delete();
+            }
         } catch (Exception e) {
             // log failure but continue to report results
             logger.error("Failed to delete the test containers", e);

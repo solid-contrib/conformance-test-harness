@@ -49,10 +49,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 class RDFModelTest {
     private static final String TEST_URL = "https://example.org/";
-    private static final String CHLID = "https://example.org/test/";
+    private static final String CHILD = "https://example.org/test/";
     private static final String NO_MEMBERS = String.format("<%s> a <%s>.", TEST_URL, LDP.RDF_SOURCE);
-    private static final String MEMBERS = String.format("<%s> <%s> <%s>.", TEST_URL, LDP.CONTAINS, CHLID);
+    private static final String MEMBERS = String.format("<%s> <%s> <%s>.", TEST_URL, LDP.CONTAINS, CHILD);
     private static final IRI BOB_IRI = iri(TestUtils.SAMPLE_NS, TestUtils.BOB);
+    private static final String SAMPLE_TRIPLE = String.format("<%s> <%s> <%s> .\n", BOB_IRI, RDF.type, FOAF.Person);
 
     private static final Model SAMPLE_HTML_MODEL;
     private static final Model SAMPLE_MODEL;
@@ -161,7 +162,7 @@ class RDFModelTest {
     void getMembers() {
         final List<String> members = RDFModel.parse(MEMBERS, "text/turtle", TEST_URL).getMembers();
         assertFalse(members.isEmpty());
-        assertEquals(CHLID, members.get(0));
+        assertEquals(CHILD, members.get(0));
     }
 
     @Test
@@ -377,5 +378,12 @@ class RDFModelTest {
         );
         assertTrue(exception.getMessage().contains("TestHarnessApiException: Failed to create a string with encoding"));
         assertTrue(exception.getMessage().contains("NullPointerException"));
+    }
+
+    @Test
+    void asTriples() {
+        final RDFModel model = RDFModel.parse(SAMPLE_TURTLE, "text/turtle", TestUtils.SAMPLE_BASE);
+        final String triples = model.asTriples();
+        assertEquals(SAMPLE_TRIPLE, triples);
     }
 }
