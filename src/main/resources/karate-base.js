@@ -62,6 +62,10 @@ function fn() {
         ACL: 'http://www.w3.org/ns/auth/acl#',
         FOAF: 'http://xmlns.com/foaf/0.1/',
         ACP: 'http://www.w3.org/ns/solid/acp#',
+        SOLID: 'http://www.w3.org/ns/solid/terms#',
+        NOTIFY: 'http://www.w3.org/ns/solid/notifications#',
+        PROV: 'http://www.w3.org/ns/prov',
+        AS: 'https://www.w3.org/ns/activitystreams#',
 
         // utility libraries
         SolidResource,
@@ -79,7 +83,7 @@ function fn() {
                 : RDFModel.literal(p1, p2)
         },
         parse: (p1, p2, p3) => {
-            return RDFModel.parse(typeof p1 === 'string' ? p1 : karate.toString(p1), p2, p3)
+            return RDFModel.parse(karate.toString(p1), p2, p3)
         },
         parseWacAllowHeader: (headers) => Utils.parseWacAllowHeader(headers),
         parseLinkHeaders: (headers) => Utils.parseLinkHeaders(karate.toJava(headers)),
