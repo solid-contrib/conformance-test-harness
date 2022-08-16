@@ -1,5 +1,9 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.1.8
+### Minor changes
+* Update libraries for better Graal support and Karate websocket improvements 
+
 ## Release 1.1.7
 ### Minor changes
 * Retry HTTP requests after timeouts to make tests more resilient. 

@@ -47,8 +47,9 @@ class TestScenarioRunner {
 //        final String featurePath = "web-access-control/acl-object/container-default.feature";
 //        final String featurePath = "web-access-control/protected-operation/read-resource-default-R.feature";
 //        final String featurePath = "web-access-control/protected-operation/acl-propagation.feature";
-        final String featurePath = "web-access-control/protected-operation/not-read-resource-default-AWC.feature";
+//        final String featurePath = "web-access-control/protected-operation/not-read-resource-default-AWC.feature";
 //        final String featurePath = "acp.feature";
+        final String featurePath = "protocol/notifications/websockets.feature";
 
         final String uri = Path.of("example/" + featurePath).toAbsolutePath().normalize().toUri().toString();
         final TestSuiteResults results = conformanceTestHarness.runSingleTest(uri);
