@@ -64,7 +64,7 @@ function fn() {
         ACP: 'http://www.w3.org/ns/solid/acp#',
         SOLID: 'http://www.w3.org/ns/solid/terms#',
         NOTIFY: 'http://www.w3.org/ns/solid/notifications#',
-        PROV: 'http://www.w3.org/ns/prov',
+        PROV: 'http://www.w3.org/ns/prov#',
         AS: 'https://www.w3.org/ns/activitystreams#',
 
         // utility libraries
