@@ -83,7 +83,7 @@ class AccessDatasetTest {
     void asSparqlInsert() throws IOException {
         final AccessDataset accessDataset = new TestAccessDataset();
         accessDataset.setModel(testModel);
-        final String insert = accessDataset.asSparqlInsert();
+        final String insert = accessDataset.asSparqlInsert().replaceAll("\\r\\n", "\n");
         final String expected = TestUtils.loadStringFromFile("src/test/resources/utils/insert.rq");
         assertEquals(expected, insert);
     }
