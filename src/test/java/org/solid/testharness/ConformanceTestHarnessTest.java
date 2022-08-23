@@ -51,6 +51,8 @@ import org.solid.testharness.utils.Namespaces;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import javax.inject.Inject;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URI;
@@ -233,12 +235,17 @@ class ConformanceTestHarnessTest {
     }
 
     @Test
-    void buildReportsWriteFail() {
-        tmp.toFile().setWritable(false);
+    void buildReportsWriteFail() throws IOException {
+        var file = new File(tmp.toFile(), "coverage.html");
+        var wr = new FileWriter(file);
+        wr.write("Not empty");
+        wr.close();
+        file.setWritable(false);
         conformanceTestHarness.buildReports(Config.RunMode.COVERAGE);
-        assertTrue(Files.notExists(tmp.resolve("coverage.html")));
+        assertNotEquals(tmp.resolve("coverage.html").toFile().length(), 0);
         assertTrue(Files.notExists(tmp.resolve("report.html")));
         assertTrue(Files.notExists(tmp.resolve("report.ttl")));
+        file.setWritable(true);
     }
 
     @Test

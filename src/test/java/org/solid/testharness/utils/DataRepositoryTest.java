@@ -325,7 +325,7 @@ class DataRepositoryTest {
         final DataRepository dataRepository = setupMinimalRepository();
         final StringWriter wr = new StringWriter();
         dataRepository.export(wr);
-        assertTrue(wr.toString().contains(sample));
+        assertTrue(wr.toString().replaceAll("\\r\\n", "\n").contains(sample));
     }
 
     @Test
