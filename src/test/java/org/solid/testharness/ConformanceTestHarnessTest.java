@@ -236,13 +236,13 @@ class ConformanceTestHarnessTest {
 
     @Test
     void buildReportsWriteFail() throws IOException {
-        var file = new File(tmp.toFile(), "coverage.html");
-        var wr = new FileWriter(file);
+        final var file = new File(tmp.toFile(), "coverage.html");
+        final var wr = new FileWriter(file);
         wr.write("Not empty");
         wr.close();
         file.setWritable(false);
         conformanceTestHarness.buildReports(Config.RunMode.COVERAGE);
-        assertNotEquals(tmp.resolve("coverage.html").toFile().length(), 0);
+        assertNotEquals(0, tmp.resolve("coverage.html").toFile().length());
         assertTrue(Files.notExists(tmp.resolve("report.html")));
         assertTrue(Files.notExists(tmp.resolve("report.ttl")));
         file.setWritable(true);
