@@ -230,14 +230,6 @@ public class Application implements QuarkusApplication {
             error.format("Output directory '%s' is not a directory", dir);
             return false;
         }
-        if (!Files.isWritable(dir)) {
-            error.format("Output directory '%s' is not writeable", dir);
-            return false;
-        }
-        if (!Files.isExecutable(dir)) {
-            error.format("Output directory '%s' is not executable", dir);
-            return false;
-        }
         return true;
     }
 }
