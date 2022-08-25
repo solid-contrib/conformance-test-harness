@@ -159,10 +159,13 @@ The Test Harness can be packaged into a single jar:
 ```shell
 ./mvnw package
 ```
-To quickly build this package without running the unit tests:
+To quickly build this package without running the unit tests and dependency checks:
 ```shell
-./mvnw -DskipTests package
+./mvnw -DskipTests -Ddependency-check.skip package
 ```
+
+To prevent build failures from dependency issues: `-Dowasp.plugin.cvss.threshold=11`
+
 This creates `target/solid-conformance-test-harness-runner.jar` which can be deployed to its own directory and run as:
 ```shell
 java -jar solid-conformance-test-harness-runner.jar

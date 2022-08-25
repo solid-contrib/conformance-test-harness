@@ -27,15 +27,16 @@
         <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
         <release.plugin.version>2.5.3</release.plugin.version>
         <properties.plugin.version>1.1.0</properties.plugin.version>
-        <checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
+        <checkstyle.plugin.version>3.2.0</checkstyle.plugin.version>
         <checkstyle.tool.version>10.3.2</checkstyle.tool.version>
-        <pmd.plugin.version>3.17.0</pmd.plugin.version>
+        <pmd.plugin.version>3.18.0</pmd.plugin.version>
         <license.plugin.version>4.1</license.plugin.version>
         <jacoco-plugin.version>0.8.8</jacoco-plugin.version>
+        <owasp.plugin.version>7.1.2</owasp.plugin.version>
 
         <!-- dependencies -->
-        <quarkus.version>2.11.2.Final</quarkus.version>
-        <karate.version>1.3.0.RC1</karate.version>
+        <quarkus.version>2.11.3.Final</quarkus.version>
+        <karate.version>1.3.0.RC2</karate.version>
         <graal.version>22.1.0</graal.version>
         <hamcrest.version>2.2</hamcrest.version>
         <rdf4j.version>4.1.0</rdf4j.version>
@@ -459,6 +460,28 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>${owasp.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <failBuildOnCVSS>${owasp.plugin.cvss.threshold}</failBuildOnCVSS>
+                    <formats>
+                        <format>HTML</format>
+                        <format>JSON</format>
+                    </formats>
+                    <suppressionFiles>
+                        <suppressionFile>suppressions.xml</suppressionFile>
+                    </suppressionFiles>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -470,6 +493,18 @@
                 <version>${surefire-plugin.version}</version>
                 <configuration>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>${owasp.plugin.version}</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>aggregate</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
             </plugin>
         </plugins>
     </reporting>

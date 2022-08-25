@@ -90,7 +90,7 @@ class ApplicationTest {
     @Test
     void outputBad() throws Exception {
         assertEquals(1, application.run("--output", "./missing"));
-        assertNull(config.getOutputDirectory());
+        verify(config, never()).setOutputDirectory(any());
     }
 
     @Test
@@ -98,25 +98,7 @@ class ApplicationTest {
         final Path tmp = Files.createTempFile("test", ".tmp");
         tmp.toFile().deleteOnExit();
         assertEquals(1, application.run("--output", tmp.toString()));
-        assertNull(config.getOutputDirectory());
-    }
-
-    @Test
-    void outputNotWritable() throws Exception {
-        final Path tmp = Files.createTempDirectory(null);
-        tmp.toFile().setWritable(false);
-        tmp.toFile().deleteOnExit();
-        assertEquals(1, application.run("--output", tmp.toString()));
-        assertNull(config.getOutputDirectory());
-    }
-
-    @Test
-    void outputNotExecutable() throws Exception {
-        final Path tmp = Files.createTempDirectory(null);
-        tmp.toFile().setExecutable(false);
-        tmp.toFile().deleteOnExit();
-        assertEquals(1, application.run("--output", tmp.toString()));
-        assertNull(config.getOutputDirectory());
+        verify(config, never()).setOutputDirectory(any());
     }
 
     @Test
