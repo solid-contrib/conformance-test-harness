@@ -131,7 +131,7 @@ class ClientTest {
         final Client client = new Client.Builder().withDpopSupport().build();
         client.setAccessToken("ACCESS");
         final HttpResponse<String> response = client.send("DAHU", baseUri.resolve("/dahu/auth"),
-                null, null, HttpClient.Version.HTTP_2.name(), true);
+                null, null, null, true);
         assertEquals(HttpClient.Version.HTTP_1_1, response.version());
         assertEquals(200, response.statusCode());
         assertEquals("AUTHENTICATED", response.body());
