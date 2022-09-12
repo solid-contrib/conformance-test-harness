@@ -1,4 +1,6 @@
-FROM openjdk:11
+FROM eclipse-temurin:11
+RUN apt-get -y update
+RUN apt-get -y install git
 COPY target/solid-conformance-test-harness-runner.jar /app/harness/
 RUN git clone https://github.com/solid-contrib/specification-tests /data
 WORKDIR /data
