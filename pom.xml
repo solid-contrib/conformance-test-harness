@@ -42,7 +42,7 @@
         <rdf4j.version>4.2.0</rdf4j.version>
         <semargl.version>0.7</semargl.version>
         <jakarta.version>3.0.0</jakarta.version>
-        <jose4j.version>0.8.0</jose4j.version>
+        <jose4j.version>0.9.0</jose4j.version>
         <commons.text.version>1.10.0</commons.text.version>
         <commons.cli.version>1.5.0</commons.cli.version>
         <wiremock.version>2.34.0</wiremock.version>
