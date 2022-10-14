@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <suppress>
+        <notes><![CDATA[
+        Payara is not a dependency of this project
+    ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.eclipse\.microprofile\.config/microprofile\-config\-api@.*$</packageUrl>
+        <cpe>cpe:/a:payara:payara</cpe>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+        The project does not use Jackson with the UNWRAP_SINGLE_VALUE_ARRAYS feature enabled
+    ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>
+        <cve>CVE-2022-42003</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+        The project is not vulnerable to this deserialization bug in Jackson
+    ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>
+        <cve>CVE-2022-42004</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+        The vulnerable version (1.9) of commons-text is not used
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.commons/commons\-text@.*$</packageUrl>
+        <vulnerabilityName>CVE-2022-42889</vulnerabilityName>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+        Version 1.33 is no longer vulnerable so this is a false positive: https://nvd.nist.gov/vuln/detail/CVE-2022-38752
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.yaml/snakeyaml@.*$</packageUrl>
+        <vulnerabilityName>CVE-2022-38752</vulnerabilityName>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+        False positive as this doesn't use vulnerable packages
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/io\.netty/netty\-tcnative\-boringssl\-static@.*$</packageUrl>
+        <cve>CVE-2011-1797</cve>
+    </suppress>
+</suppressions>

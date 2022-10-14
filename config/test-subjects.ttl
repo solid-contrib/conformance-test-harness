@@ -6,7 +6,8 @@ prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 <target>
     a earl:Software, earl:TestSubject ;
 #    solid-test:skip "acp" ;
-    solid-test:skip "wac-allow-public", "wac", "publicagent" ;
+    solid-test:skip "wac", "wac-allow-public" ;
+# For system with out unauthenticated access:  "publicagent"
 #    solid-test:features "acp-legacy" ;
     doap:name "Test Subject"@en ;
     rdfs:comment "Example comment."@en ;
