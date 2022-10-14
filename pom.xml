@@ -5,7 +5,7 @@
     <artifactId>testharness</artifactId>
     <name>Solid Specification Conformance Test Harness</name>
     <description>A test harness that will run suites of tests related to Solid specifications.</description>
-    <version>1.1.9-SNAPSHOT</version>
+    <version>1.1.9</version>
     <organization>
         <name>Inrupt</name>
         <url>https://inrupt.com</url>
@@ -520,7 +520,7 @@
         <connection>scm:git:git://github.com/solid-contrib/conformance-test-harness.git</connection>
         <developerConnection>scm:git:git@github.com:solid-contrib/conformance-test-harness.git</developerConnection>
         <url>https://github.com/solid-contrib/conformance-test-harness</url>
-        <tag>v1.0.7</tag>
+        <tag>v1.1.9</tag>
     </scm>
 
     <profiles>
