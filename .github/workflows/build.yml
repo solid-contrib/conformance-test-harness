@@ -36,4 +36,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         #Temporary disable build failure if vulnerabilities are found
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=solid-contrib_conformance-test-harness -Dowasp.plugin.cvss.threshold=11
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=solid-contrib_conformance-test-harness -Dowasp.plugin.cvss.threshold=7

@@ -41,7 +41,8 @@
         <hamcrest.version>2.2</hamcrest.version>
         <rdf4j.version>4.2.0</rdf4j.version>
         <semargl.version>0.7</semargl.version>
-        <jakarta.version>3.0.0</jakarta.version>
+        <jakarta.version>3.1.0</jakarta.version>
+        <jersey.version>3.0.8</jersey.version>
         <jose4j.version>0.9.0</jose4j.version>
         <commons.text.version>1.10.0</commons.text.version>
         <commons.cli.version>1.5.0</commons.cli.version>
@@ -122,7 +123,7 @@
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
-            <version>${jakarta.version}</version>
+            <version>${jersey.version}</version>
         </dependency>
         <dependency>
             <groupId>org.bitbucket.b_c</groupId>
@@ -251,6 +252,12 @@
             <artifactId>js</artifactId>
             <version>${graal.version}</version>
             <scope>runtime</scope>
+        </dependency>
+        <!-- transitive dependencies -->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.33</version>
         </dependency>
     </dependencies>
     <build>
@@ -478,7 +485,7 @@
                         <format>JSON</format>
                     </formats>
                     <suppressionFiles>
-                        <suppressionFile>suppressions.xml</suppressionFile>
+                        <suppressionFile>owasp-suppressions.xml</suppressionFile>
                     </suppressionFiles>
                 </configuration>
             </plugin>
