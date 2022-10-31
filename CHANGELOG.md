@@ -1,5 +1,9 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.1.10
+### Minor changes
+* Switch to UBI for base image
+
 ## Release 1.1.9
 ### Minor changes
 * Update dependencies and enable OWASP dependency checks
