@@ -1,7 +1,7 @@
 # Security policy
 
 This application executes tests from the https://github.com/solid-contrib/specification-tests repository in order to assess the conformance of
-Solid server implementatinos to the specifications at https://solid.github.io/specification/.
+Solid server implementations to the specifications at https://solid.github.io/specification/.
 
 # Reporting a vulnerability
 
