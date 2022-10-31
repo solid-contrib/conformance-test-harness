@@ -1,6 +1,6 @@
-FROM eclipse-temurin:11
-RUN apt-get -y update
-RUN apt-get -y install git
+FROM registry.access.redhat.com/ubi8/openjdk-11
+USER root
+RUN microdnf install git
 COPY target/solid-conformance-test-harness-runner.jar /app/harness/
 RUN git clone https://github.com/solid-contrib/specification-tests /data
 WORKDIR /data
