@@ -41,6 +41,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -132,7 +133,8 @@ public class Config {
     public URL getSubjectsUrl() {
         if (subjectsUrl == null) {
             if (subjectsFile.isEmpty()) {
-                throw new TestHarnessInitializationException("config option or subjects config is required");
+                throw new TestHarnessInitializationException("Missing mandatory option: 'subjects' file location " +
+                        "must be provided by command line option or config");
             }
             this.subjectsUrl = createUrl(subjectsFile.get(), "subjects");
         }
@@ -146,7 +148,8 @@ public class Config {
     public List<URL> getTestSources()  {
         if (testSources == null) {
             if (sourceList.isEmpty()) {
-                throw new TestHarnessInitializationException("source option or sources config is required");
+                throw new TestHarnessInitializationException("Missing mandatory option: either 'source' command " +
+                        "line option or 'sources' config must be provided");
             }
             this.testSources = sourceList.get().stream()
                     .map(ts -> createUrl(ts, "sources")).collect(Collectors.toList());
@@ -169,7 +172,8 @@ public class Config {
 
     public URI getSolidIdentityProvider() {
         if (solidIdentityProvider.isPresent() && !HttpUtils.isHttpProtocol(solidIdentityProvider.orElse(null))) {
-            throw new TestHarnessInitializationException("SOLID_IDENTITY_PROVIDER must be an absolute URL");
+            throw new TestHarnessInitializationException(MessageFormat.format(
+                    "SOLID_IDENTITY_PROVIDER must be an absolute URL: [{0}]", solidIdentityProvider));
         }
         return solidIdentityProvider.map(u -> u.resolve("/")).orElse(null);
     }
@@ -238,14 +242,22 @@ public class Config {
 
     public void logConfigSettings(final RunMode mode) {
         if (logger.isInfoEnabled()) {
-            logger.info("Sources:         {}", getTestSources());
-            logger.info("Path mappings:   {}", pathMappings.stringValue());
+            logger.info("Sources:          {}", getTestSources());
+            logger.info("Path mappings:    {}", pathMappings.stringValue());
+            logger.info("Output directory: {}", getOutputDirectory());
             if (mode == RunMode.TEST) {
-                logger.info("Subjects URL:    {}", getSubjectsUrl());
-                logger.info("Target server:   {}", getTestSubject());
-                logger.info("Connect timeout: {}", getConnectTimeout());
-                logger.info("Read timeout:    {}", getReadTimeout());
-                logger.info("Max threads:     {}", getMaxThreads());
+                logger.info("Subjects URL:     {}", getSubjectsUrl());
+                logger.info("Target server:    {}", getTestSubject());
+                logger.info("Connect timeout:  {}", getConnectTimeout());
+                logger.info("Read timeout:     {}", getReadTimeout());
+                logger.info("Max threads:      {}", getMaxThreads());
+                logger.info("Alice WebID:      {}", users.alice().webId());
+                logger.info("Alice IDP:        {}", users.alice().getIdp());
+                logger.info("Bob WebID:        {}", users.bob().webId());
+                logger.info("Bob IDP:          {}", users.bob().getIdp());
+                logger.info("Solid IdP:        {}", getSolidIdentityProvider());
+                logger.info("Server root:      {}", getServerRoot());
+                logger.info("Test container:   {}", getTestContainer());
             }
         }
     }
@@ -259,7 +271,8 @@ public class Config {
                     return Path.of(url).toAbsolutePath().normalize().toUri().toURL();
                 }
             } catch (MalformedURLException e) {
-                throw new TestHarnessInitializationException(param + " - " + url + " is not a valid file or URL", e);
+                throw new TestHarnessInitializationException(
+                        MessageFormat.format("Invalid file or url provided for '{0}': [{1}]", param, url), e);
             }
         }
         return null;

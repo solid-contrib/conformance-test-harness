@@ -1,0 +1,89 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+package specification {
+    class Specification <<spec>> {
+      spec:requirement
+    }
+    class SpecificationRequirement <<spec>> {
+      spec:statement
+      spec:requirementLevel
+      spec:requirementSubject
+    }
+
+    Specification "1" *-- "*" SpecificationRequirement : spec:requirement
+}
+
+package manifest {
+    class TestCase <<td>> {
+      spec:requirementReference
+      td:reviewStatus
+      spec:testScript (feature file)
+      dcterms:title
+      dcterms:description
+      dcterms:hasPart [scenario]
+    }
+    TestCase "*" -- "1" SpecificationRequirement : spec:requirementReference
+}
+
+package results {
+    class Assertion <<earl>> {
+      earl:assertedBy
+      earl:subject
+      earl:mode
+      earl:result
+      earl:test
+    }
+    class TestResult <<earl>> {
+      earl:outcome
+      dcterms:date
+    }
+
+    class Software <<earl>> {
+      doap:name
+      doap:description
+      doap:created
+      doap:developer
+      doap:homepage
+      doap:programming-language
+      doap:release
+    }
+    class Assertor
+    class TestSubject
+    Software <|-- Assertor
+    Software <|-- TestSubject
+
+    class Scenario
+    class Step
+    Activity <|-- Scenario
+    Activity <|-- Step
+    Assertion -- Assertor : earl:assertedBy
+    Assertion -- TestSubject : earl:subject
+
+    class Activity <<prov>> {
+      dcterms:title
+      prov:used (line in featureFile)
+      prov:generated (result)
+      prov:startedAtTime
+      prov:endedAtTime
+      prov:wasInformedBy
+      dcterms:hasPart [step]
+    }
+    class Entity <<prov>> {
+      Result
+      ==
+      prov:generatedAtTime
+      prov:value
+      dcterms:description
+    }
+
+    TestCase "1" *- "*" Scenario : dcterms:hasPart
+    Scenario "1" *- "*" Step : dcterms:hasPart
+
+    Assertion -- TestCase : earl:test
+    Assertion -- TestResult : earl:result
+
+    Activity *- Entity : prov:generated
+}
+
+@enduml

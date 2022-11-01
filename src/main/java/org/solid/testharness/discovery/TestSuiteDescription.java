@@ -49,6 +49,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -238,8 +239,9 @@ public class TestSuiteDescription {
             // map feature IRI to file
             final URI mappedLocation = pathMappings.mapIri(featureIri);
             if (HttpUtils.isHttpProtocol(mappedLocation)) {
-                throw new TestHarnessInitializationException("Remote test cases are not yet supported - " +
-                        "use mappings to point to local copies");
+                throw new TestHarnessInitializationException(MessageFormat.format(
+                        "Remote test cases are not yet supported [{0}]. Use mappings to point to local copies",
+                        mappedLocation));
             }
             final File file = new File(mappedLocation.getPath());
             if (!file.exists()) {

@@ -96,6 +96,7 @@ public class ConformanceTestHarness {
         try (final InputStream is = getClass().getClassLoader().getResourceAsStream("assertor.properties")) {
             final Properties properties = new Properties();
             properties.load(is);
+            logger.info("{}: {}", properties.getProperty("package.name"), properties.getProperty("package.version"));
             try (RepositoryConnection conn = dataRepository.getConnection()) {
                 final ModelBuilder builder = new ModelBuilder();
                 final IRI release = iri(Namespaces.RESULTS_URI, "assertor-release");
@@ -160,7 +161,7 @@ public class ConformanceTestHarness {
     public void buildReports(final Config.RunMode mode) {
         logger.info("===================== BUILD REPORTS ========================");
         final File outputDir = config.getOutputDirectory();
-        logger.info("Reports location: {}", outputDir.getPath());
+        logger.info("Reports location: [{}]", outputDir.getPath());
         try {
             if (mode == Config.RunMode.COVERAGE) {
                 final File coverageHtmlFile = new File(outputDir, "coverage.html");

@@ -42,6 +42,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.text.MessageFormat;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +81,8 @@ public class AuthManager {
         logger.info("Registering user {} at {}", user, config.getUserRegistrationEndpoint());
         final UserCredentials userConfig = config.getCredentials(user);
         if (userConfig == null) {
-            throw new TestHarnessInitializationException("No user credentials were provided for " + user);
+            throw new TestHarnessInitializationException(
+                    MessageFormat.format("No user credentials were provided for [{0}]", user));
         }
         final Client client = new Client.Builder()
                 .withOptionalLocalhostSupport(config.getUserRegistrationEndpoint())
@@ -110,7 +112,8 @@ public class AuthManager {
             final UserCredentials userConfig = config.getCredentials(user);
             if (userConfig == null) {
                 logger.warn("UserCredentials missing for {}", user);
-                throw new TestHarnessInitializationException("No user credentials were provided for " + user);
+                throw new TestHarnessInitializationException(MessageFormat.format(
+                        "No user credentials were provided for {0}", user));
             }
             final URI oidcIssuer = Optional.ofNullable(userConfig.getIdp()).orElse(config.getSolidIdentityProvider());
 
@@ -135,9 +138,10 @@ public class AuthManager {
             } else if (userConfig.isUsingClientCredentials()) {
                 tokens = clientCredentialsAccessToken(authClient, userConfig, oidcConfiguration);
             } else {
-                logger.warn("UserCredentials for {}: {}", user, userConfig);
-                throw new TestHarnessInitializationException("Neither login credentials nor refresh token details " +
-                        "provided for " + user);
+                logger.warn("Insufficient UserCredentials for {}: {}", user, userConfig.stringValue());
+                throw new TestHarnessInitializationException(MessageFormat.format(
+                        "Neither login credentials nor refresh token details provided for {0}: [{1}]",
+                        user, userConfig.webId()));
             }
             authClient.setAccessToken(tokens.getAccessToken());
         }
@@ -146,7 +150,7 @@ public class AuthManager {
 
     Tokens exchangeRefreshToken(final Client authClient, final UserCredentials userConfig,
                                 final OidcConfiguration oidcConfig) {
-        logger.info("Exchange refresh token for {}", authClient.getUser());
+        logger.info("Exchange refresh token for {}: [{}]", authClient.getUser(), userConfig.webId());
         if (!oidcConfig.getGrantTypesSupported().contains(HttpConstants.REFRESH_TOKEN)) {
             throw new TestHarnessInitializationException(IDP_GRANT_ERROR +
                     HttpConstants.REFRESH_TOKEN);
@@ -163,7 +167,8 @@ public class AuthManager {
 
     Tokens clientCredentialsAccessToken(final Client authClient, final UserCredentials userConfig,
                                         final OidcConfiguration oidcConfig) {
-        logger.info("Use client credentials to get access token for {}", authClient.getUser());
+        logger.info("Use client credentials to get access token for {}: [{}]",
+                authClient.getUser(), userConfig.webId());
         if (!oidcConfig.getGrantTypesSupported().contains(HttpConstants.CLIENT_CREDENTIALS)) {
             throw new TestHarnessInitializationException(IDP_GRANT_ERROR +
                     HttpConstants.CLIENT_CREDENTIALS);
@@ -179,7 +184,7 @@ public class AuthManager {
 
     Tokens loginAndGetAccessToken(final Client authClient, final UserCredentials userConfig,
                                   final OidcConfiguration oidcConfig, final Client sessionClient) {
-        logger.info("Login and get access token for {}", authClient.getUser());
+        logger.info("Login and get access token for {}: [{}]", authClient.getUser(), userConfig.webId());
         if (!oidcConfig.getGrantTypesSupported().contains(HttpConstants.AUTHORIZATION_CODE_TYPE)) {
             throw new TestHarnessInitializationException(IDP_GRANT_ERROR +
                     HttpConstants.AUTHORIZATION_CODE_TYPE);
@@ -219,7 +224,10 @@ public class AuthManager {
         try {
             final OidcConfiguration oidcConfig = objectMapper.readValue(response.body(), OidcConfiguration.class);
             if (!oidcIssuer.equals(oidcConfig.getIssuer())) {
-                throw new TestHarnessInitializationException("The configured issuer does not match the Solid IdP");
+                throw new TestHarnessInitializationException(
+                        MessageFormat.format("The configured issuer [{0}] does not match the Solid IdP [{1}]",
+                                oidcIssuer, oidcConfig.getIssuer())
+                );
             }
             return oidcConfig;
         } catch (JsonProcessingException e) {

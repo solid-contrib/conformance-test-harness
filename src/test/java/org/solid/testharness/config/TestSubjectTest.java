@@ -287,7 +287,7 @@ class TestSubjectTest {
         setupMockConfig(null, null);
         final Exception exception = assertThrows(TestHarnessInitializationException.class,
                 () -> testSubject.findStorage());
-        assertTrue(exception.getMessage().contains("Failed to read WebId profile for " + ALICE_WEBID));
+        assertTrue(exception.getMessage().contains("Failed to read WebID Profile Document for [" + ALICE_WEBID));
     }
 
     @Test
