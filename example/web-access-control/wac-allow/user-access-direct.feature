@@ -1,6 +1,29 @@
+@wac-allow-public
 Feature: The WAC-Allow header shows user access modes for Bob when given direct access
 
   Background: Create test resources giving Bob different access modes
+    * def modesList = [['read'], ['read', 'control'], ['read', 'write'], ['read', 'append'], ['read', 'write', 'append']]
+    * def setup =
+    """
+      function() {
+        const testContainer = rootTestContainer.reserveContainer();
+        const resources = {}
+        for (const modes of modesList) {
+          const resource = testContainer.createResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
+          const access = resource.accessDatasetBuilder
+                .setAgentAccess(resource.url, webIds.bob, modes)
+                .build();
+          resource.accessDataset = access;
+          resources[modes.join('/')] = resource;
+        }
+        return resources;
+      }
+    """
+    * def resources = callonce setup
+    * def resource = resources['read']
+
+  @setup
+  Scenario: Define test cases
     * table testModes
       | test | modes | check |
       | 'read' | ['read'] | 'only' |
@@ -8,25 +31,6 @@ Feature: The WAC-Allow header shows user access modes for Bob when given direct 
       | 'read/write' | ['read', 'write'] | '' |
       | 'read/append' | ['read', 'append'] | 'only' |
       | 'read/write/append' | ['read', 'write', 'append'] | 'only' |
-
-    * def setup =
-    """
-      function() {
-        const testContainer = rootTestContainer.reserveContainer();
-        const resources = {}
-        for (const row of testModes) {
-          const resource = testContainer.createResource('.ttl', karate.readAsString('../fixtures/example.ttl'), 'text/turtle');
-          const access = resource.accessDatasetBuilder
-                .setAgentAccess(resource.url, webIds.bob, row.modes)
-                .build();
-          resource.accessDataset = access;
-          resources[row.test] = resource;
-        }
-        return resources;
-      }
-    """
-    * def resources = callonce setup
-    * def resource = resources['read']
 
   Scenario: There is an acl on the resource containing Bob's WebID
     Given url resource.aclUrl
@@ -76,7 +80,7 @@ Feature: The WAC-Allow header shows user access modes for Bob when given direct 
     And match result.user contains <check> <modes>
     And match result.public == []
     Examples:
-      | testModes |
+      | karate.setup().testModes |
 
   @wac
   # outline comment 2 (skip tests for ACP to demonstrate reporting for a ScenarioOutline)
@@ -90,4 +94,4 @@ Feature: The WAC-Allow header shows user access modes for Bob when given direct 
     And match result.user contains <check> <modes>
     And match result.public == []
     Examples:
-      | testModes |
+      | karate.setup().testModes |
