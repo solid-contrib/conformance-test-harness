@@ -211,6 +211,7 @@ public class ConformanceTestHarness {
         // any features which are skipped are not included in the feature reporting phase so add assertions now
         if (skipTags != null && !skipTags.isEmpty()) {
             results.getFeatures().stream()
+                    .map(fc -> fc.feature)
                     .filter(f -> f.getTags() != null)
                     .filter(f -> !f.getTags().isEmpty())
                     .filter(f -> f.getTags().stream().map(Tag::getName).anyMatch(skipTags::contains))
@@ -220,6 +221,7 @@ public class ConformanceTestHarness {
         }
         // any features which are @ignored are not included in the feature reporting phase so add assertions now
         results.getFeatures().stream()
+                .map(fc -> fc.feature)
                 .filter(f -> f.getTags() != null)
                 .filter(f -> !f.getTags().isEmpty())
                 .filter(f -> f.getTags().stream().map(Tag::getName).anyMatch("ignore"::equals))

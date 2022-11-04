@@ -24,6 +24,7 @@
 package org.solid.testharness;
 
 import com.intuit.karate.core.Feature;
+import com.intuit.karate.core.FeatureCall;
 import com.intuit.karate.core.Tag;
 import com.intuit.karate.resource.Resource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -228,7 +229,8 @@ class ConformanceTestHarnessTest {
         when(feature3.getResource()).thenReturn(resource);
         when(feature4.getResource()).thenReturn(resource);
         final TestSuiteResults results = mockResults(false);
-        when(results.getFeatures()).thenReturn(List.of(feature1, feature2, feature3, feature4));
+        when(results.getFeatures()).thenReturn(List.of(new FeatureCall(feature1), new FeatureCall(feature2),
+                new FeatureCall(feature3), new FeatureCall(feature4)));
         when(testRunner.runTests(any(), anyInt(), any(), anyBoolean())).thenReturn(results);
         assertFalse(conformanceTestHarness.runTestSuites(null, null).hasFailures());
         verify(dataRepository, times(2)).createSkippedAssertion(any(), any(), any());
