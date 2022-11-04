@@ -4,6 +4,8 @@
 ### Minor changes
 * Improve logging of initial config and provide better information for errors.
 * Add support for JSON logging - enable by setting `quarkus.log.console.json=true`.
+* Prevent report output for setup scenarios.
+* Upgrade dependencies to use latest Graal & Quarkus and remove vulnerabilities.
 
 ## Release 1.1.10
 ### Minor changes
