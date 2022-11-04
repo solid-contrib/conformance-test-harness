@@ -7,3 +7,5 @@ quarkus:
         level: INFO
       "org.solid.testharness":
         level: INFO
+    console:
+      json: false

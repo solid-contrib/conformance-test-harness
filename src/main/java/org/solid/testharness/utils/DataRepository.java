@@ -88,10 +88,10 @@ public class DataRepository implements Repository {
     }
 
     public void load(final URL url, final String baseUri) {
-        try (RepositoryConnection conn = getConnection()) {
-            final IRI context = iri(url.toString());
+        try (var conn = getConnection()) {
+            final var context = iri(url.toString());
             logger.info("Loading {} with base {}", url, baseUri);
-            final ParserConfig parserConfig = new ParserConfig();
+            final var parserConfig = new ParserConfig();
             parserConfig.set(RDFaParserSettings.RDFA_COMPATIBILITY, RDFaVersion.RDFA_1_1);
             conn.setParserConfig(parserConfig);
             conn.add(url, baseUri, null, context);
@@ -134,7 +134,7 @@ public class DataRepository implements Repository {
 
     public void identifySpecifications() {
         try (
-                RepositoryConnection conn = getConnection();
+                var conn = getConnection();
                 var statements = conn.getStatements(null, RDF.type, DOAP.Specification)
         ) {
             while (statements.hasNext()) {
@@ -154,27 +154,36 @@ public class DataRepository implements Repository {
     public void addFeatureResult(final Suite suite, final FeatureResult fr, final IRI featureIri,
                                  final FeatureFileParser featureFileParser) {
         final long startTime = suite.startTime;
-        try (RepositoryConnection conn = getConnection()) {
+        try (var conn = getConnection()) {
             final IRI testCaseIri = getTestCase(conn, featureIri);
             if (testCaseIri != null) {
                 conn.add(testCaseIri, DCTERMS.title, literal(fr.getFeature().getName()));
-                final String featureComments = featureFileParser.getFeatureComments();
+                final var featureComments = featureFileParser.getFeatureComments();
                 if (featureComments != null) {
                     conn.add(testCaseIri, DCTERMS.description, literal(featureComments));
                 }
             }
-            final Set<FeatureSection> sections = new HashSet<>();
-            final ScenarioData scenarioData = new ScenarioData();
-            final Scores scores = new Scores();
-            for (ScenarioResult sr: fr.getScenarioResults()) {
+            final var sections = new HashSet<FeatureSection>();
+            final var scenarioData = new ScenarioData();
+            final var scores = new Scores();
+            // find results from reportable scenarios (not @setup)
+            final var resultSections = fr.getScenarioResults()
+                    .stream()
+                    .filter(s -> isReportableScenario(s.getScenario()))
+                    .collect(Collectors.toList());
+            for (var sr: resultSections) {
                 final IRI outcome = createScenarioActivity(conn, fr, sr, scenarioData.fromScenario(sr.getScenario()),
                         testCaseIri, featureIri, featureFileParser);
                 sections.add(sr.getScenario().getSection());
                 scores.incrementScore(outcome.getLocalName());
             }
-            // find scenario sections which were not run (i.e. have no results)
-            final List<FeatureSection> otherSections = fr.getFeature().getSections().stream()
+            // find scenario sections (not @setup) which were not run (i.e. have no results)
+            final List<FeatureSection> otherSections = fr.getFeature()
+                    .getSections()
+                    .stream()
                     .filter(s -> !sections.contains(s))
+                    .filter(s -> s.getScenarioOutline() != null ||
+                            isReportableScenario(s.getScenario()))
                     .collect(Collectors.toList());
             for (FeatureSection section: otherSections) {
                 final IRI outcome = createScenarioActivity(conn, fr, null, scenarioData.fromFeatureSection(section),
@@ -186,6 +195,13 @@ public class DataRepository implements Repository {
         } catch (Exception e) {
             logger.error("Failed to load feature result", e);
         }
+    }
+
+    private boolean isReportableScenario(final Scenario scenario) {
+        return scenario.getTags() == null ||
+                scenario.getTags()
+                .stream()
+                .noneMatch(tag -> Tag.SETUP.equals(tag.getName()));
     }
 
     private IRI getTestCase(final RepositoryConnection conn, final IRI featureIri) {
@@ -203,7 +219,7 @@ public class DataRepository implements Repository {
     public void createAssertion(final RepositoryConnection conn, final Value outcome, final Date date,
                                  final IRI testCaseIri) {
         final IRI featureAssertion = createNode();
-        final ModelBuilder builder = new ModelBuilder();
+        final var builder = new ModelBuilder();
         final IRI featureResult = createNode();
         conn.add(builder.subject(featureAssertion)
                 .add(RDF.type, EARL.Assertion)
@@ -222,7 +238,7 @@ public class DataRepository implements Repository {
 
     public void createSkippedAssertion(final Feature feature, final String featurePath, final IRI outcome) {
         try (
-                RepositoryConnection conn = getConnection();
+                var conn = getConnection();
                 var statements = conn.getStatements(null, SPEC.testScript, iri(featurePath))
         ) {
             if (statements.hasNext()) {
@@ -238,11 +254,10 @@ public class DataRepository implements Repository {
                                         final ScenarioResult sr, final ScenarioData sc,
                                         final IRI testCaseIri, final IRI featureIri,
                                         final FeatureFileParser featureFileParser) {
-        final ModelBuilder builder;
         final IRI scenarioIri = createNode();
         final IRI scenarioResultIri = createNode();
         final IRI outcome;
-        builder = new ModelBuilder();
+        final var builder = new ModelBuilder();
         builder.subject(scenarioIri)
                 .add(RDF.type, PROV.Activity)
                 .add(DCTERMS.title, sc.getName())
@@ -279,7 +294,9 @@ public class DataRepository implements Repository {
                     .add(PROV.endedAtTime, new Date(sr.getEndTime()))
                     .add(scenarioResultIri, PROV.value, outcome);
         } else {
-            final boolean ignored = sc.getTags().stream().anyMatch(tag -> Tag.IGNORE.equals(tag.getName()));
+            final boolean ignored = sc.getTags() != null && sc.getTags()
+                    .stream()
+                    .anyMatch(tag -> Tag.IGNORE.equals(tag.getName()));
             outcome = ignored ? EARL.untested : EARL.inapplicable;
             builder.subject(scenarioIri)
                     .add(scenarioResultIri, PROV.value, outcome);
@@ -292,7 +309,7 @@ public class DataRepository implements Repository {
         final List<Resource> steps = sr.getStepResults().stream().map(str -> {
             final IRI stepIri = createNode();
             final IRI stepResultIri = createNode();
-            final ModelBuilder stepBuilder = new ModelBuilder();
+            final var stepBuilder = new ModelBuilder();
             stepBuilder.subject(stepIri)
                     .add(RDF.type, PROV.Activity)
                     .add(DCTERMS.title, str.getStep().getPrefix() + " " + str.getStep().getText())
@@ -401,9 +418,9 @@ public class DataRepository implements Repository {
 
     @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     private Map<String, Scores> getScoresByOutcomeLevel(final String queryString) {
-        final Map<String, Scores> counts = new HashMap<>();
+        final var counts = new HashMap<String, Scores>();
         try (
-                RepositoryConnection conn = getConnection()
+                var conn = getConnection()
         ) {
             final TupleQuery tupleQuery = conn.prepareTupleQuery(queryString);
             try (TupleQueryResult result = tupleQuery.evaluate()) {
@@ -426,7 +443,7 @@ public class DataRepository implements Repository {
 
     public void export(final Writer wr, final Resource... contexts) throws TestHarnessException {
         final RDFWriter rdfWriter = Rio.createWriter(RDFFormat.TURTLE, wr);
-        try (RepositoryConnection conn = getConnection()) {
+        try (var conn = getConnection()) {
             rdfWriter.getWriterConfig().set(BasicWriterSettings.PRETTY_PRINT, true)
                     .set(BasicWriterSettings.INLINE_BLANK_NODES, true);
             conn.export(rdfWriter, contexts);

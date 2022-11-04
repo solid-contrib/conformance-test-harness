@@ -1,16 +1,23 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.1.11
+### Minor changes
+* Improve logging of initial config and provide better information for errors.
+* Add support for JSON logging - enable by setting `quarkus.log.console.json=true`.
+* Prevent report output for setup scenarios.
+* Upgrade dependencies to use latest Graal & Quarkus and remove vulnerabilities.
+
 ## Release 1.1.10
 ### Minor changes
-* Switch to UBI for base image
+* Switch to UBI for base image.
 
 ## Release 1.1.9
 ### Minor changes
-* Update dependencies and enable OWASP dependency checks
+* Update dependencies and enable OWASP dependency checks.
 
 ## Release 1.1.8
 ### Minor changes
-* Update libraries for better Graal support and Karate websocket improvements 
+* Update libraries for better Graal support and Karate websocket improvements.
 
 ## Release 1.1.7
 ### Minor changes

@@ -80,7 +80,7 @@ class AuthManagerTest {
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.authenticate("nocredentials"));
-        assertEquals("Neither login credentials nor refresh token details provided for nocredentials",
+        assertEquals("Neither login credentials nor refresh token details provided for nocredentials: [null]",
                 exception.getMessage());
     }
 

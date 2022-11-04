@@ -35,6 +35,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,7 +70,8 @@ public interface PathMappings {
         try {
             return mapLocation(url.toString()).toURL();
         } catch (MalformedURLException e) {
-            throw new TestHarnessInitializationException("Bad URL mapping", e);
+            throw new TestHarnessInitializationException(
+                    MessageFormat.format("Invalid URL mapping: [{0}]", url), e);
         }
     }
 

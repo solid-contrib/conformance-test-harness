@@ -50,6 +50,7 @@ import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -82,11 +83,13 @@ public class TestSubject {
             final Model model = Rio.parse(is, config.getSubjectsUrl().toString(), RDFFormat.TURTLE);
             final Set<Resource> testSubjects = model.filter(null, RDF.type, EARL.TestSubject).subjects();
             if (testSubjects.isEmpty()) {
-                throw new TestHarnessInitializationException("No TestSubjects were found in the config file");
+                throw new TestHarnessInitializationException(MessageFormat.format(
+                        "No TestSubjects were found in the config file: [{0}]", config.getTestSubject()));
             }
             if (configuredTestSubject == null && testSubjects.size() > 1) {
-                throw new TestHarnessInitializationException("No target has been specified but there are more than " +
-                        "one available");
+                throw new TestHarnessInitializationException(MessageFormat.format(
+                        "No target option has been specified and there are more " +
+                        "than one available in the config file: [{0}]", config.getTestSubject()));
             }
             final IRI testSubject;
             if (configuredTestSubject == null) {
@@ -97,15 +100,16 @@ public class TestSubject {
                 testSubject = (IRI) testSubjects.stream()
                         .filter(subject -> subject.equals(configuredTestSubject))
                         .findFirst()
-                        .orElseThrow(() -> new TestHarnessInitializationException("No config found for server: " +
-                                configuredTestSubject.stringValue()));
+                        .orElseThrow(() -> new TestHarnessInitializationException(MessageFormat.format(
+                                "No config found for test subject: [{0}]", configuredTestSubject.stringValue())));
                 loadSubjectIntoRepository(model, testSubject);
             }
             targetServer = new TargetServer(testSubject);
             dataRepository.setTestSubject(testSubject);
             logger.info("TestSubject {}", targetServer.getSubject());
         } catch (IOException e) {
-            throw new TestHarnessInitializationException("Failed to read config file " + config.getSubjectsUrl(), e);
+            throw new TestHarnessInitializationException(MessageFormat.format(
+                    "Failed to read test subjects config file [{0}]", config.getSubjectsUrl()), e);
         }
     }
 
@@ -198,7 +202,8 @@ public class TestSubject {
         try {
             profile = publicClient.getContentAsModel(webId);
         } catch (Exception e) {
-            throw new TestHarnessInitializationException("Failed to read WebId profile for " + webId, e);
+            throw new TestHarnessInitializationException(MessageFormat.format(
+                    "Failed to read WebID Profile Document for [{0}]", webId), e);
         }
         final List<URI> pods = profile.filter(iri(webId.toString()), PIM.storage, null)
                 .objects()
@@ -209,10 +214,13 @@ public class TestSubject {
                 .filter(p -> isPodAccessible(p, ownerClient))
                 .collect(Collectors.toList());
         if (pods.isEmpty()) {
-            throw new TestHarnessInitializationException("Pod provisioning is not yet implemented. " +
-                    "Please ensure the storage already exists for the test user.");
+            throw new TestHarnessInitializationException(MessageFormat.format(
+                    "Pod provisioning is not yet implemented. " +
+                    "Please ensure the storage already exists for the test user: [{0}] " +
+                    "and that pim:storage is defined in the WebID Profile Document.", webId));
 //            return provisionPod();
         } else {
+            logger.info("Storage found via WebID Profile Document: {}", pods.get(0));
             return pods.get(0);
         }
     }

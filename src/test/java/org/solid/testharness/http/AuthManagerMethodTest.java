@@ -79,7 +79,7 @@ class AuthManagerMethodTest {
         when(config.getCredentials("test")).thenReturn(null);
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.registerUser("test"));
-        assertEquals("No user credentials were provided for test", exception.getMessage());
+        assertEquals("No user credentials were provided for [test]", exception.getMessage());
     }
 
     @Test
@@ -123,7 +123,7 @@ class AuthManagerMethodTest {
         final OidcConfiguration oidcConfig = mockOidcConfig(Collections.emptyList());
         when(client.getUser()).thenReturn("USER");
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
-                () -> authManager.exchangeRefreshToken(client, null, oidcConfig));
+                () -> authManager.exchangeRefreshToken(client, testCredentials, oidcConfig));
         assertEquals("Identity Provider does not support grant type: " + HttpConstants.REFRESH_TOKEN,
                 exception.getMessage());
     }
@@ -146,7 +146,7 @@ class AuthManagerMethodTest {
         final OidcConfiguration oidcConfig = mockOidcConfig(Collections.emptyList());
         final Client client = mockSigningClient();
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
-                () -> authManager.clientCredentialsAccessToken(client, null, oidcConfig));
+                () -> authManager.clientCredentialsAccessToken(client, testCredentials, oidcConfig));
         assertEquals("Identity Provider does not support grant type: " + HttpConstants.CLIENT_CREDENTIALS,
                 exception.getMessage());
     }
@@ -233,7 +233,8 @@ class AuthManagerMethodTest {
         doReturn(mockResponse).when(client).send(any(), any());
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.requestOidcConfiguration(client, TEST_URI));
-        assertEquals("The configured issuer does not match the Solid IdP", exception.getMessage());
+        assertEquals("The configured issuer [" + TEST_URI +
+                "] does not match the Solid IdP [BAD/]", exception.getMessage());
     }
 
     @Test

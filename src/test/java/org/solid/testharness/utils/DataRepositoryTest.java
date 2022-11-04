@@ -78,8 +78,11 @@ class DataRepositoryTest {
         final Scenario scenario2 = mockScenario("SCENARIO 2", 10, 1, null);
         final Scenario scenario3 = mockScenario("SCENARIO 3 IGNORED", 20, 2, List.of(Tag.IGNORE));
         final Scenario scenario4 = mockScenario("SCENARIO 4 SKIPPED", 30, 3, List.of("skip"));
-        final ScenarioOutline scenarioOutline = mockScenarioOutline("SCENARIO OUTLINE SKIPPED", 40, 4, List.of("skip"));
-        final List<FeatureSection> sections = Stream.of(scenario1, scenario2, scenario3, scenario4, scenarioOutline)
+        final Scenario scenario5 = mockScenario("SCENARIO 5 SKIPPED NO TAGS", 40, 4, null);
+        final Scenario scenario6 = mockScenario("SETUP SCENARIO 6", 50, 5, List.of(Tag.SETUP));
+        final ScenarioOutline scenarioOutline = mockScenarioOutline("SCENARIO OUTLINE SKIPPED", 60, 6, List.of("skip"));
+        final List<FeatureSection> sections = Stream.of(scenario1, scenario2, scenario3,
+                        scenario4, scenario5, scenario6, scenarioOutline)
                 .map(sc -> {
                     if (sc instanceof Scenario) {
                         return ((Scenario) sc).getSection();
@@ -506,6 +509,8 @@ class DataRepositoryTest {
             when(scenario.getTags()).thenReturn(
                     tags.stream().map(t -> new Tag(1, "@" + t)).collect(Collectors.toList())
             );
+        } else {
+            when(scenario.getTags()).thenReturn(null);
         }
         final FeatureSection section = mock(FeatureSection.class);
         when(section.getScenario()).thenReturn(scenario);

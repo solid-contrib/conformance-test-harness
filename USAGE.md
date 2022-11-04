@@ -103,8 +103,8 @@ origin: https://test    # default = https://tester, origin used for OIDC registr
 ## 3. Environment Variables
 
 The CTH attempts to use a discovery process to determine the container in which to run tests.
-However, this depends on at least knowing the WebId of a user who can have full access to the test container.
-It is also possible to provide the location directly, overriding whatever is found in a WebId profile. This
+However, this depends on at least knowing the WebID of a user who can have full access to the test container.
+It is also possible to provide the location directly, overriding whatever is found in a WebID Profile Document. This
 configuration (and more) is provided using environment variables stored in a `.env` file.
 
 The definition of this configuration is split into:
@@ -114,7 +114,7 @@ The definition of this configuration is split into:
 * Other
 
 ### Core configuration
-The tests require two WebIds for users known as alice and bob. Alice has full access to the test container and can grant
+The tests require two WebIDs for users known as alice and bob. Alice has full access to the test container and can grant
 Bob certain access as required for tests.
 ```shell
 USERS_ALICE_WEBID=
@@ -125,10 +125,10 @@ the IDP value is set for each user:
 ```shell
 SOLID_IDENTITY_PROVIDER=	# e.g., https://broker.pod.inrupt.com
 ```
-The CTH will attempt to use a pod found in the WebId profile via the `pim:storage` predicate. You can use the following
-config if you want to use a particular container in that location by providing a relative path. Alternatively, if there 
-is no storage location available, or you want to use a test container in a different location (to which Alice must be
-granted full control), then you can provide an absolute URL:
+The CTH will attempt to use a pod found in the WebID Profile Document via the `pim:storage` predicate. You can use the
+following config if you want to use a particular container in that location by providing a relative path. Alternatively,
+if there is no storage location available, or you want to use a test container in a different location (to which Alice
+must be granted full control), then you can provide an absolute URL:
 ```shell
 TEST_CONTAINER=         # e.g., test/ or https://pod/test/
 ```
@@ -290,7 +290,6 @@ the logs, you can set `DEBUG` level for the categories shown below:
 
 In the environment file, this looks like this:
 ```
-# Logging Levels
 quarkus.log.category."com.intuit.karate".level=DEBUG
 quarkus.log.category."org.solid.testharness.http.Client".level=DEBUG
 quarkus.log.category."org.solid.testharness.http.AuthManager".level=DEBUG
@@ -299,6 +298,11 @@ quarkus.log.category."org.solid.testharness.http.AuthManager".level=DEBUG
 
 There is a special logging category, called `ResultLogger`, which outputs a summary of the results in JSON format at
 `INFO` level. This is described in the [Reports](#reports) section of this document.
+
+If you would like the log output in JSON you can enable this in the environment file:
+```
+quarkus.log.console.json=true
+```
 
 ### Other configuration
 #### Parallel testing

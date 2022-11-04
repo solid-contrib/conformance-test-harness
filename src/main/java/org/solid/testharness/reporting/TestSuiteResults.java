@@ -25,7 +25,7 @@ package org.solid.testharness.reporting;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.karate.Results;
-import com.intuit.karate.core.Feature;
+import com.intuit.karate.core.FeatureCall;
 import org.solid.testharness.utils.DataRepository;
 
 import javax.enterprise.inject.spi.CDI;
@@ -71,7 +71,7 @@ public class TestSuiteResults {
         return scenarioScores;
     }
 
-    public List<Feature> getFeatures() {
+    public List<FeatureCall> getFeatures() {
         return this.results.getSuite().features;
     }
 
