@@ -272,7 +272,7 @@ public class Config {
                 }
             } catch (MalformedURLException e) {
                 throw new TestHarnessInitializationException(
-                        MessageFormat.format("Invalid file or url provided for '{0}': [{1}]", param, url), e);
+                        MessageFormat.format("Invalid file or url provided for {0}: [{1}]", param, url), e);
             }
         }
         return null;
