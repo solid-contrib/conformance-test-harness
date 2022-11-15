@@ -296,13 +296,14 @@ quarkus.log.category."org.solid.testharness.http.AuthManager".level=DEBUG
 ```
 **Note**: Tokens in responses or authorization headers as masked as a security measure.
 
-There is a special logging category, called `ResultLogger`, which outputs a summary of the results in JSON format at
+There is a special logging category, called `ResultLogger`, which outputs a summary of the results in plain text at
 `INFO` level. This is described in the [Reports](#reports) section of this document.
 
 If you would like the log output in JSON you can enable this in the environment file:
 ```
-quarkus.log.console.json=true
+QUARKUS_LOG_JSON_CONSOLE_ENABLE=true
 ```
+This also adds the results to `ResultLogger` in JSON format. 
 
 ### Other configuration
 #### Parallel testing

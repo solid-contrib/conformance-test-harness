@@ -63,7 +63,6 @@ import static org.eclipse.rdf4j.model.util.Values.literal;
 @SuppressWarnings("PMD.MoreThanOneLogger")  // Additional logger provided for JSON output
 public class ConformanceTestHarness {
     private static final Logger logger = LoggerFactory.getLogger(ConformanceTestHarness.class);
-    private static final Logger resultLogger = LoggerFactory.getLogger("ResultLogger");
 
     private Map<String, SolidClient> clients;
     private TestSuiteResults results;
@@ -154,7 +153,7 @@ public class ConformanceTestHarness {
             results = runTests(featurePaths, true);
         }
 
-        resultLogger.info(results.toJson());
+        results.log();
         return results;
     }
 
@@ -229,7 +228,6 @@ public class ConformanceTestHarness {
                         f, pathMappings.unmapFeaturePath(f.getResource().getRelativePath()), EARL.untested
                 ));
         results.summarizeOutcomes(dataRepository);
-        logger.info("{}", results);
         return results;
     }
 

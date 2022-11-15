@@ -124,7 +124,7 @@ class TestSuiteResultsTest {
     }
 
     @Test
-    void toJson() {
+    void log() {
         final Results results = mock(Results.class);
         final ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Z"));
         when(results.getEndTime()).thenReturn(now.toInstant().toEpochMilli());
@@ -133,35 +133,13 @@ class TestSuiteResultsTest {
         final String timestamp = DateTimeFormatter.ISO_DATE_TIME.format(
                 Instant.ofEpochMilli(now.toInstant().toEpochMilli()).atZone(ZoneId.of("Z"))
         );
-
-        final String json = testSuiteResults.toJson();
-        assertTrue(json.contains("\"resultDate\":\"" + timestamp + "\""));
-        assertTrue(json.contains("\"mustFeatures\":{\"passed\":3,\"failed\":4,\"total\":7}"));
-        assertTrue(json.contains("\"features\":{"));
-        assertTrue(json.contains("\"MAY\":{\"passed\":1,\"failed\":1,\"cantTell\":1,\"untested\":1," +
-                "\"inapplicable\":1,\"total\":5}"));
-        assertTrue(json.contains("\"mustScenarios\":{\"passed\":23,\"failed\":24,\"total\":47}"));
-        assertTrue(json.contains("\"scenarios\":{"));
-        assertTrue(json.contains("\"MAY\":{\"passed\":11,\"failed\":11,\"cantTell\":11,\"untested\":11," +
-                "\"inapplicable\":11,\"total\":55}"));
+        assertDoesNotThrow(testSuiteResults::log);
     }
 
     @Test
-    void toJsonEmpty() {
+    void logEmpty() {
         final TestSuiteResults testSuiteResults = TestSuiteResults.emptyResults();
-        final String json = testSuiteResults.toJson();
-        assertTrue(json.contains("\"mustFeatures\":{\"passed\":0,\"failed\":0,\"total\":0}"));
-        assertTrue(json.contains("\"mustScenarios\":{\"passed\":0,\"failed\":0,\"total\":0}"));
-        assertTrue(json.contains("\"features\":{}"));
-        assertTrue(json.contains("\"scenarios\":{}"));
-    }
-
-    @Test
-    void toJsonFails() {
-        final Results results = mock(Results.class);
-        when(results.getTimeTakenMillis()).thenThrow(new RuntimeException("FAIL"));
-        final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
-        assertEquals("{}", testSuiteResults.toJson());
+        assertDoesNotThrow(testSuiteResults::log);
     }
 
     @Test

@@ -23,12 +23,12 @@
  */
 package org.solid.testharness.reporting;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.karate.Results;
 import com.intuit.karate.core.FeatureCall;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.solid.testharness.utils.DataRepository;
 
-import javax.enterprise.inject.spi.CDI;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -37,7 +37,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.quarkiverse.loggingjson.providers.KeyValueStructuredArgument.*;
+
 public class TestSuiteResults {
+    private static final Logger resultLogger = LoggerFactory.getLogger("ResultLogger");
     public static final String MUST_NOT = "MUST-NOT";
     public static final String MUST = "MUST";
     final Results results;
@@ -120,27 +123,22 @@ public class TestSuiteResults {
                 Scores.calcScore(scenarioScores, MUST_NOT, Scores.FAILED);
     }
 
-    public String toJson() {
-        try {
-            final ObjectMapper objectMapper = CDI.current().select(ObjectMapper.class).get();
-            final Map<String, Object> resultData = new HashMap<>();
-            final Scores mustFeatures = new Scores();
-            mustFeatures.setScore(Scores.PASSED, mustFeaturesPassed);
-            mustFeatures.setScore(Scores.FAILED, mustFeaturesFailed);
-            final Scores mustScenarios = new Scores();
-            mustScenarios.setScore(Scores.PASSED, mustScenariosPassed);
-            mustScenarios.setScore(Scores.FAILED, mustScenariosFailed);
-            resultData.put("mustFeatures", mustFeatures);
-            resultData.put("features", featureScores);
-            resultData.put("mustScenarios", mustScenarios);
-            resultData.put("scenarios", scenarioScores);
-            resultData.put("elapsedTime", getElapsedTime());
-            resultData.put("totalTime", getTimeTakenMillis());
-            resultData.put("resultDate", DateTimeFormatter.ISO_DATE_TIME.format(getResultDate()));
-            return objectMapper.writeValueAsString(resultData);
-        } catch (Exception e) {
-            return "{}";
-        }
+    public void log() {
+        final Scores mustFeatures = new Scores();
+        mustFeatures.setScore(Scores.PASSED, mustFeaturesPassed);
+        mustFeatures.setScore(Scores.FAILED, mustFeaturesFailed);
+        final Scores mustScenarios = new Scores();
+        mustScenarios.setScore(Scores.PASSED, mustScenariosPassed);
+        mustScenarios.setScore(Scores.FAILED, mustScenariosFailed);
+        resultLogger.info(this.toString(),
+            kv("mustFeatures", mustFeatures),
+            kv("features", featureScores),
+            kv("mustScenarios", mustScenarios),
+            kv("scenarios", scenarioScores),
+            kv("elapsedTime", getElapsedTime()),
+            kv("totalTime", getTimeTakenMillis()),
+            kv("resultDate", DateTimeFormatter.ISO_DATE_TIME.format(getResultDate()))
+        );
     }
 
     @Override

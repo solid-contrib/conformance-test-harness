@@ -38,6 +38,7 @@
         <quarkus.version>2.14.0.Final</quarkus.version>
         <karate.version>1.4.0.RC1</karate.version>
         <graal.version>22.2.0.1</graal.version>
+        <quarkiverse.version>2.0.0</quarkiverse.version>
         <hamcrest.version>2.2</hamcrest.version>
         <rdf4j.version>4.2.1</rdf4j.version>
         <semargl.version>0.7</semargl.version>
@@ -105,8 +106,9 @@
             <artifactId>quarkus-container-image-docker</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
+            <groupId>io.quarkiverse.loggingjson</groupId>
             <artifactId>quarkus-logging-json</artifactId>
+            <version>${quarkiverse.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intuit.karate</groupId>
@@ -290,14 +292,6 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${compiler-plugin.version}</version>
-                <!--
-                <configuration>
-                    <compilerArgs>
-                        <arg>-Xlint:deprecation</arg>
-                        <arg>-Xlint:unchecked</arg>
-                    </compilerArgs>
-                </configuration>
-                -->
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
