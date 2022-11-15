@@ -28,7 +28,6 @@ import com.intuit.karate.core.FeatureCall;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.utils.DataRepository;
-import static io.quarkiverse.loggingjson.providers.KeyValueStructuredArgument.*;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -37,6 +36,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.quarkiverse.loggingjson.providers.KeyValueStructuredArgument.*;
 
 public class TestSuiteResults {
     private static final Logger resultLogger = LoggerFactory.getLogger("ResultLogger");
