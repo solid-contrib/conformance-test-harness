@@ -32,7 +32,7 @@
         <pmd.plugin.version>3.19.0</pmd.plugin.version>
         <license.plugin.version>4.1</license.plugin.version>
         <jacoco-plugin.version>0.8.8</jacoco-plugin.version>
-        <owasp.plugin.version>7.3.0</owasp.plugin.version>
+        <owasp.plugin.version>7.3.1</owasp.plugin.version>
 
         <!-- dependencies -->
         <quarkus.version>2.14.0.Final</quarkus.version>
