@@ -297,7 +297,6 @@ class ReportFragmentTest {
     void testSubject() throws IOException {
         final IRI testSubjectIri = iri(BASE_URI, "testserver");
         final TestSubject testSubject = new TestSubject(testSubjectIri);
-        testSubject.getModel().remove(null, SOLID_TEST.features, null);
         testSubject.getModel().remove(null, SOLID_TEST.skip, null);
         logger.debug("TestSubject Model:\n{}", TestUtils.toTurtle(testSubject.getModel()));
 

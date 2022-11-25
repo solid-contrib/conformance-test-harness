@@ -41,8 +41,6 @@ public class AccessControlFactory {
             return (AccessDatasetBuilder<T>) new AccessDatasetWacBuilder().setBaseUri(uri);
         } else if (TestSubject.AccessControlMode.ACP.equals(testSubject.getAccessControlMode())) {
             return (AccessDatasetBuilder<T>) new AccessDatasetAcpBuilder().setBaseUri(uri);
-        } else if (TestSubject.AccessControlMode.ACP_LEGACY.equals(testSubject.getAccessControlMode())) {
-            return (AccessDatasetBuilder<T>) new AccessDatasetAcpLegacyBuilder().setBaseUri(uri);
         } else {
             return null;
         }
@@ -53,8 +51,6 @@ public class AccessControlFactory {
             return new AccessDatasetWac(acl, baseUri);
         } else if (TestSubject.AccessControlMode.ACP.equals(testSubject.getAccessControlMode())) {
             return new AccessDatasetAcp(acl, baseUri);
-        } else if (TestSubject.AccessControlMode.ACP_LEGACY.equals(testSubject.getAccessControlMode())) {
-            return new AccessDatasetAcpLegacy(acl, baseUri);
         } else {
             return null;
         }

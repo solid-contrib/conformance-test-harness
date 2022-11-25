@@ -313,7 +313,6 @@ class ConformanceTestHarnessTest {
 
     private void mockTargetServerWithSkips(final List<String> skipTags) {
         final TargetServer targetServer = mock(TargetServer.class);
-        when(targetServer.getFeatures()).thenReturn(List.of("feature"));
         when(targetServer.getSkipTags()).thenReturn(skipTags);
         when(testSubject.getTargetServer()).thenReturn(targetServer);
     }

@@ -6,17 +6,7 @@ prefix solid: <http://www.w3.org/ns/solid/terms#>
 
 <testserver>
     a earl:Software, earl:TestSubject ;
-    solid-test:skip "tag1" ;
-    solid-test:features "feature1" .
+    solid-test:skip "tag1" .
 
 <testserver2>
     a earl:Software, earl:TestSubject .
-
-# the following test cases can be deleted when users have migrated test-subjects.ttl
-<testserver-acp>
-    a earl:Software, earl:TestSubject ;
-    solid-test:features "acl" .
-
-<testserver-wac>
-    a earl:Software, earl:TestSubject ;
-    solid-test:features "acl", "wac-allow-public" .

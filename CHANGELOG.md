@@ -4,6 +4,7 @@
 ### Minor changes
 * Fix JSON logging output for result counts.
 * Detect expired access tokens and regenerate when needed.
+* Removed support for legacy mode of ACP.
 
 ## Release 1.1.11
 ### Minor changes

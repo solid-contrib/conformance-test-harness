@@ -8,7 +8,6 @@ prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 #    solid-test:skip "acp" ;
     solid-test:skip "wac", "wac-allow-public" ;
 # For system with out unauthenticated access:  "publicagent"
-#    solid-test:features "acp-legacy" ;
     doap:name "Test Subject"@en ;
     rdfs:comment "Example comment."@en ;
     rdfs:comment "Another comment."@en .

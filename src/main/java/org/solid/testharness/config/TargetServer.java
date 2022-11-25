@@ -34,18 +34,12 @@ import java.util.List;
 public class TargetServer extends DataModelBase {
     private static final Logger logger = LoggerFactory.getLogger(TargetServer.class);
 
-    private final List<String> features;
     private final List<String> skipTags;
 
     public TargetServer(final IRI subject) {
         super(subject, ConstructMode.DEEP);
         logger.debug("Retrieved {} statements for {}", super.size(), subject);
-        features = getLiteralsAsStringList(SOLID_TEST.features);
         skipTags = getLiteralsAsStringList(SOLID_TEST.skip);
-    }
-
-    public List<String> getFeatures() {
-        return features;
     }
 
     public List<String> getSkipTags() {

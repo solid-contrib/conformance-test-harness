@@ -15,8 +15,7 @@ prefix solid: <http://www.w3.org/ns/solid/terms#>
     doap:homepage <https://example.org/server>;
     doap:description "DESCRIPTION"@en;
     doap:programming-language "LANG" ;
-    solid-test:skip "acp" ;
-    solid-test:features "acp-legacy" .
+    solid-test:skip "acp" .
 
 <default#test-subject-release>
     doap:name "VERSION NAME";
