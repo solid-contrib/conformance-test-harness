@@ -221,6 +221,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>io.smallrye</groupId>
+            <artifactId>smallrye-jwt-build</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
@@ -240,6 +244,7 @@
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8</artifactId>
             <version>${wiremock.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.hashids</groupId>

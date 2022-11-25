@@ -37,6 +37,7 @@ public class OidcConfiguration {
     private URI authorizeEndpoint;
     private URI tokenEndpoint;
     private URI registrationEndpoint;
+    private URI jwksEndpoint;
     private List<String> grantTypesSupported = Collections.emptyList();
 
     public URI getIssuer() {
@@ -48,6 +49,15 @@ public class OidcConfiguration {
         if (!StringUtils.isEmpty(issuer)) {
             this.issuer = URI.create(issuer + "/").normalize();
         }
+    }
+
+    public URI getJwksEndpoint() {
+        return jwksEndpoint;
+    }
+
+    @JsonSetter("jwks_uri")
+    public void setJwksEndpoint(final String jwksEndpoint) {
+        this.jwksEndpoint = URI.create(jwksEndpoint);
     }
 
     public URI getAuthorizeEndpoint() {

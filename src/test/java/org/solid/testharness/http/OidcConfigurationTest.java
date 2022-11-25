@@ -23,35 +23,30 @@
  */
 package org.solid.testharness.http;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.solid.testharness.utils.TestUtils;
 
 import javax.inject.Inject;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 class OidcConfigurationTest {
-    private static final String DATA = "{\"authorization_endpoint\":\"https://example.org/authorization\"," +
-            "\"issuer\":\"https://example.org\"," +
-            "\"registration_endpoint\":\"https://example.org/registration\"," +
-            "\"token_endpoint\":\"https://example.org/token\"," +
-            "\"grant_types_supported\":[\"authorization_code\",\"refresh_token\",\"client_credentials\"]" +
-            "}";
-
     @Inject
     ObjectMapper objectMapper;
 
     private OidcConfiguration oidcConfiguration;
 
     @BeforeEach
-    void setup() throws JsonProcessingException {
-        oidcConfiguration = objectMapper.readValue(DATA, OidcConfiguration.class);
+    void setup() throws IOException {
+        final var config = TestUtils.loadStringFromFile("src/test/resources/openid-configuration.json");
+        oidcConfiguration = objectMapper.readValue(config, OidcConfiguration.class);
     }
 
     @Test
@@ -79,6 +74,11 @@ class OidcConfigurationTest {
     }
 
     @Test
+    void getJwksEndpoint() {
+        assertEquals("https://example.org/jwks", oidcConfiguration.getJwksEndpoint().toString());
+    }
+
+    @Test
     void getAuthorizeEndpoint() {
         assertEquals("https://example.org/authorization", oidcConfiguration.getAuthorizeEndpoint().toString());
     }
@@ -90,7 +90,7 @@ class OidcConfigurationTest {
 
     @Test
     void getRegistrationEndpoint() {
-        assertEquals("https://example.org/registration", oidcConfiguration.getRegistrationEndpoint().toString());
+        assertEquals("https://example.org/register", oidcConfiguration.getRegistrationEndpoint().toString());
     }
 
     @Test

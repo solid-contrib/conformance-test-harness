@@ -74,6 +74,7 @@ public final class HttpConstants {
     public static final String OPENID = "openid";
     public static final String CLIENT_ID = "client_id";
     public static final String CLIENT_SECRET = "client_secret";
+    public static final String SOLID = "solid";
 
     public static final String CONTAINER_LINK = "<http://www.w3.org/ns/ldp#BasicContainer>; rel=\"type\"";
 

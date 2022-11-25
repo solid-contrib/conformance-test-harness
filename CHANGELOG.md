@@ -1,5 +1,10 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.1.12
+### Minor changes
+* Fix JSON logging output for result counts.
+* Detect expired access tokens and regenerate when needed.
+
 ## Release 1.1.11
 ### Minor changes
 * Improve logging of initial config and provide better information for errors.

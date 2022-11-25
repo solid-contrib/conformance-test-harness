@@ -33,10 +33,12 @@ import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.testharness.utils.TestUtils;
 
 import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
@@ -47,10 +49,14 @@ public class ClientResource implements QuarkusTestResourceLifecycleManager {
 
     @Override
     public Map<String, String> start() {
+        final String webId = "https://webid.example/" + UUID.randomUUID() + "#i";
+
         wireMockServer = new WireMockServer(WireMockConfiguration.options().dynamicPort());
         wireMockServer.addMockServiceRequestListener(ClientResource::requestReceived);
 
         wireMockServer.start();
+
+        final var tokens = TestUtils.generateTokens(wireMockServer.baseUrl(), webId, 300);
 
         wireMockServer.stubFor(WireMock.request("DAHU", WireMock.urlEqualTo("/dahu/no-auth"))
                 .withRequestBody(containing("TEXT"))
@@ -130,6 +136,22 @@ public class ClientResource implements QuarkusTestResourceLifecycleManager {
 
         wireMockServer.stubFor(WireMock.delete(WireMock.urlEqualTo("/delete"))
                 .willReturn(WireMock.aResponse().withStatus(204)));
+
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/token"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
+                        .withBody(tokens)));
+
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/tokenfault"))
+                .willReturn(WireMock.aResponse().withFault(Fault.MALFORMED_RESPONSE_CHUNK)));
+
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/tokenbadrepsonse"))
+                .willReturn(WireMock.aResponse().withStatus(404)));
+
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/tokenparsing"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
+                        .withBody("bad-token")));
 
         return Collections.emptyMap();
     }

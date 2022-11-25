@@ -31,11 +31,15 @@ import com.github.tomakehurst.wiremock.http.Response;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.solid.testharness.utils.TestUtils;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -48,96 +52,106 @@ public class AuthenticationResource implements QuarkusTestResourceLifecycleManag
     private static final String CLIENT_REGISTRATION = "{\"client_id\": \"CLIENTID\"," +
             "\"client_secret\": \"CLIENTSECRET\"}";
 
-    private static final String ACCESS_TOKEN = "{\"access_token\": \"ACCESS_TOKEN\"}";
-
     private static final String GOOD_BASIC_AUTH = HttpConstants.PREFIX_BASIC +
             Base64.getEncoder().encodeToString("CLIENTID:CLIENTSECRET".getBytes());
 
     @Override
     public Map<String, String> start() {
+        final String webId = "https://webid.example/" + UUID.randomUUID() + "#i";
+
         wireMockServer = new WireMockServer(WireMockConfiguration.options().dynamicPort());
         // logging the requests helps when debugging tests
         wireMockServer.addMockServiceRequestListener(AuthenticationResource::requestReceived);
 
         wireMockServer.start();
 
-        // user registration
+        try {
+            final var tokens = TestUtils.generateTokens(wireMockServer.baseUrl(), webId, 300);
 
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/400/idp/register"))
-                .willReturn(WireMock.aResponse().withStatus(400)));
+            // user registration
+            wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/400/idp/register"))
+                    .willReturn(WireMock.aResponse().withStatus(400)));
 
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/idp/register"))
-                .willReturn(WireMock.aResponse().withStatus(200)));
+            wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/idp/register"))
+                    .willReturn(WireMock.aResponse().withStatus(200)));
 
-        // return OIDC configuration
-        wireMockServer.stubFor(WireMock.get(WireMock.urlEqualTo("/" + HttpConstants.OPENID_CONFIGURATION))
-                .willReturn(WireMock.aResponse()
-                        .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
-                        .withBody(getDiscoveryDocument(wireMockServer.baseUrl()))));
+            // return OIDC configuration
+            wireMockServer.stubFor(WireMock.get(WireMock.urlEqualTo("/" + HttpConstants.OPENID_CONFIGURATION))
+                    .willReturn(WireMock.aResponse()
+                            .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
+                            .withBody(getDiscoveryDocument(wireMockServer.baseUrl()))));
 
-        // refresh token succeeds with good authentication
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/token"))
-                .withHeader(HttpConstants.HEADER_AUTHORIZATION, equalTo(GOOD_BASIC_AUTH))
-                .withRequestBody(containing(HttpConstants.REFRESH_TOKEN))
-                .willReturn(WireMock.aResponse()
-                        .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
-                        .withBody(ACCESS_TOKEN)));
+            // return JWKS
+            wireMockServer.stubFor(WireMock.get(WireMock.urlEqualTo("/jwks"))
+                    .willReturn(WireMock.aResponse()
+                            .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
+                            .withBody(TestUtils.loadStringFromFile("src/test/resources/jwks.json"))));
 
-        // session login succeeds with good password
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/login/password"))
-                .withRequestBody(containing(HttpConstants.PASSWORD + "=PASSWORD"))
-                .willReturn(WireMock.aResponse()));
+            // refresh token succeeds with good authentication
+            wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/token"))
+                    .withHeader(HttpConstants.HEADER_AUTHORIZATION, equalTo(GOOD_BASIC_AUTH))
+                    .withRequestBody(containing(HttpConstants.REFRESH_TOKEN))
+                    .willReturn(WireMock.aResponse()
+                            .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
+                            .withBody(tokens)));
 
-        // register succeeds
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/register"))
-                .withRequestBody(containing("\"redirect_uris\":[\"https://origin"))
-                .willReturn(WireMock.aResponse()
-                        .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
-                        .withBody(CLIENT_REGISTRATION)));
+            // session login succeeds with good password
+            wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/login/password"))
+                    .withRequestBody(containing(HttpConstants.PASSWORD + "=PASSWORD"))
+                    .willReturn(WireMock.aResponse()));
 
-        // authorization will get immediate response for login with a good form
-        wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/authorization"))
-                .withQueryParam(HttpConstants.REDIRECT_URI, equalTo("https://origin/form"))
-                .withQueryParam(HttpConstants.CLIENT_ID, equalTo("CLIENTID"))
-                .willReturn(WireMock.aResponse()
-                        .withHeader(HttpConstants.HEADER_LOCATION, "/idp/login")
-                        .withStatus(302)));
-        wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/idp/login"))
-                .willReturn(WireMock.aResponse()
-                        .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_TEXT_HTML)
-                        .withBody("<form method=\"post\"")));
-        // idp login
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/idp/login"))
-                .withRequestBody(containing(HttpConstants.PASSWORD + "=PASSWORD"))
-                .willReturn(WireMock.aResponse()
-                        .withHeader(HttpConstants.HEADER_LOCATION, "https://origin/form?code=authorized")
-                        .withStatus(302)));
+            // register succeeds
+            wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/register"))
+                    .withRequestBody(containing("\"redirect_uris\":[\"https://origin"))
+                    .willReturn(WireMock.aResponse()
+                            .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
+                            .withBody(CLIENT_REGISTRATION)));
 
-        // authorization will get immediate response with a good authorization code
-        wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/authorization"))
-                .withQueryParam(HttpConstants.REDIRECT_URI, equalTo("https://origin/goodcode"))
-                .withQueryParam(HttpConstants.CLIENT_ID, equalTo("CLIENTID"))
-                .willReturn(WireMock.aResponse()
-                        .withHeader(HttpConstants.HEADER_LOCATION, "https://origin/goodcode?code=authorized")
-                        .withStatus(302)));
+            // authorization will get immediate response for login with a good form
+            wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/authorization"))
+                    .withQueryParam(HttpConstants.REDIRECT_URI, equalTo("https://origin/form"))
+                    .withQueryParam(HttpConstants.CLIENT_ID, equalTo("CLIENTID"))
+                    .willReturn(WireMock.aResponse()
+                            .withHeader(HttpConstants.HEADER_LOCATION, "/idp/login")
+                            .withStatus(302)));
+            wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/idp/login"))
+                    .willReturn(WireMock.aResponse()
+                            .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_TEXT_HTML)
+                            .withBody("<form method=\"post\"")));
+            // idp login
+            wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/idp/login"))
+                    .withRequestBody(containing(HttpConstants.PASSWORD + "=PASSWORD"))
+                    .willReturn(WireMock.aResponse()
+                            .withHeader(HttpConstants.HEADER_LOCATION, "https://origin/form?code=authorized")
+                            .withStatus(302)));
 
-        // authorization code token request succeeds
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/token"))
-                .withHeader(HttpConstants.HEADER_AUTHORIZATION, equalTo(GOOD_BASIC_AUTH))
-                .withRequestBody(containing(HttpConstants.AUTHORIZATION_CODE_TYPE))
-                .withRequestBody(containing(HttpConstants.CODE + "=authorized"))
-                .willReturn(WireMock.aResponse()
-                        .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
-                        .withBody(ACCESS_TOKEN)));
+            // authorization will get immediate response with a good authorization code
+            wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/authorization"))
+                    .withQueryParam(HttpConstants.REDIRECT_URI, equalTo("https://origin/goodcode"))
+                    .withQueryParam(HttpConstants.CLIENT_ID, equalTo("CLIENTID"))
+                    .willReturn(WireMock.aResponse()
+                            .withHeader(HttpConstants.HEADER_LOCATION, "https://origin/goodcode?code=authorized")
+                            .withStatus(302)));
 
-        // client credentials token request succeeds
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/token"))
-                .withHeader(HttpConstants.HEADER_AUTHORIZATION, equalTo(GOOD_BASIC_AUTH))
-                .withRequestBody(containing(HttpConstants.GRANT_TYPE + "=" + HttpConstants.CLIENT_CREDENTIALS))
-                .willReturn(WireMock.aResponse()
-                        .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
-                        .withBody(ACCESS_TOKEN)));
+            // authorization code token request succeeds
+            wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/token"))
+                    .withHeader(HttpConstants.HEADER_AUTHORIZATION, equalTo(GOOD_BASIC_AUTH))
+                    .withRequestBody(containing(HttpConstants.AUTHORIZATION_CODE_TYPE))
+                    .withRequestBody(containing(HttpConstants.CODE + "=authorized"))
+                    .willReturn(WireMock.aResponse()
+                            .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
+                            .withBody(tokens)));
 
+            // client credentials token request succeeds
+            wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/token"))
+                    .withHeader(HttpConstants.HEADER_AUTHORIZATION, equalTo(GOOD_BASIC_AUTH))
+                    .withRequestBody(containing(HttpConstants.GRANT_TYPE + "=" + HttpConstants.CLIENT_CREDENTIALS))
+                    .willReturn(WireMock.aResponse()
+                            .withHeader(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
+                            .withBody(tokens)));
+        } catch (final IOException ex) {
+            throw new UncheckedIOException("Unable to set up WireMock server", ex);
+        }
         return Collections.emptyMap();
     }
 
@@ -167,13 +181,8 @@ public class AuthenticationResource implements QuarkusTestResourceLifecycleManag
         }
     }
 
-    String getDiscoveryDocument(final String baseUrl) {
-        return "{" +
-                "\"issuer\": \"" + baseUrl + "\"," +
-                "\"authorization_endpoint\": \"" + baseUrl + "/authorization\"," +
-                "\"token_endpoint\": \"" + baseUrl + "/token\"," +
-                "\"registration_endpoint\": \"" + baseUrl + "/register\"," +
-                "\"grant_types_supported\":[\"authorization_code\",\"refresh_token\",\"client_credentials\"]" +
-                "}";
+    String getDiscoveryDocument(final String baseUrl) throws IOException {
+        final var config = TestUtils.loadStringFromFile("src/test/resources/openid-configuration.json");
+        return config.replaceAll("https://example.org", baseUrl);
     }
 }
