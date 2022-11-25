@@ -58,6 +58,8 @@ class TestSuiteRunner {
         }
     }
 
+    // If you run this and get the error "inStream parameter is null" then run "mvn generate-sources"
+
     @Test
     void testSuite() throws IOException {
         conformanceTestHarness.initialize();
