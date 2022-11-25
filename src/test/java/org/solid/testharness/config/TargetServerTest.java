@@ -54,9 +54,6 @@ class TargetServerTest {
         TestUtils.insertData(dataRepository, testFile);
         final TargetServer targetServer = new TargetServer(iri(TestUtils.SAMPLE_NS, "testserver"));
         assertAll("targetServer",
-                () -> assertNotNull(targetServer.getFeatures()),
-                () -> assertTrue(targetServer.getFeatures().contains("feature1")),
-                () -> assertFalse(targetServer.getFeatures().contains("feature2")),
                 () -> assertNotNull(targetServer.getSkipTags()),
                 () -> assertTrue(targetServer.getSkipTags().contains("tag1")),
                 () -> assertFalse(targetServer.getSkipTags().contains("tag2"))
@@ -69,8 +66,6 @@ class TargetServerTest {
         TestUtils.insertData(dataRepository, testFile);
         final TargetServer targetServer = new TargetServer(iri(TestUtils.SAMPLE_NS, "testserver2"));
         assertAll("targetServer",
-                () -> assertNotNull(targetServer.getFeatures()),
-                () -> assertTrue(targetServer.getFeatures().isEmpty()),
                 () -> assertNotNull(targetServer.getSkipTags()),
                 () -> assertTrue(targetServer.getSkipTags().isEmpty())
         );

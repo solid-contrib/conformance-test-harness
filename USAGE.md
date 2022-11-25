@@ -40,7 +40,6 @@ you specify it on the command line when running tests.
 There are some test subject specific configuration properties in this file:
 ```
   solid-test:skip "acp"  # skip tests with these tags 
-  solid-test:features "acp-legacy"  # enable the legacy mode for ACP to conform to an early version of the specification
 ```
 An example of this file is provided in the test repository (https://github.com/solid-contrib/specification-tests),
 containing descriptions of the following Solid implementations:

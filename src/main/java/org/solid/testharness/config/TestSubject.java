@@ -62,7 +62,6 @@ public class TestSubject {
     private static final Logger logger = LoggerFactory.getLogger(TestSubject.class);
 
     public enum AccessControlMode {
-        ACP_LEGACY,
         ACP,
         WAC
     }
@@ -168,9 +167,6 @@ public class TestSubject {
                     rootTestContainer.getUrl());
         }
         accessControlMode = ownerClient.getAclType(aclUrl);
-        if (accessControlMode == AccessControlMode.ACP && targetServer.getFeatures().contains("acp-legacy")) {
-            accessControlMode = AccessControlMode.ACP_LEGACY;
-        }
     }
 
     URI findTestContainer() throws TestHarnessException {

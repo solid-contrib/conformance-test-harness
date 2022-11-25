@@ -86,7 +86,7 @@ class TestSubjectTest {
         final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
         assertEquals(new URL(testFileUrl, "default").toString(), targetServer.getSubject());
-        assertEquals(13, targetServer.size());
+        assertEquals(12, targetServer.size());
     }
 
     @Test
@@ -98,7 +98,7 @@ class TestSubjectTest {
         final TargetServer targetServer = testSubject.getTargetServer();
         assertNotNull(targetServer);
         assertEquals(subject, targetServer.getSubject());
-        assertEquals(15, targetServer.size());
+        assertEquals(14, targetServer.size());
     }
 
     @Test
@@ -181,24 +181,6 @@ class TestSubjectTest {
 
         assertDoesNotThrow(() -> testSubject.prepareServer());
         assertEquals(ACP, testSubject.getAccessControlMode());
-        verify(mockClient, never()).put(any(), any(), any());
-        assertNotNull(testSubject.getTestRunContainer());
-    }
-
-    @Test
-    void prepareServerAcpLegacyMode() {
-        final Client mockClient = setupMockConfig(ACP_LEGACY, null);
-
-        final HttpResponse<String> mockStringResponse = TestUtils.mockStringResponse(200, "");
-        when(mockClient.getAsTurtle(any())).thenReturn(mockStringResponse);
-        doReturn(mockStringResponse).when(mockClient).sendAuthorized(eq(null), any(), any());
-        final HttpResponse<Void> mockVoidResponse = TestUtils.mockVoidResponse(200, Map.of(HttpConstants.HEADER_LINK,
-                List.of("<https://example.org/.acl>; rel=\"acl\"",
-                        "<http://www.w3.org/ns/solid/acp#AccessControlResource>; rel=\"type\"")));
-        when(mockClient.head(any())).thenReturn(mockVoidResponse);
-
-        assertDoesNotThrow(() -> testSubject.prepareServer());
-        assertEquals(ACP_LEGACY, testSubject.getAccessControlMode());
         verify(mockClient, never()).put(any(), any(), any());
         assertNotNull(testSubject.getTestRunContainer());
     }
@@ -323,14 +305,6 @@ class TestSubjectTest {
     }
 
     @Test
-    void setTargetServer() {
-        final TargetServer targetServer = mock(TargetServer.class);
-        when(targetServer.getFeatures()).thenReturn(List.of("feature1"));
-        testSubject.setTargetServer(targetServer);
-        assertTrue(testSubject.getTargetServer().getFeatures().contains("feature1"));
-    }
-
-    @Test
     void getTargetServerDefault() throws Exception {
         final URL testFileUrl = TestUtils.getFileUrl(CONFIG_SAMPLE_SINGLE);
         when(config.getSubjectsUrl()).thenReturn(testFileUrl);
@@ -400,9 +374,6 @@ class TestSubjectTest {
         when(clientRegistry.getClient(HttpConstants.ALICE)).thenReturn(mockClient);
         if (mode != null) {
             final TargetServer targetServer = mock(TargetServer.class);
-            if (mode.equals(ACP_LEGACY)) {
-                when(targetServer.getFeatures()).thenReturn(List.of("acp-legacy"));
-            }
             testSubject.setTargetServer(targetServer);
         }
         return mockClient;

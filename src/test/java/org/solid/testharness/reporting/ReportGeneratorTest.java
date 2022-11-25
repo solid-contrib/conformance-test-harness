@@ -136,7 +136,6 @@ class ReportGeneratorTest {
                     .getNamespace();
             config.setTestSubject(iri(namespace, "testserver"));
             resultModel = QueryResults.asModel(statements);
-            resultModel.remove(null, SOLID_TEST.features, null);
             resultModel.remove(null, SOLID_TEST.skip, null);
             resultModel.remove(iri(namespace, "testserver2"), null, null);
             resultModel.remove(iri(namespace, "testserver2#test-subject-release"), null, null);

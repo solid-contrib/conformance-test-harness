@@ -62,13 +62,6 @@ class AccessControlFactoryTest {
     }
 
     @Test
-    void getAccessDatasetBuilderAcpLegacy() {
-        when(testSubject.getAccessControlMode()).thenReturn(ACP_LEGACY);
-        final AccessDatasetBuilder accessDatasetBuilder = accessControlFactory.getAccessDatasetBuilder(SAMPLE_BASE);
-        assertEquals(ACP_LEGACY, accessDatasetBuilder.build().getMode());
-    }
-
-    @Test
     void getAccessDatasetBuilderNull() {
         when(testSubject.getAccessControlMode()).thenReturn(null);
         assertNull(accessControlFactory.getAccessDatasetBuilder(SAMPLE_BASE));
@@ -86,13 +79,6 @@ class AccessControlFactoryTest {
         when(testSubject.getAccessControlMode()).thenReturn(ACP);
         final AccessDataset accessDataset = accessControlFactory.createAccessDataset("", BASE_URI);
         assertEquals(ACP, accessDataset.getMode());
-    }
-
-    @Test
-    void createAccessDatasetAcpLegacy() {
-        when(testSubject.getAccessControlMode()).thenReturn(ACP_LEGACY);
-        final AccessDataset accessDataset = accessControlFactory.createAccessDataset("", BASE_URI);
-        assertEquals(ACP_LEGACY, accessDataset.getMode());
     }
 
     @Test
