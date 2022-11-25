@@ -23,30 +23,52 @@
  */
 package org.solid.testharness.http;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
+import org.jose4j.jwk.JsonWebKeySet;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.solid.testharness.utils.TestHarnessInitializationException;
 import org.solid.testharness.utils.TestUtils;
 
+import javax.inject.Inject;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @QuarkusTest
 @QuarkusTestResource(ClientResource.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ClientTest {
     private static final URI TEST_URL = URI.create(TestUtils.SAMPLE_BASE);
     private static final HttpResponse.BodyHandler<String> STRING_BODY_HANDLER = HttpResponse.BodyHandlers.ofString();
+    private static final String WEB_ID = "https://webid.example/" + UUID.randomUUID() + "#i";
     private URI baseUri;
+    private String accessToken;
+    private JsonWebKeySet jsonWebKeySet;
+
+    @Inject
+    ObjectMapper objectMapper;
+
+    @BeforeAll
+    void init() throws Exception {
+        jsonWebKeySet = new JsonWebKeySet(TestUtils.loadStringFromFile("src/test/resources/jwks.json"));
+    }
 
     @BeforeEach
     void setup() {
@@ -106,8 +128,84 @@ class ClientTest {
     void getSetAccessToken() {
         final Client client = new Client.Builder().build();
         assertNull(client.getAccessToken());
-        client.setAccessToken("ACCESS");
-        assertEquals("ACCESS", client.getAccessToken());
+        client.setJsonWebKeySet(jsonWebKeySet);
+        client.setAccessToken(accessToken);
+        assertEquals(accessToken, client.getAccessToken());
+    }
+
+    @Test
+    void setAccessTokenFail() {
+        final Client client = new Client.Builder().build();
+        client.setJsonWebKeySet(jsonWebKeySet);
+        final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
+            () -> client.setAccessToken(""));
+        assertTrue(exception.getMessage().startsWith("Failed to verify the access token for user "));
+    }
+
+    @Test
+    void saveTokenRequestData() {
+        final OidcConfiguration oidcConfig = mock(OidcConfiguration.class);
+        when(oidcConfig.getTokenEndpoint()).thenReturn(URI.create(TestUtils.SAMPLE_BASE));
+        final Client client = new Client.Builder().build();
+        assertDoesNotThrow(() -> client.saveTokenRequestData(oidcConfig, "", "", null));
+    }
+
+    @Test
+    void requestAccessToken() {
+        final Client client = mockClient(true);
+        assertEquals(accessToken, client.requestAccessToken());
+    }
+
+    @Test
+    void requestAccessTokenNoEndpoint() {
+        final Client client = new Client.Builder().build();
+        assertNull(client.requestAccessToken());
+    }
+
+    @Test
+    void requestAccessTokenNoToken() {
+        final Client client = mockTokenRequestClient("/token");
+        assertNull(client.getAccessToken());
+        assertNotNull(client.requestAccessToken());
+    }
+
+    @Test
+    void requestAccessTokenExpiredToken() throws JsonProcessingException, InterruptedException {
+        final Client client = mockTokenRequestClient("/token");
+        assertNull(client.getAccessToken());
+        // create token that expires quickly but allows time to valid and includes the -1sec guard
+        final String tokens = TestUtils.generateTokens(baseUri.toString(), WEB_ID, 2);
+        final String accessToken = objectMapper.readValue(tokens, Tokens.class).getAccessToken();
+        client.setAccessToken(accessToken);
+        // ensure token expires so we get a new one
+        Thread.sleep(1000);
+        assertNotNull(client.requestAccessToken());
+        assertNotEquals(accessToken, client.getAccessToken());
+    }
+
+    @Test
+    void requestAccessTokenRequestFailed() {
+        final Client client = mockTokenRequestClient("/tokenfault");
+        final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
+                client::requestAccessToken);
+        assertTrue(exception.getMessage().startsWith("Token exchange request failed"));
+    }
+
+    @Test
+    void requestAccessTokenBadResponse() {
+        final Client client = mockTokenRequestClient("/tokenbadrepsonse");
+        final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
+                client::requestAccessToken);
+        assertEquals("Token exchange failed for grant type: " + HttpConstants.CLIENT_CREDENTIALS,
+                exception.getMessage());
+    }
+
+    @Test
+    void requestAccessTokenParsingFail() {
+        final Client client = mockTokenRequestClient("/tokenparsing");
+        final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
+                client::requestAccessToken);
+        assertTrue(exception.getMessage().startsWith("Failed to parse token response"));
     }
 
     @Test
@@ -128,8 +226,7 @@ class ClientTest {
 
     @Test
     void sendRawAuthEmpty() {
-        final Client client = new Client.Builder().withDpopSupport().build();
-        client.setAccessToken("ACCESS");
+        final Client client = mockClient(true);
         final HttpResponse<String> response = client.send("DAHU", baseUri.resolve("/dahu/auth"),
                 null, null, HttpClient.Version.HTTP_2.name(), true);
         assertEquals(HttpClient.Version.HTTP_2, response.version());
@@ -214,8 +311,7 @@ class ClientTest {
 
     @Test
     void sendAuthorized() {
-        final Client client = new Client.Builder().withDpopSupport().build();
-        client.setAccessToken("ACCESS");
+        final Client client = mockClient(true);
         final HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(baseUri.resolve("/get/turtle"));
         final HttpResponse<String> response = client.sendAuthorized(null, requestBuilder, STRING_BODY_HANDLER);
         final Map<String, List<String>> headers = response.request().headers().map();
@@ -253,16 +349,14 @@ class ClientTest {
 
     @Test
     void getAsTurtleDpop() {
-        final Client client = new Client.Builder().withDpopSupport().build();
-        client.setAccessToken("ACCESS");
+        final Client client = mockClient(true);
         final HttpResponse<String> response = client.getAsTurtle(baseUri.resolve("/get/turtle"));
         assertEquals("TURTLE-DPOP", response.body());
     }
 
     @Test
     void getAsTurtleBearer() {
-        final Client client = new Client.Builder().build();
-        client.setAccessToken("ACCESS");
+        final Client client = mockClient(false);
         final HttpResponse<String> response = client.getAsTurtle(baseUri.resolve("/get/turtle"));
         assertEquals("TURTLE-BEARER", response.body());
     }
@@ -375,8 +469,7 @@ class ClientTest {
 
     @Test
     void getAuthHeadersNoDpop() {
-        final Client client = new Client.Builder().build();
-        client.setAccessToken("ACCESS");
+        final Client client = mockClient(false);
         final Map<String, String> headers = client.getAuthHeaders("GET", TEST_URL);
         assertTrue(headers.containsKey(HttpConstants.HEADER_AUTHORIZATION));
         assertTrue(headers.get(HttpConstants.HEADER_AUTHORIZATION).startsWith(HttpConstants.PREFIX_BEARER));
@@ -385,8 +478,7 @@ class ClientTest {
 
     @Test
     void getAuthHeadersDpop() {
-        final Client client = new Client.Builder().withDpopSupport().build();
-        client.setAccessToken("ACCESS");
+        final Client client = mockClient(true);
         final Map<String, String> headers = client.getAuthHeaders("GET", TEST_URL);
         assertTrue(headers.containsKey(HttpConstants.HEADER_AUTHORIZATION));
         assertTrue(headers.get(HttpConstants.HEADER_AUTHORIZATION).startsWith(HttpConstants.PREFIX_DPOP));
@@ -406,7 +498,37 @@ class ClientTest {
         assertThrows(NullPointerException.class, () -> client.getAuthHeaders("GET", null));
     }
 
+    Client mockClient(final boolean dpopSupport) {
+        final OidcConfiguration oidcConfig = mock(OidcConfiguration.class);
+        when(oidcConfig.getTokenEndpoint()).thenReturn(URI.create(TestUtils.SAMPLE_BASE));
+        final var clientBuilder = new Client.Builder();
+        if (dpopSupport) {
+            clientBuilder.withDpopSupport();
+        }
+        final Client client = clientBuilder.build();
+        client.saveTokenRequestData(oidcConfig, "id", "secret", null);
+        client.setJsonWebKeySet(jsonWebKeySet);
+        client.setAccessToken(accessToken);
+        return client;
+    }
+
+    Client mockTokenRequestClient(final String path) {
+        final OidcConfiguration oidcConfig = mock(OidcConfiguration.class);
+        when(oidcConfig.getTokenEndpoint()).thenReturn(baseUri.resolve(path));
+        final var client = new Client.Builder().withDpopSupport().build();
+        client.saveTokenRequestData(oidcConfig, "id", "secret",
+                Map.of(HttpConstants.GRANT_TYPE, HttpConstants.CLIENT_CREDENTIALS));
+        client.setJsonWebKeySet(jsonWebKeySet);
+        return client;
+    }
+
     public void setBaseUri(final URI baseUri) {
         this.baseUri = baseUri;
+        final String tokens = TestUtils.generateTokens(baseUri.toString(), WEB_ID, 300);
+        try {
+            accessToken = objectMapper.readValue(tokens, Tokens.class).getAccessToken();
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

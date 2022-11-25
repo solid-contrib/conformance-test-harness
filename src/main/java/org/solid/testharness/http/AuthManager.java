@@ -25,6 +25,8 @@ package org.solid.testharness.http;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jose4j.jwk.JsonWebKeySet;
+import org.jose4j.lang.JoseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.config.Config;
@@ -124,38 +126,38 @@ public class AuthManager {
             clientRegistry.register(user, authClient);
 
             final OidcConfiguration oidcConfiguration = requestOidcConfiguration(authClient, oidcIssuer);
+            final JsonWebKeySet jsonWebKeySet = requestJwks(authClient, oidcConfiguration);
+            authClient.setJsonWebKeySet(jsonWebKeySet);
 
-            final Tokens tokens;
             if (userConfig.isUsingUsernamePassword()) {
                 // create client with session support for login
                 final Client sessionClient = new Client.Builder()
                         .withSessionSupport()
                         .withOptionalLocalhostSupport(oidcIssuer)
                         .build();
-                tokens = loginAndGetAccessToken(authClient, userConfig, oidcConfiguration, sessionClient);
+                loginAndGetAccessToken(authClient, userConfig, oidcConfiguration, sessionClient);
             } else if (userConfig.isUsingRefreshToken()) {
-                tokens = exchangeRefreshToken(authClient, userConfig, oidcConfiguration);
+                exchangeRefreshToken(authClient, userConfig, oidcConfiguration);
             } else if (userConfig.isUsingClientCredentials()) {
-                tokens = clientCredentialsAccessToken(authClient, userConfig, oidcConfiguration);
+                clientCredentialsAccessToken(authClient, userConfig, oidcConfiguration);
             } else {
                 logger.warn("Insufficient UserCredentials for {}: {}", user, userConfig.stringValue());
                 throw new TestHarnessInitializationException(MessageFormat.format(
                         "Neither login credentials nor refresh token details provided for {0}: [{1}]",
                         user, userConfig.webId()));
             }
-            authClient.setAccessToken(tokens.getAccessToken());
         }
         return new SolidClientProvider(authClient);
     }
 
-    Tokens exchangeRefreshToken(final Client authClient, final UserCredentials userConfig,
+    void exchangeRefreshToken(final Client authClient, final UserCredentials userConfig,
                                 final OidcConfiguration oidcConfig) {
         logger.info("Exchange refresh token for {}: [{}]", authClient.getUser(), userConfig.webId());
         if (!oidcConfig.getGrantTypesSupported().contains(HttpConstants.REFRESH_TOKEN)) {
             throw new TestHarnessInitializationException(IDP_GRANT_ERROR +
                     HttpConstants.REFRESH_TOKEN);
         }
-        return requestToken(authClient, oidcConfig,
+        requestToken(authClient, oidcConfig,
                 userConfig.clientId().orElseThrow(),
                 userConfig.clientSecret().orElseThrow(),
                 Map.of(
@@ -165,7 +167,7 @@ public class AuthManager {
         );
     }
 
-    Tokens clientCredentialsAccessToken(final Client authClient, final UserCredentials userConfig,
+    void clientCredentialsAccessToken(final Client authClient, final UserCredentials userConfig,
                                         final OidcConfiguration oidcConfig) {
         logger.info("Use client credentials to get access token for {}: [{}]",
                 authClient.getUser(), userConfig.webId());
@@ -173,7 +175,7 @@ public class AuthManager {
             throw new TestHarnessInitializationException(IDP_GRANT_ERROR +
                     HttpConstants.CLIENT_CREDENTIALS);
         }
-        return requestToken(authClient, oidcConfig,
+        requestToken(authClient, oidcConfig,
                 userConfig.clientId().orElseThrow(),
                 userConfig.clientSecret().orElseThrow(),
                 Map.of(
@@ -182,7 +184,7 @@ public class AuthManager {
         );
     }
 
-    Tokens loginAndGetAccessToken(final Client authClient, final UserCredentials userConfig,
+    void loginAndGetAccessToken(final Client authClient, final UserCredentials userConfig,
                                   final OidcConfiguration oidcConfig, final Client sessionClient) {
         logger.info("Login and get access token for {}: [{}]", authClient.getUser(), userConfig.webId());
         if (!oidcConfig.getGrantTypesSupported().contains(HttpConstants.AUTHORIZATION_CODE_TYPE)) {
@@ -203,7 +205,7 @@ public class AuthManager {
         final String authCode = requestAuthorizationCode(sessionClient, oidcConfig, appOrigin, clientId,
                 userConfig, codeVerifier);
 
-        return requestToken(authClient, oidcConfig,
+        requestToken(authClient, oidcConfig,
                 clientId,
                 clientRegistration.getClientSecret(),
                 Map.of(
@@ -232,6 +234,19 @@ public class AuthManager {
             return oidcConfig;
         } catch (JsonProcessingException e) {
             throw new TestHarnessInitializationException("Failed to read the OIDC config at " + openIdEndpoint, e);
+        }
+    }
+
+    JsonWebKeySet requestJwks(final Client client, final OidcConfiguration oidcConfig) {
+        logger.debug("\n========== GET JSON WEB KEY SET");
+        final HttpResponse<String> response = getRequest(client, oidcConfig.getJwksEndpoint(),
+                HttpConstants.MEDIA_TYPE_APPLICATION_JSON, "JSON Web Key Set");
+        try {
+            final String json = response.body();
+            return new JsonWebKeySet(json);
+        } catch (JoseException e) {
+            throw new TestHarnessInitializationException("Failed to read the JSON Web Key Set at " +
+                    oidcConfig.getJwksEndpoint(), e);
         }
     }
 
@@ -340,38 +355,12 @@ public class AuthManager {
         }
     }
 
-    Tokens requestToken(final Client authClient, final OidcConfiguration oidcConfig,
-                                final String clientId, final String clientSecret,
-                                final Map<Object, Object> tokenRequestData) {
+    void requestToken(final Client authClient, final OidcConfiguration oidcConfig,
+                      final String clientId, final String clientSecret,
+                      final Map<Object, Object> tokenRequestData) {
         logger.debug("\n========== ACCESS TOKEN");
-        final String authHeader = HttpConstants.PREFIX_BASIC + base64Encode(clientId + ':' + clientSecret);
-        final HttpRequest.Builder requestBuilder = authClient.signRequest(
-                HttpUtils.newRequestBuilder(oidcConfig.getTokenEndpoint())
-                        .header(HttpConstants.HEADER_AUTHORIZATION, authHeader)
-                        .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED)
-                        .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
-                        .POST(HttpUtils.ofFormData(tokenRequestData))
-        );
-        final HttpResponse<String> response;
-        try {
-            final HttpRequest request = requestBuilder.build();
-            HttpUtils.logRequest(logger, request);
-            response = authClient.send(request, HttpResponse.BodyHandlers.ofString());
-            HttpUtils.logResponse(logger, response);
-        } catch (Exception e) {
-            throw new TestHarnessInitializationException("Token exchange request failed", e);
-        }
-        final String body = response.body();
-        if (response.statusCode() != HttpConstants.STATUS_OK) {
-            logger.error("FAILED TO GET ACCESS TOKEN {}", body);
-            throw new TestHarnessInitializationException("Token exchange failed for grant type: " +
-                    tokenRequestData.get(HttpConstants.GRANT_TYPE));
-        }
-        try {
-            return objectMapper.readValue(response.body(), Tokens.class);
-        } catch (Exception e) {
-            throw new TestHarnessInitializationException("Failed to parse token response", e);
-        }
+        authClient.saveTokenRequestData(oidcConfig, clientId, clientSecret, tokenRequestData);
+        authClient.requestAccessToken();
     }
 
     HttpResponse<String> getRequest(final Client client, final URI uri, final String type, final String stage) {
@@ -414,10 +403,6 @@ public class AuthManager {
                     response.statusCode());
         }
         return response;
-    }
-
-    private String base64Encode(final String data) {
-        return Base64.getEncoder().encodeToString(data.getBytes());
     }
 
     private String generateCodeVerifier() {

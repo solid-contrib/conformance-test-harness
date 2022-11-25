@@ -236,11 +236,11 @@ public class SolidClientProvider {
                 depth.decrementAndGet();
             }
         }
-        return deleteContainer(url, depth);
+        return deleteResource(url, depth);
     }
 
-    private CompletableFuture<HttpResponse<Void>> deleteContainer(final URI url, final AtomicInteger depth) {
-        // delete the container unless depth counting to avoid this
+    private CompletableFuture<HttpResponse<Void>> deleteResource(final URI url, final AtomicInteger depth) {
+        // delete the resource unless depth counting to avoid this
         if (depth == null || depth.get() > 0) {
             logger.debug("DELETE RESOURCE {}", url);
             return client.deleteAsync(url);

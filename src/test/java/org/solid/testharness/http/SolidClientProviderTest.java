@@ -600,8 +600,7 @@ class SolidClientProviderTest {
     void testToStringNamed() throws Exception {
         clientRegistry.register("toStringUser", new Client.Builder("toStringUser").build());
         final SolidClientProvider solidClientProvider = new SolidClientProvider("toStringUser");
-        solidClientProvider.getClient().setAccessToken("ACCESS");
-        assertEquals("SolidClientProvider: user=toStringUser, accessToken=ACCESS", solidClientProvider.toString());
+        assertEquals("SolidClientProvider: user=toStringUser, accessToken=null", solidClientProvider.toString());
     }
 
     String turtleList(final URI container, final URI... args) {

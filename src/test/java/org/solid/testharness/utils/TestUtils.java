@@ -26,6 +26,7 @@ package org.solid.testharness.utils;
 import com.intuit.karate.Suite;
 import com.intuit.karate.core.ScenarioEngine;
 import com.intuit.karate.http.HttpClientFactory;
+import io.smallrye.jwt.build.Jwt;
 import org.eclipse.rdf4j.common.exception.RDF4JException;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
@@ -43,9 +44,13 @@ import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.eclipse.rdf4j.rio.helpers.ParseErrorLogger;
 import org.eclipse.rdf4j.rio.helpers.RDFaParserSettings;
 import org.eclipse.rdf4j.rio.helpers.RDFaVersion;
+import org.jose4j.jwk.PublicJsonWebKey;
 import org.slf4j.Logger;
+import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.HttpUtils;
 
+import javax.json.bind.JsonbBuilder;
+import javax.json.bind.annotation.JsonbProperty;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -69,9 +74,15 @@ public final class TestUtils {
     public static final String SAMPLE_BASE = "https://example.org";
     public static final String SAMPLE_NS = SAMPLE_BASE + "/";
     public static final String BOB = "bob";
+    private static final String WEBID = "webid";
 
     public static final String PREFIXES = Namespaces.generateAllTurtlePrefixes() +
             "@prefix ex: <" + SAMPLE_NS + "> .\n";
+
+    public static class Token {
+        @JsonbProperty("access_token")
+        public String accessToken;
+    }
 
     public static URL getFileUrl(final String file) throws MalformedURLException {
         return Path.of(file).normalize().toUri().toURL();
@@ -237,5 +248,19 @@ public final class TestUtils {
         return new CompletionException(new Exception(error));
     }
 
+    public static String generateTokens(final String issuer, final String webId, final long expiresIn) {
+        final Token token = new Token();
+        try {
+            final String json = TestUtils.loadStringFromFile("src/test/resources/signing-key.json");
+            final PublicJsonWebKey jwk = PublicJsonWebKey.Factory.newPublicJwk(json);
+            token.accessToken = Jwt.claims().issuer(issuer).subject(webId)
+                    .claim(WEBID, webId).audience(HttpConstants.SOLID)
+                    .expiresIn(expiresIn)
+                    .jws().keyId(jwk.getKeyId()).sign(jwk.getPrivateKey());
+        } catch (final Exception ex) {
+            throw new RuntimeException("Could not generate token", ex);
+        }
+        return JsonbBuilder.create().toJson(token);
+    }
     private TestUtils() { }
 }

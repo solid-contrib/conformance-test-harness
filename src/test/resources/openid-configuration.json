@@ -1,0 +1,12 @@
+{
+  "issuer": "https://example.org",
+  "authorization_endpoint": "https://example.org/authorization",
+  "token_endpoint": "https://example.org/token",
+  "jwks_uri": "https://example.org/jwks",
+  "registration_endpoint": "https://example.org/register",
+  "grant_types_supported": [
+    "authorization_code",
+    "refresh_token",
+    "client_credentials"
+  ]
+}

@@ -92,7 +92,9 @@ class AuthManagerTest {
         setupLogin(baseUri, "login", "/login/password", null);
 
         final SolidClientProvider solidClientProvider = authManager.authenticate("login");
-        assertEquals("ACCESS_TOKEN", solidClientProvider.getClient().getAccessToken());
+        assertNotNull(solidClientProvider.getClient().getAccessToken());
+        assertEquals(solidClientProvider.getClient().getAccessToken(),
+                solidClientProvider.getClient().requestAccessToken());
     }
 
     @Test
@@ -104,7 +106,9 @@ class AuthManagerTest {
                 "/idp/register");
 
         final SolidClientProvider solidClientProvider = authManager.authenticate("login");
-        assertEquals("ACCESS_TOKEN", solidClientProvider.getClient().getAccessToken());
+        assertNotNull(solidClientProvider.getClient().getAccessToken());
+        assertEquals(solidClientProvider.getClient().getAccessToken(),
+                solidClientProvider.getClient().requestAccessToken());
     }
 
     @Test
@@ -119,7 +123,9 @@ class AuthManagerTest {
         when(config.getCredentials("refresh_token")).thenReturn(credentials);
 
         final SolidClientProvider solidClientProvider = authManager.authenticate("refresh_token");
-        assertEquals("ACCESS_TOKEN", solidClientProvider.getClient().getAccessToken());
+        assertNotNull(solidClientProvider.getClient().getAccessToken());
+        assertEquals(solidClientProvider.getClient().getAccessToken(),
+                solidClientProvider.getClient().requestAccessToken());
     }
 
     @Test
@@ -133,7 +139,9 @@ class AuthManagerTest {
         when(config.getCredentials("client_credentials")).thenReturn(credentials);
 
         final SolidClientProvider solidClientProvider = authManager.authenticate("client_credentials");
-        assertEquals("ACCESS_TOKEN", solidClientProvider.getClient().getAccessToken());
+        assertNotNull(solidClientProvider.getClient().getAccessToken());
+        assertEquals(solidClientProvider.getClient().getAccessToken(),
+                solidClientProvider.getClient().requestAccessToken());
     }
 
     public void setBaseUri(final URI baseUri) {

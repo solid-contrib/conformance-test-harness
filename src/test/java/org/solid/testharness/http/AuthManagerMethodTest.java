@@ -25,8 +25,13 @@ package org.solid.testharness.http;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
+import org.jose4j.jwk.JsonWebKeySet;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.MockitoAnnotations;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.config.TestCredentials;
 import org.solid.testharness.config.UserCredentials;
@@ -53,6 +58,13 @@ class AuthManagerMethodTest {
     private static final HttpRequest.BodyPublisher EMPTY_FORM_DATA = HttpUtils.ofFormData(Collections.emptyMap());
     private static final HttpResponse.BodyHandler<String> STRING_BODY_HANDLER = HttpResponse.BodyHandlers.ofString();
     private Client client;
+    private AutoCloseable closeable;
+
+    @Captor
+    private ArgumentCaptor<OidcConfiguration> oidcConfigArgCaptor;
+
+    @Captor
+    private ArgumentCaptor<Map<Object, Object>> mapArgCaptor;
 
     @InjectMock
     Config config;
@@ -63,15 +75,23 @@ class AuthManagerMethodTest {
     @Inject
     AuthManager authManager;
 
-    UserCredentials testCredentials;
+    UserCredentials testUserCredentials;
+    UserCredentials testClientCredentials;
 
     @BeforeEach
     void setup() {
+        closeable = MockitoAnnotations.openMocks(this);
         client = mock(Client.class);
         when(config.getConnectTimeout()).thenReturn(2000);
         when(config.getReadTimeout()).thenReturn(2000);
         when(config.getAgent()).thenReturn("AGENT");
-        testCredentials = createUserPwd();
+        testUserCredentials = createUserPwd();
+        testClientCredentials = createIdSecret();
+    }
+
+    @AfterEach
+    void close() throws Exception {
+        closeable.close();
     }
 
     @Test
@@ -108,14 +128,13 @@ class AuthManagerMethodTest {
     @Test
     void exchangeRefreshToken() {
         final OidcConfiguration oidcConfig = mockOidcConfig(List.of(HttpConstants.REFRESH_TOKEN));
-        final Client client = mockSigningClient();
-        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "{\"access_token\":\"token\"}");
-        doReturn(mockResponse).when(client).send(any(), any());
-        final TestCredentials testCredentials = new TestCredentials();
-        testCredentials.clientId = Optional.of("id");
-        testCredentials.clientSecret = Optional.of("secret");
-        final Tokens tokens = authManager.exchangeRefreshToken(client, testCredentials, oidcConfig);
-        assertEquals("token", tokens.getAccessToken());
+        authManager.exchangeRefreshToken(client, testClientCredentials, oidcConfig);
+
+        verify(client).saveTokenRequestData(oidcConfigArgCaptor.capture(), eq("id"), eq("secret"),
+                mapArgCaptor.capture());
+        assertEquals(TEST_URI, oidcConfigArgCaptor.getValue().getTokenEndpoint());
+        assertEquals(HttpConstants.REFRESH_TOKEN, mapArgCaptor.getValue().get(HttpConstants.GRANT_TYPE));
+        verify(client).requestAccessToken();
     }
 
     @Test
@@ -123,7 +142,7 @@ class AuthManagerMethodTest {
         final OidcConfiguration oidcConfig = mockOidcConfig(Collections.emptyList());
         when(client.getUser()).thenReturn("USER");
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
-                () -> authManager.exchangeRefreshToken(client, testCredentials, oidcConfig));
+                () -> authManager.exchangeRefreshToken(client, testClientCredentials, oidcConfig));
         assertEquals("Identity Provider does not support grant type: " + HttpConstants.REFRESH_TOKEN,
                 exception.getMessage());
     }
@@ -131,22 +150,20 @@ class AuthManagerMethodTest {
     @Test
     void clientCredentialsAccessToken() {
         final OidcConfiguration oidcConfig = mockOidcConfig(List.of(HttpConstants.CLIENT_CREDENTIALS));
-        final Client client = mockSigningClient();
-        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "{\"access_token\":\"token\"}");
-        doReturn(mockResponse).when(client).send(any(), any());
-        final TestCredentials testCredentials = new TestCredentials();
-        testCredentials.clientId = Optional.of("id");
-        testCredentials.clientSecret = Optional.of("secret");
-        final Tokens tokens = authManager.clientCredentialsAccessToken(client, testCredentials, oidcConfig);
-        assertEquals("token", tokens.getAccessToken());
+        authManager.clientCredentialsAccessToken(client, testClientCredentials, oidcConfig);
+
+        verify(client).saveTokenRequestData(oidcConfigArgCaptor.capture(), eq("id"), eq("secret"),
+                mapArgCaptor.capture());
+        assertEquals(TEST_URI, oidcConfigArgCaptor.getValue().getTokenEndpoint());
+        assertEquals(HttpConstants.CLIENT_CREDENTIALS, mapArgCaptor.getValue().get(HttpConstants.GRANT_TYPE));
+        verify(client).requestAccessToken();
     }
 
     @Test
     void clientCredentialsAccessTokenWrongGrant() {
         final OidcConfiguration oidcConfig = mockOidcConfig(Collections.emptyList());
-        final Client client = mockSigningClient();
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
-                () -> authManager.clientCredentialsAccessToken(client, testCredentials, oidcConfig));
+                () -> authManager.clientCredentialsAccessToken(client, testClientCredentials, oidcConfig));
         assertEquals("Identity Provider does not support grant type: " + HttpConstants.CLIENT_CREDENTIALS,
                 exception.getMessage());
     }
@@ -154,8 +171,6 @@ class AuthManagerMethodTest {
     @Test
     void loginAndGetAccessTokenStartSession() {
         final OidcConfiguration oidcConfig = mockOidcConfig(List.of(HttpConstants.AUTHORIZATION_CODE_TYPE));
-        final Client authClient = mockSigningClient();
-        when(config.getSolidIdentityProvider()).thenReturn(TEST_URI);
         when(config.getUserRegistrationEndpoint()).thenReturn(null);
         when(config.getLoginEndpoint()).thenReturn(TEST_URI.resolve("/login"));
         when(config.getOrigin()).thenReturn("https://ORIGIN");
@@ -165,24 +180,24 @@ class AuthManagerMethodTest {
         final HttpResponse<String> mockResponseAuthorize = TestUtils.mockStringResponse(
                 302, "",
                 Map.of(HttpConstants.HEADER_LOCATION, List.of("https://ORIGIN?" + HttpConstants.CODE + "=CODE")));
-        final HttpResponse<String> mockResponseToken = TestUtils.mockStringResponse(200,
-                "{\"access_token\":\"TOKEN\"}");
 
         doReturn(mockResponseSession)
                 .doReturn(mockResponseRegisterClient)
                 .doReturn(mockResponseAuthorize)
-                .doReturn(mockResponseToken)
                 .when(client).send(any(), any());
+        authManager.loginAndGetAccessToken(client, testUserCredentials, oidcConfig, client);
 
-        final Tokens tokens = authManager.loginAndGetAccessToken(authClient, testCredentials, oidcConfig, client);
-        assertEquals("TOKEN", tokens.getAccessToken());
+        verify(client).saveTokenRequestData(oidcConfigArgCaptor.capture(), eq("CLIENTID"), any(),
+                mapArgCaptor.capture());
+        assertEquals(TEST_URI, oidcConfigArgCaptor.getValue().getTokenEndpoint());
+        assertEquals(HttpConstants.AUTHORIZATION_CODE_TYPE, mapArgCaptor.getValue().get(HttpConstants.GRANT_TYPE));
+        assertEquals("CODE", mapArgCaptor.getValue().get(HttpConstants.CODE));
+        verify(client).requestAccessToken();
     }
 
     @Test
     void loginAndGetAccessTokenUserRegistration() {
         final OidcConfiguration oidcConfig = mockOidcConfig(List.of(HttpConstants.AUTHORIZATION_CODE_TYPE));
-        final Client authClient = mockSigningClient();
-        when(config.getSolidIdentityProvider()).thenReturn(TEST_URI);
         when(config.getUserRegistrationEndpoint()).thenReturn(TEST_URI.resolve("/register"));
         when(config.getOrigin()).thenReturn("https://ORIGIN");
         final HttpResponse<String> mockResponseRegisterClient = TestUtils.mockStringResponse(200,
@@ -195,25 +210,28 @@ class AuthManagerMethodTest {
         final HttpResponse<String> mockResponseAuthorize = TestUtils.mockStringResponse(
                 302, "",
                 Map.of(HttpConstants.HEADER_LOCATION, List.of("https://ORIGIN?" + HttpConstants.CODE + "=CODE")));
-        final HttpResponse<String> mockResponseToken = TestUtils.mockStringResponse(200,
-                "{\"access_token\":\"TOKEN\"}");
 
         doReturn(mockResponseRegisterClient)
                 .doReturn(mockResponseAuthorizeForm)
                 .doReturn(mockResponseAuthorizeLogin)
                 .doReturn(mockResponseAuthorize)
-                .doReturn(mockResponseToken)
                 .when(client).send(any(), any());
 
-        final Tokens tokens = authManager.loginAndGetAccessToken(authClient, testCredentials, oidcConfig, client);
-        assertEquals("TOKEN", tokens.getAccessToken());
+        authManager.loginAndGetAccessToken(client, testUserCredentials, oidcConfig, client);
+
+        verify(client).saveTokenRequestData(oidcConfigArgCaptor.capture(), eq("CLIENTID"), any(),
+                mapArgCaptor.capture());
+        assertEquals(TEST_URI, oidcConfigArgCaptor.getValue().getTokenEndpoint());
+        assertEquals(HttpConstants.AUTHORIZATION_CODE_TYPE, mapArgCaptor.getValue().get(HttpConstants.GRANT_TYPE));
+        assertEquals("CODE", mapArgCaptor.getValue().get(HttpConstants.CODE));
+        verify(client).requestAccessToken();
     }
 
     @Test
     void loginAndGetAccessTokenBadGrant() {
         final OidcConfiguration oidcConfig = mockOidcConfig(Collections.emptyList());
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
-                () -> authManager.loginAndGetAccessToken(client, testCredentials, oidcConfig, client));
+                () -> authManager.loginAndGetAccessToken(client, testUserCredentials, oidcConfig, client));
         assertEquals("Identity Provider does not support grant type: " + HttpConstants.AUTHORIZATION_CODE_TYPE,
                 exception.getMessage());
     }
@@ -248,10 +266,29 @@ class AuthManagerMethodTest {
     }
 
     @Test
+    void requestJwks() throws Exception {
+        final OidcConfiguration oidcConfig = mockOidcConfig(null);
+        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200,
+                TestUtils.loadStringFromFile("src/test/resources/jwks.json"));
+        doReturn(mockResponse).when(client).send(any(), any());
+        final JsonWebKeySet jsonWebKeySet = authManager.requestJwks(client, oidcConfig);
+        assertEquals(1, jsonWebKeySet.getJsonWebKeys().size());
+    }
+
+    @Test
+    void requestJwksJsonError() {
+        final OidcConfiguration oidcConfig = mockOidcConfig(null);
+        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "not json");
+        doReturn(mockResponse).when(client).send(any(), any());
+        final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
+                () -> authManager.requestJwks(client, oidcConfig));
+        assertTrue(exception.getMessage().startsWith("Failed to read the JSON Web Key Set at " + TEST_URI));
+    }
+    @Test
     void startLoginSession() {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "OK");
         doReturn(mockResponse).when(client).send(any(), any());
-        assertDoesNotThrow(() -> authManager.startLoginSession(client, testCredentials, TEST_URI));
+        assertDoesNotThrow(() -> authManager.startLoginSession(client, testUserCredentials, TEST_URI));
     }
 
     @Test
@@ -281,7 +318,7 @@ class AuthManagerMethodTest {
                 Map.of(HttpConstants.HEADER_LOCATION, List.of("https://ORIGIN?" + HttpConstants.CODE + "=CODE")));
         doReturn(mockResponse).when(client).send(any(), any());
         final String code = authManager.requestAuthorizationCode(client, oidcConfig, "https://ORIGIN", "CLIENTID",
-                testCredentials, "CODE_VERIFIER");
+                testUserCredentials, "CODE_VERIFIER");
         assertEquals("CODE", code);
     }
 
@@ -296,7 +333,7 @@ class AuthManagerMethodTest {
                 Map.of(HttpConstants.HEADER_LOCATION, List.of("https://ORIGIN?" + HttpConstants.CODE + "=CODE")));
         doReturn(mockResponse1).doReturn(mockResponse2).when(client).send(any(), any());
         final String code = authManager.requestAuthorizationCode(client, oidcConfig, "https://ORIGIN", "CLIENTID",
-                testCredentials, "CODE_VERIFIER");
+                testUserCredentials, "CODE_VERIFIER");
         assertEquals("CODE", code);
     }
 
@@ -311,7 +348,7 @@ class AuthManagerMethodTest {
                 Map.of(HttpConstants.HEADER_LOCATION, List.of("https://ORIGIN?" + HttpConstants.CODE + "=CODE")));
         doReturn(mockResponse1).doReturn(mockResponse2).doReturn(mockResponse3).when(client).send(any(), any());
         final String code = authManager.requestAuthorizationCode(client, oidcConfig, "https://ORIGIN", "CLIENTID",
-                testCredentials, "CODE_VERIFIER");
+                testUserCredentials, "CODE_VERIFIER");
         assertEquals("CODE", code);
     }
 
@@ -324,7 +361,7 @@ class AuthManagerMethodTest {
         doReturn(mockResponse).when(client).send(any(), any());
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.requestAuthorizationCode(client, oidcConfig, "https://ORIGIN", "CLIENTID",
-                        testCredentials, "CODE_VERIFIER"));
+                        testUserCredentials, "CODE_VERIFIER"));
         assertEquals("Failed to get authorization code", exception.getMessage());
     }
 
@@ -335,7 +372,7 @@ class AuthManagerMethodTest {
         doReturn(mockResponse).when(client).send(any(), any());
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.requestAuthorizationCode(client, oidcConfig, "https://ORIGIN", "CLIENTID",
-                        testCredentials, "CODE_VERIFIER"));
+                        testUserCredentials, "CODE_VERIFIER"));
         assertEquals("Failed to follow authentication redirects", exception.getMessage());
     }
 
@@ -345,7 +382,7 @@ class AuthManagerMethodTest {
                 302, "",
                 Map.of(HttpConstants.HEADER_LOCATION, List.of(TEST_URI.resolve("/redirect").toString())));
         doReturn(mockResponse).when(client).send(any(), any());
-        final URI uri = authManager.idpLogin(client, TEST_URI,  testCredentials, TEST_URI.resolve("/auth"));
+        final URI uri = authManager.idpLogin(client, TEST_URI,  testUserCredentials, TEST_URI.resolve("/auth"));
         assertEquals(TEST_URI.resolve("/redirect"), uri);
     }
 
@@ -353,7 +390,7 @@ class AuthManagerMethodTest {
     void idpLoginRedirectNoHeader() {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(302, "");
         doReturn(mockResponse).when(client).send(any(), any());
-        final URI uri = authManager.idpLogin(client, TEST_URI,  testCredentials, TEST_URI.resolve("/auth"));
+        final URI uri = authManager.idpLogin(client, TEST_URI,  testUserCredentials, TEST_URI.resolve("/auth"));
         assertNull(uri);
     }
 
@@ -361,7 +398,7 @@ class AuthManagerMethodTest {
     void idpLoginJson() {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "{\"location\":\"newloc\"}");
         doReturn(mockResponse).when(client).send(any(), any());
-        final URI uri = authManager.idpLogin(client, TEST_URI,  testCredentials, TEST_URI.resolve("/auth"));
+        final URI uri = authManager.idpLogin(client, TEST_URI,  testUserCredentials, TEST_URI.resolve("/auth"));
         assertEquals(TEST_URI.resolve("/newloc"), uri);
     }
 
@@ -369,56 +406,16 @@ class AuthManagerMethodTest {
     void idpLoginJsonFailed() {
         final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "no location");
         doReturn(mockResponse).when(client).send(any(), any());
-        final URI uri = authManager.idpLogin(client, TEST_URI,  testCredentials, TEST_URI.resolve("/auth"));
+        final URI uri = authManager.idpLogin(client, TEST_URI,  testUserCredentials, TEST_URI.resolve("/auth"));
         assertNull(uri);
     }
 
     @Test
     void requestToken() {
         final OidcConfiguration oidcConfig = mockOidcConfig(null);
-        final Client client = mockSigningClient();
-        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "{\"access_token\":\"TOKEN\"}");
-        doReturn(mockResponse).when(client).send(any(), any());
-        final Tokens tokens = authManager.requestToken(client, oidcConfig, "id", "secret", Collections.emptyMap());
-        assertEquals("TOKEN", tokens.getAccessToken());
-    }
-
-    @Test
-    void requestTokenRequestFailed() {
-        final OidcConfiguration oidcConfig = mockOidcConfig(null);
-        final Client client = mockSigningClient();
-        when(client.send(any(), any())).thenThrow(TestUtils.createException("FAIL"));
-        final Map<Object, Object> grantType = Map.of(HttpConstants.GRANT_TYPE, Collections.emptyMap());
-        final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
-                () -> authManager.requestToken(client, oidcConfig,
-                        "id", "secret", grantType));
-        assertTrue(exception.getMessage().startsWith("Token exchange request failed"));
-    }
-
-    @Test
-    void requestTokenBadResponse() {
-        final OidcConfiguration oidcConfig = mockOidcConfig(null);
-        final Client client = mockSigningClient();
-        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(400, "ERROR");
-        doReturn(mockResponse).when(client).send(any(), any());
-        final Map<Object, Object> grantType = Map.of(HttpConstants.GRANT_TYPE, "GRANT");
-        final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
-                () -> authManager.requestToken(client, oidcConfig,
-                        "id", "secret", grantType));
-        assertEquals("Token exchange failed for grant type: GRANT", exception.getMessage());
-    }
-
-    @Test
-    void requestTokenTokenParsingFail() {
-        final OidcConfiguration oidcConfig = mockOidcConfig(null);
-        final Client client = mockSigningClient();
-        final HttpResponse<String> mockResponse = TestUtils.mockStringResponse(200, "not json");
-        doReturn(mockResponse).when(client).send(any(), any());
-        final Map<Object, Object> tokenRequestData = Collections.emptyMap();
-        final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
-                () -> authManager.requestToken(client, oidcConfig,
-                        "id", "secret", tokenRequestData));
-        assertTrue(exception.getMessage().startsWith("Failed to parse token response"));
+        authManager.requestToken(client, oidcConfig, "id", "secret", Collections.emptyMap());
+        verify(client).saveTokenRequestData(oidcConfig, "id", "secret", Collections.emptyMap());
+        verify(client).requestAccessToken();
     }
 
     @Test
@@ -501,6 +498,7 @@ class AuthManagerMethodTest {
         final OidcConfiguration oidcConfig = mock(OidcConfiguration.class);
         when(oidcConfig.getIssuer()).thenReturn(TEST_URI);
         when(oidcConfig.getTokenEndpoint()).thenReturn(TEST_URI);
+        when(oidcConfig.getJwksEndpoint()).thenReturn(TEST_URI);
         when(oidcConfig.getRegistrationEndpoint()).thenReturn(TEST_URI.resolve("/registration"));
         when(oidcConfig.getAuthorizeEndpoint()).thenReturn(TEST_URI.resolve("/authorize"));
         if (grantTypes != null) {
@@ -509,19 +507,17 @@ class AuthManagerMethodTest {
         return oidcConfig;
     }
 
-    Client mockSigningClient() {
-        final HttpRequest.Builder builder = mock(HttpRequest.Builder.class);
-        final HttpRequest request = TestUtils.mockRequest();
-        when(builder.build()).thenReturn(request);
-        when(client.getUser()).thenReturn("USER");
-        when(client.signRequest(any())).thenReturn(builder);
-        return client;
-    }
-
     TestCredentials createUserPwd() {
         final TestCredentials testCredentials = new TestCredentials();
         testCredentials.username = Optional.of("username");
         testCredentials.password = Optional.of("password");
+        return testCredentials;
+    }
+
+    TestCredentials createIdSecret() {
+        final TestCredentials testCredentials = new TestCredentials();
+        testCredentials.clientId = Optional.of("id");
+        testCredentials.clientSecret = Optional.of("secret");
         return testCredentials;
     }
 

@@ -268,7 +268,9 @@ public class TestSubject {
     public void tearDownServer() {
         try {
             if (testRunContainer != null) {
+                logger.info("TEAR DOWN {}", testRunContainer.getUrl());
                 testRunContainer.delete();
+                logger.info("TEAR DOWN COMPLETE");
             }
         } catch (Exception e) {
             // log failure but continue to report results
