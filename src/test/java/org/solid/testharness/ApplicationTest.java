@@ -203,6 +203,18 @@ class ApplicationTest {
     }
 
     @Test
+    void tolerableBlank() throws Exception {
+        assertEquals(1, application.run("--tolerable-failures", ""));
+        verify(config).setTolerableFailuresFile("");
+    }
+
+    @Test
+    void tolerableNotSet() throws Exception {
+        assertEquals(0, application.run("--coverage"));
+        verify(config, never()).setTolerableFailuresFile(any());
+    }
+
+    @Test
     void filtersBlank() throws Exception {
         application.run("--filter", "");
         verify(conformanceTestHarness).runTestSuites(captor.capture(), any());

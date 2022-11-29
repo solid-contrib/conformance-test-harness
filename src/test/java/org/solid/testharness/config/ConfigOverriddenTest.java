@@ -44,6 +44,7 @@ class ConfigOverriddenTest {
     void setup() {
         config.setTestSubject(iri("https://github.com/solid-contrib/conformance-test-harness/testserver2"));
         config.setSubjectsUrl("https://example.org/test-subjects.ttl");
+        config.setTolerableFailuresFile("src/test/resources/config/tolerable-failures.txt");
         config.setTestSources(List.of("https://example.org/testsuite.ttl"));
     }
 
@@ -57,6 +58,11 @@ class ConfigOverriddenTest {
     @Test
     void getSubjectsUrlChanged() {
         assertEquals("https://example.org/test-subjects.ttl", config.getSubjectsUrl().toString());
+    }
+
+    @Test
+    void getTolerableFailuresFileChanged() {
+        assertEquals("src/test/resources/config/tolerable-failures.txt", config.getTolerableFailuresFile().toString());
     }
 
     @Test

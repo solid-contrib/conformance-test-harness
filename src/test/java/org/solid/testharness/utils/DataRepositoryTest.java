@@ -34,6 +34,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Test;
 import org.solid.common.vocab.*;
 import org.solid.testharness.reporting.Scores;
+import org.solid.testharness.reporting.TestSuiteResults;
 
 import java.io.File;
 import java.io.IOException;
@@ -320,6 +321,29 @@ class DataRepositoryTest {
         createScenarioOutcome(dataRepository, SPEC.SHOULD, null);
         final Map<String, Scores> results = dataRepository.getScenarioScores();
         assertEquals(0, results.size());
+    }
+
+    @Test
+    void countTolerableFailures() throws Exception {
+        final DataRepository dataRepository = createRepository();
+        final URL url = Path.of("src/test/resources/utils/results.ttl").normalize().toUri().toURL();
+        dataRepository.load(url);
+
+        assertEquals(0, dataRepository.countToleratedFailures());
+        dataRepository.setFailingScenarios(List.of());
+        assertEquals(0, dataRepository.countToleratedFailures());
+        dataRepository.setFailingScenarios(
+                List.of("SCENARIO 1 PASS", "SCENARIO 3 FAIL", "SCENARIO 4 IGNORE", "SCENARIO 5 FAIL", "SCENARIO X")
+        );
+        final var scores = dataRepository.getScenarioScores();
+        final var mustScenarioFailures = Scores.calcScore(scores, TestSuiteResults.MUST, Scores.FAILED) +
+                Scores.calcScore(scores, TestSuiteResults.MUST_NOT, Scores.FAILED);
+        assertEquals(2, mustScenarioFailures); // SCENARIO 2 FAIL, SCENARIO 3 FAIL
+        assertEquals(1, dataRepository.countToleratedFailures()); // SCENARIO 3 FAIL
+        // note: this logs warnings:
+        // - Scenario listed as a tolerable failure but passed: SCENARIO 1 PASS
+        // - Scenario listed as a tolerable failure but not found in results: SCENARIO X
+        // SCENARIO 5 FAIL is not counted as a tolerable failure since it was only a MAY requirement
     }
 
     @Test

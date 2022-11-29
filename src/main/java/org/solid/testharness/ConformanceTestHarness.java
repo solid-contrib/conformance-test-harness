@@ -38,7 +38,6 @@ import org.solid.testharness.config.PathMappings;
 import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.discovery.TestSuiteDescription;
 import org.solid.testharness.http.AuthManager;
-import org.solid.testharness.http.ClientRegistry;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.reporting.ReportGenerator;
 import org.solid.testharness.reporting.TestSuiteResults;
@@ -52,9 +51,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.eclipse.rdf4j.model.util.Values.literal;
@@ -83,14 +84,13 @@ public class ConformanceTestHarness {
     AuthManager authManager;
     @Inject
     PathMappings pathMappings;
-    @Inject
-    ClientRegistry clientRegistry;
 
     @SuppressWarnings("PMD.UseProperClassLoader") // this is not J2EE and the suggestion fails
     public void initialize() throws IOException {
         // set up the report run and create the assertor information in the data repository
         final IRI assertor = iri(Namespaces.TEST_HARNESS_URI);
         dataRepository.setAssertor(assertor);
+        dataRepository.setFailingScenarios(readTolerableFailures());
         reportGenerator.setStartTime(System.currentTimeMillis());
         try (final InputStream is = getClass().getClassLoader().getResourceAsStream("assertor.properties")) {
             final Properties properties = new Properties();
@@ -208,6 +208,12 @@ public class ConformanceTestHarness {
         results = testRunner.runTests(featurePaths, config.getMaxThreads(),
                 skipTags, enableReporting);
         // any features which are skipped are not included in the feature reporting phase so add assertions now
+        addMissingAssertions(skipTags);
+        results.summarizeOutcomes(dataRepository);
+        return results;
+    }
+
+    private void addMissingAssertions(final List<String> skipTags) {
         if (skipTags != null && !skipTags.isEmpty()) {
             results.getFeatures().stream()
                     .map(fc -> fc.feature)
@@ -227,8 +233,24 @@ public class ConformanceTestHarness {
                 .forEach(f -> dataRepository.createSkippedAssertion(
                         f, pathMappings.unmapFeaturePath(f.getResource().getRelativePath()), EARL.untested
                 ));
-        results.summarizeOutcomes(dataRepository);
-        return results;
+    }
+
+    @SuppressWarnings({"java:S1168", "PMD"})
+    private List<String> readTolerableFailures() {
+        final var file = config.getTolerableFailuresFile();
+        if (file != null) {
+            logger.info("Reading tolerable failures list from {}", file);
+            try {
+                return Files.readAllLines(file.toPath()).stream()
+                        .map(String::strip)
+                        .filter(s -> !s.isEmpty())
+                        .collect(Collectors.toList());
+            } catch (IOException e) {
+                throw new TestHarnessInitializationException(
+                        MessageFormat.format("Failed to read tolerable failure file: [{0}]", file), e);
+            }
+        }
+        return null;
     }
 
     public void cleanUp() {

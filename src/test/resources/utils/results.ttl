@@ -1,0 +1,68 @@
+@prefix schema: <http://schema.org/> .
+@prefix test-harness: <https://github.com/solid-contrib/conformance-test-harness/> .
+@prefix solid: <http://www.w3.org/ns/solid/terms#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix spec: <http://www.w3.org/ns/spec#> .
+@prefix td: <http://www.w3.org/2006/03/test-description#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix solid-test: <https://github.com/solid/conformance-test-harness/vocab#> .
+@prefix earl: <http://www.w3.org/ns/earl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+<https://example.org/req1> spec:requirementLevel spec:MUST .
+<https://example.org/req2> spec:requirementLevel spec:MUST-NOT .
+<https://example.org/req3> spec:requirementLevel spec:MAY .
+
+<https://example.org/testCase1> spec:testScript <https://example.org/feature1>;
+    spec:requirementReference <https://example.org/req1>;
+    dcterms:hasPart <https://github.com/solid-contrib/specification-tests/test#f1a>,
+                        <https://github.com/solid-contrib/specification-tests/test#f1b> .
+
+<https://example.org/testCase2> spec:testScript <https://example.org/feature2>;
+    spec:requirementReference <https://example.org/req2>;
+    dcterms:hasPart <https://github.com/solid-contrib/specification-tests/test#f2a>,
+                        <https://github.com/solid-contrib/specification-tests/test#f2b> .
+
+<https://example.org/testCase3> spec:testScript <https://example.org/feature3>;
+    spec:requirementReference <https://example.org/req3>;
+    dcterms:hasPart <https://github.com/solid-contrib/specification-tests/test#f3a> .
+
+<https://github.com/solid-contrib/specification-tests/test#f1a>
+    a prov:Activity;
+    dcterms:title "SCENARIO 1 PASS";
+    prov:generated <https://github.com/solid-contrib/specification-tests/test#f1ares>;
+    dcterms:hasPart (<https://github.com/solid-contrib/specification-tests/step>).
+<https://github.com/solid-contrib/specification-tests/test#f1ares> prov:value earl:passed .
+
+<https://github.com/solid-contrib/specification-tests/test#f1b>
+    a prov:Activity;
+    dcterms:title "SCENARIO 2 FAIL";
+    prov:generated <https://github.com/solid-contrib/specification-tests/test#f1bres>;
+    dcterms:hasPart (<https://github.com/solid-contrib/specification-tests/step>) .
+<https://github.com/solid-contrib/specification-tests/test#f1bres> prov:value earl:failed .
+
+<https://github.com/solid-contrib/specification-tests/test#f2a>
+    a prov:Activity;
+    dcterms:title "SCENARIO 3 FAIL";
+    prov:generated <https://github.com/solid-contrib/specification-tests/test#f2ares>;
+    dcterms:hasPart (<https://github.com/solid-contrib/specification-tests/step>) .
+<https://github.com/solid-contrib/specification-tests/test#f2ares> prov:value earl:failed .
+
+<https://github.com/solid-contrib/specification-tests/test#f2b>
+    a prov:Activity;
+    dcterms:title "SCENARIO 4 IGNORE";
+    prov:generated <https://github.com/solid-contrib/specification-tests/test#f2bres>;
+    dcterms:hasPart (<https://github.com/solid-contrib/specification-tests/step>) .
+<https://github.com/solid-contrib/specification-tests/test#f2bres> prov:value earl:cantTell .
+
+<https://github.com/solid-contrib/specification-tests/test#f3a>
+    a prov:Activity;
+    dcterms:title "SCENARIO 5 FAIL";
+    prov:generated <https://github.com/solid-contrib/specification-tests/test#f3ares>;
+    dcterms:hasPart (<https://github.com/solid-contrib/specification-tests/step>) .
+<https://github.com/solid-contrib/specification-tests/test#f3ares> prov:value earl:failed .
+

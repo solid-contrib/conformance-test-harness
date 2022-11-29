@@ -37,8 +37,12 @@ import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.MockitoAnnotations;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.config.TargetServer;
 import org.solid.testharness.config.TestSubject;
@@ -69,6 +73,8 @@ import static org.mockito.Mockito.*;
 
 @QuarkusTest
 class ConformanceTestHarnessTest {
+    private AutoCloseable closeable;
+
     @Inject
     ConformanceTestHarness conformanceTestHarness;
 
@@ -80,14 +86,14 @@ class ConformanceTestHarnessTest {
     TestSubject testSubject;
     @InjectMock
     TestSuiteDescription testSuiteDescription;
-    @InjectMock
-    ReportGenerator reportGenerator; // this appears to be unused but is required for buildReports to run correctly
+    @InjectMock // this appears to be unused but is required for buildReports tests to run correctly
+    ReportGenerator reportGenerator;
     @InjectMock
     TestRunner testRunner;
     @InjectMock
     AuthManager authManager;
-
-    Path tmp;
+    @Captor
+    private ArgumentCaptor<List<String>> captor;
 
     @BeforeEach
     void setup() throws IOException {
@@ -96,15 +102,27 @@ class ConformanceTestHarnessTest {
         when(config.getOutputDirectory()).thenReturn(tmp.toFile());
         when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
                 "https://alice.target.example.org/profile/card#me"));
+        closeable = MockitoAnnotations.openMocks(this);
     }
+
+    @AfterEach
+    public void releaseMocks() throws Exception {
+        closeable.close();
+    }
+
+    Path tmp;
 
     @Test
     void initialize() throws Exception {
-        final Repository repository = new SailRepository(new MemoryStore());
-        Namespaces.addToRepository(repository);
-        when(dataRepository.getConnection()).thenReturn(repository.getConnection());
+        final Repository repository = mockRepository();
+        when(config.getTolerableFailuresFile())
+                .thenReturn(new File("src/test/resources/config/tolerable-failures.txt"));
         conformanceTestHarness.initialize();
         verify(dataRepository).setAssertor(any());
+        verify(dataRepository).setFailingScenarios(captor.capture());
+        assertNotNull(captor.getValue());
+        assertEquals(2, captor.getValue().size());
+
         final StringWriter wr = new StringWriter();
         final RDFWriter rdfWriter = Rio.createWriter(RDFFormat.TURTLE, wr);
         try (RepositoryConnection conn = repository.getConnection()) {
@@ -120,6 +138,31 @@ class ConformanceTestHarnessTest {
         assertTrue(result.contains("doap:developer"));
         assertTrue(result.contains("doap:homepage"));
         assertTrue(result.contains("doap:revision"));
+    }
+
+    @Test
+    void initializeEmptyTolerableFailures() throws Exception {
+        mockRepository();
+        when(config.getTolerableFailuresFile()).thenReturn(new File("src/test/resources/config/empty.txt"));
+        conformanceTestHarness.initialize();
+        verify(dataRepository).setFailingScenarios(captor.capture());
+        assertNotNull(captor.getValue());
+        assertEquals(0, captor.getValue().size());
+    }
+
+    @Test
+    void initializeUnsetTolerableFailures() throws Exception {
+        mockRepository();
+        when(config.getTolerableFailuresFile()).thenReturn(null);
+        conformanceTestHarness.initialize();
+        verify(dataRepository).setFailingScenarios(captor.capture());
+        assertNull(captor.getValue());
+    }
+
+    @Test
+    void initializeMissingTolerableFailures() {
+        when(config.getTolerableFailuresFile()).thenReturn(new File("src/test/resources/config/missing.txt"));
+        assertThrows(TestHarnessInitializationException.class, () -> conformanceTestHarness.initialize());
     }
 
     @Test
@@ -305,6 +348,13 @@ class ConformanceTestHarnessTest {
     void cleanUp() {
         conformanceTestHarness.cleanUp();
         verify(testSubject).tearDownServer();
+    }
+
+    private Repository mockRepository() {
+        final Repository repository = new SailRepository(new MemoryStore());
+        Namespaces.addToRepository(repository);
+        when(dataRepository.getConnection()).thenReturn(repository.getConnection());
+        return repository;
     }
 
     private void mockTargetServer() {

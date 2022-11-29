@@ -60,6 +60,7 @@ public class Application implements QuarkusApplication {
     public static final String IGNORE_FAILURES = "ignore-failures";
     public static final String SKIP_TEARDOWN = "skip-teardown";
     public static final String SKIP_REPORTS = "skip-reports";
+    public static final String TOLERABLE = "tolerable-failures";
 
     private List<String> filters;
     private List<String> statuses;
@@ -171,6 +172,10 @@ public class Application implements QuarkusApplication {
                     .collect(Collectors.toList());
             logger.debug("Statuses = {}", statuses);
         }
+        if (cmd.hasOption(TOLERABLE)) {
+            config.setTolerableFailuresFile(cmd.getOptionValue(TOLERABLE));
+            logger.debug("Tolerable failures = {}", config.getTolerableFailuresFile());
+        }
     }
 
     private boolean handleReportOptions(final CommandLine cmd) {
@@ -216,7 +221,9 @@ public class Application implements QuarkusApplication {
         options.addOption(
                 Option.builder("f").longOpt(FILTER).desc("feature filter(s)").hasArgs().valueSeparator(',').build()
         );
-
+        options.addOption(
+                Option.builder().longOpt(TOLERABLE).hasArg().desc("path to a list of tests known to fail").build()
+        );
         options.addOption("h", HELP, false, "print this message");
         return options;
     }

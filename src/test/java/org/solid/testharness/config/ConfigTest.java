@@ -36,7 +36,6 @@ import java.net.URI;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
 @TestProfile(ConfigTestNormalProfile.class)
@@ -53,6 +52,11 @@ class ConfigTest {
     @Test
     void getSubjectsUrlDefault() throws MalformedURLException {
         assertEquals(TestUtils.getFileUrl("src/test/resources/config/config-sample.ttl"), config.getSubjectsUrl());
+    }
+
+    @Test
+    void getTolerableFailuresFileDefault() {
+        assertEquals("src/test/resources/config/tolerable-failures.txt", config.getTolerableFailuresFile().toString());
     }
 
     @Test

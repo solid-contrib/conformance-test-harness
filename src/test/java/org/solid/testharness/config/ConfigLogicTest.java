@@ -114,6 +114,20 @@ class ConfigLogicTest {
     }
 
     @Test
+    void getTolerableFailuresFileEmpty() {
+        final Config config = new Config();
+        config.tolerableFailuresPath = Optional.of("  ");
+        assertNull(config.getTolerableFailuresFile());
+    }
+
+    @Test
+    void getTolerableFailuresFileFails() {
+        final Config config = new Config();
+        assertThrows(TestHarnessInitializationException.class,
+                () -> config.setTolerableFailuresFile("missing-file.txt"));
+    }
+
+    @Test
     void getTestSourcesNoConfigException() {
         final Config config = new Config();
         config.sourceList = Optional.empty();
@@ -157,7 +171,7 @@ class ConfigLogicTest {
     }
 
     @Test
-    void getTestSourcesUseSetEmpty() throws MalformedURLException {
+    void getTestSourcesUseSetEmpty() {
         final Config config = new Config();
         config.setTestSources(Collections.emptyList());
         final List<URL> list = config.getTestSources();
@@ -202,7 +216,7 @@ class ConfigLogicTest {
     void getSolidIdentityProviderNull() {
         final Config config = new Config();
         config.solidIdentityProvider = Optional.empty();
-        assertEquals(null, config.getSolidIdentityProvider());
+        assertNull(config.getSolidIdentityProvider());
     }
 
     @Test
@@ -216,13 +230,13 @@ class ConfigLogicTest {
     void getLoginEndpointNull() {
         final Config config = new Config();
         config.loginEndpoint = Optional.empty();
-        assertEquals(null, config.getLoginEndpoint());
+        assertNull(config.getLoginEndpoint());
     }
 
     @Test
     void getUserRegistrationEndpointNull() {
         final Config config = new Config();
         config.userRegistrationEndpoint = Optional.empty();
-        assertEquals(null, config.getUserRegistrationEndpoint());
+        assertNull(config.getUserRegistrationEndpoint());
     }
 }
