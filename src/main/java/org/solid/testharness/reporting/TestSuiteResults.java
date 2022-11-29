@@ -53,6 +53,7 @@ public class TestSuiteResults {
     int scenariosTotal;
     int mustScenariosPassed;
     int mustScenariosFailed;
+    int toleratedScenariosFailing;
 
     public static TestSuiteResults emptyResults() {
         return new TestSuiteResults(null);
@@ -83,7 +84,7 @@ public class TestSuiteResults {
     }
 
     public boolean hasFailures() {
-        return mustScenariosFailed != 0;
+        return mustScenariosFailed - toleratedScenariosFailing != 0;
     }
 
     public int getFeatureTotal() {
@@ -117,6 +118,7 @@ public class TestSuiteResults {
                 Scores.calcScore(featureScores, MUST_NOT, Scores.FAILED);
         scenarioScores = dataRepository.getScenarioScores();
         scenariosTotal = Scores.calcScore(scenarioScores, null, null);
+        toleratedScenariosFailing = dataRepository.countToleratedFailures();
         mustScenariosPassed = Scores.calcScore(scenarioScores, MUST, Scores.PASSED) +
                 Scores.calcScore(scenarioScores, MUST_NOT, Scores.PASSED);
         mustScenariosFailed = Scores.calcScore(scenarioScores, MUST, Scores.FAILED) +
@@ -131,13 +133,14 @@ public class TestSuiteResults {
         mustScenarios.setScore(Scores.PASSED, mustScenariosPassed);
         mustScenarios.setScore(Scores.FAILED, mustScenariosFailed);
         resultLogger.info(this.toString(),
-            kv("mustFeatures", mustFeatures),
-            kv("features", featureScores),
-            kv("mustScenarios", mustScenarios),
-            kv("scenarios", scenarioScores),
-            kv("elapsedTime", getElapsedTime()),
-            kv("totalTime", getTimeTakenMillis()),
-            kv("resultDate", DateTimeFormatter.ISO_DATE_TIME.format(getResultDate()))
+                kv("mustFeatures", mustFeatures),
+                kv("features", featureScores),
+                kv("mustScenarios", mustScenarios),
+                kv("scenarios", scenarioScores),
+                kv("toleratedScenariosFailing", toleratedScenariosFailing),
+                kv("elapsedTime", getElapsedTime()),
+                kv("totalTime", getTimeTakenMillis()),
+                kv("resultDate", DateTimeFormatter.ISO_DATE_TIME.format(getResultDate()))
         );
     }
 

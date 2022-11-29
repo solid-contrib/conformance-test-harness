@@ -5,6 +5,7 @@
 * Fix JSON logging output for result counts.
 * Detect expired access tokens and regenerate when needed.
 * Removed support for legacy mode of ACP.
+* Allow operator to list scenarios which are known to fail so that they do not contribute to the overall exit code.
 
 ## Release 1.1.11
 ### Minor changes

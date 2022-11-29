@@ -92,6 +92,22 @@ class TestSuiteResultsTest {
     }
 
     @Test
+    void hasFailuresSomeTolerable() {
+        final TestSuiteResults testSuiteResults = TestSuiteResults.emptyResults();
+        when(dataRepository.countToleratedFailures()).thenReturn(1);
+        addOutcomes(testSuiteResults);
+        assertTrue(testSuiteResults.hasFailures());
+    }
+
+    @Test
+    void hasFailuresAllTolerable() {
+        final TestSuiteResults testSuiteResults = TestSuiteResults.emptyResults();
+        when(dataRepository.countToleratedFailures()).thenReturn(24);
+        addOutcomes(testSuiteResults);
+        assertFalse(testSuiteResults.hasFailures());
+    }
+
+    @Test
     void getFeatureTotal() {
         final TestSuiteResults testSuiteResults = TestSuiteResults.emptyResults();
         addOutcomes(testSuiteResults);
@@ -130,9 +146,6 @@ class TestSuiteResultsTest {
         when(results.getEndTime()).thenReturn(now.toInstant().toEpochMilli());
         final TestSuiteResults testSuiteResults = new TestSuiteResults(results);
         addOutcomes(testSuiteResults);
-        final String timestamp = DateTimeFormatter.ISO_DATE_TIME.format(
-                Instant.ofEpochMilli(now.toInstant().toEpochMilli()).atZone(ZoneId.of("Z"))
-        );
         assertDoesNotThrow(testSuiteResults::log);
     }
 

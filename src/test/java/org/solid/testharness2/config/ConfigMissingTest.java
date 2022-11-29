@@ -50,6 +50,11 @@ class ConfigMissingTest {
     }
 
     @Test
+    void getTolerableFailuresFile() {
+        assertNull(config.getTolerableFailuresFile());
+    }
+
+    @Test
     void getTestSources() {
         assertThrows(TestHarnessInitializationException.class, () -> config.getTestSources());
     }
@@ -58,7 +63,6 @@ class ConfigMissingTest {
     void getLoginEndpoint() {
         assertNull(config.getLoginEndpoint());
     }
-
 
     @Test
     void getServerRootNull() {

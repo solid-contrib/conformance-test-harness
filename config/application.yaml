@@ -25,7 +25,7 @@
     # Specification-tests repo cloned as sibling to this project
     - prefix: https://github.com/solid-contrib/specification-tests/blob/main
       path: ../specification-tests
-
+#  tolerableFailures: example/tolerable-failures.txt
 
 # Test profile
 "%test":
@@ -57,6 +57,7 @@
   readTimeout: 1000
   maxThreads: 4
   origin: https://testharness
+  tolerableFailures: src/test/resources/config/tolerable-failures.txt
 
 "%blank":
   quarkus:

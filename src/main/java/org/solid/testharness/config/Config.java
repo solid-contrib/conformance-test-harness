@@ -56,6 +56,7 @@ public class Config {
     private IRI testSubject;
     private URL subjectsUrl;
     private List<URL> testSources;
+    private File tolerableFailuresFile;
     private File outputDir;
     private Map<String, String> webIds;
     private Hashids hashids;
@@ -80,6 +81,8 @@ public class Config {
     Optional<String> subjectsFile;
     @ConfigProperty(name = "sources")
     Optional<List<String>> sourceList;
+    @ConfigProperty(name = "tolerableFailures")
+    Optional<String> tolerableFailuresPath;
 
     @ConfigProperty(name = "agent", defaultValue = "Solid-Conformance-Test-Suite")
     String agent;
@@ -136,7 +139,7 @@ public class Config {
                 throw new TestHarnessInitializationException("Missing mandatory option: 'subjects' file location " +
                         "must be provided by command line option or config");
             }
-            this.subjectsUrl = createUrl(subjectsFile.get(), "subjects");
+            subjectsUrl = createUrl(subjectsFile.get(), "subjects");
         }
         return subjectsUrl;
     }
@@ -145,13 +148,24 @@ public class Config {
         this.subjectsUrl = createUrl(subjectsUrl, "subjects");
     }
 
+    public File getTolerableFailuresFile() {
+        if (tolerableFailuresFile == null && tolerableFailuresPath.isPresent()) {
+            tolerableFailuresFile = createFile(tolerableFailuresPath.get(), "tolerableFailures");
+        }
+        return tolerableFailuresFile;
+    }
+
+    public void setTolerableFailuresFile(final String tolerableFailuresPath) {
+        this.tolerableFailuresFile = createFile(tolerableFailuresPath, "tolerableFailures");
+    }
+
     public List<URL> getTestSources()  {
         if (testSources == null) {
             if (sourceList.isEmpty()) {
                 throw new TestHarnessInitializationException("Missing mandatory option: either 'source' command " +
                         "line option or 'sources' config must be provided");
             }
-            this.testSources = sourceList.get().stream()
+            testSources = sourceList.get().stream()
                     .map(ts -> createUrl(ts, "sources")).collect(Collectors.toList());
         }
         return testSources;
@@ -242,22 +256,23 @@ public class Config {
 
     public void logConfigSettings(final RunMode mode) {
         if (logger.isInfoEnabled()) {
-            logger.info("Sources:          {}", getTestSources());
-            logger.info("Path mappings:    {}", pathMappings.stringValue());
-            logger.info("Output directory: {}", getOutputDirectory());
+            logger.info("Sources:            {}", getTestSources());
+            logger.info("Path mappings:      {}", pathMappings.stringValue());
+            logger.info("Output directory:   {}", getOutputDirectory());
             if (mode == RunMode.TEST) {
-                logger.info("Subjects URL:     {}", getSubjectsUrl());
-                logger.info("Target server:    {}", getTestSubject());
-                logger.info("Connect timeout:  {}", getConnectTimeout());
-                logger.info("Read timeout:     {}", getReadTimeout());
-                logger.info("Max threads:      {}", getMaxThreads());
-                logger.info("Alice WebID:      {}", users.alice().webId());
-                logger.info("Alice IDP:        {}", users.alice().getIdp());
-                logger.info("Bob WebID:        {}", users.bob().webId());
-                logger.info("Bob IDP:          {}", users.bob().getIdp());
-                logger.info("Solid IdP:        {}", getSolidIdentityProvider());
-                logger.info("Server root:      {}", getServerRoot());
-                logger.info("Test container:   {}", getTestContainer());
+                logger.info("Subjects URL:       {}", getSubjectsUrl());
+                logger.info("Target server:      {}", getTestSubject());
+                logger.info("Connect timeout:    {}", getConnectTimeout());
+                logger.info("Read timeout:       {}", getReadTimeout());
+                logger.info("Max threads:        {}", getMaxThreads());
+                logger.info("Alice WebID:        {}", users.alice().webId());
+                logger.info("Alice IDP:          {}", users.alice().getIdp());
+                logger.info("Bob WebID:          {}", users.bob().webId());
+                logger.info("Bob IDP:            {}", users.bob().getIdp());
+                logger.info("Solid IdP:          {}", getSolidIdentityProvider());
+                logger.info("Server root:        {}", getServerRoot());
+                logger.info("Test container:     {}", getTestContainer());
+                logger.info("Tolerable failures: {}", getTolerableFailuresFile());
             }
         }
     }
@@ -274,6 +289,18 @@ public class Config {
                 throw new TestHarnessInitializationException(
                         MessageFormat.format("Invalid file or url provided for {0}: [{1}]", param, url), e);
             }
+        }
+        return null;
+    }
+
+    private File createFile(final String path, final String param) {
+        if (!StringUtils.isBlank(path)) {
+            final File file = new File(path);
+            if (!file.isFile()) {
+                throw new TestHarnessInitializationException(
+                        MessageFormat.format("Invalid file provided for {0}: [{1}]", param, path));
+            }
+            return file;
         }
         return null;
     }

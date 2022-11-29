@@ -44,8 +44,7 @@ There are some test subject specific configuration properties in this file:
 An example of this file is provided in the test repository (https://github.com/solid-contrib/specification-tests),
 containing descriptions of the following Solid implementations:
 * `<css>` - [Community Solid Server](https://github.com/solid/community-server) (CSS).
-* `<ess>` - [Enterprise Solid Server](https://inrupt.com/products/enterprise-solid-server) (ESS) in Access Control Policies (ACP) compatibility mode.
-* `<ess-wac>` - [Enterprise Solid Server](https://inrupt.com/products/enterprise-solid-server) (ESS) in  Web Access Controls (WAC) compatibility mode.
+* `<ess>` - [Enterprise Solid Server](https://inrupt.com/products/enterprise-solid-server) (ESS).
 * `<nss>` - [Node Solid Server](https://github.com/solid/node-solid-server) (NSS).
 * `<trinpod>` - [TrinPod](https://trinpod.us).
 
@@ -157,7 +156,6 @@ For each user, the following configuration information is required:
 
 The required environment variables are:
 ```shell
-# Authentication Configuration - Client Credentials
 USERS_ALICE_CLIENTID=
 USERS_ALICE_CLIENTSECRET=
 USERS_ALICE_IDP=
@@ -190,7 +188,6 @@ For each user, the following configuration information is required:
 
 The required environment variables are:
 ```shell
-# Authentication Configuration - Refresh Tokens
 USERS_ALICE_REFRESHTOKEN=
 USERS_ALICE_CLIENTID=
 USERS_ALICE_CLIENTSECRET=
@@ -236,7 +233,6 @@ A URL for the login form is also required.
 
 The required environment variables are:
 ```shell
-# Authentication Configuration - Session-based Login
 LOGIN_ENDPOINT=		        # e.g., https://inrupt.net/login/password
 USERS_ALICE_USERNAME=
 USERS_ALICE_PASSWORD=
@@ -266,7 +262,6 @@ A URL for the user registration form is also required.
 
 The required environment variables are:
 ```shell
-# Authentication Configuration - Register Users Locally
 USER_REGISTRATION_ENDPOINT=	# e.g., https://localhost:3000/idp/register
 USERS_ALICE_USERNAME=
 USERS_ALICE_PASSWORD=
@@ -309,26 +304,33 @@ This also adds the results to `ResultLogger` in JSON format.
 By default, the CTH will run tests in parallel, defaulting to 8 threads. You can either override this in the
 YAML config file as mentioned previously, or you can do it with environment variables. For example:
 ```
-# Parallel Testing
 MAXTHREADS=2
 ```
 
+#### Tolerating scenario failures
+You may provide a list of titles of scenarios that are known to fail. This will not affect the results but they will be
+discounted when determining the overall pass/fail status of the test run. This allows operators to gate build pipelines
+despite known issues with an implementation. The list should match the exact titles in the report and have one per line.
+```
+TOLERABLEFAILURES=filepath.txt
+```
 ## 4. Command Line Options
 
 The command line options are:
 ```
 usage: run
-    --coverage        produce a coverage report only
- -f,--filter <arg>    feature filter(s)
-    --ignore-failures return success even if there are failures 
- -h,--help            print this message
- -o,--output <arg>    output directory
-    --skip-reports    skip report generation
-    --skip-teardown   skip teardown (when server itself is being stopped)
- -s,--source <arg>    URL or path to test source(s)
-    --status <arg>    status(es) of tests to run
-    --subjects <arg>  URL or path to test subject config (Turtle)
- -t,--target <arg>    target server
+    --coverage                   produce a coverage report only
+ -f,--filter <arg>               feature filter(s)
+ -h,--help                       print this message
+    --ignore-failures            return success even if there are failures
+ -o,--output <arg>               output directory
+ -s,--source <arg>               URL or path to test source(s)
+    --skip-reports               skip report generation
+    --skip-teardown              skip teardown (when server itself is being stopped)
+    --status <arg>               status(es) of tests to run
+    --subjects <arg>             URL or path to test subject config (Turtle)
+ -t,--target <arg>               target server
+    --tolerable-failures <arg>   path to a list of tests known to fail
 ```
 If `--coverage` is not specified then the default action is to run the tests and produce the results reports.
 
