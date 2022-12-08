@@ -14,4 +14,11 @@
         <packageUrl regex="true">^pkg:javascript/moment\.js@.*$</packageUrl>
         <cve>CVE-2022-31129</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+        User input is not deserialized so the system is not vulnerable
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.yaml/snakeyaml@.*$</packageUrl>
+        <vulnerabilityName>CVE-2022-1471</vulnerabilityName>
+    </suppress>
 </suppressions>
