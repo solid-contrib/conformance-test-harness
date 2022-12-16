@@ -58,7 +58,7 @@ class TestSuiteRunner {
         }
     }
 
-    // If you run this and get the error "inStream parameter is null" then run "mvn generate-sources"
+    // If you run this and get the error "inStream parameter is null" then run "mvn generate-resources"
 
     @Test
     void testSuite() throws IOException {
@@ -66,7 +66,7 @@ class TestSuiteRunner {
         config.logConfigSettings(Config.RunMode.TEST);
         final List<String> filters = List.of(
 //                "web-access-control",
-//                "storage"
+//                "turtle"
 //                "default-AWC"
         );
         final TestSuiteResults results = conformanceTestHarness.runTestSuites(filters, null);
