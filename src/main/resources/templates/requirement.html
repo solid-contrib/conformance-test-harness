@@ -5,18 +5,18 @@
   </summary>
   <dl>
     <dt>Requirement subject</dt>
-    {#switch requirementSubject}
-    {#case 'http://www.w3.org/ns/spec#Server'}<dd>Server</dd>
-    {#case 'http://www.w3.org/ns/spec#Client'}<dd>Client</dd>
+    {#switch requirementSubjectClass}
+    {#case 'server'}<dd>Server</dd>
+    {#case 'client'}<dd>Client</dd>
     {/switch}
   </dl>
   <dl>
     <dt>Requirement level</dt>
     {#switch requirementLevel}
     {#case 'http://www.w3.org/ns/spec#MUST'}<dd >MUST</dd>
-    {#case 'http://www.w3.org/ns/spec#MUST-NOT'}<dd >MUST NOT</dd>
+    {#case 'http://www.w3.org/ns/spec#MUSTNOT'}<dd >MUST NOT</dd>
     {#case 'http://www.w3.org/ns/spec#SHOULD'}<dd >SHOULD</dd>
-    {#case 'http://www.w3.org/ns/spec#SHOULD-NOT'}<dd >SHOULD NOT</dd>
+    {#case 'http://www.w3.org/ns/spec#SHOULDNOT'}<dd >SHOULD NOT</dd>
     {#case 'http://www.w3.org/ns/spec#MAY'}<dd >MAY</dd>
     {/switch}
   </dl>

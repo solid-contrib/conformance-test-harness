@@ -457,14 +457,14 @@ You can add additional options for CTH after the commands above, for example, us
 Note this is not necessarily in the order below and only non-zero values will be included.
 ```json5
 {
-  "mustFeatures": { // combination of MUST and MUST-NOT
+  "mustFeatures": { // combination of MUST and MUSTNOT
     "passed": 0,
     "failed": 0,
     "cantTell": 0,
     "untested": 0,
     "inapplicable": 0
   },
-  "mustScenarios": { // combination of MUST and MUST-NOT
+  "mustScenarios": { // combination of MUST and MUSTNOT
     /* as above */
   }, 
   "features": {
@@ -475,9 +475,9 @@ Note this is not necessarily in the order below and only non-zero values will be
       "untested": 0,
       "inapplicable": 0
     },
-    "MUST-NOT": { /* as above */ },
+    "MUSTNOT": { /* as above */ },
     "SHOULD": { /* as above */ },
-    "SHOULD-NOT": { /* as above */ },
+    "SHOULDNOT": { /* as above */ },
     "MAY": { /* as above */ },
   },
   "scenarios": {
