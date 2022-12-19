@@ -15,18 +15,18 @@
         <packageUrl regex="true">^pkg:maven/org\.yaml/snakeyaml@.*$</packageUrl>
         <vulnerabilityName>CVE-2022-1471</vulnerabilityName>
     </suppress>
-<!--    <suppress>-->
-<!--        <notes><![CDATA[-->
-<!--   file name: netty-transport-4.1.85.Final.jar-->
-<!--   ]]></notes>-->
-<!--        <packageUrl regex="true">^pkg:maven/io\.netty/netty\-codec@.*$</packageUrl>-->
-<!--        <cve>CVE-2022-41915</cve>-->
-<!--    </suppress>-->
-<!--    <suppress>-->
-<!--        <notes><![CDATA[-->
-<!--   file name: netty-transport-4.1.85.Final.jar-->
-<!--   ]]></notes>-->
-<!--        <packageUrl regex="true">^pkg:maven/io\.netty/netty\-codec\-haproxy@.*$</packageUrl>-->
-<!--        <cve>CVE-2022-41881</cve>-->
-<!--    </suppress>-->
+    <suppress>
+        <notes><![CDATA[
+        The vulnerable HAProxy components are not used
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/io\.netty/netty\-codec@.*$</packageUrl>
+        <cve>CVE-2022-41881</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+        The vulnerable HAProxy components are not used
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/io\.netty/netty\-transport@.*$</packageUrl>
+        <cve>CVE-2022-41881</cve>
+    </suppress>
 </suppressions>
