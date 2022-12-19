@@ -172,40 +172,42 @@ public class Client {
         this.tokenRequestData = tokenRequestData;
     }
 
-    public synchronized String requestAccessToken() {
+    public String requestAccessToken() {
         if (tokenEndpoint == null) {
             return null;
         }
-        if (accessToken == null || isAccessTokenExpired()) {
-            logger.debug("Request access token for {} using grant type {}",
-                    user, tokenRequestData.get(HttpConstants.GRANT_TYPE));
-            final var requestBuilder = signRequest(
-                    HttpUtils.newRequestBuilder(tokenEndpoint)
-                            .header(HttpConstants.HEADER_AUTHORIZATION, authHeader)
-                            .header(HttpConstants.HEADER_CONTENT_TYPE,
-                                    HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED)
-                            .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
-                            .POST(HttpUtils.ofFormData(tokenRequestData))
-            );
-            final HttpResponse<String> response;
-            try {
-                final var request = requestBuilder.build();
-                HttpUtils.logRequest(logger, request);
-                response = send(request, HttpResponse.BodyHandlers.ofString());
-                HttpUtils.logResponse(logger, response);
-            } catch (Exception e) {
-                throw new TestHarnessInitializationException("Token exchange request failed", e);
-            }
-            if (response.statusCode() != HttpConstants.STATUS_OK) {
-                logger.error("FAILED TO GET ACCESS TOKEN {}", response.body());
-                throw new TestHarnessInitializationException("Token exchange failed for grant type: " +
-                        tokenRequestData.get(HttpConstants.GRANT_TYPE));
-            }
-            try {
-                final var objectMapper = CDI.current().select(ObjectMapper.class).get();
-                setAccessToken(objectMapper.readValue(response.body(), Tokens.class).getAccessToken());
-            } catch (Exception e) {
-                throw new TestHarnessInitializationException("Failed to parse token response", e);
+        synchronized(this) {
+            if (accessToken == null || isAccessTokenExpired()) {
+                logger.debug("Request access token for {} using grant type {}",
+                        user, tokenRequestData.get(HttpConstants.GRANT_TYPE));
+                final var requestBuilder = signRequest(
+                        HttpUtils.newRequestBuilder(tokenEndpoint)
+                                .header(HttpConstants.HEADER_AUTHORIZATION, authHeader)
+                                .header(HttpConstants.HEADER_CONTENT_TYPE,
+                                        HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED)
+                                .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
+                                .POST(HttpUtils.ofFormData(tokenRequestData))
+                );
+                final HttpResponse<String> response;
+                try {
+                    final var request = requestBuilder.build();
+                    HttpUtils.logRequest(logger, request);
+                    response = send(request, HttpResponse.BodyHandlers.ofString());
+                    HttpUtils.logResponse(logger, response);
+                } catch (Exception e) {
+                    throw new TestHarnessInitializationException("Token exchange request failed", e);
+                }
+                if (response.statusCode() != HttpConstants.STATUS_OK) {
+                    logger.error("FAILED TO GET ACCESS TOKEN {}", response.body());
+                    throw new TestHarnessInitializationException("Token exchange failed for grant type: " +
+                            tokenRequestData.get(HttpConstants.GRANT_TYPE));
+                }
+                try {
+                    final var objectMapper = CDI.current().select(ObjectMapper.class).get();
+                    setAccessToken(objectMapper.readValue(response.body(), Tokens.class).getAccessToken());
+                } catch (Exception e) {
+                    throw new TestHarnessInitializationException("Failed to parse token response", e);
+                }
             }
         }
         return getAccessToken();

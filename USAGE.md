@@ -66,18 +66,15 @@ of the CTH, is maintained at https://github.com/solid-contrib/specification-test
 subjects: test-subjects.ttl
 sources:
   # Protocol spec & manifest
-  # Editor's draft (fully annotated)
   - https://solidproject.org/ED/protocol
   - https://github.com/solid-contrib/specification-tests/blob/main/protocol/solid-protocol-test-manifest.ttl
   # Additional comments on requirements (linked to requirement IRI and using rdfs:comment predicate)
   - https://github.com/solid-contrib/specification-tests/blob/main/protocol/requirement-comments.ttl
 
   # WAC spec & manifest
-  # Editor's draft (fully annotated)
-  - https://solid.github.io/web-access-control-spec/
+  - https://solidproject.org/TR/wac
   - https://github.com/solid-contrib/specification-tests/blob/main/web-access-control/web-access-control-test-manifest.ttl
 
-  # Published draft (not annotated)
   # This is an example of how you could run tests for a specific version of the specification 
   #  - https://solidproject.org/TR/2021/wac-20210711
   #  - https://github.com/solid-contrib/specification-tests/web-access-control/web-access-control-test-manifest-20210711.ttl
