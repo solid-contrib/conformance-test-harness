@@ -10,6 +10,7 @@
     <suppress checks="JavadocStyleCheck" files="src[/\\]test[/\\]java"/>
     <suppress checks="MultipleStringLiterals" files="src[/\\]test[/\\]java"/>
     <suppress checks="MultipleVariableDeclarations" files="src[/\\]test[/\\]java"/>
+    <suppress checks=".*" files="[/\\]target[/\\]"/>
 
     <suppress checks="ImportOrder"
               message="'java\.[^']+' should be separated from previous imports."/>

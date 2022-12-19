@@ -386,7 +386,6 @@
                         <java>SLASHSTAR_STYLE</java>
                     </mapping>
                     <excludes>
-                        <exclude>**/src/main/libs/**</exclude>
                         <exclude>**/src/main/resources/**</exclude>
                         <exclude>**/src/test/resources/**</exclude>
                     </excludes>
@@ -499,6 +498,9 @@
                     <rulesets>
                         <ruleset>pmd.xml</ruleset>
                     </rulesets>
+                    <excludeRoots>
+                        <excludeRoot>target</excludeRoot>
+                    </excludeRoots>
                 </configuration>
                 <executions>
                     <execution>

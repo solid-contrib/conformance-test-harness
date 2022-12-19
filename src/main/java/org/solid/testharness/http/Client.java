@@ -176,7 +176,7 @@ public class Client {
         if (tokenEndpoint == null) {
             return null;
         }
-        synchronized(this) {
+        synchronized (this) {
             if (accessToken == null || isAccessTokenExpired()) {
                 logger.debug("Request access token for {} using grant type {}",
                         user, tokenRequestData.get(HttpConstants.GRANT_TYPE));
