@@ -1,0 +1,58 @@
+# MIT License
+#
+# Copyright (c) 2019 - 2022 W3C Solid Community Group
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+@prefix rdf:      <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:     <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:      <http://www.w3.org/2002/07/owl#> .
+@prefix dcterms:  <http://purl.org/dc/terms/> .
+@prefix vann:     <http://purl.org/vocab/vann/> .
+@prefix earl:     <http://www.w3.org/ns/earl#> .
+@prefix earl-inrupt-ext: <https://github.com/solid/conformance-test-harness/vocab/extension/earl#> .
+
+earl-inrupt-ext:
+    a owl:Ontology, <https://w3id.org/lit/vocab/core#Ontology> ;
+    owl:versionInfo "0.1" ;
+    dcterms:creator <https://inrupt.com/profile/card/#us> ;
+    dcterms:date "2021-03-15" ;
+    dcterms:title "Extension to EARL to add named individuals" ;
+    vann:preferredNamespacePrefix "earl-inrupt-ext" ;
+    vann:preferredNamespaceUri "https://github.com/solid/conformance-test-harness/vocab/extension/earl#" ;
+    dcterms:license "http://purl.org/NET/rdflicense/MIT1.0.ttl" .
+
+earl:automatic
+    a owl:NamedIndividual ;
+    rdfs:comment "where the test was carried out automatically by the software tool and without any human intervention"@en .
+earl:passed
+    a owl:NamedIndividual ;
+    rdfs:comment "the subject passed the test"@en .
+earl:failed
+    a owl:NamedIndividual ;
+    rdfs:comment "the subject failed the test"@en .
+earl:untested
+    a owl:NamedIndividual ;
+    rdfs:comment "the test has not been carried out"@en .
+earl:inapplicable
+    a owl:NamedIndividual ;
+    rdfs:comment "the test is not applicable to the subject"@en .
+earl:cantTell
+    a owl:NamedIndividual ;
+    rdfs:comment "it is unclear if the subject passed or failed the test"@en .

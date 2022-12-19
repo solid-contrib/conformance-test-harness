@@ -33,6 +33,9 @@
         <license.plugin.version>4.1</license.plugin.version>
         <jacoco-plugin.version>0.8.8</jacoco-plugin.version>
         <owasp.plugin.version>7.4.1</owasp.plugin.version>
+        <frontend.plugin.version>1.12.1</frontend.plugin.version>
+        <build-helper.plugin.version>3.3.0</build-helper.plugin.version>
+        <node.version>16.17.0</node.version>
 
         <!-- dependencies -->
         <quarkus.version>2.15.0.Final</quarkus.version>
@@ -48,7 +51,6 @@
         <commons.text.version>1.10.0</commons.text.version>
         <commons.cli.version>1.5.0</commons.cli.version>
         <wiremock.version>2.35.0</wiremock.version>
-        <solid.vocab.version>0.0.14</solid.vocab.version>
         <hashids.version>1.0.3</hashids.version>
 
         <!-- package info -->
@@ -204,13 +206,6 @@
             <version>${semargl.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.solid.common.vocab</groupId>
-            <artifactId>generated-vocab-common</artifactId>
-            <version>${solid.vocab.version}</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/libs/generated-vocab-common-${solid.vocab.version}.jar</systemPath>
-        </dependency>
-        <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit5</artifactId>
             <scope>test</scope>
@@ -315,6 +310,53 @@
                 <configuration>
                     <tagNameFormat>v@{project.version}</tagNameFormat>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>${frontend.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>install node and npm</id>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <installDirectory>target</installDirectory>
+                            <nodeVersion>v${node.version}</nodeVersion>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>run artifact generator</id>
+                        <goals>
+                            <goal>npx</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <workingDirectory>target</workingDirectory>
+                            <arguments>@inrupt/artifact-generator generate --noPrompt --vocabListFile ../src/main/vocabs/test-suite.yml</arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>${build-helper.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>target/Generated/SourceCodeArtifacts/Java/src/main/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -565,51 +607,5 @@
                 </plugins>
             </build>
         </profile>
-        <!--
-        <profile>
-            <id>native</id>
-            <activation>
-                <property>
-                    <name>native</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>${surefire-plugin.version}</version>
-                        <configuration>
-                            <excludedGroups>solid</excludedGroups>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>${surefire-plugin.version}</version>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                    <goal>verify</goal>
-                                </goals>
-                                <configuration>
-                                    <systemPropertyVariables>
-                                        <native.image.path>
-                                            ${project.build.directory}/${project.build.finalName}-runner
-                                        </native.image.path>
-                                        <java.util.logging.manager>org.jboss.logmanager.LogManager
-                                        </java.util.logging.manager>
-                                        <maven.home>${maven.home}</maven.home>
-                                    </systemPropertyVariables>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-            <properties>
-                <quarkus.package.type>native</quarkus.package.type>
-            </properties>
-        </profile>
-        -->
     </profiles>
 </project>
