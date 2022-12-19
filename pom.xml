@@ -413,6 +413,8 @@
                         <exclude>**/JwsUtils.*</exclude>
                         <exclude>**/LocalHostSupport.*</exclude>
                         <exclude>**/LocalHostSupport$*.*</exclude>
+                        <!-- generated code excluded -->
+                        <exclude>org/solid/common/vocab/*</exclude>
                     </excludes>
                 </configuration>
                 <executions>
