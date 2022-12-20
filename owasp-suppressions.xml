@@ -17,16 +17,16 @@
     </suppress>
     <suppress>
         <notes><![CDATA[
-        The vulnerable HAProxy components are not used
+        The vulnerable component is not used at runtime
    ]]></notes>
         <packageUrl regex="true">^pkg:maven/io\.netty/netty\-codec@.*$</packageUrl>
-        <cve>CVE-2022-41881</cve>
+        <cve>CVE-2022-41915</cve>
     </suppress>
     <suppress>
         <notes><![CDATA[
-        The vulnerable HAProxy components are not used
+        The vulnerable HAProxy components are not used at runtime
    ]]></notes>
-        <packageUrl regex="true">^pkg:maven/io\.netty/netty\-transport@.*$</packageUrl>
+        <packageUrl regex="true">^pkg:maven/io\.netty/netty\-.*@.*$</packageUrl>
         <cve>CVE-2022-41881</cve>
     </suppress>
 </suppressions>
