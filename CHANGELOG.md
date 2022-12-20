@@ -1,5 +1,10 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.1.13
+### Minor changes
+* Add vocabs to project and generate code from them within the build.
+* Update use of specification vocab to account for `requirementLevel` and `requirementSubject` changes.
+
 ## Release 1.1.12
 ### Minor changes
 * Fix JSON logging output for result counts.

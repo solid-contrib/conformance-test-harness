@@ -14,7 +14,7 @@
 @prefix prov: <http://www.w3.org/ns/prov#> .
 
 <https://example.org/req1> spec:requirementLevel spec:MUST .
-<https://example.org/req2> spec:requirementLevel spec:MUST-NOT .
+<https://example.org/req2> spec:requirementLevel spec:MUSTNOT .
 <https://example.org/req3> spec:requirementLevel spec:MAY .
 
 <https://example.org/testCase1> spec:testScript <https://example.org/feature1>;

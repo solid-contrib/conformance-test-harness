@@ -41,7 +41,7 @@ import static io.quarkiverse.loggingjson.providers.KeyValueStructuredArgument.*;
 
 public class TestSuiteResults {
     private static final Logger resultLogger = LoggerFactory.getLogger("ResultLogger");
-    public static final String MUST_NOT = "MUST-NOT";
+    public static final String MUST_NOT = "MUSTNOT";
     public static final String MUST = "MUST";
     final Results results;
     long startTime;

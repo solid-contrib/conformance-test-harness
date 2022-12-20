@@ -3,12 +3,11 @@
   subjects: config/test-subjects.ttl
   sources:
     - https://solidproject.org/TR/protocol
-    - https://solid.github.io/web-access-control-spec/
+    - https://solidproject.org/TR/wac
 
-# Local tests
+    # Local tests
 #    - https://github.com/solid-contrib/conformance-test-harness/blob/main/example/protocol/solid-protocol-test-manifest.ttl
 #    - https://github.com/solid-contrib/conformance-test-harness/blob/main/example/protocol/requirement-comments.ttl
-#    - https://github.com/solid-contrib/conformance-test-harness/blob/main/example/web-access-control/web-access-control-spec.ttl
 #    - https://github.com/solid-contrib/conformance-test-harness/blob/main/example/web-access-control/web-access-control-test-manifest.ttl
 
 # Specification-tests repo (locally mapped)

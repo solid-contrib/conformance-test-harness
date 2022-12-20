@@ -23,9 +23,9 @@
  */
 package org.solid.testharness.utils;
 
-import com.intuit.karate.StringUtils;
 import com.intuit.karate.Suite;
 import com.intuit.karate.core.*;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.common.exception.RDF4JException;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -328,7 +328,7 @@ public class DataRepository implements Repository {
                 stepBuilder.add(stepIri, DCTERMS.description,
                         String.join("\n", str.getStep().getComments()));
             }
-            if (!str.getStepLog().isEmpty()) {
+            if (!StringUtils.isEmpty(str.getStepLog())) {
                 final String log;
                 if (str.getStepLog().contains("callonce lock:")) {
                     // the step log is in another scenario result so copy it here
