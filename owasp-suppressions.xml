@@ -2,7 +2,7 @@
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
     <suppress>
         <notes><![CDATA[
-        Karate does not expose the server docs in armeria-1.18.0.jar which contain the vulnerable package
+        Karate does not expose the server docs in armeria-1.20.3.jar which contain the vulnerable package
    ]]></notes>
         <packageUrl regex="true">^pkg:javascript/moment\.js@.*$</packageUrl>
         <cve>CVE-2022-24785</cve>
@@ -10,23 +10,11 @@
     </suppress>
     <suppress>
         <notes><![CDATA[
-        User input is not deserialized so the system is not vulnerable
+        User input is not deserialized so the system is not vulnerable to issues with snakeyaml-1.33.jar
    ]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.yaml/snakeyaml@.*$</packageUrl>
-        <vulnerabilityName>CVE-2022-1471</vulnerabilityName>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-        The vulnerable component is not used at runtime
-   ]]></notes>
-        <packageUrl regex="true">^pkg:maven/io\.netty/netty\-codec@.*$</packageUrl>
-        <cve>CVE-2022-41915</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-        The vulnerable HAProxy components are not used at runtime
-   ]]></notes>
-        <packageUrl regex="true">^pkg:maven/io\.netty/netty\-.*@.*$</packageUrl>
-        <cve>CVE-2022-41881</cve>
+        <cve>CVE-2022-1471</cve>
+        <cve>CVE-2022-3064</cve>
+        <cve>CVE-2021-4235</cve>
     </suppress>
 </suppressions>
