@@ -38,7 +38,7 @@
         <node.version>16.17.0</node.version>
 
         <!-- dependencies -->
-        <quarkus.version>2.15.2.Final</quarkus.version>
+        <quarkus.version>2.15.3.Final</quarkus.version>
         <karate.version>1.4.0.RC3</karate.version>
         <graal.version>22.3.0</graal.version>
         <quarkiverse.version>2.0.0</quarkiverse.version>
