@@ -29,7 +29,7 @@
         <properties.plugin.version>1.1.0</properties.plugin.version>
         <checkstyle.plugin.version>3.2.0</checkstyle.plugin.version>
         <checkstyle.tool.version>10.6.0</checkstyle.tool.version>
-        <pmd.plugin.version>3.19.0</pmd.plugin.version>
+        <pmd.plugin.version>3.20.0</pmd.plugin.version>
         <license.plugin.version>4.1</license.plugin.version>
         <jacoco-plugin.version>0.8.8</jacoco-plugin.version>
         <owasp.plugin.version>7.4.4</owasp.plugin.version>
