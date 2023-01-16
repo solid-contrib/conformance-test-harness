@@ -92,13 +92,14 @@ vocabList:
 #      - http://www.w3.org/ns/spec
       - ./local-spec.ttl
 
-  # Use FOAF archive file as current version is unavailable
+  # Use local FOAF file as current version is unavailable
   - description: FOAF
     namespaceOverride: http://xmlns.com/foaf/0.1/
     nameAndPrefixOverride: foaf
     ignoreNonVocabTerms: true
     inputResources:
-      - https://web.archive.org/web/20220614105937if_/http://xmlns.com/foaf/spec/20140114.rdf
+      - ./foaf.ttl
+#      - https://web.archive.org/web/20220614105937if_/http://xmlns.com/foaf/spec/20140114.rdf
 #      - http://xmlns.com/foaf/0.1/
 
   # The resource is missing a content type
