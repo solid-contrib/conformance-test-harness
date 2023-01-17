@@ -19,8 +19,8 @@
         <exclude name="GuardLogStatement"/> <!-- Clutters with virtually no performance benefit in the test harness -->
     </rule>
     <rule ref="category/java/errorprone.xml">
-        <!-- This is useful for EJB, but not for modern JavaEE CDI applications -->
-        <exclude name="BeanMembersShouldSerialize"/>
+        <!-- This rule is unhelpful since CTH is all about testing -->
+        <exclude name="TestClassWithoutTestCases"/>
     </rule>
 
     <!-- 1 (the default) assert per unit test seems extremely restrictive. Just raising to 5. -->
