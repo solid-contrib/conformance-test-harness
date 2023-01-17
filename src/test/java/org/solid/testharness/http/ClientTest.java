@@ -102,13 +102,20 @@ class ClientTest {
     @Test
     void buildWithLocalhostSupport() {
         final Client client = new Client.Builder("local")
-                .withOptionalLocalhostSupport(URI.create("http://server/")).build();
+                .withOptionalLocalhostSupport(URI.create("http://server/"), false).build();
+        assertEquals("Client: user=local, dPoP=false, session=false, local=true", client.toString());
+    }
+
+    @Test
+    void buildWithSelfSignedCertsSupport() {
+        final Client client = new Client.Builder("local")
+                .withOptionalLocalhostSupport(URI.create("http://mydomain/"), true).build();
         assertEquals("Client: user=local, dPoP=false, session=false, local=true", client.toString());
     }
 
     @Test
     void buildWithoutLocalhostSupport() {
-        final Client client = new Client.Builder("notlocal").withOptionalLocalhostSupport(TEST_URL).build();
+        final Client client = new Client.Builder("notlocal").withOptionalLocalhostSupport(TEST_URL, false).build();
         assertEquals("Client: user=notlocal, dPoP=false, session=false, local=false", client.toString());
     }
 

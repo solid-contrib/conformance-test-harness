@@ -49,7 +49,8 @@ public class ClientRegistry {
         registeredClientMap = Collections.synchronizedMap(new HashMap<>());
         register(DEFAULT, new Client.Builder().build());
         final URI webId = URI.create(config.getWebIds().get(HttpConstants.ALICE));
-        final Client client = new Client.Builder().followRedirects().withOptionalLocalhostSupport(webId).build();
+        final Client client = new Client.Builder().followRedirects()
+                .withOptionalLocalhostSupport(webId, config.isSelfSignedCertsAllowed()).build();
         register(ClientRegistry.ALICE_WEBID, client);
     }
 

@@ -311,6 +311,14 @@ despite known issues with an implementation. The list should match the exact tit
 ```
 TOLERABLEFAILURES=filepath.txt
 ```
+
+#### Allowing self-signed certificates
+In some test environments you may be using temporary domains with self-signed certificates. You can allow this via the
+config:
+```
+ALLOW_SELF_SIGNED_CERTS=true
+```
+
 ## 4. Command Line Options
 
 The command line options are:
@@ -351,14 +359,14 @@ To use this image, you just need to provide:
 
 When you run the server in a container, there are some important things to remember:
 * You cannot use localhost, so you need to name your instance and use that name to access it from the test container.
-  The CTH is set up to allow the name `server` so the URL will be https://server.
+  The CTH is set up to allow the name `server` so the URL will be https://server. Alternatively you can set the config
+  option `ALLOW_SELF_SIGNED_CERTS` to true and use any domain you choose.
 * When using a domain name, you may hit the problem that DPoP verification requires https unless you are using
   localhost hence using `https` in the above URL.
 * As the image uses `https`, you need to provide a SSL certificate to the server which can be generated
   as a self-signed certificate (as seen in the CSS example mentioned below).
-* The CTH is set up to detect when you are using https://server, and will allow self-signed certificates. If you see an
-  issue with DPoP verification rejecting self-signed certificates, the server being tested will need to be set up to
-  have the same capability. For a Node based server, this is done by adding `NODE_TLS_REJECT_UNAUTHORIZED=0`
+* If you see an issue with DPoP verification rejecting self-signed certificates, the server being tested will need to be
+  set up to have the same capability. For a Node based server, this is done by adding `NODE_TLS_REJECT_UNAUTHORIZED=0`
   to the environment before running the server.
 
 Some additional notes on using the Docker image:
