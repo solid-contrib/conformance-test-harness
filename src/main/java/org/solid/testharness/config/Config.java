@@ -106,6 +106,8 @@ public class Config {
     Optional<String> testContainer;
     @ConfigProperty(name = "USER_REGISTRATION_ENDPOINT")
     Optional<String> userRegistrationEndpoint;
+    @ConfigProperty(name = "ALLOW_SELF_SIGNED_CERTS")
+    Optional<Boolean> allowSelfSignedCerts;
 
     @Inject
     Users users;
@@ -254,6 +256,10 @@ public class Config {
         return hashids.encode(resourceCount.getAndIncrement());
     }
 
+    public Boolean isSelfSignedCertsAllowed() {
+        return allowSelfSignedCerts.orElse(false);
+    }
+
     public void logConfigSettings(final RunMode mode) {
         if (logger.isInfoEnabled()) {
             logger.info("Sources:            {}", getTestSources());
@@ -273,6 +279,7 @@ public class Config {
                 logger.info("Server root:        {}", getServerRoot());
                 logger.info("Test container:     {}", getTestContainer());
                 logger.info("Tolerable failures: {}", getTolerableFailuresFile());
+                logger.info("Allow self-signed:  {}", isSelfSignedCertsAllowed());
             }
         }
     }

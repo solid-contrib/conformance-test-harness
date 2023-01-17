@@ -42,7 +42,8 @@ public class ConfigTestNormalProfile implements QuarkusTestProfile {
                 "LOGIN_ENDPOINT", "https://example.org/login/password",
                 "RESOURCE_SERVER_ROOT", "https://target.example.org",
                 "TEST_CONTAINER", "test",
-                "USER_REGISTRATION_ENDPOINT", "https://example.org/idp/register"
+                "USER_REGISTRATION_ENDPOINT", "https://example.org/idp/register",
+                "ALLOW_SELF_SIGNED_CERTS", "true"
         );
     }
 

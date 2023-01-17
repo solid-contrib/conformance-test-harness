@@ -87,7 +87,7 @@ public class AuthManager {
                     MessageFormat.format("No user credentials were provided for [{0}]", user));
         }
         final Client client = new Client.Builder()
-                .withOptionalLocalhostSupport(config.getUserRegistrationEndpoint())
+                .withOptionalLocalhostSupport(config.getUserRegistrationEndpoint(), config.isSelfSignedCertsAllowed())
                 .build();
         final Map<Object, Object> data = Map.of(
             HttpConstants.EMAIL, userConfig.username().orElseThrow(),
@@ -121,7 +121,7 @@ public class AuthManager {
 
             authClient = new Client.Builder(user)
                     .withDpopSupport()
-                    .withOptionalLocalhostSupport(oidcIssuer)
+                    .withOptionalLocalhostSupport(oidcIssuer, config.isSelfSignedCertsAllowed())
                     .build();
             clientRegistry.register(user, authClient);
 
@@ -133,7 +133,7 @@ public class AuthManager {
                 // create client with session support for login
                 final Client sessionClient = new Client.Builder()
                         .withSessionSupport()
-                        .withOptionalLocalhostSupport(oidcIssuer)
+                        .withOptionalLocalhostSupport(oidcIssuer, config.isSelfSignedCertsAllowed())
                         .build();
                 loginAndGetAccessToken(authClient, userConfig, oidcConfiguration, sessionClient);
             } else if (userConfig.isUsingRefreshToken()) {

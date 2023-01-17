@@ -91,6 +91,11 @@ class ConfigTest {
     }
 
     @Test
+    void isSelfSignedCertsAllowed() {
+        assertTrue(config.isSelfSignedCertsAllowed());
+    }
+
+    @Test
     void getServerRoot() {
         assertEquals("https://target.example.org/", config.getServerRoot());
     }

@@ -1,5 +1,9 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.1.14
+### Minor changes
+* Add `ALLOW_SELF_SIGNED_CERTS` to enable self-signed certificates on the server under test.
+
 ## Release 1.1.13
 ### Minor changes
 * Add vocabs to project and generate code from them within the build.
