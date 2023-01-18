@@ -32,7 +32,7 @@
         <pmd.plugin.version>3.20.0</pmd.plugin.version>
         <license.plugin.version>4.1</license.plugin.version>
         <jacoco-plugin.version>0.8.8</jacoco-plugin.version>
-        <owasp.plugin.version>8.0.0</owasp.plugin.version>
+        <owasp.plugin.version>8.0.1</owasp.plugin.version>
         <frontend.plugin.version>1.12.1</frontend.plugin.version>
         <build-helper.plugin.version>3.3.0</build-helper.plugin.version>
         <node.version>16.17.0</node.version>
