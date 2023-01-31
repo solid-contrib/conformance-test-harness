@@ -115,8 +115,14 @@ class TestSubjectTest {
     }
 
     @Test
-    void setupBadConfig() throws Exception {
+    void setupMissingConfig() throws Exception {
         setupMockConfigMin("jsonld-sample.json", null);
+        assertThrows(TestHarnessInitializationException.class, () -> testSubject.loadTestSubjectConfig());
+    }
+
+    @Test
+    void setupBadConfig() throws Exception {
+        setupMockConfigMin("src/test/resources/jsonld-sample.json", null);
         assertThrows(TestHarnessInitializationException.class, () -> testSubject.loadTestSubjectConfig());
     }
 
