@@ -24,7 +24,7 @@
         <quarkus.package.type>uber-jar</quarkus.package.type>
         <compiler-plugin.version>3.10.1</compiler-plugin.version>
         <deploy.plugin.version>3.0.0</deploy.plugin.version>
-        <surefire-plugin.version>3.0.0-M8</surefire-plugin.version>
+        <surefire-plugin.version>3.0.0-M9</surefire-plugin.version>
         <release.plugin.version>2.5.3</release.plugin.version>
         <properties.plugin.version>1.1.0</properties.plugin.version>
         <checkstyle.plugin.version>3.2.1</checkstyle.plugin.version>
