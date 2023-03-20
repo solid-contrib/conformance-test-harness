@@ -25,7 +25,7 @@
         <compiler-plugin.version>3.11.0</compiler-plugin.version>
         <deploy.plugin.version>3.1.0</deploy.plugin.version>
         <surefire-plugin.version>3.0.0-M9</surefire-plugin.version>
-        <release.plugin.version>2.5.3</release.plugin.version>
+        <release.plugin.version>3.0.0</release.plugin.version>
         <properties.plugin.version>1.1.0</properties.plugin.version>
         <checkstyle.plugin.version>3.2.1</checkstyle.plugin.version>
         <checkstyle.tool.version>10.7.0</checkstyle.tool.version>
