@@ -56,7 +56,7 @@ class ConfigTest {
 
     @Test
     void getTolerableFailuresFileDefault() {
-        assertEquals("src/test/resources/config/tolerable-failures.txt", config.getTolerableFailuresFile().toString());
+        assertEquals(new File("src/test/resources/config/tolerable-failures.txt"), config.getTolerableFailuresFile());
     }
 
     @Test

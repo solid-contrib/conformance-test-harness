@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.util.List;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
@@ -62,7 +63,7 @@ class ConfigOverriddenTest {
 
     @Test
     void getTolerableFailuresFileChanged() {
-        assertEquals("src/test/resources/config/tolerable-failures.txt", config.getTolerableFailuresFile().toString());
+        assertEquals(new File("src/test/resources/config/tolerable-failures.txt"), config.getTolerableFailuresFile());
     }
 
     @Test

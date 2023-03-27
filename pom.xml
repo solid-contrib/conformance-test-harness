@@ -23,22 +23,22 @@
         <!-- plugins -->
         <quarkus.package.type>uber-jar</quarkus.package.type>
         <compiler-plugin.version>3.11.0</compiler-plugin.version>
-        <deploy.plugin.version>3.1.0</deploy.plugin.version>
-        <surefire-plugin.version>3.0.0-M9</surefire-plugin.version>
-        <release.plugin.version>2.5.3</release.plugin.version>
+        <deploy.plugin.version>3.1.1</deploy.plugin.version>
+        <surefire-plugin.version>3.0.0</surefire-plugin.version>
+        <release.plugin.version>3.0.0</release.plugin.version>
         <properties.plugin.version>1.1.0</properties.plugin.version>
         <checkstyle.plugin.version>3.2.1</checkstyle.plugin.version>
-        <checkstyle.tool.version>10.7.0</checkstyle.tool.version>
+        <checkstyle.tool.version>10.9.2</checkstyle.tool.version>
         <pmd.plugin.version>3.20.0</pmd.plugin.version>
-        <license.plugin.version>4.1</license.plugin.version>
+        <license.plugin.version>4.2</license.plugin.version>
         <jacoco-plugin.version>0.8.8</jacoco-plugin.version>
-        <owasp.plugin.version>8.1.2</owasp.plugin.version>
+        <owasp.plugin.version>8.2.1</owasp.plugin.version>
         <frontend.plugin.version>1.12.1</frontend.plugin.version>
         <build-helper.plugin.version>3.3.0</build-helper.plugin.version>
         <node.version>16.17.0</node.version>
 
         <!-- dependencies -->
-        <quarkus.version>2.16.3.Final</quarkus.version>
+        <quarkus.version>2.16.5.Final</quarkus.version>
         <karate.version>1.4.0.RC3</karate.version>
         <graal.version>22.3.0</graal.version>
         <quarkiverse.version>2.0.0</quarkiverse.version>

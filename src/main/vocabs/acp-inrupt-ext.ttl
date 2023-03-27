@@ -26,17 +26,6 @@
 @prefix dcterms:  <http://purl.org/dc/terms/> .
 @prefix vann:     <http://purl.org/vocab/vann/> .
 @prefix acp:      <http://www.w3.org/ns/solid/acp#> .
-@prefix acp-inrupt-ext: <https://github.com/solid/conformance-test-harness/vocab/extension/acp#> .
-
-acp-inrupt-ext:
-    a owl:Ontology, <https://w3id.org/lit/vocab/core#Ontology> ;
-    owl:versionInfo "0.1" ;
-    dcterms:creator <https://inrupt.com/profile/card/#us> ;
-    dcterms:date "2022-12-19" ;
-    dcterms:title "Extension to ACP to add missing property type" ;
-    vann:preferredNamespacePrefix "acp-inrupt-ext" ;
-    vann:preferredNamespaceUri "https://github.com/solid/conformance-test-harness/vocab/extension/acp#" ;
-    dcterms:license "http://purl.org/NET/rdflicense/MIT1.0.ttl" .
 
 acp:memberAccessControl a rdf:Property .
 
