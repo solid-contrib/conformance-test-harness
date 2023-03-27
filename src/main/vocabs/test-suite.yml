@@ -106,11 +106,11 @@ vocabList:
 
   # Extend to add named individuals
   - nameAndPrefixOverride: td
+    vocabularyIriOverride: http://www.w3.org/2006/03/test-description#
     inputResources:
       - http://www.w3.org/2006/03/test-description
       - ./td-inrupt-ext.ttl
 
   # Vocab for this software
-  - description: Solid Conformance Test Harness
-    inputResources:
+  - inputResources:
       - ./conformance-test-harness.ttl
