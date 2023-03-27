@@ -24,6 +24,7 @@
 package org.solid.testharness.config;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.rdf4j.common.exception.RDF4JException;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -31,6 +32,7 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.UnsupportedRDFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.EARL;
@@ -106,7 +108,7 @@ public class TestSubject {
             targetServer = new TargetServer(testSubject);
             dataRepository.setTestSubject(testSubject);
             logger.info("TestSubject {}", targetServer.getSubject());
-        } catch (IOException e) {
+        } catch (IOException | RDF4JException | UnsupportedRDFormatException e) {
             throw new TestHarnessInitializationException(MessageFormat.format(
                     "Failed to read test subjects config file [{0}]", config.getSubjectsUrl()), e);
         }

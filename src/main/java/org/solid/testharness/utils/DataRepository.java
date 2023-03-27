@@ -128,10 +128,8 @@ public class DataRepository implements Repository {
             // remove the temporary context
             conn.clear(context);
             logger.debug("Repository size={}", conn.size());
-        } catch (IOException e) {
-            throw new TestHarnessInitializationException("Failed to read data from " + url, e);
-        } catch (RDF4JException | UnsupportedRDFormatException e) {
-            throw new TestHarnessInitializationException("Failed to parse data", e);
+        } catch (IOException | RDF4JException | UnsupportedRDFormatException e) {
+            throw new TestHarnessInitializationException("Failed to read data from [" + url + "]", e);
         }
     }
 

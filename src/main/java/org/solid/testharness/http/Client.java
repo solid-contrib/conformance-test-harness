@@ -102,7 +102,7 @@ public class Client {
             return this;
         }
 
-        public Builder withOptionalLocalhostSupport(final URI uri, final Boolean allowSelfSignedCerts) {
+        public Builder withOptionalLocalhostSupport(final URI uri, final boolean allowSelfSignedCerts) {
             requireNonNull(uri, "uri is required to check localhost support");
             if (allowSelfSignedCerts || TRUSTED_HOSTS.contains(uri.getHost())) {
                 System.setProperty("jdk.internal.httpclient.disableHostnameVerification", Boolean.TRUE.toString());
