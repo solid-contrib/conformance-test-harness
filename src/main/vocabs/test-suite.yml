@@ -23,7 +23,7 @@
 artifactName: cth-vocabs
 artifactNamePrefix: ""
 artifactNameSuffix: ""
-artifactGeneratorVersion: 2.0.0
+artifactGeneratorVersion: 3.0.0
 
 artifactToGenerate:
   - programmingLanguage: Java
@@ -41,92 +41,71 @@ artifactToGenerate:
             fileName: pom.xml
 
 vocabList:
-  - description: RDF (the full vocabulary)
-    nameAndPrefixOverride: rdf
-    inputResources:
+  - inputResources:
       - http://www.w3.org/1999/02/22-rdf-syntax-ns#
 
-  - description: rdfs
-    nameAndPrefixOverride: rdfs
-    inputResources:
+  - inputResources:
       - http://www.w3.org/2000/01/rdf-schema#
 
-  - description: OWL
-    nameAndPrefixOverride: owl
-    inputResources:
+  - inputResources:
       - http://www.w3.org/2002/07/owl#
 
-  - description: dcterms
-    nameAndPrefixOverride: dcterms
+  - nameAndPrefixOverride: dcterms
     inputResources:
       - http://dublincore.org/2012/06/14/dcterms.ttl
 
-  - description: The PROV Ontology
-    namespaceOverride: http://www.w3.org/ns/prov#
+  - descriptionFallback: The PROV Ontology
+    vocabularyIriOverride: http://www.w3.org/ns/prov#
     nameAndPrefixOverride: prov
     inputResources:
       - http://www.w3.org/ns/prov-o#
 
-  - description: VCard
-    nameAndPrefixOverride: vcard
-    inputResources:
+  - inputResources:
       - http://www.w3.org/2006/vcard/ns#
 
-  - description: Spaces
-    nameAndPrefixOverride: pim
+  - nameAndPrefixOverride: pim
     inputResources:
       - http://www.w3.org/ns/pim/space#
 
-  - description: Solid
-    inputResources:
+  - inputResources:
       - http://www.w3.org/ns/solid/terms#
 
-  - description: ACL
-    nameAndPrefixOverride: acl
+  - nameAndPrefixOverride: acl
     inputResources:
       - http://www.w3.org/ns/auth/acl
 
   # Use local copy as the published one uses https in the namespace
-  - description: Specification requirements
-    inputResources:
+  - inputResources:
 #      - http://www.w3.org/ns/spec
       - ./local-spec.ttl
 
   # Use local FOAF file as current version is unavailable
-  - description: FOAF
-    namespaceOverride: http://xmlns.com/foaf/0.1/
-    nameAndPrefixOverride: foaf
-    ignoreNonVocabTerms: true
+  - ignoreNonVocabTerms: true
     inputResources:
       - ./foaf.ttl
 #      - https://web.archive.org/web/20220614105937if_/http://xmlns.com/foaf/spec/20140114.rdf
 #      - http://xmlns.com/foaf/0.1/
 
   # The resource is missing a content type
-  - description: DOAP (Description of a Project)
-    nameAndPrefixOverride: doap
+  - nameAndPrefixOverride: doap
     vocabContentTypeHeaderFallback: application/rdf+xml
     inputResources:
         - http://usefulinc.com/ns/doap#
 
   # Extend to add named individuals
-  - description: EARL (Evaluation and Reporting Language)
-    namespaceOverride: http://www.w3.org/ns/earl#
-    nameAndPrefixOverride: earl
+  - nameAndPrefixOverride: earl
+    namespaceIriOverride: http://www.w3.org/ns/earl#
     inputResources:
       - http://www.w3.org/ns/earl#
       - ./earl-inrupt-ext.ttl
 
   # Add missing property type
-  - description: ACP
-    inputResources:
+  - inputResources:
       - https://www.w3.org/ns/solid/acp
       - ./acp-inrupt-ext.ttl
 
   # Extend to add named individuals
-  - description: Test Description
-    namespaceOverride: http://www.w3.org/2006/03/test-description#
-    nameAndPrefixOverride: td
+  - nameAndPrefixOverride: td
     inputResources:
       - http://www.w3.org/2006/03/test-description
       - ./td-inrupt-ext.ttl
