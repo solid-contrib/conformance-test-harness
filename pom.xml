@@ -20,23 +20,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <!-- plugins -->
-        <quarkus.package.type>uber-jar</quarkus.package.type>
-        <compiler-plugin.version>3.11.0</compiler-plugin.version>
-        <deploy.plugin.version>3.1.1</deploy.plugin.version>
-        <surefire-plugin.version>3.0.0</surefire-plugin.version>
-        <release.plugin.version>3.0.0</release.plugin.version>
-        <properties.plugin.version>1.1.0</properties.plugin.version>
-        <checkstyle.plugin.version>3.2.1</checkstyle.plugin.version>
-        <checkstyle.tool.version>10.9.2</checkstyle.tool.version>
-        <pmd.plugin.version>3.20.0</pmd.plugin.version>
-        <license.plugin.version>4.2</license.plugin.version>
-        <jacoco-plugin.version>0.8.8</jacoco-plugin.version>
-        <owasp.plugin.version>8.2.1</owasp.plugin.version>
-        <frontend.plugin.version>1.12.1</frontend.plugin.version>
-        <build-helper.plugin.version>3.3.0</build-helper.plugin.version>
-        <node.version>16.17.0</node.version>
-
         <!-- dependencies -->
         <quarkus.version>2.16.5.Final</quarkus.version>
         <karate.version>1.4.0.RC3</karate.version>
@@ -53,6 +36,22 @@
         <wiremock.version>2.35.0</wiremock.version>
         <hashids.version>1.0.3</hashids.version>
 
+        <!-- plugins -->
+        <build-helper.plugin.version>3.3.0</build-helper.plugin.version>
+        <checkstyle.plugin.version>3.2.1</checkstyle.plugin.version>
+        <compiler-plugin.version>3.11.0</compiler-plugin.version>
+        <deploy.plugin.version>3.1.1</deploy.plugin.version>
+        <frontend.plugin.version>1.12.1</frontend.plugin.version>
+        <jacoco-plugin.version>0.8.8</jacoco-plugin.version>
+        <license.plugin.version>4.2</license.plugin.version>
+        <node.version>16.17.0</node.version>
+        <owasp.plugin.version>8.2.1</owasp.plugin.version>
+        <pmd.plugin.version>3.20.0</pmd.plugin.version>
+        <properties.plugin.version>1.1.0</properties.plugin.version>
+        <quarkus.package.type>uber-jar</quarkus.package.type>
+        <release.plugin.version>3.0.0</release.plugin.version>
+        <surefire-plugin.version>3.0.0</surefire-plugin.version>
+
         <!-- package info -->
         <package.name>${project.name}</package.name>
         <package.description>${project.description}</package.description>
@@ -61,8 +60,11 @@
         <package.version>${project.version}</package.version>
         <package.buildTime>${maven.build.timestamp}</package.buildTime>
 
+        <!-- tooling -->
+        <checkstyle.tool.version>10.9.3</checkstyle.tool.version>
         <sonar.organization>solid-contrib</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+
     </properties>
     <dependencyManagement>
         <dependencies>
