@@ -86,11 +86,12 @@ vocabList:
 #      - https://web.archive.org/web/20220614105937if_/http://xmlns.com/foaf/spec/20140114.rdf
 #      - http://xmlns.com/foaf/0.1/
 
-  # The resource is missing a content type
+  # The resource is missing a content type and the canonical source is no longer available
   - nameAndPrefixOverride: doap
-    vocabContentTypeHeaderFallback: application/rdf+xml
+    vocabContentTypeHeaderOverride: application/rdf+xml
     inputResources:
-        - http://usefulinc.com/ns/doap#
+      - https://raw.githubusercontent.com/ewilderj/doap/master/schema/doap.rdf
+#        - http://usefulinc.com/ns/doap#
 
   # Extend to add named individuals
   - nameAndPrefixOverride: earl
