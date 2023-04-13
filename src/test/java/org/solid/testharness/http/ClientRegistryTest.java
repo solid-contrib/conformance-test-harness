@@ -29,7 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.config.Config;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import java.util.Map;
 

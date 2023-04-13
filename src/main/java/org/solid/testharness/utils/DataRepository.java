@@ -50,8 +50,8 @@ import org.solid.common.vocab.*;
 import org.solid.testharness.reporting.Scores;
 import org.solid.testharness.reporting.TestSuiteResults;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;

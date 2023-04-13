@@ -38,7 +38,7 @@ import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.utils.TestHarnessException;
 import org.solid.testharness.utils.TestUtils;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.net.URI;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpResponse;

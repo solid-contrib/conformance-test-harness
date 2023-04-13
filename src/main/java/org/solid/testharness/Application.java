@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.reporting.TestSuiteResults;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;

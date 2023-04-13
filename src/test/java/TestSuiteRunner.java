@@ -33,7 +33,7 @@ import org.solid.testharness.config.Config;
 import org.solid.testharness.reporting.TestSuiteResults;
 import org.solid.testharness.utils.DataRepository;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;

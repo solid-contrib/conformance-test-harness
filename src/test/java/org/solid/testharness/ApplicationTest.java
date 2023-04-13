@@ -35,7 +35,7 @@ import org.solid.testharness.config.Config;
 import org.solid.testharness.reporting.TestSuiteResults;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;

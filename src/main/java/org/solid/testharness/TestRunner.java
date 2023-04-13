@@ -28,8 +28,8 @@ import com.intuit.karate.Runner;
 import org.solid.testharness.reporting.TestSuiteResults;
 import org.solid.testharness.utils.FeatureResultHandler;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
 

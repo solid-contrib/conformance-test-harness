@@ -33,9 +33,9 @@ import org.solid.testharness.config.Config;
 import org.solid.testharness.config.UserCredentials;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpRequest;

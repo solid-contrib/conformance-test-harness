@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import static org.junit.jupiter.api.Assertions.*;
 

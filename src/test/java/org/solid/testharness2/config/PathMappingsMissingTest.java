@@ -28,7 +28,7 @@ import io.quarkus.test.junit.TestProfile;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.config.PathMappings;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.net.URI;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;

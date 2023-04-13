@@ -25,9 +25,9 @@ package org.solid.testharness.http;
 
 import org.solid.testharness.config.Config;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;

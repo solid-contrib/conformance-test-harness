@@ -26,13 +26,13 @@ package org.solid.testharness.http;
 import com.intuit.karate.core.ScenarioEngine;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
-import jakarta.ws.rs.core.Link;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.slf4j.Logger;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.utils.TestUtils;
 
+import jakarta.ws.rs.core.Link;
 import java.net.URI;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;

@@ -36,8 +36,8 @@ import org.solid.common.vocab.TD;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestHarnessException;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;

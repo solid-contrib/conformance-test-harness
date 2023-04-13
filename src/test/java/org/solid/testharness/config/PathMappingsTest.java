@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 import org.solid.testharness.utils.TestUtils;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;

@@ -32,7 +32,7 @@ import org.solid.testharness.config.Config;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.SolidClientProvider;
 
-import javax.enterprise.inject.spi.CDI;
+import jakarta.enterprise.inject.spi.CDI;
 import java.net.URI;
 import java.net.http.HttpHeaders;
 

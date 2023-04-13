@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.solid.testharness.ConformanceTestHarness;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
-import javax.enterprise.inject.spi.CDI;
+import jakarta.enterprise.inject.spi.CDI;
 
 /**
  * This provides the TestSubject into Karate features by accessing the CDI container.

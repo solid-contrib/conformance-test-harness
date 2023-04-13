@@ -23,7 +23,6 @@
  */
 package org.solid.testharness.http;
 
-import jakarta.ws.rs.core.Link;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
@@ -39,8 +38,9 @@ import org.solid.testharness.accesscontrol.AccessDatasetBuilder;
 import org.solid.testharness.config.TestSubject;
 import org.solid.testharness.utils.TestHarnessException;
 
-import javax.enterprise.inject.spi.CDI;
-import javax.validation.constraints.NotNull;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.core.Link;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;

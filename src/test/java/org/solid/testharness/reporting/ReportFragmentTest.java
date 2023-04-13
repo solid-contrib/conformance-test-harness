@@ -40,8 +40,8 @@ import org.solid.common.vocab.*;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestUtils;
 
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collections;

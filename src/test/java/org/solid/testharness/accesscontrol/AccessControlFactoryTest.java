@@ -28,7 +28,7 @@ import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.config.TestSubject;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.net.URI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
