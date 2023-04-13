@@ -29,7 +29,7 @@ import org.solid.common.vocab.*;
 import org.solid.testharness.config.Config;
 import org.solid.testharness.utils.Namespaces;
 
-import javax.enterprise.inject.spi.CDI;
+import jakarta.enterprise.inject.spi.CDI;
 import java.util.List;
 import java.util.stream.Collectors;
 

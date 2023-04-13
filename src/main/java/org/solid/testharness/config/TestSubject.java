@@ -46,9 +46,8 @@ import org.solid.testharness.utils.SolidContainerProvider;
 import org.solid.testharness.utils.TestHarnessException;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -114,7 +113,7 @@ public class TestSubject {
         }
     }
 
-    private void loadSubjectIntoRepository(@NotNull final Model model, final IRI subject) {
+    private void loadSubjectIntoRepository(final Model model, final IRI subject) {
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             if (subject == null) {
                 conn.add(model);

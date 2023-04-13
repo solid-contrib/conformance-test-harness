@@ -24,13 +24,13 @@
 package org.solid.testharness.http;
 
 import com.intuit.karate.core.ScenarioEngine;
-import jakarta.ws.rs.core.Link;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.solid.testharness.config.Config;
 
-import javax.enterprise.inject.spi.CDI;
-import javax.validation.constraints.NotNull;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.core.Link;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;

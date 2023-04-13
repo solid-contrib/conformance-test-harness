@@ -32,7 +32,7 @@ import org.solid.testharness.config.Config;
 import org.solid.testharness.config.TestCredentials;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.net.URI;
 import java.util.Map;
 import java.util.Optional;

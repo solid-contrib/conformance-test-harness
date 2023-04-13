@@ -30,7 +30,7 @@ import org.eclipse.rdf4j.repository.RepositoryException;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.utils.DataRepository;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.StringWriter;
 
 import static org.junit.jupiter.api.Assertions.*;

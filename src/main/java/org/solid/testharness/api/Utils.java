@@ -23,12 +23,12 @@
  */
 package org.solid.testharness.api;
 
-import jakarta.ws.rs.core.Link;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.http.HttpConstants;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.core.Link;
 import java.net.URI;
 import java.util.*;
 import java.util.regex.Matcher;

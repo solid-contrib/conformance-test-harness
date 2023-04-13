@@ -47,7 +47,7 @@
 
         <module name="ImportOrder">
             <property name="severity" value="error"/>
-            <property name="groups" value="*,javax,java"/>
+            <property name="groups" value="*,jakarta,javax,java"/>
             <property name="option" value="bottom"/>
             <property name="sortStaticImportsAlphabetically" value="true"/>
             <property name="tokens" value="IMPORT, STATIC_IMPORT"/>
@@ -65,7 +65,7 @@
 
         <!-- Block import statements that use the * notation. -->
         <!-- <module name="AvoidStarImport">
-          <property name="excludes" value="javax.ws.rs,javax.ws.rs.core,org.junit.jupiter.api.Assertions,org.mockito.Mockito,org.mockito.ArgumentMatchers"/>
+          <property name="excludes" value="jakarta.ws.rs,jakarta.ws.rs.core,org.junit.jupiter.api.Assertions,org.mockito.Mockito,org.mockito.ArgumentMatchers"/>
         </module> -->
 
         <!-- Javadoc Checks -->

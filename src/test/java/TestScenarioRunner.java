@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.solid.testharness.ConformanceTestHarness;
 import org.solid.testharness.reporting.TestSuiteResults;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;

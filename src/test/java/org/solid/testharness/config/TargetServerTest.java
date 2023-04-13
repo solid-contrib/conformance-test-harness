@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestUtils;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.net.URL;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;

@@ -33,9 +33,9 @@ import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.HttpUtils;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;

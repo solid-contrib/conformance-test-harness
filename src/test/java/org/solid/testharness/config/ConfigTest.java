@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.utils.TestUtils;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;

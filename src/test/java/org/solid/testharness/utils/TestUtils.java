@@ -49,8 +49,8 @@ import org.slf4j.Logger;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.HttpUtils;
 
-import javax.json.bind.JsonbBuilder;
-import javax.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.JsonbBuilder;
+import jakarta.json.bind.annotation.JsonbProperty;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;

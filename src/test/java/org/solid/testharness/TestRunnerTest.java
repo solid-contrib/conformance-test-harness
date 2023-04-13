@@ -34,7 +34,7 @@ import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.FeatureResultHandler;
 import org.solid.testharness.utils.TestUtils;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.Collections;
 import java.util.List;
 

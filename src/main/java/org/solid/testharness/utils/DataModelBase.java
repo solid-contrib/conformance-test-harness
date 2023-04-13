@@ -35,8 +35,8 @@ import org.eclipse.rdf4j.repository.util.Connections;
 import org.solid.common.vocab.RDF;
 import org.solid.common.vocab.RDFS;
 
-import javax.enterprise.inject.spi.CDI;
-import javax.validation.constraints.NotNull;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.validation.constraints.NotNull;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.time.ZoneId;
