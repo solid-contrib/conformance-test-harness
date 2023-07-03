@@ -42,7 +42,7 @@
         <checkstyle.plugin.version>3.3.0</checkstyle.plugin.version>
         <compiler-plugin.version>3.11.0</compiler-plugin.version>
         <deploy.plugin.version>3.1.1</deploy.plugin.version>
-        <frontend.plugin.version>1.13.3</frontend.plugin.version>
+        <frontend.plugin.version>1.13.4</frontend.plugin.version>
         <jacoco-plugin.version>0.8.10</jacoco-plugin.version>
         <license.plugin.version>4.2</license.plugin.version>
         <node.version>16.17.0</node.version>
