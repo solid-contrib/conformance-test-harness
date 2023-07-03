@@ -8,4 +8,11 @@
         <cve>CVE-2022-24785</cve>
         <cve>CVE-2022-31129</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+            This is a disputed CVE
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>
+        <cve>CVE-2023-35116</cve>
+    </suppress>
 </suppressions>
