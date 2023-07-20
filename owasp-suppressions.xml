@@ -15,4 +15,11 @@
         <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>
         <cve>CVE-2023-35116</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+            This CVE affects the RedHat build of Quarkus (v2.13) it is not relevant to the community edition of Quarkus, used in our products.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/io\.quarkus/quarkus-.*$</packageUrl>
+        <vulnerabilityName>CVE-2023-2974</vulnerabilityName>
+    </suppress>
 </suppressions>
