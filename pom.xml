@@ -35,7 +35,7 @@
         <commons.cli.version>1.5.0</commons.cli.version>
         <wiremock.version>2.35.0</wiremock.version>
         <hashids.version>1.0.3</hashids.version>
-        <snakeyaml.version>2.0</snakeyaml.version>
+        <snakeyaml.version>2.1</snakeyaml.version>
 
         <!-- plugins -->
         <build-helper.plugin.version>3.4.0</build-helper.plugin.version>
