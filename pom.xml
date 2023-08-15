@@ -35,7 +35,6 @@
         <commons.cli.version>1.5.0</commons.cli.version>
         <wiremock.version>2.35.0</wiremock.version>
         <hashids.version>1.0.3</hashids.version>
-        <snakeyaml.version>2.0</snakeyaml.version>
 
         <!-- plugins -->
         <build-helper.plugin.version>3.4.0</build-helper.plugin.version>
@@ -82,12 +81,6 @@
                 <version>${rdf4j.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <!-- ensure Quarkus does not bring in vulnerable version -->
-            <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>${snakeyaml.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
