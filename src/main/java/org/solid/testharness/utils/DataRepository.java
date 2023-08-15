@@ -549,7 +549,7 @@ public class DataRepository implements Repository {
         return repository.getValueFactory();
     }
 
-    private static class ScenarioData {
+    private static final class ScenarioData {
         private FeatureSection section;
         private int line;
         private List<Tag> tags;
