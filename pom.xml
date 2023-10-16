@@ -22,7 +22,7 @@
 
         <!-- dependencies -->
         <quarkus.version>3.2.2.Final</quarkus.version>
-        <karate.version>1.4.0</karate.version>
+        <karate.version>1.4.1</karate.version>
         <graal.version>22.3.0</graal.version>
         <quarkiverse.version>3.0.0</quarkiverse.version>
         <hamcrest.version>2.2</hamcrest.version>
