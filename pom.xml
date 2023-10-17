@@ -15,15 +15,15 @@
 
     <properties>
         <maven.compiler.parameters>true</maven.compiler.parameters>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- dependencies -->
-        <quarkus.version>3.2.2.Final</quarkus.version>
-        <karate.version>1.4.0</karate.version>
-        <graal.version>22.3.0</graal.version>
+        <quarkus.version>3.4.3</quarkus.version>
+        <karate.version>1.5.0.RC1</karate.version>
+        <graal.version>23.0.1</graal.version>
         <quarkiverse.version>3.0.0</quarkiverse.version>
         <hamcrest.version>2.2</hamcrest.version>
         <rdf4j.version>4.3.7</rdf4j.version>
@@ -115,7 +115,7 @@
             <version>${quarkiverse.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.intuit.karate</groupId>
+            <groupId>io.karatelabs</groupId>
             <artifactId>karate-core</artifactId>
             <version>${karate.version}</version>
             <exclusions>
@@ -253,7 +253,6 @@
             <groupId>org.graalvm.js</groupId>
             <artifactId>js-scriptengine</artifactId>
             <version>${graal.version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.graalvm.js</groupId>
