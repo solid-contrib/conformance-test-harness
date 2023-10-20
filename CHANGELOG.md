@@ -1,5 +1,9 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.1.15
+### Minor changes
+* Update dependencies, in particular Karate, Quarkus and Graal to keep in sync and use latest to remove vulnerabilities.
+
 ## Release 1.1.14
 ### Minor changes
 * Add `ALLOW_SELF_SIGNED_CERTS` to enable self-signed certificates on the server under test.
