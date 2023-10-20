@@ -9,4 +9,19 @@
         <cve>CVE-2022-24785</cve>
         <cve>CVE-2022-31129</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+        This code does not run a server so does not expose the HTTP/2 reset vulnerability
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.linecorp\.armeria/armeria@.*$</packageUrl>
+        <cve>CVE-2023-44487</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+        We do not use the affected reports and they do not accept date inputs so would not expose the vulnerability found
+        in file: karate-core-1.5.0.RC1.jar: vis.min.js
+   ]]></notes>
+        <packageUrl regex="true">^pkg:javascript/moment\.js@.*$</packageUrl>
+        <cve>CVE-2017-18214</cve>
+    </suppress>
 </suppressions>
