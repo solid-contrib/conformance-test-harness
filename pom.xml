@@ -47,7 +47,7 @@
         <node.version>16.17.0</node.version>
         <owasp.plugin.version>8.4.0</owasp.plugin.version>
         <pmd.plugin.version>3.21.0</pmd.plugin.version>
-        <properties.plugin.version>1.2.0</properties.plugin.version>
+        <properties.plugin.version>1.2.1</properties.plugin.version>
         <quarkus.package.type>uber-jar</quarkus.package.type>
         <release.plugin.version>3.0.1</release.plugin.version>
         <surefire-plugin.version>3.2.1</surefire-plugin.version>
