@@ -24,4 +24,12 @@
         <packageUrl regex="true">^pkg:javascript/moment\.js@.*$</packageUrl>
         <cve>CVE-2017-18214</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+        This does not affect us as we are neither using the HotRod client
+        nor writing our own custom Netty client with hostname validation disabled.
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/io\.netty/netty\-transport@.*$</packageUrl>
+        <cve>CVE-2023-4586</cve>
+    </suppress>
 </suppressions>
