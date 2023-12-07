@@ -2,34 +2,27 @@
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
     <suppress>
         <notes><![CDATA[
-        Karate does not expose the server docs in armeria-1.25.2.jar which contain the vulnerable package in file name:
-        armeria-1.25.2.jar: main.680dc52304c22666afc6.js.gz: main.680dc52304c22666afc6.js
+        Karate does not expose the server docs in armeria-1.26.2.jar which contain the vulnerable package in file name:
+        armeria-1.26.2.jar: main.fa7e131ea46419c5ac7b.js.gz: main.fa7e131ea46419c5ac7b.js
    ]]></notes>
         <packageUrl regex="true">^pkg:javascript/moment\.js@.*$</packageUrl>
         <cve>CVE-2022-24785</cve>
         <cve>CVE-2022-31129</cve>
+        <cve>CVE-2023-22467</cve>
     </suppress>
     <suppress>
         <notes><![CDATA[
-        This code does not run a server so does not expose the HTTP/2 reset vulnerability
+        Only applies to running Glassfish in older JDKs
    ]]></notes>
-        <packageUrl regex="true">^pkg:maven/com\.linecorp\.armeria/armeria@.*$</packageUrl>
-        <cve>CVE-2023-44487</cve>
+        <packageUrl regex="true">^pkg:maven/org\.glassfish\.expressly/expressly@.*$</packageUrl>
+        <cve>CVE-2023-5763</cve>
     </suppress>
     <suppress>
         <notes><![CDATA[
         We do not use the affected reports and they do not accept date inputs so would not expose the vulnerability found
-        in file: karate-core-1.5.0.RC1.jar: vis.min.js
+        in file: karate-core-1.5.0.RC2.jar: vis.min.js
    ]]></notes>
         <packageUrl regex="true">^pkg:javascript/moment\.js@.*$</packageUrl>
         <cve>CVE-2017-18214</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-        This does not affect us as we are neither using the HotRod client
-        nor writing our own custom Netty client with hostname validation disabled.
-   ]]></notes>
-        <packageUrl regex="true">^pkg:maven/io\.netty/netty\-.*$</packageUrl>
-        <cve>CVE-2023-4586</cve>
     </suppress>
 </suppressions>
