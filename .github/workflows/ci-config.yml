@@ -30,6 +30,6 @@ jobs:
 
       # Build the software
       - name: Build with Maven
-        run: mvn -B -ntp clean package
+        run: mvn -B -ntp clean package -Dnvd.api.key=${{ secrets.NVD_API_KEY }}
 
 
