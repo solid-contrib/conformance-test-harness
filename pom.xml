@@ -61,7 +61,7 @@
         <package.buildTime>${maven.build.timestamp}</package.buildTime>
 
         <!-- tooling -->
-        <checkstyle.tool.version>10.12.5</checkstyle.tool.version>
+        <checkstyle.tool.version>10.12.6</checkstyle.tool.version>
         <sonar.organization>solid-contrib</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <nvd.api.key/>
