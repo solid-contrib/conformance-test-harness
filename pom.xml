@@ -45,7 +45,7 @@
         <jacoco-plugin.version>0.8.11</jacoco-plugin.version>
         <license.plugin.version>4.3</license.plugin.version>
         <node.version>16.17.0</node.version>
-        <owasp.plugin.version>9.0.5</owasp.plugin.version>
+        <owasp.plugin.version>9.0.6</owasp.plugin.version>
         <pmd.plugin.version>3.21.2</pmd.plugin.version>
         <properties.plugin.version>1.2.1</properties.plugin.version>
         <quarkus.package.type>uber-jar</quarkus.package.type>
