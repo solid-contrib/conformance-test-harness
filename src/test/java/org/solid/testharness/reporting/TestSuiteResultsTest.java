@@ -25,7 +25,7 @@ package org.solid.testharness.reporting;
 
 import com.intuit.karate.Results;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.InjectMock;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.TestUtils;

@@ -28,7 +28,7 @@ import com.intuit.karate.core.FeatureCall;
 import com.intuit.karate.core.Tag;
 import com.intuit.karate.resource.Resource;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.InjectMock;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
