@@ -31,9 +31,20 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+
+      - name: Generate Cache Name
+        shell: bash
+        run: echo "CACHE_NAME=$(date '+%y.%j')" >> $GITHUB_ENV
+
+      - name: Restore NVD data cache
+        uses: actions/cache@v3
+        with:
+          key: nvd-data-${{ env.CACHE_NAME }}
+          restore-keys: nvd-data-
+          path: ./data/cache
+
       - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        #Temporary disable build failure if vulnerabilities are found
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=solid-contrib_conformance-test-harness -Ddependency-check.skip
+        run: mvn -B -ntp verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=solid-contrib_conformance-test-harness

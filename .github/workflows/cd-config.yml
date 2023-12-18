@@ -28,20 +28,9 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Generate Cache Name
-        shell: bash
-        run: echo "CACHE_NAME=$(date '+%y.%j')" >> $GITHUB_ENV
-
-      - name: Restore NVD data cache
-        uses: actions/cache@v3
-        with:
-          key: nvd-data-${{ env.CACHE_NAME }}
-          restore-keys: nvd-data-
-          path: ./data/cache
-
       # Build the software
       - name: Build with Maven
-        run: mvn -B -ntp clean package -Dnvd.api.datafeed="file:${GITHUB_WORKSPACE}/data/cache/nvdcve-{0}.json.gz"
+        run: mvn -B -ntp package
 
       # Deploy the docker container
       - name: Publish the Docker container
