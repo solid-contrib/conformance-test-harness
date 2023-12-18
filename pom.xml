@@ -65,6 +65,7 @@
         <sonar.organization>solid-contrib</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <nvd.api.key/>
+        <nvd.api.datafeed/>
 
     </properties>
     <dependencyManagement>
@@ -533,6 +534,7 @@
                         <suppressionFile>owasp-suppressions.xml</suppressionFile>
                     </suppressionFiles>
                     <nvdApiKey>${nvd.api.key}</nvdApiKey>
+                    <nvdDatafeedUrl>${nvd.api.datafeed}</nvdDatafeedUrl>
                 </configuration>
             </plugin>
         </plugins>
