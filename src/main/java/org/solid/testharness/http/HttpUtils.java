@@ -176,7 +176,7 @@ public final class HttpUtils {
         Objects.requireNonNull(data, "data is required");
         final var builder = new StringBuilder();
         for (Map.Entry<Object, Object> entry : data.entrySet()) {
-            if (builder.length() > 0) {
+            if (!builder.isEmpty()) {
                 builder.append('&');
             }
             builder.append(encodeValue(entry.getKey().toString()));
@@ -232,9 +232,18 @@ public final class HttpUtils {
         List<String> links = headers.allValues(HttpConstants.HEADER_LINK);
         // TODO: the following must be applied to all link headers, then the whole list flattened
         if (links.size() == 1 && links.get(0).contains(",")) {
-            links = Arrays.stream(links.get(0).split(",")).map(String::strip).collect(Collectors.toList());
+            links = Arrays.stream(links.get(0).split(",")).map(String::strip).toList();
         }
         return links.stream().map(Link::valueOf).collect(Collectors.toList());
+    }
+
+    public static URI getHeaderLinkByType(@NotNull final HttpHeaders headers, @NotNull final String type) {
+        final List<Link> links = parseLinkHeaders(headers);
+        return links.stream()
+                .filter(link -> link.getRels().contains("type") &&
+                        type.equals(link.getUri().toString()))
+                .findFirst()
+                .map(Link::getUri).orElse(null);
     }
 
     private static Config getConfig() {

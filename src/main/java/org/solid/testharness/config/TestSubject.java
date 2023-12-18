@@ -38,8 +38,10 @@ import org.slf4j.LoggerFactory;
 import org.solid.common.vocab.EARL;
 import org.solid.common.vocab.PIM;
 import org.solid.common.vocab.RDF;
+import org.solid.testharness.api.TestHarnessApiException;
 import org.solid.testharness.http.ClientRegistry;
 import org.solid.testharness.http.HttpConstants;
+import org.solid.testharness.http.HttpUtils;
 import org.solid.testharness.http.SolidClientProvider;
 import org.solid.testharness.utils.DataRepository;
 import org.solid.testharness.utils.SolidContainerProvider;
@@ -51,10 +53,10 @@ import jakarta.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.http.HttpResponse;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.eclipse.rdf4j.model.util.Values.iri;
 
@@ -154,6 +156,25 @@ public class TestSubject {
             testRunContainer = rootTestContainer.reserveContainer(rootTestContainer.generateId()).instantiate();
             logger.debug("Test run container content: {}", testRunContainer.getContentAsTurtle());
             logger.debug("Test run container access controls: {}", testRunContainer.getAccessDataset());
+
+            // check that we can change the access control of a resource so we know those tests can run
+            final var aclTestContainer = testRunContainer.reserveContainer("acltest");
+            try {
+                aclTestContainer .instantiate();
+                final var builder = aclTestContainer.getAccessDatasetBuilder();
+                final var bobReadAcl = builder
+                        .setAgentAccess(
+                        aclTestContainer.getUrl().toString(),
+                        config.getWebIds().get(HttpConstants.BOB),
+                        List.of("read")
+                ).build();
+                aclTestContainer.setAccessDataset(bobReadAcl); // MOCK THIS PASS/FAIL
+                logger.info("Confirmed we can create a container [{}] and set ACLs on it", aclTestContainer.getUrl());
+            } catch (TestHarnessException | TestHarnessApiException ex) {
+                logger.warn("Failed to create a container [{}] and set ACLs on it: {}",
+                        aclTestContainer.getUrl(), ex.getMessage());
+                throw ex;
+            }
         } catch (TestHarnessException | RuntimeException e) {
             throw new TestHarnessInitializationException("Failed to prepare server", e);
         }
@@ -168,6 +189,7 @@ public class TestSubject {
                     rootTestContainer.getUrl());
         }
         accessControlMode = ownerClient.getAclType(aclUrl);
+        logger.info("The Pod is using [{}] for access control", accessControlMode);
     }
 
     URI findTestContainer() throws TestHarnessException {
@@ -198,37 +220,63 @@ public class TestSubject {
         final Model profile;
         try {
             profile = publicClient.getContentAsModel(webId);
+            logger.info("Loaded WebID Document for [{}]", webId);
         } catch (Exception e) {
             throw new TestHarnessInitializationException(MessageFormat.format(
-                    "Failed to read WebID Profile Document for [{0}]", webId), e);
+                    "Failed to read WebID Document for [{0}]", webId), e);
         }
-        final List<URI> pods = profile.filter(iri(webId.toString()), PIM.storage, null)
+
+        final var storages = profile.filter(iri(webId.toString()), PIM.storage, null)
                 .objects()
                 .stream()
                 .filter(Value::isIRI)
                 .map(Value::stringValue)
                 .map(URI::create)
+                .toList();
+        if (storages.isEmpty()) {
+            logger.warn("No Pod references found in the WebID Document for [{}], looking for predicate [{}]",
+                    webId, PIM.storage);
+            throw new TestHarnessInitializationException(MessageFormat.format(
+                    "No Pod references found in the WebID Document for [{0}], looking for predicate [{1}]",
+                    webId, PIM.storage));
+        }
+        logger.info("Found [{}] Pods, checking them...", storages.size());
+        final List<URI> pods = storages.stream()
                 .filter(p -> isPodAccessible(p, ownerClient))
-                .collect(Collectors.toList());
+                .toList();
+
         if (pods.isEmpty()) {
             throw new TestHarnessInitializationException(MessageFormat.format(
-                    "Pod provisioning is not yet implemented. " +
-                    "Please ensure the storage already exists for the test user: [{0}] " +
-                    "and that pim:storage is defined in the WebID Profile Document.", webId));
+                    "No accessible Pods were found for test user: [{0}]. " +
+                    "Please check the logs to see why, then ensure that Pod storage exists " +
+                    "and that pim:storage is defined in their WebID Document.", webId));
 //            return provisionPod();
         } else {
-            logger.info("Storage found via WebID Profile Document: {}", pods.get(0));
+            logger.info("Pod found: [{}]", pods.get(0));
             return pods.get(0);
         }
     }
 
     boolean isPodAccessible(final URI pod, final SolidClientProvider ownerClient) {
+        logger.info("Checking Pod [{}]", pod);
         try {
-            return ownerClient.hasStorageType(pod);
+            // is it present?
+            final HttpResponse<Void> response = ownerClient.getClient().head(pod);
+            if (!HttpUtils.isSuccessful(response.statusCode())) {
+                logger.warn("HEAD request to Pod [{}] returned [{}]", pod, response.statusCode());
+                return false;
+            }
+            // is it a storage?
+            final var storageLink = HttpUtils.getHeaderLinkByType(response.headers(), PIM.Storage.toString());
+            if (storageLink == null) {
+                logger.warn("Pod [{}] is not a valid storage as it missing a [{}] header", pod, PIM.Storage);
+                return false;
+            }
         } catch (Exception e) {
-            logger.warn("Failed to check pod accessibility: {}", pod);
+            logger.warn("Failed to check pod [{}] accessibility due to: [{}]", pod, e.getMessage());
             return false;
         }
+        return true;
     }
 
     /*

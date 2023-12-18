@@ -24,8 +24,8 @@
 package org.solid.testharness.http;
 
 import com.intuit.karate.core.ScenarioEngine;
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.slf4j.Logger;
@@ -505,6 +505,20 @@ class HttpUtilsTest {
     @Test
     void parseLinkHeadersNull() {
         assertThrows(NullPointerException.class, () -> HttpUtils.parseLinkHeaders(null));
+    }
+
+    @Test
+    void getHeaderLinkByType() {
+        final var uri = HttpUtils.getHeaderLinkByType(setupHeaders(HttpConstants.HEADER_LINK,
+                List.of("<https://example.org/type>; rel=\"type\"")), "https://example.org/type");
+        assertEquals(URI.create("https://example.org/type"), uri);
+    }
+
+    @Test
+    void getHeaderLinkByTypeNull() {
+        final var uri = HttpUtils.getHeaderLinkByType(setupHeaders(HttpConstants.HEADER_LINK,
+                List.of("<https://example.org/nottype>; rel=\"type\"")), "https://example.org/type");
+        assertNull(uri);
     }
 
     private HttpHeaders setupHeaders(final String name, final List<String> values) {
