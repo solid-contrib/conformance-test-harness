@@ -23,8 +23,8 @@
  */
 package org.solid.testharness.accesscontrol;
 
-import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.config.TestSubject;
 
@@ -34,7 +34,8 @@ import java.net.URI;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
-import static org.solid.testharness.config.TestSubject.AccessControlMode.*;
+import static org.solid.testharness.config.TestSubject.AccessControlMode.ACP;
+import static org.solid.testharness.config.TestSubject.AccessControlMode.WAC;
 import static org.solid.testharness.utils.TestUtils.SAMPLE_BASE;
 
 @QuarkusTest

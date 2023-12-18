@@ -23,8 +23,8 @@
  */
 package org.solid.testharness.http;
 
-import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.junit.jupiter.api.BeforeEach;
