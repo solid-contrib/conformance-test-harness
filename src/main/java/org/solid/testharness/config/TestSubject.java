@@ -157,26 +157,30 @@ public class TestSubject {
             logger.debug("Test run container content: {}", testRunContainer.getContentAsTurtle());
             logger.debug("Test run container access controls: {}", testRunContainer.getAccessDataset());
 
-            // check that we can change the access control of a resource so we know those tests can run
-            final var aclTestContainer = testRunContainer.reserveContainer("acltest");
-            try {
-                aclTestContainer .instantiate();
-                final var builder = aclTestContainer.getAccessDatasetBuilder();
-                final var bobReadAcl = builder
-                        .setAgentAccess(
-                        aclTestContainer.getUrl().toString(),
-                        config.getWebIds().get(HttpConstants.BOB),
-                        List.of("read")
-                ).build();
-                aclTestContainer.setAccessDataset(bobReadAcl); // MOCK THIS PASS/FAIL
-                logger.info("Confirmed we can create a container [{}] and set ACLs on it", aclTestContainer.getUrl());
-            } catch (TestHarnessException | TestHarnessApiException ex) {
-                logger.warn("Failed to create a container [{}] and set ACLs on it: {}",
-                        aclTestContainer.getUrl(), ex.getMessage());
-                throw ex;
-            }
+            testAccessControlCapability();
         } catch (TestHarnessException | RuntimeException e) {
             throw new TestHarnessInitializationException("Failed to prepare server", e);
+        }
+    }
+
+    private void testAccessControlCapability() throws TestHarnessException {
+        // check that we can change the access control of a resource so we know those tests can run
+        final var aclTestContainer = testRunContainer.reserveContainer("acltest");
+        try {
+            aclTestContainer .instantiate();
+            final var builder = aclTestContainer.getAccessDatasetBuilder();
+            final var bobReadAcl = builder
+                    .setAgentAccess(
+                    aclTestContainer.getUrl().toString(),
+                    config.getWebIds().get(HttpConstants.BOB),
+                    List.of("read")
+            ).build();
+            aclTestContainer.setAccessDataset(bobReadAcl); // MOCK THIS PASS/FAIL
+            logger.info("Confirmed we can create a container [{}] and set ACLs on it", aclTestContainer.getUrl());
+        } catch (TestHarnessException | TestHarnessApiException ex) {
+            // don't throw an error as we might not be running access control tests
+            logger.warn("Failed to create a container [{}] and set ACLs on it: {}",
+                    aclTestContainer.getUrl(), ex.getMessage());
         }
     }
 
