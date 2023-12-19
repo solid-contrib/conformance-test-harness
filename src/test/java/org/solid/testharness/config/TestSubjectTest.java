@@ -244,7 +244,8 @@ class TestSubjectTest {
                 () -> testSubject.prepareServer());
 
         assertTrue(exception.getMessage().contains("Failed to prepare server"));
-        assertTrue(exception.getCause().getMessage().contains("Error response=400 trying to apply ACL"));
+        assertTrue(exception.getCause().getMessage().contains("Failed to create a container"));
+        assertTrue(exception.getCause().getCause().getMessage().contains("Error response=400 trying to apply ACL"));
     }
 
     @Test

@@ -181,6 +181,8 @@ public class TestSubject {
             // don't throw an error as we might not be running access control tests
             logger.warn("Failed to create a container [{}] and set ACLs on it: {}",
                     aclTestContainer.getUrl(), ex.getMessage());
+            throw new TestHarnessException("Failed to create a container [" + aclTestContainer.getUrl()
+                    + "] and set ACLs on it", ex);
         }
     }
 
