@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 17
-          distribution: 'adopt'
+          distribution: 'temurin'
 
       # Use a cache for the local Maven repository
       - name: Cache Maven packages
@@ -28,8 +28,17 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
+      - name: Generate Cache Name
+        shell: bash
+        run: echo "CACHE_NAME=$(date '+%y.%j')" >> $GITHUB_ENV
+
+      - name: Restore NVD data cache
+        uses: actions/cache@v3
+        with:
+          key: nvd-data-${{ env.CACHE_NAME }}
+          restore-keys: nvd-data-
+          path: ./data/cache
+
       # Build the software
       - name: Build with Maven
-        run: mvn -B -ntp clean package -Dnvd.api.key=${{ secrets.NVD_API_KEY }}
-
-
+        run: mvn -B -ntp verify -Dnvd.api.datafeed="file:${GITHUB_WORKSPACE}/data/cache/nvdcve-{0}.json.gz"

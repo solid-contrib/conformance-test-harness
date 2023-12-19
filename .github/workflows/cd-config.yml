@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 17
-          distribution: 'adopt'
+          distribution: 'temurin'
 
       # Use a cache for the local Maven repository
       - name: Cache Maven packages
@@ -30,7 +30,7 @@ jobs:
 
       # Build the software
       - name: Build with Maven
-        run: mvn -B -ntp clean package
+        run: mvn -B -ntp package
 
       # Deploy the docker container
       - name: Publish the Docker container
