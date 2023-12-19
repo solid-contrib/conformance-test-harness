@@ -23,8 +23,8 @@
  */
 package org.solid.testharness.reporting;
 
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.junit.jupiter.api.Test;
 import org.solid.testharness.config.Config;

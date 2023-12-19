@@ -153,12 +153,7 @@ public class SolidClientProvider {
 
     private URI getLinkByType(final URI uri, final IRI type)  {
         final HttpResponse<Void> response = client.head(uri);
-        final List<Link> links = HttpUtils.parseLinkHeaders(response.headers());
-        return links.stream()
-                .filter(link -> link.getRels().contains("type") &&
-                        type.toString().equals(link.getUri().toString()))
-                .findFirst()
-                .map(Link::getUri).orElse(null);
+        return HttpUtils.getHeaderLinkByType(response.headers(), type.toString());
     }
 
     public String getContentAsTurtle(final URI url) throws TestHarnessException {

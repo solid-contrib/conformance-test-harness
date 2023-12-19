@@ -526,6 +526,12 @@
                 </executions>
                 <configuration>
                     <failBuildOnCVSS>${owasp.plugin.cvss.threshold}</failBuildOnCVSS>
+                    <ossIndexWarnOnlyOnRemoteErrors>true</ossIndexWarnOnlyOnRemoteErrors>
+                    <opensslAnalyzerEnabled>false</opensslAnalyzerEnabled>
+                    <nodeAuditAnalyzerEnabled>false</nodeAuditAnalyzerEnabled>
+                    <retireJsAnalyzerEnabled>false</retireJsAnalyzerEnabled>
+                    <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+                    <nuspecAnalyzerEnabled>false</nuspecAnalyzerEnabled>
                     <formats>
                         <format>HTML</format>
                         <format>JSON</format>

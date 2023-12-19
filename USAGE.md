@@ -99,7 +99,7 @@ origin: https://test    # default = https://tester, origin used for OIDC registr
 
 The CTH attempts to use a discovery process to determine the container in which to run tests.
 However, this depends on at least knowing the WebID of a user who can have full access to the test container.
-It is also possible to provide the location directly, overriding whatever is found in a WebID Profile Document. This
+It is also possible to provide the location directly, overriding whatever is found in a WebID Document. This
 configuration (and more) is provided using environment variables stored in a `.env` file.
 
 The definition of this configuration is split into:
@@ -120,7 +120,7 @@ the IDP value is set for each user:
 ```shell
 SOLID_IDENTITY_PROVIDER=	# e.g., https://broker.pod.inrupt.com
 ```
-The CTH will attempt to use a pod found in the WebID Profile Document via the `pim:storage` predicate. You can use the
+The CTH will attempt to use a pod found in the WebID Document via the `pim:storage` predicate. You can use the
 following config if you want to use a particular container in that location by providing a relative path. Alternatively,
 if there is no storage location available, or you want to use a test container in a different location (to which Alice
 must be granted full control), then you can provide an absolute URL:

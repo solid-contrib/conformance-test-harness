@@ -23,8 +23,8 @@
  */
 package org.solid.testharness.reporting;
 
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ import org.solid.testharness.utils.DataRepository;
 import jakarta.inject.Inject;
 import java.io.StringWriter;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest
