@@ -23,7 +23,7 @@
 artifactName: cth-vocabs
 artifactNamePrefix: ""
 artifactNameSuffix: ""
-artifactGeneratorVersion: 3.0.0
+artifactGeneratorVersion: 3.1.1
 
 artifactToGenerate:
   - programmingLanguage: Java
