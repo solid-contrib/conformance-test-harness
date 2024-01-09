@@ -1,5 +1,10 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.1.16
+### Minor changes
+* Update dependencies.
+* Separate stages of server preparation for better diagnostics of problems.
+
 ## Release 1.1.15
 ### Minor changes
 * Update dependencies, in particular Karate, Quarkus and Graal to keep in sync and use latest to remove vulnerabilities.
