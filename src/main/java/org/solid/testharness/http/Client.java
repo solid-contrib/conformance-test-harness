@@ -49,6 +49,7 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.net.http.HttpTimeoutException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
@@ -61,6 +62,7 @@ public class Client {
     private static final Logger logger = LoggerFactory.getLogger(Client.class);
     private static final List<String> TRUSTED_HOSTS = List.of("localhost", "server");
     private static final int MAX_RETRY = 10;
+    private static final long RETRY_DELAY = 500L;
     public static final int EXPIRY_GUARD = -1;
 
     private HttpClient httpClient;
@@ -334,25 +336,30 @@ public class Client {
     }
 
     // Retry on timeout exception
-    private boolean shouldRetry(final HttpResponse<?> r, final Throwable t, final int count) {
-        if (r != null || count >= maxRetries) return false;
-        if (!(t.getCause() instanceof HttpTimeoutException)) return false;
-        HttpUtils.logToKarate(logger, "Retry ({}) due to {}", count, t.toString());
-        return true;
+    private boolean shouldRetry(final HttpResponse<?> response, final Throwable exception, final int count) {
+        return count < maxRetries
+                && (response == null || response.statusCode() == 429)
+                && (response != null || exception.getCause() instanceof HttpTimeoutException);
     }
 
     private <T> CompletableFuture<HttpResponse<T>> tryResend(final HttpClient client, final HttpRequest request,
                                                              final BodyHandler<T> handler,
-                                                             final int count, final HttpResponse<T> resp,
-                                                             final Throwable t) {
-        if (shouldRetry(resp, t, count)) {
+                                                             final int count, final HttpResponse<T> response,
+                                                             final Throwable exception) {
+        if (shouldRetry(response, exception, count)) {
+            HttpUtils.logToKarate(logger, "RETRY Count=[{0}], Status=[{1}], Exception=[{2}]",
+                    count,
+                    response != null ? response.statusCode() : "",
+                    exception != null ? exception.getMessage() : "");
             return client.sendAsync(request, handler)
-                    .handleAsync((r, x) -> tryResend(client, request, handler, count + 1, r, x))
+                    .handleAsync(
+                            (r, t) -> tryResend(client, request, handler, count + 1, r, t),
+                            CompletableFuture.delayedExecutor(count * RETRY_DELAY, TimeUnit.MILLISECONDS))
                     .thenCompose(Function.identity());
-        } else if (t != null) {
-            return CompletableFuture.failedFuture(t);
+        } else if (exception != null) {
+            return CompletableFuture.failedFuture(exception);
         } else {
-            return CompletableFuture.completedFuture(resp);
+            return CompletableFuture.completedFuture(response);
         }
     }
 
