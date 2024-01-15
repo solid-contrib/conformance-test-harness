@@ -1,5 +1,10 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.1.17
+### Minor changes
+* Make config available to Karate environment.
+* Handle 429 responses in retry mechanism not just timeouts.
+
 ## Release 1.1.16
 ### Minor changes
 * Update dependencies.
