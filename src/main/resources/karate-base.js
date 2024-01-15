@@ -54,6 +54,7 @@ function fn() {
         rootTestContainer: new SolidContainer(testSubject.getTestRunContainer()),
         clients: karate.toMap(testHarness.clients),
         webIds: config.webIds,
+        config,
 
         // namespaces
         RDF: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
