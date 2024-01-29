@@ -43,6 +43,9 @@ import static org.mockito.Mockito.when;
 @QuarkusTest
 @QuarkusTestResource(AuthenticationResource.class)
 class AuthManagerTest {
+    public static final Map<String, String> ALICE_WEBID_MAP = Map.of(HttpConstants.ALICE,
+            "https://alice.target.example.org/profile/card#me");
+
     private URI baseUri;
 
     @Inject
@@ -72,22 +75,65 @@ class AuthManagerTest {
     }
 
     @Test
-    void authenticateNoCredentials() {
-        when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
-                "https://alice.target.example.org/profile/card#me"));
+    void authenticateNoWebIdInCredentials() {
+        when(config.getWebIds()).thenReturn(ALICE_WEBID_MAP);
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
-        when(config.getCredentials("nocredentials")).thenReturn(new TestCredentials());
+        when(config.getCredentials("nowebid")).thenReturn(new TestCredentials());
+
+        final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
+                () -> authManager.authenticate("nowebid"));
+
+        assertEquals("Failed to read WebID Document for [null] " +
+                        "Caused by: java.lang.NullPointerException: webId is required",
+                exception.getMessage());
+    }
+
+    @Test
+    void authenticateInvalidWebID() {
+        when(config.getWebIds()).thenReturn(ALICE_WEBID_MAP);
+        final var credentials = new TestCredentials();
+        credentials.webId = "not a web id";
+        when(config.getCredentials("notwebid")).thenReturn(credentials);
+        final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
+                () -> authManager.authenticate("notwebid"));
+        assertEquals("Failed to read WebID Document for [not a web id] Caused by: " +
+                        "java.lang.IllegalArgumentException: Illegal character in path at index 3: not a web id",
+                exception.getMessage());
+    }
+
+    @Test
+    void authenticateNotFoundWebID() {
+        when(config.getWebIds()).thenReturn(ALICE_WEBID_MAP);
+        final var credentials = new TestCredentials();
+        credentials.webId = baseUri.resolve("404webID").toString();
+        when(config.getCredentials("notfoundwebid")).thenReturn(credentials);
+        final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
+                () -> authManager.authenticate("notfoundwebid"));
+        assertEquals("Failed to read WebID Document for [" + credentials.webId + "] Caused by: " +
+                        "org.solid.testharness.utils.TestHarnessException: " +
+                        "Error response=404 trying to get content for " + credentials.webId,
+                exception.getMessage());
+    }
+
+
+    @Test
+    void authenticateNoCredentials() {
+        when(config.getWebIds()).thenReturn(ALICE_WEBID_MAP);
+        when(config.getSolidIdentityProvider()).thenReturn(baseUri);
+        final var credentials = new TestCredentials();
+        credentials.webId = baseUri.resolve("webID").toString();
+        when(config.getCredentials("nocredentials")).thenReturn(credentials);
 
         final TestHarnessInitializationException exception = assertThrows(TestHarnessInitializationException.class,
                 () -> authManager.authenticate("nocredentials"));
-        assertEquals("Neither login credentials nor refresh token details provided for nocredentials: [null]",
+        assertEquals("Neither login credentials nor refresh token details provided for nocredentials: ["
+                        + credentials.webId + "]",
                 exception.getMessage());
     }
 
     @Test
     void authenticateLoginSession() {
-        when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
-                "https://alice.target.example.org/profile/card#me"));
+        when(config.getWebIds()).thenReturn(ALICE_WEBID_MAP);
         when(config.getOrigin()).thenReturn("https://origin/goodcode");
         setupLogin(baseUri, "login", "/login/password", null);
 
@@ -99,8 +145,7 @@ class AuthManagerTest {
 
     @Test
     void authenticateLoginUserRegistration() {
-        when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
-                "https://alice.target.example.org/profile/card#me"));
+        when(config.getWebIds()).thenReturn(ALICE_WEBID_MAP);
         when(config.getOrigin()).thenReturn("https://origin/form");
         setupLogin(baseUri, "login", "/login/password",
                 "/idp/register");
@@ -113,10 +158,10 @@ class AuthManagerTest {
 
     @Test
     void authenticateRefreshCredentials() {
-        when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
-                "https://alice.target.example.org/profile/card#me"));
+        when(config.getWebIds()).thenReturn(ALICE_WEBID_MAP);
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
         final TestCredentials credentials = new TestCredentials();
+        credentials.webId = baseUri.resolve("webID").toString();
         credentials.refreshToken = Optional.of("REFRESH");
         credentials.clientId = Optional.of("CLIENTID");
         credentials.clientSecret = Optional.of("CLIENTSECRET");
@@ -130,10 +175,10 @@ class AuthManagerTest {
 
     @Test
     void authenticateClientCredentials() {
-        when(config.getWebIds()).thenReturn(Map.of(HttpConstants.ALICE,
-                "https://alice.target.example.org/profile/card#me"));
+        when(config.getWebIds()).thenReturn(ALICE_WEBID_MAP);
         when(config.getSolidIdentityProvider()).thenReturn(baseUri);
         final TestCredentials credentials = new TestCredentials();
+        credentials.webId = baseUri.resolve("webID").toString();
         credentials.clientId = Optional.of("CLIENTID");
         credentials.clientSecret = Optional.of("CLIENTSECRET");
         when(config.getCredentials("client_credentials")).thenReturn(credentials);
@@ -158,6 +203,7 @@ class AuthManagerTest {
             when(config.getUserRegistrationEndpoint()).thenReturn(idpBaseUri.resolve(userRegistrationEndpoint));
         }
         final TestCredentials credentials = new TestCredentials();
+        credentials.webId = baseUri.resolve("webID").toString();
         credentials.username = Optional.of("USERNAME");
         credentials.password = Optional.of("PASSWORD");
         when(config.getCredentials(testId)).thenReturn(credentials);

@@ -226,7 +226,7 @@ public class TestSubject {
         final Model profile;
         try {
             profile = publicClient.getContentAsModel(webId);
-            logger.info("Loaded WebID Document for [{}]", webId);
+            logger.info("Read WebID Document for [{}]", webId);
         } catch (Exception e) {
             throw new TestHarnessInitializationException(MessageFormat.format(
                     "Failed to read WebID Document for [{0}]", webId), e);

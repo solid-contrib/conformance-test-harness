@@ -45,10 +45,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.MessageFormat;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -117,6 +114,9 @@ public class AuthManager {
                 throw new TestHarnessInitializationException(MessageFormat.format(
                         "No user credentials were provided for {0}", user));
             }
+
+            checkWebId(userConfig.webId());
+
             final URI oidcIssuer = Optional.ofNullable(userConfig.getIdp()).orElse(config.getSolidIdentityProvider());
 
             authClient = new Client.Builder(user)
@@ -148,6 +148,19 @@ public class AuthManager {
             }
         }
         return new SolidClientProvider(authClient);
+    }
+
+    void checkWebId(final String webId) {
+        try {
+            Objects.requireNonNull(webId, "webId is required");
+            final var webIdUri = URI.create(webId);
+            final var publicClient = new SolidClientProvider(ClientRegistry.ALICE_WEBID);
+            publicClient.getContentAsModel(webIdUri);
+            logger.info("Loaded WebID Document for [{}]", webId);
+        } catch (Exception e) {
+            throw new TestHarnessInitializationException(MessageFormat.format(
+                    "Failed to read WebID Document for [{0}]", webId), e);
+        }
     }
 
     void exchangeRefreshToken(final Client authClient, final UserCredentials userConfig,
