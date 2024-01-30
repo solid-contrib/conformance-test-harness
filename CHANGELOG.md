@@ -1,5 +1,9 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.1.18
+### Minor changes
+* Verify the existence of the configured WebIDs during startup.
+
 ## Release 1.1.17
 ### Minor changes
 * Make config available to Karate environment.
