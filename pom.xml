@@ -5,7 +5,7 @@
     <artifactId>testharness</artifactId>
     <name>Solid Specification Conformance Test Harness</name>
     <description>A test harness that will run suites of tests related to Solid specifications.</description>
-    <version>1.1.18-SNAPSHOT</version>
+    <version>1.1.18</version>
     <organization>
         <name>Inrupt</name>
         <url>https://inrupt.com</url>
