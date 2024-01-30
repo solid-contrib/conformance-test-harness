@@ -75,6 +75,13 @@ public class AuthenticationResource implements QuarkusTestResourceLifecycleManag
             wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/idp/register"))
                     .willReturn(WireMock.aResponse().withStatus(200)));
 
+            // webID responses
+            wireMockServer.stubFor(WireMock.get(WireMock.urlEqualTo("/404webID"))
+                    .willReturn(WireMock.aResponse().withStatus(404)));
+
+            wireMockServer.stubFor(WireMock.get(WireMock.urlEqualTo("/webID"))
+                    .willReturn(WireMock.aResponse().withStatus(200)));
+
             // return OIDC configuration
             wireMockServer.stubFor(WireMock.get(WireMock.urlEqualTo("/" + HttpConstants.OPENID_CONFIGURATION))
                     .willReturn(WireMock.aResponse()

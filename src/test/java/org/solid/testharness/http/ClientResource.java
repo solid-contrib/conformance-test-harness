@@ -79,6 +79,11 @@ public class ClientResource implements QuarkusTestResourceLifecycleManager {
 
         wireMockServer.stubFor(WireMock.request("RETRY", WireMock.urlEqualTo("/retry"))
                 .inScenario("RETRY").whenScenarioStateIs(Scenario.STARTED)
+                .willReturn(WireMock.aResponse().withStatus(429))
+                .willSetStateTo("BUSY"));
+
+        wireMockServer.stubFor(WireMock.request("RETRY", WireMock.urlEqualTo("/retry"))
+                .inScenario("RETRY").whenScenarioStateIs("BUSY")
                 .willReturn(WireMock.aResponse().withStatus(200).withFixedDelay(1100))
                 .willSetStateTo("FAILED"));
 
