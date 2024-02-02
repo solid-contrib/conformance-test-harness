@@ -218,7 +218,7 @@ class ReportGeneratorTest {
         when(results.getFeaturesTotal()).thenReturn(1);
         when(results.getScenariosPassed()).thenReturn(1);
         when(results.getScenariosFailed()).thenReturn(1);
-        when(results.getScenariosTotal()).thenReturn(2);
+        when(results.getRunScenariosTotal()).thenReturn(2);
         when(results.getEndTime()).thenReturn(Instant.now().toEpochMilli());
         reportGenerator.setStartTime(System.currentTimeMillis() - 1000);
         reportGenerator.setResults(new TestSuiteResults(results));
