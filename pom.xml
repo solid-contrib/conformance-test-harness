@@ -33,7 +33,7 @@
         <jose4j.version>0.9.5</jose4j.version>
         <commons.text.version>1.11.0</commons.text.version>
         <commons.cli.version>1.6.0</commons.cli.version>
-        <wiremock.version>2.35.1</wiremock.version>
+        <wiremock.version>2.35.2</wiremock.version>
         <hashids.version>1.0.3</hashids.version>
 
         <!-- plugins -->
