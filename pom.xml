@@ -30,7 +30,7 @@
         <semargl.version>0.7</semargl.version>
         <jakarta.version>3.1.0</jakarta.version>
         <jersey.version>3.1.5</jersey.version>
-        <jose4j.version>0.9.5</jose4j.version>
+        <jose4j.version>0.9.6</jose4j.version>
         <commons.text.version>1.11.0</commons.text.version>
         <commons.cli.version>1.6.0</commons.cli.version>
         <wiremock.version>2.35.2</wiremock.version>
