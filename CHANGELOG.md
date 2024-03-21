@@ -1,5 +1,9 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.1.19
+### Minor changes
+* Update dependencies.
+
 ## Release 1.1.18
 ### Minor changes
 * Verify the existence of the configured WebIDs during startup.
