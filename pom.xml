@@ -21,9 +21,9 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- dependencies -->
-        <quarkus.version>3.8.3</quarkus.version>
+        <quarkus.version>3.8.2</quarkus.version>
         <karate.version>1.5.0.RC3</karate.version>
-        <graal.version>24.0.0</graal.version>
+        <graal.version>23.0.3</graal.version>
         <quarkiverse.version>3.0.0</quarkiverse.version>
         <hamcrest.version>2.2</hamcrest.version>
         <rdf4j.version>4.3.10</rdf4j.version>
@@ -124,14 +124,6 @@
                 <exclusion>
                     <groupId>ch.qos.logback</groupId>
                     <artifactId>logback-classic</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.graalvm.js</groupId>
-                    <artifactId>js</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.graalvm.js</groupId>
-                    <artifactId>js-scriptengine</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -265,7 +257,7 @@
             <version>${graal.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.graalvm.polyglot</groupId>
+            <groupId>org.graalvm.js</groupId>
             <artifactId>js</artifactId>
             <version>${graal.version}</version>
             <type>pom</type>
