@@ -26,7 +26,7 @@
         <graal.version>23.0.3</graal.version>
         <quarkiverse.version>3.0.0</quarkiverse.version>
         <hamcrest.version>2.2</hamcrest.version>
-        <rdf4j.version>4.3.10</rdf4j.version>
+        <rdf4j.version>4.3.11</rdf4j.version>
         <semargl.version>0.7</semargl.version>
         <jakarta.version>3.1.0</jakarta.version>
         <jersey.version>3.1.5</jersey.version>
