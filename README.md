@@ -200,7 +200,7 @@ of the tests from https://github.com/solid-contrib/specification-tests.
     ```
 5. Perform the release (whilst avoiding deploying to a maven repository or re-running the tests):
     ```shell
-    ./mvnw release:perform -Darguments="-Dmaven.deploy.skip=true -DskipTests -Dmaven.javadoc.skip=true"
+    ./mvnw release:perform -Darguments="-Dmaven.deploy.skip=true -DskipTests -Ddependency-check.skip -Dmaven.javadoc.skip=true"
     ```
 6. Create the release in GitHub - [Create a new release](https://github.com/solid-contrib/conformance-test-harness/releases/new):
    * Choose the tag that was just created.
