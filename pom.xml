@@ -39,7 +39,7 @@
         <deploy.plugin.version>3.1.2</deploy.plugin.version>
         <frontend.plugin.version>1.15.0</frontend.plugin.version>
         <jacoco-plugin.version>0.8.12</jacoco-plugin.version>
-        <license.plugin.version>4.4</license.plugin.version>
+        <license.plugin.version>4.5</license.plugin.version>
         <node.version>20.11.0</node.version>
         <owasp.plugin.version>9.1.0</owasp.plugin.version>
         <pmd.plugin.version>3.22.0</pmd.plugin.version>
