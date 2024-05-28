@@ -33,7 +33,7 @@
         <hashids.version>1.0.3</hashids.version>
 
         <!-- plugins -->
-        <build-helper.plugin.version>3.5.0</build-helper.plugin.version>
+        <build-helper.plugin.version>3.6.0</build-helper.plugin.version>
         <checkstyle.plugin.version>3.3.1</checkstyle.plugin.version>
         <compiler-plugin.version>3.13.0</compiler-plugin.version>
         <deploy.plugin.version>3.1.2</deploy.plugin.version>
@@ -41,7 +41,7 @@
         <jacoco-plugin.version>0.8.12</jacoco-plugin.version>
         <license.plugin.version>4.5</license.plugin.version>
         <node.version>20.11.0</node.version>
-        <owasp.plugin.version>9.1.0</owasp.plugin.version>
+        <owasp.plugin.version>9.2.0</owasp.plugin.version>
         <pmd.plugin.version>3.22.0</pmd.plugin.version>
         <properties.plugin.version>1.2.1</properties.plugin.version>
         <quarkus.package.type>uber-jar</quarkus.package.type>
@@ -57,7 +57,7 @@
         <package.buildTime>${maven.build.timestamp}</package.buildTime>
 
         <!-- tooling -->
-        <checkstyle.tool.version>10.16.0</checkstyle.tool.version>
+        <checkstyle.tool.version>10.17.0</checkstyle.tool.version>
         <sonar.organization>solid-contrib</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <nvd.api.key />
