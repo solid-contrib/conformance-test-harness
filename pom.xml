@@ -45,7 +45,7 @@
         <pmd.plugin.version>3.22.0</pmd.plugin.version>
         <properties.plugin.version>1.2.1</properties.plugin.version>
         <quarkus.package.type>uber-jar</quarkus.package.type>
-        <release.plugin.version>3.0.1</release.plugin.version>
+        <release.plugin.version>3.1.0</release.plugin.version>
         <surefire-plugin.version>3.2.5</surefire-plugin.version>
 
         <!-- package info -->
