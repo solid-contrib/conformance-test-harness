@@ -24,7 +24,7 @@
         <quarkus.version>3.12.1</quarkus.version>
         <karate.version>1.5.0.RC4</karate.version>
         <graal.version>24.0.0</graal.version>
-        <quarkiverse.version>3.0.0</quarkiverse.version>
+        <quarkiverse.version>3.1.0</quarkiverse.version>
         <rdf4j.version>4.3.12</rdf4j.version>
         <semargl.version>0.7</semargl.version>
         <jersey.version>3.1.7</jersey.version>
@@ -215,6 +215,11 @@
         <dependency>
             <groupId>io.smallrye</groupId>
             <artifactId>smallrye-jwt-build</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jsonb</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
