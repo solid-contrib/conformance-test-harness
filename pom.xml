@@ -21,9 +21,9 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- dependencies -->
-        <quarkus.version>3.12.2</quarkus.version>
+        <quarkus.version>3.12.3</quarkus.version>
         <karate.version>1.5.0.RC4</karate.version>
-        <graal.version>24.0.0</graal.version>
+        <graal.version>24.0.2</graal.version>
         <quarkiverse.version>3.1.0</quarkiverse.version>
         <rdf4j.version>5.0.1</rdf4j.version>
         <semargl.version>0.7</semargl.version>
@@ -41,11 +41,11 @@
         <jacoco-plugin.version>0.8.12</jacoco-plugin.version>
         <license.plugin.version>4.5</license.plugin.version>
         <node.version>20.11.0</node.version>
-        <owasp.plugin.version>10.0.2</owasp.plugin.version>
-        <pmd.plugin.version>3.23.0</pmd.plugin.version>
+        <owasp.plugin.version>10.0.3</owasp.plugin.version>
+        <pmd.plugin.version>3.24.0</pmd.plugin.version>
         <properties.plugin.version>1.2.1</properties.plugin.version>
         <quarkus.package.type>uber-jar</quarkus.package.type>
-        <release.plugin.version>3.1.0</release.plugin.version>
+        <release.plugin.version>3.1.1</release.plugin.version>
         <surefire-plugin.version>3.3.1</surefire-plugin.version>
 
         <!-- package info -->
