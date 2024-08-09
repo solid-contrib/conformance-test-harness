@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
-@WithTestResource(value = AuthenticationResource.class)
+@WithTestResource(AuthenticationResource.class)
 class AuthManagerTest {
     public static final Map<String, String> ALICE_WEBID_MAP = Map.of(HttpConstants.ALICE,
             "https://alice.target.example.org/profile/card#me");

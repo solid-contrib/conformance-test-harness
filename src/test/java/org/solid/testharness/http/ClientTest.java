@@ -52,7 +52,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
-@WithTestResource(value = ClientResource.class)
+@WithTestResource(ClientResource.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ClientTest {
     private static final URI TEST_URL = URI.create(TestUtils.SAMPLE_BASE);
