@@ -24,7 +24,7 @@
 package org.solid.testharness.http;
 
 import io.quarkus.test.InjectMock;
-import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
-@QuarkusTestResource(AuthenticationResource.class)
+@WithTestResource(AuthenticationResource.class)
 class AuthManagerTest {
     public static final Map<String, String> ALICE_WEBID_MAP = Map.of(HttpConstants.ALICE,
             "https://alice.target.example.org/profile/card#me");

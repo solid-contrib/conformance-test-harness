@@ -25,7 +25,7 @@ package org.solid.testharness.http;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import org.jose4j.jwk.JsonWebKeySet;
 import org.junit.jupiter.api.BeforeAll;
@@ -52,7 +52,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
-@QuarkusTestResource(ClientResource.class)
+@WithTestResource(ClientResource.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ClientTest {
     private static final URI TEST_URL = URI.create(TestUtils.SAMPLE_BASE);
