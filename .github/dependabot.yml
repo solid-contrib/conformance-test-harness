@@ -5,6 +5,17 @@ updates:
   schedule:
     interval: daily
   open-pull-requests-limit: 10
+  groups:
+    plugins:
+      patterns:
+        - "org.apache.maven.plugins:*"
+        - "com.github.eirslett:frontend-maven-plugin"
+        - "org.codehaus.mojo:*"
+        - "com.mycila:license-maven-plugin"
+        - "org.jacoco:jacoco-maven-plugin"
+        - "org.owasp:dependency-check-maven"
+        - "com.puppycrawl.tools:checkstyle"
+
 - package-ecosystem: "github-actions"
   directory: "/"
   schedule:
