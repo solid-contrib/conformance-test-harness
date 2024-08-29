@@ -42,11 +42,11 @@
         <license.plugin.version>4.5</license.plugin.version>
         <node.version>20.11.0</node.version>
         <owasp.plugin.version>10.0.3</owasp.plugin.version>
-        <pmd.plugin.version>3.24.0</pmd.plugin.version>
+        <pmd.plugin.version>3.25.0</pmd.plugin.version>
         <properties.plugin.version>1.2.1</properties.plugin.version>
         <quarkus.package.type>uber-jar</quarkus.package.type>
         <release.plugin.version>3.1.1</release.plugin.version>
-        <surefire-plugin.version>3.4.0</surefire-plugin.version>
+        <surefire-plugin.version>3.5.0</surefire-plugin.version>
 
         <!-- package info -->
         <package.name>${project.name}</package.name>
@@ -57,7 +57,7 @@
         <package.buildTime>${maven.build.timestamp}</package.buildTime>
 
         <!-- tooling -->
-        <checkstyle.tool.version>10.17.0</checkstyle.tool.version>
+        <checkstyle.tool.version>10.18.0</checkstyle.tool.version>
         <sonar.organization>solid-contrib</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <nvd.api.key />
