@@ -338,7 +338,7 @@ public class Client {
     // Retry on timeout exception
     private boolean shouldRetry(final HttpResponse<?> response, final Throwable exception, final int count) {
         return count < maxRetries
-                && (response == null || response.statusCode() == 429)
+                && (response == null || response.statusCode() == 429 || response.statusCode() == 504)
                 && (response != null || exception.getCause() instanceof HttpTimeoutException);
     }
 
