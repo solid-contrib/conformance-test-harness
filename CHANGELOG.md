@@ -1,5 +1,10 @@
 # Solid Specification Conformance Test Harness
 
+## Release 1.1.20
+### Minor changes
+* Update dependencies.
+* Retry requests after 504 Gateway Timeout errors.
+
 ## Release 1.1.19
 ### Minor changes
 * Update dependencies.
