@@ -15,7 +15,6 @@
     </rule>
     <rule ref="category/java/performance.xml"/>
     <rule ref="category/java/bestpractices.xml">
-        <exclude name="UnusedImports" /> <!-- Rule is deprecated and reports false positives -->
         <exclude name="GuardLogStatement"/> <!-- Clutters with virtually no performance benefit in the test harness -->
     </rule>
     <rule ref="category/java/errorprone.xml">
