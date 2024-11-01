@@ -67,21 +67,21 @@ class ConfigLogicTest {
     void getSubjectsUrlUseConfigHttp() throws MalformedURLException {
         final Config config = new Config();
         config.subjectsFile = Optional.of("http://example.org");
-        assertEquals(new URL("http://example.org"), config.getSubjectsUrl());
+        assertEquals(URI.create("http://example.org").toURL(), config.getSubjectsUrl());
     }
 
     @Test
     void getSubjectsUrlUseConfigHttps() throws MalformedURLException {
         final Config config = new Config();
         config.subjectsFile = Optional.of(TestUtils.SAMPLE_BASE);
-        assertEquals(new URL(TestUtils.SAMPLE_BASE), config.getSubjectsUrl());
+        assertEquals(URI.create(TestUtils.SAMPLE_BASE).toURL(), config.getSubjectsUrl());
     }
 
     @Test
     void getSubjectsUrlUseConfigFile() throws MalformedURLException {
         final Config config = new Config();
         config.subjectsFile = Optional.of("file:/subjectFile");
-        assertEquals(new URL("file:/subjectFile"), config.getSubjectsUrl());
+        assertEquals(URI.create("file:/subjectFile").toURL(), config.getSubjectsUrl());
     }
 
     @Test
@@ -110,7 +110,7 @@ class ConfigLogicTest {
     void getSubjectsUrlUseSet() throws MalformedURLException {
         final Config config = new Config();
         config.setSubjectsUrl(TestUtils.SAMPLE_BASE);
-        assertEquals(new URL(TestUtils.SAMPLE_BASE), config.getSubjectsUrl());
+        assertEquals(URI.create(TestUtils.SAMPLE_BASE).toURL(), config.getSubjectsUrl());
     }
 
     @Test
@@ -140,7 +140,7 @@ class ConfigLogicTest {
         config.sourceList = Optional.of(List.of(TestUtils.SAMPLE_BASE));
         final List<URL> list = config.getTestSources();
         assertEquals(1, list.size());
-        assertEquals(new URL(TestUtils.SAMPLE_BASE), list.get(0));
+        assertEquals(URI.create(TestUtils.SAMPLE_BASE).toURL(), list.get(0));
     }
 
     @Test
@@ -149,8 +149,8 @@ class ConfigLogicTest {
         config.sourceList = Optional.of(List.of("https://example.org", "http://example.org"));
         final List<URL> list = config.getTestSources();
         assertEquals(2, list.size());
-        assertEquals(new URL("https://example.org"), list.get(0));
-        assertEquals(new URL("http://example.org"), list.get(1));
+        assertEquals(URI.create("https://example.org").toURL(), list.get(0));
+        assertEquals(URI.create("http://example.org").toURL(), list.get(1));
     }
 
     @Test
@@ -166,8 +166,8 @@ class ConfigLogicTest {
         config.setTestSources(List.of("https://example.org", "http://example.org"));
         final List<URL> list = config.getTestSources();
         assertEquals(2, list.size());
-        assertEquals(new URL("https://example.org"), list.get(0));
-        assertEquals(new URL("http://example.org"), list.get(1));
+        assertEquals(URI.create("https://example.org").toURL(), list.get(0));
+        assertEquals(URI.create("http://example.org").toURL(), list.get(1));
     }
 
     @Test
