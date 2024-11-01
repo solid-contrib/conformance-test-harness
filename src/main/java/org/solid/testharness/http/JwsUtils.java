@@ -39,7 +39,7 @@ import static org.jose4j.jwx.HeaderParameterNames.TYPE;
 
 public final class JwsUtils {
     private static final RandomStringGenerator GENERATOR = new RandomStringGenerator.Builder()
-            .withinRange('0', 'z').filteredBy(LETTERS, DIGITS).build();
+            .withinRange('0', 'z').filteredBy(LETTERS, DIGITS).get();
 
     // TODO: Switch to elliptical curve as it is faster
     public static String generateDpopToken(final RsaJsonWebKey clientKey, final JwtClaims claims) {
