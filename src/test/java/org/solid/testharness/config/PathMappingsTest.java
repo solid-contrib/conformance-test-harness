@@ -137,14 +137,14 @@ class PathMappingsTest {
 
     @Test
     void mapUrl() throws MalformedURLException {
-        final URL url = pathMappings.mapUrl(new URL("https://example.org/specification-sample-1.ttl"));
+        final URL url = pathMappings.mapUrl(URI.create("https://example.org/specification-sample-1.ttl").toURL());
         assertEquals(TestUtils.getFileUrl("src/test/resources/discovery/specification-sample-1.ttl"), url);
     }
 
     @Test
     void mapUrlFail() {
         assertThrows(TestHarnessInitializationException.class,
-                () -> pathMappings.mapUrl(new URL("https://example.org/badmapping-sample-1.ttl")));
+                () -> pathMappings.mapUrl(URI.create("https://example.org/badmapping-sample-1.ttl").toURL()));
     }
 
     @Test
