@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -377,7 +378,7 @@ class DataRepositoryTest {
     void loadTurtleBadUrl() {
         final DataRepository dataRepository = new DataRepository();
         assertThrows(TestHarnessInitializationException.class,
-                () -> dataRepository.load(new URL("file:/missing.txt"))
+                () -> dataRepository.load(URI.create("file:/missing.txt").toURL())
         );
     }
 
@@ -410,7 +411,7 @@ class DataRepositoryTest {
     void loadRdfaBadUrl() {
         final DataRepository dataRepository = new DataRepository();
         assertThrows(TestHarnessInitializationException.class,
-                () -> dataRepository.load(new URL("file:/missing.txt"), TestUtils.SAMPLE_BASE)
+                () -> dataRepository.load(URI.create("file:/missing.txt").toURL(), TestUtils.SAMPLE_BASE)
         );
     }
 
