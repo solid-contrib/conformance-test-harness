@@ -41,12 +41,14 @@ import jakarta.validation.constraints.NotNull;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandler;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.net.http.HttpTimeoutException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -170,7 +172,7 @@ public class Client {
                                      final Map<Object, Object> tokenRequestData) {
         this.tokenEndpoint = oidcConfig.getTokenEndpoint();
         this.authHeader = HttpConstants.PREFIX_BASIC +
-                Base64.getEncoder().encodeToString((clientId + ':' + clientSecret).getBytes());
+                Base64.getEncoder().encodeToString((URLEncoder.encode(clientId, StandardCharsets.UTF_8) + ':' + URLEncoder.encode(clientSecret, StandardCharsets.UTF_8)).getBytes(StandardCharsets.UTF_8));
         this.tokenRequestData = tokenRequestData;
     }
 
