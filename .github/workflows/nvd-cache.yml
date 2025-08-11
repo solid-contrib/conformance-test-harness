@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Checkout OVP repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: jeremylong/Open-Vulnerability-Project
           path: ovp
@@ -29,7 +29,7 @@ jobs:
         working-directory: ./ovp
         run: ./gradlew build -x test -x spotlessJavaCheck
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           path: data
 
