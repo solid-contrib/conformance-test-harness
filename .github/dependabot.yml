@@ -9,7 +9,7 @@ updates:
     # remain aligned with Jakarta 10 APIs
     - dependency-name: "org.glassfish.jersey.core:jersey-client"
       versions:
-        - "[3.1.0,4.0.0)"
+        - "[3.1,)"
   groups:
     plugins:
       patterns:
