@@ -88,7 +88,7 @@ public interface AccessDataset {
         return sw.toString().replaceAll("@prefix ([^:]+): <([^>]+)> .", "PREFIX $1: <$2>");
     }
 
-    default void parseTurtle(String data, String baseUri) {
+    default void parseTurtle(final String data, final String baseUri) {
         final Model model;
         try {
             model = Rio.parse(new StringReader(data), baseUri, RDFFormat.TURTLE);
@@ -98,7 +98,7 @@ public interface AccessDataset {
         setModel(model);
     }
 
-    default boolean isSubsetOf(AccessDataset otherAccessDataset) {
+    default boolean isSubsetOf(final AccessDataset otherAccessDataset) {
         if (getModel() == null || otherAccessDataset == null || otherAccessDataset.getModel() == null) {
             return false;
         }

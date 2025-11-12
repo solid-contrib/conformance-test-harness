@@ -4,6 +4,11 @@ updates:
   directory: "/"
   schedule:
     interval: weekly
+  ignore:
+    # remain aligned with Jakarta 10 APIs
+    - dependency-name: "org.glassfish.jersey.core:jersey-client"
+      versions:
+        - "[3.1,)"
   groups:
     plugins:
       patterns:
