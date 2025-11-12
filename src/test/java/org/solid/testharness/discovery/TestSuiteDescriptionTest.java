@@ -44,7 +44,7 @@ import org.solid.testharness.utils.TestUtils;
 
 import jakarta.inject.Inject;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
@@ -77,8 +77,8 @@ class TestSuiteDescriptionTest {
     @Test
     void loadOneManifest() throws MalformedURLException {
         testSuiteDescription.load(List.of(
-                new URL(NS + "test-manifest-sample-1.ttl"),
-                new URL(NS + "specification-sample-1.ttl")
+                URI.create(NS + "test-manifest-sample-1.ttl").toURL(),
+                URI.create(NS + "specification-sample-1.ttl").toURL()
         ));
         assertTrue(ask(iri(NS, "specification1"), RDF.type, DOAP.Specification));
         assertTrue(ask(iri(NS, "test-manifest-sample-1.ttl#group1-feature1"),
@@ -92,10 +92,10 @@ class TestSuiteDescriptionTest {
     @Test
     void loadTwoManifest() throws MalformedURLException {
         testSuiteDescription.load(List.of(
-                new URL(NS + "test-manifest-sample-1.ttl"),
-                new URL(NS + "test-manifest-sample-2.ttl"),
-                new URL(NS + "specification-sample-1.ttl"),
-                new URL(NS + "specification-sample-2.ttl")
+                URI.create(NS + "test-manifest-sample-1.ttl").toURL(),
+                URI.create(NS + "test-manifest-sample-2.ttl").toURL(),
+                URI.create(NS + "specification-sample-1.ttl").toURL(),
+                URI.create(NS + "specification-sample-2.ttl").toURL()
         ));
         assertTrue(ask(iri(NS, "specification1"), RDF.type, DOAP.Specification));
         assertTrue(ask(iri(NS, "test-manifest-sample-1.ttl#group1-feature1"),
@@ -107,7 +107,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void loadRdfa() throws MalformedURLException {
-        testSuiteDescription.load(List.of(new URL(NS + "specification-sample-1.html")));
+        testSuiteDescription.load(List.of(URI.create(NS + "specification-sample-1.html").toURL()));
         assertTrue(ask(iri(NS, "specification1"), RDF.type, DOAP.Specification));
         assertTrue(ask(iri(NS, "specification1#spec1"), SPEC.statement,
                 literal("text of requirement 1")));
@@ -116,10 +116,10 @@ class TestSuiteDescriptionTest {
     @Test
     void loadTwoManifestMixed() throws MalformedURLException {
         testSuiteDescription.load(List.of(
-                new URL(NS + "test-manifest-sample-1.ttl"),
-                new URL(NS + "test-manifest-sample-2.ttl"),
-                new URL(NS + "specification-sample-1.html"),
-                new URL(NS + "specification-sample-2.ttl")
+                URI.create(NS + "test-manifest-sample-1.ttl").toURL(),
+                URI.create(NS + "test-manifest-sample-2.ttl").toURL(),
+                URI.create(NS + "specification-sample-1.html").toURL(),
+                URI.create(NS + "specification-sample-2.ttl").toURL()
         ));
         assertTrue(ask(iri(NS, "specification1"), RDF.type, DOAP.Specification));
         assertTrue(ask(iri(NS, "test-manifest-sample-1.ttl#group1-feature1"),
@@ -131,7 +131,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void setNonRunningTestAssertionsNull() throws MalformedURLException {
-        testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
+        testSuiteDescription.load(List.of(URI.create(NS + "test-manifest-sample-1.ttl").toURL()));
         testSuiteDescription.setNonRunningTestAssertions(null, null);
         assertEquals(6, count(null, RDF.type, TD.TestCase));
         assertEquals(0, count(null, RDF.type, EARL.Assertion));
@@ -145,7 +145,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void setNonRunningTestAssertionsEmptyFilters() throws MalformedURLException {
-        testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
+        testSuiteDescription.load(List.of(URI.create(NS + "test-manifest-sample-1.ttl").toURL()));
         testSuiteDescription.setNonRunningTestAssertions(Collections.emptyList(), null);
         assertEquals(6, count(null, RDF.type, TD.TestCase));
         assertEquals(0, count(null, RDF.type, EARL.Assertion));
@@ -159,7 +159,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void setNonRunningTestAssertionsEmptyStatuses() throws MalformedURLException {
-        testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
+        testSuiteDescription.load(List.of(URI.create(NS + "test-manifest-sample-1.ttl").toURL()));
         testSuiteDescription.setNonRunningTestAssertions(null, Collections.emptyList());
         assertEquals(6, count(null, RDF.type, TD.TestCase));
         assertEquals(0, count(null, RDF.type, EARL.Assertion));
@@ -173,7 +173,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void setNonRunningTestAssertionsFilterGroup1() throws MalformedURLException {
-        testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
+        testSuiteDescription.load(List.of(URI.create(NS + "test-manifest-sample-1.ttl").toURL()));
         testSuiteDescription.setNonRunningTestAssertions(List.of("group1"), null);
         assertEquals(6, count(null, RDF.type, TD.TestCase));
         assertEquals(3, count(null, RDF.type, EARL.Assertion));
@@ -188,7 +188,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void setNonRunningTestAssertionsStatuesAccepted() throws MalformedURLException {
-        testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
+        testSuiteDescription.load(List.of(URI.create(NS + "test-manifest-sample-1.ttl").toURL()));
         testSuiteDescription.setNonRunningTestAssertions(null, List.of("accepted"));
         assertEquals(6, count(null, RDF.type, TD.TestCase));
         assertEquals(1, count(null, RDF.type, EARL.Assertion));
@@ -207,7 +207,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void setNonRunningTestAssertionsStatusUnreviewed() throws MalformedURLException {
-        testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
+        testSuiteDescription.load(List.of(URI.create(NS + "test-manifest-sample-1.ttl").toURL()));
         testSuiteDescription.setNonRunningTestAssertions(null, List.of("unreviewed"));
         assertEquals(6, count(null, RDF.type, TD.TestCase));
         assertEquals(5, count(null, RDF.type, EARL.Assertion));
@@ -218,7 +218,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void setNonRunningTestAssertionsBadStatus() throws MalformedURLException {
-        testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
+        testSuiteDescription.load(List.of(URI.create(NS + "test-manifest-sample-1.ttl").toURL()));
         add(iri(NS, "testcase"), RDF.type, TD.TestCase);
         add(iri(NS, "testcase"), TD.reviewStatus, literal("ACCEPTED"));
         testSuiteDescription.setNonRunningTestAssertions(null, List.of("unreviewed"));
@@ -231,7 +231,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void setNonRunningTestAssertionsBadStatusNotChecked() throws MalformedURLException {
-        testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
+        testSuiteDescription.load(List.of(URI.create(NS + "test-manifest-sample-1.ttl").toURL()));
         add(iri(NS, "testcase"), RDF.type, TD.TestCase);
         add(iri(NS, "testcase"), TD.reviewStatus, literal("ACCEPTED"));
         testSuiteDescription.setNonRunningTestAssertions(null, null);
@@ -242,7 +242,7 @@ class TestSuiteDescriptionTest {
 
     @Test
     void setNonRunningTestAssertionsMissingStatus() throws MalformedURLException {
-        testSuiteDescription.load(List.of( new URL(NS + "test-manifest-sample-1.ttl")));
+        testSuiteDescription.load(List.of(URI.create(NS + "test-manifest-sample-1.ttl").toURL()));
         add(iri(NS, "testcase"), RDF.type, TD.TestCase);
         testSuiteDescription.setNonRunningTestAssertions(null, List.of("accepted", "unreviewed"));
         assertEquals(7, count(null, RDF.type, TD.TestCase));
