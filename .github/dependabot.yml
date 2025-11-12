@@ -3,8 +3,7 @@ updates:
 - package-ecosystem: maven
   directory: "/"
   schedule:
-    interval: daily
-  open-pull-requests-limit: 10
+    interval: weekly
   groups:
     plugins:
       patterns:
@@ -15,6 +14,11 @@ updates:
         - "org.jacoco:jacoco-maven-plugin"
         - "org.owasp:dependency-check-maven"
         - "com.puppycrawl.tools:checkstyle"
+
+- package-ecosystem: "docker"
+  directory: "/src/main/docker"
+  schedule:
+    interval: weekly
 
 - package-ecosystem: "github-actions"
   directory: "/"
