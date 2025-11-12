@@ -288,7 +288,7 @@ public class Config {
         if (!StringUtils.isBlank(url)) {
             try {
                 if (url.startsWith("file:") || url.startsWith("http:") || url.startsWith("https:")) {
-                    return new URL(url);
+                    return URI.create(url).toURL();
                 } else {
                     return Path.of(url).toAbsolutePath().normalize().toUri().toURL();
                 }

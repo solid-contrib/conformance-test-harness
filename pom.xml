@@ -288,6 +288,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${compiler-plugin.version}</version>
+                <configuration>
+                    <showDeprecation>true</showDeprecation>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -525,7 +528,7 @@
                 </executions>
                 <configuration>
                     <failBuildOnCVSS>${owasp.plugin.cvss.threshold}</failBuildOnCVSS>
-                    <ossIndexWarnOnlyOnRemoteErrors>true</ossIndexWarnOnlyOnRemoteErrors>
+                    <ossindexAnalyzerEnabled>false</ossindexAnalyzerEnabled>
                     <opensslAnalyzerEnabled>false</opensslAnalyzerEnabled>
                     <nodeAuditAnalyzerEnabled>false</nodeAuditAnalyzerEnabled>
                     <retireJsAnalyzerEnabled>false</retireJsAnalyzerEnabled>
