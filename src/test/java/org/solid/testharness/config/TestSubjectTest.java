@@ -90,14 +90,14 @@ class TestSubjectTest {
         final TargetServer targetServer = testSubject.getTargetServer();
 
         assertNotNull(targetServer);
-        assertEquals(new URL(testFileUrl, "default").toString(), targetServer.getSubject());
+        assertEquals(testFileUrl.toURI().resolve("default").toString(), targetServer.getSubject());
         assertEquals(12, targetServer.size());
     }
 
     @Test
     void setupTargetMultipleConfig() throws Exception {
         final URL testFileUrl = TestUtils.getFileUrl(CONFIG_SAMPLE);
-        final String subject = new URL(testFileUrl, "testserver").toString();
+        final String subject = testFileUrl.toURI().resolve("testserver").toString();
         setupMockConfigMin(CONFIG_SAMPLE, subject);
         testSubject.loadTestSubjectConfig();
 
@@ -359,7 +359,7 @@ class TestSubjectTest {
     @Test
     void loadTestSubjectConfigTarget1() throws Exception {
         final URL testFileUrl = TestUtils.getFileUrl(CONFIG_SAMPLE);
-        final String subject = new URL(testFileUrl, "testserver").toString();
+        final String subject = testFileUrl.toURI().resolve("testserver").toString();
         when(config.getSubjectsUrl()).thenReturn(testFileUrl);
         when(config.getTestSubject()).thenReturn(iri(subject));
         testSubject.loadTestSubjectConfig();
@@ -373,7 +373,7 @@ class TestSubjectTest {
     @Test
     void loadTestSubjectConfigTarget2() throws Exception {
         final URL testFileUrl = TestUtils.getFileUrl(CONFIG_SAMPLE);
-        final String subject = new URL(testFileUrl, "testserver2").toString();
+        final String subject = testFileUrl.toURI().resolve("testserver2").toString();
         when(config.getSubjectsUrl()).thenReturn(testFileUrl);
         when(config.getTestSubject()).thenReturn(iri(subject));
         testSubject.loadTestSubjectConfig();
@@ -393,7 +393,7 @@ class TestSubjectTest {
         final TargetServer targetServer = testSubject.getTargetServer();
 
         assertNotNull(targetServer);
-        assertEquals(new URL(testFileUrl, "default").toString(), targetServer.getSubject());
+        assertEquals(testFileUrl.toURI().resolve("default").toString(), targetServer.getSubject());
     }
 
     @Test
