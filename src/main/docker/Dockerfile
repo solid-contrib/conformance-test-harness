@@ -3,7 +3,7 @@ FROM registry.access.redhat.com/ubi9/openjdk-21-runtime:1.23
 ENV LANGUAGE='en_US:en'
 
 USER root
-RUN microdnf install git
+RUN microdnf install -y git
 COPY target/solid-conformance-test-harness-runner.jar /app/harness/
 RUN git clone https://github.com/solid-contrib/specification-tests /data
 WORKDIR /data
