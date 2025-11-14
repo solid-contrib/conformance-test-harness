@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.solid.testharness.config.Config;
 
 import jakarta.enterprise.inject.spi.CDI;
-import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.core.Link;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -172,7 +171,7 @@ public final class HttpUtils {
         return body;
     }
 
-    public static HttpRequest.BodyPublisher ofFormData(@NotNull final Map<Object, Object> data) {
+    public static HttpRequest.BodyPublisher ofFormData(final Map<Object, Object> data) {
         Objects.requireNonNull(data, "data is required");
         final var builder = new StringBuilder();
         for (Map.Entry<Object, Object> entry : data.entrySet()) {
@@ -194,11 +193,11 @@ public final class HttpUtils {
         return StringUtils.stripEnd(value, "/");
     }
 
-    public static String encodeValue(@NotNull final String value) {
+    public static String encodeValue(final String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
-    private static String decodeValue(@NotNull final String value) {
+    private static String decodeValue(final String value) {
         return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 
@@ -227,7 +226,7 @@ public final class HttpUtils {
 
     // Link can be multi-valued (comma separated) or multi-instance so this builds a list from either form (or both)
     // TODO: This is temporary as a link can contain a comma so this is not safe - a parser is required
-    public static List<Link> parseLinkHeaders(@NotNull final HttpHeaders headers) {
+    public static List<Link> parseLinkHeaders(final HttpHeaders headers) {
         Objects.requireNonNull(headers, "headers is required");
         List<String> links = headers.allValues(HttpConstants.HEADER_LINK);
         // TODO: the following must be applied to all link headers, then the whole list flattened
@@ -237,7 +236,7 @@ public final class HttpUtils {
         return links.stream().map(Link::valueOf).collect(Collectors.toList());
     }
 
-    public static URI getHeaderLinkByType(@NotNull final HttpHeaders headers, @NotNull final String type) {
+    public static URI getHeaderLinkByType(final HttpHeaders headers, final String type) {
         final List<Link> links = parseLinkHeaders(headers);
         return links.stream()
                 .filter(link -> link.getRels().contains("type") &&

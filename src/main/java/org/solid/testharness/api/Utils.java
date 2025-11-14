@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.solid.testharness.http.HttpConstants;
 
-import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.core.Link;
 import java.net.URI;
 import java.util.*;
@@ -83,7 +82,7 @@ public final class Utils {
      */
     // This method deliberately creates objects in a loop dependent on the structure of the header
     @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
-    public static Map<String, List<String>> parseWacAllowHeader(@NotNull final Map<String, List<String>> headers) {
+    public static Map<String, List<String>> parseWacAllowHeader(final Map<String, List<String>> headers) {
         try {
             Objects.requireNonNull(headers, "headers is required");
             logger.debug("WAC-Allow: {}", headers);
