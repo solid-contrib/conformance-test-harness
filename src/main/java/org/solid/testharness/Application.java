@@ -26,7 +26,13 @@ package org.solid.testharness;
 import io.quarkus.runtime.Quarkus;
 import io.quarkus.runtime.QuarkusApplication;
 import io.quarkus.runtime.annotations.QuarkusMain;
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.model.IRI;
 import org.slf4j.Logger;
@@ -36,6 +42,7 @@ import org.solid.testharness.reporting.TestSuiteResults;
 
 import jakarta.inject.Inject;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -109,14 +116,14 @@ public class Application implements QuarkusApplication {
         return 1;
     }
 
-    private int processCommandLine(final String... args) throws ParseException {
+    private int processCommandLine(final String... args) throws ParseException, IOException {
         logger.debug("Args: {}", Arrays.toString(args));
         final Options options = setupOptions();
         final CommandLineParser parser = new DefaultParser();
         final CommandLine cmd = parser.parse(options, args);
         if (cmd.hasOption(HELP)) {
-            final HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp( "run", options );
+            final HelpFormatter formatter = HelpFormatter.builder().get();
+            formatter.printHelp("run", null, options, null, false);
             return 0;
         }
         if (cmd.hasOption(SKIP_REPORTS) && cmd.hasOption(COVERAGE)) {
@@ -198,31 +205,31 @@ public class Application implements QuarkusApplication {
 
     private Options setupOptions() {
         final Options options = new Options();
-        options.addOption(Option.builder().longOpt(COVERAGE).desc("produce a coverage report only").build());
+        options.addOption(Option.builder().longOpt(COVERAGE).desc("produce a coverage report only").get());
         options.addOption(Option.builder().longOpt(SKIP_TEARDOWN)
-                .desc("skip teardown (when server itself is being stopped)").build());
+                .desc("skip teardown (when server itself is being stopped)").get());
         options.addOption(Option.builder().longOpt(SKIP_REPORTS)
-                .desc("skip report generation").build());
+                .desc("skip report generation").get());
         options.addOption(Option.builder().longOpt(IGNORE_FAILURES)
-                .desc("return success even if there are failures").build());
+                .desc("return success even if there are failures").get());
         options.addOption(
-                Option.builder().longOpt(SUBJECTS).hasArg().desc("URL or path to test subject config (Turtle)").build()
+                Option.builder().longOpt(SUBJECTS).hasArg().desc("URL or path to test subject config (Turtle)").get()
         );
         options.addOption("t", TARGET, true, "target server");
         options.addOption(
                 Option.builder("s").longOpt(SOURCE).desc("URL or path to test source(s)")
-                        .hasArgs().valueSeparator(',').build()
+                        .hasArgs().valueSeparator(',').get()
         );
         options.addOption(
                 Option.builder().longOpt(STATUS).desc("status(es) of tests to run")
-                        .hasArgs().valueSeparator(',').build()
+                        .hasArgs().valueSeparator(',').get()
         );
         options.addOption("o", OUTPUT, true, "output directory");
         options.addOption(
-                Option.builder("f").longOpt(FILTER).desc("feature filter(s)").hasArgs().valueSeparator(',').build()
+                Option.builder("f").longOpt(FILTER).desc("feature filter(s)").hasArgs().valueSeparator(',').get()
         );
         options.addOption(
-                Option.builder().longOpt(TOLERABLE).hasArg().desc("path to a list of tests known to fail").build()
+                Option.builder().longOpt(TOLERABLE).hasArg().desc("path to a list of tests known to fail").get()
         );
         options.addOption("h", HELP, false, "print this message");
         return options;
