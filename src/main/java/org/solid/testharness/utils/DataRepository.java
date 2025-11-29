@@ -536,7 +536,7 @@ public class DataRepository implements Repository {
                     final var level = ((IRI)bindingSet.getValue("level")).getLocalName();
                     final var outcome = ((IRI)bindingSet.getValue("outcome")).getLocalName();
                     final var count = Integer.parseInt(bindingSet.getValue("count").stringValue());
-                    var scores = counts.computeIfAbsent(level, k -> new Scores());
+                    final var scores = counts.computeIfAbsent(level, k -> new Scores());
                     scores.setScore(outcome, count);
                 }
             }

@@ -44,7 +44,7 @@
         <owasp.plugin.version>12.1.9</owasp.plugin.version>
         <pmd.plugin.version>3.28.0</pmd.plugin.version>
         <properties.plugin.version>1.2.1</properties.plugin.version>
-        <quarkus.package.type>uber-jar</quarkus.package.type>
+        <quarkus.package.jar.type>uber-jar</quarkus.package.jar.type>
         <release.plugin.version>3.2.0</release.plugin.version>
         <surefire-plugin.version>3.5.4</surefire-plugin.version>
 
@@ -407,22 +407,26 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <version>${license.plugin.version}</version>
                 <configuration>
-                    <header>${project.basedir}/LICENSE</header>
                     <mapping>
                         <java>SLASHSTAR_STYLE</java>
                         <js>SLASHSTAR_STYLE</js>
                     </mapping>
-                    <excludes>
-                        <exclude>**/src/main/resources/**</exclude>
-                        <exclude>**/src/test/resources/**</exclude>
-                        <exclude>**/src/main/js/**/dist/**</exclude>
-                        <exclude>**/src/main/js/**/node_modules/**</exclude>
-                    </excludes>
-                    <includes>
-                        <include>**/src/main/java/**</include>
-                        <include>**/src/test/java/**</include>
-                        <include>**/src/main/js/**/*.js</include>
-                    </includes>
+                    <licenseSets>
+                        <licenseSet>
+                            <header>${project.basedir}/LICENSE</header>
+                            <excludes>
+                                <exclude>**/src/main/resources/**</exclude>
+                                <exclude>**/src/test/resources/**</exclude>
+                                <exclude>**/src/main/js/**/dist/**</exclude>
+                                <exclude>**/src/main/js/**/node_modules/**</exclude>
+                            </excludes>
+                            <includes>
+                                <include>**/src/main/java/**</include>
+                                <include>**/src/test/java/**</include>
+                                <include>**/src/main/js/**/*.js</include>
+                            </includes>
+                        </licenseSet>
+                    </licenseSets>
                 </configuration>
                 <executions>
                     <execution>

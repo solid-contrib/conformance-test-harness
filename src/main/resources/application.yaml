@@ -20,3 +20,6 @@ quarkus:
     netty-common:
       group-id: io.netty
       artifact-id: netty-common
+    netty-codec-http:
+      group-id: io.netty
+      artifact-id: netty-codec-http
