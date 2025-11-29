@@ -36,6 +36,7 @@ import org.solid.common.vocab.*;
 import org.solid.testharness.reporting.Scores;
 import org.solid.testharness.reporting.TestSuiteResults;
 
+import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -67,6 +68,9 @@ class DataRepositoryTest {
     private static final IRI requirementIri = iri(TestUtils.SAMPLE_NS, "requirement");
     private static final IRI assertionIri = iri(TestUtils.SAMPLE_NS, "assertion");
 
+    @Inject
+    GraalRdfaParser graalRdfaParser;
+
     @Test
     void addFeatureResult() {
         final DataRepository dataRepository = createRepository();
@@ -95,10 +99,16 @@ class DataRepositoryTest {
         when(feature.getSections()).thenReturn(sections);
         final Step step1 = mockStep("When", "method GET", 1, true, List.of("STEP COMMENT"));
         final Step step2 = mockStep("Then", "Status 200", 2, false, null);
-        final StepResult str1 = mockStepResult(step1, "passed", "STEP1 LOG\n" +
-                "js failed:\n>>>>?<<<<\n" +
-                "org.graalvm.polyglot.PolyglotException: EXCEPTION\n" +
-                "Caused by EXCEPTION2\nSTACK1\nSTACK2\n- <js>LAST\nother stuff");
+        final StepResult str1 = mockStepResult(step1, "passed", """
+                STEP1 LOG
+                js failed:
+                >>>>?<<<<
+                org.graalvm.polyglot.PolyglotException: EXCEPTION
+                Caused by EXCEPTION2
+                STACK1
+                STACK2
+                - <js>LAST
+                other stuff""");
         final StepResult str2 = mockStepResult(step2, "skipped", "");
 
         final ScenarioResult sr1 = mockScenarioResult(scenario1, true, 2000.0, List.of(str1, str2), "FAIL");
@@ -121,8 +131,12 @@ class DataRepositoryTest {
         assertTrue(result.contains("prov:value earl:untested"));
         assertTrue(result.contains("prov:value earl:inapplicable"));
         assertTrue(result.contains("dcterms:description \"STEP COMMENT\""));
-        assertTrue(result.contains("dcterms:description \"\"\"STEP1 LOG\n" +
-                "EXCEPTION\nCaused by EXCEPTION2\nSTACK1\n- <js>LAST"));
+        assertTrue(result.contains("""
+                dcterms:description ""\"STEP1 LOG
+                EXCEPTION
+                Caused by EXCEPTION2
+                STACK1
+                - <js>LAST"""));
         assertTrue(result.contains("dcterms:title \"SCENARIO OUTLINE SKIPPED\""));
     }
 
@@ -393,6 +407,7 @@ class DataRepositoryTest {
     @Test
     void loadRdfa() throws Exception {
         final DataRepository dataRepository = new DataRepository();
+        dataRepository.setGraalRdfaParser(graalRdfaParser);
         try (RepositoryConnection conn = dataRepository.getConnection()) {
             conn.setNamespace(DCTERMS.PREFIX, DCTERMS.NAMESPACE);
             conn.setNamespace(SPEC.PREFIX, SPEC.NAMESPACE);
@@ -455,27 +470,42 @@ class DataRepositoryTest {
 
     @Test
     void simplify() {
-        final String log = "STEP1 LOG\n" +
-                "js failed:\n>>>>?<<<<\n" +
-                "org.graalvm.polyglot.PolyglotException: EXCEPTION\n" +
-                "Caused by EXCEPTION2\nSTACK1\nSTACK2\n- <js>LAST\nother stuff\nmore";
-        assertEquals("STEP1 LOG\n" +
-                "EXCEPTION\n" +
-                "Caused by EXCEPTION2\n" +
-                "STACK1\n" +
-                "- <js>LAST", DataRepository.simplify(log));
+        final String log = """
+                STEP1 LOG
+                js failed:
+                >>>>?<<<<
+                org.graalvm.polyglot.PolyglotException: EXCEPTION
+                Caused by EXCEPTION2
+                STACK1
+                STACK2
+                - <js>LAST
+                other stuff
+                more""";
+        assertEquals("""
+                STEP1 LOG
+                EXCEPTION
+                Caused by EXCEPTION2
+                STACK1
+                - <js>LAST""", DataRepository.simplify(log));
     }
 
     @Test
     void simplifyNoCause() {
-        final String log = "STEP1 LOG\n" +
-                "js failed:\n>>>>?<<<<\n" +
-                "org.graalvm.polyglot.PolyglotException: EXCEPTION\n" +
-                "STACK1\nSTACK2\n- <js>LAST\nother stuff\nmore";
-        assertEquals("STEP1 LOG\n" +
-                "EXCEPTION\n" +
-                "STACK1\n" +
-                "- <js>LAST", DataRepository.simplify(log));
+        final String log = """
+                STEP1 LOG
+                js failed:
+                >>>>?<<<<
+                org.graalvm.polyglot.PolyglotException: EXCEPTION
+                STACK1
+                STACK2
+                - <js>LAST
+                other stuff
+                more""";
+        assertEquals("""
+                STEP1 LOG
+                EXCEPTION
+                STACK1
+                - <js>LAST""", DataRepository.simplify(log));
     }
 
     private DataRepository setupMinimalRepository() {

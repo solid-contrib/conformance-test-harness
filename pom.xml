@@ -25,12 +25,12 @@
         <karate.version>1.5.1</karate.version>
         <graal.version>25.0.1</graal.version>
         <quarkiverse.version>3.4.0</quarkiverse.version>
-        <rdf4j.version>4.3.12</rdf4j.version>
-        <semargl.version>0.7</semargl.version>
+        <rdf4j.version>5.1.3</rdf4j.version>
         <commons.cli.version>1.11.0</commons.cli.version>
         <jersey.version>3.1.11</jersey.version>
         <wiremock.version>2.35.2</wiremock.version>
         <hashids.version>1.0.3</hashids.version>
+        <mockito.version>5.20.0</mockito.version>
 
         <!-- plugins -->
         <build-helper.plugin.version>3.6.1</build-helper.plugin.version>
@@ -198,11 +198,6 @@
             <artifactId>rdf4j-rio-jsonld</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.semarglproject</groupId>
-            <artifactId>semargl-rdf4j</artifactId>
-            <version>${semargl.version}</version>
-        </dependency>
-        <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit5</artifactId>
             <scope>test</scope>
@@ -302,6 +297,8 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire-plugin.version}</version>
                 <configuration>
+                    <!-- Add Mockito agent to avoid dynamic agent loading warnings on JDK 21+ -->
+                    <argLine>-javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar -XX:+EnableDynamicAgentLoading</argLine>
                     <systemPropertyVariables>
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                         <maven.home>${maven.home}</maven.home>
@@ -341,6 +338,30 @@
                         <configuration>
                             <workingDirectory>target</workingDirectory>
                             <arguments>@inrupt/artifact-generator generate --noPrompt --vocabListFile ../src/main/vocabs/test-suite.yml</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>install rdfa-parser dependencies</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <installDirectory>target</installDirectory>
+                            <workingDirectory>${project.basedir}/src/main/js/rdfa-parser</workingDirectory>
+                            <arguments>install</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>bundle rdfa-parser</id>
+                        <goals>
+                            <goal>npx</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <installDirectory>target</installDirectory>
+                            <workingDirectory>${project.basedir}/src/main/js/rdfa-parser</workingDirectory>
+                            <arguments>webpack --mode production --output-path ${project.build.outputDirectory}</arguments>
                         </configuration>
                     </execution>
                 </executions>
@@ -389,14 +410,18 @@
                     <header>${project.basedir}/LICENSE</header>
                     <mapping>
                         <java>SLASHSTAR_STYLE</java>
+                        <js>SLASHSTAR_STYLE</js>
                     </mapping>
                     <excludes>
                         <exclude>**/src/main/resources/**</exclude>
                         <exclude>**/src/test/resources/**</exclude>
+                        <exclude>**/src/main/js/**/dist/**</exclude>
+                        <exclude>**/src/main/js/**/node_modules/**</exclude>
                     </excludes>
                     <includes>
                         <include>**/src/main/java/**</include>
                         <include>**/src/test/java/**</include>
+                        <include>**/src/main/js/**/*.js</include>
                     </includes>
                 </configuration>
                 <executions>

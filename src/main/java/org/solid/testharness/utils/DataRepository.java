@@ -36,13 +36,10 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
-import org.eclipse.rdf4j.rio.ParserConfig;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.UnsupportedRDFormatException;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
-import org.eclipse.rdf4j.rio.helpers.RDFaParserSettings;
-import org.eclipse.rdf4j.rio.helpers.RDFaVersion;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,10 +49,12 @@ import org.solid.testharness.reporting.TestSuiteResults;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -69,6 +68,17 @@ public class DataRepository implements Repository {
     private static final String POLYGLOT_EXCEPTION = "org.graalvm.polyglot.PolyglotException: ";
 
     private final Repository repository = new SailRepository(new MemoryStore());
+
+    @Inject
+    GraalRdfaParser graalRdfaParser;
+
+    /**
+     * Sets the RDFa parser (for testing when CDI is not available).
+     */
+    void setGraalRdfaParser(final GraalRdfaParser parser) {
+        this.graalRdfaParser = parser;
+    }
+
     // TODO: Determine if this should be a separate IRI to the base
     private IRI assertor;
     private IRI testSubject;
@@ -94,10 +104,19 @@ public class DataRepository implements Repository {
         try (var conn = getConnection()) {
             final var context = iri(url.toString());
             logger.info("Loading {} with base {}", url, baseUri);
-            final var parserConfig = new ParserConfig();
-            parserConfig.set(RDFaParserSettings.RDFA_COMPATIBILITY, RDFaVersion.RDFA_1_1);
-            conn.setParserConfig(parserConfig);
-            conn.add(url, baseUri, null, context);
+
+            // Check if URL points to RDFa content (HTML/XHTML)
+            final var urlPath = url.getPath().toLowerCase();
+            final var isRdfa = urlPath.endsWith(".html") || urlPath.endsWith(".xhtml")
+                    || urlPath.endsWith(".htm");
+
+            if (isRdfa) {
+                // Use GraalJS-based RDFa parser
+                loadRdfaDocument(conn, url, baseUri, context);
+            } else {
+                // Use standard Rio parser for other formats
+                conn.add(url, baseUri, null, context);
+            }
             logger.debug("Loaded data into temporary context, size={}", conn.size(context));
             try (var statements = conn.getStatements(null, SPEC.requirement, null, context)) {
                 if (statements.hasNext()) {
@@ -131,6 +150,37 @@ public class DataRepository implements Repository {
         } catch (IOException | RDF4JException | UnsupportedRDFormatException e) {
             throw new TestHarnessInitializationException("Failed to read data from [" + url + "]", e);
         }
+    }
+
+    /**
+     * Load an RDFa document using the GraalJS-based parser.
+     */
+    private void loadRdfaDocument(final RepositoryConnection conn, final URL url,
+                                  final String baseUri, final IRI context) throws IOException {
+        // Fetch the document content
+        final var connection = url.openConnection();
+        final var contentType = connection.getContentType();
+        final String effectiveContentType;
+        if (contentType == null) {
+            effectiveContentType = "text/html";
+        } else if (contentType.contains(";")) {
+            effectiveContentType = contentType.substring(0, contentType.indexOf(';')).trim();
+        } else {
+            effectiveContentType = contentType;
+        }
+
+        final String content;
+        try (final var is = connection.getInputStream()) {
+            content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+        }
+
+        // Parse with GraalRdfaParser
+        final var effectiveBaseUri = baseUri != null ? baseUri : url.toString();
+        final var model = graalRdfaParser.parse(content, effectiveBaseUri, effectiveContentType);
+
+        // Add statements to the repository in the given context
+        conn.add(model, context);
+        logger.debug("Loaded {} RDFa statements from {}", model.size(), url);
     }
 
     public void identifySpecifications() {
@@ -175,7 +225,7 @@ public class DataRepository implements Repository {
             final var resultSections = fr.getScenarioResults()
                     .stream()
                     .filter(s -> isReportableScenario(s.getScenario()))
-                    .collect(Collectors.toList());
+                    .toList();
             for (var sr: resultSections) {
                 final var outcome = createScenarioActivity(conn, fr, sr, scenarioData.fromScenario(sr.getScenario()),
                         testCaseIri, featureIri, featureFileParser);
@@ -189,7 +239,7 @@ public class DataRepository implements Repository {
                     .filter(s -> !sections.contains(s))
                     .filter(s -> s.getScenarioOutline() != null ||
                             isReportableScenario(s.getScenario()))
-                    .collect(Collectors.toList());
+                    .toList();
             for (FeatureSection section: otherSections) {
                 final var outcome = createScenarioActivity(conn, fr, null, scenarioData.fromFeatureSection(section),
                         testCaseIri, featureIri, featureFileParser);
@@ -486,11 +536,7 @@ public class DataRepository implements Repository {
                     final var level = ((IRI)bindingSet.getValue("level")).getLocalName();
                     final var outcome = ((IRI)bindingSet.getValue("outcome")).getLocalName();
                     final var count = Integer.parseInt(bindingSet.getValue("count").stringValue());
-                    var scores = counts.get(level);
-                    if (scores == null) {
-                        scores = new Scores();
-                        counts.put(level, scores);
-                    }
+                    var scores = counts.computeIfAbsent(level, k -> new Scores());
                     scores.setScore(outcome, count);
                 }
             }
