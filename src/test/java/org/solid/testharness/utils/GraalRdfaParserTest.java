@@ -35,8 +35,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -51,8 +50,8 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class GraalRdfaParserTest {
     private static final String JS = "js";
+    private static final String BUNDLE_RESOURCE = "/rdfa-parser-bundle.js";
     private static Context context;
-    private static final Path BUNDLE_PATH = Path.of("src/main/js/rdfa-parser/dist/rdfa-parser-bundle.js");
 
     @BeforeAll
     static void setUp() throws IOException {
@@ -62,9 +61,14 @@ class GraalRdfaParserTest {
                 .allowHostClassLookup(className -> true)
                 .build();
 
-        // Load the bundle (includes polyfills for GraalJS environment)
-        final String bundleCode = Files.readString(BUNDLE_PATH);
-        context.eval(JS, bundleCode);
+        // Load the bundle from classpath (built by webpack to target/classes)
+        try (var is = GraalRdfaParserTest.class.getResourceAsStream(BUNDLE_RESOURCE)) {
+            if (is == null) {
+                throw new IOException("Bundle not found on classpath: " + BUNDLE_RESOURCE);
+            }
+            final var bundleCode = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            context.eval(JS, bundleCode);
+        }
     }
 
     @AfterAll
