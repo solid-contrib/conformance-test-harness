@@ -135,7 +135,7 @@ The build includes several code quality tools that run during the `verify` phase
 | License Headers | `./mvnw license:check` | `LICENSE` | Console output |
 | Checkstyle | `./mvnw checkstyle:check` | `checkstyle.xml` | `target/checkstyle-result.xml` |
 | PMD | `./mvnw pmd:check` | `pmd.xml` | `target/pmd.xml` |
-| JaCoCo Coverage | `./mvnw jacoco:check` | In `pom.xml` | `target/site/jacoco/index.html` |
+| JaCoCo Coverage | Runs during `verify` | In `pom.xml` | `target/site/jacoco/index.html` |
 | OWASP Dependency Check | `./mvnw dependency-check:check` | `owasp-suppressions.xml` | `target/dependency-check-report.html` |
 
 All checks run automatically during `./mvnw verify` (which is also part of `./mvnw package`).

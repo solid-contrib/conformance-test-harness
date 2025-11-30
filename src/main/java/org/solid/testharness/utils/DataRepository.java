@@ -160,14 +160,7 @@ public class DataRepository implements Repository {
         // Fetch the document content
         final var connection = url.openConnection();
         final var contentType = connection.getContentType();
-        final String effectiveContentType;
-        if (contentType == null) {
-            effectiveContentType = "text/html";
-        } else if (contentType.contains(";")) {
-            effectiveContentType = contentType.substring(0, contentType.indexOf(';')).trim();
-        } else {
-            effectiveContentType = contentType;
-        }
+        final var effectiveContentType = parseContentType(contentType);
 
         final String content;
         try (final var is = connection.getInputStream()) {
@@ -441,6 +434,20 @@ public class DataRepository implements Repository {
                     .collect(Collectors.joining("\n"));
         } else {
             return String.join("\n", lines);
+        }
+    }
+
+    /**
+     * Parse content-type header, extracting just the media type without parameters.
+     * Returns "text/html" as default if contentType is null.
+     */
+    static String parseContentType(final String contentType) {
+        if (contentType == null) {
+            return "text/html";
+        } else if (contentType.contains(";")) {
+            return contentType.substring(0, contentType.indexOf(';')).trim();
+        } else {
+            return contentType;
         }
     }
 

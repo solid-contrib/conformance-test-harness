@@ -423,6 +423,33 @@ class DataRepositoryTest {
     }
 
     @Test
+    void loadRdfaWithNullBaseUri() throws Exception {
+        final DataRepository dataRepository = new DataRepository();
+        dataRepository.setGraalRdfaParser(graalRdfaParser);
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/rdfa-sample.html"), null);
+        // Should use URL as base URI, resulting in different subject IRIs
+        assertTrue(dataRepositorySize(dataRepository) > 0);
+    }
+
+    @Test
+    void loadRdfaXhtmlExtension() throws Exception {
+        // Test .xhtml extension branch (line 110)
+        final DataRepository dataRepository = new DataRepository();
+        dataRepository.setGraalRdfaParser(graalRdfaParser);
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/rdfa-sample.xhtml"), TestUtils.SAMPLE_BASE);
+        assertTrue(dataRepositorySize(dataRepository) > 0);
+    }
+
+    @Test
+    void loadRdfaHtmExtension() throws Exception {
+        // Test .htm extension branch (line 111)
+        final DataRepository dataRepository = new DataRepository();
+        dataRepository.setGraalRdfaParser(graalRdfaParser);
+        dataRepository.load(TestUtils.getFileUrl("src/test/resources/rdfa-sample.htm"), TestUtils.SAMPLE_BASE);
+        assertTrue(dataRepositorySize(dataRepository) > 0);
+    }
+
+    @Test
     void loadRdfaBadUrl() {
         final DataRepository dataRepository = new DataRepository();
         assertThrows(TestHarnessInitializationException.class,
@@ -506,6 +533,28 @@ class DataRepositoryTest {
                 EXCEPTION
                 STACK1
                 - <js>LAST""", DataRepository.simplify(log));
+    }
+
+    @Test
+    void parseContentTypeNull() {
+        // Test null content-type defaults to text/html
+        assertEquals("text/html", DataRepository.parseContentType(null));
+    }
+
+    @Test
+    void parseContentTypeWithSemicolon() {
+        // Test content-type with charset parameter
+        assertEquals("text/html", DataRepository.parseContentType("text/html; charset=utf-8"));
+        assertEquals("application/xhtml+xml",
+                DataRepository.parseContentType("application/xhtml+xml; charset=utf-8"));
+        assertEquals("text/html", DataRepository.parseContentType("text/html ; charset=iso-8859-1"));
+    }
+
+    @Test
+    void parseContentTypeWithoutSemicolon() {
+        // Test simple content-type without parameters
+        assertEquals("text/html", DataRepository.parseContentType("text/html"));
+        assertEquals("application/xhtml+xml", DataRepository.parseContentType("application/xhtml+xml"));
     }
 
     private DataRepository setupMinimalRepository() {
