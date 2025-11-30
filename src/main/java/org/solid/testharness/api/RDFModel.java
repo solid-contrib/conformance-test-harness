@@ -26,20 +26,17 @@ package org.solid.testharness.api;
 import com.intuit.karate.Logger;
 import com.intuit.karate.core.ScenarioEngine;
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.util.Values;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.repository.util.RepositoryUtil;
-import org.eclipse.rdf4j.rio.ParserConfig;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.Rio;
-import org.eclipse.rdf4j.rio.helpers.ParseErrorLogger;
-import org.eclipse.rdf4j.rio.helpers.RDFaParserSettings;
-import org.eclipse.rdf4j.rio.helpers.RDFaVersion;
 import org.solid.testharness.http.HttpConstants;
+import org.solid.testharness.utils.GraalRdfaParser;
 
+import jakarta.enterprise.inject.spi.CDI;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
@@ -82,10 +79,9 @@ public final class RDFModel {
             }
             final RDFFormat format = CONTENT_TYPES.get(contentType);
             if (format.equals(RDFFormat.RDFA)) {
-                final ParserConfig parserConfig = new ParserConfig();
-                parserConfig.set(RDFaParserSettings.RDFA_COMPATIBILITY, RDFaVersion.RDFA_1_1);
-                return new RDFModel(Rio.parse(new StringReader(data), baseUri, RDFFormat.RDFA,
-                        parserConfig, SimpleValueFactory.getInstance(), new ParseErrorLogger()));
+                // Use GraalJS-based RDFa parser (replaces deprecated semargl)
+                final GraalRdfaParser parser = CDI.current().select(GraalRdfaParser.class).get();
+                return new RDFModel(parser.parse(data, baseUri, contentType));
             } else {
                 return new RDFModel(Rio.parse(new StringReader(data), baseUri, format));
             }

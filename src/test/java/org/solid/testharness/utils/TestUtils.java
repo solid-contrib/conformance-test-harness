@@ -31,24 +31,20 @@ import org.eclipse.rdf4j.common.exception.RDF4JException;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.util.RepositoryUtil;
-import org.eclipse.rdf4j.rio.ParserConfig;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
-import org.eclipse.rdf4j.rio.helpers.ParseErrorLogger;
-import org.eclipse.rdf4j.rio.helpers.RDFaParserSettings;
-import org.eclipse.rdf4j.rio.helpers.RDFaVersion;
 import org.jose4j.jwk.PublicJsonWebKey;
 import org.slf4j.Logger;
 import org.solid.testharness.http.HttpConstants;
 import org.solid.testharness.http.HttpUtils;
 
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.json.bind.annotation.JsonbProperty;
 import java.io.*;
@@ -198,11 +194,9 @@ public final class TestUtils {
         return sw.toString();
     }
 
-    public static Model parseRdfa(final String data, final String baseUri) throws IOException {
-        final ParserConfig parserConfig = new ParserConfig();
-        parserConfig.set(RDFaParserSettings.RDFA_COMPATIBILITY, RDFaVersion.RDFA_1_1);
-        return Rio.parse(new StringReader(data), baseUri, RDFFormat.RDFA,
-                parserConfig, SimpleValueFactory.getInstance(), new ParseErrorLogger());
+    public static Model parseRdfa(final String data, final String baseUri) {
+        final GraalRdfaParser parser = CDI.current().select(GraalRdfaParser.class).get();
+        return parser.parse(data, baseUri, HttpConstants.MEDIA_TYPE_TEXT_HTML);
     }
 
     public static void dumpRepository(final DataRepository repository) {

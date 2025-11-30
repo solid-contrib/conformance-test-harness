@@ -124,7 +124,27 @@ To run the unit tests on the Test Harness itself:
 ```shell
 ./mvnw test
 ```
-The test coverage report is available here:`target/site/jacoco/index.html`
+The test coverage report is available here: `target/site/jacoco/index.html`
+
+#### Code Quality Checks
+
+The build includes several code quality tools that run during the `verify` phase:
+
+| Tool | Individual Command | Configuration | Report Location |
+|------|-------------------|---------------|-----------------|
+| License Headers | `./mvnw license:check` | `LICENSE` | Console output |
+| Checkstyle | `./mvnw checkstyle:check` | `checkstyle.xml` | `target/checkstyle-result.xml` |
+| PMD | `./mvnw pmd:check` | `pmd.xml` | `target/pmd.xml` |
+| JaCoCo Coverage | Runs during `verify` | In `pom.xml` | `target/site/jacoco/index.html` |
+| OWASP Dependency Check | `./mvnw dependency-check:check` | `owasp-suppressions.xml` | `target/dependency-check-report.html` |
+
+All checks run automatically during `./mvnw verify` (which is also part of `./mvnw package`).
+
+- **License** (Mycila) verifies all Java source files have the MIT license header. Build fails on violations. Use `./mvnw license:format` to auto-add missing headers.
+- **Checkstyle** enforces code style (120 char lines, K&R braces). Build fails on violations.
+- **PMD** detects potential bugs and code smells. Reports warnings but doesn't fail the build.
+- **JaCoCo** enforces test coverage thresholds (90% branch, 90% line per package). Build fails if not met.
+- **OWASP** scans dependencies for known vulnerabilities. Can be skipped with `-Ddependency-check.skip`.
 
 To run the test suite against whichever server is configured in your `.env` file:
 ```shell

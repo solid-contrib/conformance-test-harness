@@ -10,3 +10,7 @@ release.properties
 
 # Generated RDF artifacts - until they are published
 !generated-vocab-common*.jar
+
+# Node.js (rdfa-parser)
+src/main/js/rdfa-parser/node_modules/
+src/main/js/rdfa-parser/dist/
