@@ -467,6 +467,16 @@ class DataRepositoryTest {
     }
 
     @Test
+    void loadTurtleViaContentTypeDetection() throws MalformedURLException {
+        // Tests loading a .ttl file which goes through loadWithContentTypeDetection
+        // and determines format from filename (not extension check for .html/.xhtml/.htm)
+        final DataRepository dataRepository = new DataRepository();
+        final URL url = Path.of("src/test/resources/turtle-sample.ttl").normalize().toUri().toURL();
+        dataRepository.load(url);
+        assertEquals(1, dataRepositorySize(dataRepository));
+    }
+
+    @Test
     void testOverriddenMethods() {
         final DataRepository dataRepository = new DataRepository();
         final File dataDir = new File("/tmp");
@@ -555,6 +565,31 @@ class DataRepositoryTest {
         // Test simple content-type without parameters
         assertEquals("text/html", DataRepository.parseContentType("text/html"));
         assertEquals("application/xhtml+xml", DataRepository.parseContentType("application/xhtml+xml"));
+    }
+
+    @Test
+    void isRdfaContentTypeForHtml() {
+        // Test that text/html is recognized as RDFa content
+        assertTrue(DataRepository.isRdfaContentType("text/html"));
+        assertTrue(DataRepository.isRdfaContentType("TEXT/HTML"));
+        assertTrue(DataRepository.isRdfaContentType("Text/Html"));
+    }
+
+    @Test
+    void isRdfaContentTypeForXhtml() {
+        // Test that application/xhtml+xml is recognized as RDFa content
+        assertTrue(DataRepository.isRdfaContentType("application/xhtml+xml"));
+        assertTrue(DataRepository.isRdfaContentType("APPLICATION/XHTML+XML"));
+    }
+
+    @Test
+    void isRdfaContentTypeForOtherFormats() {
+        // Test that other formats are not recognized as RDFa
+        assertFalse(DataRepository.isRdfaContentType("text/turtle"));
+        assertFalse(DataRepository.isRdfaContentType("application/ld+json"));
+        assertFalse(DataRepository.isRdfaContentType("application/rdf+xml"));
+        assertFalse(DataRepository.isRdfaContentType("text/plain"));
+        assertFalse(DataRepository.isRdfaContentType(null));
     }
 
     private DataRepository setupMinimalRepository() {

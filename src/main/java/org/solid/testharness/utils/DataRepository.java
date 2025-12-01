@@ -106,16 +106,17 @@ public class DataRepository implements Repository {
             logger.info("Loading {} with base {}", url, baseUri);
 
             // Check if URL points to RDFa content (HTML/XHTML)
+            // First check by file extension
             final var urlPath = url.getPath().toLowerCase();
-            final var isRdfa = urlPath.endsWith(".html") || urlPath.endsWith(".xhtml")
+            final var extensionIndicatesRdfa = urlPath.endsWith(".html") || urlPath.endsWith(".xhtml")
                     || urlPath.endsWith(".htm");
 
-            if (isRdfa) {
+            if (extensionIndicatesRdfa) {
                 // Use GraalJS-based RDFa parser
                 loadRdfaDocument(conn, url, baseUri, context);
             } else {
-                // Use standard Rio parser for other formats
-                conn.add(url, baseUri, null, context);
+                // Extension doesn't indicate RDFa - need to check content-type
+                loadWithContentTypeDetection(conn, url, baseUri, context);
             }
             logger.debug("Loaded data into temporary context, size={}", conn.size(context));
             try (var statements = conn.getStatements(null, SPEC.requirement, null, context)) {
@@ -153,6 +154,51 @@ public class DataRepository implements Repository {
     }
 
     /**
+     * Load a document, detecting content type from HTTP headers to determine parser.
+     */
+    private void loadWithContentTypeDetection(final RepositoryConnection conn, final URL url,
+                                              final String baseUri, final IRI context) throws IOException {
+        final var connection = url.openConnection();
+        final var contentType = connection.getContentType();
+        // Only parse content type if it's not null - we need actual content-type info to detect RDFa
+        final var mediaType = contentType != null ? parseContentType(contentType) : null;
+
+        // Check if content-type explicitly indicates HTML/XHTML (RDFa)
+        if (isRdfaContentType(mediaType)) {
+            logger.debug("Detected RDFa content-type: {}", mediaType);
+            loadRdfaFromConnection(conn, connection, url, baseUri, context, mediaType);
+        } else {
+            // Use standard Rio parser - determine format from content-type or filename
+            final var effectiveBaseUri = baseUri != null ? baseUri : url.toString();
+            final Optional<RDFFormat> formatFromMime = mediaType != null
+                    ? Rio.getParserFormatForMIMEType(mediaType)
+                    : Optional.empty();
+            final var format = formatFromMime
+                    .orElseGet(() -> Rio.getParserFormatForFileName(url.getPath()).orElse(null));
+
+            if (format != null) {
+                try (final var is = connection.getInputStream()) {
+                    conn.add(is, effectiveBaseUri, format, context);
+                }
+            } else {
+                // Let Rio try to figure it out (may fail)
+                conn.add(url, baseUri, null, context);
+            }
+        }
+    }
+
+    /**
+     * Check if the media type indicates RDFa content (HTML/XHTML).
+     */
+    static boolean isRdfaContentType(final String mediaType) {
+        if (mediaType == null) {
+            return false;
+        }
+        return "text/html".equalsIgnoreCase(mediaType)
+                || "application/xhtml+xml".equalsIgnoreCase(mediaType);
+    }
+
+    /**
      * Load an RDFa document using the GraalJS-based parser.
      */
     private void loadRdfaDocument(final RepositoryConnection conn, final URL url,
@@ -161,7 +207,15 @@ public class DataRepository implements Repository {
         final var connection = url.openConnection();
         final var contentType = connection.getContentType();
         final var effectiveContentType = parseContentType(contentType);
+        loadRdfaFromConnection(conn, connection, url, baseUri, context, effectiveContentType);
+    }
 
+    /**
+     * Load RDFa from an already-opened connection.
+     */
+    private void loadRdfaFromConnection(final RepositoryConnection conn, final java.net.URLConnection connection,
+                                        final URL url, final String baseUri, final IRI context,
+                                        final String contentType) throws IOException {
         final String content;
         try (final var is = connection.getInputStream()) {
             content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
@@ -169,7 +223,7 @@ public class DataRepository implements Repository {
 
         // Parse with GraalRdfaParser
         final var effectiveBaseUri = baseUri != null ? baseUri : url.toString();
-        final var model = graalRdfaParser.parse(content, effectiveBaseUri, effectiveContentType);
+        final var model = graalRdfaParser.parse(content, effectiveBaseUri, contentType);
 
         // Add statements to the repository in the given context
         conn.add(model, context);
