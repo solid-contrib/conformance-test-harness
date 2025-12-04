@@ -10,3 +10,16 @@ quarkus:
     json:
       console:
         enable: false
+  index-dependency:
+    armeria:
+      group-id: com.linecorp.armeria
+      artifact-id: armeria
+    netty-buffer:
+      group-id: io.netty
+      artifact-id: netty-buffer
+    netty-common:
+      group-id: io.netty
+      artifact-id: netty-common
+    netty-codec-http:
+      group-id: io.netty
+      artifact-id: netty-codec-http

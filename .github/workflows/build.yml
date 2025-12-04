@@ -11,11 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.actor != 'dependabot[bot]' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: 17
           distribution: 'temurin'
@@ -46,5 +46,4 @@ jobs:
       - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B -ntp verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=solid-contrib_conformance-test-harness -Dnvd.api.datafeed="file:${GITHUB_WORKSPACE}/data/cache/nvdcve-{0}.json.gz"
+        run: mvn -B -ntp verify -Dnvd.api.datafeed="file:${GITHUB_WORKSPACE}/data/cache/nvdcve-{0}.json.gz"

@@ -37,7 +37,7 @@ import org.solid.testharness.utils.TestHarnessInitializationException;
 
 import jakarta.inject.Inject;
 import java.io.File;
-import java.net.URL;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -168,7 +168,7 @@ class ApplicationTest {
     void target() throws Exception {
         final TestSuiteResults results = mockResults(1, false);
         when(conformanceTestHarness.runTestSuites(any(), any())).thenReturn(results);
-        when(config.getSubjectsUrl()).thenReturn(new URL("https://example.org/subjects.ttl"));
+        when(config.getSubjectsUrl()).thenReturn(URI.create("https://example.org/subjects.ttl").toURL());
         assertEquals(0, application.run("--target", "test"));
         verify(config).setTestSubject(iri("https://example.org/test"));
     }
@@ -177,7 +177,7 @@ class ApplicationTest {
     void targetIri() throws Exception {
         final TestSuiteResults results = mockResults(1, false);
         when(conformanceTestHarness.runTestSuites(any(), any())).thenReturn(results);
-        when(config.getSubjectsUrl()).thenReturn(new URL("https://example.org/subjects.ttl"));
+        when(config.getSubjectsUrl()).thenReturn(URI.create("https://example.org/subjects.ttl").toURL());
         assertEquals(0, application.run("--target", "https://example.org/test"));
         verify(config).setTestSubject(iri("https://example.org/test"));
     }
