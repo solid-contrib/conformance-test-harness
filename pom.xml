@@ -25,7 +25,7 @@
         <karate.version>1.5.2</karate.version>
         <graal.version>25.0.1</graal.version>
         <quarkiverse.version>3.4.0</quarkiverse.version>
-        <rdf4j.version>5.2.0</rdf4j.version>
+        <rdf4j.version>5.2.1</rdf4j.version>
         <commons.cli.version>1.11.0</commons.cli.version>
         <jersey.version>3.1.11</jersey.version>
         <wiremock.version>2.35.2</wiremock.version>
