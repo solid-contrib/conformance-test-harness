@@ -45,7 +45,7 @@
         <pmd.plugin.version>3.28.0</pmd.plugin.version>
         <properties.plugin.version>1.2.1</properties.plugin.version>
         <quarkus.package.jar.type>uber-jar</quarkus.package.jar.type>
-        <release.plugin.version>3.3.0</release.plugin.version>
+        <release.plugin.version>3.3.1</release.plugin.version>
         <surefire-plugin.version>3.5.4</surefire-plugin.version>
 
         <!-- package info -->
@@ -57,7 +57,7 @@
         <package.buildTime>${maven.build.timestamp}</package.buildTime>
 
         <!-- tooling -->
-        <checkstyle.tool.version>12.2.0</checkstyle.tool.version>
+        <checkstyle.tool.version>12.3.0</checkstyle.tool.version>
         <sonar.organization>solid-contrib</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <nvd.api.key />
