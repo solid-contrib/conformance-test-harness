@@ -22,7 +22,7 @@ jobs:
 
       # Use a cache for the local Maven repository
       - name: Cache Maven packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
@@ -33,7 +33,7 @@ jobs:
         run: echo "CACHE_NAME=$(date '+%y.%j')" >> $GITHUB_ENV
 
       - name: Restore NVD data cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           key: nvd-data-${{ env.CACHE_NAME }}
           restore-keys: nvd-data-
