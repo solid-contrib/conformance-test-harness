@@ -37,7 +37,7 @@
         <checkstyle.plugin.version>3.6.0</checkstyle.plugin.version>
         <compiler-plugin.version>3.14.1</compiler-plugin.version>
         <deploy.plugin.version>3.1.4</deploy.plugin.version>
-        <frontend.plugin.version>1.15.4</frontend.plugin.version>
+        <frontend.plugin.version>2.0.0</frontend.plugin.version>
         <jacoco-plugin.version>0.8.14</jacoco-plugin.version>
         <license.plugin.version>5.0.0</license.plugin.version>
         <node.version>20.11.0</node.version>
