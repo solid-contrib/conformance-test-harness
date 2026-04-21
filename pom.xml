@@ -22,7 +22,7 @@
 
         <!-- dependencies -->
         <quarkus.version>3.34.5</quarkus.version>
-        <karate.version>1.5.2</karate.version>
+        <karate.version>2.0.3</karate.version>
         <graal.version>25.0.2</graal.version>
         <quarkiverse.version>3.5.0</quarkiverse.version>
         <rdf4j.version>5.3.0</rdf4j.version>
