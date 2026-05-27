@@ -24,6 +24,7 @@
 package org.solid.testharness.http;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -40,6 +41,9 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -491,6 +495,35 @@ class ClientTest {
         assertTrue(headers.get(HttpConstants.HEADER_AUTHORIZATION).startsWith(HttpConstants.PREFIX_DPOP));
         assertTrue(headers.containsKey(HttpConstants.HEADER_DPOP));
         assertTrue(headers.containsKey(HttpConstants.USER_AGENT));
+    }
+
+    @Test
+    void getAuthHeadersDpopProofBindsAth() throws Exception {
+        // RFC 9449 §4.2/§7.1: a DPoP proof presented with an access token to a protected resource MUST
+        // carry `ath` = base64url(SHA-256(access token)) so the proof is bound to that token.
+        final Client client = mockClient(true);
+        final Map<String, String> headers = client.getAuthHeaders("GET", TEST_URL);
+        final var claims = dpopProofClaims(headers.get(HttpConstants.HEADER_DPOP));
+        final var expected = Base64.getUrlEncoder().withoutPadding().encodeToString(
+                MessageDigest.getInstance("SHA-256").digest(accessToken.getBytes(StandardCharsets.US_ASCII)));
+        assertEquals(expected, claims.get("ath"));
+    }
+
+    @Test
+    void signRequestDpopProofBindsAth() throws Exception {
+        final Client client = mockClient(true);
+        final HttpRequest request = client.signRequest(HttpRequest.newBuilder(TEST_URL)).build();
+        final var claims = dpopProofClaims(request.headers().firstValue(HttpConstants.HEADER_DPOP).orElseThrow());
+        final var expected = Base64.getUrlEncoder().withoutPadding().encodeToString(
+                MessageDigest.getInstance("SHA-256").digest(accessToken.getBytes(StandardCharsets.US_ASCII)));
+        assertEquals(expected, claims.get("ath"));
+    }
+
+    /** Decode the (unverified) payload of a DPoP proof JWS into its claims map. */
+    private Map<String, Object> dpopProofClaims(final String proof) throws JsonProcessingException {
+        final String payload = new String(
+                Base64.getUrlDecoder().decode(proof.split("\\.")[1]), StandardCharsets.UTF_8);
+        return objectMapper.readValue(payload, new TypeReference<>() { });
     }
 
     @Test
