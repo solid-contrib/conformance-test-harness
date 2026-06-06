@@ -41,6 +41,9 @@ public final class HttpConstants {
 
     public static final String PREFIX_DPOP = "DPoP ";
     public static final String PREFIX_BEARER = "Bearer ";
+
+    // RFC 9449 DPoP proof claim: base64url SHA-256 of the access token it accompanies.
+    public static final String DPOP_ATH = "ath";
     public static final String PREFIX_BASIC = "Basic ";
 
     public static final String MEDIA_TYPE_APPLICATION_FORM_URLENCODED = "application/x-www-form-urlencoded";

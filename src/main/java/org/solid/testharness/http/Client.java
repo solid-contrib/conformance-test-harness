@@ -49,6 +49,8 @@ import java.net.http.HttpResponse.BodyHandler;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.net.http.HttpTimeoutException;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -186,14 +188,16 @@ public class Client {
             if (accessToken == null || isAccessTokenExpired()) {
                 logger.debug("Request access token for {} using grant type {}",
                         user, tokenRequestData.get(HttpConstants.GRANT_TYPE));
+                // Token-endpoint proof: no access token is presented here, so it must NOT carry `ath`
+                // (pass null explicitly — a stale token in the field during a refresh must not leak in).
                 final var requestBuilder = signRequest(
                         HttpUtils.newRequestBuilder(tokenEndpoint)
                                 .header(HttpConstants.HEADER_AUTHORIZATION, authHeader)
                                 .header(HttpConstants.HEADER_CONTENT_TYPE,
                                         HttpConstants.MEDIA_TYPE_APPLICATION_FORM_URLENCODED)
                                 .header(HttpConstants.HEADER_ACCEPT, HttpConstants.MEDIA_TYPE_APPLICATION_JSON)
-                                .POST(HttpUtils.ofFormData(tokenRequestData))
-                );
+                                .POST(HttpUtils.ofFormData(tokenRequestData)),
+                        null);
                 final HttpResponse<String> response;
                 try {
                     final var request = requestBuilder.build();
@@ -373,10 +377,18 @@ public class Client {
      * @return The builder with the DPoP header added
      */
     public HttpRequest.Builder signRequest(@NotNull final HttpRequest.Builder builder) {
+        // A resource request presents the access token, so RFC 9449 requires the proof to be bound to
+        // it via `ath`.
+        return signRequest(builder, accessToken);
+    }
+
+    private HttpRequest.Builder signRequest(@NotNull final HttpRequest.Builder builder,
+                                            final String boundAccessToken) {
         requireNonNull(builder, "builder is required");
         if (!dpopSupported) return builder;
         final var provisionalRequest = builder.copy().build();
-        final var dpopToken = generateDpopToken(provisionalRequest.method(), provisionalRequest.uri().toString());
+        final var dpopToken = generateDpopToken(provisionalRequest.method(), provisionalRequest.uri().toString(),
+                boundAccessToken);
         return builder.header(HttpConstants.HEADER_DPOP, dpopToken);
     }
 
@@ -395,7 +407,7 @@ public class Client {
         if (accessToken == null) return headers;
         if (dpopSupported) {
             headers.put(HttpConstants.HEADER_AUTHORIZATION, HttpConstants.PREFIX_DPOP + accessToken);
-            final var dpopToken = generateDpopToken(method, uri.toString());
+            final var dpopToken = generateDpopToken(method, uri.toString(), accessToken);
             headers.put(HttpConstants.HEADER_DPOP, dpopToken);
         } else {
             headers.put(HttpConstants.HEADER_AUTHORIZATION, HttpConstants.PREFIX_BEARER + accessToken);
@@ -425,14 +437,30 @@ public class Client {
         return NumericDate.now().isOnOrAfter(expirationTime);
     }
 
-    private String generateDpopToken(final String htm, final String htu) {
+    private String generateDpopToken(final String htm, final String htu, final String accessToken) {
         requireNonNull(clientKey, "This instance does not have DPoP support added");
         final var claims = new JwtClaims();
         claims.setJwtId(randomUUID().toString());
         claims.setStringClaim("htm", htm);
         claims.setStringClaim("htu", htu);
+        // When the proof accompanies an access token to a protected resource, RFC 9449 requires the
+        // `ath` claim (base64url SHA-256 of the access token) so the proof is bound to that specific
+        // token. Omitted for the token request itself, where there is no access token yet.
+        if (accessToken != null) {
+            claims.setStringClaim(HttpConstants.DPOP_ATH, accessTokenHash(accessToken));
+        }
         claims.setIssuedAtToNow();
         return JwsUtils.generateDpopToken(clientKey, claims);
+    }
+
+    private static String accessTokenHash(final String accessToken) {
+        try {
+            final var digest = MessageDigest.getInstance("SHA-256")
+                    .digest(accessToken.getBytes(StandardCharsets.US_ASCII));
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
+        } catch (final NoSuchAlgorithmException e) {
+            throw new TestHarnessInitializationException("SHA-256 is required for the DPoP ath claim", e);
+        }
     }
 
     @Override
