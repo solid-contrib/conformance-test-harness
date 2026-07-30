@@ -37,6 +37,9 @@ import org.solid.testharness.utils.TestUtils;
 
 import jakarta.inject.Inject;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Base64;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -491,6 +494,47 @@ class ClientTest {
         assertTrue(headers.get(HttpConstants.HEADER_AUTHORIZATION).startsWith(HttpConstants.PREFIX_DPOP));
         assertTrue(headers.containsKey(HttpConstants.HEADER_DPOP));
         assertTrue(headers.containsKey(HttpConstants.USER_AGENT));
+    }
+
+    @Test
+    void getAuthHeadersDpopBindsProofToAccessToken() throws Exception {
+        final Client client = mockClient(true);
+        final Map<String, String> headers = client.getAuthHeaders("GET", TEST_URL);
+        final String token = headers.get(HttpConstants.HEADER_AUTHORIZATION)
+                .substring(HttpConstants.PREFIX_DPOP.length());
+        assertEquals(expectedAth(token), dpopClaim(headers.get(HttpConstants.HEADER_DPOP),
+                HttpConstants.DPOP_CLAIM_ATH));
+    }
+
+    @Test
+    void signRequestWithAccessTokenBindsProofToIt() throws Exception {
+        final Client client = new Client.Builder().withDpopSupport().build();
+        final HttpRequest.Builder builder = HttpRequest.newBuilder(TEST_URL);
+        final HttpRequest request = client.signRequest(builder, "an-access-token").build();
+        final String proof = request.headers().firstValue(HttpConstants.HEADER_DPOP).orElseThrow();
+        assertEquals(expectedAth("an-access-token"), dpopClaim(proof, HttpConstants.DPOP_CLAIM_ATH));
+    }
+
+    @Test
+    void signRequestWithoutAccessTokenOmitsAth() throws Exception {
+        final Client client = new Client.Builder().withDpopSupport().build();
+        final HttpRequest.Builder builder = HttpRequest.newBuilder(TEST_URL);
+        final HttpRequest request = client.signRequest(builder).build();
+        final String proof = request.headers().firstValue(HttpConstants.HEADER_DPOP).orElseThrow();
+        assertNull(dpopClaim(proof, HttpConstants.DPOP_CLAIM_ATH));
+        assertEquals("GET", dpopClaim(proof, HttpConstants.DPOP_CLAIM_HTM));
+        assertEquals(TEST_URL.toString(), dpopClaim(proof, HttpConstants.DPOP_CLAIM_HTU));
+    }
+
+    private static String dpopClaim(final String proof, final String claim) throws Exception {
+        final String[] parts = proof.split("\\.");
+        final String payload = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
+        return (String) new ObjectMapper().readValue(payload, Map.class).get(claim);
+    }
+
+    private static String expectedAth(final String accessToken) throws Exception {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(MessageDigest.getInstance("SHA-256")
+                .digest(accessToken.getBytes(StandardCharsets.US_ASCII)));
     }
 
     @Test

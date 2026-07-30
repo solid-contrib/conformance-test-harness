@@ -43,6 +43,11 @@ public final class HttpConstants {
     public static final String PREFIX_BEARER = "Bearer ";
     public static final String PREFIX_BASIC = "Basic ";
 
+    // DPoP proof claims (RFC 9449 section 4.2 and 4.3)
+    public static final String DPOP_CLAIM_HTM = "htm";
+    public static final String DPOP_CLAIM_HTU = "htu";
+    public static final String DPOP_CLAIM_ATH = "ath";
+
     public static final String MEDIA_TYPE_APPLICATION_FORM_URLENCODED = "application/x-www-form-urlencoded";
     public static final String MEDIA_TYPE_APPLICATION_JSON = "application/json";
     public static final String MEDIA_TYPE_APPLICATION_JSON_LD = "application/ld+json";
