@@ -28,6 +28,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import org.jose4j.jwk.JsonWebKeySet;
+import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.consumer.InvalidJwtException;
+import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -463,6 +466,17 @@ class ClientTest {
     }
 
     @Test
+    void signRequestWithoutAccessTokenOmitsAth() throws Exception {
+        final Client client = new Client.Builder().withDpopSupport().build();
+        final HttpRequest.Builder builder = HttpRequest.newBuilder(TEST_URL);
+        final HttpRequest request = client.signRequest(builder).build();
+        final JwtClaims claims = parseDpopClaims(
+                request.headers().firstValue(HttpConstants.HEADER_DPOP).orElseThrow());
+        assertFalse(claims.hasClaim("ath"),
+                "RFC 9449 defines ath only for proofs accompanying an access token");
+    }
+
+    @Test
     void signRequestNull() {
         final Client client = new Client.Builder().build();
         assertThrows(NullPointerException.class, () -> client.signRequest(null));
@@ -491,6 +505,24 @@ class ClientTest {
         assertTrue(headers.get(HttpConstants.HEADER_AUTHORIZATION).startsWith(HttpConstants.PREFIX_DPOP));
         assertTrue(headers.containsKey(HttpConstants.HEADER_DPOP));
         assertTrue(headers.containsKey(HttpConstants.USER_AGENT));
+    }
+
+    @Test
+    void getAuthHeadersDpopCarriesAth() throws Exception {
+        final Client client = mockClient(true);
+        final Map<String, String> headers = client.getAuthHeaders("GET", TEST_URL);
+        final JwtClaims claims = parseDpopClaims(headers.get(HttpConstants.HEADER_DPOP));
+        assertEquals(JwsUtils.accessTokenHash(client.getAccessToken()),
+                claims.getStringClaimValue("ath"),
+                "RFC 9449 \u00a74.3 step 12: ath must hash the accompanying access token");
+    }
+
+    private static JwtClaims parseDpopClaims(final String dpopToken) throws InvalidJwtException {
+        return new JwtConsumerBuilder()
+                .setSkipAllValidators()
+                .setSkipSignatureVerification()
+                .build()
+                .processToClaims(dpopToken);
     }
 
     @Test

@@ -432,6 +432,12 @@ public class Client {
         claims.setStringClaim("htm", htm);
         claims.setStringClaim("htu", htu);
         claims.setIssuedAtToNow();
+        if (accessToken != null) {
+            // RFC 9449 §4.3 step 12: a proof presented with an access token must carry
+            // "ath", the base64url-encoded SHA-256 of the token's ASCII value (§4.2), and
+            // resource servers are required to verify it.
+            claims.setStringClaim("ath", JwsUtils.accessTokenHash(accessToken));
+        }
         return JwsUtils.generateDpopToken(clientKey, claims);
     }
 
