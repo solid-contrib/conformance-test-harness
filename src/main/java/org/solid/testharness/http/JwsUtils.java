@@ -33,6 +33,11 @@ import org.jose4j.lang.JoseException;
 import org.jose4j.lang.UncheckedJoseException;
 import org.solid.testharness.utils.TestHarnessInitializationException;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+
 import static org.apache.commons.text.CharacterPredicates.DIGITS;
 import static org.apache.commons.text.CharacterPredicates.LETTERS;
 import static org.jose4j.jwx.HeaderParameterNames.TYPE;
@@ -54,6 +59,20 @@ public final class JwsUtils {
             return jws.getCompactSerialization();
         } catch (final JoseException ex) {
             throw new UncheckedJoseException("Unable to generate DPoP token", ex);
+        }
+    }
+
+    /**
+     * The access token hash for a DPoP proof's {@code ath} claim: the base64url encoding
+     * (no padding) of the SHA-256 digest of the token's ASCII bytes (RFC 9449 §4.2, §4.3).
+     */
+    public static String accessTokenHash(final String accessToken) {
+        try {
+            final byte[] digest = MessageDigest.getInstance("SHA-256")
+                    .digest(accessToken.getBytes(StandardCharsets.US_ASCII));
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
+        } catch (final NoSuchAlgorithmException e) {
+            throw new TestHarnessInitializationException("SHA-256 unavailable for DPoP ath", e);
         }
     }
 
